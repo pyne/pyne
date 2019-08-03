@@ -59,6 +59,8 @@ grid: False
 # should appear in this line except the space between the time and the time unit
 # for each entry.
 decay_times:1E3 s,12 h,3.0 d
+# ALARA output filename
+alara_out: output.txt
 """
 
 alara_params =\
@@ -145,11 +147,14 @@ def step2():
     config.read(config_filename)
     structured = config.getboolean('general', 'structured')
     decay_times = config.get('step2', 'decay_times').split(',')
-    #output = config.get('step2', 'output')
+    try:
+        alara_out = config.get('step2', 'alara_out')
+    except:
+        alara_out = "output.txt"
     responses = config.get('general', 'responses').split(',')
 
     for response in responses:
-        response_to_hdf5('output.txt', response)
+        response_to_hdf5(alara_out, response)
         tag_name = response
         for i, dc in enumerate(decay_times):
             print('Writing {0} for decay time: {1}'.format(response, dc))
