@@ -460,6 +460,7 @@ def response_hdf5_to_mesh(mesh, filename, tags, response):
                 "(nuc == '{0}') & (time == '{1}')".format(nuc, dc))
 
         idx = 0
+        # index, mat, volume element
         for i, _, ve in mesh:
             if matched_data[idx][0] == i:
                 tag_handles[tags[cond]][ve] = matched_data[idx][3]
