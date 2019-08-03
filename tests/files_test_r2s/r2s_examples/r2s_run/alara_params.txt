@@ -20,7 +20,7 @@ flux  my_flux     alara_fluxin  1e10     0      default
 
 # Specify the irradiation schedule below.
 # Syntax is found in the ALARA user manual
-# This example is for a single 3.5 h pulse
+# This example is for a single 3.5 d pulse
 schedule    my_schedule
     3.5 d my_flux my_pulse_history 0  s
 end
