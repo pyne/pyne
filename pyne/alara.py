@@ -256,18 +256,15 @@ def response_to_hdf5(filename, response, chunkshape=(10000,)):
     response_start = False
     for i, line in enumerate(f, 1):
         # terminate condition
-#        if str_elements_in_line('Totals for all zones'.lower(), line.lower()) \
-#                and response_start:
-        if ('Totals for all zones' in line) and response_start:
+        if str_elements_in_line('Totals for all zones.', line) \
+                and response_start:
             break
         # get response string
         if zone_start and is_response_string(line, response):
             response_start = True
             continue
         # get decay times
-#        if 'isotope shutdown'.lower().split() in line.lower().split():
-#        if str_elements_in_line('isotope shutdown'.lower(), line.lower()):
-        if 'isotope\t shutdown' in line:
+        if str_elements_in_line('isotope shutdown', line):
             if len(decay_times) == 0:
                 decay_times = read_decay_times(line)
             continue
