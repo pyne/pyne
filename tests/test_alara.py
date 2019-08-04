@@ -682,6 +682,9 @@ def test_is_data():
              "total   1.4597e-08  9.3939e-09  5.3291e-10  8.3915e-11"]
     for line in lines:
         assert_equal(_is_data(line), True)
+    # test special line
+    line = "===========\n"
+    assert_equal(_is_data(line), False)
 
 
 def test_read_decay_times():

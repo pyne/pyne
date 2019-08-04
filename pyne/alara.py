@@ -10,7 +10,8 @@ from pyne.mesh import Mesh, MeshError, HAVE_PYMOAB
 import os
 import collections
 from warnings import warn
-from pyne.utils import QAWarning, to_sec, is_float, str_to_unicode
+from pyne.utils import QAWarning, to_sec, is_float, str_to_unicode, \
+        str_elements_in_line
 import numpy as np
 import tables as tb
 from io import open
@@ -255,20 +256,23 @@ def response_to_hdf5(filename, response, chunkshape=(10000,)):
     response_start = False
     for i, line in enumerate(f, 1):
         # terminate condition
-        if 'Totals for all zones'.lower.split() in line.lower.split() \
-                and response_start:
+#        if str_elements_in_line('Totals for all zones'.lower(), line.lower()) \
+#                and response_start:
+        if ('Totals for all zones' in line) and response_start:
             break
         # get response string
         if zone_start and is_response_string(line, response):
             response_start = True
             continue
         # get decay times
-        if 'isotope shutdown'.lower.split() in line.lower.split():
+#        if 'isotope shutdown'.lower().split() in line.lower().split():
+#        if str_elements_in_line('isotope shutdown'.lower(), line.lower()):
+        if 'isotope\t shutdown' in line:
             if len(decay_times) == 0:
                 decay_times = read_decay_times(line)
             continue
         # get zone idx
-        if 'Zone #'.lower.split() in line.lower.split():
+        if 'Zone #' in line:
             idx = _get_zone_idx(line)
             if idx == 0:
                 ## new blocks, disable first response string
@@ -1200,6 +1204,8 @@ def _is_data(line):
     """
     # check the list from the second value, if they are float, then return True
     ls = line.strip().split()
+    if len(ls) < 2:
+        return False
     try:
         np.array(ls[1:]).astype(float)
         return True

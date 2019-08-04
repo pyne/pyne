@@ -157,7 +157,6 @@ def test_response_hdf5_to_mesh():
                     structured_coords=[[0, 1], [0, 1], [0, 1]])
     
         tags = {('h-3', 'shutdown'): 'tag1', ('TOTAL', '12 h'): 'tag2'}
-#        import pdb; pdb.set_trace()
         response_hdf5_to_mesh(mesh, h5_filename, tags, response)
     
         # create lists of lists of expected results

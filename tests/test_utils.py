@@ -350,5 +350,16 @@ def test_file_block_almost_same():
     assert(utils.file_block_almost_same(f1, f2) == False)
 
 
+def test_str_elements_in_line():
+    # true case
+    s = "test string"
+    line = "line include test string 1"
+    assert(utils.str_elements_in_line(s, line))
+    # false case
+    s = "test string 2"
+    line = "line include test string 1"
+    assert(utils.str_elements_in_line(s, line) == False)
+
+    
 if __name__ == "__main__":
     nose.runmodule()
