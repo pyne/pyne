@@ -58,9 +58,11 @@ def irradiation_setup_structured(flux_tag="n_flux", meshtal_file="meshtal_2x2x1"
                      (3, 2, 0.037037037037037035, 0.5443310539518174),
                      (3, 3, 0.9629629629629629, 0.010467904883688454)]
 
-    irradiation_setup(meshtal, cell_mats, cell_fracs, alara_params, tally_num,
-                      num_rays, grid, flux_tag, fluxin, reverse, alara_inp,
-                      alara_matlib, output_mesh, output_material)
+    irradiation_setup(meshtal, cell_mats, cell_fracs, alara_params,
+            tally_num=tally_num, num_rays=num_rays, grid=grid,
+            flux_tag=flux_tag, fluxin=fluxin, reverse=reverse,
+            alara_inp=alara_inp, alara_matlib=alara_matlib,
+            output_mesh=output_mesh, output_material=output_material)
 
     #  expected output files
     exp_alara_inp = os.path.join(thisdir, "files_test_r2s", "exp_alara_inp")
