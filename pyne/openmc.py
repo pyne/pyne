@@ -231,7 +231,7 @@ def get_tally_results_from_openmc_sp(filename, tally_num):
     return tally_results
 
 
-def get_structured_coords_from_openmc_sp(filename):
+def get_structured_coords_from_openmc_sp(filename, mesh_id=None):
     """
     This function read the OpenMC state point file and get the structured
     coordinates of the mesh.
@@ -240,6 +240,9 @@ def get_structured_coords_from_openmc_sp(filename):
     -----------
     filename : str
         OpenMC state point filename.
+    mesh_id : int
+        The mesh id used in this tally. Required if multiple meshes exist in
+        the state point file.
 
     Returns:
     --------
@@ -253,10 +256,16 @@ def get_structured_coords_from_openmc_sp(filename):
         try:
             meshes = h5f.root.tallies._f_get_child('meshes')
             if meshes._v_nchildren != 1:
-                raise ValueError(
-                        "Only one mesh is support for each Tally now")
-            mesh_str = meshes._v_groups.__str__()
-            mesh_name = get_openmc_mesh_name(mesh_str)
+                if mesh_id is None:
+                    raise ValueError(
+                        "mesh_id must provide if multiple meshes in the file.")
+                else:
+                    # define mesh_name according to the mesh_id provided by user
+                    mesh_name = ''.join(['mesh ', str(mesh_id)])
+            else:
+                # there is only one mesh in the sp file, get that one
+                mesh_str = meshes._v_groups.__str__()
+                mesh_name = get_openmc_mesh_name(mesh_str)
             mesh = meshes._f_get_child(mesh_name)
             structured_coords = calc_structured_coords(
                     mesh.lower_left[:],
@@ -344,7 +353,7 @@ def create_tally_name(tally_number):
     tally_name = ''.join(["tally ", str(tally_number)])
     return tally_name
 
-def create_meshtally(filename, tally_number, particle=None,
+def create_meshtally(filename, tally_id, mesh_id=None, particle=None,
         tag_names=None, mesh_has_mats=False):
     """
     This function creates a MeshTally instance from OpenMC statepoint file.
@@ -354,8 +363,11 @@ def create_meshtally(filename, tally_number, particle=None,
     filename : str
         Filename of the OpenMC statepoint file. It ends with ".h5",
         eg: "statepoint.10.h5".
-    tally_number : int
+    tally_id : int
         Tally number.
+    mesh_id : int
+        Mesh id of this tally used. Required if multiple meshes exist in the
+        OpenMC state point file.
     particle : str
         The particle type, 'neutron' or 'photon'.
     tag_names : iterable, optional
@@ -367,7 +379,7 @@ def create_meshtally(filename, tally_number, particle=None,
     """
     m = MeshTally()
     # assign tally_number
-    m.tally_number = tally_number
+    m.tally_number = tally_id
     # assign particle
     if particle != None:
        m.particle = particle
@@ -384,7 +396,7 @@ def create_meshtally(filename, tally_number, particle=None,
     tally_results = get_tally_results_from_openmc_sp(filename,
             m.tally_number)
     structured_coords = get_structured_coords_from_openmc_sp(
-            filename)
+            filename, mesh_id=mesh_id)
 
     # parameters to create mesh
     m.x_bounds = structured_coords[0]

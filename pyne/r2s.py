@@ -13,8 +13,8 @@ from pyne.alara import mesh_to_fluxin, record_to_geom, photon_source_to_hdf5, \
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 
-def resolve_mesh(mesh_reference, tally_num=None, flux_tag="n_flux",
-                 output_material=False):
+def resolve_mesh(mesh_reference, transport_code='MCNP', tally_num=None,
+        mesh_id=None, flux_tag="n_flux", output_material=False):
     """This function creates a method that will consume many mesh-like objects
        (e.g. mesh, an h5m file, a meshtal file, etc) and returns a robust PyNE
        mesh object accordingly.
@@ -26,9 +26,14 @@ def resolve_mesh(mesh_reference, tally_num=None, flux_tag="n_flux",
         The source of the neutron flux information. This can be a PyNE Meshtal
         object, a pyne Mesh object, or the filename an MCNP meshtal file, or
         the filename of an unstructured mesh tagged with fluxes.
-    tally_num : int
+    transport_code: str, optional
+        Transport code name. Currently support 'MCNP' and 'OpenMC'.
+    tally_num : int, optional
         The MCNP FMESH4 tally number of the neutron flux tally within the
         meshtal file.
+    mesh_id : int, optional
+        The mesh id used in the OpenMC tally. Required if multiple meshes
+        exist in the same state point file.
     flux_tag : str, optional
         The tag name for the neutron flux.
     output_material : bool, optional
@@ -54,8 +59,8 @@ def resolve_mesh(mesh_reference, tally_num=None, flux_tag="n_flux",
     # mesh_reference is a openmc statepoint file
     elif isinstance(mesh_reference, str) and isfile(mesh_reference) \
             and mesh_reference.endswith(".h5"):
-            m = openmc.create_meshtally(mesh_reference, tally_number=tally_num,
-                                     tag_names=(flux_tag, flux_tag + "_err",
+            m = openmc.create_meshtally(mesh_reference, tally_id=tally_num,
+                    mesh_id=mesh_id, tag_names=(flux_tag, flux_tag + "_err",
                                                   flux_tag + "_total",
                                                   flux_tag + "_err_total"))
     #  mesh_reference is Meshtal or meshtal file
@@ -83,7 +88,7 @@ def resolve_mesh(mesh_reference, tally_num=None, flux_tag="n_flux",
 
 
 def irradiation_setup(flux_mesh, cell_mats, cell_fracs, alara_params,
-                      tally_num=4, num_rays=10, grid=False, flux_tag="n_flux",
+                      tally_num=4, mesh_id=None, num_rays=10, grid=False, flux_tag="n_flux",
                       fluxin="alara_fluxin", reverse=False,
                       alara_inp="alara_inp", alara_matlib="alara_matlib",
                       output_mesh="r2s_step1.h5m", output_material=False,
@@ -107,6 +112,8 @@ def irradiation_setup(flux_mesh, cell_mats, cell_fracs, alara_params,
     tally_num : int
         The MCNP FMESH4 tally number of the neutron flux tally within the
         meshtal file.
+    mesh_id : int, optional
+        The mesh id used in OpenMC state point file for this tally.
     num_rays : int, optional
         The number of rays to fire down a mesh row for geometry discretization.
         This number must be a perfect square if grid=True.
@@ -140,7 +147,8 @@ def irradiation_setup(flux_mesh, cell_mats, cell_fracs, alara_params,
         If true, sub-voxel r2s work flow  will be used.
     """
 
-    m = resolve_mesh(flux_mesh, tally_num, flux_tag, output_material)
+    m = resolve_mesh(flux_mesh, tally_num=tally_num, mesh_id=mesh_id,
+            flux_tag=flux_tag, output_material=output_material)
 
     if output_material:
         m.cell_fracs_to_mats(cell_fracs, cell_mats)

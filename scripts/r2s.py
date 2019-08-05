@@ -33,6 +33,8 @@ transport_code: MCNP
 meshtal: meshtal
 # Tally number within the meshtal file containing the fluxes for activation.
 tally_num: 4
+# Mesh id. The mesh id used in OpenMC state point file. Default is -1.
+mesh_id: -1
 # The name of the tag used to store flux data on the mesh. For unstructured
 # mesh this tag must already exist within the file specified in <meshtal>.
 flux_tag: n_flux
@@ -116,8 +118,18 @@ def step1():
 
     structured = config.getboolean('general', 'structured')
     sub_voxel = config.getboolean('general', 'sub_voxel')
+    try:
+        transport_code = config.get('general', 'transport_code')
+    except:
+        transport_code = 'MCNP'
     meshtal = config.get('step1', 'meshtal')
     tally_num = config.getint('step1', 'tally_num')
+    try:
+        mesh_id = config.getint('step1', 'mesh_id')
+        if mesh_id == -1:
+            mesh_id = None
+    except:
+        mesh_id = None
     flux_tag = config.get('step1', 'flux_tag')
     decay_times = config.get('step2', 'decay_times').split(',')
     geom = config.get('step1', 'geom')
@@ -128,7 +140,8 @@ def step1():
     load(geom)
 
     # get meshtal info from meshtal file
-    flux_mesh = resolve_mesh(meshtal, tally_num, flux_tag)
+    flux_mesh = resolve_mesh(meshtal, transport_code=transport_code,
+            tally_num=tally_num, mesh_id=mesh_id, flux_tag=flux_tag)
 
     # create the cell_fracs array before irradiation_steup
     if flux_mesh.structured:
@@ -139,10 +152,10 @@ def step1():
         cell_fracs = discretize_geom(flux_mesh)
 
     cell_mats = cell_materials(geom)
-    irradiation_setup(flux_mesh, cell_mats, cell_fracs, alara_params_filename, tally_num,
-                      num_rays=num_rays, grid=grid, reverse=reverse,
-                      flux_tag=flux_tag, decay_times=decay_times,
-                      sub_voxel=sub_voxel)
+    irradiation_setup(flux_mesh, cell_mats, cell_fracs, alara_params_filename,
+            tally_num=tally_num, mesh_id=mesh_id, num_rays=num_rays, grid=grid,
+            reverse=reverse, flux_tag=flux_tag, decay_times=decay_times, 
+            sub_voxel=sub_voxel)
 
     # create a blank mesh for step 2:
     ves = list(flux_mesh.iter_ve())
