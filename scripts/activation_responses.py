@@ -68,6 +68,7 @@ alara_params =\
 element_lib nuclib
 data_library alaralib fendl3bin
 
+# Specify the flux condition below.
 #     flux name    fluxin file   norm   shift   unused
 flux  my_flux     alara_fluxin  1e10     0      default
 
