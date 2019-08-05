@@ -82,6 +82,7 @@ output zone
        1.40E7 2.00E7
 end
 
+# Specify the flux condition below.
 #     flux name    fluxin file   norm   shift   unused
 flux  my_flux     alara_fluxin  1e10     0      default
 
