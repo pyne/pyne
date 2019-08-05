@@ -29,8 +29,8 @@ calculated using two separate transport steps, using the procedure below:
 
 PyNE R2S implements a Cartesian- and tetrahedral- mesh-based R2S method that
 operates entirely on CAD geometry. This is accomplished using the Direct
-Accelerated Geometry Monte Carlo (DAGMC) version of MCNP5, known as DAG-MCNP5
-[2]_ and the ALARA activation code [3]_. For Cartesian mesh, the CAD geometry
+Accelerated Geometry Monte Carlo (DAGMC), (DAG-MCNP5 [2]_ or DagOpenMC)
+and the ALARA activation code [3]_. For Cartesian mesh, the CAD geometry
 must be discretized onto the mesh in order to obtain material compositions in each
 mesh volume element for activation. This is done using a ray-tracing technique.
 For both Cartesian and tetrahedral meshes, mesh-based photon sampling is
@@ -51,8 +51,8 @@ order to use the CLI, the following files are first needed:
 
 1. A material-laden CAD file representing the geometry. Instructions on creating
    this file can be found `here <http://svalinn.github.io/DAGMC/usersguide/uw2.html>`_.
-2. An MCNP MESHTAL file or DAG-MCNP tetrahedral mesh tally containing the
-   neutron fluxes used for neutron activation.
+2. An MCNP MESHTAL file, DAG-MCNP tetrahedral mesh tally containing the
+   neutron fluxes, or an OpenMC state point file is used for neutron activation.
 
 Once these files have been obtained, PyNE R2S can proceed. PyNE R2S is best run
 in its own folder, due the large number of intermediate files created. Create
@@ -105,13 +105,17 @@ decay time. These files will be named like:
 
 source_1.h5m, source_2.h5m ... source_N.h5m
 
-An "e_bounds" file containing the photon lower and upper energy bounds will also be generated. 
-These source files, combined with the "e_bounds" file can now be used as sources
-for photon transport within MCNP. Information on compiling/using a version of MCNP5
-that can utilize these mesh-based sources is found in the PyNE user's guide entry on 
+An "e_bounds" file containing the photon lower and upper energy bounds will
+also be generated. These source files, combined with the "e_bounds" file can
+now be used as sources for photon transport within DAG-MCNP or DagOpenMC.
+Information on compiling/using a version of MCNP5 that can utilize these
+mesh-based sources is found in the PyNE user's guide entry on
 `mesh-based source sampling <http://pyne.io/usersguide/source_sampling.html#source-sampling-in-mcnp5>`_.
 Note that each of these source files must be renamed to "source.h5m" for this purpose.
-By using these sources for photon transport, the shutdown dose rate can be obtained. Tally results will have to be normalized by the total photon source intentity. This information is found in the "total_photon_source_intensites.txt" file printed out by r2s.py step2.
+By using these sources for photon transport, the shutdown dose rate can be
+obtained. Tally results will have to be normalized by the total photon source
+intentity. This information is found in the
+"total_photon_source_intensites.txt" file printed out by r2s.py step2.
 
 ****************
 PyNE R2S example
