@@ -105,8 +105,8 @@ subroutine find_cell(cell_list, cell_list_size, icl_tmp, count_1, count_2, count
           ! reset the icl_tmp to -1 because of the type 2 not found
           icl_tmp = -1
           count_2 = count_2 + 1
-          return
         endif
+        return
       endif
     enddo
     ! icl now is -1, it is a type 3 error.
