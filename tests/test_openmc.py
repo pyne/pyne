@@ -1,4 +1,4 @@
-"""openmc tests"""
+"""openmc_utils tests"""
 from __future__ import unicode_literals, division
 from io import StringIO
 import warnings
@@ -10,7 +10,7 @@ from pyne.utils import QAWarning
 warnings.simplefilter("ignore", QAWarning)
 
 from pyne import nucname
-from pyne import openmc
+from pyne import openmc_utils
 
 sample_xs = StringIO("""<?xml version="1.0" ?>
 <cross_sections>
@@ -40,7 +40,7 @@ sample_xs_with_mcnp_id = StringIO("""<?xml version="1.0" ?>
 
 
 def test_ace_table_init():
-    atab = openmc.AceTable(zaid='92235', path='U235.ace',
+    atab = openmc_utils.AceTable(zaid='92235', path='U235.ace',
                            cross_sections_path='/tmp/cross_sections.xml')
     assert_equal('92235', atab.zaid)
     assert_equal('U235.ace', atab.path)
@@ -49,7 +49,7 @@ def test_ace_table_init():
 
 
 def test_ace_table_xml():
-    atab = openmc.AceTable(zaid='92235', path='U235.ace',
+    atab = openmc_utils.AceTable(zaid='92235', path='U235.ace',
                            cross_sections_path='/tmp/cross_sections.xml')
     exp = '<ace_table path="U235.ace" zaid="92235"/>'
     obs = atab.xml()
@@ -58,25 +58,25 @@ def test_ace_table_xml():
 
 def test_cross_sections_read():
     sample_xs.seek(0)
-    xs = openmc.CrossSections(sample_xs)
+    xs = openmc_utils.CrossSections(sample_xs)
     assert_equal('ascii', xs.filetype)
     assert_true(xs.path is None)
 
-    exp = [openmc.AceTable(alias='H-1.71c', awr='0.999167', location='1',
+    exp = [openmc_utils.AceTable(alias='H-1.71c', awr='0.999167', location='1',
                            name='1001.71c', path='293.6K/H_001_293.6K.ace',
                            temperature='2.53e-08', zaid='1001'),
-           openmc.AceTable(alias='Am-242m.73c', awr='239.9801', location='1',
+           openmc_utils.AceTable(alias='Am-242m.73c', awr='239.9801', location='1',
                            metastable='1', name='95242.73c',
                            path='900K/Am_242_900K.ace', temperature='7.756e-08',
                            zaid='95242'),
-           openmc.AceTable(awr='89.1324', location='1', name='ZrZrH.71t',
+           openmc_utils.AceTable(awr='89.1324', location='1', name='ZrZrH.71t',
                            path='tsl/zrzrh.acer', temperature='2.551e-08',
                            zaid='0')]
     assert_equal(exp, xs.ace_tables)
 
 
 def test_cross_sections_abspath_with_dir():
-    xs = openmc.CrossSections(sample_xs_with_dir)
+    xs = openmc_utils.CrossSections(sample_xs_with_dir)
     assert_equal('ascii', xs.filetype)
     assert_equal(xs.path, "/")
 
@@ -87,7 +87,7 @@ def test_cross_sections_abspath_with_dir():
 
 
 def test_cross_sections_mcnp_id():
-    xstables = openmc.CrossSections(sample_xs_with_mcnp_id).ace_tables
+    xstables = openmc_utils.CrossSections(sample_xs_with_mcnp_id).ace_tables
     mcnp_obs = [table.nucid for table in xstables if table.alias == "Co-58m.70c"][0]
     assert_equal(mcnp_obs, 270580001)
     nucid_obs = [table.nucid for table in xstables if table.alias == "Co-58.70c"][0]
@@ -96,7 +96,7 @@ def test_cross_sections_mcnp_id():
 
 def test_cross_sections_roundtrip():
     sample_xs.seek(0)
-    xs = openmc.CrossSections(sample_xs)
+    xs = openmc_utils.CrossSections(sample_xs)
     sample_xs.seek(0)
     exp = sample_xs.read()
     obs = xs.xml()
