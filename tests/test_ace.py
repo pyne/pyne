@@ -13,7 +13,7 @@ def setup():
         import urllib
 
     if not os.path.isfile('C012-n.ace'):
-        urllib.urlretrieve('https://github.com/pyne/data/blob/master/C012-n.ace',
+        urllib.urlretrieve('https://raw.githubusercontent.com/pyne/data/master/C012-n.ace',
                            'C012-n.ace')
     with open('C012-n.ace') as f:
         lines = f.readlines()
