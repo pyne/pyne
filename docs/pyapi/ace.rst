@@ -34,3 +34,14 @@ Library Class
 
 .. autoclass:: Reaction
    :members:
+
+++++++++++++++++
+Attribution
+++++++++++++++++
+The PyNE development team would like to thank the following people and organizations
+for allowing us to redistribute open nuclear data as part of tests`.
+
+* **Rochman D. Alexandre** for the `TENDL`_ data.
+
+.. _TENDL: https://tendl.web.psi.ch/tendl_2017/tendl2017.html
+
