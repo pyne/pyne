@@ -20,11 +20,17 @@ if HAVE_PYMOAB:
     from pyne.mesh import NativeMeshTag
 else:
     warn("The PyMOAB optional dependency could not be imported. "
-         "Some aspects of the mcnp module may be incomplete.",
+         "Some aspects of the openmc module may be incomplete.",
          QAWarning)
 from pyne import nucname
 from pyne.utils import QAWarning
 warn(__name__ + " is not yet QA compliant.", QAWarning)
+
+try:
+    import openmc
+except:
+    warn("The openmc optional dependency could not be imported. "
+        "Some aspects of the openmc module may be incomplete.")
 
 if sys.version_info[0] > 2:
     basestring = str
