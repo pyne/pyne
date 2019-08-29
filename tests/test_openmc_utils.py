@@ -1,8 +1,7 @@
 """openmc_utils tests"""
 from __future__ import unicode_literals, division
 from io import StringIO
-import warnings
-
+import warnings 
 import os
 import nose
 from nose.plugins.skip import SkipTest
@@ -112,14 +111,14 @@ def test_get_openmc_mesh_name():
                   children := ['dimension' (Array), 'lower_left' (Array), 
                   'type' (Array), 'upper_right' (Array), 'width' (Array)]}"""
     exp_mesh_name = "mesh 14"
-    assert_equal(openmc.get_openmc_mesh_name(mesh_str), exp_mesh_name)
+    assert_equal(openmc_utils.get_openmc_mesh_name(mesh_str), exp_mesh_name)
 
 def test_get_tally_results_from_openmc_sp():
     # energy bin: [0.0, 1.0, 20.0], 2bins
     # 6 volume elemenes
     filename = os.path.join(cwd, "files_test_openmc", "statepoint.ebin2.ves6.h5")
     # dimension of the tally_results: (12, 1, 2)
-    tally_results = openmc.get_tally_results_from_openmc_sp(filename,
+    tally_results = openmc_utils.get_tally_results_from_openmc_sp(filename,
             tally_num=1)
     exp_tally_results = np.array(
            [[[0.977887, 0.956263 ]],
@@ -148,7 +147,7 @@ def test_get_tally_results_from_openmc_sp():
     # 6 volume elemenes
     filename = os.path.join(cwd, "files_test_openmc", "statepoint.ebin2.ves6.h5")
     # dimension of the tally_results: (12, 1, 2)
-    tally_results = openmc.get_tally_results_from_openmc_sp(filename,
+    tally_results = openmc_utils.get_tally_results_from_openmc_sp(filename,
             tally_num=1)
     exp_tally_results = np.array(
            [[[0.977887, 0.956263 ]],
@@ -169,7 +168,7 @@ def test_get_tally_results_from_openmc_sp():
         for j in range(tally_results.shape[1]):
             for k in  range(tally_results.shape[2]):
                 # data in h5 file is 6 digits
-                assert_true(isclose(tally_results[i][j][k],
+                assert_true(is_close(tally_results[i][j][k],
                     exp_tally_results[i][j][k], rel_tol=1e-5))
 
 def test_calc_structured_coords():
@@ -179,7 +178,7 @@ def test_calc_structured_coords():
     exp_structured_coords = np.array([[0.0, 0.5, 1.0],
                                       [0.0, 0.5, 1.0, 1.5, 2.0],
                                       [0.0, 0.6, 1.2, 1.8, 2.4, 3.0]])
-    structured_coords = openmc.calc_structured_coords(lower_left,
+    structured_coords = openmc_utils.calc_structured_coords(lower_left,
             upper_right, dimension)
     assert_equal(len(structured_coords), len(exp_structured_coords))
     for i in range(len(exp_structured_coords)):
@@ -192,29 +191,33 @@ def test_get_ebins_from_openmc_sp():
     filename = os.path.join(cwd, "files_test_openmc", "statepoint.ebin2.ves6.h5")
     # OpenMC energy unit is eV
     exp_ebins = np.array([0.0, 1.0, 20.0]) * 1e6
-    ebins = openmc.get_ebins_from_openmc_sp(filename, tally_num=1)
+    ebins = openmc_utils.get_ebins_from_openmc_sp(filename, tally_num=1)
     assert_array_equal(ebins, exp_ebins)
 
 def test_create_tally_name():
     tally_number = 1
     exp_tally_name = "tally 1"
-    tally_name = openmc.create_tally_name(tally_number)
+    tally_name = openmc_utils.create_tally_name(tally_number)
     assert_equal(tally_name, exp_tally_name)
 
-def test_mesh_from_openmc_statepoint():
+def test_meshtally_from_openmc_statepoint():
     if not HAVE_PYMOAB:
         raise SkipTest
     # mesh read from openmc state point file
     # Parameters of the tally and mesh
-    # mesh = openmc.Mesh(mesh_id=14, name="n_flux")
+    # mesh = openmc_utils.Mesh(mesh_id=14, name="n_flux")
     # mesh.dimension= [3, 2, 1]
     # mesh.lower_left = (-40.0, -12.5, -2.5)
     # mesh.upper_right = (40.0, 12.5, 2.5)
     # energy_bins = np.array([0.0, 1.0, 20.0]) * 1e6
-    filename = os.path.join(cwd, "files_test_openmc", "statepoint.ebin2.ves6.h5")
+    filename = os.path.join(os.getcwd(), "files_test_openmc",
+            "statepoint.ebin2.ves6.h5")
     tally_num = 1
-    
-    mesh = openmc.meshtally_from_openmc_statepoint(filename, tally_num)
+
+    tag_names = ("n_flux", "n_flux_err", "n_flux_total", "n_flux_total_err")
+    #mesh = MeshTally() #filename, tally_num, tag_names=tag_names, mc_code='openmc')
+    mesh = openmc_utils.create_meshtally(filename, tally_num, particle='neutron',
+            tag_names=tag_names)
     # check mesh attributes
     assert_equal(len(mesh), 6)
     assert(mesh.structured)
@@ -248,7 +251,6 @@ def test_mesh_from_openmc_statepoint():
         for j in range(exp_n_flux_err.shape[1]):
             assert(is_close(mesh.n_flux_err[i][j],
                 exp_n_flux_err[i][j], rel_tol=1e-5))
-
 
 if __name__ == "__main__":
     nose.runmodule()

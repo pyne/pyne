@@ -14,6 +14,14 @@ if sys.version_info[0] == 2:
 else:
     from html.parser import HTMLParser
 
+from pyne.utils import QAWarning
+from pyne.mesh import MeshTally, HAVE_PYMOAB
+if HAVE_PYMOAB:
+    from pyne.mesh import NativeMeshTag
+else:
+    warn("The PyMOAB optional dependency could not be imported. "
+         "Some aspects of the mcnp module may be incomplete.",
+         QAWarning)
 from pyne import nucname
 from pyne.utils import QAWarning
 warn(__name__ + " is not yet QA compliant.", QAWarning)
@@ -223,7 +231,7 @@ def get_tally_results_from_openmc_sp(filename, tally_num):
     return tally_results
 
 
-def get_structured_coords_from_openmc_sp(filename):
+def get_structured_coords_from_openmc_sp(filename, mesh_id=None):
     """
     This function read the OpenMC state point file and get the structured
     coordinates of the mesh.
@@ -232,6 +240,9 @@ def get_structured_coords_from_openmc_sp(filename):
     -----------
     filename : str
         OpenMC state point filename.
+    mesh_id : int
+        The mesh id used in this tally. Required if multiple meshes exist in
+        the state point file.
 
     Returns:
     --------
@@ -245,10 +256,16 @@ def get_structured_coords_from_openmc_sp(filename):
         try:
             meshes = h5f.root.tallies._f_get_child('meshes')
             if meshes._v_nchildren != 1:
-                raise ValueError(
-                        "Only one mesh is support for each Tally now")
-            mesh_str = meshes._v_groups.__str__()
-            mesh_name = get_openmc_mesh_name(mesh_str)
+                if mesh_id is None:
+                    raise ValueError(
+                        "mesh_id must provide if multiple meshes in the file.")
+                else:
+                    # define mesh_name according to the mesh_id provided by user
+                    mesh_name = ''.join(['mesh ', str(mesh_id)])
+            else:
+                # there is only one mesh in the sp file, get that one
+                mesh_str = meshes._v_groups.__str__()
+                mesh_name = get_openmc_mesh_name(mesh_str)
             mesh = meshes._f_get_child(mesh_name)
             structured_coords = calc_structured_coords(
                     mesh.lower_left[:],
@@ -335,3 +352,66 @@ def create_tally_name(tally_number):
     """
     tally_name = ''.join(["tally ", str(tally_number)])
     return tally_name
+
+def create_meshtally(filename, tally_id, mesh_id=None, particle=None,
+        tag_names=None, mesh_has_mats=False):
+    """
+    This function creates a MeshTally instance from OpenMC statepoint file.
+
+    Parameters:
+    -----------
+    filename : str
+        Filename of the OpenMC statepoint file. It ends with ".h5",
+        eg: "statepoint.10.h5".
+    tally_id : int
+        Tally number.
+    mesh_id : int
+        Mesh id of this tally used. Required if multiple meshes exist in the
+        OpenMC state point file.
+    particle : str
+        The particle type, 'neutron' or 'photon'.
+    tag_names : iterable, optional
+        Four strs that specify the tag names for the results, relative
+        errors, total results and relative errors of the total results.
+    mesh_has_mats: bool
+        If false, Meshtally objects will be created without PyNE material
+        objects.
+    """
+    m = MeshTally()
+    # assign tally_number
+    m.tally_number = tally_id
+    # assign particle
+    if particle != None:
+       m.particle = particle
+    # assign tag_names
+    if tag_names is None:
+        m.tag_names = ("{0}_result".format(m.particle),
+                          "{0}_result_rel_error".format(m.particle),
+                          "{0}_result_total".format(m.particle),
+                          "{0}_result_total_rel_error".format(m.particle))
+    else:
+        m.tag_names = tag_names
+    # check tally_num exist
+    tally_name = create_tally_name(m.tally_number)
+    tally_results = get_tally_results_from_openmc_sp(filename,
+            m.tally_number)
+    structured_coords = get_structured_coords_from_openmc_sp(
+            filename, mesh_id=mesh_id)
+
+    # parameters to create mesh
+    m.x_bounds = structured_coords[0]
+    m.y_bounds = structured_coords[1]
+    m.z_bounds = structured_coords[2]
+    m.dims = [0, 0, 0] + [len(m.x_bounds) - 1,
+                             len(m.y_bounds) - 1,
+                             len(m.z_bounds) - 1]
+    m.num_ves = (len(m.x_bounds)-1) * (len(m.y_bounds)-1)\
+        * (len(m.z_bounds)-1)
+    m.num_e_groups = len(tally_results) // m.num_ves
+    mats = () if mesh_has_mats is True else None
+    super(MeshTally, m).__init__(structured_coords=structured_coords,
+            structured=True, mats=mats)
+    m.tag_flux_error_from_openmc_tally_results(tally_results)
+    return m
+
+

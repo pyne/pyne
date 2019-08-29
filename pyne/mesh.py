@@ -1570,62 +1570,6 @@ class MeshTally(StatMesh):
         self.tag_names = None
 
 
-    def from_openmc_statepoint(self, filename, tally_number, particle=None,
-            tag_names=None, mesh_has_mats=False):
-        """
-        This function creates a Mesh instance from OpenMC statepoint file.
-    
-        Parameters:
-        -----------
-        filename : str
-            Filename of the OpenMC statepoint file. It ends with ".h5",
-            eg: "statepoint.10.h5".
-        tally_number : int
-            Tally number.
-        particle : str
-            The particle type, 'neutron' or 'photon'.
-        tag_names : iterable, optional
-            Four strs that specify the tag names for the results, relative
-            errors, total results and relative errors of the total results.
-        mesh_has_mats: bool
-            If false, Meshtally objects will be created without PyNE material
-            objects.
-        """
-        # assign tally_number
-        self.tally_number = tally_number
-        # assign particle
-        if particle != None:
-           self.particle = particle
-        # assign tag_names
-        if tag_names is None:
-            self.tag_names = ("{0}_result".format(self.particle),
-                              "{0}_result_rel_error".format(self.particle),
-                              "{0}_result_total".format(self.particle),
-                              "{0}_result_total_rel_error".format(self.particle))
-        else:
-            self.tag_names = tag_names
-        # check tally_num exist
-        tally_name = openmc.create_tally_name(self.tally_number)
-        tally_results = openmc.get_tally_results_from_openmc_sp(filename,
-                self.tally_number)
-        structured_coords = openmc.get_structured_coords_from_openmc_sp(
-                filename)
-        # parameters to create mesh
-        self.x_bounds = structured_coords[0]
-        self.y_bounds = structured_coords[1]
-        self.z_bounds = structured_coords[2]
-        self.dims = [0, 0, 0] + [len(self.x_bounds) - 1,
-                                 len(self.y_bounds) - 1,
-                                 len(self.z_bounds) - 1]
-        num_ves = (len(self.x_bounds)-1) * (len(self.y_bounds)-1)\
-            * (len(self.z_bounds)-1)
-        mats = () if mesh_has_mats is True else None
-        super(MeshTally, self).__init__(structured_coords=structured_coords,
-                structured=True, mats=mats)
-        self.tag_flux_error_from_openmc_tally_results(tally_results,
-                particle=self.particle)
-
-
     def tag_flux_error_from_mcnp_tally_results(self, result, rel_error,
             res_tot, rel_err_tot):
         """

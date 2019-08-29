@@ -38,7 +38,7 @@ from pymoab.types import _eh_py_type
 from pymoab import core as mb_core, hcoord, scd, types
 from pyne.mesh import Mesh, StatMesh, MeshError, meshset_iterate, \
         mesh_iterate, _cell_fracs_sort_vol_frac_reverse
-from pyne import openmc
+from pyne import openmc_utils
 
 warnings.simplefilter("ignore", QAWarning)
 
@@ -1038,56 +1038,4 @@ def test_no_mats():
     assert_true(mesh.mats is None)
     i, mat, ve = next(iter(mesh))
     assert_true(mat is None)
-
-def test_meshtally_from_openmc_statepoint():
-    if not HAVE_PYMOAB:
-        raise SkipTest
-    # mesh read from openmc state point file
-    # Parameters of the tally and mesh
-    # mesh = openmc.Mesh(mesh_id=14, name="n_flux")
-    # mesh.dimension= [3, 2, 1]
-    # mesh.lower_left = (-40.0, -12.5, -2.5)
-    # mesh.upper_right = (40.0, 12.5, 2.5)
-    # energy_bins = np.array([0.0, 1.0, 20.0]) * 1e6
-    filename = os.path.join(os.getcwd(), "files_test_openmc",
-            "statepoint.ebin2.ves6.h5")
-    tally_num = 1
-    
-    tag_names = ("n_flux", "n_flux_err", "n_flux_total", "n_flux_total_err")
-    mesh = MeshTally() #filename, tally_num, tag_names=tag_names, mc_code='openmc')
-    mesh.from_openmc_statepoint(filename, tally_num, particle='neutron',
-            tag_names=tag_names)
-    # check mesh attributes
-    assert_equal(len(mesh), 6)
-    assert(mesh.structured)
-    # structured_coords
-    assert_array_almost_equal(mesh.structured_coords[0],
-            [(-40.0 + x * 80.0 / 3) for x in range(0, 4)])
-    assert_array_almost_equal(mesh.structured_coords[1],
-            [(-12.5 + x * 25.0 / 2) for x in range (0, 3)])
-    assert_array_almost_equal(mesh.structured_coords[2],
-            [(-2.5 + x * 5.0 / 1) for x in range(0, 2)])
-    ve_vol = (80.0/3) * (25.0/2) * (5.0/1)
-    # flux
-    exp_n_flux = np.divide(np.array([[0.977887, 4.20556],
-                           [0.115698, 0.0],
-                           [0.181645, 0.0],
-                           [0.938374, 3.40724],
-                           [0.219677, 0.0],
-                           [0.18134,  0.0]]), ve_vol)
-    assert_equal(len(mesh.n_flux[:]), len(exp_n_flux))
-    for i in range(len(exp_n_flux)):
-        assert_array_almost_equal(mesh.n_flux[i], exp_n_flux[i], decimal=5)
-    # error
-    exp_n_flux_err = np.divide(np.array([[0.956263, 17.6867],
-                               [0.0133861, 0.0],
-                               [0.0329949, 0.0],
-                               [0.880546, 11.6093],
-                               [0.0482578, 0.0],
-                               [0.0328842, 0.0]]), ve_vol)
-    assert_equal(len(mesh.n_flux_err[:]), len(exp_n_flux_err))
-    for i in range(len(exp_n_flux_err)):
-        for j in range(exp_n_flux_err.shape[1]):
-            assert(is_close(mesh.n_flux_err[i][j],
-                exp_n_flux_err[i][j], rel_tol=1e-5))
 
