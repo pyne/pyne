@@ -1581,7 +1581,7 @@ class MeshTally(StatMesh):
         result : numpy array
             This numpy array contains the flux data read from MCNP meshtally
             file. The shape of this numpy array is
-            (num_e_groups*num_vess).
+            (num_ves*num_e_groups).
         rel_error: numpy array
             This numpy array contains the relative error data read from MCNP
             meshtally.
@@ -1618,53 +1618,55 @@ class MeshTally(StatMesh):
             rel_err_tot_tag[:] = rel_err_tot
 
 
-    def tag_flux_error_from_openmc_tally_results(self, tally_results):
+    def tag_flux_error_from_openmc_tally_results(self, flux, rel_err):
         """
-        This function uses the output tally_results from
-        openmc.get_tally_results_from_openmc_sp to set the flux and error tags.
+        This function uses the output tally_results (flux, rel_err) from
+        openmc_utils.get_tally_results_from_openmc_sp to set the flux and error tags.
 
         Parameters
         ----------
-        tally_results : numpy array
-            This numpy array contains the flux and error data read from an
-            openmc state point file. The shape of this numpy array is
-            (num_ves*num_e_groups, 1, 2). In the first dimension, the energy
-            changes the fastest.
-            The flux data is tally_results[:, :, 0], and the error data is
-            tally_results[:, :, 1].
+        flux : numpy array
+            This numpy array contains the flux data read from an
+            openmc state point file. The length of this numpy array is
+            num_ves*num_e_groups..
             The unit of flux data is units are particle-cm per source particle.
             Different from the neutron flux tallied in MCNP, this tally results
             does not divide the mesh element volume.
+        rel_err : numpy array
+            This numpy array contains the relative error data read from an
+            openmc state point file. The length of this numpy array is
+            num_ves*num_e_groups..
         """
+
         num_ves = len(self)
         # currently, the openmc mesh are uniform
         ve_vol = self.structured_hex_volume(0, 0, 0)
-        num_e_groups = len(tally_results) // num_ves
+        num_e_groups = len(flux) // num_ves
     
         # set flux and error tag
         # set results tag
-        flux_data = np.divide(tally_results[:, :, 0], ve_vol)
-        flux_data = np.reshape(flux_data, newshape=(num_e_groups, num_ves))
-        flux_data = flux_data.transpose()
-        self.tag(name=self.tag_names[0], value=flux_data,
+        flux = np.divide(flux, ve_vol)
+        flux = np.reshape(flux, newshape=(num_e_groups, num_ves))
+        flux = flux.transpose()
+        self.tag(name=self.tag_names[0], value=flux,
                  doc='{0} flux'.format(self.particle),
                  tagtype=NativeMeshTag, size=num_e_groups, dtype=float)
         # set result_rel_error tag
-        error_data = np.divide(tally_results[:, :, 1], ve_vol)
-        error_data = np.reshape(error_data, newshape=(num_e_groups, num_ves))
-        error_data = error_data.transpose()
+#        error_data = np.divide(tally_results[:, :, 1], ve_vol)
+        rel_err = np.reshape(rel_err, newshape=(num_e_groups, num_ves))
+        rel_err = rel_err.transpose()
         self.tag(name=self.tag_names[1],
-                 value=error_data,
+                 value=rel_err,
                  doc='{0} flux relative error'.format(self.particle),
                  tagtype=NativeMeshTag, size=num_e_groups, dtype=float)
         # set result_total tag
-        total_flux_data = np.sum(flux_data, axis=1)
+        total_flux = np.sum(flux, axis=1)
         self.tag(name=self.tag_names[2],
-                 value=total_flux_data,
+                 value=total_flux,
                  doc='total {0} flux'.format(self.particle),
                  tagtype=NativeMeshTag, size=1, dtype=float)
         # set result_total_rel_error tag
-        total_error_data = np.sum(error_data, axis=1)
+        total_rel_err = np.sum(rel_err, axis=1)
         self.tag(name=self.tag_names[3],
                  value=total_flux_data,
                  doc='total {0} flux relative error'.format(self.particle),
