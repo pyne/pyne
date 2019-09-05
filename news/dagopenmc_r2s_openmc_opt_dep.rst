@@ -1,5 +1,6 @@
 **Added:**
 
+* Add OpenMC python API as optional dependency for OpenMC R2S
 * Functions to read mesh and meshtally results OpenMC state point file
 * Functions to create MeshTally instance from the results of OpenMC results
 * Functions to set up the interface for R2S using OpenMC results
