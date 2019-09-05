@@ -172,6 +172,7 @@ class CrossSections(HTMLParser):
         s = template.format(filetype=self.filetype, ace_tables=ace_tables)
         return s
 
+
 def get_e_bounds_from_openmc_sp(filename, tally_id):
     """
     This function reads OpenMC state point file to get the energy boundaries
@@ -195,48 +196,8 @@ def get_e_bounds_from_openmc_sp(filename, tally_id):
     for flt in tally.filters:
         if isinstance(flt, openmc.filter.EnergyFilter):
             energy_filter = flt
-    return energy_filter.values
-
-    
-#    # check tally_num exist
-#    tally_name = ''.join(["tally ", str(tally_num)])
-#    with tb.open_file(filename) as h5f:
-#        try:
-#            filters_id = h5f.root.tallies._f_get_child(
-#                    tally_name)._f_get_child('filters')[:]
-#            for fil_id in filters_id:
-#                filter_name = ''.join(["filter ", str(fil_id)])
-#                filter_type = h5f.root.tallies.filters._f_get_child(filter_name).type.read()
-#                if filter_type == np.array(b'energy'):
-#                    e_bounds = h5f.root.tallies.filters._f_get_child(filter_name).bins[:]
-#                    return e_bounds
-#        except:
-#            raise ValueError("Energy bin {0} not found in file: {1}".format(
-#                str(tally_num), filename))
-
-
-
-#def get_flux_mean_std_dev_from_openmc_sp(filename, tally_num):
-#    """
-#    This function reads a OpenMC state point file to get the flux data for
-#    a specific tally number.
-#
-#    Parameters:
-#    -----------
-#    filename : str
-#        The OpenMC state point file name.
-#    tally_num : int
-#        Tally number to read.
-#
-#    Returns:
-#    --------
-#    flux : openmc flux
-#        Tally flux for the tally.
-#    """
-#    sp = openmc.StatePoint(filename)
-#    tally = sp.get_tally(scores=['flux'], id=tally_num)
-#    flux = tally.get_slice(scores=['flux'])
-#    return flux.mean.flatten(), flux.std_dev.flatten()
+    e_bounds = energy_filter.values
+    return e_bounds
 
 
 def get_structured_coords_from_openmc_sp(filename, tally_id):
@@ -274,30 +235,6 @@ def get_structured_coords_from_openmc_sp(filename, tally_id):
             mesh_filter.mesh.upper_right[:],
             mesh_filter.mesh.dimension[:])
     return structured_coords
-
-
-    #with tb.open_file(filename) as h5f:
-    #    try:
-    #        meshes = h5f.root.tallies._f_get_child('meshes')
-    #        if meshes._v_nchildren != 1:
-    #            if mesh_id is None:
-    #                raise ValueError(
-    #                    "mesh_id must provide if multiple meshes in the file.")
-    #            else:
-    #                # define mesh_name according to the mesh_id provided by user
-    #                mesh_name = ''.join(['mesh ', str(mesh_id)])
-    #        else:
-    #            # there is only one mesh in the sp file, get that one
-    #            mesh_str = meshes._v_groups.__str__()
-    #            mesh_name = get_openmc_mesh_name(mesh_str)
-    #        mesh = meshes._f_get_child(mesh_name)
-    #        structured_coords = calc_structured_coords(
-    #                mesh.lower_left[:],
-    #                mesh.upper_right[:],
-    #                mesh.dimension[:])
-    #    except:
-    #        raise ValueError("Read mesh failed in file: {0}".format(filename))
-    #return structured_coords
 
 
 def calc_structured_coords(lower_left, upper_right, dimension):
@@ -339,44 +276,6 @@ def calc_structured_coords(lower_left, upper_right, dimension):
     return structured_coords
 
 
-#def get_openmc_mesh_name(mesh_str):
-#    """
-#    This function is used to get mesh name from a string contain it.
-#    A mesh string contains the content such as:
-#    "{'mesh 14': /tallies/meshes/mesh 14 (Group)"
-#
-#    Parameters:
-#    -----------
-#    mesh_str : str
-#        A mesh string contains mesh name.
-#    
-#    Returns:
-#    --------
-#    mesh_name : str
-#        The mesh name, Eg: "mesh 14"
-#    """
-#    ls = mesh_str.strip().split(':')
-#    mesh_name = ls[0].split("'")[1]
-#    return mesh_name
-
-
-#def create_tally_name(tally_number):
-#    """
-#    This function is used to create OpenMC tally name from tally number.
-#
-#    Parameters:
-#    -----------
-#    tally_number : int
-#        Tally number.
-#
-#    Returns:
-#    --------
-#    tally_name : str
-#        Tally name. Eg: "tally 1"
-#    """
-#    tally_name = ''.join(["tally ", str(tally_number)])
-#    return tally_name
-
 def get_result_error_from_openmc_sp(filename, m):
     """
     Convert the openmc flux into result, rel_err, res_tot, rel_err_tot.
@@ -402,7 +301,6 @@ def get_result_error_from_openmc_sp(filename, m):
     rel_err_tot : list
         Relative error of total results.
     """
-
     sp = openmc.StatePoint(filename)
     tally = sp.get_tally(scores=['flux'], id=m.tally_number)
     flux = tally.get_slice(scores=['flux'])
@@ -432,6 +330,7 @@ def get_result_error_from_openmc_sp(filename, m):
     nonzero = res_tot > 0
     rel_err_tot = np.sqrt(var_tot[nonzero]) / (res_tot[nonzero] * ve_vol)
     return result, rel_err, res_tot, rel_err_tot
+
 
 def create_meshtally(filename, tally_id, mesh_id=None, particle=None,
         tag_names=None, mesh_has_mats=False):

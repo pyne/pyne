@@ -97,7 +97,6 @@ def test_cross_sections_mcnp_id():
     nucid_obs = [table.nucid for table in xstables if table.alias == "Co-58.70c"][0]
     assert_equal(nucid_obs, 270580000)
 
-
 def test_cross_sections_roundtrip():
     sample_xs.seek(0)
     xs = openmc_utils.CrossSections(sample_xs)
@@ -105,13 +104,6 @@ def test_cross_sections_roundtrip():
     exp = sample_xs.read()
     obs = xs.xml()
     assert_equal(exp, obs)
-
-#def test_get_openmc_mesh_name():
-#    mesh_str = """{'mesh 14': /tallies/meshes/mesh 14 (Group) ''\n
-#                  children := ['dimension' (Array), 'lower_left' (Array), 
-#                  'type' (Array), 'upper_right' (Array), 'width' (Array)]}"""
-#    exp_mesh_name = "mesh 14"
-#    assert_equal(openmc_utils.get_openmc_mesh_name(mesh_str), exp_mesh_name)
 
 def test_calc_structured_coords():
     lower_left = np.array([0.0, 0.0, 0.0])
@@ -126,7 +118,6 @@ def test_calc_structured_coords():
     for i in range(len(exp_structured_coords)):
         assert_array_almost_equal(structured_coords[i],
                 exp_structured_coords[i])
-
 
 def test_get_e_bounds_from_openmc_sp():
     # energy bin: [0.0, 1.0, 20.0], 2bins
