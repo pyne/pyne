@@ -136,11 +136,11 @@ def test_get_e_bounds_from_openmc_sp():
     e_bounds = openmc_utils.get_e_bounds_from_openmc_sp(filename, tally_num=1)
     assert_array_equal(e_bounds, exp_e_bounds)
 
-def test_create_tally_name():
-    tally_number = 1
-    exp_tally_name = "tally 1"
-    tally_name = openmc_utils.create_tally_name(tally_number)
-    assert_equal(tally_name, exp_tally_name)
+#def test_create_tally_name():
+#    tally_number = 1
+#    exp_tally_name = "tally 1"
+#    tally_name = openmc_utils.create_tally_name(tally_number)
+#    assert_equal(tally_name, exp_tally_name)
 
 def test_get_result_error_from_openmc_sp():
     try:

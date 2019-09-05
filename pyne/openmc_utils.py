@@ -335,22 +335,22 @@ def get_openmc_mesh_name(mesh_str):
     return mesh_name
 
 
-def create_tally_name(tally_number):
-    """
-    This function is used to create OpenMC tally name from tally number.
-
-    Parameters:
-    -----------
-    tally_number : int
-        Tally number.
-
-    Returns:
-    --------
-    tally_name : str
-        Tally name. Eg: "tally 1"
-    """
-    tally_name = ''.join(["tally ", str(tally_number)])
-    return tally_name
+#def create_tally_name(tally_number):
+#    """
+#    This function is used to create OpenMC tally name from tally number.
+#
+#    Parameters:
+#    -----------
+#    tally_number : int
+#        Tally number.
+#
+#    Returns:
+#    --------
+#    tally_name : str
+#        Tally name. Eg: "tally 1"
+#    """
+#    tally_name = ''.join(["tally ", str(tally_number)])
+#    return tally_name
 
 def get_result_error_from_openmc_sp(filename, m):
     """
@@ -447,7 +447,7 @@ def create_meshtally(filename, tally_id, mesh_id=None, particle=None,
     else:
         m.tag_names = tag_names
     # check tally_num exist
-    tally_name = create_tally_name(m.tally_number)
+    #tally_name = create_tally_name(m.tally_number)
     structured_coords = get_structured_coords_from_openmc_sp(
             filename, mesh_id=mesh_id)
 
