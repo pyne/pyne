@@ -230,7 +230,7 @@ def get_e_bounds_from_openmc_sp(filename, tally_num):
 #    return flux.mean.flatten(), flux.std_dev.flatten()
 
 
-def get_structured_coords_from_openmc_sp(filename, mesh_id=None):
+def get_structured_coords_from_openmc_sp(filename, tally_id):
     """
     This function read the OpenMC state point file and get the structured
     coordinates of the mesh.
@@ -239,6 +239,8 @@ def get_structured_coords_from_openmc_sp(filename, mesh_id=None):
     -----------
     filename : str
         OpenMC state point filename.
+    tally_id : int
+        Tally id.
     mesh_id : int
         The mesh id used in this tally. Required if multiple meshes exist in
         the state point file.
@@ -251,28 +253,42 @@ def get_structured_coords_from_openmc_sp(filename, mesh_id=None):
                                  [y_bounds1, y_bounds2, ...],
                                  [z_bounds1, z_bounds2, ...]]
     """
-    with tb.open_file(filename) as h5f:
-        try:
-            meshes = h5f.root.tallies._f_get_child('meshes')
-            if meshes._v_nchildren != 1:
-                if mesh_id is None:
-                    raise ValueError(
-                        "mesh_id must provide if multiple meshes in the file.")
-                else:
-                    # define mesh_name according to the mesh_id provided by user
-                    mesh_name = ''.join(['mesh ', str(mesh_id)])
-            else:
-                # there is only one mesh in the sp file, get that one
-                mesh_str = meshes._v_groups.__str__()
-                mesh_name = get_openmc_mesh_name(mesh_str)
-            mesh = meshes._f_get_child(mesh_name)
-            structured_coords = calc_structured_coords(
-                    mesh.lower_left[:],
-                    mesh.upper_right[:],
-                    mesh.dimension[:])
-        except:
-            raise ValueError("Read mesh failed in file: {0}".format(filename))
+
+    sp = openmc.StatePoint(filename)
+    tally = sp.get_tally(id=tally_id)
+    # check filters to find MeshFilter
+    for flt in tally.filters:
+        if isinstance(flt, openmc.filter.MeshFilter):
+            mesh_filter = flt
+    structured_coords = calc_structured_coords(
+            mesh_filter.mesh.lower_left[:],
+            mesh_filter.mesh.upper_right[:],
+            mesh_filter.mesh.dimension[:])
     return structured_coords
+
+
+    #with tb.open_file(filename) as h5f:
+    #    try:
+    #        meshes = h5f.root.tallies._f_get_child('meshes')
+    #        if meshes._v_nchildren != 1:
+    #            if mesh_id is None:
+    #                raise ValueError(
+    #                    "mesh_id must provide if multiple meshes in the file.")
+    #            else:
+    #                # define mesh_name according to the mesh_id provided by user
+    #                mesh_name = ''.join(['mesh ', str(mesh_id)])
+    #        else:
+    #            # there is only one mesh in the sp file, get that one
+    #            mesh_str = meshes._v_groups.__str__()
+    #            mesh_name = get_openmc_mesh_name(mesh_str)
+    #        mesh = meshes._f_get_child(mesh_name)
+    #        structured_coords = calc_structured_coords(
+    #                mesh.lower_left[:],
+    #                mesh.upper_right[:],
+    #                mesh.dimension[:])
+    #    except:
+    #        raise ValueError("Read mesh failed in file: {0}".format(filename))
+    #return structured_coords
 
 
 def calc_structured_coords(lower_left, upper_right, dimension):
@@ -447,9 +463,8 @@ def create_meshtally(filename, tally_id, mesh_id=None, particle=None,
     else:
         m.tag_names = tag_names
     # check tally_num exist
-    #tally_name = create_tally_name(m.tally_number)
     structured_coords = get_structured_coords_from_openmc_sp(
-            filename, mesh_id=mesh_id)
+            filename, tally_id=m.tally_number)
 
     # parameters to create mesh
     m.x_bounds = structured_coords[0]

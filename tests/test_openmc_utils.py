@@ -127,6 +127,7 @@ def test_calc_structured_coords():
         assert_array_almost_equal(structured_coords[i],
                 exp_structured_coords[i])
 
+
 def test_get_e_bounds_from_openmc_sp():
     # energy bin: [0.0, 1.0, 20.0], 2bins
     # 6 volume elemenes
@@ -135,12 +136,6 @@ def test_get_e_bounds_from_openmc_sp():
     exp_e_bounds = np.array([0.0, 1.0, 20.0]) * 1e6
     e_bounds = openmc_utils.get_e_bounds_from_openmc_sp(filename, tally_num=1)
     assert_array_equal(e_bounds, exp_e_bounds)
-
-#def test_create_tally_name():
-#    tally_number = 1
-#    exp_tally_name = "tally 1"
-#    tally_name = openmc_utils.create_tally_name(tally_number)
-#    assert_equal(tally_name, exp_tally_name)
 
 def test_get_result_error_from_openmc_sp():
     try:
@@ -154,7 +149,7 @@ def test_get_result_error_from_openmc_sp():
 
     m = MeshTally()
     structured_coords = openmc_utils.get_structured_coords_from_openmc_sp(
-            filename, mesh_id=1)
+            filename, tally_id=tally_num)
 
     super(MeshTally, m).__init__(structured_coords=structured_coords,
             structured=True, mats=())
