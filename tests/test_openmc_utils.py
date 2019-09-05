@@ -120,6 +120,10 @@ def test_calc_structured_coords():
                 exp_structured_coords[i])
 
 def test_get_e_bounds_from_openmc_sp():
+    try:
+        import openmc
+    except:
+        raise SkipTest
     # energy bin: [0.0, 1.0, 20.0], 2bins
     # 6 volume elemenes
     filename = os.path.join(cwd, "files_test_openmc", "statepoint.10.ebin2.ves6.h5")
