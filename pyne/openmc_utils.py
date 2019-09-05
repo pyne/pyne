@@ -207,27 +207,27 @@ def get_ebins_from_openmc_sp(filename, tally_num):
 
 
 
-def get_flux_mean_std_dev_from_openmc_sp(filename, tally_num):
-    """
-    This function reads a OpenMC state point file to get the flux data for
-    a specific tally number.
-
-    Parameters:
-    -----------
-    filename : str
-        The OpenMC state point file name.
-    tally_num : int
-        Tally number to read.
-
-    Returns:
-    --------
-    flux : openmc flux
-        Tally flux for the tally.
-    """
-    sp = openmc.StatePoint(filename)
-    tally = sp.get_tally(scores=['flux'], id=tally_num)
-    flux = tally.get_slice(scores=['flux'])
-    return flux.mean.flatten(), flux.std_dev.flatten()
+#def get_flux_mean_std_dev_from_openmc_sp(filename, tally_num):
+#    """
+#    This function reads a OpenMC state point file to get the flux data for
+#    a specific tally number.
+#
+#    Parameters:
+#    -----------
+#    filename : str
+#        The OpenMC state point file name.
+#    tally_num : int
+#        Tally number to read.
+#
+#    Returns:
+#    --------
+#    flux : openmc flux
+#        Tally flux for the tally.
+#    """
+#    sp = openmc.StatePoint(filename)
+#    tally = sp.get_tally(scores=['flux'], id=tally_num)
+#    flux = tally.get_slice(scores=['flux'])
+#    return flux.mean.flatten(), flux.std_dev.flatten()
 
 
 def get_structured_coords_from_openmc_sp(filename, mesh_id=None):
@@ -352,7 +352,7 @@ def create_tally_name(tally_number):
     tally_name = ''.join(["tally ", str(tally_number)])
     return tally_name
 
-def get_results_error_from_openmc(filename, m):
+def get_result_error_from_openmc(filename, m):
     """
     Convert the openmc flux into result, rel_err, res_tot, rel_err_tot.
 
@@ -381,10 +381,11 @@ def get_results_error_from_openmc(filename, m):
     sp = openmc.StatePoint(filename)
     tally = sp.get_tally(scores=['flux'], id=m.tally_number)
     flux = tally.get_slice(scores=['flux'])
+
     num_ves = len(m)
     # currently, the openmc mesh are uniform
-    ve_vol = mesh.structured_hex_volume(0, 0, 0)
-    num_e_groups = len(mesh) // num_ves
+    ve_vol = m.structured_hex_volume(0, 0, 0)
+    num_e_groups = len(flux.mean.flatten()) // num_ves
 
     # get result
     result = flux.mean.flatten()
@@ -404,7 +405,7 @@ def get_results_error_from_openmc(filename, m):
     std_dev = std_dev.transpose()
     var_tot = np.sum(np.square(std_dev), axis=1)
     nonzero = res_tot > 0
-    rel_err_tot = np.sqrt(var_tot[nonzeor]) / res_tot[nonzero]
+    rel_err_tot = np.sqrt(var_tot[nonzero]) / (res_tot[nonzero] * ve_vol)
     return result, rel_err, res_tot, rel_err_tot
 
 def create_meshtally(filename, tally_id, mesh_id=None, particle=None,
@@ -449,22 +450,19 @@ def create_meshtally(filename, tally_id, mesh_id=None, particle=None,
     tally_name = create_tally_name(m.tally_number)
     structured_coords = get_structured_coords_from_openmc_sp(
             filename, mesh_id=mesh_id)
-    flux = get_result_error_from_openmc_sp(filename, m)
+#    flux = get_result_error_from_openmc_sp(filename, m)
 
     # parameters to create mesh
     m.x_bounds = structured_coords[0]
     m.y_bounds = structured_coords[1]
     m.z_bounds = structured_coords[2]
-    m.dims = [0, 0, 0] + [len(m.x_bounds) - 1,
-                             len(m.y_bounds) - 1,
-                             len(m.z_bounds) - 1]
-    m.num_ves = (len(m.x_bounds)-1) * (len(m.y_bounds)-1)\
-        * (len(m.z_bounds)-1)
+    m.dims = [len(m.x_bounds) - 1, len(m.y_bounds) - 1, len(m.z_bounds) - 1]
+    m.num_ves = (len(m.x_bounds)-1) * (len(m.y_bounds)-1) * (len(m.z_bounds)-1)
     m.num_e_groups = len(flux.mean) // m.num_ves
     mats = () if mesh_has_mats is True else None
     super(MeshTally, m).__init__(structured_coords=structured_coords,
             structured=True, mats=mats)
-    result, rel_err, res_tot, rel_err_tot = convert_openmc_flux(flux, m)
+    result, rel_err, res_tot, rel_err_tot = get_result_error_from_openmc(filename, m)
 #    m.tag_flux_error_from_openmc_tally_results(result, rel_err)
     return m
 

@@ -113,63 +113,43 @@ def test_get_openmc_mesh_name():
     exp_mesh_name = "mesh 14"
     assert_equal(openmc_utils.get_openmc_mesh_name(mesh_str), exp_mesh_name)
 
-# data from statepoint.ebin2.ves6.h5
+# data from statepoint.10.ebin2.ves6.h5
+# num_realization 10
+# particles per batch 10000
+# sum, sum_sq
 sp_tally_flux = np.array(
-           [[[0.977887, 0.956263 ]],
-            [[0.115698, 0.0133861]], 
-            [[0.181645, 0.0329949]],
-            [[0.938374, 0.880546 ]],
-            [[0.219677, 0.0482578]],
-            [[0.18134 , 0.0328842]],
-            [[4.20556 , 17.6867  ]],
-            [[0       , 0        ]],
-            [[0       , 0        ]],
-            [[3.40724 , 11.6093  ]],
-            [[0       , 0        ]],
-            [[0       , 0        ]]], dtype=float)
+           [[[10.7484 , 11.5613   ]],
+            [[1.13296 , 0.129772  ]], 
+            [[0.855668, 0.0738944 ]],
+            [[10.7556 , 11.5765   ]],
+            [[1.09605 , 0.121621  ]],
+            [[0.836818, 0.07046   ]],
+            [[41.6117 , 173.169   ]],
+            [[0.865331, 0.0759644 ]],
+            [[0.127499, 0.00174581]],
+            [[41.3212 , 170.769   ]],
+            [[0.774163, 0.0610184 ]],
+            [[0.114357, 0.00145603]]], dtype=float)
+num_realizations = 10
 
-def test_get_flux_mean_std_dev_from_openmc_sp():
-    try:
-        import openmc
-    except:
-        raise SkipTest
-
-    # energy bin: [0.0, 1.0, 20.0], 2bins
-    # 6 volume elemenes
-    filename = os.path.join(cwd, "files_test_openmc", "statepoint.ebin2.ves6.h5")
-    # dimension of the tally_results: (12, 1, 2)
-    flux_mean, flux_std_dev = openmc_utils.get_flux_mean_std_dev_from_openmc_sp(filename,
-            tally_num=1)
-    exp_flux_mean = sp_tally_flux[:, :, 0].flatten()
-#    exp_flux_mean = np.array([0.977887,
-#                              0.115698,
-#                              0.181645,
-#                              0.938374,
-#                              0.219677,
-#                              0.18134 ,
-#                              4.20556 ,
-#                              0       ,
-#                              0       ,
-#                              3.40724 ,
-#                              0       ,
-#                              0       ])
-    exp_flux_std_dev = np.array([[[0.956263 ]],
-                                 [[0.0133861]],
-                                 [[0.0329949]],
-                                 [[0.880546 ]],
-                                 [[0.0482578]],
-                                 [[0.0328842]],
-                                 [[17.6867  ]],
-                                 [[0        ]],
-                                 [[0        ]],
-                                 [[11.6093  ]],
-                                 [[0        ]],
-                                 [[0        ]]])
-    # compare
-    assert_array_equal(flux_mean.shape, exp_flux_mean.shape)
-    for i in range(len(flux_mean)):
-        # data in h5 file is 6 digits
-        assert_true(is_close(flux_mean[i], exp_flux_mean[i], rel_tol=1e-5))
+#def test_get_flux_mean_std_dev_from_openmc_sp():
+#    try:
+#        import openmc
+#    except:
+#        raise SkipTest
+#
+#    # energy bin: [0.0, 1.0, 20.0], 2bins
+#    # 6 volume elemenes
+#    filename = os.path.join(cwd, "files_test_openmc", "statepoint.10.ebin2.ves6.h5")
+#    flux_mean, flux_std_dev = openmc_utils.get_flux_mean_std_dev_from_openmc_sp(filename,
+#            tally_num=1)
+#    exp_flux_mean = sp_tally_flux[:, :, 0].flatten()
+#    exp_flux_std_dev = sp_tally_flux[:, :, 1].flatten()
+#    # compare
+#    assert_array_equal(flux_mean.shape, exp_flux_mean.shape)
+#    for i in range(len(flux_mean)):
+#        # data in h5 file is 6 digits
+#        assert_true(is_close(flux_mean[i], exp_flux_mean[i], rel_tol=1e-5))
 
 def test_calc_structured_coords():
     lower_left = np.array([0.0, 0.0, 0.0])
@@ -188,7 +168,7 @@ def test_calc_structured_coords():
 def test_get_ebins_from_openmc_sp():
     # energy bin: [0.0, 1.0, 20.0], 2bins
     # 6 volume elemenes
-    filename = os.path.join(cwd, "files_test_openmc", "statepoint.ebin2.ves6.h5")
+    filename = os.path.join(cwd, "files_test_openmc", "statepoint.10.ebin2.ves6.h5")
     # OpenMC energy unit is eV
     exp_ebins = np.array([0.0, 1.0, 20.0]) * 1e6
     ebins = openmc_utils.get_ebins_from_openmc_sp(filename, tally_num=1)
@@ -200,17 +180,43 @@ def test_create_tally_name():
     tally_name = openmc_utils.create_tally_name(tally_number)
     assert_equal(tally_name, exp_tally_name)
 
-#def test_get_result_error_from_openmc_sp():
-#    try:
-#        import openmc
-#    except:
-#        raise SkipTest
-#
-#    filename = os.path.join(os.getcwd(), "files_test_openmc",
-#            "statepoint.ebin2.ves6.h5")
-#    tally_num = 1
-#
-#
+def test_get_result_error_from_openmc_sp():
+    try:
+        import openmc
+    except:
+        raise SkipTest
+
+    filename = os.path.join(os.getcwd(), "files_test_openmc",
+            "statepoint.10.ebin2.ves6.h5")
+    tally_num = 1
+
+    m = MeshTally()
+    structured_coords = openmc_utils.get_structured_coords_from_openmc_sp(
+            filename, mesh_id=1)
+
+    super(MeshTally, m).__init__(structured_coords=structured_coords,
+            structured=True, mats=())
+    num_ves = len(m)
+    ve_vol = m.structured_hex_volume(0, 0, 0)
+
+    result, rel_err, res_tot, rel_err_tot = \
+            openmc_utils.get_result_error_from_openmc(filename, m)
+    # read expected data from statepoint.10.ebin2.ves6.h5
+    sp = openmc.StatePoint(filename)
+    tally = sp.get_tally(id=1)
+    flux = tally.get_slice(scores=['flux'])
+    num_e_groups = len(flux.mean.flatten()) // num_ves
+    exp_result = np.divide(flux.mean.flatten(), ve_vol)
+    exp_result = np.reshape(exp_result, newshape=(num_e_groups, num_ves))
+    exp_result = exp_result.transpose()
+
+    exp_rel_err = flux.std_dev / flux.mean
+    exp_rel_err = np.reshape(exp_rel_err, newshape=(num_e_groups, num_ves))
+    exp_rel_err = exp_rel_err.transpose()
+    # compare the data and expected answer
+    assert_array_almost_equal(result, exp_result)
+    assert_array_almost_equal(rel_err, exp_rel_err)
+
 #def test_meshtally_from_openmc_statepoint():
 #    if not HAVE_PYMOAB:
 #        raise SkipTest
@@ -222,7 +228,7 @@ def test_create_tally_name():
 #    # mesh.upper_right = (40.0, 12.5, 2.5)
 #    # energy_bins = np.array([0.0, 1.0, 20.0]) * 1e6
 #    filename = os.path.join(os.getcwd(), "files_test_openmc",
-#            "statepoint.ebin2.ves6.h5")
+#            "statepoint.10.ebin2.ves6.h5")
 #    tally_num = 1
 #
 #    tag_names = ("n_flux", "n_flux_err", "n_flux_total", "n_flux_total_err")
