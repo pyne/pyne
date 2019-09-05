@@ -330,25 +330,25 @@ def calc_structured_coords(lower_left, upper_right, dimension):
     return structured_coords
 
 
-def get_openmc_mesh_name(mesh_str):
-    """
-    This function is used to get mesh name from a string contain it.
-    A mesh string contains the content such as:
-    "{'mesh 14': /tallies/meshes/mesh 14 (Group)"
-
-    Parameters:
-    -----------
-    mesh_str : str
-        A mesh string contains mesh name.
-    
-    Returns:
-    --------
-    mesh_name : str
-        The mesh name, Eg: "mesh 14"
-    """
-    ls = mesh_str.strip().split(':')
-    mesh_name = ls[0].split("'")[1]
-    return mesh_name
+#def get_openmc_mesh_name(mesh_str):
+#    """
+#    This function is used to get mesh name from a string contain it.
+#    A mesh string contains the content such as:
+#    "{'mesh 14': /tallies/meshes/mesh 14 (Group)"
+#
+#    Parameters:
+#    -----------
+#    mesh_str : str
+#        A mesh string contains mesh name.
+#    
+#    Returns:
+#    --------
+#    mesh_name : str
+#        The mesh name, Eg: "mesh 14"
+#    """
+#    ls = mesh_str.strip().split(':')
+#    mesh_name = ls[0].split("'")[1]
+#    return mesh_name
 
 
 #def create_tally_name(tally_number):

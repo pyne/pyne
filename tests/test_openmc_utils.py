@@ -106,12 +106,12 @@ def test_cross_sections_roundtrip():
     obs = xs.xml()
     assert_equal(exp, obs)
 
-def test_get_openmc_mesh_name():
-    mesh_str = """{'mesh 14': /tallies/meshes/mesh 14 (Group) ''\n
-                  children := ['dimension' (Array), 'lower_left' (Array), 
-                  'type' (Array), 'upper_right' (Array), 'width' (Array)]}"""
-    exp_mesh_name = "mesh 14"
-    assert_equal(openmc_utils.get_openmc_mesh_name(mesh_str), exp_mesh_name)
+#def test_get_openmc_mesh_name():
+#    mesh_str = """{'mesh 14': /tallies/meshes/mesh 14 (Group) ''\n
+#                  children := ['dimension' (Array), 'lower_left' (Array), 
+#                  'type' (Array), 'upper_right' (Array), 'width' (Array)]}"""
+#    exp_mesh_name = "mesh 14"
+#    assert_equal(openmc_utils.get_openmc_mesh_name(mesh_str), exp_mesh_name)
 
 def test_calc_structured_coords():
     lower_left = np.array([0.0, 0.0, 0.0])
