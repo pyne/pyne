@@ -27,6 +27,9 @@ executors:
     py3_dagmc_pymoab:
         docker:
             - image: pyne/ubuntu_18.04_py3_dagmc_pymoab_pyne-deps:latest
+    py3_dagmc_pymoab_openmc:
+        docker:
+            - image: pyne/ubuntu_18.04_py3_dagmc_pymoab_openmc_pyne-deps:latest
 
 
 # Commands:
@@ -160,6 +163,22 @@ jobs:
           flags: "python3"
           build: "python3_dagmc_pymoab"
 
+  py3_dagmc_pymoab_openmc_build:
+      executor:
+        name: py3_dagmc_pymoab_openmc
+      working_directory: ~/repo
+      steps:
+        - checkout_build:
+            flags: "--moab $HOME/opt/moab --dagmc $HOME/opt/dagmc"
+            build: "python3_dagmc_pymoab_openmc"
+  py3_dagmc_pymoab_openmc_test:
+      executor:
+        name: py3_dagmc_pymoab_openmc
+      working_directory: ~/repo
+      steps:
+        - run_test:
+            flags: "python3"
+            build: "python3_dagmc_pymoab_openmc"
 
 # Python 2 jobs
 # without optional depedencies
@@ -242,6 +261,13 @@ workflows:
       - py3_dagmc_pymoab_test:
           requires:
             - py3_dagmc_pymoab_build
+
+      - py3_dagmc_pymoab_openmc_build:
+          requires:
+            - py3_dagmc_pymoab_build
+      - py3_dagmc_pymoab_openmc_test:
+          requires:
+            - py3_dagmc_pymoab_openmc_build
 
       - py2_build
       - py2_test:
