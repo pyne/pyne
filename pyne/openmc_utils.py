@@ -172,7 +172,7 @@ class CrossSections(HTMLParser):
         s = template.format(filetype=self.filetype, ace_tables=ace_tables)
         return s
 
-def get_ebins_from_openmc_sp(filename, tally_num):
+def get_e_bounds_from_openmc_sp(filename, tally_num):
     """
     This function reads OpenMC state point file to get the energy boundaries
     for a specific tally number.
@@ -186,7 +186,7 @@ def get_ebins_from_openmc_sp(filename, tally_num):
 
     Returns:
     --------
-    ebins : numpy array
+    e_bounds : numpy array
         Energy boundries with size of (num_e_gourps + 1).
     """
     # check tally_num exist
@@ -199,8 +199,8 @@ def get_ebins_from_openmc_sp(filename, tally_num):
                 filter_name = ''.join(["filter ", str(fil_id)])
                 filter_type = h5f.root.tallies.filters._f_get_child(filter_name).type.read()
                 if filter_type == np.array(b'energy'):
-                    ebins = h5f.root.tallies.filters._f_get_child(filter_name).bins[:]
-                    return ebins
+                    e_bounds = h5f.root.tallies.filters._f_get_child(filter_name).bins[:]
+                    return e_bounds
         except:
             raise ValueError("Energy bin {0} not found in file: {1}".format(
                 str(tally_num), filename))
@@ -352,7 +352,7 @@ def create_tally_name(tally_number):
     tally_name = ''.join(["tally ", str(tally_number)])
     return tally_name
 
-def get_result_error_from_openmc(filename, m):
+def get_result_error_from_openmc_sp(filename, m):
     """
     Convert the openmc flux into result, rel_err, res_tot, rel_err_tot.
 
@@ -450,7 +450,6 @@ def create_meshtally(filename, tally_id, mesh_id=None, particle=None,
     tally_name = create_tally_name(m.tally_number)
     structured_coords = get_structured_coords_from_openmc_sp(
             filename, mesh_id=mesh_id)
-#    flux = get_result_error_from_openmc_sp(filename, m)
 
     # parameters to create mesh
     m.x_bounds = structured_coords[0]
@@ -458,12 +457,13 @@ def create_meshtally(filename, tally_id, mesh_id=None, particle=None,
     m.z_bounds = structured_coords[2]
     m.dims = [len(m.x_bounds) - 1, len(m.y_bounds) - 1, len(m.z_bounds) - 1]
     m.num_ves = (len(m.x_bounds)-1) * (len(m.y_bounds)-1) * (len(m.z_bounds)-1)
-    m.num_e_groups = len(flux.mean) // m.num_ves
+    m.e_bounds = get_e_bounds_from_openmc_sp(filename, m.tally_number)
+    m.num_e_groups = len(m.e_bounds) - 1
     mats = () if mesh_has_mats is True else None
     super(MeshTally, m).__init__(structured_coords=structured_coords,
             structured=True, mats=mats)
-    result, rel_err, res_tot, rel_err_tot = get_result_error_from_openmc(filename, m)
-#    m.tag_flux_error_from_openmc_tally_results(result, rel_err)
+    result, rel_err, res_tot, rel_err_tot = get_result_error_from_openmc_sp(filename, m)
+    m.tag_flux_error_from_openmc_tally_results(result, rel_err, res_tot, rel_err_tot)
     return m
 
 

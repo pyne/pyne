@@ -113,44 +113,6 @@ def test_get_openmc_mesh_name():
     exp_mesh_name = "mesh 14"
     assert_equal(openmc_utils.get_openmc_mesh_name(mesh_str), exp_mesh_name)
 
-# data from statepoint.10.ebin2.ves6.h5
-# num_realization 10
-# particles per batch 10000
-# sum, sum_sq
-sp_tally_flux = np.array(
-           [[[10.7484 , 11.5613   ]],
-            [[1.13296 , 0.129772  ]], 
-            [[0.855668, 0.0738944 ]],
-            [[10.7556 , 11.5765   ]],
-            [[1.09605 , 0.121621  ]],
-            [[0.836818, 0.07046   ]],
-            [[41.6117 , 173.169   ]],
-            [[0.865331, 0.0759644 ]],
-            [[0.127499, 0.00174581]],
-            [[41.3212 , 170.769   ]],
-            [[0.774163, 0.0610184 ]],
-            [[0.114357, 0.00145603]]], dtype=float)
-num_realizations = 10
-
-#def test_get_flux_mean_std_dev_from_openmc_sp():
-#    try:
-#        import openmc
-#    except:
-#        raise SkipTest
-#
-#    # energy bin: [0.0, 1.0, 20.0], 2bins
-#    # 6 volume elemenes
-#    filename = os.path.join(cwd, "files_test_openmc", "statepoint.10.ebin2.ves6.h5")
-#    flux_mean, flux_std_dev = openmc_utils.get_flux_mean_std_dev_from_openmc_sp(filename,
-#            tally_num=1)
-#    exp_flux_mean = sp_tally_flux[:, :, 0].flatten()
-#    exp_flux_std_dev = sp_tally_flux[:, :, 1].flatten()
-#    # compare
-#    assert_array_equal(flux_mean.shape, exp_flux_mean.shape)
-#    for i in range(len(flux_mean)):
-#        # data in h5 file is 6 digits
-#        assert_true(is_close(flux_mean[i], exp_flux_mean[i], rel_tol=1e-5))
-
 def test_calc_structured_coords():
     lower_left = np.array([0.0, 0.0, 0.0])
     upper_right = np.array([1.0, 2.0, 3.0])
@@ -165,14 +127,14 @@ def test_calc_structured_coords():
         assert_array_almost_equal(structured_coords[i],
                 exp_structured_coords[i])
 
-def test_get_ebins_from_openmc_sp():
+def test_get_e_bounds_from_openmc_sp():
     # energy bin: [0.0, 1.0, 20.0], 2bins
     # 6 volume elemenes
     filename = os.path.join(cwd, "files_test_openmc", "statepoint.10.ebin2.ves6.h5")
     # OpenMC energy unit is eV
-    exp_ebins = np.array([0.0, 1.0, 20.0]) * 1e6
-    ebins = openmc_utils.get_ebins_from_openmc_sp(filename, tally_num=1)
-    assert_array_equal(ebins, exp_ebins)
+    exp_e_bounds = np.array([0.0, 1.0, 20.0]) * 1e6
+    e_bounds = openmc_utils.get_e_bounds_from_openmc_sp(filename, tally_num=1)
+    assert_array_equal(e_bounds, exp_e_bounds)
 
 def test_create_tally_name():
     tally_number = 1
@@ -200,7 +162,7 @@ def test_get_result_error_from_openmc_sp():
     ve_vol = m.structured_hex_volume(0, 0, 0)
 
     result, rel_err, res_tot, rel_err_tot = \
-            openmc_utils.get_result_error_from_openmc(filename, m)
+            openmc_utils.get_result_error_from_openmc_sp(filename, m)
     # read expected data from statepoint.10.ebin2.ves6.h5
     sp = openmc.StatePoint(filename)
     tally = sp.get_tally(id=1)
@@ -213,62 +175,68 @@ def test_get_result_error_from_openmc_sp():
     exp_rel_err = flux.std_dev / flux.mean
     exp_rel_err = np.reshape(exp_rel_err, newshape=(num_e_groups, num_ves))
     exp_rel_err = exp_rel_err.transpose()
+
+    exp_res_tot = np.sum(exp_result, axis=1)
+    exp_rel_err_tot = np.zeros_like(exp_res_tot)
+    std_dev = np.reshape(flux.std_dev.flatten(), newshape=(num_e_groups, num_ves))
+    std_dev = std_dev.transpose()
+    var_tot = np.sum(np.square(std_dev), axis=1)
+    exp_rel_err_tot = np.sqrt(var_tot) / (exp_res_tot * ve_vol)
     # compare the data and expected answer
     assert_array_almost_equal(result, exp_result)
     assert_array_almost_equal(rel_err, exp_rel_err)
+    assert_array_almost_equal(res_tot, exp_res_tot)
+    assert_array_almost_equal(rel_err_tot, exp_rel_err_tot)
 
-#def test_meshtally_from_openmc_statepoint():
-#    if not HAVE_PYMOAB:
-#        raise SkipTest
-#    # mesh read from openmc state point file
-#    # Parameters of the tally and mesh
-#    # mesh = openmc_utils.Mesh(mesh_id=14, name="n_flux")
-#    # mesh.dimension= [3, 2, 1]
-#    # mesh.lower_left = (-40.0, -12.5, -2.5)
-#    # mesh.upper_right = (40.0, 12.5, 2.5)
-#    # energy_bins = np.array([0.0, 1.0, 20.0]) * 1e6
-#    filename = os.path.join(os.getcwd(), "files_test_openmc",
-#            "statepoint.10.ebin2.ves6.h5")
-#    tally_num = 1
-#
-#    tag_names = ("n_flux", "n_flux_err", "n_flux_total", "n_flux_total_err")
-#    #mesh = MeshTally() #filename, tally_num, tag_names=tag_names, mc_code='openmc')
-#    mesh = openmc_utils.create_meshtally(filename, tally_num, particle='neutron',
-#            tag_names=tag_names)
-#    # check mesh attributes
-#    assert_equal(len(mesh), 6)
-#    assert(mesh.structured)
-#    # structured_coords
-#    assert_array_almost_equal(mesh.structured_coords[0],
-#            [(-40.0 + x * 80.0 / 3) for x in range(0, 4)])
-#    assert_array_almost_equal(mesh.structured_coords[1],
-#            [(-12.5 + x * 25.0 / 2) for x in range (0, 3)])
-#    assert_array_almost_equal(mesh.structured_coords[2],
-#            [(-2.5 + x * 5.0 / 1) for x in range(0, 2)])
-#    ve_vol = (80.0/3) * (25.0/2) * (5.0/1)
-#    # flux
-#    exp_n_flux = np.divide(np.array([[0.977887, 4.20556],
-#                           [0.115698, 0.0],
-#                           [0.181645, 0.0],
-#                           [0.938374, 3.40724],
-#                           [0.219677, 0.0],
-#                           [0.18134,  0.0]]), ve_vol)
-#    assert_equal(len(mesh.n_flux[:]), len(exp_n_flux))
-#    for i in range(len(exp_n_flux)):
-#        assert_array_almost_equal(mesh.n_flux[i], exp_n_flux[i], decimal=5)
-#    # error
-#    exp_n_flux_err = np.divide(np.array([[0.956263, 17.6867],
-#                               [0.0133861, 0.0],
-#                               [0.0329949, 0.0],
-#                               [0.880546, 11.6093],
-#                               [0.0482578, 0.0],
-#                               [0.0328842, 0.0]]), ve_vol)
-#    assert_equal(len(mesh.n_flux_err[:]), len(exp_n_flux_err))
-#    for i in range(len(exp_n_flux_err)):
-#        for j in range(exp_n_flux_err.shape[1]):
-#            assert(is_close(mesh.n_flux_err[i][j],
-#                exp_n_flux_err[i][j], rel_tol=1e-5))
-#
+def test_meshtally_from_openmc_statepoint():
+    if not HAVE_PYMOAB:
+        raise SkipTest
+    try:
+        import openmc
+    except:
+        raise SkipTest
+    # mesh read from openmc state point file
+    # Parameters of the tally and mesh
+    # mesh = openmc_utils.Mesh(mesh_id=1, name="n_flux")
+    # mesh.dimension= [3, 2, 1]
+    # mesh.lower_left = (-40.0, -12.5, -2.5)
+    # mesh.upper_right = (40.0, 12.5, 2.5)
+    # energy_bins = np.array([0.0, 1.0, 20.0]) * 1e6
+    filename = os.path.join(os.getcwd(), "files_test_openmc",
+            "statepoint.10.ebin2.ves6.h5")
+    tally_num = 1
+    tag_names = ("n_flux", "n_flux_err", "n_flux_total", "n_flux_total_err")
+    mesh = openmc_utils.create_meshtally(filename, tally_num, particle='neutron',
+            tag_names=tag_names)
+    num_ves = len(mesh)
+    # check mesh attributes
+    assert_equal(num_ves, 6)
+    assert(mesh.structured)
+    # structured_coords
+    assert_array_almost_equal(mesh.structured_coords[0],
+            [(-40.0 + x * 80.0 / 3) for x in range(0, 4)])
+    assert_array_almost_equal(mesh.structured_coords[1],
+            [(-12.5 + x * 25.0 / 2) for x in range (0, 3)])
+    assert_array_almost_equal(mesh.structured_coords[2],
+            [(-2.5 + x * 5.0 / 1) for x in range(0, 2)])
+    ve_vol = (80.0/3) * (25.0/2) * (5.0/1)
+
+    # read expected data from statepoint.10.ebin2.ves6.h5
+    sp = openmc.StatePoint(filename)
+    tally = sp.get_tally(id=1)
+    flux = tally.get_slice(scores=['flux'])
+    num_e_groups = len(flux.mean.flatten()) // num_ves
+    exp_result = np.divide(flux.mean.flatten(), ve_vol)
+    exp_result = np.reshape(exp_result, newshape=(num_e_groups, num_ves))
+    exp_result = exp_result.transpose()
+    exp_rel_err = flux.std_dev / flux.mean
+    exp_rel_err = np.reshape(exp_rel_err, newshape=(num_e_groups, num_ves))
+    exp_rel_err = exp_rel_err.transpose()
+
+    # compare
+    assert_array_almost_equal(mesh.n_flux[:], exp_result)
+    assert_array_almost_equal(mesh.n_flux_err[:], exp_rel_err)
+
 
 if __name__ == "__main__":
     nose.runmodule()
