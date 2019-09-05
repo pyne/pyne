@@ -3,6 +3,7 @@ from __future__ import unicode_literals, division
 from io import StringIO
 import warnings 
 import os
+import sys
 import nose
 from nose.plugins.skip import SkipTest
 import numpy as np
@@ -120,6 +121,8 @@ def test_calc_structured_coords():
                 exp_structured_coords[i])
 
 def test_get_e_bounds_from_openmc_sp():
+    if not HAVE_PYMOAB or sys.version_info[0] == 2:
+        raise SkipTest
     try:
         import openmc
     except:
@@ -133,11 +136,12 @@ def test_get_e_bounds_from_openmc_sp():
     assert_array_equal(e_bounds, exp_e_bounds)
 
 def test_get_result_error_from_openmc_sp():
+    if not HAVE_PYMOAB or sys.version_info[0] == 2:
+        raise SkipTest
     try:
         import openmc
     except:
         raise SkipTest
-
     filename = os.path.join(os.getcwd(), "files_test_openmc",
             "statepoint.10.ebin2.ves6.h5")
     tally_num = 1
@@ -179,7 +183,7 @@ def test_get_result_error_from_openmc_sp():
     assert_array_almost_equal(rel_err_tot, exp_rel_err_tot)
 
 def test_meshtally_from_openmc_statepoint():
-    if not HAVE_PYMOAB:
+    if not HAVE_PYMOAB or sys.version_info[0] == 2:
         raise SkipTest
     try:
         import openmc
