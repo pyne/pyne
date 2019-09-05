@@ -516,6 +516,10 @@ def test_r2s_script_step_by_step():
     _r2s_test_step1(r2s_run_dir, remove_step1_out)
     _r2s_test_step2(r2s_run_dir, remove_step1_out)
     # test openmc r2s
+    try:
+        import openmc
+    except:
+        raise SkipTest
     r2s_run_dir = os.path.join(
             thisdir, "files_test_r2s", "r2s_examples", "openmc_r2s")
     _r2s_test_step1(r2s_run_dir, remove_step1_out)
@@ -546,6 +550,10 @@ def test_r2s_script():
    _r2s_test_step1(r2s_run_dir, remove_step1_out)
    _r2s_test_step2(r2s_run_dir, remove_step1_out)
    # openmc r2s
+   try:
+       import openmc
+   except:
+       raise SkipTest
    r2s_run_dir = os.path.join(
        thisdir, "files_test_r2s", "r2s_examples", "openmc_r2s")
    _r2s_test_step1(r2s_run_dir, remove_step1_out)
