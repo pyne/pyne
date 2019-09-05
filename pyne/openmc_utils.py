@@ -172,7 +172,7 @@ class CrossSections(HTMLParser):
         s = template.format(filetype=self.filetype, ace_tables=ace_tables)
         return s
 
-def get_e_bounds_from_openmc_sp(filename, tally_num):
+def get_e_bounds_from_openmc_sp(filename, tally_id):
     """
     This function reads OpenMC state point file to get the energy boundaries
     for a specific tally number.
@@ -181,29 +181,38 @@ def get_e_bounds_from_openmc_sp(filename, tally_num):
     -----------
     filename : str
         The OpenMC state point file name.
-    tally_num : int
-        Tally number to read.
+    tally_id : int
+        Tally id to read.
 
     Returns:
     --------
     e_bounds : numpy array
         Energy boundries with size of (num_e_gourps + 1).
     """
-    # check tally_num exist
-    tally_name = ''.join(["tally ", str(tally_num)])
-    with tb.open_file(filename) as h5f:
-        try:
-            filters_id = h5f.root.tallies._f_get_child(
-                    tally_name)._f_get_child('filters')[:]
-            for fil_id in filters_id:
-                filter_name = ''.join(["filter ", str(fil_id)])
-                filter_type = h5f.root.tallies.filters._f_get_child(filter_name).type.read()
-                if filter_type == np.array(b'energy'):
-                    e_bounds = h5f.root.tallies.filters._f_get_child(filter_name).bins[:]
-                    return e_bounds
-        except:
-            raise ValueError("Energy bin {0} not found in file: {1}".format(
-                str(tally_num), filename))
+    sp = openmc.StatePoint(filename)
+    tally = sp.get_tally(id=tally_id)
+    # check filter to find EnergyFilter
+    for flt in tally.filters:
+        if isinstance(flt, openmc.filter.EnergyFilter):
+            energy_filter = flt
+    return energy_filter.values
+
+    
+#    # check tally_num exist
+#    tally_name = ''.join(["tally ", str(tally_num)])
+#    with tb.open_file(filename) as h5f:
+#        try:
+#            filters_id = h5f.root.tallies._f_get_child(
+#                    tally_name)._f_get_child('filters')[:]
+#            for fil_id in filters_id:
+#                filter_name = ''.join(["filter ", str(fil_id)])
+#                filter_type = h5f.root.tallies.filters._f_get_child(filter_name).type.read()
+#                if filter_type == np.array(b'energy'):
+#                    e_bounds = h5f.root.tallies.filters._f_get_child(filter_name).bins[:]
+#                    return e_bounds
+#        except:
+#            raise ValueError("Energy bin {0} not found in file: {1}".format(
+#                str(tally_num), filename))
 
 
 

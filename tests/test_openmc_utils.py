@@ -134,7 +134,7 @@ def test_get_e_bounds_from_openmc_sp():
     filename = os.path.join(cwd, "files_test_openmc", "statepoint.10.ebin2.ves6.h5")
     # OpenMC energy unit is eV
     exp_e_bounds = np.array([0.0, 1.0, 20.0]) * 1e6
-    e_bounds = openmc_utils.get_e_bounds_from_openmc_sp(filename, tally_num=1)
+    e_bounds = openmc_utils.get_e_bounds_from_openmc_sp(filename, tally_id=1)
     assert_array_equal(e_bounds, exp_e_bounds)
 
 def test_get_result_error_from_openmc_sp():
