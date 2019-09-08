@@ -11,7 +11,6 @@ from pyne.utils import QAWarning
 import numpy as np
 import tables as tb
 
-
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 try:
@@ -1510,6 +1509,162 @@ class StatMesh(Mesh):
 
         return mesh_1
 
+
+class MeshTally(StatMesh):
+    """This class stores all information from all single mesh tally that
+    exists within some meshtal or state point file. Header information is
+    stored as attributes and the "mesh" attribute is a MOAB mesh with all
+    result and relative error data tagged. This class inherits from StatMesh,
+    exposing all statistical mesh manipulation methods.
+
+    Attributes
+    ----------
+    tally_number : int
+        The tally number.
+        For mesh tally from MCNP, it must end with 4 (e.g. 4, 14, 214).
+        For mesh tally from OpenMC, it could be any int.
+    particle : string
+        Either "neutron" for a neutron mesh tally or "photon" for a photon mesh
+        tally.
+    dose_response : bool
+        True is the tally is modified by a dose response function.
+    x_bounds : list of floats
+        The locations of mesh vertices in the x direction.
+    y_bounds : list of floats
+        The locations of mesh vertices in the y direction.
+    z_bounds : list of floats
+        The locations of mesh vertices in the z direction.
+    dims : list
+        Dimensions of the mesh.
+    num_ves : int
+        Number of volume elements.
+    e_bounds : list of floats
+        The minimum and maximum bounds for energy bins
+    num_e_groups: int
+        Number of energy groups.
+    mesh :
+        An PyMOAB core instance tagged with all results and
+        relative errors
+    tag_names : iterable
+        Four strs that specify the tag names for the results, relative errors,
+        total results, and relative errors of the total results.
+
+    Notes
+    -----
+    All Mesh/StatMesh attributes are also present via a super() call to
+    StatMesh.__init__().
+
+    """
+
+    def __init__(self):
+        """
+        Create an empty MeshTally object and set default values.
+        """
+
+        if not HAVE_PYMOAB:
+            raise RuntimeError("PyMOAB is not available, "
+                               "unable to create Meshtally Mesh.")
+
+        self.tally_number = None
+        self.particle = 'neutron'
+        self.tag_names = None
+
+
+    def tag_flux_error_from_mcnp_tally_results(self, result, rel_error,
+            res_tot, rel_err_tot):
+        """
+        This function uses the output tally result from mcnp result and
+        rel_error to set the flux and error tags.
+
+        Parameters
+        ----------
+        result : numpy array
+            This numpy array contains the flux data read from MCNP meshtally
+            file. The shape of this numpy array is
+            (num_e_groups*num_ves).
+        rel_error: numpy array
+            This numpy array contains the relative error data read from MCNP
+            meshtally.
+        res_tot : list
+            The total results.
+        rel_err_tot : list
+            Relative error of total results.
+        """
+        # Tag results and error vector to mesh
+        self.tag(self.tag_names[0], tagtype='nat_mesh',
+                 size=self.num_e_groups, dtype=float)
+        res_tag = self.get_tag(self.tag_names[0])
+        self.tag(self.tag_names[1], tagtype='nat_mesh',
+                 size=self.num_e_groups, dtype=float)
+        rel_err_tag = self.get_tag(self.tag_names[1])
+
+        if self.num_e_groups == 1:
+            res_tag[:] = result[0]
+            rel_err_tag[:] = rel_error[0]
+        else:
+            res_tag[:] = result.transpose()
+            rel_err_tag[:] = rel_error.transpose()
+
+        if self.num_e_groups > 1:
+            self.tag(self.tag_names[2], size=1,
+                     dtype=float, tagtype='nat_mesh')
+            res_tot_tag = self.get_tag(self.tag_names[2])
+    
+            self.tag(self.tag_names[3], size=1,
+                     dtype=float, tagtype='nat_mesh')
+            rel_err_tot_tag = self.get_tag(self.tag_names[3])
+    
+            res_tot_tag[:] = res_tot
+            rel_err_tot_tag[:] = rel_err_tot
+
+
+    def tag_flux_error_from_openmc_tally_results(self, result, rel_err,
+            res_tot, rel_err_tot):
+        """
+        This function uses the output tally_results (flux, rel_err) from
+        openmc_utils.get_tally_results_from_openmc_sp to set the flux and error tags.
+
+        Parameters
+        ----------
+        result : numpy array
+            This numpy array contains the flux data read from an
+            openmc state point file. The length of this numpy array is
+            ves*num_e_groups.
+            The unit of flux data is units are particle-cm per source particle.
+            Different from the neutron flux tallied in MCNP, this tally results
+            does not divide the mesh element volume.
+        rel_err : numpy array
+            This numpy array contains the relative error data read from an
+            openmc state point file. The length of this numpy array is
+            num_ves*num_e_groups.
+        res_tot : list
+            The total results.
+        rel_err_tot : list
+            Relative error of total results.
+        """
+
+        num_ves = len(self)
+        self.tag(name=self.tag_names[0], value=result,
+                 doc='{0} flux'.format(self.particle),
+                 tagtype=NativeMeshTag, size=self.num_e_groups, dtype=float)
+        # set result_rel_error tag
+        self.tag(name=self.tag_names[1],
+                 value=rel_err,
+                 doc='{0} flux relative error'.format(self.particle),
+                 tagtype=NativeMeshTag, size=self.num_e_groups, dtype=float)
+        # set result_total tag
+        self.tag(name=self.tag_names[2],
+                 value=res_tot,
+                 doc='total {0} flux'.format(self.particle),
+                 tagtype=NativeMeshTag, size=1, dtype=float)
+        # set result_total_rel_error tag
+        self.tag(name=self.tag_names[3],
+                 value=rel_err_tot,
+                 doc='total {0} flux relative error'.format(self.particle),
+                 tagtype=NativeMeshTag, size=1, dtype=float)
+
+
+
 ######################################################
 # private helper functions for structured mesh methods
 ######################################################
@@ -1695,4 +1850,5 @@ def _cell_fracs_sort_vol_frac_reverse(cell_fracs):
     cell_fracs.sort(order=['idx', 'vol_frac'])
     cell_fracs['vol_frac'] *= -1.0
     return cell_fracs
+
 
