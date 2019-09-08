@@ -15,6 +15,7 @@ to build docker containers with a custom set of
     - `build_moab=YES` add MOAB in the docker container (default: `NO`)
     - `build_pymoab=YES` install MOAB with pymoab (default: `NO`)
     - `build_dagmc=YES` add DAGMC (default: `NO`)
+    - `install_openmc=YES` install OpenMC Python3 API (default: `NO`)
     - `build_pyne=NO` do not build PyNE, only add the PyNE dependencies to the container (default: `YES`)
     - `py_version=X.Y` specify the python version to install (options are 2.7 or
       3.6) (default: `2.7`)
@@ -32,6 +33,7 @@ to request DAGMC dependencies only with Python 2.7, the docker build arguments w
     - `--moab` install MOAB in the container
     - `--dagmc` install DAGMC in the container
     - `--pymoab` install pyMOAB in the container (along with MOAB)
+    - `--openmc` install OpenMC Python3 API in the container
     - `--all/-a/-all` install all the optional dependencies (MOAB/pyMOAB/DAGMC) 
     - `--deps` don't install PyNE, only install the dependencies (both required and selected optional dependencies)
     - `--push` push the docker container to DockerHub after building it
