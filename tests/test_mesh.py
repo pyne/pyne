@@ -29,15 +29,16 @@ import numpy as np
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 
 from pyne.material import Material
-from pyne.utils import QAWarning
+from pyne.utils import QAWarning, is_close
 from pyne.mesh import HAVE_PYMOAB
 if not HAVE_PYMOAB:
     raise SkipTest
-from pyne.mesh import NativeMeshTag, ComputedTag, MetadataTag
+from pyne.mesh import NativeMeshTag, ComputedTag, MetadataTag, MeshTally
 from pymoab.types import _eh_py_type
 from pymoab import core as mb_core, hcoord, scd, types
 from pyne.mesh import Mesh, StatMesh, MeshError, meshset_iterate, \
         mesh_iterate, _cell_fracs_sort_vol_frac_reverse
+from pyne import openmc_utils
 
 warnings.simplefilter("ignore", QAWarning)
 
@@ -1037,3 +1038,5 @@ def test_no_mats():
     assert_true(mesh.mats is None)
     i, mat, ve = next(iter(mesh))
     assert_true(mat is None)
+
+
