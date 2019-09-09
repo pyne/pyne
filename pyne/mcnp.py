@@ -2025,6 +2025,11 @@ class Meshtal(object):
         mesh_has_mats: bool
             If false, Meshtally objects will be created without PyNE material
             objects.
+
+        Returns:
+        --------
+        m : MeshTally object
+            The MeshTally object created from MCNP mesh tally of tally_number.
         """
         m = MeshTally()
         # assign tally_number
