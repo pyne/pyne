@@ -386,7 +386,7 @@ def create_meshtally(filename, tally_id, mesh_id=None, particle=None,
     super(MeshTally, m).__init__(structured_coords=structured_coords,
             structured=True, mats=mats)
     result, rel_err, res_tot, rel_err_tot = get_result_error_from_openmc_sp(filename, m)
-    m.tag_flux_error_from_openmc_tally_results(result, rel_err, res_tot, rel_err_tot)
+    m.tag_flux_error_from_tally_results(result, rel_err, res_tot, rel_err_tot)
     return m
 
 
