@@ -355,6 +355,12 @@ def create_meshtally(filename, tally_id, mesh_id=None, particle=None,
     mesh_has_mats: bool
         If false, Meshtally objects will be created without PyNE material
         objects.
+
+    Returns:
+    --------
+    m : MeshTally object
+        The MeshTally object created from OpenMC state point file with tally
+        number of tally_id.
     """
     m = MeshTally()
     # assign tally_number
