@@ -1539,12 +1539,12 @@ class MeshTally(StatMesh):
     num_ves : int
         Number of volume elements.
     e_bounds : list of floats
-        The minimum and maximum bounds for energy bins
+        The minimum and maximum bounds for energy bins.
     num_e_groups: int
         Number of energy groups.
     mesh :
         An PyMOAB core instance tagged with all results and
-        relative errors
+        relative errors.
     tag_names : iterable
         Four strs that specify the tag names for the results, relative errors,
         total results, and relative errors of the total results.
@@ -1569,9 +1569,8 @@ class MeshTally(StatMesh):
         self.particle = 'neutron'
         self.tag_names = None
 
-
-    def tag_flux_error_from_tally_results(self, result, rel_err,
-            res_tot, rel_err_tot):
+    def tag_flux_error_from_tally_results(self, result, rel_err, res_tot,
+                                          rel_err_tot):
         """
         This function uses the output tally result, rel_err, res_tot and the
         rel_err_tot to set the flux and error tags.
@@ -1762,6 +1761,7 @@ class MeshSetIterator(object):
             at_end = True
         return at_end
 
+
 def _cell_fracs_sort_vol_frac_reverse(cell_fracs):
     """
     Sort cell_fracs according to the order of increasing idx and decreasing
@@ -1797,5 +1797,3 @@ def _cell_fracs_sort_vol_frac_reverse(cell_fracs):
     cell_fracs.sort(order=['idx', 'vol_frac'])
     cell_fracs['vol_frac'] *= -1.0
     return cell_fracs
-
-

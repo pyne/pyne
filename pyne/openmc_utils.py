@@ -29,8 +29,8 @@ warn(__name__ + " is not yet QA compliant.", QAWarning)
 try:
     import openmc
 except:
-    warn("The openmc optional dependency could not be imported. "
-        "Some aspects of the openmc module may be incomplete.")
+    warn("The openmc (OpenMC Python API) could not be imported. "
+         "Some aspects of the openmc module may be incomplete.")
 
 if sys.version_info[0] > 2:
     basestring = str
@@ -83,7 +83,8 @@ class AceTable(namedtuple('_AceTable', ['alias', 'awr', 'location', 'metastable'
             nuc = nucname.zzaaam_to_id(zaid + meta)
             if nuc == 0:
                 pass
-            elif not nucname.isnuclide(nuc):  # then it's in MCNP metastable form
+            elif not nucname.isnuclide(nuc):
+                # then it's in MCNP metastable form
                 nuc = nucname.mcnp_to_id(zaid)
         self.nucid = nuc
         abspath = None
@@ -231,9 +232,9 @@ def get_structured_coords_from_openmc_sp(filename, tally_id):
         if isinstance(flt, openmc.filter.MeshFilter):
             mesh_filter = flt
     structured_coords = calc_structured_coords(
-            mesh_filter.mesh.lower_left[:],
-            mesh_filter.mesh.upper_right[:],
-            mesh_filter.mesh.dimension[:])
+        mesh_filter.mesh.lower_left[:],
+        mesh_filter.mesh.upper_right[:],
+        mesh_filter.mesh.dimension[:])
     return structured_coords
 
 
@@ -324,7 +325,8 @@ def get_result_error_from_openmc_sp(filename, m):
     rel_err = rel_err.transpose()
     # calculate rel_err_tot
     rel_err_tot = np.zeros_like(res_tot)
-    std_dev = np.reshape(flux.std_dev.flatten(), newshape=(num_e_groups, num_ves))
+    std_dev = np.reshape(flux.std_dev.flatten(),
+                         newshape=(num_e_groups, num_ves))
     std_dev = std_dev.transpose()
     var_tot = np.sum(np.square(std_dev), axis=1)
     nonzero = res_tot > 0
@@ -333,7 +335,7 @@ def get_result_error_from_openmc_sp(filename, m):
 
 
 def create_meshtally(filename, tally_id, mesh_id=None, particle=None,
-        tag_names=None, mesh_has_mats=False):
+                     tag_names=None, mesh_has_mats=False):
     """
     This function creates a MeshTally instance from OpenMC statepoint file.
 
@@ -367,18 +369,18 @@ def create_meshtally(filename, tally_id, mesh_id=None, particle=None,
     m.tally_number = tally_id
     # assign particle
     if particle != None:
-       m.particle = particle
+        m.particle = particle
     # assign tag_names
     if tag_names is None:
         m.tag_names = ("{0}_result".format(m.particle),
-                          "{0}_result_rel_error".format(m.particle),
-                          "{0}_result_total".format(m.particle),
-                          "{0}_result_total_rel_error".format(m.particle))
+                       "{0}_result_rel_error".format(m.particle),
+                       "{0}_result_total".format(m.particle),
+                       "{0}_result_total_rel_error".format(m.particle))
     else:
         m.tag_names = tag_names
     # check tally_num exist
     structured_coords = get_structured_coords_from_openmc_sp(
-            filename, tally_id=m.tally_number)
+        filename, tally_id=m.tally_number)
 
     # parameters to create mesh
     m.x_bounds = structured_coords[0]
@@ -390,10 +392,8 @@ def create_meshtally(filename, tally_id, mesh_id=None, particle=None,
     m.num_e_groups = len(m.e_bounds) - 1
     mats = () if mesh_has_mats is True else None
     super(MeshTally, m).__init__(structured_coords=structured_coords,
-            structured=True, mats=mats)
-    result, rel_err, res_tot, rel_err_tot = get_result_error_from_openmc_sp(filename, m)
+                                 structured=True, mats=mats)
+    result, rel_err, res_tot, rel_err_tot = get_result_error_from_openmc_sp(
+        filename, m)
     m.tag_flux_error_from_tally_results(result, rel_err, res_tot, rel_err_tot)
     return m
-
-
-
