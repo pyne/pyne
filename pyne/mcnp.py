@@ -2135,13 +2135,17 @@ class Meshtal(object):
             Number of volume elements.
         column_idx : dict
             Dictionary of the column index.
-        
+
         Returns
         -------
         results : numpy array
-            Tally results data.
+            Tally results data, shape=(num_ves, num_e_groups)
         rel_error : numpy array
-            Tally relative error data.
+            Tally relative error data, shape=(num_ves, num_e_groups)
+        res_tot : numpy array
+            Tally total flux result.
+        rel_err_tot : numpy array
+            Total relative error fo flux.
         """
         # get result and relative error data from file
         result = np.empty(shape=(num_e_groups, num_ves))
@@ -2171,6 +2175,10 @@ class Meshtal(object):
         else:
             res_tot = result.flatten()
             rel_err_tot = rel_error.flatten()
+
+        # convert the shape of result and rel_err to (num_ves, num_e_groups)
+        result = result.transpose()
+        rel_error = rel_error.transpose()
         return result, rel_error, res_tot, rel_err_tot
 
 

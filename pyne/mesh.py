@@ -1570,7 +1570,7 @@ class MeshTally(StatMesh):
         self.tag_names = None
 
 
-    def tag_flux_error_from_mcnp_tally_results(self, result, rel_error,
+    def tag_flux_error_from_mcnp_tally_results(self, result, rel_err,
             res_tot, rel_err_tot):
         """
         This function uses the output tally result from mcnp result and
@@ -1581,8 +1581,8 @@ class MeshTally(StatMesh):
         result : numpy array
             This numpy array contains the flux data read from MCNP meshtally
             file. The shape of this numpy array is
-            (num_e_groups*num_ves).
-        rel_error: numpy array
+            (num_ves*num_e_groups).
+        rel_err: numpy array
             This numpy array contains the relative error data read from MCNP
             meshtally.
         res_tot : list
@@ -1590,32 +1590,25 @@ class MeshTally(StatMesh):
         rel_err_tot : list
             Relative error of total results.
         """
-        # Tag results and error vector to mesh
-        self.tag(self.tag_names[0], tagtype='nat_mesh',
-                 size=self.num_e_groups, dtype=float)
-        res_tag = self.get_tag(self.tag_names[0])
-        self.tag(self.tag_names[1], tagtype='nat_mesh',
-                 size=self.num_e_groups, dtype=float)
-        rel_err_tag = self.get_tag(self.tag_names[1])
-
-        if self.num_e_groups == 1:
-            res_tag[:] = result[0]
-            rel_err_tag[:] = rel_error[0]
-        else:
-            res_tag[:] = result.transpose()
-            rel_err_tag[:] = rel_error.transpose()
-
-        if self.num_e_groups > 1:
-            self.tag(self.tag_names[2], size=1,
-                     dtype=float, tagtype='nat_mesh')
-            res_tot_tag = self.get_tag(self.tag_names[2])
-    
-            self.tag(self.tag_names[3], size=1,
-                     dtype=float, tagtype='nat_mesh')
-            rel_err_tot_tag = self.get_tag(self.tag_names[3])
-    
-            res_tot_tag[:] = res_tot
-            rel_err_tot_tag[:] = rel_err_tot
+        num_ves = len(self)
+        self.tag(name=self.tag_names[0], value=result,
+                 doc='{0} flux'.format(self.particle),
+                 tagtype=NativeMeshTag, size=self.num_e_groups, dtype=float)
+        # set result_rel_error tag
+        self.tag(name=self.tag_names[1],
+                 value=rel_err,
+                 doc='{0} flux relative error'.format(self.particle),
+                 tagtype=NativeMeshTag, size=self.num_e_groups, dtype=float)
+        # set result_total tag
+        self.tag(name=self.tag_names[2],
+                 value=res_tot,
+                 doc='total {0} flux'.format(self.particle),
+                 tagtype=NativeMeshTag, size=1, dtype=float)
+        # set result_total_rel_error tag
+        self.tag(name=self.tag_names[3],
+                 value=rel_err_tot,
+                 doc='total {0} flux relative error'.format(self.particle),
+                 tagtype=NativeMeshTag, size=1, dtype=float)
 
 
     def tag_flux_error_from_openmc_tally_results(self, result, rel_err,
