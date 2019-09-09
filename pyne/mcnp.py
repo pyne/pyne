@@ -2055,7 +2055,7 @@ class Meshtal(object):
         # read result, rel_error, res_tot and rel_err_tot
         result, rel_error, res_tot, rel_err_tot = self.read_tally_results_rel_error(f,
                 m.num_e_groups, m.num_ves, column_idx)
-        m.tag_flux_error_from_mcnp_tally_results(result, rel_error,
+        m.tag_flux_error_from_tally_results(result, rel_error,
                 res_tot, rel_err_tot)
         return m
 

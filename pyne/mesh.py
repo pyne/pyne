@@ -1570,72 +1570,27 @@ class MeshTally(StatMesh):
         self.tag_names = None
 
 
-    def tag_flux_error_from_mcnp_tally_results(self, result, rel_err,
+    def tag_flux_error_from_tally_results(self, result, rel_err,
             res_tot, rel_err_tot):
         """
-        This function uses the output tally result from mcnp result and
-        rel_error to set the flux and error tags.
+        This function uses the output tally result, rel_err, res_tot and the
+        rel_err_tot to set the flux and error tags.
 
         Parameters
         ----------
         result : numpy array
-            This numpy array contains the flux data read from MCNP meshtally
-            file. The shape of this numpy array is
-            (num_ves*num_e_groups).
-        rel_err: numpy array
-            This numpy array contains the relative error data read from MCNP
-            meshtally.
-        res_tot : list
-            The total results.
-        rel_err_tot : list
-            Relative error of total results.
-        """
-        num_ves = len(self)
-        self.tag(name=self.tag_names[0], value=result,
-                 doc='{0} flux'.format(self.particle),
-                 tagtype=NativeMeshTag, size=self.num_e_groups, dtype=float)
-        # set result_rel_error tag
-        self.tag(name=self.tag_names[1],
-                 value=rel_err,
-                 doc='{0} flux relative error'.format(self.particle),
-                 tagtype=NativeMeshTag, size=self.num_e_groups, dtype=float)
-        # set result_total tag
-        self.tag(name=self.tag_names[2],
-                 value=res_tot,
-                 doc='total {0} flux'.format(self.particle),
-                 tagtype=NativeMeshTag, size=1, dtype=float)
-        # set result_total_rel_error tag
-        self.tag(name=self.tag_names[3],
-                 value=rel_err_tot,
-                 doc='total {0} flux relative error'.format(self.particle),
-                 tagtype=NativeMeshTag, size=1, dtype=float)
-
-
-    def tag_flux_error_from_openmc_tally_results(self, result, rel_err,
-            res_tot, rel_err_tot):
-        """
-        This function uses the output tally_results (flux, rel_err) from
-        openmc_utils.get_tally_results_from_openmc_sp to set the flux and error tags.
-
-        Parameters
-        ----------
-        result : numpy array
-            This numpy array contains the flux data read from an
-            openmc state point file. The length of this numpy array is
-            ves*num_e_groups.
-            The unit of flux data is units are particle-cm per source particle.
-            Different from the neutron flux tallied in MCNP, this tally results
-            does not divide the mesh element volume.
+            This numpy array contains the flux data read from MCNP meshtal or
+            OpenMC state point file.
+            The shape of this numpy array is (ves, num_e_groups).
         rel_err : numpy array
-            This numpy array contains the relative error data read from an
-            openmc state point file. The length of this numpy array is
-            num_ves*num_e_groups.
+            This numpy array contains the relative error data read from MCNP
+            meshtal or OpenMC state point file. The shape of this numpy array
+            is (num_ves, num_e_groups).
         res_tot : list
             The total results.
         rel_err_tot : list
             Relative error of total results.
         """
-
         num_ves = len(self)
         self.tag(name=self.tag_names[0], value=result,
                  doc='{0} flux'.format(self.particle),
@@ -1655,7 +1610,6 @@ class MeshTally(StatMesh):
                  value=rel_err_tot,
                  doc='total {0} flux relative error'.format(self.particle),
                  tagtype=NativeMeshTag, size=1, dtype=float)
-
 
 
 ######################################################
