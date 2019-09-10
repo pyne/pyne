@@ -309,7 +309,7 @@ def str_elements_in_line(s, line):
     Returns:
     --------
     True : bool
-        If all the elements of the string are in the line.
+        True if all the elements of the string are in the line.
     False : bool
         If not.
     """
