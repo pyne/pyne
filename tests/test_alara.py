@@ -668,7 +668,7 @@ end"""
 
 def test_is_data():
     """
-    This function tests alara.is_data, which check whether a line in the output
+    This function tests alara.is_data, which checks whether a line in the output
     file of ALARA output file output.txt contains data or not.
     """
     lines = ["ALARA 2.9.1rc",
