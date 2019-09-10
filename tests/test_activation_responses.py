@@ -262,7 +262,6 @@ def _activation_responses_test_step2(activation_responses_run_dir):
 
 
 def test_activation_responses_script():
-
     # skip test without dagmc
     try:
         from pyne import dagmc
