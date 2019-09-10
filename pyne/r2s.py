@@ -130,7 +130,7 @@ def irradiation_setup(flux_mesh, cell_mats, cell_fracs, alara_params,
     responses : list of str, optional
         The list of requested responses.
     wdr_file : str
-        File name of the standard to calculate wdr.
+        Path to the wdr file.
     """
 
     m = resolve_mesh(flux_mesh, tally_num, flux_tag, output_material)

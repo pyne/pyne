@@ -168,7 +168,9 @@ def step2():
 
 
 def main():
-
+    """
+    Setup the activation responses calculation.
+    """
     activation_response_help = ('This script automates the process of preforming\n'
                 'activation analysis using DAG-MCNP5 and the ALARA activation code.\n')
     setup_help = ('Prints the files "config.ini" and "alara_params.txt, to be\n'
