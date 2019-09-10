@@ -311,7 +311,7 @@ def str_elements_in_line(s, line):
     True : bool
         True if all the elements of the string are in the line.
     False : bool
-        If not.
+        False if one or more of the elements of the string is not found in the line.
     """
     s_ele = s.strip().lower().split()
     line_ele = line.strip().lower().split()
