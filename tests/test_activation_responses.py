@@ -29,7 +29,6 @@ thisdir = os.path.dirname(__file__)
 
 responses = ['decay_heat', 'specific_activity', 'alpha_heat', 'beta_heat',
              'gamma_heat', 'wdr', 'photon_source']
-#responses = ['specific_activity']
 
 def _generate_exp_h5(filename, response, exp_h5_filename):
     """
