@@ -281,6 +281,17 @@ std::string pyne::natural_naming(std::string name) {
   return nat_name;
 }
 
+template<typename T>
+std::string pyne::join_to_string(std::vector<T> vect, std::string delimiter){
+  std::stringstream out;
+  out << std::setiosflags(std::ios::fixed) << std::setprecision(6);
+  for( int i= 0; i < vect.size(); i++)
+    out << delimiter << vect[i];
+  return out.str();
+}
+template std::string pyne::join_to_string(std::vector<int> vect, std::string delimiter);
+template std::string pyne::join_to_string(std::vector<double> vect,
+                                 std::string delimiter);
 
 //
 // Math Helpers

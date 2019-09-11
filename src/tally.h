@@ -113,7 +113,6 @@ namespace pyne
                      std::string out = "");
 
     template<typename T> bool is_zero(T vect);
-    template<typename T> std::string join_to_string(vector<T> vect, std::string delimiter = " ");
 
     // Form the mcnp tally line as function of its properties
     std::string form_mcnp_tally(int tally_index, int type,

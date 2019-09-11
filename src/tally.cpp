@@ -485,21 +485,21 @@ std::string pyne::Tally::mcnp(int tally_index, std::string mcnp_version,
     } else if (entity_geometry.find("Cylinder") != std::string::npos) {
       output << "CYL ";
       if (!is_zero(axl)) {
-        sup_var << indent_block << "AXL=" << join_to_string(axl) << "\n";
+        sup_var << indent_block << "AXL=" << pyne::join_to_string(axl) << "\n";
       }
       if (!is_zero(vec)) {
-        sup_var << indent_block << "VEC=" << join_to_string(vec) << "\n";
+        sup_var << indent_block << "VEC=" << pyne::join_to_string(vec) << "\n";
       }
     }
 
-    output << "ORIGIN=" << join_to_string(origin) << "\n";
+    output << "ORIGIN=" << pyne::join_to_string(origin) << "\n";
     std::string dir_name[3] = {"I", "J", "K"};
 
     for (int j = 0; j < 3; j++) {
       output << indent_block;
-      output << dir_name[j] << "MESH=" << join_to_string(meshes[j]);
+      output << dir_name[j] << "MESH=" << pyne::join_to_string(meshes[j]);
       if (bins[j].size() > 0) {
-        output << " " << dir_name[j] << "INTS=" << join_to_string(bins[j]);
+        output << " " << dir_name[j] << "INTS=" << pyne::join_to_string(bins[j]);
       }
       output << "\n";
     }
@@ -508,12 +508,12 @@ std::string pyne::Tally::mcnp(int tally_index, std::string mcnp_version,
     }
     if (e_bounds.size() > 0) {
       output << indent_block << "EMESH=";
-      output << join_to_string(e_bounds);
+      output << pyne::join_to_string(e_bounds);
     }
     output << "\n";
     if (e_bins.size() > 0) {
       output << indent_block << "EINTS=";
-      output << join_to_string(e_bins);
+      output << pyne::join_to_string(e_bins);
     }
     if (out.size() > 0) {
       output << "\n" << indent_block << "OUT=" << out;
@@ -533,17 +533,6 @@ bool pyne::Tally::is_zero(T vect) {
   return result;
 }
 
-template<typename T>
-std::string pyne::Tally::join_to_string(std::vector<T> vect, std::string delimiter){
-  std::stringstream out;
-  out << std::setiosflags(std::ios::fixed) << std::setprecision(6);
-  if (normalization > 1.0)
-    out << std::scientific;
-
-  for( int i= 0; i < vect.size(); i++)
-    out << delimiter << vect[i];
-  return out.str();
-}
 
 
 // Form the tally line as function of its properties
