@@ -35,7 +35,10 @@ void pyne::MaterialLibrary::from_hdf5(const std::string& filename,
                                       const std::string& datapath,
                                       const std::string& nucpath,
                                       int protocol) {
-  if (!hdf5_path_exists(filename, datapath)) return;
+  if (!hdf5_path_exists(filename, datapath)){
+    throw std::runtime_error("The datapath, " + datapath + ", in " + file +
+                             " is empty.");
+  }
 
   int file_num_materials = get_length_of_table(filename, datapath);
   int library_length = material_library.size();
