@@ -22,8 +22,11 @@
 
 namespace pyne
 {
-  const std::vector<double> _empty_vec_dbl;
-  const std::vector<int> _empty_vec_int;
+  // simplifying implementation...
+  using std::vector;
+  // default empty parameters for constructors
+  const vector<double> null_v_dbl;
+  const vector<int> null_v_int;
   class Tally 
   {
   public:
@@ -59,11 +62,13 @@ namespace pyne
     /// \param i,j,k vector<double> coordinate of the coarse meshes
     /// \param ints i,j,k vector<double> coordinate of the coarse meshes
     /// \param normalization the number required to normalize your tally
-    Tally(std::string particule_name, std::string entity_geom, std::vector<double> orgn,
-          std::vector<double> i_mesh, std::vector<double> j_mesh, std::vector<double> k_mesh,
-          std::vector<int> i_ints = _empty_vec_int, std::vector<int> j_ints =_empty_vec_int,
-          std::vector<int> k_ints = _empty_vec_int, std::vector<double> e_bounds = _empty_vec_dbl, std::vector<int> e_ints =_empty_vec_int,
-          std::vector<double> vec =_empty_vec_dbl, std::vector<double> axl = _empty_vec_dbl,
+    Tally(std::string particule_name, std::string entity_geom, vector<double> orgn,
+          vector<double> i_mesh, vector<double> j_mesh, vector<double> k_mesh,
+          vector<int> bins_i = null_v_int, 
+          vector<int> bins_j = null_v_int, 
+          vector<int> bins_k = null_v_int, 
+          vector<double> e_bounds = null_v_dbl, vector<int> e_ints = null_v_int,
+          vector<double> vec =null_v_dbl, vector<double> axl = null_v_dbl,
           std::string tally_name = "", double norm = 1.0);
 
     ~Tally();  /// default destructor
@@ -108,7 +113,7 @@ namespace pyne
                      std::string out = "");
 
     template<typename T> bool is_zero(T vect);
-    template<typename T> std::string join_to_string(std::vector<T> vect, std::string delimiter = " ");
+    template<typename T> std::string join_to_string(vector<T> vect, std::string delimiter = " ");
 
     // Form the mcnp tally line as function of its properties
     std::string form_mcnp_tally(int tally_index, int type,
@@ -131,17 +136,13 @@ namespace pyne
     /// fundemental mesh tally variables
     /// Mesh tally definition variable
     std::string entity_geometry;
-    std::vector<double> origin;
-    std::vector<double> vec;
-    std::vector<double> axl;
-    std::vector<double> i_meshs;
-    std::vector<double> j_meshs;
-    std::vector<double> k_meshs;
-    std::vector<int> i_bins;
-    std::vector<int> j_bins;
-    std::vector<int> k_bins;
-    std::vector<double> e_bounds;    ///< Energy Mesh
-    std::vector<int> e_bins;  ///< Bin per energy
+    vector<double> origin;
+    vector<double> vec;
+    vector<double> axl;
+    vector<double> meshes[3];
+    vector<int> bins[3];
+    vector<double> e_bounds;    ///< Energy Mesh
+    vector<int> e_bins;  ///< Bin per energy
   };
 
   /// Converts a Tally to a string stream representation.

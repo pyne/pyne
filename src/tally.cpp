@@ -61,7 +61,7 @@ pyne::Tally::Tally(std::string type, std::string part_name,
 pyne::Tally::Tally(std::string part_name, std::string ent_geom, 
                    std::vector<double> orgn,
                    std::vector<double> mesh_i, std::vector<double> mesh_j, std::vector<double> mesh_k,
-                   std::vector<int> i_ints, std::vector<int> j_ints, std::vector<int> k_ints, 
+                   std::vector<int> bins_i, std::vector<int> bins_j, std::vector<int> bins_k, 
                    std::vector<double> e_bounds_, std::vector<int> e_ints_,
                    std::vector<double> vec_, std::vector<double> axl_, 
                    std::string tal_name, double norm) {
@@ -76,12 +76,12 @@ pyne::Tally::Tally(std::string part_name, std::string ent_geom,
   origin = orgn;
   vec = vec_;
   axl = axl_;
-  i_meshs = mesh_i;
-  j_meshs = mesh_j;
-  k_meshs = mesh_k;
-  i_bins = i_ints;
-  j_bins = j_ints;
-  k_bins = k_ints;
+  meshes[0] = mesh_i;
+  meshes[1] = mesh_j;
+  meshes[2] = mesh_k;
+  bins[0] = bins_i;
+  bins[1] = bins_j;
+  bins[2] = bins_k;
   e_bounds = e_bounds_;       ///< Energy Mesh
   e_bins = e_ints_;  ///< Bin per energy
   normalization = norm;
@@ -492,8 +492,6 @@ std::string pyne::Tally::mcnp(int tally_index, std::string mcnp_version,
 
     output << " ORIGIN=" << join_to_string(origin) << "\n";
     std::string dir_name[3] = {"I", "J", "K"};
-    std::vector<double> meshes[3] = {i_meshs, j_meshs, k_meshs};
-    std::vector<int> bins[3] = {i_bins, j_bins, k_bins};
 
     for (int j = 0; j < 3; j++) {
       output << indent_block;
