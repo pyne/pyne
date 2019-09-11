@@ -974,7 +974,7 @@ int pyne::nucname::mcnp_to_id(std::string nuc) {
 /************************/
 std::string pyne::nucname::openmc(int nuc) {
   std::string nucname = name(nuc);
-  
+
   // check aaa value
   if (iselement(nuc)) {
     nucname.append("0");
@@ -1039,7 +1039,7 @@ int pyne::nucname::openmc_to_id(std::string nuc) {
 
   // form integer id and return
   return (zzz * 10000000) + (aaa * 10000) + m;
-    
+
 }
 
 

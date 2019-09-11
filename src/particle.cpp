@@ -86,10 +86,10 @@ int pyne::particle::_pdcids[NUM_PARTICLES] = {
 };
 
 std::set<std::string> pyne::particle::names(pyne::particle::_names,
-					    pyne::particle::_names+NUM_PARTICLES);
+              pyne::particle::_names+NUM_PARTICLES);
 
 std::set<int> pyne::particle::pdc_nums(pyne::particle::_pdcids,
-					       pyne::particle::_pdcids+NUM_PARTICLES);
+                 pyne::particle::_pdcids+NUM_PARTICLES);
 
 std::map<std::string,int> pyne::particle::altnames;
 std::map<int,std::string> pyne::particle::id_name;
@@ -339,9 +339,9 @@ int pyne::particle::id(std::string s) {
   if(pyne::nucname::isnuclide(s))
     {
       if(pyne::particle::is_hydrogen(s))
-	return name_id["Proton"];
+  return name_id["Proton"];
       if( pyne::particle::is_heavy_ion(s) )
-	return 0;
+  return 0;
     }
 
   if (0 < pdc_nums.count(name_id[s]))
@@ -369,9 +369,9 @@ std::string pyne::particle::name(std::string s) {
   if(pyne::nucname::isnuclide(s))
     {
       if(pyne::particle::is_hydrogen(s))
-	return "Proton";
+  return "Proton";
       if( pyne::particle::is_heavy_ion(s) )
-	return s;
+  return s;
     }
   // check std name
   if(0 < names.count(s))
@@ -481,9 +481,9 @@ std::string pyne::particle::describe(std::string s) {
   if (pyne::nucname::isnuclide(s))
     {
       if (pyne::particle::is_hydrogen(s))
-	return docs[pyne::particle::name(s)];
+  return docs[pyne::particle::name(s)];
       if (pyne::particle::is_heavy_ion(s))
-	return "Is a heavy ion";
+  return "Is a heavy ion";
     }
   // check std name
   if(0 < names.count(s))

@@ -13,11 +13,11 @@ using moab::DagMC;
 namespace pyne {
 
 static DagMC* DAG = new DagMC();
-  
+
 extern "C" {
 #endif
 /* Notice to future maintainers:
- * If this file is ever used as a C header from a C compilation unit, 
+ * If this file is ever used as a C header from a C compilation unit,
  * there will probably need to be an #elseif here that defines EntityHandle
  * or includes an appropriate MOAB header.  I don't think Types.hpp guarantees
  * that EntityHandle will be defined in C.
@@ -42,21 +42,21 @@ void* dag_alloc_ray_history(void);
 
 void dag_dealloc_ray_history(void* history);
 
-ErrorCode dag_ray_fire(EntityHandle vol, vec3 ray_start, vec3 ray_dir, 
+ErrorCode dag_ray_fire(EntityHandle vol, vec3 ray_start, vec3 ray_dir,
                         EntityHandle* next_surf, double* next_surf_dist,
                         void* history, double distance_limit);
 
 ErrorCode dag_ray_follow(EntityHandle firstvol, vec3 ray_start, vec3 ray_dir,
                           double distance_limit, int* num_intersections,
-                          EntityHandle** surfs, double** distances, 
+                          EntityHandle** surfs, double** distances,
                           EntityHandle** volumes, void* data_buffers);
 
 void dag_dealloc_ray_buffer(void* data_buffers);
 
-ErrorCode dag_pt_in_vol(EntityHandle vol, vec3 pt, int* result, vec3 dir, 
+ErrorCode dag_pt_in_vol(EntityHandle vol, vec3 pt, int* result, vec3 dir,
                          const void* history);
 
-ErrorCode dag_next_vol(EntityHandle surface, EntityHandle volume, 
+ErrorCode dag_next_vol(EntityHandle surface, EntityHandle volume,
                         EntityHandle* next_vol);
 
 int vol_is_graveyard(EntityHandle vol);

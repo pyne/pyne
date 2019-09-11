@@ -2,25 +2,25 @@
 /// \author Elliott Biondo (biondo\@wisc.edu)
 ///
 /// \brief Mesh-based Monte Carlo source sampling.
-/// 
+///
 /// The Sampler class is used for Monte Carlo source sampling from mesh-based
 /// sources.  The source density distribution and optional biased source density
-/// distribution are defined on a MOAB mesh. Upon instantiation, a Sampler  
+/// distribution are defined on a MOAB mesh. Upon instantiation, a Sampler
 /// object reads this mesh and creates an alias table for randomly sampling
-/// particle birth parameters. The particle_birth member function is supplied 
-/// with 6 pseudo-random numbers and returns the position, energy, and weight 
-/// of a particle upon birth. 
+/// particle birth parameters. The particle_birth member function is supplied
+/// with 6 pseudo-random numbers and returns the position, energy, and weight
+/// of a particle upon birth.
 /// There are three sampling modes: analog, uniform, and user-speficied
 /// In analog sampling, no source biasing is used and birth weights
-/// are all 1. In uniform sampling, the position of the particle (but not the 
-/// energy) is sampled uniformly and weights are adjusted accordingly. In 
-/// user-speficied mode, a supplied biased source density distribution is used 
-/// for sampling and particle weights are adjusted accordingly. The biased 
-/// source density distribution must have the same number of energy groups as 
+/// are all 1. In uniform sampling, the position of the particle (but not the
+/// energy) is sampled uniformly and weights are adjusted accordingly. In
+/// user-speficied mode, a supplied biased source density distribution is used
+/// for sampling and particle weights are adjusted accordingly. The biased
+/// source density distribution must have the same number of energy groups as
 /// the unbiased distribution. Alternatively, it may have exactly 1 energy
 /// group, in which case only spatial biasing is done, and energies are sampled
 /// in analog.
- 
+
 #ifndef PYNE_6OR6BJURKJHHTOFWXO2VMQM5EY
 #define PYNE_6OR6BJURKJHHTOFWXO2VMQM5EY
 
@@ -30,7 +30,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <vector>
-#include <stdexcept> 
+#include <stdexcept>
 #include <sstream>
 #include <string>
 #include <map>
@@ -49,7 +49,7 @@ extern "C" {
 namespace pyne {
 
   /// MCNP interface for source sampling setup
-  /// \param mode The sampling mode: 
+  /// \param mode The sampling mode:
   /// Voxel(DEFAULT) R2S: 0 = analog, 1 = uniform, 2 = user-specified
   /// SubVoxel(SUBVOXEL) R2S: 3 = analog, 4 = uniform, 5 = user-specified
   /// cell_list_size if the variable used for create the cell_list
@@ -84,7 +84,7 @@ namespace pyne {
     moab::CartVect y_vec;
     moab::CartVect z_vec;
   };
-  
+
   /// A data structure for O(1) source sampling
   class AliasTable {
   public:
@@ -135,25 +135,25 @@ namespace pyne {
     /// cell list. For sub-voxel mode, the size of cell_list is 1.
     std::vector<int> cell_list;
   };
-  
+
   /// Problem modes
   enum BiasMode {USER, ANALOG, UNIFORM};
   enum MeshMode {VOXEL, SUBVOXEL, TET};
-  
+
   /// Mesh based Monte Carlo source sampling.
   class Sampler {
   public:
     /// Constuctor for analog and uniform sampling
     /// \param filename The path to the MOAB mesh (.h5m) file
-    /// \param src_tag_name The name of the tag that describes the unbiased 
+    /// \param src_tag_name The name of the tag that describes the unbiased
     ///                     source density distribution.
     /// \param e_bounds The energy boundaries, note there are N + 1 energy
     ///                 bounds for N energy groups
     /// \param uniform If false, analog sampling is used. If true, uniform
     ///                sampling is used.
-    Sampler(std::string filename, 
-            std::string src_tag_name, 
-            std::vector<double> e_bounds, 
+    Sampler(std::string filename,
+            std::string src_tag_name,
+            std::vector<double> e_bounds,
             bool uniform);
     /// Constuctor for analog and uniform sampling
     /// \param filename The path to the MOAB mesh (.h5m) file
@@ -166,9 +166,9 @@ namespace pyne {
     ///                       number of energy groups as <src_tag_name> or 1.
     ///                       If 1 (i.e. spatial biasing only), all energy groups
     ///                       within a mesh volume element are sampled equally.
-    Sampler(std::string filename, 
-            std::string src_tag_name, 
-            std::vector<double> e_bounds, 
+    Sampler(std::string filename,
+            std::string src_tag_name,
+            std::vector<double> e_bounds,
             std::string bias_tag_name);
     /// Constuctor for overall sampler
     /// \param filename The filename of the h5m file
@@ -194,7 +194,7 @@ namespace pyne {
       delete mesh;
       delete at;
     };
-  
+
   // member variables
   private:
     // problem parameters
@@ -230,7 +230,7 @@ namespace pyne {
     std::vector<int> cell_list; ///< Cell list passed to Fortran
     std::vector<double> cell_fracs; ///< Tag cell_fracs
     AliasTable* at; ///< Alias table used for sampling.
-  
+
   // member functions
   private:
     // instantiation
@@ -244,7 +244,7 @@ namespace pyne {
     // helper functions
     void normalize_pdf(std::vector<double> & pdf);
     int num_groups(moab::Tag tag);
-    std::vector<double> read_bias_pdf(moab::Range ves, std::vector<double> volumes, 
+    std::vector<double> read_bias_pdf(moab::Range ves, std::vector<double> volumes,
                                       std::vector<double> pdf);
     // Get max_num_cells
     int get_max_num_cells(moab::Tag cell_fracs_tag);
