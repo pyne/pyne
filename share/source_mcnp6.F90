@@ -12,7 +12,7 @@
 ! Full instructions on compiling and using MCNP6 with this subroutine are found
 ! in the PyNE user manual.
 
-function find_cell(cell_list, cell_list_size) result(icl_tmp)
+subroutine find_cell(cell_list, cell_list_size, icl_tmp, count_1, count_2, count_3)
 ! This function determines the current MCNP cell index location.
 ! Return a positive integer if a valid cell is found, otherwise it returns -1.
 ! This only works if there are no repeated geometries or universes present in
@@ -57,6 +57,8 @@ function find_cell(cell_list, cell_list_size) result(icl_tmp)
   integer :: icl_tmp ! temporary cell variable
   integer, intent(in) :: cell_list_size
   integer, dimension(cell_list_size), intent(in) :: cell_list
+  integer, intent(out) :: icl_tmp ! temporary cell variable
+  integer, intent(out) :: count_1, count_2, count_3 ! failure counter
   integer :: cidx ! cell index
 
   icl_tmp = -1
@@ -72,13 +74,14 @@ function find_cell(cell_list, cell_list_size) result(icl_tmp)
       cidx = namchg(1, cell_list(i))
       if (cidx .eq. 0) then
         ! Type 1: cell index not found, skip and resampling
-        exit
+        count_1 = count_1 + 1
+        return
       endif
       call chkcel(cidx, 0, j)
       if (j .eq. 0) then
         ! valid cell found
         icl_tmp = cidx
-        exit
+        return
       endif
     enddo
   endif
@@ -96,19 +99,22 @@ function find_cell(cell_list, cell_list_size) result(icl_tmp)
           ! this is a type 2 problem, skip
           ! reset the icl_tmp to -1 because of the type 2 not found
           icl_tmp = -1
+          count_2 = count_2 + 1
         endif
-        exit
+        return
       endif
     enddo
     ! icl now is -1, it is a type 3 error.
     ! Skip and print error message
     if(icl_tmp .le. 0) then
+      count_3 = count_3 + 1
       write(*,*) 'ERROR: history ', nps, 'at position ', &
       &          pbl%r%x, pbl%r%y, pbl%r%z, ' not in any cell'
       write(*,*) 'Skipping and resampling the source particle'
     endif
   endif
-end function find_cell
+  return
+end subroutine find_cell
 
 subroutine source
   ! This subroutine is called directly by MCNP to select particle birth
@@ -119,6 +125,8 @@ subroutine source
   use mcnp_random, only: rang
   use pblcom, only: pbl
   use mcnp_debug
+  use varcom, only: nps, npp
+
 
   implicit none
 
@@ -129,11 +137,17 @@ subroutine source
   integer :: tries
   integer, save :: cell_list_size = 0
   integer, dimension(:), allocatable, save :: cell_list
+  ! counter for type 1, 2 and 3 failure.
+  integer, save :: count_1, count_2, count_3
 
   if (first_run .eqv. .true.) then
     ! set up, and return cell_list_size to create a cell_list
     call sampling_setup(idum(1), cell_list_size)
     allocate(cell_list(cell_list_size))
+    ! initialize failure counter
+    count_1 = 0
+    count_2 = 0
+    count_3 = 0
     first_run = .false.
   endif
 
@@ -150,7 +164,7 @@ subroutine source
   call particle_birth(rands, pbl%r%x, pbl%r%y, pbl%r%z, pbl%r%erg, pbl%r%wgt, &
   &                   cell_list)
   ! Loop over cell_list to find icl_tmp
-  icl_tmp = find_cell(cell_list, cell_list_size)
+  call find_cell(cell_list, cell_list_size, icl_tmp, count_1, count_2, count_3)
 
   ! check whether this is a valid cell
   if (icl_tmp .le. 0) then
@@ -158,7 +172,9 @@ subroutine source
   endif
 
   ! check whether the material of sampled cell is void
-  if (mat(icl_tmp).eq.0) then
+  ! idum > 0, enable void rejection
+  ! idum = 0, disable void rejection
+  if ((mat(icl_tmp).eq.0) .and. (idum(2) > 0)) then
     goto 300
   else
     goto 400
@@ -177,6 +193,17 @@ subroutine source
   pbl%r%tme = 0.0
   pbl%i%ipt = idum(3)
   pbl%i%jsu = 0
-
+  if ((nps .eq. npp) .and. (count_1 + count_2 + count_3 > 0)) then
+    write(*, *) "Cell not found error summary:"
+    write(*, *) "Type1 warning counts:", count_1, "/", npp
+    write(*, *) "Type2 warning counts:", count_2, "/", npp
+    if (count_2 / DBLE(npp) > 0.05) then
+      write(*, *) "Suggest to increase num_rays in r2s step1"
+    endif
+    write(*, *) "Type3 error counts:", count_3, "/", npp
+    if (count_3 > 0) then
+        write(*, *) "Check the geometry!"
+    endif
+  endif
   return
 end subroutine source

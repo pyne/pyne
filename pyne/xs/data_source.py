@@ -23,7 +23,7 @@ except ImportError:
 
 from pyne import nuc_data
 from pyne import nucname
-from pyne import openmc
+from pyne import openmc_utils
 from pyne import rxname
 from pyne import endf
 from pyne import bins
@@ -919,7 +919,7 @@ class OpenMCDataSource(DataSource):
     def __init__(self, cross_sections=None, src_group_struct=None, **kwargs):
         """Parameters
         ----------
-        cross_sections : openmc.CrossSections or string or file-like, optional
+        cross_sections : openmc_utils.CrossSections or string or file-like, optional
             Path or file to OpenMC cross_sections.xml
         src_group_struct : array-like, optional
             The group structure to discretize the ACE data to, defaults to
@@ -928,13 +928,13 @@ class OpenMCDataSource(DataSource):
             Keyword arguments to be sent to DataSource base class.
 
         """
-        if not isinstance(cross_sections, openmc.CrossSections):
+        if not isinstance(cross_sections, openmc_utils.CrossSections):
             cross_sections = cross_sections or os.getenv('CROSS_SECTIONS')
-            cross_sections = openmc.CrossSections(f=cross_sections)
+            cross_sections = openmc_utils.CrossSections(f=cross_sections)
         self.cross_sections = cross_sections
         self._src_group_struct = src_group_struct
         super(OpenMCDataSource, self).__init__(**kwargs)
-        self.libs = {}  # cross section libraries, index by openmc.AceTables
+        self.libs = {}  # cross section libraries, index by openmc_utils.AceTables
 
     @property
     def exists(self):
@@ -1126,14 +1126,14 @@ class OpenMCDataSource(DataSource):
                 lib.read(atab.name)
 
 class StatePointDataSource(DataSource):
-    """Data source for reactions coming from openmc state points
+    """Data source for reactions coming from OpenMC state points
     """
 
     def __init__(self, state_point, tallies, num_den, phi_tot, **kwargs):
         """Parameters
         ----------
         state_point : string
-            Path to the openmc statepoint file to be used to build the data_source
+            Path to the OpenMC statepoint file to be used to build the data_source
         tallies : array-like
             The tally id's used to pull the cross sections from.
         num_dens: map of int to float
@@ -1157,19 +1157,19 @@ class StatePointDataSource(DataSource):
         return True
 
     def _load_group_structure(self):
-        """Loads the group structure from a tally in openMC. It is
+        """Loads the group structure from a tally in OpenMC. It is
         assumed that all tallies have the same group structure
         """
         self._src_group_struct = self.state_point.tallies[self.tallies[0]].filters[0].bins[::-1]
         self.src_group_struct = self._src_group_struct
 
     def _load_reactions(self, num_dens, phi_tot):
-        """Loads the group structure from a tally in openMC. It is
+        """Loads the group structure from a tally in OpenMC. It is
         assumed that all tallies have the same group structure
 
         Parameters
         ----------
-        state_point: openMC statepoint file
+        state_point: OpenMC statepoint file
             The statepoint file that will be used to load the reaction
             rates to determine the microscopic cross sections for the
             statepoint.

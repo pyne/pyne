@@ -448,7 +448,7 @@ std::string pyne::Tally::mcnp(int tally_index, std::string mcnp_version,
   output << "C " << tally_name << std::endl;
   output << std::setiosflags(std::ios::fixed) << std::setprecision(6);
 
-  if (normalization > 1.0)
+  if (normalization != 1.0)
     output << std::scientific;
   int tally_id = 0;
 
@@ -543,7 +543,7 @@ std::string pyne::Tally::form_mcnp_tally(int tally_index,
                                                double normalization) {
   std::stringstream tally_stream;  // tally stream
   tally_stream << std::setiosflags(std::ios::fixed) << std::setprecision(6);
-  if (normalization > 1.0)
+  if (normalization != 1.0)
     tally_stream << std::scientific;
 
   tally_stream << "F" << tally_index << type
@@ -552,7 +552,7 @@ std::string pyne::Tally::form_mcnp_tally(int tally_index,
   if (entity_size > 0.0)
     tally_stream << "SD" << tally_index << type << " " << entity_size << std::endl;
 
-  if (normalization > 1.0)
+  if (normalization != 1.0)
     tally_stream << "FM" << tally_index << type << " " << normalization << std::endl;
 
   return tally_stream.str();

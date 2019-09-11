@@ -226,12 +226,14 @@ groups used in the activation calculations. An "idum" card must be used
 in the MCNP5 input file. This card should have three arguments. The first is the
 sampling mode (0: DEFAULT_ANALOG, 1: DEFAULT_UNIFORM, 2: DEFAULT_USER,
 3: SUBVOXEL_ANALOG, 4: SUBVOXEL_UNIFORM, 5: SUBVOXEL_USER). The second is the
-resample limit for void and cell rejections. For a given particle, if a source
-position is selected in void (MCNP material 0) or in a cell that disagrees with the
-cell number, the source position is resampled within the selected mesh volume
-element until either a correct position is found, or this user-specified limit
-is researched. The third argument should specify the particle type: 1 for
-neutrons, 2 for photons.
+resample limit for void and cell rejections. If the second argument is set to
+be a postive integer, the void rejection will be applied, i.e., for a given
+particle, if a source position is selected in void (MCNP material 0) or in a
+cell that disagrees with the cell number, the source position is resampled
+within the selected mesh volume element until either a correct position is
+found, or this user-specified limit is researched. If the second argument is
+set to be 0, then the void rejection will be disabled. The third argument
+should specify the particle type: 1 for neutrons, 2 for photons.
 
 For example, this "idum" card specifies uniform sampling with a resample limit
 of 100 with source particles specified as photons:
