@@ -36,7 +36,7 @@ void pyne::MaterialLibrary::from_hdf5(const std::string& filename,
                                       const std::string& nucpath,
                                       int protocol) {
   if (!hdf5_path_exists(filename, datapath)){
-    throw std::runtime_error("The datapath, " + datapath + ", in " + file +
+    throw std::runtime_error("The datapath, " + datapath + ", in " + filename +
                              " is empty.");
   }
 
