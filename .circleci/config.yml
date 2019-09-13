@@ -86,7 +86,7 @@ commands:
       - run: cd ../ && nuc_data_make ;
       - save_container:
           build: << parameters.build >>
-
+  
   # Run PyNE test
   run_test:
     description: "Run tests"
@@ -108,6 +108,17 @@ commands:
 # Define the different job that will be ran this separate building form
 # testing for each configuration allowing to get more information out of the CI
 jobs:
+# news file checker
+  news_update:
+    executor: 
+      name: py3
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - run:
+          name: Checking News Update
+          command: news/news_test.sh news
+ 
 # Python 3 jobs
   py3_build:
     executor:
@@ -224,6 +235,8 @@ workflows:
   version: 2
   build_and_test:
     jobs:
+      - news_update
+        
       - py3_build
       - py3_test:
           requires:
