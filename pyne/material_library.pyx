@@ -84,7 +84,8 @@ cdef class _MaterialLibrary:
                 for key in sorted(lib.keys()):
                     mat = lib[key]
                     self.__setitem__(key, material.ensure_material(mat))
-            elif isinstance(lib, basestring):
+            elif isinstance(lib, basestring): 
+                # Python2: basestring = (std + unicode)
                 c_filename = lib.encode('UTF-8')
                 c_datapath = datapath.encode('UTF-8')
                 self._inst = new cpp_material_library.MaterialLibrary(c_filename, c_datapath)
@@ -108,6 +109,21 @@ cdef class _MaterialLibrary:
         del self._inst
 
     def from_hdf5(self, filename, datapath="/materials", nucpath="", protocol=1):
+        """Loads data from an HDF5 file into this material library.
+        Parameters
+        ----------
+        file : str
+            A path to an HDF5 file.
+        datapath : str, optional
+            The path in the heirarchy to the data table in an HDF5 file.
+        nucpath : str, optional
+            The path in the heirarchy to the nuclide array in an HDF5 file.
+        protocol : int, optional
+            Specifies the protocol to use to read in the data.  Different
+            protocols are used to represent different internal structures in
+            the HDF5 file.
+
+        """ 
         cdef char * c_filename
         filename_bytes = filename.encode('UTF-8')
         c_filename = filename_bytes
@@ -121,6 +137,17 @@ cdef class _MaterialLibrary:
 
 
     def write_hdf5(self, filename, datapath="/materials", nucpath="/nucid"):
+        """Writes this material library to an HDF5 file.
+        Parameters
+        ----------
+        filename : str
+            A path to an HDF5 file.
+        datapath : str, optional
+            The path in the heirarchy to the data table in an HDF5 file.
+        nucpath : str, optional
+            The path in the heirarchy to the nuclide array in an HDF5 file.
+        """
+        
         cdef char * c_filename
         filename_bytes = filename.encode('UTF-8')
         c_filename = filename_bytes
@@ -133,6 +160,16 @@ cdef class _MaterialLibrary:
         self._inst.write_hdf5(c_filename, c_datapath, c_nucpath)
 
     def add_material(self, key, mat):
+        """Add a Material to this material library.
+        Parameters
+        ----------
+        key : str
+            key to regisgter the material, if material has no name attribute
+            will be added as the name metadata of the material
+        mat : Material
+            PyNE material object be added to this material library
+        """
+        
         cdef std_string c_matname
         if isinstance(key, basestring):
             key = key.encode('UTF-8')
@@ -147,17 +184,35 @@ cdef class _MaterialLibrary:
                             "{0}".format(type(mat)))
 
     def del_material(self, mat):
+        """Remove a Material to this material library.
+        Parameters
+        ----------
+        mat : Material or str
+            PyNE material object or material name be removed to this material library
+            if a material is provided it needs a name metadata as material are
+            removed according to their names
+        """
+
         cdef std_string c_matname
         if isinstance(mat, material._Material):
+             if "name" not in mat.metadata:
+                raise TypeError("Material needs a name to be removed form the
+                material library")
             c_matname = std_string(< char * > mat).mat_pointer.metadata["name"] 
         elif isinstance(mat, basestring):
             c_matname = std_string(< char * > mat)
         else:
-            raise TypeError("the material must be a material or a stri but is a "
+            raise TypeError("the material must be a material or a string but is a "
                             "{0}".format(type(mat)))
         self._inst.del_material(c_matname)
 
     def get_material(self, key):
+        """Get a Material from this material library.
+        Parameters
+        ----------
+        key : str
+            key of the material to return 
+        """
         # Get the correct cpp_material
         cdef cpp_material.Material c_mat
         cdef std_string c_matname
@@ -173,6 +228,13 @@ cdef class _MaterialLibrary:
         return py_mat
 
     def merge(self, mat_library):
+        """Merge a material library into this material library.
+        Parameters
+        ----------
+        mat_library : MaterialLibrary
+            Material Library to merge 
+        """
+
         if isinstance(mat_library, _MaterialLibrary):
             self._inst.merge(mat_library._inst)
         else:
