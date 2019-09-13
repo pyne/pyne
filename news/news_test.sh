@@ -9,7 +9,6 @@ default_branch="develop"
 
 # setup temp remote 
 git_remote_name=ci_news_`git log --pretty=format:'%h' -n 1`
-echo $git_remote_name
 git remote add ${git_remote_name} ${master_repo}
 git fetch ${git_remote_name}
 
