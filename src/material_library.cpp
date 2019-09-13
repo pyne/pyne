@@ -278,7 +278,7 @@ void pyne::MaterialLibrary::write_hdf5(char* fname, char* dpath, char* npath) {
 void pyne::MaterialLibrary::write_hdf5(const std::string& filename,
                                        const std::string& datapath,
                                        const std::string& nucpath) {
-  // A large part of this is inspiwrite_hdf5red/taken from by material.cpp...
+  // A large part of this is inspired/taken from by material.cpp...
   // Turn off annoying HDF5 errors
   H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
