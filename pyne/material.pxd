@@ -15,6 +15,7 @@ cdef cpp_map[int, double] dict_to_comp(dict)
 cdef class _Material:
     cdef cpp_material.Material * mat_pointer
     cdef public bint _free_mat
+
 #
 # Material containers
 #
