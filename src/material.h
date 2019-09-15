@@ -167,7 +167,7 @@ namespace pyne
 
     /// Return an openmc xml material element as a string
     std::string openmc(std::string fact_type = "mass");
-    
+
     /// Return an mcnp input deck record as a string
     std::string mcnp(std::string frac_type = "mass");
     ///

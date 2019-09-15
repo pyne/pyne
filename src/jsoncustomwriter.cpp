@@ -50,7 +50,7 @@ CustomWriter::CustomWriter( std::string opencurly,
 }
 
 
-std::string 
+std::string
 CustomWriter::write( const Value &root )
 {
    document_ = "";
@@ -61,7 +61,7 @@ CustomWriter::write( const Value &root )
 }
 
 
-void 
+void
 CustomWriter::writeValue( const Value &value, std::string &doc, bool forceSingleLine )
 {
    switch ( value.type() )
@@ -145,15 +145,15 @@ CustomWriter::writeValue( const Value &value, std::string &doc, bool forceSingle
          doc += opencurly_;
          if (isMulti)
             indent();
-         for ( Value::Members::iterator it = members.begin(); 
-               it != members.end(); 
+         for ( Value::Members::iterator it = members.begin();
+               it != members.end();
                ++it )
          {
             if (isMulti)
             {
                doc += "\n";
                doc += indentString_;
-               
+
             }
             const std::string &name = *it;
             doc += valueToQuotedString( name.c_str() );
@@ -175,14 +175,14 @@ CustomWriter::writeValue( const Value &value, std::string &doc, bool forceSingle
 }
 
 
-void 
+void
 CustomWriter::indent()
 {
    indentString_ += indent_;
 }
 
 
-void 
+void
 CustomWriter::unindent()
 {
    int idSize = int(indent_.size());

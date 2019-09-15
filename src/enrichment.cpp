@@ -1,4 +1,4 @@
-// Enrichment 
+// Enrichment
 #ifndef PYNE_IS_AMALGAMATED
 #include "enrichment.h"
 #endif
@@ -7,7 +7,7 @@ namespace pyne_enr = pyne::enrichment;
 
 pyne_enr::Cascade pyne_enr::_fill_default_uranium_cascade() {
   // Default cascade for uranium-based enrichment
-  Cascade duc; 
+  Cascade duc;
 
   duc.alpha = 1.05;
   duc.Mstar = 236.5;
@@ -139,16 +139,16 @@ void pyne_enr::_recompute_nm(pyne_enr::Cascade & casc, double tolerance) {
 
   casc.N = N;
   casc.M = M;
-  return; 
+  return;
 }
 
 
 
 void pyne_enr::_recompute_prod_tail_mats(pyne_enr::Cascade & casc) {
-  //This function takes a given initial guess number of enriching and stripping stages 
-  //for a given composition of fuel with a given jth key component, knowing the values 
-  //that are desired in both Product and Tails streams.  Having this it solves for what 
-  //the actual N and M stage numbers are and also what the product and waste streams 
+  //This function takes a given initial guess number of enriching and stripping stages
+  //for a given composition of fuel with a given jth key component, knowing the values
+  //that are desired in both Product and Tails streams.  Having this it solves for what
+  //the actual N and M stage numbers are and also what the product and waste streams
   //compositions are.  It returns precisely these.
   pyne::comp_map comp_prod;
   pyne::comp_map comp_tail;
@@ -186,10 +186,10 @@ void pyne_enr::_recompute_prod_tail_mats(pyne_enr::Cascade & casc) {
 
 pyne_enr::Cascade pyne_enr::_norm_comp_secant(pyne_enr::Cascade & casc, \
                                               double tolerance, int max_iter) {
-  // This function actually solves the whole system of equations.  It uses _recompute_prod_tail_mats 
-  // to find the roots for the enriching and stripping stage numbers.  It then 
+  // This function actually solves the whole system of equations.  It uses _recompute_prod_tail_mats
+  // to find the roots for the enriching and stripping stage numbers.  It then
   // checks to see if the product and waste streams meet their target enrichments
-  // for the jth component like they should.  If they don't then it trys other values 
+  // for the jth component like they should.  If they don't then it trys other values
   // of N and M varied by the Secant ethod.  Rinse and repeat as needed.
   int j = casc.j;
   pyne_enr::Cascade prev_casc = casc;
@@ -218,7 +218,7 @@ pyne_enr::Cascade pyne_enr::_norm_comp_secant(pyne_enr::Cascade & casc, \
   historyM.push_back(curr_casc.M);
 
   // My guess is that what we are checkin here is that the isotopic compositions
-  // make sense with abs(1.0 - masscurr_P) rather than calculatign the 
+  // make sense with abs(1.0 - masscurr_P) rather than calculatign the
   // relative product to watse mass streams.
   double prev_N = prev_casc.N;
   double prev_M = prev_casc.M;
@@ -284,7 +284,7 @@ pyne_enr::Cascade pyne_enr::_norm_comp_secant(pyne_enr::Cascade & casc, \
 
     niter += 1;
 
-    // Calculate new isotopics for valid (N, M)        
+    // Calculate new isotopics for valid (N, M)
     prev_casc = curr_casc;
     curr_casc.N = curr_N;
     curr_casc.M = curr_M;
@@ -298,9 +298,9 @@ pyne_enr::Cascade pyne_enr::_norm_comp_secant(pyne_enr::Cascade & casc, \
 
 double pyne_enr::_deltaU_i_OverG(pyne_enr::Cascade & casc, int i) {
   // Solves for a stage separative power relevant to the ith component
-  // per unit of flow G.  This is taken from Equation 31 divided by G 
+  // per unit of flow G.  This is taken from Equation 31 divided by G
   // from the paper "Wood, Houston G., Borisevich, V. D. and Sulaberidze, G. A.,
-  // 'On a Criterion Efficiency for Multi-Isotope Mixtures Separation', 
+  // 'On a Criterion Efficiency for Multi-Isotope Mixtures Separation',
   // Separation Science and Technology, 34:3, 343 - 357"
   // To link to this article: DOI: 10.1081/SS-100100654
   // URL: http://dx.doi.org/10.1081/SS-100100654
@@ -331,7 +331,7 @@ pyne_enr::Cascade pyne_enr::solve_numeric(pyne_enr::Cascade & orig_casc, \
 
   double ltotpf = 0.0;
   double swupf = 0.0;
-  double temp_numer = 0.0; 
+  double temp_numer = 0.0;
 
   for (pyne::comp_iter i = casc.mat_feed.comp.begin(); i != casc.mat_feed.comp.end(); i++) {
     nuc = (i->first);
@@ -345,9 +345,9 @@ pyne_enr::Cascade pyne_enr::solve_numeric(pyne_enr::Cascade & orig_casc, \
   // Assign flow rates
   casc.l_t_per_feed = ltotpf;
 
-  // The -1 term is put in the SWU calculation because otherwise swupf   
-  // represents the SWU that would be undone if you were to deenrich the 
-  // whole process.  Thus the SWU to enrich is -1x this number.  This is 
+  // The -1 term is put in the SWU calculation because otherwise swupf
+  // represents the SWU that would be undone if you were to deenrich the
+  // whole process.  Thus the SWU to enrich is -1x this number.  This is
   // a by-product of the value function used as a constraint.
   casc.swu_per_feed = -1 * swupf;       // This is the SWU for 1 kg of Feed material.
   casc.swu_per_prod = -1 * swupf / ppf;	// This is the SWU for 1 kg of Product material.
@@ -366,7 +366,7 @@ pyne_enr::Cascade pyne_enr::multicomponent(pyne_enr::Cascade & orig_casc, \
 
 pyne_enr::Cascade pyne_enr::multicomponent(pyne_enr::Cascade & orig_casc, \
                                     std::string solver, double tolerance, int max_iter) {
-  // The multicomponent() function finds a value of Mstar by minimzing the seperative power.  
+  // The multicomponent() function finds a value of Mstar by minimzing the seperative power.
   // Note that Mstar0 represents an intial guess at what Mstar might be.
   // This is the final function that actually solves for an optimized M* that makes the cascade!
   pyne_enr::Cascade temp_casc;
@@ -379,7 +379,7 @@ pyne_enr::Cascade pyne_enr::multicomponent(pyne_enr::Cascade & orig_casc, \
     solver_code = 0;
   else if (solver == "numeric")
     solver_code = 1;
-  else 
+  else
     throw "solver not known: " + solver;
 
   // validate Mstar or pick new value
@@ -392,7 +392,7 @@ pyne_enr::Cascade pyne_enr::multicomponent(pyne_enr::Cascade & orig_casc, \
     curr_casc.Mstar = ms;
   }
 
-  // xpn is the exponential index 
+  // xpn is the exponential index
   double ooe = -log10(tolerance);
   double xpn = 1.0;
 
