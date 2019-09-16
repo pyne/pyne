@@ -1186,7 +1186,7 @@ def _is_data(line):
     """
     This function is used to check whether a line of alara output file contains
     wanted data. The line contains data is conposed of:
-        - nuc : nuc name (total or TOTAL)
+        - nuc : nuc name (total or total)
         - data for each decay time (including 'shutdown': floats
 
     Parameters
@@ -1202,6 +1202,9 @@ def _is_data(line):
     # check the list from the second value, if they are float, then return True
     ls = line.strip().split()
     if len(ls) < 2:
+        return False
+    # first block should be a valid nucname or 'total'
+    if not (nucname.isnuclide(ls[0]) or ls[0] == 'TOTAL'.lower()):
         return False
     try:
         np.array(ls[1:]).astype(float)
