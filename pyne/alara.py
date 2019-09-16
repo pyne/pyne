@@ -260,7 +260,7 @@ def response_to_hdf5(filename, response, chunkshape=(10000,)):
                 and response_start:
             break
         # get response string
-        if zone_start and is_response_string(line, response):
+        if zone_start and response in line:
             response_start = True
             continue
         # get decay times
@@ -1271,37 +1271,6 @@ def get_alara_lib(alara_params):
     raise ValueError("alara_lib not found!")
 
 
-def is_response_string(line, response):
-    """
-    This function is used to check whether this line ot ALARA output.txt
-    containing specific response string.
-
-    Parameters
-    ----------
-    line : string
-        A line from ALARA output.txt
-    response : string
-        The response.
-
-    Returns
-    -------
-    True : this line contains response string
-    False : this line does not contain response string
-    """
-
-    # response strings for different responses
-    response_strings = {'decay_heat': 'Total Decay Heat',
-                        'specific_activity': 'Specific Activity',
-                        'alpha_heat': 'Alpha Decay Heat',
-                        'beta_heat': 'Beta Decay Heat',
-                        'gamma_heat': 'Gamma Decay Heat',
-                        'wdr': 'WDR/Clearance index',
-                        'photon_source': 'Photon Source Distribution'}
-    if response_strings[response] in line:
-        return True
-    else:
-        return False
-
 def _read_phtn_src_dc(filename):
     """
     This function reads decay times in photon source file.
@@ -1325,5 +1294,3 @@ def _read_phtn_src_dc(filename):
             else:
                 break
     return phtn_src_dc
-
-
