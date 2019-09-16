@@ -254,7 +254,7 @@ def response_to_hdf5(filename, response, chunkshape=(10000,)):
     decay_times = []
     zone_start = False
     response_start = False
-    for i, line in enumerate(f, 1):
+    for line in f:
         # terminate condition
         if str_elements_in_line('Totals for all zones.', line) \
                 and response_start:
