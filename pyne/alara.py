@@ -293,7 +293,7 @@ def response_to_hdf5(filename, response, chunkshape=(10000,)):
         ls = line.strip().split()
         # put data into table
         # format of each row: idx, nuc, time, decay_heat
-        for k, dc in enumerate(decay_times):
+        for dc, response_value in zip(decay_times,ls[1:]):
             j = (count-1) % chunksize
             nuc = ls[0].strip()
             if nuc.lower() == 'total':
