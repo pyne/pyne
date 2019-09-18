@@ -30,6 +30,13 @@ else:
     warn("The PyMOAB optional dependency could not be imported. "
          "Some aspects of the mesh module may be incomplete.", QAWarning)
 
+response_strings = {'decay_heat': 'Total Decay Heat',
+                    'specific_activity': 'Specific Activity',
+                    'alpha_heat': 'Alpha Decay Heat',
+                    'beta_heat': 'Beta Decay Heat',
+                    'gamma_heat': 'Gamma Decay Heat',
+                    'wdr': 'WDR/Clearance index',
+                    'photon_source': 'Photon Source Distribution'}
 
 def mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
                    reverse=False, sub_voxel=False, cell_fracs=None,
@@ -260,7 +267,7 @@ def response_to_hdf5(filename, response, chunkshape=(10000,)):
                 and response_start:
             break
         # get response string
-        if zone_start and response in line:
+        if zone_start and (response_strings[response] in line):
             response_start = True
             continue
         # get decay times
