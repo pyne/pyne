@@ -10,8 +10,7 @@ from pyne.mesh import Mesh, MeshError, HAVE_PYMOAB
 import os
 import collections
 from warnings import warn
-from pyne.utils import QAWarning, to_sec, is_float, str_to_unicode, \
-        str_elements_in_line
+from pyne.utils import QAWarning, to_sec, str_to_unicode, str_elements_in_line
 import numpy as np
 import tables as tb
 from io import open
