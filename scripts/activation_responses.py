@@ -157,10 +157,10 @@ def step2():
     for response in responses:
         response_to_hdf5(alara_out, response)
         tag_name = response
-        for i, dc in enumerate(decay_times):
-            print('Writing {0} for decay time: {1}'.format(response, dc))
+        for i, dt in enumerate(decay_times):
+            print('Writing {0} for decay time: {1}'.format(response, dt))
             mesh = Mesh(structured=structured, mesh='blank_mesh.h5m')
-            tags = {('TOTAL', dc): tag_name}
+            tags = {('TOTAL', dt): tag_name}
             response_hdf5_to_mesh(mesh, ''.join([response, '.h5']), tags, response)
             mesh.write_hdf5('{0}_{1}.h5m'.format(response, i+1))
 
