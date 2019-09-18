@@ -298,7 +298,7 @@ def response_to_hdf5(filename, response, chunkshape=(10000,)):
             nuc = ls[0].strip()
             if nuc.lower() == 'total':
                 nuc = nuc.upper()
-            rows[j] = (idx, nuc, dc, float(ls[k+1]))
+            rows[j] = (idx, nuc, dc, response_value)
             if count % chunksize == 0:
                 tab.append(rows)
                 rows = np.empty(chunksize, dtype=dt)
