@@ -293,9 +293,9 @@ def response_to_hdf5(filename, response, chunkshape=(10000,)):
         nuc = ls[0].strip()
         if nuc.lower() == 'total':
             nuc = nuc.upper()
-        for dc, response_value in zip(decay_times,ls[1:]):
+        for dt, response_value in zip(decay_times,ls[1:]):
             j = (count-1) % chunksize
-            rows[j] = (zone_idx, nuc, dc, response_value)
+            rows[j] = (zone_idx, nuc, dt, response_value)
             if count % chunksize == 0:
                 tab.append(rows)
                 rows = np.empty(chunksize, dtype=dt)
@@ -362,7 +362,7 @@ def photon_source_hdf5_to_mesh(mesh, filename, tags, sub_voxel=False,
                  size=tag_size, dtype=float)
         tag_handles[tag_name] = mesh.get_tag(tag_name)
 
-    phtn_src_dc = _read_phtn_src_dc(filename)
+    decay_times = _read_h5_dt(filename)
 
     # iterate through each requested nuclide/dectay time
     for cond in tags.keys():
@@ -376,10 +376,10 @@ def photon_source_hdf5_to_mesh(mesh, filename, tags, sub_voxel=False,
                 nuc = u"TOTAL"
 
             # time match, convert string mathch to float mathch
-            dc = _find_phsrc_dc(cond[1], phtn_src_dc)
+            dt = _find_dt(cond[1], decay_times)
             # create of array of rows that match the nuclide/decay criteria
             matched_data = h5f.root.data.read_where(
-                "(nuc == '{0}') & (time == '{1}')".format(nuc, dc))
+                "(nuc == '{0}') & (time == '{1}')".format(nuc, dt))
 
         if not sub_voxel:
             idx = 0
@@ -413,7 +413,7 @@ def response_hdf5_to_mesh(mesh, filename, tags, response):
     mesh : PyNE Mesh
        The object containing the PyMOAB instance to be tagged.
     filename : str
-        The path of the hdf5 version of the photon source file.
+        The path of the hdf5 version of the response file.
     tags: dict
         A dictionary were the keys are tuples with two values. The first is a
         string denoting an nuclide in any form that is understood by
@@ -445,12 +445,12 @@ def response_hdf5_to_mesh(mesh, filename, tags, response):
                  size=1, dtype=float)
         tag_handles[tag_name] = mesh.get_tag(tag_name)
 
-    phtn_src_dc = _read_phtn_src_dc(filename)
+    decay_times = _read_h5_dt(filename)
 
     # iterate through each requested nuclide/dectay time
     for cond in tags.keys():
         with tb.open_file(filename) as h5f:
-            # Convert nuclide to the form found in the ALARA phtn_src
+            # Convert nuclide to the form found in the ALARA response file
             # file, which is similar to the Serpent form. Note this form is
             # different from the ALARA input nuclide form found in nucname.
             if cond[0] != "TOTAL":
@@ -459,10 +459,10 @@ def response_hdf5_to_mesh(mesh, filename, tags, response):
                 nuc = "TOTAL"
 
             # time match, convert string mathch to float mathch
-            dc = _find_phsrc_dc(cond[1], phtn_src_dc)
+            dt = _find_dt(cond[1], decay_times)
             # create of array of rows that match the nuclide/decay criteria
             matched_data = h5f.root.data.read_where(
-                "(nuc == '{0}') & (time == '{1}')".format(nuc, dc))
+                "(nuc == '{0}') & (time == '{1}')".format(nuc, dt))
 
         idx = 0
         # index, mat, volume element
@@ -1063,63 +1063,64 @@ def _get_subvoxel_array(mesh, cell_mats):
     return subvoxel_array
 
 
-def _convert_unit_to_s(dc):
+def _convert_unit_to_s(dt):
     """
     This function return a float number represent a time in unit of s.
     Parameters
     ----------
-    dc : string. Contain a num and an unit.
+    dt : string.
+        Decay time. Contain a num and an unit.
 
     Returns
     -------
     a float number
     """
-    dc = str_to_unicode(dc)
+    dt = str_to_unicode(dt)
     # get num and unit
-    if dc == u'shutdown':
+    if dt == u'shutdown':
         num, unit = u'0.0', u's'
     else:
-        num, unit = dc.split()
+        num, unit = dt.split()
     return to_sec(float(num), unit)
 
 
-def _find_phsrc_dc(idc, phtn_src_dc):
+def _find_dt(idt, decay_times):
     """
-    This function returns a string representing a time in phsrc_dc.
+    This function returns a string representing a time in decay times.
 
     Parameters
     ----------
-    idc : string
+    idt : string
         Represents a time, input decay time
-    phtn_src_dc : list of strings
-        Decay times in phtn_src file
+    decay_times : list of strings
+        Decay times.
 
     Returns
     -------
-    string from phtn_src_dc list that mathches idc
+    string from decay_times list that mathches idt
     """
-    # Check the existence of idc in phtn_src_dc list.
-    if idc in phtn_src_dc:
-        return idc
+    # Check the existence of idt in decay_times list.
+    if idt in decay_times:
+        return idt
     # Direct matching cannot be found. Convert units to [s] and compare.
     else:
-        # convert idc to [s]
-        idc_s = _convert_unit_to_s(idc)
-        # Loop over decay times in phtn_src_dc list and compare to idc_s.
-        for dc in phtn_src_dc:
+        # convert idt to [s]
+        idt_s = _convert_unit_to_s(idt)
+        # Loop over decay times in decay_times list and compare to idt_s.
+        for dt in decay_times:
             # Skip "shutdown" string in list.
-            if str_to_unicode(dc) == u'shutdown':
+            if str_to_unicode(dt) == u'shutdown':
                 continue
             # Convert to [s].
-            dc_s = _convert_unit_to_s(dc)
-            if idc_s == dc_s:
-                # idc_s matches dc_s. return original string, dc.
-                return dc
-            elif dc_s != 0.0 and (abs(idc_s - dc_s)/dc_s) < 1e-6:
-                return dc
-        # if idc doesn't match any string in phtn_src_dc list, raise an error.
+            dt_s = _convert_unit_to_s(dt)
+            if idt_s == dt_s:
+                # idt_s matches dt_s. return original string, dt.
+                return dt
+            elif dt_s != 0.0 and (abs(idt_s - dt_s)/dt_s) < 1e-6:
+                return dt
+        # if idt doesn't match any string in decay_times list, raise an error.
         raise ValueError(
-            'Decay time {0} not found in phtn_src file'.format(idc))
+            'Decay time {0} not found in decay_times'.format(idt))
 
 
 def responses_output_zone(responses=None, wdr_file=None, alara_params=None):
@@ -1278,26 +1279,26 @@ def get_alara_lib(alara_params):
     raise ValueError("alara_lib not found!")
 
 
-def _read_phtn_src_dc(filename):
+def _read_h5_dt(filename):
     """
-    This function reads decay times in photon source file.
+    This function reads decay times in h5 photon source and responses file.
 
     Parameters
     ----------
     filename : string
-        Filename of the photon source file.
+        Filename of the photon source file or response file.
 
     Returns
     -------
-    phtn_src_dc : list
+    dt : list
         List of the decay times, in unicode.
     """
     # creat a list of decay times (strings) in the source file
-    phtn_src_dc = []
+    dt = []
     with tb.open_file(filename) as h5f:
         for row in h5f.root.data:
-            if row[2].decode() not in phtn_src_dc:
-                phtn_src_dc.append(row[2].decode())
+            if row[2].decode() not in dt:
+                dt.append(row[2].decode())
             else:
                 break
-    return phtn_src_dc
+    return dt
