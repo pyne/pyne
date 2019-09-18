@@ -1155,37 +1155,25 @@ def responses_output_zone(responses=None, wdr_file=None, alara_params=None):
         return ''
     # input check
     for response in responses:
-        if response not in ('decay_heat', 'photon_source', 'specific_activity',
-                        'alpha_heat', 'beta_heat', 'gamma_heat', 'wdr'):
+        if response not in response_strings.keys():
             raise ValueError('response {0} not supported.'.format(response))
 
-    start_str = "output zone\n"
-    end_str = "end"
-    code_block = ''
-    # define code block for decay_heat
-    if 'decay_heat' in responses:
-        code_block = ''.join([code_block, "      total_heat\n"])
-    # define code block for specific_activity
-    if 'specific_activity' in responses:
-        code_block = ''.join([code_block, "      specific_activity\n"])
-    # define code block for alpha_heat
-    if 'alpha_heat' in responses:
-        code_block = ''.join([code_block, "       alapha_heat\n"])
-    # define code block for beta_heat
-    if 'beta_heat' in responses:
-        code_block = "       beta_heat\n"
-    # define code block for gamma_heat
-    if 'gamma_heat' in responses:
-        code_block = ''.join([code_block, "       gamma_heat\n"])
-    # define code block for wdr
+    output_strings = {"decay_heat": "      total_heat\n",
+                      "specific_activity": "      specific_activity\n",
+                      "alpha_heat": "      appha_heat\n",
+                      "beta_heat": "      beta_heat\n",
+                      "gamma_heat": "      gamma_heat\n"}
     if 'wdr' in responses:
-        code_block= ''.join(["       wdr ", wdr_file, "\n"])
-    # define code block for photon_source
+        output_strings['wdr'] = ''.join(["       wdr ", wdr_file, "\n"])
     if 'photon_source' in responses:
         alara_lib = get_alara_lib(alara_params)
-        code_block= ''.join([code_block, "       photon_source ", alara_lib,
-                             " phtn_src 1 2e7\n"])
-    return ''.join([start_str, code_block, end_str])
+        output_strings["photon_source"] =  ''.join(["      photon_source ",
+            alara_lib, " phtn_src 1 2e7\n"])
+    output_zone = ["output zone\n"]
+    for response in responses:
+        output_zone.append(output_strings[response])
+    output_zone.append("end")
+    return ''.join(output_zone)
 
 def _is_data(line):
     """

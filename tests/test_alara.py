@@ -664,6 +664,8 @@ def test_alara_responses_output_zone():
 end"""
     response_code = responses_output_zone(response)
     assert_equal(response_code, exp_response_code)
+    # wrong nuc option raise test
+    assert_raises(ValueError, responses_output_zone, 'test')
 
 
 def test_is_data():
