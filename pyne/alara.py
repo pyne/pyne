@@ -256,7 +256,7 @@ def response_to_hdf5(filename, response, chunkshape=(10000,)):
 
     chunksize = chunkshape[0]
     rows = np.empty(chunksize, dtype=dt)
-    idx = 0
+    zone_idx = 0
     count = 1
     decay_times = []
     zone_start = False
@@ -277,8 +277,8 @@ def response_to_hdf5(filename, response, chunkshape=(10000,)):
             continue
         # get zone idx
         if 'Zone #' in line:
-            idx = _get_zone_idx(line)
-            if idx == 0:
+            zone_idx = _get_zone_idx(line)
+            if zone_idx == 0:
                 ## new blocks, disable first response string
                 #response_start = False
                 zone_start = True
@@ -292,13 +292,13 @@ def response_to_hdf5(filename, response, chunkshape=(10000,)):
     
         ls = line.strip().split()
         # put data into table
-        # format of each row: idx, nuc, time, decay_heat
+        # format of each row: zone_idx, nuc, time, decay_heat
         nuc = ls[0].strip()
         if nuc.lower() == 'total':
             nuc = nuc.upper()
         for dc, response_value in zip(decay_times,ls[1:]):
             j = (count-1) % chunksize
-            rows[j] = (idx, nuc, dc, response_value)
+            rows[j] = (zone_idx, nuc, dc, response_value)
             if count % chunksize == 0:
                 tab.append(rows)
                 rows = np.empty(chunksize, dtype=dt)
