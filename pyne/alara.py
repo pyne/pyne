@@ -1125,8 +1125,8 @@ def _find_dt(idt, decay_times):
 
 def responses_output_zone(responses=None, wdr_file=None, alara_params=None):
     """
-    This function returns a string representing the output zone of alara input
-    code block.
+    This function returns a string that is an output block for an alara input
+    file, configured for zone resolution.
 
     Parameters
     ----------
