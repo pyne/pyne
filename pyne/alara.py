@@ -279,8 +279,6 @@ def response_to_hdf5(filename, response, chunkshape=(10000,)):
         if 'Zone #' in line:
             zone_idx = _get_zone_idx(line)
             if zone_idx == 0:
-                ## new blocks, disable first response string
-                #response_start = False
                 zone_start = True
             continue
         # skip the lines does not contain specific response info
