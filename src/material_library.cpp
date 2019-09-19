@@ -250,14 +250,6 @@ pyne::Material* pyne::MaterialLibrary::get_material_ptr(
   }
 }
 
-pyne::Material* pyne::MaterialLibrary::get_material_ptr(int num) {
-  if (num < name_order.size()) {
-    return material_library[name_order[num]];
-  } else {
-    return new pyne::Material();
-  }
-}
-
 void pyne::MaterialLibrary::replace(int num, pyne::Material mat) {
   if (!mat.metadata.isMember("name")) {
     mat.metadata["name"] = name_order[num];

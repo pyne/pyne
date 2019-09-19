@@ -216,11 +216,11 @@ cdef class _MaterialLibrary:
         # Get the correct cpp_material
         cdef cpp_material.Material c_mat
         cdef std_string c_matname
-        if isinstance(key, int):
-            c_mat = deref(self._inst.get_material_ptr(<int> key) )
+        elif isinstance(key, _INTEGRAL_TYPES):
+            c_matname = str(key).encode('UTF-8')
         else:
             c_matname = key
-            c_mat = self._inst.get_material(c_matname)
+        c_mat = self._inst.get_material(c_matname)
 
         # build a PyNE Material object form the cpp_material
         py_mat = material.Material(free_mat = False)
