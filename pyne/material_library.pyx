@@ -216,7 +216,7 @@ cdef class _MaterialLibrary:
         # Get the correct cpp_material
         cdef cpp_material.Material c_mat
         cdef std_string c_matname
-        elif isinstance(key, _INTEGRAL_TYPES):
+        if isinstance(key, _INTEGRAL_TYPES):
             c_matname = str(key).encode('UTF-8')
         else:
             c_matname = key
