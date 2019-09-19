@@ -195,9 +195,9 @@ cdef class _MaterialLibrary:
 
         cdef std_string c_matname
         if isinstance(mat, material._Material):
-             if "name" not in mat.metadata:
-                raise TypeError("Material needs a name to be removed form the
-                material library")
+            if "name" not in mat.metadata:
+                raise TypeError("Material needs a name to be removed form" +
+                    " the material library")
             c_matname = std_string(< char * > mat).mat_pointer.metadata["name"] 
         elif isinstance(mat, basestring):
             c_matname = std_string(< char * > mat)
