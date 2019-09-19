@@ -294,32 +294,6 @@ def line_almost_same(l1, l2, rel_tol=1e-9):
         return True
 
 
-def str_elements_in_line(s, line):
-    """
-    This function is used to check whether all the words of a string is in
-    a given line (another string), without consideration for the order of those words.
-
-    Parameters:
-    -----------
-    s : str
-        String to be checked.
-    line : str
-        The given line
-
-    Returns:
-    --------
-    True : bool
-        True if all the elements of the string are in the line.
-    False : bool
-        False if one or more of the elements of the string is not found in the line.
-    """
-    s_ele = s.strip().lower().split()
-    line_ele = line.strip().lower().split()
-    if all(ele in line_ele for ele in s_ele):
-        return True
-    else:
-        return False
-
 def file_almost_same(f1, f2, rel_tol=1e-9):
     """
     For some reasones, it's useful to compare two files that are almost the

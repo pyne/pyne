@@ -10,7 +10,7 @@ from pyne.mesh import Mesh, MeshError, HAVE_PYMOAB
 import os
 import collections
 from warnings import warn
-from pyne.utils import QAWarning, to_sec, str_to_unicode, str_elements_in_line
+from pyne.utils import QAWarning, to_sec, str_to_unicode
 import numpy as np
 import tables as tb
 from io import open
@@ -262,7 +262,7 @@ def response_to_hdf5(filename, response, chunkshape=(10000,)):
     response_start = False
     for line in f:
         # terminate condition
-        if str_elements_in_line('Totals for all zones.', line) \
+        if ('Totals for all zones.' in line) \
                 and response_start:
             break
         # get response string
@@ -270,7 +270,7 @@ def response_to_hdf5(filename, response, chunkshape=(10000,)):
             response_start = True
             continue
         # get decay times
-        if str_elements_in_line('isotope shutdown', line):
+        if ('isotope\t shutdown' in line):
             if len(decay_times) == 0:
                 decay_times = read_decay_times(line)
             continue
