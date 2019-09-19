@@ -188,16 +188,16 @@ def test_photon_source_to_hdf5():
         count = 0
         old = ""
         for i, row in enumerate(obs):
-            ls = lines[i].strip().split('\t')
-            if ls[0] != 'TOTAL' and old == 'TOTAL':
+            tokens = lines[i].strip().split('\t')
+            if tokens[0] != 'TOTAL' and old == 'TOTAL':
                 count += 1
 
             assert_equal(count, row['idx'])
-            assert_equal(ls[0].strip(), row['nuc'].decode())
-            assert_equal(ls[1].strip(), row['time'].decode())
-            assert_array_equal(np.array(ls[2:], dtype=np.float64),
+            assert_equal(tokens[0].strip(), row['nuc'].decode())
+            assert_equal(tokens[1].strip(), row['time'].decode())
+            assert_array_equal(np.array(tokens[2:], dtype=np.float64),
                                row['phtn_src'])
-            old = ls[0]
+            old = tokens[0]
 
     if os.path.isfile(filename + '.h5'):
         os.remove(filename + '.h5')

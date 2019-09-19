@@ -280,14 +280,14 @@ def line_almost_same(l1, l2, rel_tol=1e-9):
         return True
     else:
         # There are differences
-        ls1 = l1.strip().split()
-        ls2 = l2.strip().split()
-        if len(ls1) != len(ls2):
+        tokens1 = l1.strip().split()
+        tokens2 = l2.strip().split()
+        if len(tokens1) != len(tokens2):
             return False
         else:
             # compare string elements of the line
-            for i in range(len(ls1)):
-                if str_almost_same(ls1[i], ls2[i], rel_tol):
+            for i in range(len(tokens1)):
+                if str_almost_same(tokens1[i], tokens2[i], rel_tol):
                     pass
                 else:
                     return False

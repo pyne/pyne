@@ -167,31 +167,31 @@ def photon_source_to_hdf5(filename, nucs='all', chunkshape=(10000,)):
     old = ""
     row_count = 0
     for i, line in enumerate(f, 1):
-        ls = line.strip().split('\t')
+        tokens = line.strip().split('\t')
 
         # Keep track of the idx by delimiting by the last TOTAL line in a
         # volume element.
-        if ls[0] != u'TOTAL' and old == u'TOTAL':
+        if tokens[0] != u'TOTAL' and old == u'TOTAL':
             idx += 1
 
         if nucs.lower() == 'all':
             row_count += 1
             j = (row_count-1) % chunksize
-            rows[j] = (idx, ls[0].strip(), ls[1].strip(),
-                       np.array(ls[2:], dtype=np.float64))
+            rows[j] = (idx, tokens[0].strip(), tokens[1].strip(),
+                       np.array(tokens[2:], dtype=np.float64))
         elif nucs.lower() == 'total':
-            if ls[0] == 'TOTAL':
+            if tokens[0] == 'TOTAL':
                 row_count += 1
                 j = (row_count-1) % chunksize
-                rows[j] = (idx, ls[0].strip(), ls[1].strip(),
-                           np.array(ls[2:], dtype=np.float64))
+                rows[j] = (idx, tokens[0].strip(), tokens[1].strip(),
+                           np.array(tokens[2:], dtype=np.float64))
         else:
             h5f.close()
             f.close()
             raise ValueError(u"Nucs option {0} not support!".format(nucs))
 
         # Save the nuclide in order to keep track of idx
-        old = ls[0]
+        old = tokens[0]
 
         if (row_count > 0) and (row_count % chunksize == 0):
             tab.append(rows)
@@ -287,13 +287,13 @@ def response_to_hdf5(filename, response, chunkshape=(10000,)):
         if not _is_data(line):
             continue
     
-        ls = line.strip().split()
+        tokens = line.strip().split()
         # put data into table
         # format of each row: zone_idx, nuc, time, decay_heat
-        nuc = ls[0].strip()
+        nuc = tokens[0].strip()
         if nuc.lower() == 'total':
             nuc = nuc.upper()
-        for dt, response_value in zip(decay_times,ls[1:]):
+        for dt, response_value in zip(decay_times,tokens[1:]):
             j = (count-1) % chunksize
             rows[j] = (zone_idx, nuc, dt, response_value)
             if count % chunksize == 0:
@@ -1193,14 +1193,14 @@ def _is_data(line):
     False : if this line doesn't contain results data
     """
     # check the list from the second value, if they are float, then return True
-    ls = line.strip().split()
-    if len(ls) < 2:
+    tokens = line.strip().split()
+    if len(tokens) < 2:
         return False
     # first block should be a valid nucname or 'total'
-    if not (nucname.isnuclide(ls[0]) or ls[0] == 'TOTAL'.lower()):
+    if not (nucname.isnuclide(tokens[0]) or tokens[0] == 'TOTAL'.lower()):
         return False
     try:
-        np.array(ls[1:]).astype(float)
+        np.array(tokens[1:]).astype(float)
         return True
     except:
         return False
@@ -1221,10 +1221,10 @@ def read_decay_times(line):
     decay_times : array of string
         Array of decay times.
     """
-    ls = line.strip().split()
+    tokens = line.strip().split()
     decay_times = ['shutdown']
-    for i in range(2, len(ls), 2):
-        decay_times.append(''.join([ls[i], ' ', ls[i+1]]))
+    for i in range(2, len(tokens), 2):
+        decay_times.append(''.join([tokens[i], ' ', tokens[i+1]]))
     return decay_times
     
 
