@@ -296,7 +296,7 @@ def line_almost_same(l1, l2, rel_tol=1e-9):
 
 def str_elements_in_line(s, line):
     """
-    This function is used to check whether all the elements of a string is in
+    This function is used to check whether all the words of a string is in
     a given line (another string).
 
     Parameters:
