@@ -1160,7 +1160,7 @@ def responses_output_zone(responses=None, wdr_file=None, alara_params=None):
 
     output_strings = {"decay_heat": "      total_heat",
                       "specific_activity": "      specific_activity",
-                      "alpha_heat": "      appha_heat",
+                      "alpha_heat": "      alpha_heat",
                       "beta_heat": "      beta_heat",
                       "gamma_heat": "      gamma_heat"}
     if 'wdr' in responses:
