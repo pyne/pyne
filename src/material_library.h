@@ -172,9 +172,9 @@ class MaterialLibrary {
   pyne::Material get_material(const std::string& mat_name);
   /**
    * \brief Get a material of the Library by name
-   * \param num number of the material to return
+   * \param mat_name name of the material to return
   */
-  pyne::Material* get_material_ptr(int num);
+  pyne::Material* get_material_ptr(const std::string& mat_name);
   /**
    * \brief Get the material Library
    * \return std::map<std::string, pyne::MaterialLibrary>
