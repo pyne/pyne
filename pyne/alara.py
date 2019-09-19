@@ -1243,7 +1243,7 @@ def _get_zone_idx(line):
     """
     
     last_word = line.strip().split()[-1]
-    return int(ls[-1].split('_')[-1])
+    return int(last_word.split('_')[-1])
 
 
 def get_alara_lib(alara_params):
