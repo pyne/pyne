@@ -1242,7 +1242,7 @@ def _get_zone_idx(line):
     int, zone index
     """
     
-    ls = line.strip().split()
+    last_word = line.strip().split()[-1]
     return int(ls[-1].split('_')[-1])
 
 
