@@ -1158,22 +1158,22 @@ def responses_output_zone(responses=None, wdr_file=None, alara_params=None):
         if response not in response_strings.keys():
             raise ValueError('response {0} not supported.'.format(response))
 
-    output_strings = {"decay_heat": "      total_heat\n",
-                      "specific_activity": "      specific_activity\n",
-                      "alpha_heat": "      appha_heat\n",
-                      "beta_heat": "      beta_heat\n",
-                      "gamma_heat": "      gamma_heat\n"}
+    output_strings = {"decay_heat": "      total_heat",
+                      "specific_activity": "      specific_activity",
+                      "alpha_heat": "      appha_heat",
+                      "beta_heat": "      beta_heat",
+                      "gamma_heat": "      gamma_heat"}
     if 'wdr' in responses:
-        output_strings['wdr'] = ''.join(["       wdr ", wdr_file, "\n"])
+        output_strings['wdr'] = ''.join(["       wdr ", wdr_file])
     if 'photon_source' in responses:
         alara_lib = get_alara_lib(alara_params)
         output_strings["photon_source"] =  ''.join(["      photon_source ",
-            alara_lib, " phtn_src 1 2e7\n"])
-    output_zone = ["output zone\n"]
+            alara_lib, " phtn_src 1 2e7"])
+    output_zone = ["output zone"]
     for response in responses:
         output_zone.append(output_strings[response])
     output_zone.append("end")
-    return ''.join(output_zone)
+    return '\n'.join(output_zone)
 
 def _is_data(line):
     """
