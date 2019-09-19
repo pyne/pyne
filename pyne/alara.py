@@ -1241,6 +1241,7 @@ def _get_zone_idx(line):
     -------
     int, zone index
     """
+    
     ls = line.strip().split()
     return int(ls[-1].split('_')[-1])
 
