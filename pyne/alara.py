@@ -258,20 +258,20 @@ def response_to_hdf5(filename, response, chunkshape=(10000,)):
     zone_idx = 0
     count = 1
     decay_times = []
-    zone_start = 1
-    response_start = 2
+    zone_start_state = 1
+    response_start_state = 2
     state = None
     for line in f:
         # terminate condition
-        if state == response_start and \
+        if state == response_start_state and \
            ('Totals for all zones.' in line):
             break
         # get response string
-        if state == zone_start and \
+        if state == zone_start_state and \
            (response_strings[response] in line):
-            state = response_start
+            state = response_start_state
         # get decay times
-        elif state == response_start and \
+        elif state == response_start_state and \
              len(decay_times) == 0 and \
              ('isotope\t shutdown' in line):
                 decay_times = read_decay_times(line)
@@ -280,10 +280,10 @@ def response_to_hdf5(filename, response, chunkshape=(10000,)):
              'Zone #' in line:
             zone_idx = _get_zone_idx(line)
             if zone_idx == 0:
-                state = zone_start
+                state = zone_start_state
         # skip lines if we haven't started the response or
         # the lines don't contain wanted data
-        elif state == response_start and \
+        elif state == response_start_state and \
              _is_data(line):
     
             tokens = line.strip().split()
