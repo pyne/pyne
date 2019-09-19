@@ -149,7 +149,7 @@ def photon_source_to_hdf5(filename, nucs='all', chunkshape=(10000,)):
     f.seek(0)
     G = len(header) - 2
 
-    dt = np.dtype([
+    dtype = np.dtype([
         ('idx', np.int64),
         ('nuc', 'S6'),
         ('time', 'S20'),
@@ -159,10 +159,10 @@ def photon_source_to_hdf5(filename, nucs='all', chunkshape=(10000,)):
     filters = tb.Filters(complevel=1, complib='zlib')
     # set the default output h5_filename
     h5f = tb.open_file(filename + '.h5', 'w', filters=filters)
-    tab = h5f.create_table('/', 'data', dt, chunkshape=chunkshape)
+    tab = h5f.create_table('/', 'data', dtype, chunkshape=chunkshape)
 
     chunksize = chunkshape[0]
-    rows = np.empty(chunksize, dtype=dt)
+    rows = np.empty(chunksize, dtype=dtype)
     idx = 0
     old = ""
     row_count = 0
@@ -195,7 +195,7 @@ def photon_source_to_hdf5(filename, nucs='all', chunkshape=(10000,)):
 
         if (row_count > 0) and (row_count % chunksize == 0):
             tab.append(rows)
-            rows = np.empty(chunksize, dtype=dt)
+            rows = np.empty(chunksize, dtype=dtype)
             row_count = 0
 
     if row_count % chunksize != 0:
@@ -242,7 +242,7 @@ def response_to_hdf5(filename, response, chunkshape=(10000,)):
     f = open(filename, 'r')
     f.seek(0)
 
-    dt = np.dtype([
+    dtype = np.dtype([
         ('idx', np.int64),
         ('nuc', 'S6'),
         ('time', 'S20'),
@@ -251,10 +251,10 @@ def response_to_hdf5(filename, response, chunkshape=(10000,)):
     filters = tb.Filters(complevel=1, complib='zlib')
     h5_filename = os.path.join(os.path.dirname(filename), ''.join([response, '.h5']))
     h5f = tb.open_file(h5_filename, 'w', filters=filters)
-    tab = h5f.create_table('/', 'data', dt, chunkshape=chunkshape)
+    tab = h5f.create_table('/', 'data', dtype, chunkshape=chunkshape)
 
     chunksize = chunkshape[0]
-    rows = np.empty(chunksize, dtype=dt)
+    rows = np.empty(chunksize, dtype=dtype)
     zone_idx = 0
     count = 1
     decay_times = []
