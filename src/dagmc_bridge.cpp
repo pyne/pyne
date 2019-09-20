@@ -100,14 +100,14 @@ void dag_dealloc_ray_history(void* r) {
     delete (static_cast<DagMC::RayHistory*>(r));
 }
 
-ErrorCode dag_ray_fire(EntityHandle vol, vec3 ray_start, vec3 ray_dir, 
+ErrorCode dag_ray_fire(EntityHandle vol, vec3 ray_start, vec3 ray_dir,
                         EntityHandle* next_surf_ent, double* next_surf_dist,
                         void* history, double distance_limit) {
     ErrorCode err;
 
     DagMC*  dag = DAG;
 
-    err = dag->ray_fire(vol, ray_start, ray_dir, *next_surf_ent, *next_surf_dist, 
+    err = dag->ray_fire(vol, ray_start, ray_dir, *next_surf_ent, *next_surf_dist,
                          static_cast<DagMC::RayHistory*>(history), distance_limit);
     CHECKERR(err);
 
@@ -143,7 +143,7 @@ ErrorCode dag_ray_follow(EntityHandle firstvol, vec3 ray_start, vec3 ray_dir,
 
     // iterate over the ray until no more intersections are available
     while(vol) {
-        err = dag->ray_fire(vol, ray_point.array(), ray_dir, 
+        err = dag->ray_fire(vol, ray_point.array(), ray_dir,
                              next_surf, next_surf_dist, &(buf->history), dlimit);
         CHECKERR(err);
 
@@ -177,11 +177,11 @@ void dag_dealloc_ray_buffer(void* data_buffers) {
 }
 
 ErrorCode dag_pt_in_vol(EntityHandle vol, vec3 pt, int* result, vec3 dir, const void* history) {
-    
+
     ErrorCode err;
 
     DagMC* dag = DAG;
-    
+
     err = dag->point_in_volume(vol, pt, *result, dir, static_cast<const DagMC::RayHistory*>(history));
 
     return err;
@@ -226,7 +226,7 @@ ErrorCode get_volume_metadata(EntityHandle vol, int* material, double* density, 
         // the default value of mat_id needs to be used.
         CHECKERR(err);
     }
-    
+
     err = dag->prop_value(vol, "rho", str);
     if(err == moab::MB_SUCCESS) {
         rho = strtod(str.c_str(), NULL);

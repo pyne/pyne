@@ -13,7 +13,7 @@ def setup():
         import urllib
 
     if not os.path.isfile('C012-n.ace'):
-        urllib.urlretrieve('ftp://ftp.nrg.eu/pub/www/talys/tendl2013/neutron_file/C/012/lib/endf/C012-n.ace',
+        urllib.urlretrieve('https://raw.githubusercontent.com/pyne/data/master/C012-n.ace',
                            'C012-n.ace')
     with open('C012-n.ace') as f:
         lines = f.readlines()
