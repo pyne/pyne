@@ -21,40 +21,31 @@ in the differents jobs.
 
 `save_container`: allows to save the status of a container to be reloaded in an
 other job.
-    
-    `arguments`: 
+    - `arguments`: 
         - `build` (string): build configuration parameters, used to identify a
           build configuration
 
-
 `pull_container`: pulls a previously saved (using the `save_container` command) status of container.
-    
-    `arguments`:
+    - `arguments`:
         - `build` (string): build configuration parameters (has to match the build
           argument used to save the container)
 
-
 `checkout_build`: checkout PyNE branch to be tested, build its and saves it
 usins the `save_container` command.
-    
-    `arguments`:
+    - `arguments`:
         - `build` (string): used to identify a configuration
         - `flags` (string): flags to be use when building PyNE
 
-
 `run_test`: pull a previous using `pull_container` command, then run the PyNE
 nosetests using the provided `flag`.
-    
-    `arguments`:
+    - `arguments`:
         - `build` (string): used to identify a configuration
         - `flags` (string): flags to be use when running the PyNE nosetests
-
 
 `website_build_push`: pull the Python 2.7 build with all the PyNE optionnal
 depedencies `python2_dagmc_pymaob` saved image (using `pull_container` command)
 build the website and push it to the `pyne.github.com` repo.
-    
-    `arguments`:
+    - `arguments`:
         - `push_option` (string: `test` or `root`): 
             - `test` option will push the new built website to `website_preview` 
             branch of the repo allowing previous allowing reviews. the push `root` 
