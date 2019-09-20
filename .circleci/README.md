@@ -17,34 +17,45 @@ Commands
 ---------
 The `commands` section allows to define macro commands with arguments to be used
 in the differents jobs.
+
 `news_check`: check the presence of a new news file in the news folder
+
 
 `save_container`: allows to save the status of a container to be reloaded in an
 other job.
+
     - `arguments`: 
         - `build` (string): build configuration parameters, used to identify a
           build configuration
 
+
 `pull_container`: pulls a previously saved (using the `save_container` command) status of container.
+
     - `arguments`:
         - `build` (string): build configuration parameters (has to match the build
           argument used to save the container)
 
+
 `checkout_build`: checkout PyNE branch to be tested, build its and saves it
 usins the `save_container` command.
+    
     - `arguments`:
         - `build` (string): used to identify a configuration
         - `flags` (string): flags to be use when building PyNE
 
+
 `run_test`: pull a previous using `pull_container` command, then run the PyNE
 nosetests using the provided `flag`.
+    
     - `arguments`:
         - `build` (string): used to identify a configuration
         - `flags` (string): flags to be use when running the PyNE nosetests
 
+
 `website_build_push`: pull the Python 2.7 build with all the PyNE optionnal
 depedencies `python2_dagmc_pymaob` saved image (using `pull_container` command)
 build the website and push it to the `pyne.github.com` repo.
+    
     - `arguments`:
         - `push_option` (string: `test` or `root`): 
             - `test` option will push the new built website to `website_preview` 
@@ -52,6 +63,7 @@ build the website and push it to the `pyne.github.com` repo.
             version will push the website on the
             - `master` branch of the repo, deploying a new version of the website 
             in `pyne.io`
+
 
 Jobs
 ----
