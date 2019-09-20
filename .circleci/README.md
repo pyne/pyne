@@ -23,7 +23,6 @@ in the differents jobs.
 other job.
     
     `arguments`: 
-        
         - `build` (string): build configuration parameters, used to identify a
           build configuration
 
@@ -31,7 +30,6 @@ other job.
 `pull_container`: pulls a previously saved (using the `save_container` command) status of container.
     
     `arguments`:
-        
         - `build` (string): build configuration parameters (has to match the build
           argument used to save the container)
 
@@ -40,9 +38,7 @@ other job.
 usins the `save_container` command.
     
     `arguments`:
-        
         - `build` (string): used to identify a configuration
-        
         - `flags` (string): flags to be use when building PyNE
 
 
@@ -50,9 +46,7 @@ usins the `save_container` command.
 nosetests using the provided `flag`.
     
     `arguments`:
-        
         - `build` (string): used to identify a configuration
-        
         - `flags` (string): flags to be use when running the PyNE nosetests
 
 
@@ -62,11 +56,9 @@ build the website and push it to the `pyne.github.com` repo.
     
     `arguments`:
         - `push_option` (string: `test` or `root`): 
-            
             - `test` option will push the new built website to `website_preview` 
             branch of the repo allowing previous allowing reviews. the push `root` 
             version will push the website on the
-        
             - `master` branch of the repo, deploying a new version of the website 
             in `pyne.io`
 
