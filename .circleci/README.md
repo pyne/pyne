@@ -7,21 +7,21 @@ PyNE Circle-CI use CIrcle_CI version 2.1 and is composed in 4 main sections:
 
 Executors
 ---------
-The `executors` defines aliases to the environment to run the differents jobs, in our case
-different docker images containing differents combinaisons of the optionnal
+The `executors` define aliases to the environment to run the different jobs, in our case
+different docker images containing different combinations of the optional
 dependencies of PyNE (`MOAB`, `pyMOAB`, `DAGMC`) in one of the two supported
-PyTHON flavor (Python 2.7 or Python 3.6).
+PyTHON flavors (Python 2.7 or Python 3.6).
 
 
 Commands
 ---------
-The `commands` section allows to define macro commands with arguments to be used
-in the differents jobs.
+The `commands` section allows the definition of macro commands with arguments to be used
+in the different jobs.
 
 `news_check`: check the presence of a new news file in the news folder
 
 
-`save_container`: allows to save the status of a container to be reloaded in an
+`save_container`: saves the status of a container to be reloaded in an
 other job.
 
     - `arguments`: 
@@ -36,8 +36,8 @@ other job.
           argument used to save the container)
 
 
-`checkout_build`: checkout PyNE branch to be tested, build its and saves it
-usins the `save_container` command.
+`checkout_build`: checks out PyNE branch to be tested, builds it and saves it
+using the `save_container` command.
     
     - `arguments`:
         - `build` (string): used to identify a configuration
