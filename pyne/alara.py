@@ -276,8 +276,7 @@ def response_to_hdf5(filename, response, chunkshape=(10000,)):
              ('isotope\t shutdown' in line):
                 decay_times = read_decay_times(line)
         # get zone idx
-        elif state == None and \
-             'Zone #' in line:
+        elif 'Zone #' in line:
             zone_idx = _get_zone_idx(line)
             if zone_idx == 0:
                 state = zone_start_state
