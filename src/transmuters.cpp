@@ -4,10 +4,12 @@ extern "C" {
 #include "utils.h"
 #include "transmuters.h"
 
-
 std::map<int, double> pyne::transmuters::cram(std::vector<double>& A,
                                               const std::map<int, double>& n0,
                                               const int order) {
+#ifdef _WIN32
+  throw std::runtime_error("cram not yet supported on Windows");
+#else
   using std::map;
   using std::vector;
   // Get intial condition vector
@@ -60,4 +62,5 @@ std::map<int, double> pyne::transmuters::cram(std::vector<double>& A,
     }
   }
   return n1;
+#endif
 }

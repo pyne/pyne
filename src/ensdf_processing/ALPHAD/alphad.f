@@ -174,13 +174,12 @@
 !
 !     FUNCTIONS USED
 !
-      CHARACTER(LEN=1), INTRINSIC :: CHAR
+
       CHARACTER(LEN=1), EXTERNAL :: LOCASE
-      INTEGER(KIND=4), INTRINSIC :: INDEX, INT, LEN, MIN0, NINT,        &       
-     &                              LEN_TRIM
+
       INTEGER(KIND=4), EXTERNAL :: INDEXF, IVLSTR, TYPSTR
       REAL(KIND=4), EXTERNAL :: VALSTR
-      REAL(KIND=8), INTRINSIC :: DABS, DBLE, DMOD, DSQRT
+
       REAL(KIND=8), EXTERNAL :: DVALST
 !
 !     Local variables
@@ -1417,7 +1416,6 @@
 !
       REAL(KIND=8) :: akay, alam, alfa, amu, bmu, delr, factor, tcal,   &       
      &                test1, test2, y
-      REAL(KIND=8) :: DABS, DACOS, DCOS, DEXP, DLOG, DSIN, DSQRT, DTAN
       INTEGER(KIND=4) :: i, nx
 !
       IF(Enerx.LE.0..OR.T1.LE.0) THEN
@@ -1497,8 +1495,7 @@
       REAL(KIND=8) :: akay, alam, alfa, amu, bmu, dade, dadr, dalam,    &       
      &                dbde, dbdr, dfde, dkde, dlde, dldr, dyde, dydr,   &       
      &                factor, temp, test1, test2, y
-      REAL(KIND=8), INTRINSIC :: DABS, DACOS, DBLE, DCOS, DEXP, DMAX1,  &       
-     &                           DSIN, DSQRT, DTAN
+
       INTEGER(KIND=4) :: i
 !
 !     Split from the main program on 22-Feb-1994 to allow calculation
@@ -1605,7 +1602,6 @@
 !
       CHARACTER(LEN=8) :: chkstr
       INTEGER(KIND=4) :: i, j
-      INTEGER(KIND=4) :: INDEX, LEN_TRIM
       INTEGER(KIND=4), EXTERNAL :: TYPSTR
 !
 !     Attempts to set a non-numeric uncertainty on the HF uncertainty
