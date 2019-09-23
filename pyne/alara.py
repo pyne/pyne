@@ -258,48 +258,46 @@ def response_to_hdf5(filename, response, chunkshape=(10000,)):
     zone_idx = 0
     count = 1
     decay_times = []
-    zone_start = False
-    response_start = False
+    zone_start_state = 1
+    response_start_state = 2
+    state = None
     for line in f:
         # terminate condition
-        if ('Totals for all zones.' in line) \
-                and response_start:
+        if state == response_start_state and \
+           ('Totals for all zones.' in line):
             break
         # get response string
-        if zone_start and (response_strings[response] in line):
-            response_start = True
-            continue
+        if state == zone_start_state and \
+           (response_strings[response] in line):
+            state = response_start_state
         # get decay times
-        if ('isotope\t shutdown' in line):
-            if len(decay_times) == 0:
+        elif state == response_start_state and \
+             len(decay_times) == 0 and \
+             ('isotope\t shutdown' in line):
                 decay_times = read_decay_times(line)
-            continue
         # get zone idx
-        if 'Zone #' in line:
+        elif 'Zone #' in line:
             zone_idx = _get_zone_idx(line)
             if zone_idx == 0:
-                zone_start = True
-            continue
-        # skip the lines does not contain specific response info
-        if not response_start:
-            continue
-        # skip the lines don't contain wanted data
-        if not _is_data(line):
-            continue
+                state = zone_start_state
+        # skip lines if we haven't started the response or
+        # the lines don't contain wanted data
+        elif state == response_start_state and \
+             _is_data(line):
     
-        tokens = line.strip().split()
-        # put data into table
-        # format of each row: zone_idx, nuc, time, decay_heat
-        nuc = tokens[0].strip()
-        if nuc.lower() == 'total':
-            nuc = nuc.upper()
-        for dt, response_value in zip(decay_times,tokens[1:]):
-            j = (count-1) % chunksize
-            rows[j] = (zone_idx, nuc, dt, response_value)
-            if count % chunksize == 0:
-                tab.append(rows)
-                rows = np.empty(chunksize, dtype=dt)
-            count += 1
+            tokens = line.strip().split()
+            # put data into table
+            # format of each row: zone_idx, nuc, time, decay_heat
+            nuc = tokens[0].strip()
+            if nuc.lower() == 'total':
+                nuc = nuc.upper()
+            for dt, response_value in zip(decay_times,tokens[1:]):
+                j = (count-1) % chunksize
+                rows[j] = (zone_idx, nuc, dt, response_value)
+                if count % chunksize == 0:
+                    tab.append(rows)
+                    rows = np.empty(chunksize, dtype=dt)
+                count += 1
     
     if count % chunksize != 0:
         tab.append(rows[:j+1])
