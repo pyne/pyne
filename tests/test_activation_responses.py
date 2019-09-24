@@ -13,7 +13,7 @@ import tables as tb
 from pyne.mcnp import Meshtal
 from pyne.material import Material
 from pyne.utils import QAWarning, file_block_almost_same
-from pyne.alara import response_to_hdf5, response_hdf5_to_mesh
+from pyne.alara import response_to_hdf5, response_hdf5_to_mesh, _make_response_dtype
 from pyne.mesh import Mesh, NativeMeshTag, HAVE_PYMOAB
 if not HAVE_PYMOAB:
     raise SkipTest
@@ -40,11 +40,7 @@ def _generate_exp_h5(filename, response, exp_h5_filename):
     # generate expected h5 file
     f = open(filename, 'r')
     f.seek(0)
-    dt = np.dtype([
-        ('idx', np.int64),
-        ('nuc', 'S6'),
-        ('time', 'S20'),
-        (response, np.float64)])
+    dt = _make_response_dtype(response)
     filters = tb.Filters(complevel=1, complib='zlib')
     h5f = tb.open_file(exp_h5_filename, 'w', filters=filters)
     tab = h5f.create_table('/', 'data', dt)
