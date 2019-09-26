@@ -238,7 +238,7 @@ workflows:
       - news_update:
           filters:
             branches:
-              ignore: master
+              ignore: develop
             tags:
               ignore: /.*/   
       
