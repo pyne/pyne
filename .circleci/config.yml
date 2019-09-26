@@ -235,8 +235,13 @@ workflows:
   version: 2
   build_and_test:
     jobs:
-      - news_update
-        
+      - news_update:
+          filters:
+            branches:
+              ignore: master
+            tags:
+              ignore: /.*/   
+      
       - py3_build
       - py3_test:
           requires:
