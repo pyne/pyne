@@ -2,23 +2,23 @@ PyNE-CI Documentation
 =====================
 
 
-PyNE Circle-CI use CIrcle_CI version 2.1 and is composed in 4 main sections:
+PyNE Circle-CI use CIrcle_CI version 2.1 and is composed of 4 main sections:
 `executors`, `commands`, `jobs` and `workflow`.
 
 Executors
 ---------
-The `executors` define aliases to the environment to run the different jobs, in our case
+The `executors` define aliases to the environment to run the different jobs. In our case these are
 different docker images containing different combinations of the optional
 dependencies of PyNE (`MOAB`, `pyMOAB`, `DAGMC`) in one of the two supported
-PyTHON flavors (Python 2.7 or Python 3.6).
+Python versions (Python 2.7 or Python 3.6).
 
 
 Commands
 ---------
-The `commands` section allows the definition of macro commands with arguments to be used
+The `commands` section provides the definitions of macro commands with arguments to be used
 in the different jobs.
 
-`news_check`: check the presence of a new news file in the news folder
+`news_check`: checks the presence of a new news file in the news folder
 
 
 `save_container`: saves the status of a container to be reloaded in an
@@ -44,7 +44,7 @@ using the `save_container` command.
         - `flags` (string): flags to be use when building PyNE
 
 
-`run_test`: pull a previous using `pull_container` command, then run the PyNE
+`run_test`: pulls a previous container using `pull_container` command, then runs the PyNE
 nosetests using the provided `flag`.
     
     - `arguments`:
@@ -52,14 +52,14 @@ nosetests using the provided `flag`.
         - `flags` (string): flags to be use when running the PyNE nosetests
 
 
-`website_build_push`: pull the Python 2.7 build with all the PyNE optionnal
-depedencies `python2_dagmc_pymaob` saved image (using `pull_container` command)
-build the website and push it to the `pyne.github.com` repo.
+`website_build_push`: pull the Python 2.7 build with all the PyNE optional
+depedencies `python2_dagmc_pymoab` saved image (using `pull_container` command),
+build the website, and push it to the `pyne.github.com` repo.
     
     - `arguments`:
         - `push_option` (string: `test` or `root`): 
-            - `test` option will push the new built website to `website_preview` 
-            branch of the repo allowing previous allowing reviews. the push `root` 
+            - `test` option will push the newly built website to `website_preview` 
+            branch of the repo allowing reviews. The push `root` 
             version will push the website on the
             - `master` branch of the repo, deploying a new version of the website 
             in `pyne.io`
@@ -69,7 +69,7 @@ Jobs
 ----
 The `jobs` section defines all the different jobs used in the different
 workflows. For each built configuration two jobs have been defined, one to build
-PyNE, and one to run the `nosetests`. In addition to the the build and test
+PyNE, and one to run the `nosetests`. In addition to the build and test
 jobs, two additional jobs have been created to build and push the website, one
 to the `website_test` branch of the `pyne.github.com` repo, and one to the
 `master` branch.
@@ -77,5 +77,5 @@ to the `website_test` branch of the `pyne.github.com` repo, and one to the
 
 Workflow
 --------
-The `workflow` section defines independant workflow triggers the differents
+The `workflow` section defines independent workflow triggers the different
 jobs (with triggers).
