@@ -59,10 +59,9 @@ build the website and push it to the `pyne.github.com` repo.
     - `arguments`:
         - `push_option` (string: `test` or `root`): 
             - `test` option will push the new built website to `website_preview` 
-            branch of the repo allowing previous allowing reviews. the push `root` 
-            version will push the website on the
-            - `master` branch of the repo, deploying a new version of the website 
-            in `pyne.io`
+            branch of the repo allowing previous allowing reviews. 
+            - `root` option will push the website on the `master` branch of the repo, 
+            deploying a new version of the website in `pyne.io`
 
 
 Jobs
