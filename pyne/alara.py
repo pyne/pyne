@@ -149,12 +149,7 @@ def photon_source_to_hdf5(filename, nucs='all', chunkshape=(10000,)):
     f.seek(0)
     G = len(header) - 2
 
-    phtn_dtype = np.dtype([
-        ('idx', np.int64),
-        ('nuc', 'S6'),
-        ('time', 'S20'),
-        ('phtn_src', np.float64, G),
-    ])
+    phtn_dtype = _make_response_dtype('phtn_src')
 
     filters = tb.Filters(complevel=1, complib='zlib')
     # set the default output h5_filename
@@ -242,11 +237,7 @@ def response_to_hdf5(filename, response, chunkshape=(10000,)):
     f = open(filename, 'r')
     f.seek(0)
 
-    response_dtype = np.dtype([
-        ('idx', np.int64),
-        ('nuc', 'S6'),
-        ('time', 'S20'),
-        (response, np.float64)])
+    response_dtype = _make_response_dtype(response)
 
     filters = tb.Filters(complevel=1, complib='zlib')
     h5_filename = os.path.join(os.path.dirname(filename), ''.join([response, '.h5']))
@@ -1060,6 +1051,15 @@ def _get_subvoxel_array(mesh, cell_mats):
 
     return subvoxel_array
 
+def _make_response_dtype(response_name):
+
+    return np.dtype([
+        ('idx', np.int64),
+        ('nuc', 'S6'),
+        ('time', 'S20'),
+        (response_name, np.float64, G),
+    ])
+ 
 
 def _convert_unit_to_s(dt):
     """
