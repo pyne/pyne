@@ -149,7 +149,7 @@ def photon_source_to_hdf5(filename, nucs='all', chunkshape=(10000,)):
     f.seek(0)
     G = len(header) - 2
 
-    phtn_dtype = _make_response_dtype('phtn_src')
+    phtn_dtype = _make_response_dtype('phtn_src', data_length=G)
 
     filters = tb.Filters(complevel=1, complib='zlib')
     # set the default output h5_filename
@@ -1051,13 +1051,13 @@ def _get_subvoxel_array(mesh, cell_mats):
 
     return subvoxel_array
 
-def _make_response_dtype(response_name):
+def _make_response_dtype(response_name, data_length=1):
 
     return np.dtype([
         ('idx', np.int64),
         ('nuc', 'S6'),
         ('time', 'S20'),
-        (response_name, np.float64, G),
+        (response_name, np.float64, data_length)
     ])
  
 
