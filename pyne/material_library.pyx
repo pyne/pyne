@@ -49,9 +49,6 @@ import pyne.material as material
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
-# Maximum 32-bit signed int
-DEF INT_MAX = 2147483647
-
 _INTEGRAL_TYPES = (int, np.integer, np.bool_)
  
 

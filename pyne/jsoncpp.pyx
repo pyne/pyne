@@ -112,7 +112,7 @@ cdef class Value(object):
     def __getitem__(self, pykey):
         cdef cpp_jsoncpp.Value * cvalue
         cdef Value pyvalue = Value(view=True)
-        
+
         # convert key and get value
         if isinstance(pykey, basestring):
             pykey_bytes = pykey.encode()

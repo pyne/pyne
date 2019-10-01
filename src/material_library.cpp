@@ -43,8 +43,8 @@ void pyne::MaterialLibrary::from_hdf5(const std::string& filename,
   int file_num_materials = get_length_of_table(filename, datapath);
   int library_length = material_library.size();
   for (int i = 0; i < file_num_materials; i++) {
-    pyne::Material mat = pyne::Material();  // from file
-    // read new mat
+    pyne::Material mat = pyne::Material();  
+    // Get material from the hdf5 file
     if (nucpath == "") {
       mat.from_hdf5(filename, datapath, i, protocol);
     } else {
@@ -127,14 +127,6 @@ void pyne::MaterialLibrary::add_material(pyne::Material mat) {
       mat_number = mat.metadata["mat_number"].asInt();
     } else {
       mat_number = std::stoi(mat.metadata["mat_number"].asString());
-      mat.metadata["mat_number"] = mat_number;
-    }
-    mat_numb_it = mat_number_set.find(mat_number);
-    if (mat_numb_it != mat_number_set.end()) {
-      std::string msg = "The Material Number Conflict. Material Number ";
-      msg += mat_number;
-      msg += " is already in the library.";
-      warning(msg);
     }
   } 
   pyne::matname_set::iterator key_it;
@@ -150,7 +142,7 @@ void pyne::MaterialLibrary::add_material(pyne::Material mat) {
     
   } else {
     if (mat_number == -1) {
-      mat_number = keylist.size(); //set a temp 
+      mat_number = keylist.size(); //set a temp mat_number to form mat name 
     }
     mat_name = "_" + std::to_string(mat_number);
     mat.metadata["name"] = mat_name;
@@ -194,9 +186,12 @@ void pyne::MaterialLibrary::add_material(const std::string& key, pyne::Material 
   append_to_nuclist(mat);
   if(mat_number > 0)
     mat_number_set.insert(mat_number);
-  keylist.insert(key);
+  pair<std::set<std::string>::iterator, bool> key_insert;
+  key_insert = keylist.insert(key);
+  // if the key was not present in the MaterialLibrary add it, otherwise overwrite the existing material
+  if( key_insert.second == false)
+    name_order.push_back(key);
   material_library[key] = new Material(mat);
-  name_order.push_back(key);
 }
 
 void pyne::MaterialLibrary::del_material(pyne::Material mat) {

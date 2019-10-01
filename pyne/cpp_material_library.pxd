@@ -12,9 +12,6 @@ cimport cpp_jsoncpp
 from pyne cimport cpp_material 
 
 cdef extern from "material_library.h" namespace "pyne":
-    # Cython does not allow for typdef'ing tamplated types :(
-    #ctypedef map[int, double] comp_map
-    #ctypedef map[int, double].iterator comp_iter
 
     cdef cppclass MaterialLibrary:
         # Constuctors
