@@ -189,7 +189,7 @@ void pyne::MaterialLibrary::add_material(const std::string& key, pyne::Material 
   std::pair<std::set<std::string>::iterator, bool> key_insert;
   key_insert = keylist.insert(key);
   // if the key was not present in the MaterialLibrary add it, otherwise overwrite the existing material
-  if( key_insert.second == false)
+  if( key_insert.second == true)
     name_order.push_back(key);
   material_library[key] = new Material(mat);
 }
