@@ -186,7 +186,7 @@ void pyne::MaterialLibrary::add_material(const std::string& key, pyne::Material 
   append_to_nuclist(mat);
   if(mat_number > 0)
     mat_number_set.insert(mat_number);
-  pair<std::set<std::string>::iterator, bool> key_insert;
+  std::pair<std::set<std::string>::iterator, bool> key_insert;
   key_insert = keylist.insert(key);
   // if the key was not present in the MaterialLibrary add it, otherwise overwrite the existing material
   if( key_insert.second == false)
