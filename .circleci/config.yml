@@ -114,9 +114,7 @@ commands:
     steps:
       - pull_container:
           build: "python2_dagmc_pymoab"
-      - add_ssh_keys:
-          fingerprints:
-            - $PYNE_KEY_FINGERPRINT
+      - add_ssh_keys
       - run:
           command: |
               git config --global user.email "pyne-dev@googlegroups.com"
