@@ -57,12 +57,13 @@ _INTEGRAL_TYPES = (int, np.integer, np.bool_)
 #
 
 cdef class _MaterialLibrary:
-    """This class allows the definitions of a set of material, stored by names
+    """This class allows the definitions of a set of materials, stored by name
     """
 
 
     def __cinit__(self, lib=None, datapath="/materials", nucpath="/nucid"):
-        """Parameters
+        """
+        Parameters
         ----------
         lib : dict-like, str, or None, optional
             The data to intialize the material library with.  If this is a
@@ -177,15 +178,15 @@ cdef class _MaterialLibrary:
                 mat, free_mat=not isinstance(mat, material._Material))
             self._inst.add_material( key, (<material._Material> value_proxy).mat_pointer[0])
         else:
-            raise TypeError("the material must be a material or a stri but is a "
+            raise TypeError("Material must be a PyNE Material or a string but is a "
                             "{0}".format(type(mat)))
 
     def del_material(self, mat):
-        """Remove a Material to this material library.
+        """Remove a Material from this material library.
         Parameters
         ----------
         mat : Material or str
-            PyNE material object or material name be removed to this material library
+            PyNE material object or material name be removed from this material library
             if a material is provided it needs a name metadata as material are
             removed according to their names
         """
