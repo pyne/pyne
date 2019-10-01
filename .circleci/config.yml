@@ -325,22 +325,23 @@ workflows:
      # Build/Push test website
       - build_push_website_test:
           requires:
-            - py2_dagmc_pymoab_test
-            - py3_dagmc_pymoab_test
-          filters:
-            branches:
-              only:
-                - develop
+            - py2_build
+              #   requires:
+              #     - py2_dagmc_pymoab_test
+              #     - py3_dagmc_pymoab_test
+              #   filters:
+              #     branches:
+              #       only:
+              #         - develop
 
 
      # only done on tags
       - build_push_website_deploy:
           requires:
-            - py2_build
-          #      - py2_dagmc_pymoab_test
-          #      - py3_dagmc_pymoab_test
-          #    filters:
-          #      branches:
-          #        ignore: /.*/
-          #      tags:
-          #        only: /.*/
+            - py2_dagmc_pymoab_test
+            - py3_dagmc_pymoab_test
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /.*/
