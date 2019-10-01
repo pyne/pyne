@@ -131,7 +131,7 @@ void pyne::MaterialLibrary::add_material(pyne::Material mat) {
     }
     mat_numb_it = mat_number_set.find(mat_number);
     if (mat_numb_it != mat_number_set.end()) {
-      std::string msg = "The Material Number Conflict. Material Number ";
+      std::string msg = "Material number ";
       msg += mat_number;
       msg += " is already in the library.";
       warning(msg);
