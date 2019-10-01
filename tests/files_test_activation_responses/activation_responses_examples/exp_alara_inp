@@ -1,0 +1,57 @@
+geometry rectangular
+
+volume
+     1.000000E+03    zone_0
+     1.000000E+03    zone_1
+     1.000000E+03    zone_2
+     1.000000E+03    zone_3
+end
+
+mat_loading
+    zone_0    mix_0
+    zone_1    mix_1
+    zone_2    mix_2
+    zone_3    mix_0
+end
+
+mixture mix_0
+    material mat:Steel/rho:7.8 1 0.5
+    material mat:Water/rho:1.0 1 0.5
+end
+
+mixture mix_1
+    material mat_void 1 1.0
+end
+
+mixture mix_2
+    material mat:Steel/rho:7.8 1 1.0
+end
+
+cooling
+    1E3 s
+end
+
+material_lib alara_matlib
+element_lib data/nuclib
+data_library alaralib data/fendl2.0bin
+
+#     flux name    fluxin file   norm   shift   unused
+flux  my_flux     alara_fluxin  1e10     0      default
+
+# Specify the irradiation schedule below.
+# Syntax is found in the ALARA user manual
+# This example is for a single 3.5 d pulse
+schedule    my_schedule
+    3.5 d my_flux my_pulse_history 0  s
+end
+pulsehistory  my_pulse_history
+    1    0.0    s
+end
+
+#other parameters
+truncation 1e-12
+impurity 5e-6 1e-3
+dump_file dump.file
+output zone
+      total_heat
+end
