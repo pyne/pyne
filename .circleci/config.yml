@@ -104,6 +104,30 @@ commands:
           cd ~/repo/tests
           ./travis-run-tests.sh << parameters.flags >>
 
+  # Build and push PyNE website
+  website_build_push:
+    description: "build PyNE website and push it either on the test branch (default) or on the deployed branch"
+    parameters:
+      push_option:
+          type: string
+          default: "test"
+    steps:
+      - pull_container:
+          build: "python2_dagmc_pymoab"
+      - add_ssh_keys:
+          fingerprints:
+            - $PYNE_KEY_FINGERPRINT
+      - run:
+          command: |
+              git config --global user.email "pyne-dev@googlegroups.com"
+              git config --global user.name "report errors on github.com/PyNE/PyNE"
+      - run:
+          name: Build PyNE website
+          command: |
+              cd docs/
+              make html
+              make push-<< parameters.push_option >>
+
 # Jobs part:
 # Define the different job that will be ran this separate building form
 # testing for each configuration allowing to get more information out of the CI
@@ -227,6 +251,25 @@ jobs:
           flags: "python2"
           build: "python2_dagmc_pymoab"
 
+# Website
+# Build and push the website
+  build_push_website_test:
+    executor:
+      name: py2_dagmc_pymoab
+    working_directory: ~/repo
+    steps:
+      - website_build_push:
+          push_option: "test"
+
+  build_push_website_deploy:
+    executor:
+      name: py2_dagmc_pymoab
+    working_directory: ~/repo
+    steps:
+      - website_build_push:
+          push_option: "root"
+
+
 # Workflow part:
 # This part defines the list of the jobs that will be ran and in which sequence.
 # The goal was to avoid running advanced configuration if PyNE does not work
@@ -279,3 +322,26 @@ workflows:
       - py2_dagmc_pymoab_test:
           requires:
             - py2_dagmc_pymoab_build
+
+
+     # Build/Push test website
+      - build_push_website_test:
+          requires:
+            - py2_dagmc_pymoab_test
+            - py3_dagmc_pymoab_test
+          filters:
+            branches:
+              only:
+                - develop
+
+
+      # only done on tags
+      - build_push_website_deploy:
+          requires:
+            - py2_dagmc_pymoab_test
+            - py3_dagmc_pymoab_test
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /.*/
