@@ -866,8 +866,9 @@ def half_life(nuc, use_metastable=True):
     if use_metastable is True:
         nuc = pyne.nucname.id(nuc)
         ms = nuc % 10000
-        nuc = (nuc // 10000) * 10000
         nuc = metastable_id(nuc, ms)
+        if nuc is None:
+            return float('inf')  # nuclide doesn't exist, assume stable
     if isinstance(nuc, int):
         hl = cpp_data.half_life(<int> nuc)
     elif isinstance(nuc, basestring):
@@ -904,8 +905,9 @@ def decay_const(nuc, use_metastable=True):
     if use_metastable is True:
         nuc = pyne.nucname.id(nuc)
         ms = nuc % 10000
-        nuc = (nuc // 10000) * 10000
         nuc = metastable_id(nuc, ms)
+        if nuc is None:
+            return 0.0  # nuclide doesn't exist, assume stable
     if isinstance(nuc, int):
         dc = cpp_data.decay_const(<int> nuc)
     elif isinstance(nuc, basestring):
@@ -944,11 +946,13 @@ def branch_ratio(from_nuc, to_nuc, use_metastable=True):
         from_nuc = pyne.nucname.id(from_nuc)
         to_nuc = pyne.nucname.id(to_nuc)
         ms = from_nuc % 10000
-        from_nuc = (from_nuc // 10000) * 10000
         from_nuc = metastable_id(from_nuc, ms)
+        if from_nuc is None:
+            return 0.0
         ms = to_nuc % 10000
-        to_nuc = (to_nuc // 10000) * 10000
         to_nuc = metastable_id(to_nuc, ms)
+        if to_nuc is None:
+            return 0.0
     if isinstance(from_nuc, int):
         fn = pyne.cpp_nucname.id(<int> from_nuc)
     elif isinstance(from_nuc, basestring):
@@ -992,8 +996,9 @@ def state_energy(nuc, use_metastable=True):
     if use_metastable is True:
         nuc = pyne.nucname.id(nuc)
         ms = nuc % 10000
-        nuc = (nuc // 10000) * 10000
         nuc = metastable_id(nuc, ms)
+        if nuc is None:
+            return 0.0  # nuclide doesn't exist, assume stable
     if isinstance(nuc, int):
         se = cpp_data.state_energy(<int> nuc)
     elif isinstance(nuc, basestring):
@@ -1028,8 +1033,9 @@ def decay_children(nuc, use_metastable=True):
     if use_metastable is True:
         nuc = pyne.nucname.id(nuc)
         ms = nuc % 10000
-        nuc = (nuc // 10000) * 10000
         nuc = metastable_id(nuc, ms)
+        if nuc is None:
+            return set()
     cdef conv._SetInt dc = conv.SetInt()
 
     if isinstance(nuc, int):
@@ -1077,7 +1083,7 @@ def all_branch_ratio(from_nuc, to_nuc):
     br : float
         Branch ratio of this nuclide pair [fraction].
     """
-    br1 = branch_ratio(from_nuc, to_nuc, use_metastable=False)   
+    br1 = branch_ratio(from_nuc, to_nuc, use_metastable=False)
     br2 = decay_branch_ratio(from_nuc, to_nuc)[0]
     if np.isnan(br1) and not np.isnan(br2):
         return br2
@@ -1119,6 +1125,7 @@ def id_from_level(nuc, level, special=""):
     else:
         return nuc
 
+
 def metastable_id(nuc, level=1):
     """
     return the nuc_id of a metastable state
@@ -1132,10 +1139,15 @@ def metastable_id(nuc, level=1):
 
     Returns
     -------
-    nuc : int
-        state_id of metastable state
+    nuc : int or None
+        state_id of metastable state or None if the metastable state
+        can not be found.
     """
-    return cpp_data.metastable_id(<int> nuc, <int> level)
+    rtn = cpp_data.metastable_id(<int> nuc, <int> level)
+    if rtn < 0:
+        rtn = None
+    return rtn
+
 
 def decay_half_life(from_nuc, to_nuc):
     """

@@ -52,20 +52,20 @@ def test_id_number():
     assert_equal(id("22Na"),0)
 
 def test_mcnp_id():
-    assert_equal(mcnp("Neutron"),"N")
-    assert_equal(mcnp(2112),"N")
-    assert_equal(mcnp("Photon"),"P")
-    assert_equal(mcnp("Gamma"),"P")
-    assert_equal(mcnp("Electron"),"E")
+    assert_equal(mcnp("Neutron"),"n")
+    assert_equal(mcnp(2112),"n")
+    assert_equal(mcnp("Photon"),"p")
+    assert_equal(mcnp("Gamma"),"p")
+    assert_equal(mcnp("Electron"),"e")
 
 def test_mcnp6_id():
-    assert_equal(mcnp6("Neutron"),"N")
-    assert_equal(mcnp6(2112),"N")
-    assert_equal(mcnp6("Photon"),"P")
-    assert_equal(mcnp6("Gamma"),"P")
-    assert_equal(mcnp6("Electron"),"E")
-    assert_equal(mcnp6("Proton"),"H")
-    assert_equal(mcnp6("Hydrogen"),"H")
+    assert_equal(mcnp6("Neutron"),"n")
+    assert_equal(mcnp6(2112),"n")
+    assert_equal(mcnp6("Photon"),"p")
+    assert_equal(mcnp6("Gamma"),"p")
+    assert_equal(mcnp6("Electron"),"e")
+    assert_equal(mcnp6("Proton"),"h")
+    assert_equal(mcnp6("Hydrogen"),"h")
 
 def test_fluka_id():
     assert_equal(fluka("Neutron"),"NEUTRON")

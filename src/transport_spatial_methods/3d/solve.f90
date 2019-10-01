@@ -14,9 +14,10 @@ USE kernel_module
 USE dgfem_kernel_module
 USE sct_step_kernel_module
 USE tracking_routines
+use precision_module, only: dp
 IMPLICIT NONE
 INTEGER :: i, j, k, t, u, v, m, g, gp
-REAL*8 :: xsct
+REAL(kind=dp) :: xsct
 
 ! Intitialize warn to indicate where warnings may occur
 warn = 0

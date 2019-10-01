@@ -574,9 +574,11 @@ std::string pyne::rxname::_names[NUM_RX_NAMES] = {
   "bplus_3p",
   "sf",
   "decay_2bplus",
-  "decay_2ec"
+  "decay_2ec",
+  "ec_3p",
+  "bminus_sf"
   };
-std::set<std::string> pyne::rxname::names(pyne::rxname::_names, 
+std::set<std::string> pyne::rxname::names(pyne::rxname::_names,
                                           pyne::rxname::_names+NUM_RX_NAMES);
 
 
@@ -1143,6 +1145,8 @@ void * pyne::rxname::_fill_maps() {
     848,
     849,
     851,
+    0,
+    0,
     0,
     0,
     0,
@@ -1740,7 +1744,9 @@ void * pyne::rxname::_fill_maps() {
     "(z,b+3p)",
     "(z,sf)",
     "(z,2b+)",
-    "(z,2ec)"
+    "(z,2ec)",
+    "(z,ec3p)",
+    "(z,b-sf)"
   };
   std::string _docs[NUM_RX_NAMES] = {
     "(n,total) Neutron total",
@@ -2314,7 +2320,9 @@ void * pyne::rxname::_fill_maps() {
     "(z,b+3p)",
     "(z,sf)",
     "(z,2b+)",
-    "(z,2ec)"
+    "(z,2ec)",
+    "(z,ec3p)",
+    "(z,b-sf)"
   };
 
   // fill the maps
@@ -2326,10 +2334,10 @@ void * pyne::rxname::_fill_maps() {
     if (0 < _mts[i]) {
       id_mt[rxid] = _mts[i];
       mt_id[_mts[i]] = rxid;
-    };
+    }
     labels[rxid] = _labels[i];
     docs[rxid] = _docs[i];
-  };
+  }
 
   // set alternative names
   altnames["tot"] = name_id["total"];
@@ -2376,13 +2384,15 @@ void * pyne::rxname::_fill_maps() {
   altnames["b-4n"] = name_id["bminus_4n"];
   altnames["b+2p"] = name_id["bplus_2p"];
   altnames["ec2p"] = name_id["ec_2p"];
+  altnames["ec3p"] = name_id["ec_3p"];
   altnames["2b-"] = name_id["decay_2bminus"];
   altnames["b-p"] = name_id["bminus_p"];
   altnames["14c"] = name_id["decay_14c"];
   altnames["b+3p"] = name_id["bplus_3p"];
   altnames["2b+"] = name_id["decay_2bplus"];
   altnames["2ec"] = name_id["decay_2ec"];
-  
+  altnames["b-sf"] = name_id["bminus_sf"];
+
 
   // set the nuclide difference mappings, offset_id
   // offset_id[incident particle type "n", "p", ...][delta Z num][delta A num][rxid]
@@ -2527,12 +2537,12 @@ void * pyne::rxname::_fill_maps() {
   offset_id[make_pair("decay", offset(2, 0))] = name_id["decay_2bminus"];
   offset_id[make_pair("decay", offset(-2, 0))] = name_id["decay_2bplus"];
   offset_id[make_pair("decay", offset(-6, -14))] = name_id["decay_14c"];
-  
+
   // pre-loaded child offsets
   std::map<std::pair<std::string, int>, unsigned int>::iterator ioffid;
   for (ioffid = offset_id.begin(); ioffid != offset_id.end(); ioffid++) {
     id_offset[make_pair(ioffid->first.first, ioffid->second)] = ioffid->first.second;
-  };
+  }
   // neutrons:
   id_offset[make_pair("n", name_id["nHe3"])] = offset(-2, -3);
   id_offset[make_pair("n", name_id["nHe3_1"])] = offset(-2, -3, 2);
@@ -2549,30 +2559,31 @@ void * pyne::rxname::_fill_maps() {
   // decay:
   id_offset[make_pair("decay", name_id["bminus_p"])] = offset(0, -1);
   id_offset[make_pair("decay", name_id["ec_2p"])] = offset(-3, -2);
+  id_offset[make_pair("decay", name_id["ec_3p"])] = offset(-4, -3);
   id_offset[make_pair("decay", name_id["ec"])] = offset(-1, 0);
   id_offset[make_pair("decay", name_id["ec_bplus"])] = offset(-1, 0);
   id_offset[make_pair("decay", name_id["ecp"])] = offset(-2, -1);
   id_offset[make_pair("decay", name_id["eca"])] = offset(-3, -4);
   id_offset[make_pair("decay", name_id["decay_2ec"])] = offset(-2, 0);
   return NULL;
-};
+}
 void * pyne::rxname::_ = pyne::rxname::_fill_maps();
 
 
 unsigned int pyne::rxname::hash(std::string s) {
   return pyne::rxname::hash(s.c_str());
-  };
+}
 
 unsigned int pyne::rxname::hash(const char * s) {
   // Modified from http://cboard.cprogramming.com/tech-board/114650-string-hashing-algorithm.html#post853145
   // starting from h = 32*2^5 > 1000, rather than 0, to reserve space for MT numbers
   int c;
-  unsigned int h = 32; 
+  unsigned int h = 32;
   while((c = *s++)) {
     h = ((h << 5) + h) ^ c;
   }
   return h;
-};
+}
 
 
 // ************************
@@ -2581,7 +2592,7 @@ unsigned int pyne::rxname::hash(const char * s) {
 
 std::string pyne::rxname::name(char * s) {
   return pyne::rxname::name(std::string(s));
-  };
+}
 
 std::string pyne::rxname::name(std::string s) {
   if (0 < names.count(s))
@@ -2600,12 +2611,12 @@ std::string pyne::rxname::name(std::string s) {
     return pyne::rxname::name(atoi(s.c_str()));
   // dead...
   throw NotAReaction(s, "???");
-};
+}
 
 
 std::string pyne::rxname::name(int n) {
   return pyne::rxname::name((unsigned int) n);
-};
+}
 
 std::string pyne::rxname::name(unsigned int n) {
   if (0 < id_name.count(n))
@@ -2613,7 +2624,7 @@ std::string pyne::rxname::name(unsigned int n) {
   if (0 < mt_id.count(n))
     return id_name[mt_id[n]];
   throw NotAReaction(n, "???");
-};
+}
 
 
 std::string pyne::rxname::name(int from_nuc, int to_nuc, std::string z) {
@@ -2623,22 +2634,22 @@ std::string pyne::rxname::name(int from_nuc, int to_nuc, std::string z) {
     throw IndeterminateReactionForm("z=" + z + ", " + pyne::to_str(from_nuc) + \
                                     ", " + pyne::to_str(to_nuc), "???");
   return id_name[offset_id[key]];
-};
+}
 
 std::string pyne::rxname::name(std::string from_nuc, int to_nuc, std::string z) {
-  return pyne::rxname::name(pyne::nucname::id(from_nuc), 
+  return pyne::rxname::name(pyne::nucname::id(from_nuc),
                             pyne::nucname::id(to_nuc), z);
-};
+}
 
 std::string pyne::rxname::name(int from_nuc, std::string to_nuc, std::string z) {
-  return pyne::rxname::name(pyne::nucname::id(from_nuc), 
+  return pyne::rxname::name(pyne::nucname::id(from_nuc),
                             pyne::nucname::id(to_nuc), z);
-};
+}
 
 std::string pyne::rxname::name(std::string from_nuc, std::string to_nuc, std::string z) {
-  return pyne::rxname::name(pyne::nucname::id(from_nuc), 
+  return pyne::rxname::name(pyne::nucname::id(from_nuc),
                             pyne::nucname::id(to_nuc), z);
-};
+}
 
 
 
@@ -2647,28 +2658,28 @@ std::string pyne::rxname::name(std::string from_nuc, std::string to_nuc, std::st
 // **********************
 unsigned int pyne::rxname::id(int x) {
   return name_id[pyne::rxname::name(x)];
-};
-  
+}
+
 unsigned int pyne::rxname::id(unsigned int x) {
   if (0 < id_name.count(x))
     return x;
   if (0 < mt_id.count(x))
     return mt_id[x];
   return name_id[pyne::rxname::name(x)];
-};
-  
+}
+
 unsigned int pyne::rxname::id(const char * x) {
   return name_id[pyne::rxname::name(x)];
-};
-  
+}
+
 unsigned int pyne::rxname::id(std::string x) {
   if (0 < names.count(x))
     return name_id[x];
   if (0 < altnames.count(x))
     return altnames[x];
-  return name_id[pyne::rxname::name(x)];  
-};
-  
+  return name_id[pyne::rxname::name(x)];
+}
+
 unsigned int pyne::rxname::id(int from_nuc, int to_nuc, std::string z) {
   // This assumes nuclides are in id form
   std::pair<std::string, int> key = std::make_pair(z, to_nuc - from_nuc);
@@ -2676,22 +2687,22 @@ unsigned int pyne::rxname::id(int from_nuc, int to_nuc, std::string z) {
     throw IndeterminateReactionForm("z=" + z + ", " + pyne::to_str(from_nuc) + \
                                     ", " + pyne::to_str(to_nuc), "???");
   return offset_id[key];
-};
-  
+}
+
 unsigned int pyne::rxname::id(int from_nuc, std::string to_nuc, std::string z) {
-  return pyne::rxname::id(pyne::nucname::id(from_nuc), 
+  return pyne::rxname::id(pyne::nucname::id(from_nuc),
                           pyne::nucname::id(to_nuc), z);
-};
-  
+}
+
 unsigned int pyne::rxname::id(std::string from_nuc, int to_nuc, std::string z) {
-  return pyne::rxname::id(pyne::nucname::id(from_nuc), 
+  return pyne::rxname::id(pyne::nucname::id(from_nuc),
                           pyne::nucname::id(to_nuc), z);
-};
-  
+}
+
 unsigned int pyne::rxname::id(std::string from_nuc, std::string to_nuc, std::string z) {
-  return pyne::rxname::id(pyne::nucname::id(from_nuc), 
+  return pyne::rxname::id(pyne::nucname::id(from_nuc),
                           pyne::nucname::id(to_nuc), z);
-};
+}
 
 
 // **********************
@@ -2702,56 +2713,56 @@ unsigned int pyne::rxname::mt(int x) {
   if (0 == id_mt.count(rxid))
     throw NotAReaction();
   return id_mt[rxid];
-};
-  
+}
+
 unsigned int pyne::rxname::mt(unsigned int x) {
   unsigned int rxid = pyne::rxname::id(x);
   if (0 == id_mt.count(rxid))
     throw NotAReaction();
   return id_mt[rxid];
-};
-  
+}
+
 unsigned int pyne::rxname::mt(char * x) {
   unsigned int rxid = pyne::rxname::id(x);
   if (0 == id_mt.count(rxid))
     throw NotAReaction();
   return id_mt[rxid];
-};
-  
+}
+
 unsigned int pyne::rxname::mt(std::string x) {
   unsigned int rxid = pyne::rxname::id(x);
   if (0 == id_mt.count(rxid))
     throw NotAReaction();
   return id_mt[rxid];
-};
-  
+}
+
 unsigned int pyne::rxname::mt(int from_nuc, int to_nuc, std::string z) {
   unsigned int rxid = pyne::rxname::id(from_nuc, to_nuc, z);
   if (0 == id_mt.count(rxid))
     throw NotAReaction();
   return id_mt[rxid];
-};
-  
+}
+
 unsigned int pyne::rxname::mt(int from_nuc, std::string to_nuc, std::string z) {
   unsigned int rxid = pyne::rxname::id(from_nuc, to_nuc, z);
   if (0 == id_mt.count(rxid))
     throw NotAReaction();
   return id_mt[rxid];
-};
-  
+}
+
 unsigned int pyne::rxname::mt(std::string from_nuc, int to_nuc, std::string z) {
   unsigned int rxid = pyne::rxname::id(from_nuc, to_nuc, z);
   if (0 == id_mt.count(rxid))
     throw NotAReaction();
   return id_mt[rxid];
-};
-  
+}
+
 unsigned int pyne::rxname::mt(std::string from_nuc, std::string to_nuc, std::string z) {
   unsigned int rxid = pyne::rxname::id(from_nuc, to_nuc, z);
   if (0 == id_mt.count(rxid))
     throw NotAReaction();
   return id_mt[rxid];
-};
+}
 
 
 // ***********************
@@ -2759,35 +2770,35 @@ unsigned int pyne::rxname::mt(std::string from_nuc, std::string to_nuc, std::str
 // ***********************
 std::string pyne::rxname::label(int x) {
   return labels[pyne::rxname::id(x)];
-};
-  
+}
+
 std::string pyne::rxname::label(unsigned int x) {
   return labels[pyne::rxname::id(x)];
-};
-  
+}
+
 std::string pyne::rxname::label(char * x) {
   return labels[pyne::rxname::id(x)];
-};
-  
+}
+
 std::string pyne::rxname::label(std::string x) {
   return labels[pyne::rxname::id(x)];
-};
-  
+}
+
 std::string pyne::rxname::label(int from_nuc, int to_nuc, std::string z) {
   return labels[pyne::rxname::id(from_nuc, to_nuc, z)];
-};
-  
+}
+
 std::string pyne::rxname::label(int from_nuc, std::string to_nuc, std::string z) {
   return labels[pyne::rxname::id(from_nuc, to_nuc, z)];
-};
-  
+}
+
 std::string pyne::rxname::label(std::string from_nuc, int to_nuc, std::string z) {
   return labels[pyne::rxname::id(from_nuc, to_nuc, z)];
-};
-  
+}
+
 std::string pyne::rxname::label(std::string from_nuc, std::string to_nuc, std::string z) {
   return labels[pyne::rxname::id(from_nuc, to_nuc, z)];
-};
+}
 
 
 // *********************
@@ -2795,35 +2806,35 @@ std::string pyne::rxname::label(std::string from_nuc, std::string to_nuc, std::s
 // *********************
 std::string pyne::rxname::doc(int x) {
   return docs[pyne::rxname::id(x)];
-};
-  
+}
+
 std::string pyne::rxname::doc(unsigned int x) {
   return docs[pyne::rxname::id(x)];
-};
-  
+}
+
 std::string pyne::rxname::doc(char * x) {
   return docs[pyne::rxname::id(x)];
-};
-  
+}
+
 std::string pyne::rxname::doc(std::string x) {
   return docs[pyne::rxname::id(x)];
-};
-  
+}
+
 std::string pyne::rxname::doc(int from_nuc, int to_nuc, std::string z) {
   return docs[pyne::rxname::id(from_nuc, to_nuc, z)];
-};
-  
+}
+
 std::string pyne::rxname::doc(int from_nuc, std::string to_nuc, std::string z) {
   return docs[pyne::rxname::id(from_nuc, to_nuc, z)];
-};
-  
+}
+
 std::string pyne::rxname::doc(std::string from_nuc, int to_nuc, std::string z) {
   return docs[pyne::rxname::id(from_nuc, to_nuc, z)];
-};
-  
+}
+
 std::string pyne::rxname::doc(std::string from_nuc, std::string to_nuc, std::string z) {
   return docs[pyne::rxname::id(from_nuc, to_nuc, z)];
-};
+}
 
 
 // ***********************
@@ -2835,24 +2846,23 @@ int pyne::rxname::child(int nuc, unsigned int rx, std::string z) {
   std::pair<std::string, unsigned int> key = std::make_pair(z, rx);
   if (0 == id_offset.count(key))
     throw IndeterminateReactionForm("z=" + z + ", rx=" + pyne::to_str(rx), "???");
-  int to_nuc = nuc + id_offset[key];
+  int to_nuc = pyne::nucname::groundstate(nuc) + id_offset[key];
   if (!pyne::nucname::isnuclide(to_nuc))
     throw pyne::nucname::NotANuclide(nuc, to_nuc);
   return to_nuc;
-};
+}
 
 int pyne::rxname::child(int nuc, std::string rx, std::string z) {
   return child(nuc, id(rx), z);
-};
+}
 
 int pyne::rxname::child(std::string nuc, unsigned int rx, std::string z) {
   return child(pyne::nucname::id(nuc), rx, z);
-};
+}
 
 int pyne::rxname::child(std::string nuc, std::string rx, std::string z) {
   return child(pyne::nucname::id(nuc), id(rx), z);
-};
-
+}
 
 // ************************
 // *** parent functions ***
@@ -2867,17 +2877,17 @@ int pyne::rxname::parent(int nuc, unsigned int rx, std::string z) {
   if (!pyne::nucname::isnuclide(from_nuc))
     throw pyne::nucname::NotANuclide(from_nuc, nuc);
   return from_nuc;
-};
+}
 
 int pyne::rxname::parent(int nuc, std::string rx, std::string z) {
   return parent(nuc, id(rx), z);
-};
+}
 
 int pyne::rxname::parent(std::string nuc, unsigned int rx, std::string z) {
   return parent(pyne::nucname::id(nuc), rx, z);
-};
+}
 
 int pyne::rxname::parent(std::string nuc, std::string rx, std::string z) {
   return parent(pyne::nucname::id(nuc), id(rx), z);
-};
+}
 

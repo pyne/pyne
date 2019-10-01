@@ -12,6 +12,7 @@ extern "C" double endftod_(char *str, int len);
 
 std::string pyne::PYNE_DATA = "";
 std::string pyne::NUC_DATA_PATH = "";
+std::string pyne::VERSION = "0.5.11";
 
 void pyne::pyne_start() {
 #if defined __WIN_MSVC__
@@ -41,7 +42,7 @@ void pyne::pyne_start() {
   NUC_DATA_PATH = std::string(tmppath);
 #endif
   return;
-};
+}
 
 
 
@@ -221,7 +222,7 @@ std::string pyne::replace_all_substrings(std::string s, std::string substr, std:
     n_found = s.find(substr);
   }
   return s;
-};
+}
 
 
 
@@ -278,7 +279,7 @@ std::string pyne::natural_naming(std::string name) {
     nat_name.insert(0, "_");
 
   return nat_name;
-};
+}
 
 
 //
@@ -288,21 +289,21 @@ std::string pyne::natural_naming(std::string name) {
 double pyne::slope(double x2, double y2, double x1, double y1) {
   // Finds the slope of a line.
   return (y2 - y1) / (x2 - x1);
-};
+}
 
 
 double pyne::solve_line(double x, double x2, double y2, double x1, double y1) {
   return (slope(x2,y2,x1,y1) * (x - x2)) + y2;
-};
+}
 
 
 double pyne::tanh(double x) {
   return std::tanh(x);
-};
+}
 
 double pyne::coth(double x) {
   return 1.0 / std::tanh(x);
-};
+}
 
 
 
@@ -334,10 +335,10 @@ bool pyne::file_exists(std::string strfilename) {
   }
 
   return(blnReturn);
-};
+}
 
 // Message Helpers
- 
+
 bool pyne::USE_WARNINGS = true;
 
 bool pyne::toggle_warnings(){
@@ -348,8 +349,8 @@ bool pyne::toggle_warnings(){
 void pyne::warning(std::string s){
   // Prints a warning message
   if (USE_WARNINGS){
-    std::cout << "\033[1;33m WARNING: \033[0m" << s << "\n"; 
-  }  
+    std::cout << "\033[1;33m WARNING: \033[0m" << s << "\n";
+  }
 }
 
 

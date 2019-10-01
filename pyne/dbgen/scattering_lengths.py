@@ -120,15 +120,15 @@ def make_scattering_lengths_table(nuc_data, build_dir=""):
     sl_array = parse_scattering_lengths(build_dir)
 
     # Open the HDF5 File
-    db = tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS)
+    db = tb.open_file(nuc_data, 'a', filters=BASIC_FILTERS)
 
     # Ensure that the appropriate file structure is present
     if not hasattr(db.root, 'neutron'):
         # Create neutron group
-        neutron_group = db.createGroup('/', 'neutron', 'Neutron Data')
+        neutron_group = db.create_group('/', 'neutron', 'Neutron Data')
 
     # Init the neutron fission product info table
-    sl_table = db.createTable('/neutron/', 'scattering_lengths', 
+    sl_table = db.create_table('/neutron/', 'scattering_lengths', 
                               np.empty(0, dtype=sl_dtype), 
                               'Neutron Scattering Lengths, b [cm], sigma [barns]', 
                               expectedrows=len(sl_array))
@@ -147,7 +147,7 @@ def make_scattering_lengths(args):
     nuc_data, build_dir = args.nuc_data, args.build_dir
 
     # Check that the table exists
-    with tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS) as f:
+    with tb.open_file(nuc_data, 'a', filters=BASIC_FILTERS) as f:
         if hasattr(f.root, 'neutron') and hasattr(f.root.neutron, 'scattering_lengths'):
             print("skipping scattering lengths data table creation; already exists.")
             return

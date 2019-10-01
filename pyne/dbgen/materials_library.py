@@ -156,7 +156,7 @@ def make_materials_library(args):
     """Controller function for adding materials library."""
     nuc_data = args.nuc_data
     if os.path.exists(nuc_data):
-        with tb.openFile(nuc_data, 'r') as f:
+        with tb.open_file(nuc_data, 'r') as f:
             if '/material_library' in f:
                 print("skipping materials library data table creation; already exists.")
                 return

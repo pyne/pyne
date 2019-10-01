@@ -1,0 +1,43 @@
+**Added:**
+
+* Function to convert unit to s in pyne/alara.py
+* Function to do float match for decay times
+* Add SourceParticle class in pyne/src/source_sampling.
+* Codes to read ALARA output file under subvoxel R2S condition
+* A function to build up a subvoxel_array from mesh and cell_mats information
+* A test function to test the process of reading ALARA output file
+* Test function for subvoxel with (N, 1) condition in test_mesh.py
+* Reshape the array when max_num_cells == 1
+
+
+**Changed:**
+
+* shape of IMeshTag when input value is a (N, 1) array
+* set tag as array rather than number
+* decaygen now gets the include dir based on the compiler path.
+* Build system now explitily looks for C++11 standard compatability.
+* Unit of e_bounds changed from eV to MeV
+* Change loop variables to be v for volume elements and e for energy groups (instead of i & j)
+* Use bias_mode instead of mode to allow for additional mode types in future
+* A parameter in test_alara.py, to test modified match method
+* Correct the wrong mode description comment in pyne/src/source_sampling.h
+* Change the particle_birth return value from std::vectot<double> to SourceParticle object
+* Some code clean up
+* Some clean up of white space
+
+
+**Removed:**
+
+* Code in mesh.py to reshpe a (N,1) to (N, ) array is no longer needed if PR #971 merged
+
+
+**Fixed:**
+
+* decaygen now can properly produce Clang assembly.
+* Build system would always download cram sources, even if they already existed.
+  This has been fixed.
+* ENDF error bounds bug that was preventing ``nuc_data_make`` from working.
+* NNDC no longer provides the ``mednew.dat`` data set. A fallback has been
+  supplied.
+
+

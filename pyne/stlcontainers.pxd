@@ -20,13 +20,13 @@ from cpython.ref cimport PyTypeObject, Py_INCREF, Py_XDECREF
 cimport numpy as np
 
 # Local imports
-cimport extra_types
+from pyne cimport extra_types
 
 cimport numpy as np
 
 
 # Cython Imports For Types
-cimport extra_types
+from pyne cimport extra_types
 from libcpp.vector cimport vector as cpp_vector
 from libcpp.string cimport string as std_string
 

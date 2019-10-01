@@ -13,17 +13,18 @@ USE invar
 USE solvar
 USE sct_step_kernel_module
 USE sct_module
+use precision_module, only: dp
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: g
 INTEGER :: xs, xe, ys, ye, zs, ze, incx, incy, incz, ord, nfy, nfz
 INTEGER :: i, j, k, t, u, v, m, n, cell
 INTEGER :: ix,iy,iz,jx,jy,jz,indx,oct,l,oct_mate
 
-REAL*8 :: fx(3)
-REAL*8, DIMENSION(3,nx) :: fy
-REAL*8, DIMENSION(3,nx, ny) :: fz
-REAL*8 :: b
-REAL*8 :: sig, mu, eta, xi, x, y, z, c, sgn 
+REAL(kind=dp) :: fx(3)
+REAL(kind=dp), DIMENSION(3,nx) :: fy
+REAL(kind=dp), DIMENSION(3,nx, ny) :: fz
+REAL(kind=dp) :: b
+REAL(kind=dp) :: sig, mu, eta, xi, x, y, z, c, sgn 
 
 ! data for sct algorithm
 integer(kind=1)              :: cell_tpe(nx,ny,nz)

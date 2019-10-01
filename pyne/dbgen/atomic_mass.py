@@ -119,10 +119,10 @@ def make_atomic_mass_table(nuc_data, build_dir=""):
     A = sorted(A.values(), key=lambda x: x[0])
 
     # Open the HDF5 File
-    kdb = tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS)
+    kdb = tb.open_file(nuc_data, 'a', filters=BASIC_FILTERS)
 
     # Make a new the table
-    Atable = kdb.createTable("/", "atomic_mass", atomic_mass_desc,
+    Atable = kdb.create_table("/", "atomic_mass", atomic_mass_desc,
                              "Atomic Mass Data [amu]", expectedrows=len(A))
     Atable.append(A)
 
@@ -138,7 +138,7 @@ def make_atomic_mass(args):
     nuc_data, build_dir = args.nuc_data, args.build_dir
 
     if os.path.exists(nuc_data):
-        with tb.openFile(nuc_data, 'r') as f:
+        with tb.open_file(nuc_data, 'r') as f:
             if hasattr(f.root, 'atomic_mass'):
                 print("skipping atomic mass data table creation; already exists.")
                 return

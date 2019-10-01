@@ -656,8 +656,6 @@ def test_map_str_vector_double():
     uismap = isinstance([1.0, -65.5555, 1.0, -65.5555], Mapping) 
     m['Aha'] = [42.42, 18, 42.42, 18]
     m['Take'] = [1.0, -65.5555, 1.0, -65.5555]
-    import pprint
-    pprint.pprint(m)
     assert_equal(len(m), 2)
     if uismap:
         for key, value in m['Take'].items():
@@ -711,8 +709,6 @@ def test_map_int_vector_double():
     uismap = isinstance([1.0, -65.5555, 1.0, -65.5555], Mapping) 
     m[1] = [42.42, 18, 42.42, 18]
     m[42] = [1.0, -65.5555, 1.0, -65.5555]
-    import pprint
-    pprint.pprint(m)
     assert_equal(len(m), 2)
     if uismap:
         for key, value in m[42].items():

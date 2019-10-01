@@ -10,9 +10,10 @@ SUBROUTINE check
 !-------------------------------------------------------------
 
 USE invar
+use precision_module, only: dp
 IMPLICIT NONE
 INTEGER :: n
-REAL*8, DIMENSION(apo) :: leng
+REAL(kind=dp), DIMENSION(apo) :: leng
 
 ! Before starting IF constructs, set up ordinate lengths to make sure they're 1 or less
 DO n = 1, apo

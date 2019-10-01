@@ -1,4 +1,3 @@
-
 # Cython imports
 from libcpp.utility cimport pair as cpp_pair
 from libcpp.string cimport string as std_string

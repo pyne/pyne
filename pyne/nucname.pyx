@@ -9,10 +9,10 @@ from cython.operator cimport preincrement as inc
 #from cython cimport pointer
 from libcpp.string cimport string as std_string
 
-# Python imports 
+# Python imports
 #from collections import Iterable
 
-# local imports 
+# local imports
 cimport pyne.cpp_utils
 cimport pyne.pyne_config
 import pyne.pyne_config
@@ -93,7 +93,7 @@ class NucTypeError(Exception):
     def __str__(self):
         msg = "Nuclide type not an int or str"
         if self.nuc is not None:
-            msg += ": " + repr(self.nuc) 
+            msg += ": " + repr(self.nuc)
         return msg
 
 
@@ -106,7 +106,7 @@ def isnuclide(nuc):
 
     Parameters
     ----------
-    nuc : int or str 
+    nuc : int or str
         Input nuclide(s).
 
     Returns
@@ -129,7 +129,7 @@ def iselement(nuc):
 
     Parameters
     ----------
-    nuc : int or str 
+    nuc : int or str
         Input element.
 
     Returns
@@ -172,12 +172,12 @@ def id(nuc):
         - LL (element symbol)
 
     For well-defined situations where you know ahead of time what format the
-    nuclide is in, you should use the various form_to_id() functions, rather 
+    nuclide is in, you should use the various form_to_id() functions, rather
     than the id() function which is meant to resolve possibly ambiquous cases.
 
     Parameters
     ----------
-    nuc : int or str 
+    nuc : int or str
         Input nuclide.
 
     Returns
@@ -197,18 +197,18 @@ def id(nuc):
 
 
 def name(nuc):
-    """Converts a nuclide to its name form ('Am242M'). The name() function 
-    first converts functions to id form using the id() function. Thus the 
+    """Converts a nuclide to its name form ('Am242M'). The name() function
+    first converts functions to id form using the id() function. Thus the
     form order resolution for id() also applies to here.
 
     Parameters
     ----------
-    nuc : int or str 
+    nuc : int or str
         Input nuclide.
 
     Returns
     -------
-    newnuc : str 
+    newnuc : str
         Output nuclide in name form.
 
     """
@@ -228,7 +228,7 @@ def znum(nuc):
 
     Parameters
     ----------
-    nuc : int or str 
+    nuc : int or str
         Input nuclide.
 
     Returns
@@ -252,7 +252,7 @@ def anum(nuc):
 
     Parameters
     ----------
-    nuc : int or str 
+    nuc : int or str
         Input nuclide.
 
     Returns
@@ -276,7 +276,7 @@ def snum(nuc):
 
     Parameters
     ----------
-    nuc : int or str 
+    nuc : int or str
         Input nuclide.
 
     Returns
@@ -296,16 +296,16 @@ def snum(nuc):
 
 
 def zzaaam(nuc):
-    """Converts a nuclide to its zzaaam form (952420). 
+    """Converts a nuclide to its zzaaam form (952420).
 
     Parameters
     ----------
-    nuc : int or str 
+    nuc : int or str
         Input nuclide.
 
     Returns
     -------
-    newnuc : int 
+    newnuc : int
         Output nuclide in zzaaam form.
 
     """
@@ -321,16 +321,16 @@ def zzaaam(nuc):
 
 def zzaaam_to_id(nuc):
     """Converts a nuclide directly from ZZAAAM form (952420) to
-    the canonical identifier form. 
+    the canonical identifier form.
 
     Parameters
     ----------
-    nuc : int or str 
+    nuc : int or str
         Input nuclide in ZZAAAM form.
 
     Returns
     -------
-    newnuc : int 
+    newnuc : int
         Output nuclide in identifier form.
 
     """
@@ -345,16 +345,16 @@ def zzaaam_to_id(nuc):
 
 
 def zzzaaa(nuc):
-    """Converts a nuclide to its zzzaaa form (95242). 
+    """Converts a nuclide to its zzzaaa form (95242).
 
     Parameters
     ----------
-    nuc : int or str 
+    nuc : int or str
         Input nuclide.
 
     Returns
     -------
-    newnuc : int 
+    newnuc : int
         Output nuclide in zzzaaa form.
 
     """
@@ -370,16 +370,16 @@ def zzzaaa(nuc):
 
 def zzzaaa_to_id(nuc):
     """Converts a nuclide directly from ZZZAAA form (95242) to
-    the canonical identifier form. 
+    the canonical identifier form.
 
     Parameters
     ----------
-    nuc : int or str 
+    nuc : int or str
         Input nuclide in ZZZAAA form.
 
     Returns
     -------
-    newnuc : int 
+    newnuc : int
         Output nuclide in identifier form.
 
     """
@@ -393,23 +393,23 @@ def zzzaaa_to_id(nuc):
 
 
 def mcnp(nuc):
-    """Converts a nuclide to its MCNP form (92636). 
+    """Converts a nuclide to its MCNP form (92636).
 
     Parameters
     ----------
-    nuc : int or str 
+    nuc : int or str
         Input nuclide.
 
     Returns
     -------
-    newnuc : int 
+    newnuc : int
         Output nuclide in MCNP form.
 
     Notes
     -----
-    Most metastables in this form add 300 + 100*m where 
+    Most metastables in this form add 300 + 100*m where
     m is the isomeric state (U-236m = 92636).  However,
-    MCNP special cases Am-242 and Am-242m by switching 
+    MCNP special cases Am-242 and Am-242m by switching
     the meaning. Thus Am-242m = 95242 and Am-242 = 95642.
 
     """
@@ -426,16 +426,16 @@ def mcnp(nuc):
 
 def mcnp_to_id(nuc):
     """Converts a nuclide directly from MCNP form (92636) to
-    the canonical identifier form. 
+    the canonical identifier form.
 
     Parameters
     ----------
-    nuc : int or str 
+    nuc : int or str
         Input nuclide in MCNP form.
 
     Returns
     -------
-    newnuc : int 
+    newnuc : int
         Output nuclide in identifier form.
 
     """
@@ -448,18 +448,61 @@ def mcnp_to_id(nuc):
         raise NucTypeError(nuc)
     return newnuc
 
+def openmc(nuc):
+    """Converts a nuclide to its OpenMC form (GND).
+
+    Parameters
+    ----------
+    nuc : int or str
+        Input nuclide.
+
+    Returns
+    -------
+    newnuc : str
+        Output nuclide in OpenMC form.
+
+
+    """
+
+    if isinstance(nuc, basestring):
+        nuc_bytes = nuc.encode()
+        newnuc = cpp_nucname.openmc(<char *> nuc_bytes)
+    elif isinstance(nuc, int):
+        newnuc = cpp_nucname.openmc(<int> nuc)
+    else:
+        raise NucTypeError(nuc)
+    return newnuc.decode()
+
+def openmc_to_id(nuc):
+    """Converts a nuclide directly from OpenMC form to
+    the canonical identifier form.
+
+    Parameters
+    ----------
+    nuc : str
+        Input nuclide in OpenMC form.
+
+    Returns
+    -------
+    newnuc : id
+        Output nuclide in identifier form.
+
+    """
+    nuc_bytes = nuc.encode()
+    newnuc = cpp_nucname.openmc_to_id(<char *> nuc_bytes)
+    return newnuc
 
 def fluka(nuc):
     """Converts a nuclide to its FLUKA name.
 
     Parameters
     ----------
-    nuc : int 
+    nuc : int
         Input nuclide.
 
     Returns
     -------
-    fluka_name : string 
+    fluka_name : string
         Output name in FLUKA form.
 
 
@@ -469,16 +512,16 @@ def fluka(nuc):
 
 
 def fluka_to_id(name):
-    """Converts a fluka name to the canonical identifier form. 
+    """Converts a fluka name to the canonical identifier form.
 
     Parameters
     ----------
-    name : str 
+    name : str
         Input name, expectedt to be one FLUKA knows
 
     Returns
     -------
-    newnuc : int 
+    newnuc : int
         Output nuclide in identifier form.
 
     """
@@ -488,16 +531,16 @@ def fluka_to_id(name):
 
 
 def zzllaaam(nuc):
-    """Converts a nuclide to its zzllaaam form (95-Am-241m). 
+    """Converts a nuclide to its zzllaaam form (95-Am-241m).
 
     Parameters
     ----------
-    nuc : int or str 
+    nuc : int or str
         Input nuclide.
 
     Returns
     -------
-    newnuc : str 
+    newnuc : str
         Output nuclide in zzllaaam form.
 
     """
@@ -513,16 +556,16 @@ def zzllaaam(nuc):
 
 def zzllaaam_to_id(nuc):
     """Converts a nuclide directly from ZZLLAAAM form (95-Am-241m) to
-    the canonical identifier form. 
+    the canonical identifier form.
 
     Parameters
     ----------
-    nuc : int or str 
+    nuc : int or str
         Input nuclide in ZZLLAAAM form.
 
     Returns
     -------
-    newnuc : int 
+    newnuc : int
         Output nuclide in identifier form.
 
     """
@@ -536,16 +579,16 @@ def zzllaaam_to_id(nuc):
 
 
 def serpent(nuc):
-    """Converts a nuclide to its Serepnt form ('Am-242m'). 
+    """Converts a nuclide to its Serepnt form ('Am-242m').
 
     Parameters
     ----------
-    nuc : int or str 
+    nuc : int or str
         Input nuclide.
 
     Returns
     -------
-    newnuc : str 
+    newnuc : str
         Output nuclide in serpent form.
 
     """
@@ -564,16 +607,16 @@ def serpent(nuc):
 
 def serpent_to_id(nuc):
     """Converts a nuclide directly from Serpent form ('Am-242m') to
-    the canonical identifier form. 
+    the canonical identifier form.
 
     Parameters
     ----------
-    nuc : int or str 
+    nuc : int or str
         Input nuclide in Serpent form.
 
     Returns
     -------
-    newnuc : int 
+    newnuc : int
         Output nuclide in identifier form.
 
     """
@@ -592,12 +635,12 @@ def nist(nuc):
 
     Parameters
     ----------
-    nuc : int or str 
+    nuc : int or str
         Input nuclide.
 
     Returns
     -------
-    newnuc : str 
+    newnuc : str
         Output nuclide in nist form.
 
     """
@@ -616,16 +659,16 @@ def nist(nuc):
 
 def nist_to_id(nuc):
     """Converts a nuclide directly from NIST form ('242Am') to
-    the canonical identifier form. 
+    the canonical identifier form.
 
     Parameters
     ----------
-    nuc : int or str 
+    nuc : int or str
         Input nuclide in NIST form.
 
     Returns
     -------
-    newnuc : int 
+    newnuc : int
         Output nuclide in identifier form.
 
     """
@@ -640,16 +683,16 @@ def nist_to_id(nuc):
 
 
 def cinder(nuc):
-    """Converts a nuclide to its CINDER (aaazzzm) form (2420951). 
+    """Converts a nuclide to its CINDER (aaazzzm) form (2420951).
 
     Parameters
     ----------
-    nuc : int or str 
+    nuc : int or str
         Input nuclide.
 
     Returns
     -------
-    newnuc : int 
+    newnuc : int
         Output nuclide in CINDER (aaazzzm) form.
 
     """
@@ -665,16 +708,16 @@ def cinder(nuc):
 
 def cinder_to_id(nuc):
     """Converts a nuclide directly from Cinder form (2420951) to
-    the canonical identifier form. 
+    the canonical identifier form.
 
     Parameters
     ----------
-    nuc : int or str 
+    nuc : int or str
         Input nuclide in Cinder form.
 
     Returns
     -------
-    newnuc : int 
+    newnuc : int
         Output nuclide in identifier form.
 
     """
@@ -688,16 +731,16 @@ def cinder_to_id(nuc):
 
 
 def alara(nuc):
-    """Converts a nuclide to its ALARA form ('am:242'). 
+    """Converts a nuclide to its ALARA form ('am:242').
 
     Parameters
     ----------
-    nuc : int or str 
+    nuc : int or str
         Input nuclide.
 
     Returns
     -------
-    newnuc : str 
+    newnuc : str
         Output nuclide in name form.
 
     """
@@ -716,16 +759,16 @@ def alara(nuc):
 
 def alara_to_id(nuc):
     """Converts a nuclide directly from ALARA form ('am:242') to
-    the canonical identifier form. 
+    the canonical identifier form.
 
     Parameters
     ----------
-    nuc : int or str 
+    nuc : int or str
         Input nuclide in ALARA form.
 
     Returns
     -------
-    newnuc : int 
+    newnuc : int
         Output nuclide in identifier form.
 
     """
@@ -740,16 +783,16 @@ def alara_to_id(nuc):
 
 
 def sza(nuc):
-    """Converts a nuclide to its SZA form (SSSZZZAAA). 
+    """Converts a nuclide to its SZA form (SSSZZZAAA).
 
     Parameters
     ----------
-    nuc : int or str 
+    nuc : int or str
         Input nuclide.
 
     Returns
     -------
-    newnuc : int 
+    newnuc : int
         Output nuclide in SZA form.
 
     """
@@ -765,16 +808,16 @@ def sza(nuc):
 
 def sza_to_id(nuc):
     """Converts a nuclide directly from SZA form (SSSZZZAAA) to
-    the canonical identifier form. 
+    the canonical identifier form.
 
     Parameters
     ----------
-    nuc : int or str 
+    nuc : int or str
         Input nuclide in SZA form.
 
     Returns
     -------
-    newnuc : int 
+    newnuc : int
         Output nuclide in identifier form.
 
     """
@@ -789,11 +832,11 @@ def sza_to_id(nuc):
 
 
 def groundstate(nuc):
-    """Converts a nuclide to its Groundstate form. 
+    """Converts a nuclide to its Groundstate form.
 
     Parameters
     ----------
-    nuc : int or str 
+    nuc : int or str
         Input nuclide.
 
     Returns
@@ -815,7 +858,7 @@ def groundstate(nuc):
 def state_id_to_id(state):
     """
     Converts a ENSDF state id to a PyNE nuc_id
-    
+
     Parameters
     ----------
     nuc : int
@@ -823,21 +866,24 @@ def state_id_to_id(state):
 
     Returns
     -------
-    newnuc : int
-        Output nuclide in nuc_id form.
+    newnuc : int or None
+        Output nuclide in nuc_id form. If the cooresponding value cannot be
+        found, None is returned.
 
     """
     if isinstance(state, int) or isinstance(state, long):
         newnuc = cpp_nucname.state_id_to_id(<int> state)
     else:
         raise NucTypeError(state)
+    if newnuc < 0:
+        newnuc = None
     return newnuc
 
 
 def id_to_state_id(nuc):
     """
     Converts a ENSDF state id to a PyNE nuc_id
-    
+
     Parameters
     ----------
     nuc : int
@@ -845,15 +891,19 @@ def id_to_state_id(nuc):
 
     Returns
     -------
-    newnuc : int
-        Output nuclide in nuc_id form.
+    newnuc : int or None
+        Output nuclide in nuc_id form. If the cooresponding value cannot be
+        found, None is returned.
 
     """
     if isinstance(nuc, int) or isinstance(nuc, long):
         newnuc = cpp_nucname.id_to_state_id(<int> nuc)
     else:
         raise NucTypeError(nuc)
+    if newnuc < 0:
+        newnuc = None
     return newnuc
+
 
 def ensdf_to_id(nuc):
     """

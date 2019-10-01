@@ -191,8 +191,8 @@ steps for the MAGIC method. [2]
    section data and a high energy cut-off, corresponding to a mean-free path no 
    greater than the mesh voxel size, should be used.
 
-2. Process the resulting meshtally data by normalizing the fluz to have a value 
-   of 0.5 in the source (or highest) region. Use the normilized flux to create
+2. Process the resulting meshtally data by normalizing the flux to have a value 
+   of 0.5 in the source (or highest) region. Use the normalized flux to create
    a new weight window file to be used for MCNP.
 
 3. Modify the original MCNP input to use the generated weight window file and 

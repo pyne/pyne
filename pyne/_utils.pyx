@@ -164,6 +164,41 @@ def fromendf_tok(s):
         i += 1
     return cdata
 
+def fromendl_tok(s, num_fields):
+    """A replacement for numpy.fromstring().
+
+    Parameters:
+    -----------
+    s : str
+        String of data, consisting of complete lines of ENDL data.
+    num_fields : int
+        Number of fields in each line of the ENDL data
+
+    Returns:
+    --------
+    data : ndarray, float64
+        Will return a num_fields-dimensional float64 array.
+    """
+    cdef char * cs
+    if isinstance(s, str):
+        s = s.encode()
+    cs = s
+    cdef int i, num_entries, num_lines, line_length
+    cdef char entry[12]
+    cdef long pos = 0
+    cdef np.ndarray[np.float64_t, ndim=1] cdata
+    i = 0
+    line_length = num_fields*11+1
+    num_lines = len(cs)//line_length
+    num_entries = num_fields*num_lines
+    cdata = np.empty(num_entries, dtype=np.float64)
+    while i < num_entries:
+        pos = (i%num_fields)*11 + i//num_fields * line_length
+        strncpy(entry, cs+pos, 11)
+        cdata[i] = pyne.cpp_utils.endftod(entry)
+        i += 1
+    return cdata.reshape(num_lines, num_fields)
+
 def use_warnings():
     """Displays if warnings are off or on
     """    

@@ -40,7 +40,7 @@ PyNE has the following dependencies:
    #. `Jinja2 <http://jinja.pocoo.org/>`_
 
 Optional Depenendencies:
-   #. `MOAB <http://trac.mcs.anl.gov/projects/ITAPS/wiki/MOAB>`_
+   #. `MOAB <https://press3.mcs.anl.gov/sigma/moab-library>`_
    #. `PyTAPS <https://pythonhosted.org/PyTAPS/index.html>`_
 
 Additionally, building the documentation requires the following:
@@ -49,16 +49,19 @@ Additionally, building the documentation requires the following:
    #. `sphinxcontrib-bibtex <https://pypi.python.org/pypi/sphinxcontrib-bibtex/>`_
    #. `PrettyTable <https://code.google.com/p/prettytable/>`_
    #. `numpydoc <https://pypi.python.org/pypi/numpydoc>`_
+   #. `jupyter <http://jupyter.org/>`_
 
 Most of the dependencies are readily available through package managers. 
 
 ------
 Binary
 ------
-Binary distributions of the latest release (0.4) for mac and linux (64-bit) 
+Binary distributions of the latest release for mac and linux (64-bit) 
 using the conda package manager can be installed by running the command::
 
-    conda install -c https://conda.binstar.org/pyne pyne
+    conda install -c conda-forge pyne
+
+where VERSION should be replaced with the version number to be installed.
 
 A windows 32-bit binary is also available on conda via the same command but
 it is highly experimental and likely broken. Conda binaries do not have 
@@ -111,10 +114,12 @@ PyNE has known issues on the following platforms
 Conda Install Instructions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 After installing anaconda or miniconda from 
-`the Continuum downloads page <http://continuum.io/downloads>`_,
+`the downloads page <https://www.anaconda.com/distribution/#download-section>`_,
 in a new terminal run the following conda install command::
 
-    conda install -c https://conda.binstar.org/pyne pyne
+    conda install -c conda-forge pyne
+
+where VERSION should be replaced with the version number to be installed.
 
 If you have any issues, please let us know.
 
@@ -123,7 +128,7 @@ Conda Build Instructions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 On mac and linux PyNE can be installed via the package manager conda. 
 After installing anaconda or miniconda from 
-`the Continuum downloads page <http://continuum.io/downloads>`_ 
+`the downloads page <https://www.anaconda.com/distribution/#download-section>`_ 
 add conda's binary directory to your bash profile by adding::
 
     export PATH=/path/to/anaconda/bin:$PATH
@@ -197,17 +202,17 @@ Once those lines have been added, run the following command before running
     source ~/.bashrc
 
 
-.. _zip: https://github.com/pyne/pyne/zipball/0.4
-.. _tar: https://github.com/pyne/pyne/tarball/0.4
+.. _zip: https://github.com/pyne/pyne/zipball/0.5.1
+.. _tar: https://github.com/pyne/pyne/tarball/0.5.1
 
 
 ^^^^^^^^^^^^^^^^^^^^^^^^^
-Ubuntu 14.04 Build script
+Ubuntu Build Scripts
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-A script for installing PyNE and all its dependencies from scratch on Ubuntu
-14.04 is found `here
-<https://github.com/pyne/install_scripts/blob/master/ubuntu_14.04.sh>`_
+Scripts for installing PyNE and all its dependencies from scratch on Ubuntu
+14.04 - 15.04 are found `here
+<https://github.com/pyne/install_scripts/>`_.
 
 .. install-end
 

@@ -1,0 +1,2 @@
+Total photon source intensities (p/s)
+1 h: 396029783.149

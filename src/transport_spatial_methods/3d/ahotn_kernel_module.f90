@@ -14,14 +14,16 @@ module kernel_module
 !*********************************************************
 use invar
 use solvar
+use precision_module, only: dp
+
 implicit none
 
 ! sp_weights saves Pade coefficients for the computation of the AHOTN
 ! spatial weights for AHOTN/LL and AHOTN/LN solvers
-real*8 :: sp_wt0(4,0:1000)
-real*8 :: sp_wt1(4,0:1000)
+real(kind=dp) :: sp_wt0(4,0:1000)
+real(kind=dp) :: sp_wt1(4,0:1000)
 ! spatial weights for AHOTN/NEFD solver
-real(kind=8) :: sp_wts(4,0:1000)
+real(kind=dp) :: sp_wts(4,0:1000)
 
 contains
 
@@ -38,9 +40,9 @@ subroutine read_sp_wts_ahotn_l
 end subroutine
 
 function spwt0(e)
-  real*8 :: spwt0
-  real*8 :: e
-  real*8 :: c(4)
+  real(kind=dp) :: spwt0
+  real(kind=dp) :: e
+  real(kind=dp) :: c(4)
   integer :: pos
   pos=min(idnint(10.0d0*e),1000)
   c=sp_wt0(:,pos)
@@ -48,9 +50,9 @@ function spwt0(e)
 end function
 
 function spwt1(e)
-  real*8 :: spwt1
-  real*8 :: e
-  real*8 :: c(4)
+  real(kind=dp) :: spwt1
+  real(kind=dp) :: e
+  real(kind=dp) :: c(4)
   integer :: pos
   pos=min(idnint(10.0d0*e),1000)
   c=sp_wt1(:,pos)
@@ -103,9 +105,9 @@ function spwt(e)
 ! the spatial weight. 
 !
 !*********************************************************
-  real*8 :: spwt
-  real*8 :: e
-  real*8 :: c(4)
+  real(kind=dp) :: spwt
+  real(kind=dp) :: e
+  real(kind=dp) :: c(4)
   integer :: pos
   pos=min(idnint(10.0d0*e),1000)
   c=sp_wts(:,pos)
@@ -278,9 +280,15 @@ subroutine ahotn_ll_kernel(x,y,z,mu,eta,xi,sgm,sge,sgx,sig,c,inflow_x,inflow_y,i
 
    ! Define a11 through a44 
    a11 = 1.0d0 + ex0 + ey0 + ez0 
-   a22 = 1.0d0 + 2.0d0*ez*(dzx+dzy) + 2.0d0*gamma1*( (ex*ez-36.0d0*alpha1)*dxz/ex + (ey*ez-36.0d0*beta1 )*dyz/ey ) + 3.0d0*gamma0*ez0 
-   a33 = 1.0d0 + 2.0d0*ey*(dyx+dyz) + 2.0d0*beta1 *( (ex*ey-36.0d0*alpha1)*dxy/ex + (ey*ez-36.0d0*gamma1)*dzy/ez ) + 3.0d0*beta0 *ey0 
-   a44 = 1.0d0 + 2.0d0*ex*(dxz+dxy) + 2.0d0*alpha1*( (ex*ey-36.0d0*beta1 )*dyx/ey + (ex*ez-36.0d0*gamma1)*dzx/ez ) + 3.0d0*alpha0*ex0
+   a22 = 1.0d0 + 2.0d0*ez*(dzx+dzy) &
+         + 2.0d0*gamma1*((ex*ez-36.0d0*alpha1)*dxz/ex + (ey*ez-36.0d0*beta1)*dyz/ey) &
+         + 3.0d0*gamma0*ez0 
+   a33 = 1.0d0 + 2.0d0*ey*(dyx+dyz) &
+         + 2.0d0*beta1*((ex*ey-36.0d0*alpha1)*dxy/ex + (ey*ez-36.0d0*gamma1)*dzy/ez) &
+         + 3.0d0*beta0*ey0 
+   a44 = 1.0d0 + 2.0d0*ex*(dxz+dxy) &
+         + 2.0d0*alpha1*((ex*ey-36.0d0*beta1)*dyx/ey + (ex*ez-36.0d0*gamma1)*dzx/ez) &
+         + 3.0d0*alpha0*ex0
    a21 = sgx*(ez0-2.0d0/ez) 
    a31 = sge*(ey0-2.0d0/ey)
    a41 = sgm*(ex0-2.0d0/ex)

@@ -290,5 +290,5 @@ Solver Assumptions
 References
 *************************************
 
-.. [Schunert] SCHUNERT, SEBASTIAN. Development of a Quantitative Decision Metric for Selecting the Most Suitable Discretization Method for S N Transport Problems. (Under the direction of Yousry Y. Azmy.)
-.. [Hesthaven] HESTHAVEN, J.S. and WARBURTON, T. Nodal Discontinuous Galerkin Methods.
+.. [Schunert] SCHUNERT, SEBASTIAN. Development of a Quantitative Decision Metric for Selecting the Most Suitable Discretization Method for S N Transport Problems. (Under the direction of Yousry Y. Azmy.) http://repository.lib.ncsu.edu/ir/bitstream/1840.16/9048/1/etd.pdf
+.. [Hesthaven] HESTHAVEN, J.S. and WARBURTON, T. Nodal Discontinuous Galerkin Methods. http://www.springer.com/us/book/9780387720654

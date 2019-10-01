@@ -1,0 +1,140 @@
+228TH    ADOPTED LEVELS, GAMMAS                                  97NDS    199709
+                                                                                
+228TH    228AC B- DECAY                1987DA28                  97NDS    199704
+                                                                                
+228TH    228PA EC DECAY                1995BA42                  97NDS    199704
+                                                                                
+228TH    232U A DECAY                  1977KU15,1986LOZT         97NDS    199704
+228TH  H TYP=FUL$AUT=AGDA ARTNA-COHEN$CIT=NDS 80, 723 (1997)$CUT=1-Nov-1996$    
+232U   P 0            0+               68.9 Y    4               5413.63  9     
+228TH  N 0.00259      0.00259  1                                                
+228TH PN                                                                     2  
+228TH cN NR        From absolute I|g measurements of 1984Ge07, 1986LoZT         
+228TH cL E,J       From adopted levels                                          
+228TH cA           Q(|a)({+232}U)=5413.63 {I9} corrected value from G. Audi,    
+228THxcA Aug. 1996.                                                             
+228TH cA E         1972Go33, 1971So15, 1966Ba49, 1963Le17. Calculated values    
+228TH2cA are from Q(|a) and E(level) in {+228}Th                                
+228TH cA IA        Calculated from I(|g+ce) balance in level scheme, unless     
+228TH2cA otherwise noted. The values differ                                     
+228TH3cA substantially from the direct I|a measurements of 1966Ba49.            
+228TH cA HF        HF(5320.12|a)=1.00 yields r{-0}({+228}Th)=1.5289 {I3}        
+228TH cA E(B)      From 1991Ry01. Recommended E|a=5262.36 {I9} in 1991Ry01 is a 
+228TH2cA misprint, see originally published E|a and adjustment.                 
+228TH cA IA(F)     From I(A{-0})/I|a(58)=0.463 {I5} (weighted average from      
+228TH2cA 1955As28, 1965Be15, 1966Ba49, 1971So15) and I(A{-0})+I(a(58)=99.70 {I2}
+228TH cG E,RI$From 1977Ku15, except as noted. (I|g of 1977Ku15 are normalized   
+228TH2cG to 26.33 for the 129|g). Others: 1963Le17, 1965Be15, 1966Ah02,         
+228THxcG 1984Ge07.                                                              
+228TH cG M         From adopted gammas, unless otherwise noted                  
+228TH cG RI(A)     From 1986LoZT, 1984Ge07                                      
+228TH cG M(D)      1977Ku15 quote A. Plochocki, thesis (1974) as establishing   
+228TH2cG the multipolarity E0+E2; however, no published information is          
+228TH3cG available on this. 1977Ku15 give I|g=I(|g+ce) in their level scheme,   
+228TH4cG suggesting that the E0 admixture may not be significant for intensity  
+228TH5cG calculations.                                                          
+228TH  L 0.0         0+                                                         
+228TH  A 5320.12   14 68.15  23 1.00                                        B   
+228TH2 A FLAG=F                                                                 
+228TH  L 57.762    5 2+                 0.406 NS 7                              
+228TH cL T         weighted average of 0.409 ns {I10} (1970To08) and 0.402 ns   
+228TH2cL {I10} (1965Ne03); other: 0.40 ns {I3} (1960Be25)                       
+228TH  A 5263.36   9  31.55  230.992   12                                   B   
+228TH2 A FLAG=F                                                                 
+228TH  G 57.78     5 77.2    7  E2                       156                A   
+228THS G               LC=  114   $MC=   31.1   $NC+=  11.4   $                 
+228TH cG CC        158 {I7} (1968Du06)                                          
+228TH cG M         L1:L2:L3=3.55 {I25}:115 {I4}:100 (1966Ha01);                 
+228TH2cG M1:M2:M3=5.3 {I13}:107 {I8}:100, M3/L3=0.32 {I3} (1966Ra15); theory:   
+228TH2cG L1:L2:L3=3.90:119:100, M1:M2:M3=4.35:114:100, M3/L3=0.276              
+228TH  L 186.828   5 4+                 0.164 NS 4                              
+228TH cL T         weighted average of 0.169 ns {I7} (1970To08), 0.161 ns {I5}  
+228TH2cL (1965Ne03)                                                             
+228TH  A 5139.0    20 0.30   2  17.5   12                                       
+228TH cA IA        weighted average from 1955As28, 1965Be15, 1966Ba49, 1971So15.
+228TH  G 129.08    5  26.33  15 E2                        3.81              A   
+228THS G KC=  0.269   $LC=   2.57   $MC=  0.706   $NC+=  0.263   $              
+228TH  L 328.003   5  1-                                                        
+228TH  A 4997.94   CA 0.00616 8 111    2                                        
+WARNING: Non-numeric DE(alpha)= CA
+228TH cA IA        other: 0.0029 {I2} (1966Ba49)                                
+228TH  G 270.2     2  1.220  19 E1                      0.0474              A   
+228THS G KC= 0.0379   $LC=0.00722   $MC=0.00173   $NC+=0.00061   $              
+228TH  G 327.9     2  1.093  23 E1                      0.0308              A   
+228THS G KC=0.02472   $LC=0.00458   $MC=0.00110   $NC+=0.00039   $              
+228TH  L 378.178   11 6+                                                        
+228TH  A 4948.63   CA 5.1E-5 5 6.4E+3  6                                        
+WARNING: Non-numeric DE(alpha)= CA
+228TH cA IA$other: 0.00017 {I3} (1966Ba49)                                      
+228TH  G 191.0     2  0.012  1  E2                       0.791                  
+228THS G KC= 0.1741   $LC=  0.453   $MC= 0.1237   $NC+= 0.0457   $              
+228TH  L 396.085   5  3-                                                        
+228TH  A 4931.04   CA 4.8E-5 4 5.2E+3  5                                        
+WARNING: Non-numeric DE(alpha)= CA
+228TH cA IA$other: 0.00021 {I3} (1966Ba49)                                      
+228TH  G 209.5     5  0.0041 10 E1                      0.0856                  
+228THS G KC= 0.0676   $LC=0.01341   $MC=0.00323   $NC+=0.00114   $              
+228TH  G 338.1     2  0.0143 5  E1                      0.0288                  
+228THS G KC=0.02314   $LC=0.00427   $MC=0.00102   $NC+=0.00036   $              
+228TH  L 519.199   6  5-                                                        
+228TH  A 4810.04   CA 5.6E-5 3  680    40                                       
+WARNING: Non-numeric DE(alpha)= CA
+228TH  G 141.0     5  0.0012 5  (E1)                    0.220                   
+228THS G KC= 0.1711   $LC= 0.0367   $MC=0.00883   $NC+=0.00313   $              
+228TH  G 332.3     3  0.019  1  (E1)                    0.0299                  
+228THS G KC=0.02402   $LC=0.00444   $MC=0.00106   $NC+=0.00038   $              
+228TH  L 831.832   11 0+                                                        
+228TH  A 4502.80   CA 2.1E-5 2 10.6    11                                       
+WARNING: Non-numeric DE(alpha)= CA
+228TH cA IA$other: 0.000024 {I7} (1963Le17)                                     
+228TH  G 503.6     3  0.0056 3  (E1)                   0.0125                   
+228THS G KC=0.01015   $LC=0.00179   $                                           
+228TH  G 773.4     5  0.0018 3  [E2]                   0.0167                   
+228THS G KC=0.01218   $LC=0.00340   $                                           
+228TH  G 831          0.0003 LT E0                               8E-4     4     
+228TH cG M,TI      from 1963Le17                                                
+228TH  L 874.48    3  2+                                                        
+228TH  A 4460.94   CA 3.9E-6 9  27     8                                        
+WARNING: Non-numeric DE(alpha)= CA
+228TH cA IA$includes additional weak |g's at 688.1, 816.7 and 874.4 keV,        
+228TH2cA from adopted levels. I|a=3.2|*10{+-6} {I9} without inclusion of these  
+228TH3cA additional |g's                                                        
+228TH  G 478       1 0.00055 21 [E1]                   0.0139                   
+228THS G KC=0.01127   $LC=0.00199   $MC=0.00047   $NC+=0.00017   $              
+228TH  G 547       1 0.00039 24 [E1]                   0.0106                   
+228THS G KC=0.00863   $LC=0.00150   $                                           
+228TH  G 817       1 0.0003  AP [M1+E2]                0.038  23            D   
+                                                                                
+
+
+===================================
+ Z:  92. A: 232. DATE RUN 06-Oct-2015 ALPHAD Version 2.0a [06-Nov-2006]
+-----------------------------------
+Q ALPHA     E TOTAL      ALPHA HALF LIFE   RADIUS (1E-13 cm)  RZERO
+5.41363 9   5.44980 9    2.517E4 D 15      9.3399 18          1.52885  29
+                                                    R0(T+DT): 1.52856 -28
+                                                    R0(T-DT): 1.52913  29
+                                                    R0(Q+DQ): 1.52880  -5
+                                                    R0(Q-DQ): 1.52890   5
+
+    TOTAL HALF LIFE   ALPHA BRANCH
+    68.9 Y 4          1.000   
+THIS RADIUS ADJUSTED
+K
+ENERGY LEVEL  ALPHA ENERGY   ABUNDANCE      CALC. HALF LIFE  HINDRANCE FACTOR
+
+0.000         5320.12 14     0.6815 23      3.693E4 25       1.000   
+57.762 5      5263.36 9      0.3155 23      8.038E4 9        0.992 10
+186.828 5     5139.0 20      0.00300 20     4.796E5 6        17.5 12
+328.003 5     4998           6.16E-5 8      3.664E6 4        111.5 16
+378.178 11    4949           5.1E-7 5       7.710E6 9        6.40E3 63
+396.085 5     4931           4.8E-7 4       1.0082E7 12      5.20E3 44
+519.199 6     4810           5.6E-7 3       6.641E7 8        677 37
+831.832 11    4503           2.10E-7 20     1.1261E10 14     10.6 11
+874.48 3      4461           3.9E-8 9       2.365E10 3       27 7 
+228TH    226RA(A,2NG)                  1993AC02,1986SC18         97NDS    199704
+                                                                                
+228TH    230TH(P,T)                    1972MA15                  97NDS    199704
+                                                                                
+228TH    230TH(A,A'2NG)                1984HA21                  97NDS    199704
+                                                                                

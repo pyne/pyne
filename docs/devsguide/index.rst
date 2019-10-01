@@ -15,6 +15,7 @@ work builds upon past work well.
     :maxdepth: 1
 
     style_guide
+    new_devs_guide
     testing
     doc
     release

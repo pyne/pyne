@@ -1,0 +1,22 @@
+ ENTER ATOMIC NUMBER(Z) and NEUTRON NUMBER(N) FOR ALPHA DAUGHTER NUCLEUS
+
+
+
+=================================================================
+           CALCULATION FOR RADIUS PARAMETER
+=================================================================
+
+    Alpha Parent               Daughter
+  ================         ================    ================
+  Ele  Z   N   A            Ele   Z   N   A       Radius (fm)
+  ----------------         ----------------    ----------------
+  Ra  88 115  203           Rn   86 113  199      1.5665 0.0520
+
+-----------------------------------------------------------------
+
+ ATTENTION!:One of the input even-even radius,used in these calculations,has asymmetric uncertainity (1998Ak04) and larger uncertainity has been considered
+
+
+ Do you wish to calculate radius parameter for any other nuclide?
+
+ Type yes or YES to calculate again and no or NO to exit

@@ -1,0 +1,5 @@
+**Changed:**
+
+* Downloading files now uses null SSL context.
+
+

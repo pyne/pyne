@@ -38,6 +38,7 @@ cdef extern from "material.h" namespace "pyne":
 
         # Methods
         void norm_comp() except +
+        std_string openmc(std_string) except +
         std_string mcnp(std_string) except +
         std_string fluka(int, std_string) except +
         bool not_fluka_builtin(std_string) except +
@@ -70,7 +71,7 @@ cdef extern from "material.h" namespace "pyne":
         map[int, double] dose_per_g(std_string, int) except +
         double molecular_mass() except +
         double molecular_mass(double) except +
-        Material expand_elements() except +
+        Material expand_elements(std_set[int]) except +
         Material collapse_elements(std_set[int]) except +
         double mass_density() except +
         double mass_density(double) except +
@@ -98,7 +99,7 @@ cdef extern from "material.h" namespace "pyne":
         # Atom frac member functions
         map[int, double] to_atom_frac() except +
         void from_atom_frac(map[int, double]) except +
-        
+
         map[int, double] to_atom_dens() except +
 
 
@@ -107,6 +108,8 @@ cdef extern from "material.h" namespace "pyne":
         vector[pair[double, double]] photons(bool) except +
 
         Material decay(double) except +
+        Material cram(vector[double]) except +
+        Material cram(vector[double], int) except +
 
         # Operator Overloads
         Material operator+(double) except +

@@ -125,6 +125,7 @@ def test_nds_fpyield():
 def test_half_life():
     assert_equal(data.half_life('H1'), np.inf)
     assert_equal(data.half_life(922350001), 1560.0)
+    assert_equal(data.half_life('Eu151'), np.inf)
 
 
 def test_decay_const():
@@ -136,17 +137,25 @@ def test_branch_ratio():
     assert_equal(data.branch_ratio('H1', 'H1'), 1.0)
     assert_equal(data.branch_ratio(922350001, 922350000), 1.0)
     assert_equal(data.branch_ratio(922350001, 922360000), 0.0)
-    assert_equal(data.branch_ratio(611460000, 621460000), 0.34)
+    assert_equal(data.branch_ratio(611460000, 621460000), 0.34299999999999997)
 
     children = data.decay_children('U235')
     for child in children:
         obs = data.branch_ratio('U235', child)
         assert_true(obs >= 0.0 and obs <= 1.0)
 
+    # There was a bug with metastable ids being dropped prematurely,
+    # which would then lead to the branch ratio for the ground state being reported
+    # Obviously, this was bad, so here is a test.
+    assert_equal(data.branch_ratio('Se86', 'Br86M'), 0.0)
+
+    # Not all isomeric transitions have a 100% branch ratio
+    assert_equal(data.branch_ratio(932400001, 932400000), 0.0012)
+
 
 def test_state_energy():
     assert_equal(data.state_energy('H1'), 0.0)
-    assert_equal(data.state_energy(922350001), 7.65e-5)
+    assert_equal(data.state_energy(922350001), 7.6e-5)
 
 
 def test_decay_children():
@@ -189,6 +198,10 @@ def test_constants():
 
 def test_metastable_id():
     assert_equal(data.metastable_id(430990000, 1), 430990002)
+    assert_equal(data.metastable_id(310720000, 1), 310720002)
+    assert_equal(data.metastable_id(451080000, 1), 451080004)
+    assert_equal(data.metastable_id(611360000, 0), 611360000)
+    assert_equal(data.metastable_id(611360000, 1), 611360001)
 
 
 def test_decay_half_life():
@@ -235,7 +248,7 @@ def test_gamma_energy():
 
 
 def test_gamma_energy_byen():
-    npt.assert_equal(data.gamma_energy_byen(103.5, .05), 
+    npt.assert_equal(data.gamma_energy_byen(103.5, .05),
                      [(103.5, 0.4),
                       (103.5, np.nan),
                       (103.5, 0.1),
@@ -245,7 +258,6 @@ def test_gamma_energy_byen():
                       (103.5, np.nan),
                       (103.519, 0.004),
                       (103.519, 0.004),
-                      (103.528, 0.019),
                       (103.54, 0.08)])
 
 
@@ -259,16 +271,16 @@ def test_gamma_parent_child():
      (982520000, 521320000),
      (511320000, 521320000),
      (511320001, 521320000),
-     (751800000, 741800000),
      (671700000, 681700000)])
 
 def test_gamma_child_byen():
-    assert_equal(data.gamma_child_byen(103.5,.1),[391020000, 521320000, 
-                 731720000, 791870000, 791870000, 832120000, 832120000, 
+    assert_equal(data.gamma_child_byen(103.5,.1),[391020000, 521320000,
+                 731720000, 791870000, 791870000, 832120000, 832120000,
                  922380000, 982500000, 801910000, 370780000, 691520000,
-                 771860000, 882210000, 922380000, 521320000, 521320000, 
-                 521320000, 741800000, 681700000, 591330000, 591330000, 
-                 741800000, 792000000, 872210000, 611560000, 1002560000])
+                 771860000, 882210000, 922380000, 521320000, 521320000,
+                 521320000, 681700000, 741800000, 741800000, 591330000,
+                 591330000, 741800000, 792000000, 872210000, 611560000,
+                 1002560000])
 
 def test_gamma_child_byparent():
     assert_equal(data.gamma_child_byparent(551370000), [561370000, 561370000])
@@ -299,7 +311,7 @@ def test_gamma_from_to_byen():
      (641500021, 641500006),
      (390990016, 390990005),
      (822040062, 822040024),
-     (902290055, 902290000),
+     (902290055, 902290001),
      (400880011, 400880004),
      (400880011, 400880004),
      (551310023, 551310009),
@@ -315,7 +327,8 @@ def test_gamma_from_to_byen():
      (621540026, 621540006),
      (781810026, 781810000),
      (791930069, 791930033),
-     (541390033, 541390028)])
+     (431060030, 431060027),
+     ])
 
 
 def test_gamma_parent():
@@ -377,14 +390,14 @@ def test_alpha_child_byparent():
     assert_equal(data.alpha_child_byparent(952410000),
                  [932370047, 932370043, 932370041, 932370038, 932370034,
                   932370033, 932370032, 932370031, 932370028, 932370027,
-                  932370026, 932370024, 932370023, 932370022, 932370021,
+                  932370026, 932370025, 932370023, 932370022, 932370021,
                   932370020, 932370019, 932370018, 932370017, 932370015,
                   932370014, 932370013, 932370012, 932370009, 932370008,
                   932370006, 932370005, 932370004, 932370003, 932370002,
                   932370001, 932370000])
     assert_equal(data.alpha_child_byparent(922350000),
-                 [902310038, -902310000, 902310027, 902310023, 902310020,
-                  902310018, 902310017, 902310016, 902310014, 902310013,
+                 [902310038, -902310000, 902310028, 902310023, 902310020,
+                  902310018, -902310000, 902310016, 902310014, 902310013,
                   902310012, 902310007, 902310005, 902310004, 902310003,
                   902310002, 902310001, 902310000])
 
@@ -434,12 +447,14 @@ def test_beta_plus_intensity():
 
 def test_ecbp_parent():
     assert_equal(data.ecbp_parent(215.54, 0.5),
-                 [110220000, 340690000, 541230000, 571330000])
+                 [110220000, 340690000, 340700000,
+                  541230000, 571330000, 601390000])
 
 
 def test_ecbp_child_byen():
     assert_equal(data.ecbp_child_byen(215.54, 0.5),
-                 [100220001, -330690000, 531230020, 561330006])
+                 [100220001, -330690000, 330700031,
+                  531230020, 561330006, 591390015])
 
 
 def test_ecbp_child_byparent():
@@ -484,7 +499,7 @@ def test_gamma_photon_intensity_byen():
                              (0.14, np.nan),
                              (160.0, 24.0),
                              (0.32, 0.1),
-                             (5.0, np.nan)])
+                             (np.nan, np.nan)])
 
 # Tests associated with "special cases" from decaygen.py
 
@@ -509,7 +524,7 @@ def test_special_children():
     special_children = {451040000: set([441040000, 461040000]),
                         521270000: set([531270000])}
     for item in special_children:
-        assert_equal(set(data.decay_data_children(nucname.id_to_state_id(item))), 
+        assert_equal(set(data.decay_data_children(nucname.id_to_state_id(item))),
                      special_children[item])
 
 if __name__ == "__main__":

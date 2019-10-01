@@ -3,7 +3,7 @@ from __future__ import unicode_literals, division
 import sys
 import warnings
 
-import nose 
+import nose
 from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
     assert_in, assert_greater_equal
 
@@ -24,9 +24,9 @@ def _hash(s):
     return h
 
 def test_hash():
-    rxs = ["a", "hello", "total", "wowza", "z_2na", "z_3na", "absorption", "np", 
-           "n2a", "z_2n2a", "nd", "nt", "nHe3", "nd3a", "nt2a", "z_4n", 
-           "fission_fourth", "z_2np", "z_3np", "n2p", "npa", "n_0", "n_1", "n_2", 
+    rxs = ["a", "hello", "total", "wowza", "z_2na", "z_3na", "absorption", "np",
+           "n2a", "z_2n2a", "nd", "nt", "nHe3", "nd3a", "nt2a", "z_4n",
+           "fission_fourth", "z_2np", "z_3np", "n2p", "npa", "n_0", "n_1", "n_2",
            "n_3", "n_4", "n_5", "n_6", "n_7", "n_8",]
     for rx in rxs:
         yield assert_equal, rxname.hash(rx), _hash(rx)
@@ -42,13 +42,13 @@ def test_name_alts():
 
 def test_name_ids():
     assert_equal(rxname.name(_hash("a")), "a")
-    assert_equal(rxname.name(_hash("total")), "total")    
+    assert_equal(rxname.name(_hash("total")), "total")
 
     assert_equal(rxname.name(long(_hash("a"))), "a")
-    assert_equal(rxname.name(long(_hash("total"))), "total")    
+    assert_equal(rxname.name(long(_hash("total"))), "total")
 
     assert_equal(rxname.name(str(_hash("a"))), "a")
-    assert_equal(rxname.name(str(_hash("total"))), "total")    
+    assert_equal(rxname.name(str(_hash("total"))), "total")
 
 def test_name_mts():
     assert_equal(rxname.name(107), "a")
@@ -82,10 +82,10 @@ def test_id_ids():
     assert_equal(rxname.id(_hash("total")), _hash("total"))
 
     assert_equal(rxname.id(long(_hash("a"))), _hash("a"))
-    assert_equal(rxname.id(long(_hash("total"))), _hash("total"))    
+    assert_equal(rxname.id(long(_hash("total"))), _hash("total"))
 
     assert_equal(rxname.id(str(_hash("a"))), _hash("a"))
-    assert_equal(rxname.id(str(_hash("total"))), _hash("total"))    
+    assert_equal(rxname.id(str(_hash("total"))), _hash("total"))
 
 def test_id_mts():
     assert_equal(rxname.id(107), _hash("a"))
@@ -119,10 +119,10 @@ def test_mt_ids():
     assert_equal(rxname.mt(_hash("total")), 1)
 
     assert_equal(rxname.mt(long(_hash("a"))), 107)
-    assert_equal(rxname.mt(long(_hash("total"))), 1)    
+    assert_equal(rxname.mt(long(_hash("total"))), 1)
 
     assert_equal(rxname.mt(str(_hash("a"))), 107)
-    assert_equal(rxname.mt(str(_hash("total"))), 1)    
+    assert_equal(rxname.mt(str(_hash("total"))), 1)
 
 def test_mt_mts():
     assert_equal(rxname.mt(107), 107)
@@ -146,10 +146,17 @@ def test_mt_not():
 def test_child():
     assert_equal(rxname.child("U235", "absorption"), 922360000)
     assert_equal(rxname.child(922350000, "absorption"), 922360000)
+    assert_equal(rxname.child("Co58M", "gamma"), 270590000)
+    assert_equal(rxname.child("Co58M", "gamma_1"), 270590001)
+    assert_equal(rxname.child("Co58M", "gamma_1", 'n'), 270590001)
+    assert_equal(rxname.child("Co58M", "gamma_1", b'n'), 270590001)
+
 
 def test_parent():
     assert_equal(rxname.parent("U235", "absorption"), 922340000)
     assert_equal(rxname.parent(922350000, "absorption"), 922340000)
+    assert_equal(rxname.parent(922350000, "absorption", 'n'), 922340000)
+    assert_equal(rxname.parent(922350000, "absorption", b'n'), 922340000)
 
 
 
@@ -171,10 +178,10 @@ def test_label_ids():
     assert_equal(rxname.label(_hash("total")), totlabel)
 
     assert_equal(rxname.label(long(_hash("a"))), alabel)
-    assert_equal(rxname.label(long(_hash("total"))), totlabel)    
+    assert_equal(rxname.label(long(_hash("total"))), totlabel)
 
     assert_equal(rxname.label(str(_hash("a"))), alabel)
-    assert_equal(rxname.label(str(_hash("total"))), totlabel)    
+    assert_equal(rxname.label(str(_hash("total"))), totlabel)
 
 def test_label_mts():
     assert_equal(rxname.label(107), alabel)
@@ -214,10 +221,10 @@ def test_doc_ids():
     assert_equal(rxname.doc(_hash("total")), totdoc)
 
     assert_equal(rxname.doc(long(_hash("a"))), adoc)
-    assert_equal(rxname.doc(long(_hash("total"))), totdoc)    
+    assert_equal(rxname.doc(long(_hash("total"))), totdoc)
 
     assert_equal(rxname.doc(str(_hash("a"))), adoc)
-    assert_equal(rxname.doc(str(_hash("total"))), totdoc)    
+    assert_equal(rxname.doc(str(_hash("total"))), totdoc)
 
 def test_doc_mts():
     assert_equal(rxname.doc(107), adoc)

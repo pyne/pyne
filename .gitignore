@@ -5,6 +5,10 @@ build-*
 *egg-info/
 build_nuc_data/
 pyne/include/
+src/atomic_data.cpp
+src/atomic_data.h
+src/*.tar.gz
+*.s
 
 # Ignore temp files
 *.pyc
@@ -34,15 +38,31 @@ examples/*.png
 examples/*.h5m
 tests/test.file
 tests/test.txt
+tests/U233.txt
 tests/U235.txt
 tests/Ni59.txt
+tests/Mo.txt
+tests/Xe.txt
 tests/Zn.txt
+tests/98AK04.in
+tests/ELE.in
+tests/alara.txt
+tests/mcnp_mass_fracs.txt
 tutorial/Ni59.txt
 docs/rxname_listing
 .ipynb_checkpoints
 rs.cred
+src/cram.h
+src/cram.c
 src/decay.h
 src/decay.cpp
 tests/fort.8
 tests/endftape.100
 tests/test_fluka_data.h5m
+tests/epdl97_eedl_Pb
+
+# Rever
+rever/
+
+# exceptions for test files
+!tests/files_test_activation_responses/activation_responses_examples/*.h5

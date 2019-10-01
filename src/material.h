@@ -44,16 +44,17 @@ namespace pyne
   #endif
 
 
-  // These 37 strings are predefined FLUKA materials. 
-  // Materials not on this list requires a MATERIAL card. 
+  // These 37 strings are predefined FLUKA materials.
+  // Materials not on this list requires a MATERIAL card.
   static std::string fluka_mat_strings[] = {
-   "BLCKHOLE", "VACUUM",   "HYDROGEN", "HELIUM",   "BERYLLIU", "CARBON", 
-   "NITROGEN", "OXYGEN",   "MAGNESIU", "ALUMINUM", "IRON",     "COPPER", 
-   "SILVER",   "SILICON",  "GOLD",     "MERCURY",  "LEAD",     "TANTALUM", 
-   "SODIUM",   "ARGON",    "CALCIUM",  "TIN",      "TUNGSTEN", "TITANIUM", 
-   "NICKEL",   "WATER",    "POLYSTYR", "PLASCINT", "PMMA",     "BONECOMP", 
+   "BLCKHOLE", "VACUUM",   "HYDROGEN", "HELIUM",   "BERYLLIU", "CARBON",
+   "NITROGEN", "OXYGEN",   "MAGNESIU", "ALUMINUM", "IRON",     "COPPER",
+   "SILVER",   "SILICON",  "GOLD",     "MERCURY",  "LEAD",     "TANTALUM",
+   "SODIUM",   "ARGON",    "CALCIUM",  "TIN",      "TUNGSTEN", "TITANIUM",
+   "NICKEL",   "WATER",    "POLYSTYR", "PLASCINT", "PMMA",     "BONECOMP",
    "BONECORT", "MUSCLESK", "MUSCLEST", "ADTISSUE", "KAPTON", "POLYETHY", "AIR"
   };
+
   static int FLUKA_MAT_NUM = 37;
 
   /// Material composed of nuclides.
@@ -164,9 +165,12 @@ namespace pyne
     void write_hdf5(std::string filename, std::string datapath="/material",
                     std::string nucpath="/nucid", float row=-0.0, int chunksize=100);
 
+    /// Return an openmc xml material element as a string
+    std::string openmc(std::string fact_type = "mass");
+
     /// Return an mcnp input deck record as a string
     std::string mcnp(std::string frac_type = "mass");
-    /// 
+    ///
     /// Return a fluka input deck MATERIAL card as a string
     std::string fluka(int id, std::string frac_type = "mass");
     /// Convenience function to tell whether a given name needs a material card
@@ -174,10 +178,10 @@ namespace pyne
     /// High level call to get details and call material_component(..)
     std::string fluka_material_str(int id);
     /// Intermediate level call to prepare final info and call material_line(..)
-    std::string fluka_material_component(int fid, int nucid, 
+    std::string fluka_material_component(int fid, int nucid,
                                          std::string fluka_name);
     /// Format information into a FLUKA material card
-    std::string fluka_material_line(int znum, double atomic_mass, 
+    std::string fluka_material_line(int znum, double atomic_mass,
                               int fid, std::string fluka_name);
     /// Convenience function to format a single fluka field
     std::string fluka_format_field(float field);
@@ -229,10 +233,11 @@ namespace pyne
     /// guess value calculated from the normailized composition is used here.
     double molecular_mass(double apm=-1.0);
     /// Calculates the activity of a material based on the composition and each
-    /// nuclide's mass, decay_const, and atmoic_mass. 
+    /// nuclide's mass, decay_const, and atmoic_mass.
     comp_map activity();
     /// Calculates the decay heat of a material based on the composition and
-    /// each nuclide's mass, q_val, decay_const, and atomic_mass.
+    /// each nuclide's mass, q_val, decay_const, and atomic_mass. This assumes
+    /// input mass of grams. Return values is in megawatts.
     comp_map decay_heat();
     /// Caclulates the dose per gram using the composition of the the
     /// material, the dose type desired, and the source for dose factors
@@ -241,12 +246,14 @@ namespace pyne
     ///     ext_soil -- returns mrem/h per g per m^2
     ///     ingest -- returns mrem per g
     ///     inhale -- returns mrem per g
-    ///   source is: 
+    ///   source is:
     ///     {EPA=0, DOE=1, GENII=2}, default is EPA
     comp_map dose_per_g(std::string dose_type, int source=0);
     /// Returns a copy of the current material where all natural elements in the
     /// composition are expanded to their natural isotopic abundances.
-    Material expand_elements();
+    Material expand_elements(std::set<int> exception_ids);
+    // Wrapped version to facilitate calling from python
+    Material expand_elements(int **int_ptr_arry = NULL);
     // Returns a copy of the current material where all the isotopes of the elements
     // are added up, atomic-fraction-wise, unless they are in the exception set
     Material collapse_elements(std::set<int> exception_znum);
@@ -317,7 +324,7 @@ namespace pyne
     /// Sets the composition, mass, and atoms_per_molecule of this material to those
     /// calculated from \a atom_fracs, a mapping of nuclides to atom fractions values.
     void from_atom_frac(std::map<int, double> atom_fracs);
-    
+
     /// Returns a mapping of the nuclides in this material to their atom densities.
     /// This calculation is based off of the material's density.
     std::map<int, double> to_atom_dens();
@@ -340,6 +347,12 @@ namespace pyne
     /// Decays this material for a given amount of time in seconds
     Material decay(double t);
 
+    /// Transmutes the material via the CRAM method.
+    /// \param A The transmutation matrix [unitless]
+    /// \param order The CRAM approximation order (default 14).
+    /// \return A new material which has been transmuted.
+    Material cram(std::vector<double> A, const int order=14);
+
     // Overloaded Operators
     /// Adds mass to a material instance.
     Material operator+ (double);
@@ -361,7 +374,7 @@ namespace pyne
     double mass;  ///< material mass
     double density; ///< material density
     double atoms_per_mol; ///< material atoms per mole
-    double comp []; ///< array of material composition mass weights.
+    double comp[1]; ///< array of material composition mass weights.
   } material_data;
 
   /// Custom exception for invalid HDF5 protocol numbers
@@ -371,10 +384,10 @@ namespace pyne
     virtual const char* what() const throw()
     {
       return "Invalid loading protocol number; please use 0 or 1.";
-    };
+    }
   };
 
 // End pyne namespace
-};
+}
 
 #endif  // PYNE_MR34UE5INRGMZK2QYRDWICFHVM

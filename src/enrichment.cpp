@@ -1,4 +1,4 @@
-// Enrichment 
+// Enrichment
 #ifndef PYNE_IS_AMALGAMATED
 #include "enrichment.h"
 #endif
@@ -7,7 +7,7 @@ namespace pyne_enr = pyne::enrichment;
 
 pyne_enr::Cascade pyne_enr::_fill_default_uranium_cascade() {
   // Default cascade for uranium-based enrichment
-  Cascade duc; 
+  Cascade duc;
 
   duc.alpha = 1.05;
   duc.Mstar = 236.5;
@@ -29,7 +29,7 @@ pyne_enr::Cascade pyne_enr::_fill_default_uranium_cascade() {
   duc.mat_feed = pyne::Material(cm, 1.0, 1.0);
 
   return duc;
-};
+}
 pyne_enr::Cascade pyne_enr::default_uranium_cascade(pyne_enr::_fill_default_uranium_cascade());
 
 
@@ -117,38 +117,38 @@ void pyne_enr::_recompute_nm(pyne_enr::Cascade & casc, double tolerance) {
     if (tolerance < fabs(delta_prod)) {
       N = N - (delta_prod * N);
       rhs_prod = (pow(astar_j, M+1.0) - 1.0) / (pow(astar_j, M+1.0) - pow(astar_j, -N));
-    };
+    }
 
     if (tolerance < fabs(delta_tail)) {
       M = M - (delta_tail * M);
       rhs_tail = (1.0 - pow(astar_j, -N)) / (pow(astar_j, M+1.0) - pow(astar_j, -N));
-    };
+    }
 
     if (N < tolerance) {
       N = origN + n;
       M = origM + n;
       n = n + 1.0;
-    };
+    }
 
     if (M < tolerance) {
       N = origN + n;
       M = origM + n;
       n = n + 1.0;
-    };
-  };
+    }
+  }
 
   casc.N = N;
   casc.M = M;
-  return; 
-};
+  return;
+}
 
 
 
 void pyne_enr::_recompute_prod_tail_mats(pyne_enr::Cascade & casc) {
-  //This function takes a given initial guess number of enriching and stripping stages 
-  //for a given composition of fuel with a given jth key component, knowing the values 
-  //that are desired in both Product and Tails streams.  Having this it solves for what 
-  //the actual N and M stage numbers are and also what the product and waste streams 
+  //This function takes a given initial guess number of enriching and stripping stages
+  //for a given composition of fuel with a given jth key component, knowing the values
+  //that are desired in both Product and Tails streams.  Having this it solves for what
+  //the actual N and M stage numbers are and also what the product and waste streams
   //compositions are.  It returns precisely these.
   pyne::comp_map comp_prod;
   pyne::comp_map comp_tail;
@@ -175,21 +175,21 @@ void pyne_enr::_recompute_prod_tail_mats(pyne_enr::Cascade & casc) {
     numer_tail = casc.mat_feed.comp[nuc] * (1.0 - pow(astar_i, -N));
     denom_tail = (pow(astar_i, M+1.0) - pow(astar_i, -N)) / tpf;
     comp_tail[nuc] = numer_tail / denom_tail;
-  };
+  }
 
   casc.mat_prod = pyne::Material(comp_prod);
   casc.mat_tail = pyne::Material(comp_tail);
   return;
-};
+}
 
 
 
 pyne_enr::Cascade pyne_enr::_norm_comp_secant(pyne_enr::Cascade & casc, \
                                               double tolerance, int max_iter) {
-  // This function actually solves the whole system of equations.  It uses _recompute_prod_tail_mats 
-  // to find the roots for the enriching and stripping stage numbers.  It then 
+  // This function actually solves the whole system of equations.  It uses _recompute_prod_tail_mats
+  // to find the roots for the enriching and stripping stage numbers.  It then
   // checks to see if the product and waste streams meet their target enrichments
-  // for the jth component like they should.  If they don't then it trys other values 
+  // for the jth component like they should.  If they don't then it trys other values
   // of N and M varied by the Secant ethod.  Rinse and repeat as needed.
   int j = casc.j;
   pyne_enr::Cascade prev_casc = casc;
@@ -218,7 +218,7 @@ pyne_enr::Cascade pyne_enr::_norm_comp_secant(pyne_enr::Cascade & casc, \
   historyM.push_back(curr_casc.M);
 
   // My guess is that what we are checkin here is that the isotopic compositions
-  // make sense with abs(1.0 - masscurr_P) rather than calculatign the 
+  // make sense with abs(1.0 - masscurr_P) rather than calculatign the
   // relative product to watse mass streams.
   double prev_N = prev_casc.N;
   double prev_M = prev_casc.M;
@@ -249,7 +249,7 @@ pyne_enr::Cascade pyne_enr::_norm_comp_secant(pyne_enr::Cascade & casc, \
       // If the new value of N is less than zero, reset.
       if (curr_N < 0.0)
         curr_N = (temp_curr_N + temp_prev_N)/2.0;
-    };
+    }
 
     if (tolerance <= fabs(delta_x_tail_j)/curr_casc.mat_tail.comp[j]) {
       // Make a new guess for M
@@ -262,7 +262,7 @@ pyne_enr::Cascade pyne_enr::_norm_comp_secant(pyne_enr::Cascade & casc, \
       // If the new value of M is less than zero, reset.
       if (curr_M < 0.0)
         curr_M = (temp_curr_M + temp_prev_M)/2.0;
-    };
+    }
 
     // Check for infinite loops
     for (h = 0; h < historyN.size(); h++) {
@@ -272,35 +272,35 @@ pyne_enr::Cascade pyne_enr::_norm_comp_secant(pyne_enr::Cascade & casc, \
         curr_M = curr_M + delta_x_tail_j * \
                ((curr_M - prev_M)/(curr_casc.mat_tail.comp[j] - prev_casc.mat_tail.comp[j]));;
         break;
-      };
-    };
+      }
+    }
 
     if (max_hist <= historyN.size()) {
       historyN.erase(historyN.begin());
       historyM.erase(historyM.begin());
-    };
+    }
     historyN.push_back(curr_N);
     historyM.push_back(curr_M);
 
     niter += 1;
 
-    // Calculate new isotopics for valid (N, M)        
+    // Calculate new isotopics for valid (N, M)
     prev_casc = curr_casc;
     curr_casc.N = curr_N;
     curr_casc.M = curr_M;
     _recompute_nm(curr_casc, tolerance);
     _recompute_prod_tail_mats(curr_casc);
-  };
+  }
   return curr_casc;
-};
+}
 
 
 
 double pyne_enr::_deltaU_i_OverG(pyne_enr::Cascade & casc, int i) {
   // Solves for a stage separative power relevant to the ith component
-  // per unit of flow G.  This is taken from Equation 31 divided by G 
+  // per unit of flow G.  This is taken from Equation 31 divided by G
   // from the paper "Wood, Houston G., Borisevich, V. D. and Sulaberidze, G. A.,
-  // 'On a Criterion Efficiency for Multi-Isotope Mixtures Separation', 
+  // 'On a Criterion Efficiency for Multi-Isotope Mixtures Separation',
   // Separation Science and Technology, 34:3, 343 - 357"
   // To link to this article: DOI: 10.1081/SS-100100654
   // URL: http://dx.doi.org/10.1081/SS-100100654
@@ -308,7 +308,7 @@ double pyne_enr::_deltaU_i_OverG(pyne_enr::Cascade & casc, int i) {
   double astar_i = alphastar_i(casc.alpha, casc.Mstar, pyne::atomic_mass(i));
   return log(pow(casc.alpha, (casc.Mstar - pyne::atomic_mass(casc.j)) )) * \
                              ((astar_i - 1.0)/(astar_i + 1.0));
-};
+}
 
 
 pyne_enr::Cascade pyne_enr::solve_numeric(pyne_enr::Cascade & orig_casc, \
@@ -331,7 +331,7 @@ pyne_enr::Cascade pyne_enr::solve_numeric(pyne_enr::Cascade & orig_casc, \
 
   double ltotpf = 0.0;
   double swupf = 0.0;
-  double temp_numer = 0.0; 
+  double temp_numer = 0.0;
 
   for (pyne::comp_iter i = casc.mat_feed.comp.begin(); i != casc.mat_feed.comp.end(); i++) {
     nuc = (i->first);
@@ -340,14 +340,14 @@ pyne_enr::Cascade pyne_enr::solve_numeric(pyne_enr::Cascade & orig_casc, \
                       casc.mat_feed.comp[nuc]*log(rfeed));
     ltotpf = ltotpf + (temp_numer / _deltaU_i_OverG(casc, nuc));
     swupf = swupf + temp_numer;
-  };
+  }
 
   // Assign flow rates
   casc.l_t_per_feed = ltotpf;
 
-  // The -1 term is put in the SWU calculation because otherwise swupf   
-  // represents the SWU that would be undone if you were to deenrich the 
-  // whole process.  Thus the SWU to enrich is -1x this number.  This is 
+  // The -1 term is put in the SWU calculation because otherwise swupf
+  // represents the SWU that would be undone if you were to deenrich the
+  // whole process.  Thus the SWU to enrich is -1x this number.  This is
   // a by-product of the value function used as a constraint.
   casc.swu_per_feed = -1 * swupf;       // This is the SWU for 1 kg of Feed material.
   casc.swu_per_prod = -1 * swupf / ppf;	// This is the SWU for 1 kg of Product material.
@@ -356,17 +356,17 @@ pyne_enr::Cascade pyne_enr::solve_numeric(pyne_enr::Cascade & orig_casc, \
   casc.mat_prod.mass = casc.mat_feed.mass * ppf;
   casc.mat_tail.mass = casc.mat_feed.mass * tpf;
   return casc;
-};
+}
 
 pyne_enr::Cascade pyne_enr::multicomponent(pyne_enr::Cascade & orig_casc, \
                                     char * solver, double tolerance, int max_iter) {
   std::string strsolver(solver);
   return multicomponent(orig_casc, strsolver, tolerance, max_iter);
-};
+}
 
 pyne_enr::Cascade pyne_enr::multicomponent(pyne_enr::Cascade & orig_casc, \
                                     std::string solver, double tolerance, int max_iter) {
-  // The multicomponent() function finds a value of Mstar by minimzing the seperative power.  
+  // The multicomponent() function finds a value of Mstar by minimzing the seperative power.
   // Note that Mstar0 represents an intial guess at what Mstar might be.
   // This is the final function that actually solves for an optimized M* that makes the cascade!
   pyne_enr::Cascade temp_casc;
@@ -379,7 +379,7 @@ pyne_enr::Cascade pyne_enr::multicomponent(pyne_enr::Cascade & orig_casc, \
     solver_code = 0;
   else if (solver == "numeric")
     solver_code = 1;
-  else 
+  else
     throw "solver not known: " + solver;
 
   // validate Mstar or pick new value
@@ -390,9 +390,9 @@ pyne_enr::Cascade pyne_enr::multicomponent(pyne_enr::Cascade & orig_casc, \
     double ms = (pyne::atomic_mass(orig_casc.j) + pyne::atomic_mass(orig_casc.k)) / 2.0;
     prev_casc.Mstar = ms;
     curr_casc.Mstar = ms;
-  };
+  }
 
-  // xpn is the exponential index 
+  // xpn is the exponential index
   double ooe = -log10(tolerance);
   double xpn = 1.0;
 
@@ -404,7 +404,7 @@ pyne_enr::Cascade pyne_enr::multicomponent(pyne_enr::Cascade & orig_casc, \
     case 1:
       prev_casc = solve_numeric(prev_casc, tolerance, max_iter);
       break;
-  };
+  }
 
   // Initialize curr_ent point
   curr_casc.Mstar = (pyne::atomic_mass(curr_casc.j) + curr_casc.Mstar) / 2.0;
@@ -415,7 +415,7 @@ pyne_enr::Cascade pyne_enr::multicomponent(pyne_enr::Cascade & orig_casc, \
     case 1:
       curr_casc = solve_numeric(curr_casc, tolerance, max_iter);
       break;
-  };
+  }
 
   double m = pyne::slope(curr_casc.Mstar, curr_casc.l_t_per_feed, \
                          prev_casc.Mstar, prev_casc.l_t_per_feed);
@@ -440,7 +440,7 @@ pyne_enr::Cascade pyne_enr::multicomponent(pyne_enr::Cascade & orig_casc, \
       case 1:
         curr_casc = solve_numeric(curr_casc, tolerance, max_iter);
         break;
-    };
+    }
 
     if (prev_casc.l_t_per_feed < curr_casc.l_t_per_feed) {
       temp_casc = curr_casc;
@@ -452,7 +452,7 @@ pyne_enr::Cascade pyne_enr::multicomponent(pyne_enr::Cascade & orig_casc, \
         case 1:
           temp_casc = solve_numeric(temp_casc, tolerance, max_iter);
           break;
-      };
+      }
 
       temp_m = pyne::slope(curr_casc.Mstar, curr_casc.l_t_per_feed, \
                            temp_casc.Mstar, temp_casc.l_t_per_feed);
@@ -460,7 +460,7 @@ pyne_enr::Cascade pyne_enr::multicomponent(pyne_enr::Cascade & orig_casc, \
         prev_casc = curr_casc;
         curr_casc = temp_casc;
         break;
-      };
+      }
 
       temp_m_sign = temp_m / fabs(temp_m);
       if (m_sign != temp_m_sign) {
@@ -475,7 +475,7 @@ pyne_enr::Cascade pyne_enr::multicomponent(pyne_enr::Cascade & orig_casc, \
           case 1:
             temp_casc = solve_numeric(temp_casc, tolerance, max_iter);
             break;
-        };
+        }
         temp_m = pyne::slope(prev_casc.Mstar, prev_casc.l_t_per_feed, \
                              temp_casc.Mstar, temp_casc.l_t_per_feed);
 
@@ -483,15 +483,15 @@ pyne_enr::Cascade pyne_enr::multicomponent(pyne_enr::Cascade & orig_casc, \
           prev_casc = curr_casc;
           curr_casc = temp_casc;
           break;
-        };
+        }
 
         m_sign = temp_m / fabs(temp_m);
         m = temp_m;
         prev_casc = curr_casc;
         curr_casc = temp_casc;
-      };
-    };
-  };
+      }
+    }
+  }
 
   return curr_casc;
-};
+}

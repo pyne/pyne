@@ -11,9 +11,11 @@
 cimport dtypes
 cimport numpy as np
 from libc.stdlib cimport free
+from libc.string cimport memcpy
 from libcpp cimport bool as cpp_bool
 from libcpp.string cimport string as std_string
 from libcpp.vector cimport vector as cpp_vector
+from libcpp.map cimport map as cpp_map
 
 import numpy as np
 
@@ -187,6 +189,30 @@ cdef class AliasTable:
     pass
 
 
+cdef cpp_vector[double] convert_nparray_to_vector(array):
+    """convert_nparray_to_vector
+    Convert python np.ndarray into cpp_vector[double]
+    
+    Parameters
+    ----------
+    array : np.ndarray
+    
+    Returns
+    -------
+    res1 : cpp_vector[double]
+    
+    """
+
+    cdef cpp_vector[double] array_proxy
+    cdef int array_size
+    cdef double * array_data
+    array = np.array(array, dtype=np.float64)
+    array_size = len(array)
+    array_data = <double *> np.PyArray_DATA(<np.ndarray> array)
+    array_proxy = cpp_vector[double](<size_t> array_size)
+    memcpy(<void*> &array_proxy[0], array_data, sizeof(double) *  array_size)
+    return array_proxy
+
 
 
 
@@ -267,48 +293,21 @@ cdef class Sampler:
         Returns
         -------
         None
-        
-        ################################################################
-        
-        Constuctor for analog and uniform sampling
-        
-        Parameters
-        ----------
-        e_bounds : std::vector< double >
-        
-        src_tag_name : std::string
-        
-        uniform : bool
-        
-        filename : std::string
-        
-        Returns
-        -------
-        None
-        
         """
         cdef char * filename_proxy
         cdef char * src_tag_name_proxy
-        cdef cpp_vector[double] e_bounds_proxy
-        cdef int ie_bounds
-        cdef int e_bounds_size
-        cdef double * e_bounds_data
         cdef char * bias_tag_name_proxy
         filename_bytes = filename.encode()
         src_tag_name_bytes = src_tag_name.encode()
-        # e_bounds is a ('vector', 'float64', 0)
-        e_bounds_size = len(e_bounds)
-        if isinstance(e_bounds, np.ndarray) and (<np.ndarray> e_bounds).descr.type_num == np.NPY_FLOAT64:
-            e_bounds_data = <double *> np.PyArray_DATA(<np.ndarray> e_bounds)
-            e_bounds_proxy = cpp_vector[double](<size_t> e_bounds_size)
-            for ie_bounds in range(e_bounds_size):
-                e_bounds_proxy[ie_bounds] = e_bounds_data[ie_bounds]
-        else:
-            e_bounds_proxy = cpp_vector[double](<size_t> e_bounds_size)
-            for ie_bounds in range(e_bounds_size):
-                e_bounds_proxy[ie_bounds] = <double> e_bounds[ie_bounds]
         bias_tag_name_bytes = bias_tag_name.encode()
-        self._inst = new cpp_source_sampling.Sampler(std_string(<char *> filename_bytes), std_string(<char *> src_tag_name_bytes), e_bounds_proxy, std_string(<char *> bias_tag_name_bytes))
+        # convert e_bounds
+        cdef cpp_vector[double] e_bounds_proxy = convert_nparray_to_vector(e_bounds)
+        # construct sampler
+        self._inst = new cpp_source_sampling.Sampler(
+                std_string(<char *> filename_bytes),
+                std_string(<char *> src_tag_name_bytes),
+                e_bounds_proxy,
+                std_string(<char *> bias_tag_name_bytes))
     
     
     def _sampler_sampler_1(self, filename, src_tag_name, e_bounds, uniform):
@@ -332,50 +331,82 @@ cdef class Sampler:
         Returns
         -------
         None
+        """
+        cdef char * filename_proxy
+        cdef char * src_tag_name_proxy
+        # convert filename
+        filename_bytes = filename.encode()
+        src_tag_name_bytes = src_tag_name.encode()
+        # convert e_bounds
+        cdef cpp_vector[double] e_bounds_proxy = convert_nparray_to_vector(e_bounds)
+        # construct sampler
+        self._inst = new cpp_source_sampling.Sampler(
+                std_string(<char *> filename_bytes),
+                std_string(<char *> src_tag_name_bytes),
+                e_bounds_proxy,
+                <bint> uniform)
+
+    def _sampler_sampler_2(self, filename, tag_names, e_bounds, mode):
+        """Sampler(self, filename, tag_names, e_bounds, mode)
         
-        ################################################################
-        
-        Constuctor for analog and uniform sampling
+        Constuctor for overall Sampler
         
         Parameters
         ----------
-        e_bounds : std::vector< double >
-        
-        src_tag_name : std::string
-        
-        uniform : bool
-        
         filename : std::string
+        
+        tag_names : std::map<std::string, std::string>
+        
+        e_bounds : std::vector< double >
         
         Returns
         -------
         None
-        
         """
+        # convert filename
         cdef char * filename_proxy
-        cdef char * src_tag_name_proxy
-        cdef cpp_vector[double] e_bounds_proxy
-        cdef int ie_bounds
-        cdef int e_bounds_size
-        cdef double * e_bounds_data
         filename_bytes = filename.encode()
-        src_tag_name_bytes = src_tag_name.encode()
-        # e_bounds is a ('vector', 'float64', 0)
-        e_bounds_size = len(e_bounds)
-        if isinstance(e_bounds, np.ndarray) and (<np.ndarray> e_bounds).descr.type_num == np.NPY_FLOAT64:
-            e_bounds_data = <double *> np.PyArray_DATA(<np.ndarray> e_bounds)
-            e_bounds_proxy = cpp_vector[double](<size_t> e_bounds_size)
-            for ie_bounds in range(e_bounds_size):
-                e_bounds_proxy[ie_bounds] = e_bounds_data[ie_bounds]
-        else:
-            e_bounds_proxy = cpp_vector[double](<size_t> e_bounds_size)
-            for ie_bounds in range(e_bounds_size):
-                e_bounds_proxy[ie_bounds] = <double> e_bounds[ie_bounds]
-        self._inst = new cpp_source_sampling.Sampler(std_string(<char *> filename_bytes), std_string(<char *> src_tag_name_bytes), e_bounds_proxy, <bint> uniform)
+        # Convert tag_names
+        cdef cpp_map[std_string, std_string] cpp_tag_names = \
+                cpp_map[std_string, std_string]()
+        for key, value in tag_names.items():
+            key = key.encode('utf-8')
+            value = value.encode('utf-8')
+            cpp_tag_names[key] = value
+        # convert e_bounds
+        cdef cpp_vector[double] e_bounds_proxy = convert_nparray_to_vector(e_bounds)
+        # construct sampler
+        self._inst = new cpp_source_sampling.Sampler(
+                std_string(<char *> filename_bytes),
+                <cpp_map[std_string, std_string]> cpp_tag_names,
+                <cpp_vector[double]> e_bounds_proxy,
+                <int> mode)
+
     
-    
-    _sampler_sampler_0_argtypes = frozenset(((0, str), (1, str), (2, np.ndarray), (3, str), ("filename", str), ("src_tag_name", str), ("e_bounds", np.ndarray), ("bias_tag_name", str)))
-    _sampler_sampler_1_argtypes = frozenset(((0, str), (1, str), (2, np.ndarray), (3, bool), ("filename", str), ("src_tag_name", str), ("e_bounds", np.ndarray), ("uniform", bool)))
+    _sampler_sampler_0_argtypes = frozenset(((0, str),
+                                             (1, str),
+                                             (2, np.ndarray),
+                                             (3, str),
+                                             ("filename", str),
+                                             ("src_tag_name", str),
+                                             ("e_bounds", np.ndarray),
+                                             ("bias_tag_name", str)))
+    _sampler_sampler_1_argtypes = frozenset(((0, str),
+                                             (1, str),
+                                             (2, np.ndarray),
+                                             (3, bool),
+                                             ("filename", str),
+                                             ("src_tag_name", str),
+                                             ("e_bounds", np.ndarray),
+                                             ("uniform", bool)))
+    _sampler_sampler_2_argtypes = frozenset(((0, str),
+                                             (1, dict),
+                                             (2, np.ndarray),
+                                             (3, int),
+                                             ("filename", str),
+                                             ("tag_names", dict),
+                                             ("e_bounds",  np.ndarray),
+                                             ("mode", int)))
     
     def __init__(self, *args, **kwargs):
         """Sampler(self, filename, src_tag_name, e_bounds, uniform)
@@ -398,25 +429,6 @@ cdef class Sampler:
         Returns
         -------
         None
-        
-        ################################################################
-        
-        Constuctor for analog and uniform sampling
-        
-        Parameters
-        ----------
-        e_bounds : std::vector< double >
-        
-        src_tag_name : std::string
-        
-        uniform : bool
-        
-        filename : std::string
-        
-        Returns
-        -------
-        None
-        
         """
         types = set([(i, type(a)) for i, a in enumerate(args)])
         types.update([(k, type(v)) for k, v in kwargs.items()])
@@ -424,8 +436,11 @@ cdef class Sampler:
         if types <= self._sampler_sampler_0_argtypes:
             self._sampler_sampler_0(*args, **kwargs)
             return
-        if types <= self._sampler_sampler_1_argtypes:
+        elif types <= self._sampler_sampler_1_argtypes:
             self._sampler_sampler_1(*args, **kwargs)
+            return
+        elif types <= self._sampler_sampler_2_argtypes:
+            self._sampler_sampler_2(*args, **kwargs)
             return
         # duck-typed dispatch based on whatever works!
         try:
@@ -435,6 +450,11 @@ cdef class Sampler:
             pass
         try:
             self._sampler_sampler_1(*args, **kwargs)
+            return
+        except (RuntimeError, TypeError, NameError):
+            pass
+        try:
+            self._sampler_sampler_2(*args, **kwargs)
             return
         except (RuntimeError, TypeError, NameError):
             pass
@@ -457,19 +477,19 @@ cdef class Sampler:
         
         Returns
         -------
-        res1 : std::vector< double >
+        res1 : pyne::SourceParticle
         
         """
         cdef cpp_vector[double] rands_proxy
         cdef int irands
         cdef int rands_size
         cdef double * rands_data
-        cdef cpp_vector[double] rtnval
         
         cdef np.npy_intp rtnval_proxy_shape[1]
         # rands is a ('vector', 'float64', 0)
         rands_size = len(rands)
-        if isinstance(rands, np.ndarray) and (<np.ndarray> rands).descr.type_num == np.NPY_FLOAT64:
+        if isinstance(rands, np.ndarray) and \
+                (<np.ndarray> rands).descr.type_num == np.NPY_FLOAT64:
             rands_data = <double *> np.PyArray_DATA(<np.ndarray> rands)
             rands_proxy = cpp_vector[double](<size_t> rands_size)
             for irands in range(rands_size):
@@ -478,20 +498,62 @@ cdef class Sampler:
             rands_proxy = cpp_vector[double](<size_t> rands_size)
             for irands in range(rands_size):
                 rands_proxy[irands] = <double> rands[irands]
-        rtnval = (<cpp_source_sampling.Sampler *> self._inst).particle_birth(rands_proxy)
-        rtnval_proxy_shape[0] = <np.npy_intp> rtnval.size()
-        rtnval_proxy = np.PyArray_SimpleNewFromData(1, rtnval_proxy_shape, np.NPY_FLOAT64, &rtnval[0])
-        rtnval_proxy = np.PyArray_Copy(rtnval_proxy)
-        return rtnval_proxy
+        cdef cpp_source_sampling.SourceParticle c_src = \
+                (<cpp_source_sampling.Sampler *> self._inst)\
+                .particle_birth(rands_proxy)
+        return SourceParticle(c_src.get_x(), c_src.get_y(), c_src.get_z(), \
+                c_src.get_e(), c_src.get_w(), c_src.get_cell_list())
+
+
+cdef class SourceParticle:
+    """Constructor for class SourceParticle
     
+    Attributes
+    ----------
+    x : double
+        The x coordinate of the source particle
+    y : double
+        The y coordinate of the source particle
+    z : double
+        The z coordinate of the source particle
+    e : double
+        The energy of the source particle
+    w : double
+        The weight of the source particle
+    cell_list : vector[int]
+        The cell list for available cells of the source particle
     
+    Notes
+    -----
+    This class was defined in source_sampling.h
     
+    The class is found in the "pyne" namespace"""
 
-    pass
+    # constuctors
+    def __cinit__(self, double x, double y, double z, double e, double w, cpp_vector[int] cell_list):
+        self.c_src = cpp_source_sampling.SourceParticle(x, y, z, e, w, cell_list)
+    
+    @property
+    def cell_list(self):
+        return self.c_src.get_cell_list()
 
+    @property
+    def x(self):
+        return self.c_src.get_x()
 
+    @property
+    def y(self):
+        return self.c_src.get_y()
 
+    @property
+    def z(self):
+        return self.c_src.get_z()
 
+    @property
+    def e(self):
+        return self.c_src.get_e()
 
+    @property
+    def w(self):
+        return self.c_src.get_w()
 
-{'cpppxd_footer': '', 'pyx_header': '', 'pxd_header': '', 'pxd_footer': '', 'cpppxd_header': '', 'pyx_footer': ''}

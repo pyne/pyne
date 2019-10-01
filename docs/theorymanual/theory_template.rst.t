@@ -7,7 +7,7 @@ Template for Explaining Physics
 .. currentmodule:: pyne.theory_template
 
 This page presents a detailed explanation of how :py:mod:`THIS_THING` works, including
-underlying theory, any assocaited assumptions, and information about correct and
+underlying theory, any associated assumptions, and information about correct and
 appropriate use of this physics. 
 
 

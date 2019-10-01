@@ -424,6 +424,29 @@ namespace nucname
   int mcnp_to_id(std::string nuc);
   /// \}
 
+  /// \name OPENMC Form Functions
+  /// \{
+  /// This is the naming convention used by the OpenMC code.
+  /// The OpenMC format for entering nuclides uses a GND format.
+  /// For information on how metastable isotopes are named, please consult the
+  /// OpenMC documentation for more information.
+  /// \param nuc a nuclide
+  /// \return a string nuclide identifier.
+  std::string openmc(int nuc);
+  std::string openmc(const char * nuc);
+  std::string openmc(std::string nuc);
+  /// \}
+
+  /// \name OPENMC Form to Identifier Form Functions
+  /// \{
+  /// This converts from the OPENMC nuclide naming convention
+  /// to the id canonical form  for nuclides in PyNE.
+  /// \param nuc a nuclide in OPENMC form.
+  /// \return an integer id nuclide identifier.
+  int openmc_to_id(const char * nuc);
+  int openmc_to_id(std::string nuc);
+  /// \}
+
   /// \name FLUKA Form Functions
   /// \{
   /// This is the naming convention used by the FLUKA suite of codes.
@@ -575,15 +598,16 @@ namespace nucname
   /// form as ID, but the four last digits are all zeros.
   /// \param nuc a nuclide
   /// \return a integer groundstate id
-  inline int groundstate(int nuc) {return (id(nuc) / 10000 ) * 10000;};
-  inline int groundstate(std::string nuc) {return groundstate(id(nuc));};
-  inline int groundstate(const char * nuc) {return groundstate(std::string(nuc));};
+  inline int groundstate(int nuc) {return (id(nuc) / 10000 ) * 10000;}
+  inline int groundstate(std::string nuc) {return groundstate(id(nuc));}
+  inline int groundstate(const char * nuc) {return groundstate(std::string(nuc));}
   /// \}
 
   /// \name State Map functions
   /// \{
   /// These convert from/to decay state ids (used in decay data)
-  /// to metastable ids (the PyNE default)
+  /// to metastable ids (the PyNE default). If the cooresponding value cannot
+  /// be found, -1 is returned.
   void _load_state_map();
   int state_id_to_id(int state);
   int id_to_state_id(int nuc_id);
@@ -599,7 +623,7 @@ namespace nucname
   int ensdf_to_id(std::string nuc);
   /// \}
 
-};
-};
+}
+}
 
 #endif  // PYNE_D35WIXV5DZAA5LLOWBY2BL2DPA

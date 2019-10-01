@@ -1,6 +1,7 @@
 // Implements basic nuclear data functions.
 #ifndef PYNE_IS_AMALGAMATED
 #include "data.h"
+#include "atomic_data.h"
 #endif
 
 //
@@ -13,7 +14,7 @@ const double pyne::barns_per_cm2 = 1e24;
 const double pyne::cm2_per_barn = 1e-24;
 const double pyne::sec_per_day = 24.0 * 3600.0;
 const double pyne::MeV_per_K = 8.617343e-11;
-const double pyne::MeV_per_MJ = 1.60217657e-19;
+const double pyne::MeV_per_MJ = 6.2415096471204E+18;
 const double pyne::Bq_per_Ci = 3.7e10;
 const double pyne::Ci_per_Bq = 2.7027027e-11;
 
@@ -33,7 +34,7 @@ std::map<std::string, std::string> pyne::get_data_checksums() {
     temp_map["/decay"]="4f41f3e46f4306cc44449f08a20922e0";
     temp_map["/dose_factors"]="dafa32c24b2303850a0bebdf3e6b122e";
     return temp_map;
-};
+}
 
 std::map<std::string, std::string> pyne::data_checksums =
   pyne::get_data_checksums();
@@ -47,8 +48,10 @@ void pyne::_load_atomic_mass_map() {
   // Loads the important parts of atomic_wight table into atomic_mass_map
 
   //Check to see if the file is in HDF5 format.
-  if (!pyne::file_exists(pyne::NUC_DATA_PATH))
-    throw pyne::FileNotFound(pyne::NUC_DATA_PATH);
+  if (!pyne::file_exists(pyne::NUC_DATA_PATH)) {
+    pyne::_load_atomic_mass_map_memory();
+    return;
+  }
 
   bool ish5 = H5Fis_hdf5(pyne::NUC_DATA_PATH.c_str());
   if (!ish5)
@@ -86,7 +89,7 @@ void pyne::_load_atomic_mass_map() {
   }
 
   delete[] atomic_mass_array;
-};
+}
 
 
 double pyne::atomic_mass(int nuc) {
@@ -130,19 +133,19 @@ double pyne::atomic_mass(int nuc) {
     atomic_mass_map.insert(std::pair<int, double>(nuc, aw));
   }
   return aw;
-};
+}
 
 
 double pyne::atomic_mass(char * nuc) {
   int nuc_zz = nucname::id(nuc);
   return atomic_mass(nuc_zz);
-};
+}
 
 
 double pyne::atomic_mass(std::string nuc) {
   int nuc_zz = nucname::id(nuc);
   return atomic_mass(nuc_zz);
-};
+}
 
 
 /*******************************/
@@ -168,7 +171,7 @@ double pyne::natural_abund(int nuc) {
     // Don't fail if we can't load the library
       _load_atomic_mass_map();
       return natural_abund(nuc);
-  };
+  }
 
   double na;
   int nucid = nucname::id(nuc);
@@ -179,7 +182,7 @@ double pyne::natural_abund(int nuc) {
     na = natural_abund((nucid/10000)*10000);
     natural_abund_map[nuc] = na;
     return na;
-  };
+  }
 
   // Finally, if none of these work,
   // take a best guess based on the
@@ -187,19 +190,19 @@ double pyne::natural_abund(int nuc) {
   na = 0.0;
   natural_abund_map[nuc] = na;
   return na;
-};
+}
 
 
 double pyne::natural_abund(char * nuc) {
   int nuc_zz = nucname::id(nuc);
   return natural_abund(nuc_zz);
-};
+}
 
 
 double pyne::natural_abund(std::string nuc) {
   int nuc_zz = nucname::id(nuc);
   return natural_abund(nuc_zz);
-};
+}
 
 
 
@@ -247,7 +250,7 @@ void pyne::_load_q_val_map() {
   }
 
   delete[] q_val_array;
-};
+}
 
 std::map<int, double> pyne::q_val_map = std::map<int, double>();
 
@@ -277,19 +280,19 @@ double pyne::q_val(int nuc) {
   qv = 0.0;
   q_val_map[nuc] = qv;
   return qv;
-};
+}
 
 
 double pyne::q_val(const char * nuc) {
   int nuc_zz = nucname::id(nuc);
   return q_val(nuc_zz);
-};
+}
 
 
 double pyne::q_val(std::string nuc) {
   int nuc_zz = nucname::id(nuc);
   return q_val(nuc_zz);
-};
+}
 
 
 /****************************/
@@ -313,7 +316,7 @@ double pyne::gamma_frac(int nuc) {
   if (gamma_frac_map.empty()) {
       _load_q_val_map();
       return gamma_frac(nuc);
-  };
+  }
 
   double gf;
   int nucid = nucname::id(nuc);
@@ -324,19 +327,19 @@ double pyne::gamma_frac(int nuc) {
   gf = 0.0;
   gamma_frac_map[nucid] = gf;
   return gf;
-};
+}
 
 
 double pyne::gamma_frac(const char * nuc) {
   int nuc_zz = nucname::id(nuc);
   return gamma_frac(nuc_zz);
-};
+}
 
 
 double pyne::gamma_frac(std::string nuc) {
   int nuc_zz = nucname::id(nuc);
   return gamma_frac(nuc_zz);
-};
+}
 
 
 /*****************************/
@@ -399,7 +402,7 @@ void pyne::_load_dose_map(std::map<int, dose>& dm, std::string source_path) {
   // Put array of structs in the map
   for (int n = 0; n < dose_length; n++) {
     dm[dose_array[n].nuc] = dose_array[n];
-  };
+  }
 
   // Close the nuc_data library
   H5Dclose(dose_set);
@@ -407,7 +410,7 @@ void pyne::_load_dose_map(std::map<int, dose>& dm, std::string source_path) {
   H5Fclose(nuc_data_h5);
 
   delete[] dose_array;
-};
+}
 
 ///
 /// Functions for Source Location in nuc_data.h5
@@ -424,7 +427,7 @@ std::string source_string(int source) {
     source_location = "/dose_factors/EPA";
   }
   return source_location;
-};
+}
 
 std::map<int, pyne::dose>& dose_source_map(int source) {
   std::map<int, pyne::dose>* dm;
@@ -440,7 +443,7 @@ std::map<int, pyne::dose>& dose_source_map(int source) {
       _load_dose_map(*dm, source_path);
   }
   return *dm;
-};
+}
 
 std::map<int, pyne::dose> pyne::epa_dose_map;
 std::map<int, pyne::dose> pyne::doe_dose_map;
@@ -461,18 +464,18 @@ double pyne::ext_air_dose(int nuc, int source) {
   } else {
     return -1;
   }
-};
+}
 
 double pyne::ext_air_dose(const char * nuc, int source) {
   int nuc_zz = nucname::id(nuc);
   return ext_air_dose(nuc_zz, source);
-};
+}
 
 
 double pyne::ext_air_dose(std::string nuc, int source) {
   int nuc_zz = nucname::id(nuc);
   return ext_air_dose(nuc_zz, source);
-};
+}
 
 /// Dose Ratio
 double pyne::dose_ratio(int nuc, int source) {
@@ -484,18 +487,18 @@ double pyne::dose_ratio(int nuc, int source) {
   } else {
     return -1;
   }
-};
+}
 
 double pyne::dose_ratio(const char * nuc, int source) {
   int nuc_zz = nucname::id(nuc);
   return dose_ratio(nuc_zz, source);
-};
+}
 
 
 double pyne::dose_ratio(std::string nuc, int source) {
   int nuc_zz = nucname::id(nuc);
   return dose_ratio(nuc_zz, source);
-};
+}
 
 ///
 /// Function for External Soil Dose Factors
@@ -510,18 +513,18 @@ double pyne::ext_soil_dose(int nuc, int source) {
   } else {
     return -1;
   }
-};
+}
 
 double pyne::ext_soil_dose(const char * nuc, int source) {
   int nuc_zz = nucname::id(nuc);
   return ext_soil_dose(nuc_zz, source);
-};
+}
 
 
 double pyne::ext_soil_dose(std::string nuc, int source) {
   int nuc_zz = nucname::id(nuc);
   return ext_soil_dose(nuc_zz, source);
-};
+}
 
 ///
 /// Functions for Ingestion Dose Factors and
@@ -538,18 +541,17 @@ double pyne::ingest_dose(int nuc, int source) {
   } else {
     return -1;
   }
-};
+}
 
 double pyne::ingest_dose(const char * nuc, int source) {
   int nuc_zz = nucname::id(nuc);
   return ingest_dose(nuc_zz, source);
-};
-
+}
 
 double pyne::ingest_dose(std::string nuc, int source) {
   int nuc_zz = nucname::id(nuc);
   return ingest_dose(nuc_zz, source);
-};
+}
 
 /// Fluid Fraction
 double pyne::dose_fluid_frac(int nuc, int source) {
@@ -561,18 +563,17 @@ double pyne::dose_fluid_frac(int nuc, int source) {
   } else {
     return -1;
   }
-};
+}
 
 double pyne::dose_fluid_frac(const char * nuc, int source) {
   int nuc_zz = nucname::id(nuc);
   return dose_fluid_frac(nuc_zz, source);
-};
-
+}
 
 double pyne::dose_fluid_frac(std::string nuc, int source) {
   int nuc_zz = nucname::id(nuc);
   return dose_fluid_frac(nuc_zz, source);
-};
+}
 
 ///
 /// Functions for Inhalation Dose Factors and
@@ -589,18 +590,17 @@ double pyne::inhale_dose(int nuc, int source) {
   } else {
     return -1;
   }
-};
+}
 
 double pyne::inhale_dose(const char * nuc, int source) {
   int nuc_zz = nucname::id(nuc);
   return inhale_dose(nuc_zz, source);
-};
-
+}
 
 double pyne::inhale_dose(std::string nuc, int source) {
   int nuc_zz = nucname::id(nuc);
   return inhale_dose(nuc_zz, source);
-};
+}
 
 /// Lung Model
 std::string pyne::dose_lung_model(int nuc, int source) {
@@ -612,18 +612,18 @@ std::string pyne::dose_lung_model(int nuc, int source) {
   } else {
     return "Nada";
   }
-};
+}
 
 std::string pyne::dose_lung_model(const char * nuc, int source) {
   int nuc_zz = nucname::id(nuc);
   return dose_lung_model(nuc_zz, source);
-};
+}
 
 
 std::string pyne::dose_lung_model(std::string nuc, int source) {
   int nuc_zz = nucname::id(nuc);
   return dose_lung_model(nuc_zz, source);
-};
+}
 
 
 /***********************************/
@@ -679,10 +679,10 @@ void pyne::_load_scattering_lengths() {
   for(int n = 0; n < scat_len_length; n++) {
     b_coherent_map[scat_len_array[n].nuc] = scat_len_array[n].b_coherent;
     b_incoherent_map[scat_len_array[n].nuc] = scat_len_array[n].b_incoherent;
-  };
+  }
 
   delete[] scat_len_array;
-};
+}
 
 
 
@@ -707,7 +707,7 @@ xd_complex_t pyne::b_coherent(int nuc) {
   if (b_coherent_map.empty()) {
     _load_scattering_lengths();
     return b_coherent(nuc);
-  };
+  }
 
   xd_complex_t bc;
   int nucid = nucname::id(nuc);
@@ -721,9 +721,9 @@ xd_complex_t pyne::b_coherent(int nuc) {
       bc = (*nuc_iter).second;
       b_coherent_map[nuc] = bc;
       return bc;
-    };
+    }
     nuc_iter++;
-  };
+  }
 
   // Try to find a nuclide with matching Z-number
   nuc_iter = b_coherent_map.begin();
@@ -732,9 +732,9 @@ xd_complex_t pyne::b_coherent(int nuc) {
       bc = (*nuc_iter).second;
       b_coherent_map[nuc] = bc;
       return bc;
-    };
+    }
     nuc_iter++;
-  };
+  }
 
   // Finally, if none of these work,
   // just return zero...
@@ -742,19 +742,19 @@ xd_complex_t pyne::b_coherent(int nuc) {
   bc.im = 0.0;
   b_coherent_map[nuc] = bc;
   return bc;
-};
+}
 
 
 xd_complex_t pyne::b_coherent(char * nuc) {
   int nuc_zz = nucname::id(nuc);
   return b_coherent(nuc_zz);
-};
+}
 
 
 xd_complex_t pyne::b_coherent(std::string nuc) {
   int nuc_zz = nucname::id(nuc);
   return b_coherent(nuc_zz);
-};
+}
 
 
 
@@ -779,7 +779,7 @@ xd_complex_t pyne::b_incoherent(int nuc) {
   if (b_incoherent_map.empty()) {
     _load_scattering_lengths();
     return b_incoherent(nuc);
-  };
+  }
 
   xd_complex_t bi;
   int nucid = nucname::id(nuc);
@@ -793,9 +793,9 @@ xd_complex_t pyne::b_incoherent(int nuc) {
       bi = (*nuc_iter).second;
       b_incoherent_map[nuc] = bi;
       return bi;
-    };
+    }
     nuc_iter++;
-  };
+  }
 
   // Try to find a nuclide with matching Z-number
   nuc_iter = b_incoherent_map.begin();
@@ -804,9 +804,9 @@ xd_complex_t pyne::b_incoherent(int nuc) {
       bi = (*nuc_iter).second;
       b_incoherent_map[nuc] = bi;
       return bi;
-    };
+    }
     nuc_iter++;
-  };
+  }
 
   // Finally, if none of these work,
   // just return zero...
@@ -814,17 +814,17 @@ xd_complex_t pyne::b_incoherent(int nuc) {
   bi.im = 0.0;
   b_incoherent_map[nuc] = bi;
   return bi;
-};
+}
 
 
 xd_complex_t pyne::b_incoherent(char * nuc) {
   return b_incoherent(nucname::id(nuc));
-};
+}
 
 
 xd_complex_t pyne::b_incoherent(std::string nuc) {
   return b_incoherent(nucname::id(nuc));
-};
+}
 
 
 
@@ -850,19 +850,19 @@ double pyne::b(int nuc) {
   double b_val = sqrt(bc.re*bc.re + bc.im*bc.im + bi.re*bi.re + bi.im*bi.im);
 
   return b_val;
-};
+}
 
 
 double pyne::b(char * nuc) {
   int nucid = nucname::id(nuc);
   return b(nucid);
-};
+}
 
 
 double pyne::b(std::string nuc) {
   int nucid = nucname::id(nuc);
   return b(nucid);
-};
+}
 
 
 
@@ -914,10 +914,10 @@ void pyne::_load_wimsdfpy() {
   for(int n=0; n < wimsdfpy_length; n++) {
     wimsdfpy_data[std::make_pair(wimsdfpy_array[n].from_nuc,
       wimsdfpy_array[n].to_nuc)] = wimsdfpy_array[n].yields;
-  };
+  }
 
   delete[] wimsdfpy_array;
-};
+}
 
 
 std::map<std::pair<int, int>, pyne::ndsfpysub> pyne::ndsfpy_data = \
@@ -983,12 +983,12 @@ void pyne::_load_ndsfpy() {
     ndsfpysub_temp.yield_14MeV_err = ndsfpy_array[n].yield_14MeV_err;
     ndsfpy_data[std::make_pair(ndsfpy_array[n].from_nuc,
       ndsfpy_array[n].to_nuc)] = ndsfpysub_temp;
-  };
+  }
 
 
 
   delete[] ndsfpy_array;
-};
+}
 
 double pyne::fpyield(std::pair<int, int> from_to, int source, bool get_error) {
   // Note that this may be expanded eventually to include other
@@ -1043,23 +1043,23 @@ double pyne::fpyield(std::pair<int, int> from_to, int source, bool get_error) {
   double fpy = 0.0;
   wimsdfpy_data[from_to] = fpy;
   return fpy;
-};
+}
 
 double pyne::fpyield(int from_nuc, int to_nuc, int source, bool get_error) {
   return fpyield(std::pair<int, int>(nucname::id(from_nuc),
                                      nucname::id(to_nuc)), source, get_error);
-};
+}
 
 double pyne::fpyield(char * from_nuc, char * to_nuc, int source, bool get_error) {
   return fpyield(std::pair<int, int>(nucname::id(from_nuc),
                                      nucname::id(to_nuc)), source, get_error);
-};
+}
 
 double pyne::fpyield(std::string from_nuc, std::string to_nuc, int source,
                      bool get_error) {
   return fpyield(std::pair<int, int>(nucname::id(from_nuc),
                                      nucname::id(to_nuc)), source, get_error);
-};
+}
 
 
 /***********************/
@@ -1074,7 +1074,7 @@ bool pyne::swapmapcompare::operator()(const std::pair<int, double>& lhs,
 const std::pair<int, double>& rhs) const {
     return lhs.second<rhs.second || (!(rhs.second<lhs.second) &&
       lhs.first<rhs.first);
-};
+}
 
 template<typename T, typename U> std::vector<T> pyne::data_access(
 double energy_min, double energy_max, size_t valoffset, std::map<std::pair<int,
@@ -1103,9 +1103,9 @@ double>, U>  &data) {
   {
     _load_data<U>();
     return data_access<T, U>(energy_min, energy_max, valoffset, data);
-  };
+  }
   return result;
-};
+}
 
 template<typename T, typename U> std::vector<T> pyne::data_access(int parent,
 double min, double max, size_t valoffset,
@@ -1126,9 +1126,9 @@ std::map<std::pair<int, double>, U>  &data) {
   {
     _load_data<U>();
     return data_access<T, U>(parent, min, max, valoffset, data);
-  };
+  }
   return result;
-};
+}
 
 template<typename T, typename U> T pyne::data_access(std::pair<int, int>
 from_to, size_t valoffset, std::map<std::pair<int, int>, U> &data) {
@@ -1148,7 +1148,7 @@ from_to, size_t valoffset, std::map<std::pair<int, int>, U> &data) {
   {
     _load_data<U>();
     return data_access<T, U>(from_to, valoffset, data);
-  };
+  }
   // This is okay for now because we only return ints and doubles
   return 0;
 }
@@ -1171,9 +1171,9 @@ size_t valoffset, std::map<std::pair<int, int>, U> &data){
   {
     _load_data<U>();
     return data_access<T, U>(parent, valoffset, data);
-  };
+  }
   return result;
-};
+}
 
 template<typename T, typename U> std::vector<T> pyne::data_access(int parent,
 size_t valoffset, std::map<std::pair<int, unsigned int>, U> &data){
@@ -1194,9 +1194,9 @@ size_t valoffset, std::map<std::pair<int, unsigned int>, U> &data){
   {
     _load_data<U>();
     return data_access<T, U>(parent, valoffset, data);
-  };
+  }
   return result;
-};
+}
 
 template<typename U> double pyne::data_access(int nuc,
 size_t valoffset, std::map<int, U> &data){
@@ -1214,9 +1214,9 @@ size_t valoffset, std::map<int, U> &data){
   {
     _load_data<U>();
     return data_access<U>(nuc, valoffset, data);
-  };
+  }
   throw pyne::nucname::NotANuclide(nuc, "");
-};
+}
 
 
 //
@@ -1444,17 +1444,17 @@ int pyne::id_from_level(int nuc, double level, std::string special) {
   int ret_id = nuc;
   for (std::map<std::pair<int, double>, level_data>::iterator it=nuc_lower;
        it!=nuc_upper; ++it) {
-    if ((abs(level - it->second.level) < minv) &&
+    if ((std::abs(level - it->second.level) < minv) &&
     ((char)it->second.special == special.c_str()[0]) &&
     !isnan(it->second.level)) {
-      minv = abs(level - it->second.level);
+      minv = std::abs(level - it->second.level);
       ret_id = it->second.nuc_id;
     }
   }
   // This value was chosen so important transitions in U-235 are not missed
   if (minv > 3.0)
     return -nuc;
-  else 
+  else
     return ret_id;
 }
 
@@ -1476,14 +1476,14 @@ int pyne::metastable_id(int nuc, int m) {
 
   nuc_lower = level_data_lvl_map.lower_bound(std::make_pair(nostate, 0.0));
   nuc_upper = level_data_lvl_map.upper_bound(std::make_pair(nostate+9999,
-  DBL_MAX));
+                                                            DBL_MAX));
   for (std::map<std::pair<int, double>, level_data>::iterator it=nuc_lower;
   it!=nuc_upper; ++it) {
     if (it->second.metastable == m)
         return it->second.nuc_id;
   }
 
-  return nuc;
+  return -1;
 }
 
 int pyne::metastable_id(int nuc) {
@@ -1507,12 +1507,15 @@ std::set<int> pyne::decay_children(int nuc) {
   for (; it != part.end(); ++it) {
     switch (*it) {
       case 36125: {
-        // internal conversion, rx == 'it'
+        // internal transition, rx == 'it'
         result.insert((nuc /10000) * 10000);
         break;
       }
-      case 36565: {
-        // spontaneous fission, rx == 'sf'
+      case 36565:
+      case 1794828612:
+      {
+        // spontaneous fission, rx == 'sf', 36565
+        // beta- & spontaneous fission, rx == 'b-sf', 1794828612
         std::map<std::pair<int, int>, double>::iterator sf = wimsdfpy_data.begin();
         for (; sf != wimsdfpy_data.end(); ++sf)
           if (sf->first.first == nuc)
@@ -1530,12 +1533,12 @@ std::set<int> pyne::decay_children(int nuc) {
 std::set<int> pyne::decay_children(char * nuc)
 {
   return decay_children(nucname::id(nuc));
-};
+}
 
 std::set<int> pyne::decay_children(std::string nuc)
 {
   return decay_children(nucname::id(nuc));
-};
+}
 
 //
 // Excitation state energy data
@@ -1553,13 +1556,13 @@ double pyne::state_energy(int nuc)
 double pyne::state_energy(char * nuc)
 {
   return state_energy(nucname::id(nuc));
-};
+}
 
 
 double pyne::state_energy(std::string nuc)
 {
   return state_energy(nucname::id(nuc));
-};
+}
 
 
 //
@@ -1580,13 +1583,13 @@ double pyne::decay_const(int nuc)
 double pyne::decay_const(char * nuc) {
   int nuc_zz = nucname::id(nuc);
   return decay_const(nuc_zz);
-};
+}
 
 
 double pyne::decay_const(std::string nuc) {
   int nuc_zz = nucname::id(nuc);
   return decay_const(nuc_zz);
-};
+}
 
 
 //
@@ -1599,18 +1602,18 @@ double pyne::half_life(int nuc) {
         return result[0];
     }
     return 1.0/0.0;
-};
+}
 
 
 double pyne::half_life(char * nuc) {
   int nuc_zz = nucname::id(nuc);
   return half_life(nuc_zz);
-};
+}
 
 double pyne::half_life(std::string nuc) {
   int nuc_zz = nucname::id(nuc);
   return half_life(nuc_zz);
-};
+}
 
 
 //
@@ -1636,11 +1639,12 @@ double pyne::branch_ratio(std::pair<int, int> from_to) {
     if ((part1[i] == 36125) &&
         (groundstate(from_to.first) == groundstate(from_to.second)) &&
         (from_to.second % 10000 == 0)) {
-      // internal conversion, rx == 'it'
-      result = 1.0;
+      // internal transition, rx == 'it', 36125
+      result = part2[i] * 0.01;
       break;
-    } else if (part1[i] == 36565) {
-      // spontaneous fission, rx == 'sf'
+    } else if (part1[i] == 36565 || part1[i] == 1794828612) {
+      // spontaneous fission, rx == 'sf', 36565
+      // beta- & spontaneous fission, rx == 'b-sf', 1794828612
       result += part2[i] * 0.01 * wimsdfpy_data[from_to];
     } else if ((part1[i] != 0) && (groundstate(rxname::child(from_to.first,
                                    part1[i], "decay")) == from_to.second)) {
@@ -1653,17 +1657,17 @@ double pyne::branch_ratio(std::pair<int, int> from_to) {
 double pyne::branch_ratio(int from_nuc, int to_nuc) {
   return branch_ratio(std::pair<int, int>(nucname::id(from_nuc),
                                           nucname::id(to_nuc)));
-};
+}
 
 double pyne::branch_ratio(char * from_nuc, char * to_nuc) {
   return branch_ratio(std::pair<int, int>(nucname::id(from_nuc),
                                           nucname::id(to_nuc)));
-};
+}
 
 double pyne::branch_ratio(std::string from_nuc, std::string to_nuc) {
   return branch_ratio(std::pair<int, int>(nucname::id(from_nuc),
                                           nucname::id(to_nuc)));
-};
+}
 
 std::map<std::pair<int, int>, pyne::decay> pyne::decay_data = \
   std::map<std::pair<int, int>, pyne::decay>();
@@ -1742,7 +1746,7 @@ std::pair<double, double> pyne::decay_half_life(std::pair<int, int> from_to){
   return std::make_pair(data_access<double, decay>(from_to, offsetof(
    decay, half_life), decay_data), data_access<double, decay>(
    from_to, offsetof(decay, half_life_error), decay_data));
-};
+}
 
 std::vector<std::pair<double, double> >pyne::decay_half_lifes(int parent) {
   std::vector<std::pair<double, double> > result;
@@ -1760,7 +1764,7 @@ std::pair<double, double> pyne::decay_branch_ratio(std::pair<int, int> from_to) 
   return std::make_pair(data_access<double, decay>(from_to, offsetof(decay,
     branch_ratio), decay_data),data_access<double, decay>(from_to, offsetof(decay,
     branch_ratio_error), decay_data));
-};
+}
 
 std::vector<double> pyne::decay_branch_ratios(int parent) {
   return data_access<double, decay>(parent, offsetof(decay,
@@ -1773,7 +1777,7 @@ from_to) {
     offsetof(decay, photon_branch_ratio), decay_data),
     data_access<double, decay>(from_to, offsetof(decay,
     photon_branch_ratio_error), decay_data));
-};
+}
 
 std::vector<std::pair<double, double> >pyne::decay_photon_branch_ratios(
 int parent) {
@@ -1794,7 +1798,7 @@ from_to) {
     offsetof(decay, beta_branch_ratio), decay_data),
     data_access<double, decay>(from_to, offsetof(decay,
     beta_branch_ratio_error), decay_data));
-};
+}
 
 std::vector<std::pair<double, double> >pyne::decay_beta_branch_ratios(
 int parent) {
@@ -1894,7 +1898,7 @@ std::vector<std::pair<double, double> > pyne::gamma_energy(int parent) {
     result.push_back(std::make_pair(part1[i],part2[i]));
   }
   return result;
-};
+}
 
 std::vector<std::pair<double, double> > pyne::gamma_energy(double energy,
 double error) {
@@ -1907,7 +1911,7 @@ double error) {
     result.push_back(std::make_pair(part1[i],part2[i]));
   }
   return result;
-};
+}
 
 std::vector<std::pair<double, double> > pyne::gamma_photon_intensity(
 int parent) {
@@ -1920,7 +1924,7 @@ int parent) {
     result.push_back(std::make_pair(part1[i],part2[i]));
   }
   return result;
-};
+}
 
 std::vector<std::pair<double, double> > pyne::gamma_photon_intensity(
 double energy, double error) {
@@ -1933,7 +1937,7 @@ double energy, double error) {
     result.push_back(std::make_pair(part1[i],part2[i]));
   }
   return result;
-};
+}
 
 std::vector<std::pair<double, double> > pyne::gamma_conversion_intensity(
 int parent) {
@@ -1946,7 +1950,7 @@ int parent) {
     result.push_back(std::make_pair(part1[i],part2[i]));
   }
   return result;
-};
+}
 
 std::vector<std::pair<double, double> > pyne::gamma_total_intensity(
 int parent) {
@@ -1959,7 +1963,7 @@ int parent) {
     result.push_back(std::make_pair(part1[i],part2[i]));
   }
   return result;
-};
+}
 
 std::vector<std::pair<int, int> > pyne::gamma_from_to(int parent) {
   std::vector<std::pair<int, int> > result;
@@ -1971,7 +1975,7 @@ std::vector<std::pair<int, int> > pyne::gamma_from_to(int parent) {
     result.push_back(std::make_pair(part1[i],part2[i]));
   }
   return result;
-};
+}
 
 std::vector<std::pair<int, int> > pyne::gamma_from_to(double energy,
 double error) {
@@ -1984,7 +1988,7 @@ double error) {
     result.push_back(std::make_pair(part1[i],part2[i]));
   }
   return result;
-};
+}
 
 
 std::vector<std::pair<int, int> > pyne::gamma_parent_child(double energy,
@@ -1998,22 +2002,22 @@ double error) {
     result.push_back(std::make_pair(part1[i],part2[i]));
   }
   return result;
-};
+}
 
 std::vector<int> pyne::gamma_parent(double energy, double error) {
   return data_access<int, gamma>(energy+error, energy-error,
     offsetof(gamma, parent_nuc), gamma_data);
-};
+}
 
 std::vector<int> pyne::gamma_child(double energy, double error) {
   return data_access<int, gamma>(energy+error, energy-error,
   offsetof(gamma, child_nuc), gamma_data);
-};
+}
 
 std::vector<int> pyne::gamma_child(int parent) {
   return data_access<int, gamma>(parent, 0.0, DBL_MAX,
   offsetof(gamma, child_nuc), gamma_data);
-};
+}
 
 std::vector<std::pair<double, double> > pyne::gamma_xrays(int parent) {
   std::vector<std::pair<double, double> > result;
@@ -2052,7 +2056,7 @@ std::vector<std::pair<double, double> > pyne::gamma_xrays(int parent) {
     }
   }
   return result;
-};
+}
 
 std::map<std::pair<int, double>, pyne::alpha> pyne::alpha_data;
 
@@ -2110,26 +2114,26 @@ template<> void pyne::_load_data<pyne::alpha>() {
 std::vector<double > pyne::alpha_energy(int parent){
   return data_access<double, alpha>(parent, 0.0, DBL_MAX,
                      offsetof(alpha,energy), alpha_data);
-};
+}
 std::vector<double> pyne::alpha_intensity(int parent){
   return data_access<double, alpha>(parent, 0.0, DBL_MAX,
                      offsetof(alpha,intensity), alpha_data);
-};
+}
 
 std::vector<int> pyne::alpha_parent(double energy, double error) {
   return data_access<int, alpha>(energy+error, energy-error,
                      offsetof(alpha, from_nuc), alpha_data);
-};
+}
 
 std::vector<int> pyne::alpha_child(double energy, double error) {
   return data_access<int, alpha>(energy+error, energy-error,
                      offsetof(alpha, to_nuc), alpha_data);
-};
+}
 
 std::vector<int> pyne::alpha_child(int parent){
   return data_access<int, alpha>(parent, 0.0, DBL_MAX,
                      offsetof(alpha, to_nuc), alpha_data);
-};
+}
 
 std::map<std::pair<int, double>, pyne::beta> pyne::beta_data;
 
@@ -2188,32 +2192,32 @@ template<> void pyne::_load_data<pyne::beta>() {
 std::vector<double > pyne::beta_endpoint_energy(int parent){
   return data_access<double, beta>(parent, 0.0, DBL_MAX,
                      offsetof(beta, endpoint_energy), beta_data);
-};
+}
 
 std::vector<double > pyne::beta_average_energy(int parent){
   return data_access<double, beta>(parent, 0.0, DBL_MAX,
                      offsetof(beta, avg_energy), beta_data);
-};
+}
 
 std::vector<double> pyne::beta_intensity(int parent){
   return data_access<double, beta>(parent, 0.0, DBL_MAX,
                      offsetof(beta, intensity), beta_data);
-};
+}
 
 std::vector<int> pyne::beta_parent(double energy, double error) {
   return data_access<int, beta>(energy+error, energy-error,
                      offsetof(beta, from_nuc), beta_data);
-};
+}
 
 std::vector<int> pyne::beta_child(double energy, double error) {
   return data_access<int, beta>(energy+error, energy-error,
                      offsetof(beta, to_nuc), beta_data);
-};
+}
 
 std::vector<int> pyne::beta_child(int parent){
   return data_access<int, beta>(parent, 0.0, DBL_MAX,
                      offsetof(beta, to_nuc),beta_data);
-};
+}
 
 
 std::map<std::pair<int, double>, pyne::ecbp> pyne::ecbp_data;
@@ -2280,37 +2284,37 @@ template<> void pyne::_load_data<pyne::ecbp>() {
 std::vector<double > pyne::ecbp_endpoint_energy(int parent){
   return data_access<double, ecbp>(parent, 0.0, DBL_MAX,
                      offsetof(ecbp,endpoint_energy), ecbp_data);
-};
+}
 
 std::vector<double > pyne::ecbp_average_energy(int parent){
   return data_access<double, ecbp>(parent, 0.0, DBL_MAX,
                      offsetof(ecbp, avg_energy), ecbp_data);
-};
+}
 
 std::vector<double> pyne::ec_intensity(int parent){
   return data_access<double, ecbp>(parent, 0.0, DBL_MAX,
                      offsetof(ecbp, ec_intensity), ecbp_data);
-};
+}
 
 std::vector<double> pyne::bp_intensity(int parent){
   return data_access<double, ecbp>(parent, 0.0, DBL_MAX,
                      offsetof(ecbp, beta_plus_intensity), ecbp_data);
-};
+}
 
 std::vector<int> pyne::ecbp_parent(double energy, double error) {
   return data_access<int, ecbp>(energy+error, energy-error,
                      offsetof(ecbp, from_nuc), ecbp_data);
-};
+}
 
 std::vector<int> pyne::ecbp_child(double energy, double error) {
   return data_access<int, ecbp>(energy+error, energy-error,
                      offsetof(ecbp, to_nuc), ecbp_data);
-};
+}
 
 std::vector<int> pyne::ecbp_child(int parent){
   return data_access<int, ecbp>(parent, 0.0, DBL_MAX,
                      offsetof(ecbp, to_nuc), ecbp_data);
-};
+}
 
 std::vector<std::pair<double, double> > pyne::ecbp_xrays(int parent) {
   std::vector<std::pair<double, double> > result;
@@ -2349,7 +2353,7 @@ std::vector<std::pair<double, double> > pyne::ecbp_xrays(int parent) {
     }
   }
   return result;
-};
+}
 
 ///////////////////////////
 /// Combined decay data ///
@@ -2489,7 +2493,7 @@ std::vector<std::pair<double, double> > pyne::xrays(int parent) {
   for(int i = 0; i < result.size(); ++i)
     result[i].second = result[i].second * decay_c;
   return result;
-};
+}
 
 //////////////////////////////////////////
 //////////// simple xs data //////////////

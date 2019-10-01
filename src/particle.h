@@ -178,23 +178,23 @@ namespace particle
     NotAParticle(std::string particle_name)
     {
        part_name = particle_name;
-    };
+    }
 
     /// raises error message
     virtual const char* what() const throw()
     {
       std::string pname ("Not a valid particle name ");
       if(!part_name.empty())
-	pname += part_name;
+        pname += part_name;
       return (const char *) pname.c_str();
-    };
+    }
 
     private:
        std::string part_name;  /// the particle name
 
 
   };
-};
-};
+}
+}
 
 #endif

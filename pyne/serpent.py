@@ -2,12 +2,12 @@ import re
 import sys
 from warnings import warn
 from pyne.utils import QAWarning
-
+ 
 import numpy as np
 
 if sys.version_info[0] > 2:
     basestring = str
-
+    
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 _if_idx_str_serpent1 = (
@@ -43,6 +43,13 @@ _detector_pattern = r"(DET\w+)\s*=\s*np.array\("
 
 _detector_pattern_all = r"(DET\w+)\s*=\s*"
 
+_imaterial_line_pattern = r"(i[a-zA-Z]\w+)\s*=\s*\d*;"
+
+def _delete_imaterial(s):
+    """"Remove imaterial information from the top of Serpent2 *_dep.m file started from 'i' with nothing."""
+    s = re.sub(_imaterial_line_pattern,
+               '', s)
+    return s
 
 def _replace_comments(s):
     """Replaces matlab comments with python arrays in string s."""
@@ -206,12 +213,15 @@ def parse_dep(depfile, write_py=False, make_mats=True):
     else:
         f = depfile.read()
 
+    # Remove imaterial information from the top of Serpent2 *_dep.m file
+    f = _delete_imaterial(f)
+    
     # Keep comments around
     f = _replace_comments(f)
 
     # Replace matlab Arrays
     f = _replace_arrays(f)
-
+    
     # Now to find and convert arrays that have comments in them
     comment_arrays = re.findall("(" + _comment_array_pattern + ")", f)
     for ca in comment_arrays:
@@ -331,8 +341,10 @@ def parse_det(detfile, write_py=False):
                 f += '{name}.shape = ({name_min_E}_EBINS, 3)\n'.format(name=dn,
                                                             name_min_E=dn[:-1])
         else:
-            if (dn + 'E' in det_names) or (dn + 'T' in det_names):
+            if (dn + 'T' in det_names):
                 f += '{name}.shape = (len({name})//13, 13)\n'.format(name=dn)
+            elif (dn + 'E' in det_names):
+                f += '{name}.shape = (len({name})//12, 12)\n'.format(name=dn)
             else:
                 f += '{name}.shape = (len({name})//3, 3)\n'.format(name=dn)
 

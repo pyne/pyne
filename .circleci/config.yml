@@ -1,0 +1,347 @@
+version: 2.1
+# Executors:
+# Alias the environment on which run the different jobs
+# i.e. in this case, docker image in which the jobs will be run
+executors:
+    py2:
+        docker:
+            - image: pyne/ubuntu_18.04_py2_pyne-deps:latest
+    py2_dagmc:
+        docker:
+            - image: pyne/ubuntu_18.04_py2_dagmc_pyne-deps:latest
+    py2_pymoab:
+        docker:
+            - image: pyne/ubuntu_18.04_py2_pymoab_pyne-deps:latest
+    py2_dagmc_pymoab:
+        docker:
+            - image: pyne/ubuntu_18.04_py2_dagmc_pymoab_pyne-deps:latest
+    py3:
+        docker:
+            - image: pyne/ubuntu_18.04_py3_pyne-deps:latest
+    py3_dagmc:
+        docker:
+            - image: pyne/ubuntu_18.04_py3_dagmc_pyne-deps:latest
+    py3_pymoab:
+        docker:
+            - image: pyne/ubuntu_18.04_py3_pymoab_pyne-deps:latest
+    py3_dagmc_pymoab:
+        docker:
+            - image: pyne/ubuntu_18.04_py3_dagmc_pymoab_pyne-deps:latest
+
+
+# Commands:
+# Define macros that will be used to build and test PyNE.
+# Save_container/pull_container:
+#   used to avoid repeting building PyNE for the testing jobs,
+#   it will only pull the saved container state...
+#
+# checkout_build:
+#   checkout the source code (usually the PR branch, and build
+#   PyNE, save the state of the container after the build
+#
+# run_test:
+#   load the PyNE build (built in checkout_build macro
+#   run the nose test
+commands:
+  # Save Container change
+  save_container:
+    description: "Save container state"
+    parameters:
+        build:
+          type: string
+          default: "build"
+    steps:
+      - run: echo $CIRCLE_SHA1 > .circle-sha
+      - save_cache:
+          key: v1-repo-<< parameters.build >>{{ checksum ".circle-sha" }}
+          paths:
+            - ~/
+
+  # Pull Container change
+  pull_container:
+    description: "Load container state"
+    parameters:
+        build:
+          type: string
+          default: "build"
+    steps:
+      - run: echo $CIRCLE_SHA1 > .circle-sha
+      - restore_cache:
+          keys:
+          key: v1-repo-<< parameters.build >>{{ checksum ".circle-sha" }}
+
+  # Checkout and build PyNE
+  checkout_build:
+    description: "Checkout PyNE, build with the provided flags"
+    parameters:
+      flags:
+        type: string
+        default: ""
+      build:
+          type: string
+          default: "build"
+    steps:
+      - checkout
+      - run: python setup.py install --user --clean << parameters.flags >>
+      - run: cd ../ && nuc_data_make ;
+      - save_container:
+          build: << parameters.build >>
+  
+  # Run PyNE test
+  run_test:
+    description: "Run tests"
+    parameters:
+      flags:
+        type: string
+        default: ""
+      build:
+          type: string
+          default: "build"
+    steps:
+      - pull_container:
+          build: << parameters.build >>
+      - run: |
+          cd ~/repo/tests
+          ./travis-run-tests.sh << parameters.flags >>
+
+  # Build and push PyNE website
+  website_build_push:
+    description: "build PyNE website and push it either on the test branch (default) or on the deployed branch"
+    parameters:
+      push_option:
+          type: string
+          default: "test"
+    steps:
+      - pull_container:
+          build: "python2_dagmc_pymoab"
+      - add_ssh_keys:
+          fingerprints:
+            - $PYNE_KEY_FINGERPRINT
+      - run:
+          command: |
+              git config --global user.email "pyne-dev@googlegroups.com"
+              git config --global user.name "report errors on github.com/PyNE/PyNE"
+      - run:
+          name: Build PyNE website
+          command: |
+              cd docs/
+              make html
+              make push-<< parameters.push_option >>
+
+# Jobs part:
+# Define the different job that will be ran this separate building form
+# testing for each configuration allowing to get more information out of the CI
+jobs:
+# news file checker
+  news_update:
+    executor: 
+      name: py3
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - run:
+          name: Checking News Update
+          command: news/news_test.sh news
+ 
+# Python 3 jobs
+  py3_build:
+    executor:
+      name: py3
+    working_directory: ~/repo
+    steps:
+      - checkout_build:
+          flags: ""
+          build: "python3"
+  py3_test:
+    executor:
+      name: py3
+    working_directory: ~/repo
+    steps:
+      - run_test:
+          flags: "python3"
+          build: "python3"
+
+  py3_pymoab_build:
+    executor:
+      name: py3_pymoab
+    working_directory: ~/repo
+    steps:
+      - checkout_build:
+          flags: "--moab $HOME/opt/moab"
+          build: "python3_pymoab"
+  py3_pymoab_test:
+    executor:
+      name: py3_pymoab
+    working_directory: ~/repo
+    steps:
+      - run_test:
+          flags: "python3"
+          build: "python3_pymoab"
+
+  py3_dagmc_pymoab_build:
+    executor:
+      name: py3_dagmc_pymoab
+    working_directory: ~/repo
+    steps:
+      - checkout_build:
+          flags: "--moab $HOME/opt/moab --dagmc $HOME/opt/dagmc"
+          build: "python3_dagmc_pymoab"
+  py3_dagmc_pymoab_test:
+    executor:
+      name: py3_dagmc_pymoab
+    working_directory: ~/repo
+    steps:
+      - run_test:
+          flags: "python3"
+          build: "python3_dagmc_pymoab"
+
+
+# Python 2 jobs
+# without optional depedencies
+  py2_build:
+    executor:
+      name: py2
+    working_directory: ~/repo
+    steps:
+      - checkout_build:
+          flags: ""
+          build: "python2"
+  py2_test:
+    executor:
+      name: py2
+    working_directory: ~/repo
+    steps:
+      - run_test:
+          flags: "python2"
+          build: "python2"
+
+# With PyMOAB
+  py2_pymoab_build:
+    executor:
+      name: py2_pymoab
+    working_directory: ~/repo
+    steps:
+      - checkout_build:
+          flags: "--moab $HOME/opt/moab"
+          build: "python2_pymoab"
+  py2_pymoab_test:
+    executor:
+      name: py2_pymoab
+    working_directory: ~/repo
+    steps:
+      - run_test:
+          flags: "python2"
+          build: "python2_pymoab"
+
+# With PyMOAB & DAGMC
+  py2_dagmc_pymoab_build:
+    executor:
+      name: py2_dagmc_pymoab
+    working_directory: ~/repo
+    steps:
+      - checkout_build:
+          flags: "--moab $HOME/opt/moab --dagmc $HOME/opt/dagmc"
+          build: "python2_dagmc_pymoab"
+  py2_dagmc_pymoab_test:
+    executor:
+      name: py2_dagmc_pymoab
+    working_directory: ~/repo
+    steps:
+      - run_test:
+          flags: "python2"
+          build: "python2_dagmc_pymoab"
+
+# Website
+# Build and push the website
+  build_push_website_test:
+    executor:
+      name: py2_dagmc_pymoab
+    working_directory: ~/repo
+    steps:
+      - website_build_push:
+          push_option: "test"
+
+  build_push_website_deploy:
+    executor:
+      name: py2_dagmc_pymoab
+    working_directory: ~/repo
+    steps:
+      - website_build_push:
+          push_option: "root"
+
+
+# Workflow part:
+# This part defines the list of the jobs that will be ran and in which sequence.
+# The goal was to avoid running advanced configuration if PyNE does not work
+# with limited amount of dependencies.
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - news_update:
+          filters:
+            branches:
+              ignore: develop
+            tags:
+              ignore: /.*/   
+      
+      - py3_build
+      - py3_test:
+          requires:
+            - py3_build
+
+      - py3_pymoab_build:
+          requires:
+            - py3_build
+      - py3_pymoab_test:
+          requires:
+            - py3_pymoab_build
+
+      - py3_dagmc_pymoab_build:
+          requires:
+            - py3_pymoab_build
+      - py3_dagmc_pymoab_test:
+          requires:
+            - py3_dagmc_pymoab_build
+
+      - py2_build
+      - py2_test:
+          requires:
+            - py2_build
+
+      - py2_pymoab_build:
+          requires:
+            - py2_build
+      - py2_pymoab_test:
+          requires:
+            - py2_pymoab_build
+
+      - py2_dagmc_pymoab_build:
+          requires:
+            - py2_pymoab_build
+      - py2_dagmc_pymoab_test:
+          requires:
+            - py2_dagmc_pymoab_build
+
+
+     # Build/Push test website
+      - build_push_website_test:
+          requires:
+            - py2_dagmc_pymoab_test
+            - py3_dagmc_pymoab_test
+          filters:
+            branches:
+              only:
+                - develop
+
+
+      # only done on tags
+      - build_push_website_deploy:
+          requires:
+            - py2_dagmc_pymoab_test
+            - py3_dagmc_pymoab_test
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /.*/

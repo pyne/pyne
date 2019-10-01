@@ -13,15 +13,15 @@ from libcpp.string cimport string as std_string
 import os
 import json
 
-# local imports 
+# local imports
 cimport cpp_utils
 import pyne.__init__
 
-prefix = os.path.dirname(pyne.__init__.__file__)
-
-lib = os.path.abspath(os.path.join(prefix, '..', '..', '..', '..', 'lib'))
-includes = os.path.abspath(os.path.join(prefix, '..', '..', '..', '..', 'include'))
-nuc_data = os.path.join(prefix, 'nuc_data.h5')
+pyne_dir = os.path.dirname(pyne.__init__.__file__)
+prefix = os.path.abspath(os.path.join(pyne_dir, '..', '..', '..', '..'))
+lib = os.path.join(prefix, 'lib')
+includes = os.path.join(prefix, 'include', 'pyne')
+nuc_data = os.path.join(pyne_dir, 'nuc_data.h5')
 
 
 ####################################
@@ -30,18 +30,17 @@ nuc_data = os.path.join(prefix, 'nuc_data.h5')
 
 # Expose the C-code start up routine
 def pyne_start():
-    # Specifiy the BRIGHT_DATA directory
     if "PYNE_DATA" not in os.environ:
-        os.environ['PYNE_DATA'] = prefix
+        os.environ['PYNE_DATA'] = pyne_dir
 
-    # Specifiy the NUC_DATA_PATH 
+    # Specifiy the NUC_DATA_PATH
     if "NUC_DATA_PATH" not in os.environ:
         os.environ['NUC_DATA_PATH'] = nuc_data
 
     libdll = 'dll' if os.name == 'nt' else 'lib'
     ldpath = 'PATH' if os.name == 'nt' else 'LD_LIBRARY_PATH'
     sepcha = ';' if os.name == 'nt' else ':'
-    
+
     # Call the C-version of pyne_start
     cpp_utils.pyne_start()
 

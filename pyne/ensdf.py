@@ -2,13 +2,14 @@ from __future__ import division
 import re
 import sys
 import copy
+from collections import defaultdict
 from warnings import warn
 from pyne.utils import QAWarning
+from pyne.utils import time_conv_dict
 
 import numpy as np
 
 from pyne import nucname, rxname, data
-from pyne.utils import to_sec
 
 if sys.version_info[0] > 2:
     basestring = str
@@ -68,6 +69,62 @@ def _to_id(nuc):
     return nucid
 
 
+# Energy to half-life conversion:  T1/2= ln(2) × (h/2 pi) / energy
+# See http://www.nndc.bnl.gov/nudat2/help/glossary.jsp#halflife
+# NIST CODATA https://physics.nist.gov/cgi-bin/cuu/Value?hbar
+#    h-bar = 1.054 571 800(13) x 1e-34 J
+#    1 J = 6.241 509 126(38) x 1e18 eV
+HBAR_LN2 = 4.5623775832376968e-16  # h-bar ln(2) in eV s
+energy_conv_dict = {'ev': HBAR_LN2,
+                    'kev': 1e-3 * HBAR_LN2,
+                    'mev': 1e-6 * HBAR_LN2,
+                    }
+
+
+def _halflife_to_seconds(value, err, units):
+    """Converts a halflife with err and units to seconds.
+
+    Parameters
+    ----------
+    value: number
+        Time or energy, depending on units.
+    err : number or (number, number)
+        Uncertainty, or (plus, minus) uncertainty in [units].
+    units : str
+        Units flag, eg 'min', 'ms', 'days', or even 'MeV'.
+
+    Returns
+    -------
+    sec_time : float
+        Time value in [sec].
+    sec_err : None or float or (float, float) in [sec].
+        Time uncertainty in [sec], or (plus, minus) if asymmetric uncertainty.
+    """
+    if err is None:
+        plus, minus = 0, 0
+    elif np.isscalar(err):
+        plus, minus = err, err
+    else:
+        plus, minus = err
+
+    units = units.lower()
+    scale = time_conv_dict.get(units, None)
+    if scale is not None:
+        sec_time = scale * value
+        sec_err = (scale * plus, scale * minus)
+    else:
+        scale = energy_conv_dict[units]
+        sec_time = scale / value
+        sec_err = (scale / max(0.1*value, value - minus) - sec_time,
+                   sec_time - scale / (value + plus))
+    if err is None:
+        return sec_time, None
+    elif sec_err[0] == sec_err[1]:
+        return sec_time, sec_err[0]
+    else:
+        return sec_time, sec_err
+
+
 def _to_time(tstr, errstr):
     t = tstr.strip()
     # This accepts questionable levels
@@ -75,13 +132,8 @@ def _to_time(tstr, errstr):
     tobj = [s.strip(' ()') for s in t.split()]
     if len(tobj) == 2:
         t, t_unit = tobj
-        t, terr = _get_val_err(t, errstr)
-        tfinal = to_sec(t, t_unit)
-        tfinalerr = None
-        if type(terr) == float:
-            tfinalerr = to_sec(terr, t_unit)
-        elif terr is not None:
-            tfinalerr = to_sec(terr[0], t_unit), to_sec(terr[1], t_unit)
+        value, err = _get_val_err(t, errstr)
+        tfinal, tfinalerr = _halflife_to_seconds(value, err, t_unit)
     elif 'STABLE' in t:
         tfinal = np.inf
         tfinalerr = None
@@ -613,14 +665,14 @@ def _parse_decay_dataset(lines, decay_s):
     ecbp = []
     ident = _ident.match(lines[0])
     daughter = ident.group(1)
-    daughter_id = _to_id(daughter)
+    daughter_id = abs(_to_id(daughter))
     parent = ident.group(2).split()[0]
     parent = parent.split('(')[0]
     parents = parent.split(',')
     if len(parents) > 1:
-        pfinal = _to_id(parents[0])
+        pfinal = abs(_to_id(parents[0]))
     else:
-        pfinal = _to_id(parents[0][:5])
+        pfinal = abs(_to_id(parents[0][:5]))
     tfinal = None
     tfinalerr = None
     nrbr = None
@@ -649,7 +701,7 @@ def _parse_decay_dataset(lines, decay_s):
             else:
                 bparent = parent2
             level = 0.0 if level is None else level
-            bdaughter = data.id_from_level(_to_id(daughter), level)
+            bdaughter = abs(data.id_from_level(_to_id(daughter), level))
             betas.append([bparent, bdaughter, dat[0], 0.0, dat[2]])
         bc_rec = _betac.match(line)
         if bc_rec is not None:
@@ -676,8 +728,8 @@ def _parse_decay_dataset(lines, decay_s):
             else:
                 aparent = parent2
             level = 0.0 if level is None else level
-            adaughter = data.id_from_level(_to_id(daughter), level)
-            alphas.append((aparent, adaughter, dat[0], dat[2]))
+            adaughter = abs(data.id_from_level(_to_id(daughter), level))
+            alphas.append([aparent, adaughter, dat[0], dat[2]])
         ec_rec = _ec.match(line)
         if ec_rec is not None:
             dat = _parse_ec_record(ec_rec)
@@ -686,7 +738,7 @@ def _parse_decay_dataset(lines, decay_s):
             else:
                 ecparent = parent2
             level = 0.0 if level is None else level
-            ecdaughter = data.id_from_level(_to_id(daughter), level)
+            ecdaughter = abs(data.id_from_level(_to_id(daughter), level))
             ecbp.append([ecparent, ecdaughter, dat[0], 0.0, dat[2], dat[4],
                          0, 0, 0])
             continue
@@ -697,11 +749,11 @@ def _parse_decay_dataset(lines, decay_s):
                 gparent = 0
                 gdaughter = 0
                 if level is not None:
-                    gparent = data.id_from_level(_to_id(daughter), level,
-                                                 special)
+                    gparent = abs(data.id_from_level(_to_id(daughter), level,
+                                                     special))
                     dlevel = level - dat[0]
-                    gdaughter = data.id_from_level(_to_id(daughter), dlevel,
-                                                   special)
+                    gdaughter = abs(data.id_from_level(_to_id(daughter), dlevel,
+                                                       special))
                 if parent2 is None:
                     gp2 = pfinal
                 else:
@@ -758,7 +810,7 @@ def _parse_decay_dataset(lines, decay_s):
                 tfinal = [t,]
                 tfinalerr = [terr,]
             parent2, t, terr, e, e_err, special = _parse_parent_record(p_rec)
-            parent2 = data.id_from_level(_to_id(parent2), e, special)
+            parent2 = abs(data.id_from_level(_to_id(parent2), e, special))
             if terr is not None and not isinstance(terr, float):
                 terr = (terr[0] + terr[1])/2.0
             if multi:
@@ -780,6 +832,96 @@ def _parse_decay_dataset(lines, decay_s):
                br, br_err, nrbr, nrbr_err, nbbr, nbbr_err, gammarays, alphas, \
                betas, ecbp
     return None
+
+
+_BAD_RX = frozenset([
+    # Be-6 doesn't really alpha decay (leaving He-2), rather it emits 2p
+    (40060000, 1089),
+    # Li-8 -> He-4 + beta- + alpha is really a shortcut for
+    # Li-8 -> Be-8 + beta- -> He-4 + alpha
+    (30080000, 1355894000),
+    ])
+
+
+def _adjust_ge100_branches(levellist):
+    """This adjust branches that are greater than or equal to 100% to be
+    100% - sum(other branches).  This helps prevent unphysical errors
+    downstream.
+    """
+    n = len(levellist)
+    brsum = defaultdict(float)
+    bridx = defaultdict(lambda: (-1, -1.0))
+    baddies = []
+    for i, (nuc, rx, hl, lvl, br, ms, sp) in enumerate(levellist):
+        if rx == 0:
+            continue
+        if br >= bridx[nuc][1]:
+            bridx[nuc] = (i, br)
+        brsum[nuc] += br
+        nucrx = (nuc, rx)
+        if nucrx in _BAD_RX:
+            baddies.append(i)
+    # adjust branch ratios
+    for nuc, (i, br) in bridx.items():
+        row = levellist[i]
+        # this line ensures that all branches sum to 100.0 within floating point
+        new_br = 100.0 - brsum[nuc] + br
+        new_row = row[:4] + (new_br,) + row[5:]
+        levellist[i] = new_row
+    # remove bad reaction rows
+    for i in baddies[::-1]:
+        del levellist[i]
+
+
+# State Id, Bad Metastable Number, (Replacement State ID, optional) Replacement Metastable Number
+_BAD_METASTABLES = {
+    # Rh-110 misreports its ground state as a first meta-stable and its first
+    # metastable as its second.
+    (451100000, 1): 0,
+    (451100001, 2): 1,
+    # Pm-154 misreports its ground state as a first metastable
+    (611540000, 1): 0,
+    # Ga-72M is not listed as metastable
+    (310720002, 0): 1,
+    # Rh-108M is not listed as metastable
+    (451080004, 0): 1,
+    # Pm-136 mislabels two states as both metastable or ground.
+    # Replacing with what KAERI and NNDC report
+    (611360001, 2): (611360000, 0),
+    (611360000, 1): (611360001, 1),
+    }
+
+
+def _adjust_metastables(levellist):
+    """Adjusts misreported metastable states in place."""
+    for i in range(len(levellist)):
+        key = (levellist[i][0], levellist[i][5])
+        if key in _BAD_METASTABLES:
+            row = list(levellist[i])
+            new_id = _BAD_METASTABLES[key]
+            if not isinstance(new_id, int):
+                row[0], new_id = new_id
+            row[5] = new_id
+            levellist[i] = tuple(row)
+
+
+# State Id, Rx Id : New Half-lives
+_BAD_HALF_LIVES = {
+    # Eu-151 lists a very long half-life (5.364792e+25) even though it
+    # lists no reaction, and thus no children, and no branch ratio.
+    # set to infinity for consistency.
+    (631510000, 0): float('inf'),
+    }
+
+
+def _adjust_half_lives(levellist):
+    """Resets misbehaving half-lives to new value."""
+    for i in range(len(levellist)):
+        key = levellist[i][:2]
+        if key in _BAD_HALF_LIVES:
+            row = list(levellist[i])
+            row[2] = _BAD_HALF_LIVES[key]
+            levellist[i] = tuple(row)
 
 
 def levels(filename, levellist=None):
@@ -853,8 +995,9 @@ def levels(filename, levellist=None):
                                     goodkey = False
                             if goodkey is True:
                                 rx = rxname.id(keystrip)
+                                branch_percent = float(val.split("(")[0])
                                 levellist.append((nuc_id, rx, half_lifev,
-                                                  level, val.split("(")[0],
+                                                  level, branch_percent,
                                                   state, special))
                     if level_found is True:
                         levellist.append((nuc_id, 0, half_lifev, level, 0.0,
@@ -882,11 +1025,15 @@ def levels(filename, levellist=None):
                             goodkey = False
                     if goodkey is True:
                         rx = rxname.id(keystrip)
+                        branch_percent = float(val.split("(")[0])
                         levellist.append((nuc_id, rx, half_lifev, level,
-                                          val.split("(")[0], state, special))
+                                          branch_percent, state, special))
             if level_found is True:
                 levellist.append((nuc_id, 0, half_lifev, level, 0.0, state,
                                   special))
+    _adjust_ge100_branches(levellist)
+    _adjust_metastables(levellist)
+    _adjust_half_lives(levellist)
     return levellist
 
 
@@ -1057,7 +1204,6 @@ def _dlist_gen(f):
         ident = re.match(_ident, lines[0])
         if ident is not None:
             if 'DECAY' in ident.group(2):
-                #print ident.group(2)
                 fin = ident.group(2).split()[1]
                 if fin not in decaylist:
                     decaylist.append(fin)
@@ -1090,7 +1236,6 @@ def _level_dlist_gen(f, keys):
         ident = re.match(_ident, lines[0])
         if ident is not None:
             if 'ADOPTED LEVELS' in ident.group(2):
-                #print ident.group(2)
                 for line in lines:
                     levelc = _level_cont_regex.match(line)
                     if levelc is None:

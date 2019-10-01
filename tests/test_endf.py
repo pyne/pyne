@@ -1,11 +1,11 @@
 import os
 import io
 import warnings
-try:
-    from StringIO import StringIO
-except ImportError:
-    from io import StringIO
 from math import e
+from hashlib import md5
+
+import nose
+from nose.tools import assert_equal
 
 import numpy as np
 from numpy.testing import assert_array_equal, assert_allclose, \
@@ -14,14 +14,13 @@ from numpy.testing import assert_array_equal, assert_allclose, \
 from pyne.utils import QAWarning
 warnings.simplefilter("ignore", QAWarning)
 
-from pyne.endf import Library
+from pyne.endf import Library, Evaluation
 from pyne.utils import endftod
 from pyne.rxdata import DoubleSpinDict
 from pyne.xs.data_source import ENDFDataSource
 from pyne import nucname
 
-import nose
-from nose.tools import assert_equal
+from utils import download_file
 
 def ignore_future_warnings(func):
     """This is a decorator which can be used to ignore FutureWarnings
@@ -79,27 +78,12 @@ def test_endftod():
     assert_allclose(obs, exp, rtol = 1e-8)
 
 def test_loadtape():
-    try:
-        assert(os.path.isfile('endftape.100'))
-    except AssertionError:
-        try:
-            import urllib.request as urllib
-        except ImportError:
-            import urllib
-        urllib.urlretrieve("http://www.nndc.bnl.gov/endf/b6.8/tapes/tape.100",
-                    "endftape.100")
-    from hashlib import md5
-    with open("endftape.100", "rb") as f:
-        obs_hash = md5(f.read()).hexdigest()
-    exp_hash = "b56dd0aee38bd006c58181e473232776"
-    try:
-        assert_equal(obs_hash, exp_hash)
-    except AssertionError:
-        raise AssertionError("endftape.100 hash check failed; please try redownloading the endftape.100 data file.")
+    download_file("http://www.nndc.bnl.gov/endf/b6.8/tapes/tape.100",
+                  "endftape.100", "b56dd0aee38bd006c58181e473232776")
     testlib = Library("endftape.100")
-    exp_nuclides = [10010000, 30060000, 40090000, 50110000, 30070000, 60000000, 50100000]
-    obs_nuclides = list(map(int, testlib.structure.keys()))
-    assert_array_equal(exp_nuclides, obs_nuclides)
+    exp_nuclides = set([10010000, 30060000, 40090000, 50110000, 30070000, 60000000, 50100000])
+    obs_nuclides = set(map(int, testlib.structure.keys()))
+    assert_equal(exp_nuclides, obs_nuclides)
 
 def test_get():
     obs = library.get_rx(nuc40000, 4, 2)
@@ -153,7 +137,7 @@ def test_unresolved_resonances_b():
 -3.280571+7                                                       """))
     exp_2 = dict(zip((0,0,'L','MUF','NE+6',0,'D','AJ','AMUN','GN0','GG'),
                      exp_2_a[:2].flat))
-    num_e = exp_2['NE+6']-6
+    num_e = int(exp_2['NE+6']) - 6
     exp_2['GF'] = exp_2_a[2:].flat[:num_e]
     del exp_2[0]
     for key in exp_2:
@@ -303,15 +287,14 @@ def test_resolved_r_matrix_kbk_kps():
  0.000000+0 0.000000+0          0          0          1          1
  0.000000+0 0.000000+0 0.000000+0 0.000000+0 0.000000+0 0.000000+0
  0.000000+0 0.000000+0          0          0          1          3
-          3          2                                            
+          3          2                                            """ + b"""
  4.016335+2 2.076736-3 4.668090-5 9.776415+2-3.940740+2-2.296483+8
  0.000000+0 0.000000+0          0          0          3         10
           3          1          6          2         10          3
 -4.803282+6-1.114539-5 9.465304+2-1.436769-9 7.889727+2 4.824983+9
  4.020763+6 2.308443-6-4.188441-2 1.778263+8-3.408683+7 2.845463+7
  3.371147+1 2.054714+3-2.746606-3-9.635977-6-1.387257-2 7.042637+0
- 6.917628+9-2.912896-7                                            
-"""))
+ 6.917628+9-2.912896-7                                            """))
 
 
     ch0_obs = obs_3['ch0']
@@ -355,9 +338,9 @@ def test_resolved_r_matrix_kbk_kps():
  0.000000+0 0.000000+0 0.000000+0 0.000000+0 0.000000+0 0.000000+0
  0.000000+0 0.000000+0          0          0          4          5
           1          2          2          1          3          3
-          5          4                                            
+          5          4                                            """ + b"""
  0.000000+0 0.000000+0          0          0          2          6
-          4          1          6          2                      
+          4          1          6          2                      """ + b"""
  1.960831+3-1.053619+4          0          0          2          1
  1.298772+5-2.834965+3 8.381641-6 3.338353+5-1.012675-7 0.000000+0
 """))
@@ -498,25 +481,10 @@ def test_isomeric():
     library._read_res(nuc61148m)
     assert (library.structure[nuc61148m]['matflags']['LIS0'] == 1)
     assert (nuc61148m in library.structure)
-    
+
 def test_u235():
-    try:
-        assert(os.path.isfile('U235.txt'))
-    except AssertionError:
-        try:
-            import urllib.request as urllib
-        except ImportError:
-            import urllib
-        urllib.urlretrieve("http://t2.lanl.gov/nis/data/data/ENDFB-VII.1-neutron/U/235",
-                    "U235.txt")
-    from hashlib import md5
-    with open("U235.txt", "rb") as f:
-        obs_hash = md5(f.read()).hexdigest()
-    exp_hash = "1b71da3769d8b1e675c3c579ba5cb2d3"
-    try:
-        assert_equal(obs_hash, exp_hash)
-    except AssertionError:
-        raise AssertionError("U235.txt hash check failed; please try redownloading the U235 data file.")
+    download_file("http://t2.lanl.gov/nis/data/data/ENDFB-VII.1-neutron/U/235",
+                  "U235.txt", "1b71da3769d8b1e675c3c579ba5cb2d3")
 
     u235 = Library('U235.txt')
     nuc = 922350000
@@ -525,7 +493,7 @@ def test_u235():
     exp_a = array_from_ENDF(io.BytesIO
          (b""" 9.223500+4 2.330248+2          0          0          0          0
 -1.788560+7-1.788560+7          0          0          1          6
-          6          2                                            
+          6          2                                            """ + b"""
  1.796240+7 5.05980-10 1.800000+7 3.810030-7 1.850000+7 8.441785-5
  1.900000+7 2.387410-4 1.950000+7 1.348763-3 2.000000+7 4.785594-3
 """))
@@ -670,7 +638,7 @@ def test_discretize():
         import urllib.request as urllib
     except ImportError:
         import urllib
-    
+
     if not isfile("Ni59.txt"):
         urllib.urlretrieve("http://t2.lanl.gov/nis/data/data/ENDFB-VII.1-neutron/Ni/59",
                     "Ni59.txt")
@@ -694,15 +662,8 @@ def test_discretize():
 
 
 def test_photoatomic():
-    try:
-        assert(os.path.isfile('Zn.txt'))
-    except AssertionError:
-        try:
-            import urllib.request as urllib
-        except ImportError:
-            import urllib
-        urllib.urlretrieve("https://www-nds.iaea.org/fendl30/data/atom/endf/ph_3000_30-Zn.txt",
-                           "Zn.txt")
+    download_file("https://www-nds.iaea.org/fendl30/data/atom/endf/ph_3000_30-Zn.txt",
+                  "Zn.txt", 'e6bda2fe6125ad9a8d51a6405ae9cc2a')
     photondata = Library('Zn.txt')
     xs_data = photondata.get_xs(300000000, 501)[0]
     Eints, sigmas = xs_data['e_int'], xs_data['xs']
@@ -710,14 +671,200 @@ def test_photoatomic():
     assert_equal(len(sigmas),1864)
     assert_array_equal(Eints[0:5],[1.,  1.109887,  1.217224,
                                    1.2589,  1.334942])
-    assert_array_equal(Eints[-5:],[6.30960000e+10,   7.94328000e+10,  
-                                   7.94330000e+10, 8.00000000e+10, 
+    assert_array_equal(Eints[-5:],[6.30960000e+10,   7.94328000e+10,
+                                   7.94330000e+10, 8.00000000e+10,
                                    1.00000000e+11])
     assert_array_almost_equal(sigmas[0:5],[0.00460498,  0.00710582,
                                            0.01047864,  0.01210534,
                                            0.01556538])
     assert_array_almost_equal(sigmas[-5:],[ 6.71525 ,  6.716781,  6.716781,
                                            6.716829,  6.717811])
+
+
+def test_evaluation_neutron():
+    download_file('http://t2.lanl.gov/nis/data/data/ENDFB-VII.1-neutron/U/235',
+                  'U235.txt', "1b71da3769d8b1e675c3c579ba5cb2d3")
+    u235 = Evaluation('U235.txt', verbose=False)
+    u235.read()
+
+    # Check descriptive data
+    assert hasattr(u235, 'info')
+    assert u235.info['library'] == (u'ENDF/B', 7, 1)
+    assert u235.info['sublibrary'] == 10
+    assert u235.info['format'] == 6
+    assert u235.material == 9228
+    assert u235.projectile['mass'] == 1.0
+    assert u235.target['fissionable']
+    assert u235.target['mass'] == 233.0248
+    assert u235.target['zsymam'] == u' 92-U -235 '
+    assert not u235.target['stable']
+    assert u235.target['isomeric_state'] == 0
+
+    # Check components of fission energy release
+    delayed_betas = np.array([[6.5e+06, -7.5e-02, 0.0],
+                              [5.0e+04, 7.5e-03, 0.0]])
+    assert_array_almost_equal(u235.fission['energy_release']['delayed_betas'],
+                              delayed_betas)
+
+    # Check prompt, delayed, and total nu
+    E = np.logspace(-4, 6, 10)
+    nu_t = np.array([2.4367, 2.4367, 2.4367, 2.4367, 2.4367,
+                     2.43586422, 2.4338, 2.4338, 2.43001824, 2.532706])
+    nu_p = np.array([2.42085, 2.42085, 2.42085, 2.42085, 2.42085,
+                     2.42001364, 2.41794193, 2.41784842, 2.41331824, 2.516006])
+    nu_d = np.array([0.01585, 0.01585, 0.01585, 0.01585, 0.01585005,
+                     0.01585061, 0.01585789, 0.01595191, 0.0167, 0.0167])
+    assert_array_almost_equal(u235.fission['nu']['total'](E), nu_t)
+    assert_array_almost_equal(u235.fission['nu']['prompt'](E), nu_p)
+    assert_array_almost_equal(u235.fission['nu']['delayed']['values'](E), nu_d)
+
+    # Reactions
+    assert 37 in u235.reactions
+    assert 38 in u235.reactions
+    assert 89 in u235.reactions
+
+    # Check reaction cross section
+    r = u235.reactions[80]  # (n,n30)
+    assert r.xs.x[0] == 2309870.0
+    E = np.linspace(r.xs.x[0], r.xs.x[-1], 10)
+    sigma = np.array([0., 0.01433554, 0.01672903, 0.01649244, 0.01556801,
+                      0.01457872, 0.01341327, 0.01215489, 0.01094848,
+                      0.00987096])
+    assert_array_almost_equal(r.xs(E), sigma)
+
+    # Check reaction angular distribution
+    assert r.angular_distribution.center_of_mass
+    assert r.angular_distribution.type == u'legendre'
+    assert len(r.angular_distribution.energy) == 14
+    mu = np.linspace(-1., 1., 10)
+    p = np.array([0.22002253, 0.40547169, 0.45029205, 0.59018363, 0.6086658,
+                  0.48871545, 0.45452016, 0.55752484, 0.55576971, 0.51885337])
+    assert_array_almost_equal(r.angular_distribution.probability[5](mu), p)
+
+
+def test_evaluation_decay():
+    download_file('http://t2.lanl.gov/nis/data/endf/decayVII.1/092_U_233',
+                  'U233.txt', '3db23dc650bae28eabb92942dd7d0de5')
+    u233 = Evaluation('U233.txt', verbose=False)
+    u233.read()
+
+    assert hasattr(u233, 'info')
+    assert u233.info['library'] == (u'ENDF/B', 7, 1)
+    assert u233.info['sublibrary'] == 4
+    assert u233.material == 3513
+    assert u233.target['mass'] == 231.0377
+    assert u233.target['zsymam'] == u' 92-U -233 '
+    assert not u233.target['stable']
+
+    assert u233.decay['half_life'] == (5023970000000.0, 6311520000.0)
+    assert u233.decay['energies'] == [(5043.237, 536.3191),
+                                      (1110.218, 107.6781),
+                                      (4888351.0, 28967.6)]
+    assert len(u233.decay['modes']) == 1
+    assert u233.decay['modes'][0]['branching_ratio'] == (1.0, 0.0)
+    assert u233.decay['modes'][0]['energy'] == (4908500.0, 1200.0)
+    assert u233.decay['modes'][0]['type'] == u'alpha'
+
+    for s in ['e-', 'alpha', 'xray', 'gamma']:
+        assert s in u233.decay['spectra']
+    assert u233.decay['spectra']['e-']['energy_average'] == (5043.237,
+                                                             536.3191)
+    alpha_spectrum = u233.decay['spectra']['alpha']['discrete']
+    assert alpha_spectrum[-1]['energy'] == (4824200.0, 1200.0)
+    assert alpha_spectrum[-1]['intensity'] == (0.843, 0.006)
+
+
+def test_evaluation_photoatomic():
+    download_file('https://www-nds.iaea.org/fendl30/data/atom/endf/ph_3000_30-Zn.txt',
+                  'Zn.txt', 'e6bda2fe6125ad9a8d51a6405ae9cc2a')
+    zn = Evaluation('Zn.txt', verbose=False)
+    zn.read()
+
+    assert zn.info['library'] == (u'ENDF/B', 6, 0)
+    assert zn.info['sublibrary'] == 3
+    assert zn.info['format'] == 6
+    assert zn.projectile['mass'] == 0.0
+
+    assert 501 in zn.reactions
+    assert 515 in zn.reactions
+    assert 540 in zn.reactions
+
+    # Check cross section
+    coherent = zn.reactions[502]
+    assert len(coherent.xs.x) == 788
+    E = np.logspace(0, 11, 10)
+    xs = np.array([4.60408600e-03, 2.87607904e+00, 3.00145792e+02,
+                   3.43420255e+02, 8.18532007e+00, 3.58892209e-02,
+                   1.29382964e-04, 4.64984378e-07, 1.67106649e-09,
+                   6.00550000e-12])
+    assert_array_almost_equal(coherent.xs(E), xs)
+
+    # Check scattering factor
+    ff = coherent.scattering_factor
+    x = np.logspace(-3, 9, 10)
+    y = np.array([3.00000000e+01, 2.98789879e+01, 1.54855832e+01,
+                  4.24200000e-01, 1.40737115e-05, 7.34268836e-10,
+                  8.06893048e-14, 1.06881338e-17, 1.27450979e-21,
+                  1.40780000e-25])
+    assert_array_almost_equal(ff(x), y)
+
+
+def test_evaluation_electroatomic():
+    download_file('http://t2.lanl.gov/nis/data/data/ENDFB-VII-electroatomic/Mo/nat',
+                  'Mo.txt', '2139a23258c517ae3bfa5f2cc346da4c')
+    mo = Evaluation('Mo.txt', verbose=False)
+    mo.read()
+
+    assert mo.info['laboratory'].startswith('LLNL')
+    assert 'Cullen' in mo.info['author']
+    assert mo.info['library'] == (u'ENDF/B', 6, 0)
+    assert mo.info['sublibrary'] == 113
+
+    assert 526 in mo.reactions
+    assert 527 in mo.reactions
+    assert 543 in mo.reactions
+
+    # Check bremsstrahlung cross section
+    brem = mo.reactions[527]
+    E = np.logspace(1, 11, 10)
+    xs = np.array([4276.9, 6329.94427327, 5350.43318579, 1818.71320602,
+                   467.65208672, 376.17541997, 434.15352828, 484.99421137,
+                   535.39666445, 591.138])
+    assert_array_almost_equal(brem.xs(E), xs)
+
+    # Check bremsstrahlung secondary distributions
+    assert brem.products[0]['za'] == 11  # electrons
+    E = np.logspace(1, 11)
+    assert np.all(brem.products[0]['yield'](E) == 1.0)
+    eout = np.array([0.1, 0.133352, 0.165482, 0.228757, 0.316228,
+                     0.421697, 0.523299, 0.723394, 1., 1.41421,
+                     2., 2.82843, 4., 5.65685, 8., 9.9, 10.])
+    assert_array_almost_equal(brem.products[0]['energy_out'][0], eout)
+
+
+def test_evaluation_relaxation():
+    download_file('http://t2.lanl.gov/nis/data/endf/relaxation/Xe-relax',
+                  'Xe.txt', '40ecb69da6a45f992918a98da4d98ba0')
+    xe = Evaluation('Xe.txt', verbose=False)
+    xe.read()
+
+    assert xe.info['laboratory'].startswith('LLNL')
+    assert 'Cullen' in xe.info['author']
+    assert xe.info['library'] == (u'ENDF/B', 6, 0)
+    assert xe.info['sublibrary'] == 6
+
+    # Levels
+    data = xe.atomic_relaxation
+    assert len(data) == 17
+    assert 'K' in data
+    assert 'O3' in data
+
+    assert data['K']['binding_energy'] == 34556.0
+    assert data['M5']['number_electrons'] == 6.0
+    assert data['L1']['transitions'][6] == (u'N2', None, 5256.21, 0.00299258)
+    assert data['N2']['transitions'][12] == (u'N5', u'O3', 81.95, 0.00224012)
+    assert data['O3']['transitions'] == []
+
 
 if __name__ == "__main__":
     nose.runmodule()

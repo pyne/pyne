@@ -1,0 +1,286 @@
+geometry rectangular
+
+volume
+     1.046395E+01    zone_0
+     1.036938E+01    zone_1
+     2.974312E+01    zone_2
+     1.256501E+01    zone_3
+     2.147480E+01    zone_4
+     1.046396E+01    zone_5
+     2.083333E+01    zone_6
+     2.083333E+01    zone_7
+     2.083333E+01    zone_8
+     2.019186E+01    zone_9
+     1.256501E+01    zone_10
+     2.019186E+01    zone_11
+     2.092791E+01    zone_12
+     1.256501E+01    zone_13
+     2.083333E+01    zone_14
+     1.256501E+01    zone_15
+     2.846019E+01    zone_16
+     2.083333E+01    zone_17
+     2.846019E+01    zone_18
+     2.073876E+01    zone_19
+     1.036938E+01    zone_20
+     2.092791E+01    zone_21
+     2.073876E+01    zone_22
+     2.147480E+01    zone_23
+     2.974312E+01    zone_24
+     2.083333E+01    zone_25
+     1.460121E+01    zone_26
+     2.789158E+01    zone_27
+     1.033406E+01    zone_28
+     1.049928E+01    zone_29
+     1.049928E+01    zone_30
+     2.083333E+01    zone_31
+     2.623934E+01    zone_32
+     2.083333E+01    zone_33
+     1.460121E+01    zone_34
+     1.033405E+01    zone_35
+     1.460121E+01    zone_36
+     1.460121E+01    zone_37
+     2.165945E+01    zone_38
+     2.099856E+01    zone_39
+     2.789158E+01    zone_40
+     2.083333E+01    zone_41
+     2.066811E+01    zone_42
+     2.083333E+01    zone_43
+     2.099856E+01    zone_44
+     2.083333E+01    zone_45
+     2.066811E+01    zone_46
+     2.083333E+01    zone_47
+     2.165945E+01    zone_48
+     2.623934E+01    zone_49
+     2.000721E+01    zone_50
+     2.000721E+01    zone_51
+     2.311183E+01    zone_52
+     3.196260E+01    zone_53
+     1.864577E+01    zone_54
+     2.771268E+01    zone_55
+     2.698022E+01    zone_56
+     2.448030E+01    zone_57
+     2.360949E+01    zone_58
+     2.760296E+01    zone_59
+     2.350539E+01    zone_60
+     3.171715E+01    zone_61
+     2.250847E+01    zone_62
+     1.273928E+01    zone_63
+     3.649009E+01    zone_64
+     1.641952E+01    zone_65
+     2.798311E+01    zone_66
+     2.370977E+01    zone_67
+     2.302092E+01    zone_68
+     3.453052E+01    zone_69
+     3.245113E+01    zone_70
+     1.641948E+01    zone_71
+     3.652112E+01    zone_72
+     2.694226E+01    zone_73
+     3.399402E+01    zone_74
+     2.408740E+01    zone_75
+     4.036496E+01    zone_76
+     1.865600E+01    zone_77
+     1.864578E+01    zone_78
+     2.229246E+01    zone_79
+     3.541342E+01    zone_80
+     3.297682E+01    zone_81
+     2.229246E+01    zone_82
+     2.475060E+01    zone_83
+     2.694226E+01    zone_84
+     3.919222E+01    zone_85
+     1.939376E+01    zone_86
+     2.138170E+01    zone_87
+     3.189610E+01    zone_88
+     1.865601E+01    zone_89
+     4.899099E+01    zone_90
+     1.865600E+01    zone_91
+     4.166666E+01    zone_92
+     2.373939E+01    zone_93
+     3.399402E+01    zone_94
+     4.637988E+01    zone_95
+     4.166668E+01    zone_96
+     3.399402E+01    zone_97
+     8.333333E+01    zone_98
+     2.408739E+01    zone_99
+     2.525160E+01    zone_100
+     1.864578E+01    zone_101
+     1.864578E+01    zone_102
+     2.229249E+01    zone_103
+     1.865600E+01    zone_104
+     4.221014E+01    zone_105
+     4.112319E+01    zone_106
+     4.060946E+01    zone_107
+     4.060946E+01    zone_108
+     4.272387E+01    zone_109
+     4.221014E+01    zone_110
+     2.056160E+01    zone_111
+     4.166668E+01    zone_112
+     6.328546E+01    zone_113
+     4.166666E+01    zone_114
+     8.333333E+01    zone_115
+end
+
+mat_loading
+    zone_0    mix_0
+    zone_1    mix_0
+    zone_2    mix_0
+    zone_3    mix_0
+    zone_4    mix_0
+    zone_5    mix_0
+    zone_6    mix_0
+    zone_7    mix_0
+    zone_8    mix_0
+    zone_9    mix_0
+    zone_10    mix_0
+    zone_11    mix_0
+    zone_12    mix_0
+    zone_13    mix_0
+    zone_14    mix_0
+    zone_15    mix_0
+    zone_16    mix_0
+    zone_17    mix_0
+    zone_18    mix_0
+    zone_19    mix_0
+    zone_20    mix_0
+    zone_21    mix_0
+    zone_22    mix_0
+    zone_23    mix_0
+    zone_24    mix_0
+    zone_25    mix_0
+    zone_26    mix_1
+    zone_27    mix_1
+    zone_28    mix_1
+    zone_29    mix_1
+    zone_30    mix_1
+    zone_31    mix_1
+    zone_32    mix_1
+    zone_33    mix_1
+    zone_34    mix_1
+    zone_35    mix_1
+    zone_36    mix_1
+    zone_37    mix_1
+    zone_38    mix_1
+    zone_39    mix_1
+    zone_40    mix_1
+    zone_41    mix_1
+    zone_42    mix_1
+    zone_43    mix_1
+    zone_44    mix_1
+    zone_45    mix_1
+    zone_46    mix_1
+    zone_47    mix_1
+    zone_48    mix_1
+    zone_49    mix_1
+    zone_50    mix_1
+    zone_51    mix_1
+    zone_52    mix_0
+    zone_53    mix_0
+    zone_54    mix_0
+    zone_55    mix_0
+    zone_56    mix_0
+    zone_57    mix_0
+    zone_58    mix_0
+    zone_59    mix_0
+    zone_60    mix_0
+    zone_61    mix_0
+    zone_62    mix_0
+    zone_63    mix_0
+    zone_64    mix_0
+    zone_65    mix_0
+    zone_66    mix_0
+    zone_67    mix_0
+    zone_68    mix_0
+    zone_69    mix_0
+    zone_70    mix_0
+    zone_71    mix_0
+    zone_72    mix_0
+    zone_73    mix_0
+    zone_74    mix_0
+    zone_75    mix_0
+    zone_76    mix_0
+    zone_77    mix_0
+    zone_78    mix_0
+    zone_79    mix_0
+    zone_80    mix_0
+    zone_81    mix_0
+    zone_82    mix_0
+    zone_83    mix_0
+    zone_84    mix_0
+    zone_85    mix_0
+    zone_86    mix_0
+    zone_87    mix_0
+    zone_88    mix_0
+    zone_89    mix_0
+    zone_90    mix_1
+    zone_91    mix_1
+    zone_92    mix_1
+    zone_93    mix_1
+    zone_94    mix_1
+    zone_95    mix_1
+    zone_96    mix_1
+    zone_97    mix_1
+    zone_98    mix_1
+    zone_99    mix_1
+    zone_100    mix_1
+    zone_101    mix_1
+    zone_102    mix_1
+    zone_103    mix_1
+    zone_104    mix_1
+    zone_105    mix_0
+    zone_106    mix_0
+    zone_107    mix_0
+    zone_108    mix_0
+    zone_109    mix_0
+    zone_110    mix_0
+    zone_111    mix_0
+    zone_112    mix_0
+    zone_113    mix_0
+    zone_114    mix_0
+    zone_115    mix_0
+end
+
+mixture mix_0
+    material mat:Steel/rho:7.8 1 1.0
+end
+
+mixture mix_1
+    material mat:Water/rho:1.0 1 1.0
+end
+
+cooling
+    1 h
+end
+
+material_lib alara_matlib
+element_lib data/nuclib
+data_library alaralib data/truncated_fendl2bin
+
+cooling
+    1 h
+end
+
+output zone
+       integrate_energy
+       # Energy group upper bounds. The lower bound is always zero.
+       photon_source  data/truncated_fendl2bin  phtn_src 24 1.00E4 2.00E4 5.00E4 1.00E5
+       2.00E5 3.00E5 4.00E5 6.00E5 8.00E5 1.00E6 1.22E6 1.44E6 1.66E6
+       2.00E6 2.50E6 3.00E6 4.00E6 5.00E6 6.50E6 8.00E6 1.00E7 1.20E7
+       1.40E7 2.00E7
+end
+
+#     flux name    fluxin file   norm   shift   unused
+flux  my_flux     alara_fluxin  1e10     0      default
+
+# Specify the irradiation schedule below.
+# Syntax is found in the ALARA user manual
+# This example is for a single 3.5 d pulse
+schedule    my_schedule
+    3.5 d my_flux my_pulse_history 0  s
+end
+pulsehistory  my_pulse_history
+    1    0.0    s
+end
+
+#other parameters
+truncation 1e-12
+impurity 5e-6 1e-3
+dump_file dump.file

@@ -1,0 +1,22 @@
+  * * * GABS Version 11 [15-Dec-2014] Report file  * * *
+        Current date: 12/15/2014
+        ENSDF input file: 80Br.in
+        new ENSDF file:   80Br.new
+ 
+        Data Set: 80BR EC DECAY (17.68 M)
+        NR=      0.89         BR=   0.075   9
+ 
+        E= 665.94    15 %IG=1.07 13 per 100 dis. Compare with 1.07 19
+        E= 783.0     3  %IG=0.007  4 per 100 dis.
+        E= 1448.9    3  %IG=0.008  8 per 100 dis. Compare with 0.008  8
+        E= 811.4     5  %IG=0.040 15 per 100 dis.
+ 
+        Data Set: 80BR B- DECAY (17.68 M)
+        NR=     0.072         BR=   0.925   9
+ 
+        E=  677.6    10 %IG=0.008  3 per 100 dis.
+        E=  688.0    10 %IG=0.012  4 per 100 dis.
+        E= 616.9     3  %IG=6.7  7 per 100 dis. Compare with 6.7  9
+        E= 639.93    18 %IG=0.25  3 per 100 dis.
+        E= 1256.8     3 %IG=0.079 10 per 100 dis. Compare with 0.079 10
+        E= 704.37    19 %IG=0.19  4 per 100 dis.

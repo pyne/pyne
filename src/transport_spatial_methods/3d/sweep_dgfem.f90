@@ -1,5 +1,6 @@
 SUBROUTINE sweep_dgfem(g)
 USE dgfem_kernel_module
+use precision_module, only: dp
 !-------------------------------------------------------------
 !
 !  Sweeps across the 3-D matrix
@@ -17,12 +18,12 @@ INTEGER :: xs, xe, ys, ye, zs, ze, incx, incy, incz, ord, nfy, nfz
 INTEGER :: i, j, k, t, u, v, m, n, sgm, sge, sgx, ydir, xdir, zdir, mltx, mlty, mltz
 INTEGER :: ieq, tt, col, indx, jndx, kndx, info, tmp1, tmp2
 INTEGER :: ix,iy,iz,jx,jy,jz
-REAL*8, DIMENSION(orpc) :: psi
-REAL*8, DIMENSION(orpc) :: fx
-REAL*8, DIMENSION(orpc,nx, 2) :: fy
-REAL*8, DIMENSION(orpc,nx, ny, 2, 2) :: fz
-REAL*8 :: sig, mu, eta, xi, x, y, z, sigsc, sgn, factor
-REAL*8 :: del(3),omeg(3),face(orpc,3)
+REAL(kind=dp), DIMENSION(orpc) :: psi
+REAL(kind=dp), DIMENSION(orpc) :: fx
+REAL(kind=dp), DIMENSION(orpc,nx, 2) :: fy
+REAL(kind=dp), DIMENSION(orpc,nx, ny, 2, 2) :: fz
+REAL(kind=dp) :: sig, mu, eta, xi, x, y, z, sigsc, sgn, factor
+REAL(kind=dp) :: del(3),omeg(3),face(orpc,3)
 
 ! Initialize the flux solution to zero
 f = 0.0

@@ -2,22 +2,19 @@
 from __future__ import print_function, division
 import os
 import glob
-from warnings import warn
-from pyne.utils import QAWarning
-
+import shutil
+from zipfile import ZipFile
 try:
     import urllib.request as urllib
 except ImportError:
-    import urllib
-from zipfile import ZipFile
+    import urllib2 as urllib
+
 
 import numpy as np
 import tables as tb
 
 from pyne import ensdf
 from pyne.dbgen.api import BASIC_FILTERS
-
-warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 
 def _readpoint(line, dstart, dlen):
@@ -38,9 +35,22 @@ def _read_variablepoint(line, dstart, dlen):
 
 def grab_atomic_data(build_dir=""):
     medfile = os.path.join(build_dir, 'mednew.dat')
-    if not os.path.isfile(medfile):
-        urllib.urlretrieve('http://www.nndc.bnl.gov/nndcscr/ensdf_pgm/'
-                           + 'analysis/radlst/mednew.dat', medfile)
+    local = os.path.join(os.path.dirname(__file__), 'mednew.dat')
+    if os.path.isfile(medfile):
+        return
+    # try to download first
+    # nndc url seems to be down
+    #url = 'http://www.nndc.bnl.gov/nndcscr/ensdf_pgm/analysis/radlst/mednew.dat'
+    url = 'https://www-nds.iaea.org/workshops/smr1939/Codes/ENSDF_Codes/mswindows/radlst/mednew.dat'
+    try:
+        conn = urllib.urlopen(url)
+        with open(medfile, 'wb') as f:
+            f.write(conn.read())
+        return
+    except Exception:
+        pass
+    # use local copy if we can't download
+    shutil.copy(local, medfile)
 
 
 def parse_atomic_data(build_dir=""):
@@ -100,29 +110,34 @@ def grab_ensdf_decay(build_dir=""):
         pass
 
     # Grab ENSDF files and unzip them.
-    iaea_base_url = 'http://www.nndc.bnl.gov/ensarchivals/distributions/dist14/'
+    iaea_base_url = 'http://www.nndc.bnl.gov/ensarchivals/distributions/dist17/'
 
     cf_base_url = 'http://data.pyne.io/'
-    ensdf_zip = ['ensdf_141022_099.zip', 'ensdf_141022_199.zip',
-                 'ensdf_141022_299.zip', ]
+    ensdf_zip = ['ensdf_170501.099.zip',
+                 'ensdf_170501_199.zip',
+                 'ensdf_170501_299.zip', ]
 
     for f in ensdf_zip:
         fpath = os.path.join(build_dir, f)
         if f not in os.listdir(build_dir):
             print("  grabbing {0} and placing it in {1}".format(f, fpath))
-            urllib.urlretrieve(iaea_base_url + f, fpath)
+            conn = urllib.urlopen(iaea_base_url + f)
+            with open(fpath, 'wb') as f:
+                f.write(conn.read())
 
             if os.path.getsize(fpath) < 1048576:
                 print("  could not get {0} from NNDC; trying mirror".format(f))
                 os.remove(fpath)
-                urllib.urlretrieve(cf_base_url + f, fpath)
+                conn = urllib.urlopen(cf_base_url + f)
+                with open(fpath, 'wb') as f:
+                    f.write(conn.read())
 
         # not using ZipFile context manager (with statement for Python 2.6)
         try:
             zf = ZipFile(fpath)
             for name in zf.namelist():
                 if not os.path.exists(os.path.join(build_dir, name)):
-                    print("    extracting {0} from {1}".format(name, f))
+                    print("    extracting {0} from {1}".format(name, fpath))
                     zf.extract(name, build_dir)
         finally:
             zf.close()
@@ -327,13 +342,13 @@ def make_atomic_decay_table(nuc_data, build_dir=""):
     """
     xrd = parse_atomic_data(build_dir)
 
-    db = tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS)
+    db = tb.open_file(nuc_data, 'a', filters=BASIC_FILTERS)
 
     # Make a new the table
     if not hasattr(db.root, 'decay'):
-        db.createGroup('/', 'decay', 'ENSDF Decay data')
+        db.create_group('/', 'decay', 'ENSDF Decay data')
 
-    atomic_table = db.createTable('/decay/', 'atomic', xrd,
+    atomic_table = db.create_table('/decay/', 'atomic', xrd,
                               'z'
                               'k_shell_fluor'
                               'k_shell_fluor_error'
@@ -379,13 +394,13 @@ def make_decay_half_life_table(nuc_data, build_dir=""):
     level_list = parse_level_data(build_dir)
 
     # Open the HDF5 File
-    db = tb.openFile(nuc_data, 'a', filters=BASIC_FILTERS)
+    db = tb.open_file(nuc_data, 'a', filters=BASIC_FILTERS)
 
     # Make a new the table
     if not hasattr(db.root, 'decay'):
-        db.createGroup('/', 'decay', 'ENSDF Decay data')
+        db.create_group('/', 'decay', 'ENSDF Decay data')
 
-    ll_table = db.createTable('/decay/', 'level_list', level_list,
+    ll_table = db.create_table('/decay/', 'level_list', level_list,
                               'nuclide [nuc_id], level [keV], half life [s],'
                               'metastable [int]', expectedrows=len(level_list))
     ll_table.flush()
@@ -393,7 +408,7 @@ def make_decay_half_life_table(nuc_data, build_dir=""):
     # now that the level data is in nuc_data we can build the decay data fast
     decay, gammas, alphas, betas, ecbp = parse_decay_data(build_dir)
 
-    decay_table = db.createTable('/decay/', 'decays', decay,
+    decay_table = db.create_table('/decay/', 'decays', decay,
                                  'parent nuclide [nuc_id], daughter nuclide '
                                  '[nuc_id], decay [string], half life [s],'
                                  'half life error [s], branch ratio [frac],'
@@ -405,7 +420,7 @@ def make_decay_half_life_table(nuc_data, build_dir=""):
                                  expectedrows=len(decay))
     decay_table.flush()
 
-    gamma_table = db.createTable('/decay/', 'gammas', gammas,
+    gamma_table = db.create_table('/decay/', 'gammas', gammas,
                                  'from_nuc [int], to_nuc [int], primary parent'
                                  'nuc_id [int], child nuc_id [int]'
                                  'Energy [keV], Energy error [keV], '
@@ -423,13 +438,13 @@ def make_decay_half_life_table(nuc_data, build_dir=""):
 
     gamma_table.flush()
 
-    alphas_table = db.createTable('/decay/', 'alphas', alphas,
+    alphas_table = db.create_table('/decay/', 'alphas', alphas,
                                   'from_nuc [int], to_nuc [int]'
                                   'Energy [keV], Intensity [ratio],',
                                   expectedrows=len(alphas))
     alphas_table.flush()
 
-    betas_table = db.createTable('/decay/', 'betas', betas,
+    betas_table = db.create_table('/decay/', 'betas', betas,
                                  'from_nuc [int], to_nuc [int],'
                                  'Endpoint Energy [keV], Average Energy [keV],'
                                  'Intensity [ratio]',
@@ -437,7 +452,7 @@ def make_decay_half_life_table(nuc_data, build_dir=""):
 
     betas_table.flush()
 
-    ecbp_table = db.createTable('/decay/', 'ecbp', ecbp,
+    ecbp_table = db.create_table('/decay/', 'ecbp', ecbp,
                                 'from_nuc [int], to_nuc [int],'
                                 'Endpoint Energy [keV], Average Energy [keV],'
                                 'B+ Intensity [ratio], '
@@ -457,7 +472,7 @@ def make_decay(args):
     """Controller function for adding decay data."""
     nuc_data, build_dir = args.nuc_data, args.build_dir
 
-    with tb.openFile(nuc_data, 'r') as f:
+    with tb.open_file(nuc_data, 'r') as f:
         if hasattr(f.root, 'decay') and hasattr(f.root.decay, 'ecbp'):
             print("skipping ENSDF decay data table creation; already exists.")
             return
@@ -470,7 +485,7 @@ def make_decay(args):
     print("Making decay data table.")
     make_decay_half_life_table(nuc_data, build_dir)
 
-    print("Grabbing Atomic data from NNDC")
+    print("Grabbing Atomic data")
     grab_atomic_data(build_dir)
 
     print("Making atomic decay data table")

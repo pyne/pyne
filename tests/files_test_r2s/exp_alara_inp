@@ -19,5 +19,8 @@ mixture mix_0
     material mat_12 1 0.962963
 end
 
+cooling
+    1 s
+end
 
 Bogus line for testing

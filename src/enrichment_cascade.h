@@ -18,7 +18,7 @@ namespace pyne {
 namespace enrichment {
 
   /// A set of physical parameters used to specify an enrichment cascade.
-  class Cascade 
+  class Cascade
   {
 
   public:
@@ -56,9 +56,9 @@ namespace enrichment {
   };
 
 // end enrichment
-};
+}
 // end pyne
-};
+}
 
 #endif
 

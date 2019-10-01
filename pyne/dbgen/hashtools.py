@@ -83,8 +83,8 @@ def calc_hash(node, nuc_data):
         path to the nuc_data.h5 file
 
     """
-    with tables.openFile(nuc_data) as f:
-        node = f.getNode(node)
+    with tables.open_file(nuc_data) as f:
+        node = f.get_node(node)
         if type(node) == tables.group.Group:
             mhash = hashlib.md5()
             for item in node:
@@ -117,8 +117,8 @@ def set_hash(node, nuc_data):
 
     """
     the_hash = calc_hash(node, nuc_data)
-    with tables.openFile(nuc_data, mode='a') as f:
-        f.setNodeAttr(node, 'hash', the_hash)
+    with tables.open_file(nuc_data, mode='a') as f:
+        f.set_node_attr(node, 'hash', the_hash)
 
 
 def check_hash(node, nuc_data):
@@ -134,6 +134,6 @@ def check_hash(node, nuc_data):
         path to the nuc_data.h5 file
 
     """
-    with tables.openFile(nuc_data) as f:
-        hash_val = f.getNodeAttr(node, 'hash')
+    with tables.open_file(nuc_data) as f:
+        hash_val = f.get_node_attr(node, 'hash')
     return calc_hash(node, nuc_data) == hash_val

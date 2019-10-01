@@ -42,7 +42,7 @@ O2HLS = None  # Origen Half-lives
 
 def setup():
     global MATS, O2HLS
-    o2benchurl = 'http://data.pyne.io/' + H5NAME
+    o2benchurl = 'https://github.com/pyne/data/raw/master/' + H5NAME
     if not os.path.exists(H5NAME):
         sys.stderr.write("\nDownloading " + o2benchurl + ": ")
         sys.stderr.flush()
@@ -85,10 +85,10 @@ def hl_relerr(nuc):
 
 
 def pivot_mat_keys():
-    """This puts the material keys into a dict mapping nuclides to the data 
-    set names (eg 'origen_922350000_3'). This filters out any data sets that 
-    contain high relative errors in the half-lives. It also filters out 
-    species for which Origen has weird metastable behavior that seems 
+    """This puts the material keys into a dict mapping nuclides to the data
+    set names (eg 'origen_922350000_3'). This filters out any data sets that
+    contain high relative errors in the half-lives. It also filters out
+    species for which Origen has weird metastable behavior that seems
     unphysical.
     """
     nuc_keys = {}
@@ -112,8 +112,8 @@ def pivot_mat_keys():
 
 
 def matdiff(x, y, threshold=1e-3):
-    """Takes the difference between to materials, returns diff dict, 
-    the maximum relative error, the child which has the max difference, 
+    """Takes the difference between to materials, returns diff dict,
+    the maximum relative error, the child which has the max difference,
     that child's mass, and the mass-weighted error.
     Skips nuclides that are not in both materials.
     """
@@ -139,7 +139,7 @@ def matdiff(x, y, threshold=1e-3):
 
 
 def mat_err_compare(nuc_keys, threshold=1e-3):
-    """This returns a generator that compares the origen decayed 
+    """This returns a generator that compares the origen decayed
     material to the pyne material decay. The comparison stores:
 
     * the material key, matkey
@@ -150,9 +150,9 @@ def mat_err_compare(nuc_keys, threshold=1e-3):
     * The mass of the child, childmass
     * the child's mass weighted relative error, weightederr
 
-    Note that this also filters by when Origen itself has messed up by 
-    gaining or losing too much mass (1%). Furthermore, the maximum relative 
-    error is only computed for species that have a certain threshold 
+    Note that this also filters by when Origen itself has messed up by
+    gaining or losing too much mass (1%). Furthermore, the maximum relative
+    error is only computed for species that have a certain threshold
     unit mass (default 1e-3).
     """
     for nuc, keys in list(nuc_keys.items()):

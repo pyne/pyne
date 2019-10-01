@@ -12,7 +12,7 @@ Browse and borrow code from the PyNE examples!
     *
 
 |ace| |chainsolve_transmutation| |discretized_teapot| |half_life| |data_source| 
-|enrichment_mstar_vs_flowrate| |fng_model| |materials| |material_library| |mesh_tags| 
+|mstar_vs_flowrate| |fng_model| |materials| |material_library| |mesh_tags| 
 |open_origen_data| |origen22_h1_xs| |reaction_names| |endf_reader|
 
 .. |ace| image:: ace_thumb.png
@@ -32,8 +32,8 @@ Browse and borrow code from the PyNE examples!
     :target: data_sources.html
     :width: 150 px
 
-.. |enrichment_mstar_vs_flowrate| image:: enrichment_mstar_vs_flowrate_thumb.png
-    :target: enrichment_mstar_vs_flowrate.html
+.. |mstar_vs_flowrate| image:: mstar_vs_flowrate_thumb.png
+    :target: mstar_vs_flowrate.html
 
 .. |fng_model| image:: fng_model_thumb.png
     :target: fng_model.html

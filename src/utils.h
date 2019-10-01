@@ -24,14 +24,12 @@
 #include <vector>
 #include <algorithm>
 
-#if defined __APPLE__ || defined __WIN_GNUC__
 #if (__GNUC__ >= 4)
   #include <cmath>
   #define isnan(x) std::isnan(x)
 #else
   #include <math.h>
   #define isnan(x) __isnand((double)x)
-#endif
 #endif
 
 #ifdef __WIN_MSVC__
@@ -50,6 +48,7 @@ namespace pyne {
   /// Path to the directory containing the PyNE data.
   extern std::string PYNE_DATA;
   extern std::string NUC_DATA_PATH; ///< Path to the nuc_data.h5 file.
+  extern std::string VERSION; ///< PyNE version number
 
   // String Transformations
   /// string of digit characters
@@ -160,25 +159,54 @@ namespace pyne {
     /// constructor with the filename \a fname.
     FileNotFound(std::string fname)
     {
-      filename = fname;
+      FNF_message = "File not found";
+      if (!fname.empty())
+        FNF_message += ": " + fname;
     };
 
     /// Creates a helpful error message.
     virtual const char* what() const throw()
     {
-      std::string FNFstr ("File not found: ");
-      if (!filename.empty())
-        FNFstr += filename;
-
-      return (const char *) FNFstr.c_str();
+      return FNF_message.c_str();
     };
 
   private:
-    std::string filename; ///< unfindable filename.
+    std::string FNF_message; /// Message for exception
+  };
+
+  /// Exception representing value errors of all kinds
+  class ValueError : public std::exception
+  {
+  public:
+
+    /// default constructor
+    ValueError () {};
+
+    /// default destructor
+    ~ValueError () throw () {};
+
+    /// constructor with the filename \a fname.
+    ValueError(std::string msg)
+    {
+      message = msg;
+    };
+
+    /// Creates a helpful error message.
+    virtual const char* what() const throw()
+    {
+      std::string msgstr ("ValueError: ");
+      if (!message.empty())
+        msgstr += message;
+
+      return (const char *) msgstr.c_str();
+    };
+
+  private:
+    std::string message; ///< extra message for the user.
   };
 
 
 // End PyNE namespace
-};
+}
 
 #endif  // PYNE_KMMHYNANYFF5BFMEYIP7TUNLHA

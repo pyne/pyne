@@ -7,9 +7,11 @@ SUBROUTINE angle
 !-------------------------------------------------------------
 
 USE invar
+use precision_module, only: dp
+
 IMPLICIT NONE
-REAL*8, DIMENSION(:), ALLOCATABLE :: cs
-REAL*8 :: tmp, cons, wtsum
+REAL(kind=dp), DIMENSION(:), ALLOCATABLE :: cs
+REAL(kind=dp) :: tmp, cons, wtsum
 INTEGER :: qdhalf, l, n, i, j
 
 ! Check that the type is now 0 or 1 -- 2 has been ruled out already

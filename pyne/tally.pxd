@@ -8,10 +8,10 @@
 ################################################
 
 
-cimport stlcontainers
 from libcpp.map cimport map as cpp_map
 from libcpp.string cimport string as std_string
 from pyne cimport cpp_tally
+from pyne cimport stlcontainers
 
 
 
@@ -24,6 +24,3 @@ cdef class Tally:
     pass
 
 
-
-
-{'cpppxd_footer': '', 'pyx_header': '', 'pxd_header': '', 'pxd_footer': '', 'cpppxd_header': '', 'pyx_footer': ''}
