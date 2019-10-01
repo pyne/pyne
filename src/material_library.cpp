@@ -136,15 +136,7 @@ void pyne::MaterialLibrary::add_material(pyne::Material mat) {
       msg += " is already in the library.";
       warning(msg);
     }
-  } else {
-    while (mat_numb_it == mat_number_set.end()) {
-      // mat number are conflicting, this adds an arbitrarily large number.
-      mat.metadata["mat_number"] = int(name_order.size() + 1);
-      mat_number = mat.metadata["mat_number"].asInt();
-      mat_numb_it = mat_number_set.find(mat_number);
-    }
-  }
-
+  } 
   pyne::matname_set::iterator key_it;
   if (mat.metadata.isMember("name")) {
     
@@ -156,11 +148,12 @@ void pyne::MaterialLibrary::add_material(pyne::Material mat) {
       mat_name = mat.metadata["name"].asString();
     }
     
-    key_it = keylist.find(mat_name);
   } else {
-    mat_name = "m" + std::to_string(mat_number);
+    if (mat_number == -1) {
+      mat_number = keylist.size(); //set a temp 
+    }
+    mat_name = "_" + std::to_string(mat_number);
     mat.metadata["name"] = mat_name;
-    key_it = keylist.find(mat_name);
   }
   
   add_material(mat_name, mat);  
@@ -193,20 +186,14 @@ void pyne::MaterialLibrary::add_material(const std::string& key, pyne::Material 
       msg += " is already in the library.";
       warning(msg);
     }
-  } else {
-    while (mat_numb_it == mat_number_set.end()) {
-      mat.metadata["mat_number"] = int(name_order.size() + 1);
-      mat_number = mat.metadata["mat_number"].asInt();
-      mat_numb_it = mat_number_set.find(mat_number);
-    }
-  }
-  
+  }  
   if ( !mat.metadata.isMember("name")) {
     mat.metadata["name"] = key;
   } 
 
   append_to_nuclist(mat);
-  mat_number_set.insert(mat_number);
+  if(mat_number > 0)
+    mat_number_set.insert(mat_number);
   keylist.insert(key);
   material_library[key] = new Material(mat);
   name_order.push_back(key);
