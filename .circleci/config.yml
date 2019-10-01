@@ -336,7 +336,7 @@ workflows:
       # only done on tags
        - build_push_website_deploy:
            requires:
-             - py_2_build
+             - py2_build
           #      - py2_dagmc_pymoab_test
           #      - py3_dagmc_pymoab_test
           #    filters:
