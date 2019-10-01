@@ -113,7 +113,7 @@ commands:
           default: "test"
     steps:
       - pull_container:
-          build: "python2_dagmc_pymoab"
+          build: "python2"
       - add_ssh_keys
       - run:
           command: |
@@ -334,8 +334,9 @@ workflows:
 
 
       # only done on tags
-      - build_push_website_deploy
-          #    requires:
+       - build_push_website_deploy:
+           requires:
+             - py_2_build
           #      - py2_dagmc_pymoab_test
           #      - py3_dagmc_pymoab_test
           #    filters:
