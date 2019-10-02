@@ -104,11 +104,6 @@ class MaterialLibrary {
    *  \param filename Path on disk to the HDF5 file.
    *  \param datapath Path to the the material in the file.
    *  \param nucpath Path to the nuclides set in the file.
-   *  \param row The index to read out, may be negative. Also note that this is
-   * a
-   *             float.  A value of -0.0 indicates that the material should be
-   *             appended to the end of the dataset.
-   *  \param chunksize The chunksize for all material data on disk.
   */
   void write_hdf5(char* filename, char* datapath = "/materials", char* nucpath = "/nucid");
   /**
@@ -117,11 +112,6 @@ class MaterialLibrary {
    *  \param filename Path on disk to the HDF5 file.
    *  \param datapath Path to the the material in the file.
    *  \param nucpath Path to the nuclides set in the file.
-   *  \param row The index to read out, may be negative. Also note that this is
-   * a
-   *             float.  A value of -0.0 indicates that the material should be
-   *             appended to the end of the dataset.
-   *  \param chunksize The chunksize for all material data on disk.
   */
   void write_hdf5(const std::string& filename,
                   const std::string& datapath = "/materials",
@@ -140,18 +130,19 @@ class MaterialLibrary {
   /**
    * \brief Add a material to the library
    * \param mat material to add
-   * \param mat_name name of the material to add(will overwrite material name 
-            if it already has one)
   */
   void add_material(char* mat_name, pyne::Material mat);
   /**
    * \brief Add a material to the library
+   * \param mat_name name of the material to add(will overwrite material name 
+            if it already has one)
    * \param mat material to add
   */
   void add_material(const std::string& mat_name, pyne::Material mat);
   /**
    * \brief replace a material to the library
-   * \param num position of the material to replace
+   * \param mat_name name of the material to add(will overwrite material name 
+            if it already has one)
    * \param mat material to add
   */
   void replace(int num, pyne::Material mat);
@@ -166,8 +157,8 @@ class MaterialLibrary {
   */
   void del_material(const std::string& mat_name);
   /**
-   * \brief Get a material of the Library by name
-   * \param mat_name name of the material to return
+   * \brief remove a material of the Library by name
+   * \param mat_name name of the material to remove
   */
   pyne::Material get_material(const std::string& mat_name);
   /**
