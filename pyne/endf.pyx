@@ -40,11 +40,10 @@ libraries = {0: 'ENDF/B', 1: 'ENDF/A', 2: 'JEFF', 3: 'EFF',
              4: 'ENDF/B High Energy', 5: 'CENDL', 6: 'JENDL',
              31: 'INDL/V', 32: 'INDL/A', 33: 'FENDL', 34: 'IRDF',
              35: 'BROND', 36: 'INGDB-90', 37: 'FENDL/A', 41: 'BROND'}
-FILE1_R = re.compile(r'1451 *\d{1,5}$')
-CONTENTS_R = re.compile(' +\d{1,2} +\d{1,3} +\d{1,10} +')
+FILE1_R = re.compile(r'1451[ \d]{4}\d$')
+CONTENTS_R = re.compile('^ {22}([ \d]{10}\d){4}')
 SPACE66_R = re.compile(' {66}')
-NUMERICAL_DATA_R = re.compile('[\d\-+. ]{80}\n$')
-SPACE66_R = re.compile(' {66}')
+NUMERICAL_DATA_R = re.compile('^([ +\-]\d.(\d{6}[+\-]\d|\d{5}[+\-]\d{2})){2}([ \d]{10}\d){4}')
 
 def _radiation_type(value):
     p = {0: 'gamma', 1: 'beta-', 2: 'ec/beta+', 3: 'IT',
