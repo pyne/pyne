@@ -865,6 +865,19 @@ def test_evaluation_relaxation():
     assert data['N2']['transitions'][12] == (u'N5', u'O3', 81.95, 0.00224012)
     assert data['O3']['transitions'] == []
 
+def test_contents_regexp():
+    from os.path import isfile
+    try:
+        import urllib.request as urllib
+    except ImportError:
+        import urllib
+
+    inFile = "n-058_Ce_136.endf"
+    if not isfile(inFile):
+        urllib.urlretrieve("http://t2.lanl.gov/nis/data/data/ENDFB-VII.1-neutron/Ce/136",
+                           inFile)
+
+    Ce136Lib = Library(inFile)
 
 if __name__ == "__main__":
     nose.runmodule()
