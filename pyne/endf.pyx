@@ -40,10 +40,10 @@ libraries = {0: 'ENDF/B', 1: 'ENDF/A', 2: 'JEFF', 3: 'EFF',
              4: 'ENDF/B High Energy', 5: 'CENDL', 6: 'JENDL',
              31: 'INDL/V', 32: 'INDL/A', 33: 'FENDL', 34: 'IRDF',
              35: 'BROND', 36: 'INGDB-90', 37: 'FENDL/A', 41: 'BROND'}
-FILE1_R = re.compile(r'1451[ \d]{4}\d$')
-CONTENTS_R = re.compile('^ {22}([ \d]{10}\d){4}')
-SPACE66_R = re.compile(' {66}')
-NUMERICAL_DATA_R = re.compile('^([ +\-]\d.(\d{6}[+\-]\d|\d{5}[+\-]\d{2})){2}([ \d]{10}\d){4}')
+FILE1END = r'(\d{4}| \d{3}|  \d\d|   \d) 1451(?= *\d+$)[ \d]{5}$'
+FILE1_R = re.compile(r'^.{66}'+FILE1END)
+ELESSFLOAT_R = re.compile('^[ +-]\d.(\d{8}|\d{6}[+-]\d|\d{5}[+-]\d\d)$') # "E-less" Float (FORTRAN77)
+SPACEINT11_R = re.compile('^(?= *\d+$)[ \d]{11}$')                       # I11 (FORTRAN77)
 
 def _radiation_type(value):
     p = {0: 'gamma', 1: 'beta-', 2: 'ec/beta+', 3: 'IT',
@@ -136,6 +136,30 @@ class Library(rxdata.RxLib):
         else:
             warn('TPID is the first line, has been read already', UserWarning)
 
+    def _isContentLine(self,parts):
+        """Check whether a line is consisted of 22*spaces and 4*(I11)s (FORTRAN77).
+
+        Parameters
+        -----------
+        parts: list
+            made by dividing 1-66 chars of an input line into 6 parts of equal length
+        """
+        return parts[0]+parts[1]==' '*22 and \
+        SPACEINT11_R.match(parts[2]) and SPACEINT11_R.match(parts[3]) and \
+        SPACEINT11_R.match(parts[4]) and SPACEINT11_R.match(parts[5])
+
+    def _isDataLine(self,parts):
+        """Check whether a line is consisted of 2*E-less floats and 4x(I11)s (FORTRAN77).
+
+        Parameters
+        -----------
+        parts: list
+            made by dividing 1-66 chars of an input line into 6 parts of equal length
+        """
+        return ELESSFLOAT_R.match(parts[0]) and ELESSFLOAT_R.match(parts[1]) and \
+        SPACEINT11_R.match(parts[2]) and SPACEINT11_R.match(parts[3]) and \
+        SPACEINT11_R.match(parts[4]) and SPACEINT11_R.match(parts[5])
+
     def _read_headers(self):
         cdef int nuc
         cdef int mat_id
@@ -175,26 +199,25 @@ class Library(rxdata.RxLib):
         start = (self.chars_til_now+self.offset)//self.line_length
         stop = start  # if no 451 can be found
         while FILE1_R.search(line):
+            # divide 1-66 chars of the line into six 11-char parts
+            lineparts = [line[i:i+11] for i in range(0, 66, 11)]
             # parse contents section
-            if CONTENTS_R.match(line):
+            if self._isContentLine(lineparts):
                 # When MF and MT change, add offset due to SEND/FEND records.
                 old_mf = mf
-                mf, mt = int(line[22:33]), int(line[33:44])
+                mf, mt = int(lineparts[2]), int(lineparts[3])
                 if old_mf != mf:
                     start += 1
-                mt_length = int(line[44:55])
+                mt_length = int(lineparts[4])
                 stop = start + mt_length
                 self.mat_dict[nuc]['mfs'][mf, mt] = (self.line_length*start-self.offset,
                                                      self.line_length*stop-self.offset)
                 start = stop + 1
                 line = fh.readline()
-            # parse comment
-            elif SPACE66_R.match(line):
-                self.structure[nuc]['docs'].append(line[0:66])
-                line = fh.readline()
-            elif NUMERICAL_DATA_R.match(line):
+            elif self._isDataLine(lineparts):
                 line = fh.readline()
                 continue
+            # parse comment
             else:
                 self.structure[nuc]['docs'].append(line[0:66])
                 line = fh.readline()
