@@ -866,18 +866,49 @@ def test_evaluation_relaxation():
     assert data['O3']['transitions'] == []
 
 def test_contents_regexp():
-    from os.path import isfile
-    try:
-        import urllib.request as urllib
-    except ImportError:
-        import urllib
-
-    inFile = "n-058_Ce_136.endf"
-    if not isfile(inFile):
-        urllib.urlretrieve("http://t2.lanl.gov/nis/data/data/ENDFB-VII.1-neutron/Ce/136",
-                           inFile)
-
-    Ce136Lib = Library(inFile)
+    testInput = """A line like this will never happen in any ENDF-6 formatted file!!!
+This line looks like a (MF,MT)=(1,451) line but NOT!              012  1451 1 34
+This line should be recognized as a valid (MF,MT)=(1,451) doc line 123 1451  456
+It is not checked whether an integer number starts with '0' or not0123 1451  457
+    (perhaps not a valid FORTRAN77 INTEGER!)                       123 1451  458
+The following two lines are valid CONT Records in ENDF-6 format    123 1451  459
+but are NOT recognized as CONTENTS lines in (MF,MT)=(1,451).       123 1451  460
+12345689901 2345678901  345678901   45678901    5678901     6789012345 1451  461
+          1          2          3          4          5          62345 1451  462
+The following two lines should be recognized as the CONTENTS lines.
+   (Neither the ranges of the numbers (MF:1-99, MT:1-999)
+    nor the position of the CONTENTS lines are checked)
+                        345678901   45678901    5678901     6789012345 1451  463
+                                3          4          5          62345 1451  464
+The following three lines should be recognized as the DATA lines.
+ 9.87654+32-6.54321098  345678901   45678901    5678901     6789012345 1451  465
+-1.234567+1+1.23456-22          3          4          5          62345 1451  466
+ 2.34567890-3.456789+1          3          4          5          62345 1451  467
+How about the following three???
+2.34567890 -3.456789+1          3          4          5          62345 1451  468
+ 2.34567890-3.456789+1         3          4          5          6 2345 1451  469
+ 2.34567890-3.456789+1         3          4          5          6 2345 1451 470 
+"""
+    from pyne.endf import FILE1_R, ELESSFLOAT_R, SPACEINT11_R
+    for line in testInput.splitlines():
+        #print("'{}'".format(line))
+        if FILE1_R.match(line):
+            parts = [line[i:i+11] for i in range(0, 66, 11)]
+            # CONTENTS line
+            if parts[0]+parts[1]==' '*22 and \
+               SPACEINT11_R.match(parts[2]) and SPACEINT11_R.match(parts[3]) and \
+               SPACEINT11_R.match(parts[4]) and SPACEINT11_R.match(parts[5]):
+                print("1451CONT: '{}'".format(line))
+            # DATA line
+            elif ELESSFLOAT_R.match(parts[0]) and ELESSFLOAT_R.match(parts[1]) and \
+               SPACEINT11_R.match(parts[2]) and SPACEINT11_R.match(parts[3]) and \
+               SPACEINT11_R.match(parts[4]) and SPACEINT11_R.match(parts[5]):
+                print("1451DATA: '{}'".format(line))
+            # DOCUMENTS line
+            else:
+                print("1451DOCS: '{}'".format(line))
+        else:
+            print("OTHER   : '{}'".format(line))
 
 if __name__ == "__main__":
     nose.runmodule()
