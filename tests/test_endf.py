@@ -869,7 +869,7 @@ def test_contents_regexp():
     testInput = """A line like this will never happen in any ENDF-6 formatted file!!!
 This line looks like a (MF,MT)=(1,451) line but NOT!              012  1451 1 34
 This line should be recognized as a valid (MF,MT)=(1,451) doc line 123 1451  456
-It is not checked whether an integer number starts with '0' or not0123 1451  457
+It is now checked whether an integer number starts with '0' or not0123 1451  457
     (perhaps not a valid FORTRAN77 INTEGER!)                       123 1451  458
 The following two lines are valid CONT Records in ENDF-6 format    123 1451  459
 but are NOT recognized as CONTENTS lines in (MF,MT)=(1,451).       123 1451  460
@@ -884,10 +884,12 @@ The following three lines should be recognized as the DATA lines.
  9.87654+32-6.54321098  345678901   45678901    5678901     6789012345 1451  465
 -1.234567+1+1.23456-22          3          4          5          62345 1451  466
  2.34567890-3.456789+1          3          4          5          62345 1451  467
+LRP can be NEGATIVE!
+ 2.34567890-3.456789+1         -3          4          5          62345 1451  468
 How about the following three???
-2.34567890 -3.456789+1          3          4          5          62345 1451  468
- 2.34567890-3.456789+1         3          4          5          6 2345 1451  469
- 2.34567890-3.456789+1         3          4          5          6 2345 1451 470 
+2.34567890 -3.456789+1          3          4          5          62345 1451  469
+ 2.34567890-3.456789+1         3          4          5          6 2345 1451  470
+ 2.34567890-3.456789+1         3          4          5          6 2345 1451 471 
 """
     from pyne.endf import FILE1_R, ELESSFLOAT_R, SPACEINT11_R
     for line in testInput.splitlines():

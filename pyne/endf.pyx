@@ -40,10 +40,10 @@ libraries = {0: 'ENDF/B', 1: 'ENDF/A', 2: 'JEFF', 3: 'EFF',
              4: 'ENDF/B High Energy', 5: 'CENDL', 6: 'JENDL',
              31: 'INDL/V', 32: 'INDL/A', 33: 'FENDL', 34: 'IRDF',
              35: 'BROND', 36: 'INGDB-90', 37: 'FENDL/A', 41: 'BROND'}
-FILE1END = r'(\d{4}| \d{3}|  \d\d|   \d) 1451(?= *\d+$)[ \d]{5}$'
+FILE1END = r'([1-9]\d{3}| [1-9]\d{2}|  [1-9]\d|   [1-9]) 1451(?= *[1-9]\d*$)[ \d]{5}$'
 FILE1_R = re.compile(r'^.{66}'+FILE1END)
 ELESSFLOAT_R = re.compile('^[ +-]\d.(\d{8}|\d{6}[+-]\d|\d{5}[+-]\d\d)$') # "E-less" Float (FORTRAN77)
-SPACEINT11_R = re.compile('^(?= *\d+$)[ \d]{11}$')                       # I11 (FORTRAN77)
+SPACEINT11_R = re.compile('^((?= *-?[1-9]\d*$)[ \d-]{11}| {10}0)$')      # I11 (FORTRAN77)
 
 def _radiation_type(value):
     p = {0: 'gamma', 1: 'beta-', 2: 'ec/beta+', 3: 'IT',
