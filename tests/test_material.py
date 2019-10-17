@@ -1290,7 +1290,47 @@ def test_mcnp_mat0():
     assert_equal(mass, mass_exp)
 
 
+def uwuw():
+    leu = Material(nucvec={'U235': 0.04, 'U238': 0.96},
+                   metadata={'mat_number': 2,
+                          'table_ids': {'92235':'15c', '92238':'25c'},
+                          'mat_name':'LEU',
+                          'source':'Some URL',
+                          'comments': ('this is a long comment that will definitly '
+                                       'go over the 80 character limit, for science'),
+                          'name':'leu'},
+                   density=19.1)
+
+    uwuw_name = leu.uwuw()
+    name_exp = ('<mat:leu/rho:19.1>')
+    assert_equal(uwuw_name, name_exp)
+
+    leu2 = Material(nucvec={'U235': 0.04, 'U238': 0.96},
+                   metadata={'mat_number': 2,
+                          'table_ids': {'92235':'15c', '92238':'25c'},
+                          'mat_name':'LEU',
+                          'source':'Some URL',
+                          'comments': ('this is a long comment that will definitly '
+                                       'go over the 80 character limit, for science'),
+                          'name':'leu'})
+    uwuw_name = leu2.uwuw()
+    name_exp = ('<mat:leu>')
+    assert_equal(uwuw_name, name_exp)
+
     
+    no_name = Material(nucvec={'U235': 0.04, 'U238': 0.96},
+                   metadata={'mat_number': 2,
+                          'table_ids': {'92235':'15c', '92238':'25c'},
+                          'mat_name':'LEU',
+                          'source':'Some URL',
+                          'comments': ('this is a long comment that will definitly '
+                                       'go over the 80 character limit, for science'),
+                          },
+                   density=19.1)
+    uwuw_name = no_name.uwuw()
+    name_exp = ('')
+    assert_equal(uwuw_name, name_exp)
+
 
 def test_alara():
 

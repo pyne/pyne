@@ -345,6 +345,14 @@ cdef class _Material:
         cdef std_string card
         card = self.mat_pointer.mcnp(frac_type.encode())
         return card.decode()
+    
+    def mcnp(self):
+        """mcnp(frac_type)
+        Return a uwuw material name
+        """
+        cdef std_string uwuw_name
+        uwuw_name = self.mat_pointer.uwuw()
+        return uwuw_name.decode()
 
     def openmc(self, frac_type='mass'):
         """openmc(frac_type)
