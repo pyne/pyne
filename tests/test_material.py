@@ -1301,7 +1301,7 @@ def test_uwuw():
                           'name':'leu'},
                    density=19.1)
 
-    uwuw_name = leu.uwuw()
+    uwuw_name = leu.get_uwuw_name()
     name_exp = ('mat:leu/rho:19.1')
     assert_equal(uwuw_name, name_exp)
 
@@ -1313,7 +1313,7 @@ def test_uwuw():
                           'comments': ('this is a long comment that will definitly '
                                        'go over the 80 character limit, for science'),
                           'name':'leu'})
-    uwuw_name = leu2.uwuw()
+    uwuw_name = leu2.get_uwuw_name()
     name_exp = ('mat:leu')
     assert_equal(uwuw_name, name_exp)
 
@@ -1327,7 +1327,7 @@ def test_uwuw():
                                        'go over the 80 character limit, for science'),
                           },
                    density=19.1)
-    uwuw_name = no_name.uwuw()
+    uwuw_name = no_name.get_uwuw_name()
     name_exp = ('')
     assert_equal(uwuw_name, name_exp)
 

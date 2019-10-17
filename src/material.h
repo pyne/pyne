@@ -172,7 +172,7 @@ namespace pyne
     std::string mcnp(std::string frac_type = "mass");
     ///
     /// Return an uwuw name
-    std::string uwuw();
+    std::string get_uwuw_name();
     ///
     /// Return a fluka input deck MATERIAL card as a string
     std::string fluka(int id, std::string frac_type = "mass");
