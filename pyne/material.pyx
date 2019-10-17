@@ -346,7 +346,7 @@ cdef class _Material:
         card = self.mat_pointer.mcnp(frac_type.encode())
         return card.decode()
     
-    def mcnp(self):
+    def uwuw(self):
         """mcnp(frac_type)
         Return a uwuw material name
         """

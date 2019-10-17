@@ -1290,7 +1290,7 @@ def test_mcnp_mat0():
     assert_equal(mass, mass_exp)
 
 
-def uwuw():
+def test_uwuw():
     leu = Material(nucvec={'U235': 0.04, 'U238': 0.96},
                    metadata={'mat_number': 2,
                           'table_ids': {'92235':'15c', '92238':'25c'},
@@ -1302,7 +1302,7 @@ def uwuw():
                    density=19.1)
 
     uwuw_name = leu.uwuw()
-    name_exp = ('<mat:leu/rho:19.1>')
+    name_exp = ('mat:leu/rho:19.1')
     assert_equal(uwuw_name, name_exp)
 
     leu2 = Material(nucvec={'U235': 0.04, 'U238': 0.96},
@@ -1314,7 +1314,7 @@ def uwuw():
                                        'go over the 80 character limit, for science'),
                           'name':'leu'})
     uwuw_name = leu2.uwuw()
-    name_exp = ('<mat:leu>')
+    name_exp = ('mat:leu')
     assert_equal(uwuw_name, name_exp)
 
     
