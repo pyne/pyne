@@ -347,7 +347,7 @@ cdef class _Material:
         return card.decode()
     
     def uwuw(self):
-        """mcnp(frac_type)
+        """uwuw()
         Return a uwuw material name
         """
         cdef std_string uwuw_name
