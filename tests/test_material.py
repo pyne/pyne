@@ -1294,7 +1294,6 @@ def test_uwuw():
     leu = Material(nucvec={'U235': 0.04, 'U238': 0.96},
                    metadata={'mat_number': 2,
                           'table_ids': {'92235':'15c', '92238':'25c'},
-                          'mat_name':'LEU',
                           'source':'Some URL',
                           'comments': ('this is a long comment that will definitly '
                                        'go over the 80 character limit, for science'),
@@ -1308,7 +1307,6 @@ def test_uwuw():
     leu2 = Material(nucvec={'U235': 0.04, 'U238': 0.96},
                    metadata={'mat_number': 2,
                           'table_ids': {'92235':'15c', '92238':'25c'},
-                          'mat_name':'LEU',
                           'source':'Some URL',
                           'comments': ('this is a long comment that will definitly '
                                        'go over the 80 character limit, for science'),
@@ -1321,7 +1319,6 @@ def test_uwuw():
     no_name = Material(nucvec={'U235': 0.04, 'U238': 0.96},
                    metadata={'mat_number': 2,
                           'table_ids': {'92235':'15c', '92238':'25c'},
-                          'mat_name':'LEU',
                           'source':'Some URL',
                           'comments': ('this is a long comment that will definitly '
                                        'go over the 80 character limit, for science'),
