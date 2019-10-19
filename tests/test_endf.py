@@ -880,7 +880,7 @@ The following two lines should be recognized as the CONTENTS lines.
     nor the position of the CONTENTS lines are checked)
                         345678901   45678901    5678901     6789012345 1451  463
                                 3          4          5          62345 1451  464
-The following three lines should be recognized as the DATA lines.
+The following three lines are DATA lines but now it is not searched for.
  9.87654+32-6.54321098  345678901   45678901    5678901     6789012345 1451  465
 -1.234567+1+1.23456-22          3          4          5          62345 1451  466
  2.34567890-3.456789+1          3          4          5          62345 1451  467
@@ -891,7 +891,7 @@ How about the following three???
  2.34567890-3.456789+1         3          4          5          6 2345 1451  470
  2.34567890-3.456789+1         3          4          5          6 2345 1451 471 
 """
-    from pyne.endf import FILE1_R, ELESSFLOAT_R, SPACEINT11_R
+    from pyne.endf import FILE1_R, SPACEINT11_R
     for line in testInput.splitlines():
         #print("'{}'".format(line))
         if FILE1_R.match(line):
@@ -901,11 +901,6 @@ How about the following three???
                SPACEINT11_R.match(parts[2]) and SPACEINT11_R.match(parts[3]) and \
                SPACEINT11_R.match(parts[4]) and SPACEINT11_R.match(parts[5]):
                 print("1451CONT: '{}'".format(line))
-            # DATA line
-            elif ELESSFLOAT_R.match(parts[0]) and ELESSFLOAT_R.match(parts[1]) and \
-               SPACEINT11_R.match(parts[2]) and SPACEINT11_R.match(parts[3]) and \
-               SPACEINT11_R.match(parts[4]) and SPACEINT11_R.match(parts[5]):
-                print("1451DATA: '{}'".format(line))
             # DOCUMENTS line
             else:
                 print("1451DOCS: '{}'".format(line))
