@@ -42,7 +42,6 @@ libraries = {0: 'ENDF/B', 1: 'ENDF/A', 2: 'JEFF', 3: 'EFF',
              35: 'BROND', 36: 'INGDB-90', 37: 'FENDL/A', 41: 'BROND'}
 FILE1END = r'([1-9]\d{3}| [1-9]\d{2}|  [1-9]\d|   [1-9]) 1451(?= *[1-9]\d*$)[ \d]{5}$'
 FILE1_R = re.compile(r'^.{66}'+FILE1END)
-ELESSFLOAT_R = re.compile('^[ +-]\d.(\d{8}|\d{6}[+-]\d|\d{5}[+-]\d\d)$') # "E-less" Float (FORTRAN77)
 SPACEINT11_R = re.compile('^((?= *-?[1-9]\d*$)[ \d-]{11}| {10}0)$')      # I11 (FORTRAN77)
 
 def _radiation_type(value):
@@ -148,18 +147,6 @@ class Library(rxdata.RxLib):
         SPACEINT11_R.match(parts[2]) and SPACEINT11_R.match(parts[3]) and \
         SPACEINT11_R.match(parts[4]) and SPACEINT11_R.match(parts[5])
 
-    def _isDataLine(self,parts):
-        """Check whether a line is consisted of 2*E-less floats and 4x(I11)s (FORTRAN77).
-
-        Parameters
-        -----------
-        parts: list
-            made by dividing 1-66 chars of an input line into 6 parts of equal length
-        """
-        return ELESSFLOAT_R.match(parts[0]) and ELESSFLOAT_R.match(parts[1]) and \
-        SPACEINT11_R.match(parts[2]) and SPACEINT11_R.match(parts[3]) and \
-        SPACEINT11_R.match(parts[4]) and SPACEINT11_R.match(parts[5])
-
     def _read_headers(self):
         cdef int nuc
         cdef int mat_id
@@ -175,18 +162,14 @@ class Library(rxdata.RxLib):
         # get mat_id
         line = fh.readline()
         mat_id = int(line[66:70].strip() or -1)
-        # store position of read
-        pos = fh.tell()
         # check for isomer (LIS0/LISO entry)
-        matflagstring = line + fh.read(3*self.line_length)
+        matflagstring = line + fh.read(3*len(line))
         flagkeys = ['ZA', 'AWR', 'LRP', 'LFI', 'NLIB', 'NMOD', 'ELIS',
                     'STA', 'LIS', 'LIS0', 0, 'NFOR', 'AWI', 'EMAX',
                     'LREL', 0, 'NSUB', 'NVER', 'TEMP', 0, 'LDRV',
                     0, 'NWD', 'NXC']
         flags = dict(zip(flagkeys, fromendf_tok(matflagstring)))
         nuc = cpp_nucname.id(<int> (<int> flags['ZA']*10000 + flags['LIS0']))
-        # go back to line after first line
-        fh.seek(pos)
         # Make a new dict in self.structure to contain the material data.
         if nuc not in self.structure:
             self.structure.update(
@@ -198,6 +181,7 @@ class Library(rxdata.RxLib):
         mf = 1
         start = (self.chars_til_now+self.offset)//self.line_length
         stop = start  # if no 451 can be found
+        line = fh.readline() # get the next line; start parsing from the 6th line
         while FILE1_R.search(line):
             # divide 1-66 chars of the line into six 11-char parts
             lineparts = [line[i:i+11] for i in range(0, 66, 11)]
@@ -214,9 +198,6 @@ class Library(rxdata.RxLib):
                                                      self.line_length*stop-self.offset)
                 start = stop + 1
                 line = fh.readline()
-            elif self._isDataLine(lineparts):
-                line = fh.readline()
-                continue
             # parse comment
             else:
                 self.structure[nuc]['docs'].append(line[0:66])
