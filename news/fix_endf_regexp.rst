@@ -1,9 +1,9 @@
 **Added:** None
 
-**Changed:** Regular expressions in endf.pyx
+**Changed:** endf.Library._read_headers() and regular expressions in endf.pyx
     Removed regexps: CONTENTS_R, SPACE66_R, NUMERICAL_DATA_R
-    Added regexps:   ELESSFLOAT_R, SPACEINT11_R
-    Added methods:   _isContentLine(parts), _isDataLine(parts)
+    Added regexps:   SPACEINT11_R
+    Added methods:   _isContentLine(parts)
 
 **Deprecated:** None
 
