@@ -10,7 +10,7 @@ from os.path import isfile
 from pyne.mesh import Mesh, NativeMeshTag
 from pyne.dagmc import cell_materials, load, discretize_geom
 from pyne.r2s import resolve_mesh, irradiation_setup, photon_sampling_setup,\
-    total_photon_source_intensity
+    total_photon_source_intensity, photon_source_add_filetype
 from pyne.alara import photon_source_to_hdf5, photon_source_hdf5_to_mesh,\
     phtn_src_energy_bounds
 from pyne.mcnp import Meshtal
@@ -24,13 +24,16 @@ config = \
 structured: True
 # Specify whether this problem uses sub-voxel r2s
 sub_voxel: False
-
+# transport code, MCNP or OpenMC
+transport_code: MCNP
 [step1]
 # Path to MCNP MESHTAL file containing neutron fluxes or a DAG-MCNP5
 # unstructured mesh tally .h5m file.
 meshtal: meshtal
 # Tally number within the meshtal file containing the fluxes for activation.
 tally_num: 4
+# Mesh id. The mesh id used in OpenMC state point file. Default is -1.
+mesh_id: -1
 # The name of the tag used to store flux data on the mesh. For unstructured
 # mesh this tag must already exist within the file specified in <meshtal>.
 flux_tag: n_flux
@@ -49,7 +52,6 @@ num_rays: 10
 # In this case <num_rays> must be a perfect square. If false, rays are fired
 # down mesh rows in random intervals.
 grid: False
-
 [step2]
 # List of decays times, seperated by commas. These strings much match exactly
 # with their counterparts in the phtn_src file produced in step1. No spaces
@@ -68,7 +70,6 @@ alara_params =\
     """material_lib alara_matlib
 element_lib nuclib
 data_library alaralib fendl3bin
-
 output zone
        integrate_energy
        # Energy group upper bounds. The lower bound is always zero.
@@ -77,10 +78,9 @@ output zone
        2.00E6 2.50E6 3.00E6 4.00E6 5.00E6 6.50E6 8.00E6 1.00E7 1.20E7
        1.40E7 2.00E7
 end
-
+# Specify the flux condition below.
 #     flux name    fluxin file   norm   shift   unused
 flux  my_flux     alara_fluxin  1e10     0      default
-
 # Specify the irradiation schedule below.
 # Syntax is found in the ALARA user manual
 # This example is for a single 3.5 d pulse
@@ -90,12 +90,12 @@ end
 pulsehistory  my_pulse_history
     1    0.0    s
 end
-
 #other parameters
 truncation 1e-12
 impurity 5e-6 1e-3
 dump_file dump.file
 """
+
 
 def setup():
     with open(config_filename, 'w') as f:
@@ -113,8 +113,18 @@ def step1():
 
     structured = config.getboolean('general', 'structured')
     sub_voxel = config.getboolean('general', 'sub_voxel')
+    try:
+        transport_code = config.get('general', 'transport_code')
+    except:
+        transport_code = 'MCNP'
     meshtal = config.get('step1', 'meshtal')
     tally_num = config.getint('step1', 'tally_num')
+    try:
+        mesh_id = config.getint('step1', 'mesh_id')
+        if mesh_id == -1:
+            mesh_id = None
+    except:
+        mesh_id = None
     flux_tag = config.get('step1', 'flux_tag')
     decay_times = config.get('step2', 'decay_times').split(',')
     geom = config.get('step1', 'geom')
@@ -125,7 +135,8 @@ def step1():
     load(geom)
 
     # get meshtal info from meshtal file
-    flux_mesh = resolve_mesh(meshtal, tally_num, flux_tag)
+    flux_mesh = resolve_mesh(meshtal, transport_code=transport_code,
+            tally_num=tally_num, mesh_id=mesh_id, flux_tag=flux_tag)
 
     # create the cell_fracs array before irradiation_steup
     if flux_mesh.structured:
@@ -136,10 +147,10 @@ def step1():
         cell_fracs = discretize_geom(flux_mesh)
 
     cell_mats = cell_materials(geom)
-    irradiation_setup(flux_mesh, cell_mats, cell_fracs, alara_params_filename, tally_num,
-                      num_rays=num_rays, grid=grid, reverse=reverse,
-                      flux_tag=flux_tag, decay_times=decay_times,
-                      sub_voxel=sub_voxel)
+    irradiation_setup(flux_mesh, cell_mats, cell_fracs, alara_params_filename,
+            tally_num=tally_num, mesh_id=mesh_id, num_rays=num_rays, grid=grid,
+            reverse=reverse, flux_tag=flux_tag, decay_times=decay_times, 
+            sub_voxel=sub_voxel)
 
     # create a blank mesh for step 2:
     ves = list(flux_mesh.iter_ve())
@@ -161,6 +172,10 @@ def step2():
     config.read(config_filename)
     structured = config.getboolean('general', 'structured')
     sub_voxel = config.getboolean('general', 'sub_voxel')
+    try:
+        transport_code = config.get('general', 'transport_code')
+    except:
+        transport_code = 'MCNP'
     decay_times = config.get('step2', 'decay_times').split(',')
     output = config.get('step2', 'output')
     tot_phtn_src_intensities = config.get('step2', 'tot_phtn_src_intensities')
@@ -176,16 +191,19 @@ def step2():
     if not isfile(h5_file):
         photon_source_to_hdf5(filename='phtn_src', nucs='total')
     intensities = "Total photon source intensities (p/s)\n"
-    for i, dt in enumerate(decay_times):
-        print('Writing source for decay time: {0} to mesh'.format(dt))
+    for i, dc in enumerate(decay_times):
+        print('Writing source for decay time: {0} to mesh'.format(dc))
         mesh = Mesh(structured=structured, mesh='blank_mesh.h5m')
-        tags = {('TOTAL', dt): tag_name}
+        tags = {('TOTAL', dc): tag_name}
         photon_source_hdf5_to_mesh(mesh, h5_file, tags, sub_voxel=sub_voxel,
                                    cell_mats=cell_mats)
-        mesh.write_hdf5('{0}_{1}.h5m'.format(output, i+1))
+        p_src_filename = '{0}_{1}.h5m'.format(output, i+1)
+        mesh.write_hdf5(p_src_filename)
+        if transport_code.lower() == 'openmc':
+            photon_source_add_filetype(p_src_filename)
         intensity = total_photon_source_intensity(mesh, tag_name,
                                                   sub_voxel=sub_voxel)
-        intensities += "{0}: {1}\n".format(dt, intensity)
+        intensities += "{0}: {1}\n".format(dc, intensity)
 
     with open(tot_phtn_src_intensities, 'w') as f:
         f.write(intensities)
@@ -197,35 +215,3 @@ def step2():
         e_bounds_str += "{0}\n".format(e)
     with open("e_bounds", 'w') as f:
         f.write(e_bounds_str)
-
-    print('R2S step2 complete.')
-
-
-def main():
-
-    r2s_help = ('This script automates the process of preforming Rigorous Two-\n'
-                'Step (R2S) analysis using DAG-MCNP5 and the ALARA activation code.\n'
-                'Infomation on how to use this script can be found at:\n'
-                'http://pyne.io/usersguide/r2s.html\n')
-    setup_help = ('Prints the files "config.ini" and "alara_params.txt, to be\n'
-                  'filled in by the user.\n')
-    step1_help = 'Creates the necessary files for running ALARA.'
-    step2_help = 'Creates mesh-based photon sources for photon transport.'
-    parser = argparse.ArgumentParser()
-    subparsers = parser.add_subparsers(help=r2s_help, dest='command')
-
-    setup_parser = subparsers.add_parser('setup', help=setup_help)
-    step1_parser = subparsers.add_parser('step1', help=step1_help)
-    step2_parser = subparsers.add_parser('step2', help=step2_help)
-
-    args, other = parser.parse_known_args()
-    if args.command == 'setup':
-        setup()
-    elif args.command == 'step1':
-        step1()
-    elif args.command == 'step2':
-        step2()
-
-
-if __name__ == '__main__':
-    main()

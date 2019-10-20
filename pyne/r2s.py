@@ -2,21 +2,22 @@ from os.path import isfile
 from warnings import warn
 from pyne.utils import QAWarning
 import numpy as np
+import tables as tb
 
-from pyne.mesh import Mesh
+from pyne.mesh import Mesh, MeshTally
 from pyne.mcnp import Meshtal
+from pyne import openmc_utils
 from pyne.alara import mesh_to_fluxin, record_to_geom, photon_source_to_hdf5, \
-    photon_source_hdf5_to_mesh, responses_output_zone
+    photon_source_hdf5_to_mesh
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 
-def resolve_mesh(mesh_reference, tally_num=None, flux_tag="n_flux",
-                 output_material=False):
+def resolve_mesh(mesh_reference, transport_code='MCNP', tally_num=None,
+        mesh_id=None, flux_tag="n_flux", output_material=False):
     """This function creates a method that will consume many mesh-like objects
        (e.g. mesh, an h5m file, a meshtal file, etc) and returns a robust PyNE
        mesh object accordingly.
-
     Parameters
     ----------
     mesh_reference : Mesh object, unstructured mesh file, Meshtal, meshtal
@@ -24,15 +25,19 @@ def resolve_mesh(mesh_reference, tally_num=None, flux_tag="n_flux",
         The source of the neutron flux information. This can be a PyNE Meshtal
         object, a pyne Mesh object, or the filename an MCNP meshtal file, or
         the filename of an unstructured mesh tagged with fluxes.
-    tally_num : int
+    transport_code: str, optional
+        Transport code name. Currently support 'MCNP' and 'OpenMC'.
+    tally_num : int, optional
         The MCNP FMESH4 tally number of the neutron flux tally within the
         meshtal file.
+    mesh_id : int, optional
+        The mesh id used in the OpenMC tally. Required if multiple meshes
+        exist in the same state point file.
     flux_tag : str, optional
         The tag name for the neutron flux.
     output_material : bool, optional
         If true, output mesh will have materials as determined by
         dagmc.discretize_geom().
-
     Returns
     -------
     m : PyNE mesh object
@@ -42,10 +47,20 @@ def resolve_mesh(mesh_reference, tally_num=None, flux_tag="n_flux",
     # mesh_reference is Mesh object
     if isinstance(mesh_reference, Mesh):
         m = mesh_reference
+    # mesh_reference is a file
+    elif isinstance(mesh_reference, str) and not isfile(mesh_reference):
+        raise ValueError("File {0} not found!".format(mesh_reference))
     #  mesh_reference is unstructured mesh file
     elif isinstance(mesh_reference, str) and isfile(mesh_reference) \
             and mesh_reference.endswith(".h5m"):
         m = Mesh(structured=False, mesh=mesh_reference)
+    # mesh_reference is a openmc statepoint file
+    elif isinstance(mesh_reference, str) and isfile(mesh_reference) \
+            and mesh_reference.endswith(".h5"):
+            m = openmc_utils.create_meshtally(mesh_reference, tally_id=tally_num,
+                    mesh_id=mesh_id, tag_names=(flux_tag, flux_tag + "_err",
+                                                  flux_tag + "_total",
+                                                  flux_tag + "_err_total"))
     #  mesh_reference is Meshtal or meshtal file
     elif tally_num is not None:
         #  mesh_reference is meshtal file
@@ -62,24 +77,22 @@ def resolve_mesh(mesh_reference, tally_num=None, flux_tag="n_flux",
         else:
             raise ValueError("meshtal argument not a Mesh object, Meshtal"
                              " object, MCNP meshtal file or meshtal.h5m file.")
-    # mesh_references is a Meshtal file but no tally_num provided
+    # mesh_references is a Meshtal or state point file but no tally_num provided
     else:
         raise ValueError(
-            "Need to provide a tally number when reading a Meshtal file")
+            "Need to provide a tally number when reading a Meshtal or state point file")
 
     return m
 
 
 def irradiation_setup(flux_mesh, cell_mats, cell_fracs, alara_params,
-                      tally_num=4, num_rays=10, grid=False, flux_tag="n_flux",
+                      tally_num=4, mesh_id=None, num_rays=10, grid=False, flux_tag="n_flux",
                       fluxin="alara_fluxin", reverse=False,
                       alara_inp="alara_inp", alara_matlib="alara_matlib",
                       output_mesh="r2s_step1.h5m", output_material=False,
-                      decay_times=None, sub_voxel=False, responses=None,
-                      wdr_file=None):
+                      decay_times=None, sub_voxel=False):
     """This function is used to setup the irradiation inputs after the first
     R2S transport step.
-
     Parameters
     ----------
     flux_mesh : PyNE Meshtal object, Mesh object, or str
@@ -96,6 +109,8 @@ def irradiation_setup(flux_mesh, cell_mats, cell_fracs, alara_params,
     tally_num : int
         The MCNP FMESH4 tally number of the neutron flux tally within the
         meshtal file.
+    mesh_id : int, optional
+        The mesh id used in OpenMC state point file for this tally.
     num_rays : int, optional
         The number of rays to fire down a mesh row for geometry discretization.
         This number must be a perfect square if grid=True.
@@ -127,13 +142,10 @@ def irradiation_setup(flux_mesh, cell_mats, cell_fracs, alara_params,
         List of the decay times. If no decay times given, use '1 s'.
     sub_voxel : bool, optional
         If true, sub-voxel r2s work flow  will be used.
-    responses : list of str, optional
-        The list of requested responses.
-    wdr_file : str
-        Path to the wdr file.
     """
 
-    m = resolve_mesh(flux_mesh, tally_num, flux_tag, output_material)
+    m = resolve_mesh(flux_mesh, tally_num=tally_num, mesh_id=mesh_id,
+            flux_tag=flux_tag, output_material=output_material)
 
     if output_material:
         m.cell_fracs_to_mats(cell_fracs, cell_mats)
@@ -160,10 +172,6 @@ def irradiation_setup(flux_mesh, cell_mats, cell_fracs, alara_params,
     with open(alara_inp, 'a') as f:
         f.write("\n" + alara_params)
 
-    # append responses output zone
-    with open(alara_inp, 'a') as f:
-        f.write(responses_output_zone(responses, wdr_file, alara_params))
-
     m.write_hdf5(output_mesh)
 
 
@@ -171,7 +179,6 @@ def photon_sampling_setup(mesh, phtn_src, tags):
     """This function reads in an ALARA photon source file and creates and tags
     photon source densities onto a Mesh object for the second R2S transport
     step.
-
     Parameters
     ----------
     mesh : PyNE Mesh
@@ -187,7 +194,6 @@ def photon_sampling_setup(mesh, phtn_src, tags):
         dictionary are the requested tag names for the combination of nuclide
         and decay time. These tag names should be the tag names that are read
         by the sampling subroutine. For example:
-
         tags = {('U-235', 'shutdown'): 'tag1', ('TOTAL', '1 h'): 'tag2'}
     """
     photon_source_to_hdf5(phtn_src)
@@ -198,7 +204,6 @@ def photon_sampling_setup(mesh, phtn_src, tags):
 def total_photon_source_intensity(m, tag_name, sub_voxel=False):
     """This function reads mesh tagged with photon source densities and returns
     the total photon emission desinty.
-
     Parameters
     ----------
     m : PyNE Mesh
@@ -208,7 +213,6 @@ def total_photon_source_intensity(m, tag_name, sub_voxel=False):
        information.
     sub_voxel: bool, optional
         If true, sub-voxel r2s work flow will be used.
-
     Returns
     -------
     intensity : float
@@ -231,3 +235,18 @@ def total_photon_source_intensity(m, tag_name, sub_voxel=False):
             sv_data = ve_data[num_e_groups*svid:num_e_groups*(svid+1)]
             intensity += vol * np.sum(sv_data)
     return intensity
+
+
+def photon_source_add_filetype(filename):
+    """
+    This function is used to add 'filetype' attribute for PyNE R2S photon
+    source file 'source_x.h5m'. For OpenMC source sampling.
+    Parameters
+    ----------
+    filename : string
+        Filename of the 'source_x.h5m'.
+    """
+    with tb.open_file(filename, 'r+') as h5f:
+        h5f.root._f_setattr('filetype',
+                'pyne_r2s_source'.encode(encoding='ascii'))
+    return
