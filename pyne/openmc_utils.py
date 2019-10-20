@@ -291,12 +291,11 @@ def get_result_error_from_openmc_sp(filename, m):
     Returns:
     --------
     result : numpy array
-        This numpy array contains the flux data read from MCNP meshtally
-        file. The shape of this numpy array is
-        (num_ves*num_e_groups).
+        This numpy array contains the flux data read from OpenMC state point
+        file. The shape of this numpy array is (num_ves*num_e_groups), with z
+        changes fastest.
     rel_error: numpy array
-        This numpy array contains the relative error data read from MCNP
-        meshtally.
+        This numpy array contains the relative error data.
     res_tot : list
         The total results.
     rel_err_tot : list
@@ -311,12 +310,13 @@ def get_result_error_from_openmc_sp(filename, m):
     ve_vol = m.structured_hex_volume(0, 0, 0)
     num_e_groups = len(flux.mean.flatten()) // num_ves
 
-    # get result
+    # get result and res_tot
     result = flux.mean.flatten()
     result = np.divide(result, ve_vol)
     result = np.reshape(result, newshape=(num_e_groups, num_ves))
     result = result.transpose()
     res_tot = np.sum(result, axis=1)
+
     # calculate rel_err
     rel_err = np.zeros_like(flux.std_dev)
     nonzero = flux.mean > 0
@@ -331,7 +331,45 @@ def get_result_error_from_openmc_sp(filename, m):
     var_tot = np.sum(np.square(std_dev), axis=1)
     nonzero = res_tot > 0
     rel_err_tot = np.sqrt(var_tot[nonzero]) / (res_tot[nonzero] * ve_vol)
+
+    # In the result of OpenMC, x changes fastest
+    # change the order to z changes fastest
+    result = result_changes_order(result, m.dims[3:6])
+    rel_err = result_changes_order(rel_err, m.dims[3:6])
+    res_tot = result_changes_order(res_tot, m.dims[3:6])
+    rel_err_tot = result_changes_order(rel_err_tot, m.dims[3:6])
     return result, rel_err, res_tot, rel_err_tot
+
+def result_changes_order(result, dims):
+    """
+    This function changes the order of openmc flux data. The default order of
+    OpenMC flux is x changes the fastest. This function changes it to the order
+    which z changes the fasest (the same order as MCNP meshtal).
+
+    Parameters:
+    -----------
+    result : numpy array
+        This numpy array contains the flux data read from OpenMC state point
+        file. The shape of this numpy array is (num_ves*num_e_groups) or
+        (num_ves, ), with x changes the fastest.
+    dims : list
+        The dimension of x, y, z.
+
+    Returns:
+    result_ : numpy array
+        This numpy array contains the flux data read from OpenMC state point
+        file. The shape of this numpy array is (num_ves*num_e_groups) or
+        (num_ves, ), with changes the fastest.
+    """
+    result_ = np.zeros_like(result)
+    x_dim, y_dim, z_dim = dims[0], dims[1], dims[2]
+    for i in range(x_dim):
+        for j in range(y_dim):
+            for k in range(z_dim):
+                idx = k * (x_dim * y_dim) + j * x_dim + i
+                idx_ = i * (y_dim * z_dim) + j * z_dim + k
+                result_[idx_] = result[idx]
+    return result_
 
 
 def create_meshtally(filename, tally_id, mesh_id=None, particle=None,
