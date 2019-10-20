@@ -7,11 +7,13 @@ from numpy.testing import assert_array_equal
 import multiprocessing
 import filecmp
 import sys
+import tables as tb
 from shutil import copyfile
 
 from pyne.mcnp import Meshtal
 from pyne.material import Material
-from pyne.r2s import irradiation_setup, photon_sampling_setup, total_photon_source_intensity
+from pyne.r2s import irradiation_setup, photon_sampling_setup, \
+        total_photon_source_intensity, photon_source_add_filetype
 from pyne.utils import QAWarning, file_almost_same, file_block_almost_same
 from pyne.mesh import Mesh, NativeMeshTag, HAVE_PYMOAB
 if not HAVE_PYMOAB:
@@ -56,9 +58,11 @@ def irradiation_setup_structured(flux_tag="n_flux", meshtal_file="meshtal_2x2x1"
                      (3, 2, 0.037037037037037035, 0.5443310539518174),
                      (3, 3, 0.9629629629629629, 0.010467904883688454)]
 
-    irradiation_setup(meshtal, cell_mats, cell_fracs, alara_params, tally_num,
-                      num_rays, grid, flux_tag, fluxin, reverse, alara_inp,
-                      alara_matlib, output_mesh, output_material)
+    irradiation_setup(meshtal, cell_mats, cell_fracs, alara_params,
+            tally_num=tally_num, num_rays=num_rays, grid=grid,
+            flux_tag=flux_tag, fluxin=fluxin, reverse=reverse,
+            alara_inp=alara_inp, alara_matlib=alara_matlib,
+            output_mesh=output_mesh, output_material=output_material)
 
     #  expected output files
     exp_alara_inp = os.path.join(thisdir, "files_test_r2s", "exp_alara_inp")
@@ -369,6 +373,16 @@ def test_irradiation_setup_unstructured_nondef_tag():
     f2 = results[1]
     f3 = results[2]
 
+def test_photon_soruce_add_filetype():
+    filename = os.path.join("files_test_r2s", "source.h5m")
+    filename_add_type = os.path.join("files_test_r2s", "source_filetype.h5m")
+    copyfile(filename, filename_add_type)
+    photon_source_add_filetype(filename_add_type)
+    with tb.open_file(filename_add_type) as h5f:
+        retval = h5f.root._f_getattr('filetype')
+        assert_equal(retval, b'pyne_r2s_source')
+    os.remove(filename_add_type)
+
 
 def _r2s_test_step1(r2s_run_dir, remove_step1_out=True):
     os.chdir(thisdir)
@@ -477,7 +491,6 @@ def _r2s_test_step2(r2s_run_dir, remove_step1_out=True):
     assert_equal(f6, True)
 
 
-
 def test_r2s_script_step_by_step():
     # skip test without dagmc
     try:
@@ -501,9 +514,18 @@ def test_r2s_script_step_by_step():
     _r2s_test_step1(r2s_run_dir, remove_step1_out)
     _r2s_test_step2(r2s_run_dir, remove_step1_out)
 
+    # test openmc r2s
+    try:
+        import openmc
+    except:
+        raise SkipTest
+    r2s_run_dir = os.path.join(
+            thisdir, "files_test_r2s", "r2s_examples", "openmc_r2s")
+    _r2s_test_step1(r2s_run_dir, remove_step1_out)
+    _r2s_test_step2(r2s_run_dir, remove_step1_out)
+
 
 def test_r2s_script():
-
    # skip test without dagmc
    try:
        from pyne import dagmc
@@ -523,5 +545,15 @@ def test_r2s_script():
    # test unstructured r2s
    r2s_run_dir = os.path.join(
        thisdir, "files_test_r2s", "r2s_examples", "unstructured_r2s_run")
+   _r2s_test_step1(r2s_run_dir, remove_step1_out)
+   _r2s_test_step2(r2s_run_dir, remove_step1_out)
+
+   # openmc r2s
+   try:
+       import openmc
+   except:
+       raise SkipTest
+   r2s_run_dir = os.path.join(
+       thisdir, "files_test_r2s", "r2s_examples", "openmc_r2s")
    _r2s_test_step1(r2s_run_dir, remove_step1_out)
    _r2s_test_step2(r2s_run_dir, remove_step1_out)
