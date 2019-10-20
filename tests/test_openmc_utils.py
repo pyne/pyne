@@ -135,6 +135,31 @@ def test_get_e_bounds_from_openmc_sp():
     e_bounds = openmc_utils.get_e_bounds_from_openmc_sp(filename, tally_id=1)
     assert_array_equal(e_bounds, exp_e_bounds)
 
+def test_flux_changes_order():
+    if not HAVE_PYMOAB or sys.version_info[0] == 2:
+        raise SkipTest
+    try:
+        import openmc
+    except:
+        raise SkipTest
+    # test mesh dimensions: (3, 2, 1), num_e_groups: 2
+    dims = np.array([3, 2, 1])
+    result = np.array([['x0y0z0e0', 'x0y0z0e1'],
+                       ['x1y0z0e0', 'x1y0z0e1'],
+                       ['x2y0z0e0', 'x2y0z0e1'],
+                       ['x0y1z0e0', 'x0y1z0e1'],
+                       ['x1y1z0e0', 'x1y1z0e1'],
+                       ['x2y1z0e0', 'x2y1z0e1']])
+    exp_result = np.array(
+                      [['x0y0z0e0', 'x0y0z0e1'],
+                       ['x0y1z0e0', 'x0y1z0e1'],
+                       ['x1y0z0e0', 'x1y0z0e1'],
+                       ['x1y1z0e0', 'x1y1z0e1'],
+                       ['x2y0z0e0', 'x2y0z0e1'],
+                       ['x2y1z0e0', 'x2y1z0e1']])
+    result_ = openmc_utils.result_changes_order(result, dims)
+    assert_array_equal(result_, exp_result)
+
 def test_get_result_error_from_openmc_sp():
     if not HAVE_PYMOAB or sys.version_info[0] == 2:
         raise SkipTest
@@ -145,6 +170,7 @@ def test_get_result_error_from_openmc_sp():
     filename = os.path.join(os.getcwd(), "files_test_openmc",
             "statepoint.10.ebin2.ves6.h5")
     tally_num = 1
+    dims = np.array([3, 2, 1])
 
     m = MeshTally()
     structured_coords = openmc_utils.get_structured_coords_from_openmc_sp(
@@ -165,17 +191,22 @@ def test_get_result_error_from_openmc_sp():
     exp_result = np.divide(flux.mean.flatten(), ve_vol)
     exp_result = np.reshape(exp_result, newshape=(num_e_groups, num_ves))
     exp_result = exp_result.transpose()
+    exp_res_tot = np.sum(exp_result, axis=1)
 
     exp_rel_err = flux.std_dev / flux.mean
     exp_rel_err = np.reshape(exp_rel_err, newshape=(num_e_groups, num_ves))
     exp_rel_err = exp_rel_err.transpose()
 
-    exp_res_tot = np.sum(exp_result, axis=1)
     exp_rel_err_tot = np.zeros_like(exp_res_tot)
     std_dev = np.reshape(flux.std_dev.flatten(), newshape=(num_e_groups, num_ves))
     std_dev = std_dev.transpose()
     var_tot = np.sum(np.square(std_dev), axis=1)
     exp_rel_err_tot = np.sqrt(var_tot) / (exp_res_tot * ve_vol)
+    # changes the order of exp results
+    exp_result = openmc_utils.result_changes_order(exp_result, dims)
+    exp_rel_err = openmc_utils.result_changes_order(exp_rel_err, dims)
+    exp_res_tot = openmc_utils.result_changes_order(exp_res_tot, dims)
+    exp_rel_err_tot = openmc_utils.result_changes_order(exp_rel_err_tot, dims)
     # compare the data and expected answer
     assert_array_almost_equal(result, exp_result)
     assert_array_almost_equal(rel_err, exp_rel_err)
@@ -199,6 +230,7 @@ def test_meshtally_from_openmc_statepoint():
     filename = os.path.join(os.getcwd(), "files_test_openmc",
             "statepoint.10.ebin2.ves6.h5")
     tally_num = 1
+    dims = np.array([3, 2, 1])
     tag_names = ("n_flux", "n_flux_err", "n_flux_total", "n_flux_total_err")
     mesh = openmc_utils.create_meshtally(filename, tally_num, particle='neutron',
             tag_names=tag_names)
@@ -227,6 +259,9 @@ def test_meshtally_from_openmc_statepoint():
     exp_rel_err = np.reshape(exp_rel_err, newshape=(num_e_groups, num_ves))
     exp_rel_err = exp_rel_err.transpose()
 
+    # changes the order of exp results
+    exp_result = openmc_utils.result_changes_order(exp_result, dims)
+    exp_rel_err = openmc_utils.result_changes_order(exp_rel_err, dims)
     # compare
     assert_array_almost_equal(mesh.n_flux[:], exp_result)
     assert_array_almost_equal(mesh.n_flux_err[:], exp_rel_err)
