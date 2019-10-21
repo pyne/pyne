@@ -215,3 +215,35 @@ def step2():
         e_bounds_str += "{0}\n".format(e)
     with open("e_bounds", 'w') as f:
         f.write(e_bounds_str)
+
+    print('R2S step2 complete.')
+
+
+def main():
+
+    r2s_help = ('This script automates the process of preforming Rigorous Two-\n'
+                'Step (R2S) analysis using DAG-MCNP5 and the ALARA activation code.\n'
+                'Infomation on how to use this script can be found at:\n'
+                'http://pyne.io/usersguide/r2s.html\n')
+    setup_help = ('Prints the files "config.ini" and "alara_params.txt, to be\n'
+                  'filled in by the user.\n')
+    step1_help = 'Creates the necessary files for running ALARA.'
+    step2_help = 'Creates mesh-based photon sources for photon transport.'
+    parser = argparse.ArgumentParser()
+    subparsers = parser.add_subparsers(help=r2s_help, dest='command')
+
+    setup_parser = subparsers.add_parser('setup', help=setup_help)
+    step1_parser = subparsers.add_parser('step1', help=step1_help)
+    step2_parser = subparsers.add_parser('step2', help=step2_help)
+
+    args, other = parser.parse_known_args()
+    if args.command == 'setup':
+        setup()
+    elif args.command == 'step1':
+        step1()
+    elif args.command == 'step2':
+        step2()
+
+
+if __name__ == '__main__':
+    main()
