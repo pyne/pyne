@@ -502,10 +502,10 @@ std::string pyne::Material::openmc(std::string frac_type) {
   }
 
   // add name if specified
-  if (temp_mat.metadata.isMember("mat_name")) {
-    oss << "name=" << new_quote << temp_mat.metadata["mat_name"].asString() << end_quote;
-  }
 
+  if (temp_mat.metadata.isMember("name")) {
+    oss << "name=" << new_quote << temp_mat.metadata["name"].asString() << end_quote;
+  } 
   // close the material tag
   oss << ">";
   // new line
