@@ -171,6 +171,9 @@ namespace pyne
     /// Return an mcnp input deck record as a string
     std::string mcnp(std::string frac_type = "mass");
     ///
+    /// Return an uwuw name
+    std::string get_uwuw_name();
+    ///
     /// Return a fluka input deck MATERIAL card as a string
     std::string fluka(int id, std::string frac_type = "mass");
     /// Convenience function to tell whether a given name needs a material card
