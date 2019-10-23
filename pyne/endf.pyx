@@ -67,8 +67,7 @@ class Library(rxdata.RxLib):
                         12: self._linlin, 13: self._linlog, 14: self._loglin,
                         15: self._loglog, 21: self._histogram, 22: self._linlin,
                         23: self._linlog, 24: self._loglin, 25: self._loglog}
-        self.chars_til_now = 0
-        self.offset = 0
+        self.chars_til_now = 0 # offset (byte) from the top of the file for seek()ing
         self.fh = fh
         self._set_line_length()
         # read first line (Tape ID)
@@ -92,8 +91,11 @@ class Library(rxdata.RxLib):
         # two seem to be necessary for Windows-style terminators.
         fh.seek(0)
         fh.readline()
-        fh.readline()
-        self.line_length = 82 if fh.newlines=='\r\n' else 81
+        line = fh.readline()
+        self.line_length = len(line) # actual chars/line read
+        # self.offset now stores the diff. between the length of a line read
+        # and the length of a line in the ENDF-6 formatted file.
+        self.offset = 1 if self.line_length == 81 and fh.newlines=='\r\n' else 0
         fh.seek(0)
 
         if opened_here:
@@ -130,8 +132,7 @@ class Library(rxdata.RxLib):
             else:
                 fh = self.fh
             line = fh.readline()
-            self.chars_til_now = len(line) + self.line_length - 81
-            self.offset = self.line_length - self.chars_til_now
+            self.chars_til_now = len(line) + self.offset
         else:
             warn('TPID is the first line, has been read already', UserWarning)
 
@@ -163,7 +164,7 @@ class Library(rxdata.RxLib):
         line = fh.readline()
         mat_id = int(line[66:70].strip() or -1)
         # check for isomer (LIS0/LISO entry)
-        matflagstring = line + fh.read(3*len(line))
+        matflagstring = line + fh.read(3*self.line_length)
         flagkeys = ['ZA', 'AWR', 'LRP', 'LFI', 'NLIB', 'NMOD', 'ELIS',
                     'STA', 'LIS', 'LIS0', 0, 'NFOR', 'AWI', 'EMAX',
                     'LREL', 0, 'NSUB', 'NVER', 'TEMP', 0, 'LDRV',
@@ -179,7 +180,7 @@ class Library(rxdata.RxLib):
                                         'mfs': {}}})
         # Parse header (all lines with 1451)
         mf = 1
-        start = (self.chars_til_now+self.offset)//self.line_length
+        start = self.chars_til_now//(self.line_length+self.offset) # present (the first) line number
         stop = start  # if no 451 can be found
         line = fh.readline() # get the next line; start parsing from the 6th line
         while FILE1_R.search(line):
@@ -194,8 +195,10 @@ class Library(rxdata.RxLib):
                     start += 1
                 mt_length = int(lineparts[4])
                 stop = start + mt_length
-                self.mat_dict[nuc]['mfs'][mf, mt] = (self.line_length*start-self.offset,
-                                                     self.line_length*stop-self.offset)
+                # The first number in the tuple is the offset in the file to seek(),
+                # whereas the second stands for the number of characters to be read().
+                self.mat_dict[nuc]['mfs'][mf, mt] = ((self.line_length+self.offset)*start,
+                                                     self.line_length*stop)
                 start = stop + 1
                 line = fh.readline()
             # parse comment
@@ -205,7 +208,7 @@ class Library(rxdata.RxLib):
         # Find where the end of the material is and then jump to it.
         # The end is 3 lines after the last mf,mt
         # combination (SEND, FEND, MEND)
-        self.chars_til_now = (stop + 3)*self.line_length - self.offset
+        self.chars_til_now = (stop + 3)*(self.line_length+self.offset) # at the end of a MAT
         fh.seek(self.chars_til_now)
         nextline = fh.readline()
         self.more_files = (nextline != '' and nextline[68:70] != '-1')
