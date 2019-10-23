@@ -502,10 +502,10 @@ std::string pyne::Material::openmc(std::string frac_type) {
   }
 
   // add name if specified
-  if (temp_mat.metadata.isMember("mat_name")) {
-    oss << "name=" << new_quote << temp_mat.metadata["mat_name"].asString() << end_quote;
-  }
 
+  if (temp_mat.metadata.isMember("name")) {
+    oss << "name=" << new_quote << temp_mat.metadata["name"].asString() << end_quote;
+  } 
   // close the material tag
   oss << ">";
   // new line
@@ -594,6 +594,26 @@ std::string pyne::Material::openmc(std::string frac_type) {
   return oss.str();
 }
 
+///---------------------------------------------------------------------------//
+std::string pyne::Material::get_uwuw_name() {
+  // standard uwuw material name is : "mat:<Name of Material>/rho:<density>" 
+  if (! metadata.isMember("name")) {
+    pyne::warning("The material has no name");
+    return "";
+  }
+  std::ostringstream uwuw_name;
+  uwuw_name << "mat:";
+  uwuw_name << metadata["name"].asString();
+  if (density > 0) {
+    uwuw_name << "/rho:" << std::setprecision(5) << density;
+  } else {
+    pyne::warning("No Density defined for this Material");
+  }
+
+  return uwuw_name.str();
+}
+
+///---------------------------------------------------------------------------//
 std::string pyne::Material::mcnp(std::string frac_type) {
   //////////////////// Begin card creation ///////////////////////
   std::ostringstream oss;

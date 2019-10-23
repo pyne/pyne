@@ -1137,11 +1137,10 @@ def test_openmc():
     leu = Material(nucvec={'U235': 0.04, 'U238': 0.96},
                    metadata={'mat_number': 2,
                           'table_ids': {'92235':'15c', '92238':'25c'},
-                          'mat_name':'LEU',
                           'source':'Some URL',
                           'comments': ('this is a long comment that will definitly '
                                        'go over the 80 character limit, for science'),
-                          'name':'leu'},
+                          'name':'LEU'},
                    density=19.1)
 
     mass = leu.openmc()
@@ -1177,11 +1176,10 @@ def test_openmc_mat0():
     leu = Material(nucvec={'U235': 0.04, 'U236': 0.0, 'U238M': 0.96},
                    metadata={'mat_number': 2,
                           'table_ids': {'92235':'15c', '92236':'15c', '92238':'25c'},
-                          'mat_name':'LEU',
                           'source':'Some URL',
                           'comments': ('this is a long comment that will definitly '
                                        'go over the 80 character limit, for science'),
-                          'name':'leu'},
+                          'name':'LEU'},
                    density=19.1)
 
     mass = leu.openmc()
@@ -1197,11 +1195,10 @@ def test_openmc_sab():
     leu = Material(nucvec={'H1': 0.66, 'O16': 0.33},
                    metadata={'mat_number': 2,
                              'sab': 'c_H_in_H2O',
-                             'mat_name':'Water',
                              'source':'Some URL',
                              'comments': ('this is a long comment that will definitly '
                                           'go over the 80 character limit, for science'),
-                          'name':'leu'},
+                          'name':'Water'},
                    density=1.001)
 
     mass = leu.openmc()
@@ -1218,8 +1215,7 @@ def test_openmc_c():
     csi = Material()
     csi.from_atom_frac({'C': 0.5, 'Si': 0.5})
     csi.metadata= {'mat_number': 2,
-                   'mat_name':'silicon carbide',
-                   'name':'leu'}
+                   'name':'silicon carbide'}
     csi.density = 3.16
 
     atom = csi.openmc(frac_type='atom')
@@ -1237,7 +1233,6 @@ def test_mcnp():
     leu = Material(nucvec={'U235': 0.04, 'U238': 0.96},
                    metadata={'mat_number': 2,
                           'table_ids': {'92235':'15c', '92238':'25c'},
-                          'mat_name':'LEU',
                           'source':'Some URL',
                           'comments': ('this is a long comment that will definitly '
                                        'go over the 80 character limit, for science'),
@@ -1271,7 +1266,6 @@ def test_mcnp_mat0():
     leu = Material(nucvec={'U235': 0.04, 'U236': 0.0, 'U238': 0.96},
                    metadata={'mat_number': 2,
                           'table_ids': {'92235':'15c', '92236':'15c', '92238':'25c'},
-                          'mat_name':'LEU',
                           'source':'Some URL',
                           'comments': ('this is a long comment that will definitly '
                                        'go over the 80 character limit, for science'),
@@ -1290,7 +1284,44 @@ def test_mcnp_mat0():
     assert_equal(mass, mass_exp)
 
 
+def test_uwuw():
+    leu = Material(nucvec={'U235': 0.04, 'U238': 0.96},
+                   metadata={'mat_number': 2,
+                          'table_ids': {'92235':'15c', '92238':'25c'},
+                          'source':'Some URL',
+                          'comments': ('this is a long comment that will definitly '
+                                       'go over the 80 character limit, for science'),
+                          'name':'leu'},
+                   density=19.1)
+
+    uwuw_name = leu.get_uwuw_name()
+    name_exp = ('mat:leu/rho:19.1')
+    assert_equal(uwuw_name, name_exp)
+
+    leu2 = Material(nucvec={'U235': 0.04, 'U238': 0.96},
+                   metadata={'mat_number': 2,
+                          'table_ids': {'92235':'15c', '92238':'25c'},
+                          'source':'Some URL',
+                          'comments': ('this is a long comment that will definitly '
+                                       'go over the 80 character limit, for science'),
+                          'name':'leu'})
+    uwuw_name = leu2.get_uwuw_name()
+    name_exp = ('mat:leu')
+    assert_equal(uwuw_name, name_exp)
+
     
+    no_name = Material(nucvec={'U235': 0.04, 'U238': 0.96},
+                   metadata={'mat_number': 2,
+                          'table_ids': {'92235':'15c', '92238':'25c'},
+                          'source':'Some URL',
+                          'comments': ('this is a long comment that will definitly '
+                                       'go over the 80 character limit, for science'),
+                          },
+                   density=19.1)
+    uwuw_name = no_name.get_uwuw_name()
+    name_exp = ('')
+    assert_equal(uwuw_name, name_exp)
+
 
 def test_alara():
 
@@ -1332,11 +1363,10 @@ def test_write_openmc():
     leu = Material(nucvec={'U235': 0.04, 'U238': 0.96},
                    metadata={'mat_number': 2,
                           'table_ids': {'92235':'15c', '92238':'25c'},
-                          'mat_name':'LEU',
                           'source':'Some URL',
                           'comments': ('this is a long comment that will definitly '
                                        'go over the 80 character limit, for science'),
-                          'name':'leu'},
+                          'name':'LEU'},
                    density=19.1)
 
     leu.write_openmc('openmc_mass_fracs.txt')
@@ -1366,7 +1396,6 @@ def test_write_mcnp():
     leu = Material(nucvec={'U235': 0.04, 'U238': 0.96},
                    metadata={'mat_number': 2,
                           'table_ids': {'92235':'15c', '92238':'25c'},
-                          'mat_name':'LEU',
                           'source':'Some URL',
                           'comments': ('this is a long comment that will definitly '
                                        'go over the 80 character limit, for science'),
