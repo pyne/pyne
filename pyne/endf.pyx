@@ -95,7 +95,7 @@ class Library(rxdata.RxLib):
         self.line_length = len(line) # actual chars/line read
         # self.offset now stores the diff. between the length of a line read
         # and the length of a line in the ENDF-6 formatted file.
-        self.offset = 1 if self.line_length == 81 and fh.newlines=='\r\n' else 0
+        self.offset = len(fh.newlines) - (self.line_length - 80)
         fh.seek(0)
 
         if opened_here:
