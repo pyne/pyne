@@ -160,8 +160,8 @@ std::string pyne::capitalize(std::string s) {
   return s;
 }
 
-std::ostringstream pyne::line_wrapping(std::string line,
-                                       int line_lenght) {
+std::ostringstream pyne::comment_line_wrapping(std::string line,
+                                       int line_length) {
   std::ostringstream oss;
 
   // Include as is if short enough
