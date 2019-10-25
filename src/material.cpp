@@ -633,7 +633,7 @@ std::string pyne::Material::mcnp(std::string frac_type) {
   // Metadata comments
   if (metadata.isMember("comments")) {
     std::string comment_string = "comments: " + metadata["comments"].asString();
-    oss << pyne::line_wrapping(comment_string, mcnp_line_length).str();
+    oss << pyne::comment_line_wrapping(comment_string, mcnp_line_length).str();
   }
 
   // Metadata mat_num

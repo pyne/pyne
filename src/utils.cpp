@@ -170,8 +170,8 @@ std::ostringstream pyne::comment_line_wrapping(std::string line,
   // Include as is if short enough
   if (line.length() <= line_length) {
     oss << "C " << line << std::endl;
-  } else {  // otherwise create a remainder string and
-    iterate / update it oss << "C " << line.substr(0, line_length) << std::endl;
+  } else {  // otherwise create a remainder string and iterate / update it 
+    oss << "C " << line.substr(0, line_length) << std::endl;
     std::string remainder_string = line.substr(line_length);
 
     while (remainder_string.length() > line_length) {
