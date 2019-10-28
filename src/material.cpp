@@ -616,6 +616,9 @@ std::string pyne::Material::get_uwuw_name() {
 std::string pyne::Material::mcnp(std::string frac_type) {
   //////////////////// Begin card creation ///////////////////////
   std::ostringstream oss;
+
+  std::string comment_prefix = "C ";
+  
   // 'name'
   if (metadata.isMember("name")) {
     oss << "C name: " << metadata["name"].asString() << std::endl;
@@ -633,7 +636,7 @@ std::string pyne::Material::mcnp(std::string frac_type) {
   // Metadata comments
   if (metadata.isMember("comments")) {
     std::string comment_string = "comments: " + metadata["comments"].asString();
-    oss << pyne::comment_line_wrapping(comment_string, mcnp_line_length).str();
+    oss << pyne::comment_line_wrapping(comment_string, comment_prefix, mcnp_line_length).str();
   }
 
   // Metadata mat_num
@@ -660,6 +663,9 @@ std::string pyne::Material::mcnp(std::string frac_type) {
 std::string pyne::Material::phits(std::string frac_type) {
   //////////////////// Begin card creation ///////////////////////
   std::ostringstream oss;
+
+  std::string comment_prefix = "C ";
+  
   // 'name'
   if (metadata.isMember("name")) {
     oss << "C name: " << metadata["name"].asString() << std::endl;
@@ -667,7 +673,7 @@ std::string pyne::Material::phits(std::string frac_type) {
   // Metadata comments
   if (metadata.isMember("comments")) {
     std::string comment_string = "comments: " + metadata["comments"].asString();
-    oss << pyne::comment_line_wrapping(comment_string, mcnp_line_length).str();
+    oss << pyne::comment_line_wrapping(comment_string, comment_prefix, mcnp_line_length).str();
   }
 
   // Metadata mat_num
