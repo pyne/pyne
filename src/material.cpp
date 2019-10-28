@@ -616,6 +616,9 @@ std::string pyne::Material::get_uwuw_name() {
 std::string pyne::Material::mcnp(std::string frac_type) {
   //////////////////// Begin card creation ///////////////////////
   std::ostringstream oss;
+
+  std::string comment_prefix = "C ";
+  
   // 'name'
   if (metadata.isMember("name")) {
     oss << "C name: " << metadata["name"].asString() << std::endl;
@@ -633,7 +636,7 @@ std::string pyne::Material::mcnp(std::string frac_type) {
   // Metadata comments
   if (metadata.isMember("comments")) {
     std::string comment_string = "comments: " + metadata["comments"].asString();
-    oss << pyne::comment_line_wrapping(comment_string, mcnp_line_length).str();
+    oss << pyne::comment_line_wrapping(comment_string, comment_prefix, mcnp_line_length).str();
   }
 
   // Metadata mat_num
@@ -649,12 +652,8 @@ std::string pyne::Material::mcnp(std::string frac_type) {
   std::map<int, double> fracs = get_density_frac(frac_type);
   std::string frac_sign = "";
 
-  if ("atom" != frac_type) {
-    frac_sign = "-";
-  }
-
   // write the frac map
-  oss << mcnp_frac(fracs, frac_sign);
+  oss << mcnp_frac(fracs, frac_type);
 
   return oss.str();
 }
@@ -664,6 +663,9 @@ std::string pyne::Material::mcnp(std::string frac_type) {
 std::string pyne::Material::phits(std::string frac_type) {
   //////////////////// Begin card creation ///////////////////////
   std::ostringstream oss;
+
+  std::string comment_prefix = "C ";
+  
   // 'name'
   if (metadata.isMember("name")) {
     oss << "C name: " << metadata["name"].asString() << std::endl;
@@ -671,7 +673,7 @@ std::string pyne::Material::phits(std::string frac_type) {
   // Metadata comments
   if (metadata.isMember("comments")) {
     std::string comment_string = "comments: " + metadata["comments"].asString();
-    oss << pyne::comment_line_wrapping(comment_string, mcnp_line_length).str();
+    oss << pyne::comment_line_wrapping(comment_string, comment_prefix, mcnp_line_length).str();
   }
 
   // Metadata mat_num
@@ -700,18 +702,19 @@ std::string pyne::Material::phits(std::string frac_type) {
   std::map<int, double> fracs = get_density_frac(frac_type);
   std::string frac_sign = "";
 
-  if ("atom" != frac_type) {
-    frac_sign = "-";
-  }
-
   // write the frac map
-  oss << mcnp_frac(fracs, frac_sign);
+  oss << mcnp_frac(fracs, frac_type);
 
   return oss.str();
 }
 
-std::string pyne::Material::mcnp_frac(std::map<int, double> fracs, std::string frac_sign){
+std::string pyne::Material::mcnp_frac(std::map<int, double> fracs, std::string frac_type){
 
+  std::string frac_sign = "";
+  if ("atom" != frac_type) {
+    frac_sign = "-";
+  }
+  
   // iterate through frac map
   // This is an awkward pre-C++11 way to put an int to a string
   std::ostringstream oss;

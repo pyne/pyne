@@ -164,24 +164,20 @@ std::string pyne::to_lower(std::string s) {
 }
 
 std::ostringstream pyne::comment_line_wrapping(std::string line,
+                                               std::string comment_prefix,
                                                int line_length) {
   std::ostringstream oss;
 
+  line_length -= comment_prefix.length();
+    
   // Include as is if short enough
-  if (line.length() <= line_length) {
-    oss << "C " << line << std::endl;
-  } else {  // otherwise create a remainder string and iterate / update it 
-    oss << "C " << line.substr(0, line_length) << std::endl;
-    std::string remainder_string = line.substr(line_length);
+  while (line.length() > line_length) {
+    oss << comment_prefix << line.substr(0, line_length) << std::endl;
+    line.erase(0, line_length);
+  }
 
-    while (remainder_string.length() > line_length) {
-      oss << "C " << remainder_string.substr(0, line_length) << std::endl;
-      remainder_string.erase(0, line_length);
-    }
-
-    if (remainder_string.length() > 0) {
-      oss << "C " << remainder_string << std::endl;
-    }
+  if (line.length() > 0) {
+    oss << comment_prefix << line << std::endl;
   }
 
   return oss;
