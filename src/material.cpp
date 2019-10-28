@@ -649,12 +649,8 @@ std::string pyne::Material::mcnp(std::string frac_type) {
   std::map<int, double> fracs = get_density_frac(frac_type);
   std::string frac_sign = "";
 
-  if ("atom" != frac_type) {
-    frac_sign = "-";
-  }
-
   // write the frac map
-  oss << mcnp_frac(fracs, frac_sign);
+  oss << mcnp_frac(fracs, frac_type);
 
   return oss.str();
 }
@@ -700,18 +696,19 @@ std::string pyne::Material::phits(std::string frac_type) {
   std::map<int, double> fracs = get_density_frac(frac_type);
   std::string frac_sign = "";
 
-  if ("atom" != frac_type) {
-    frac_sign = "-";
-  }
-
   // write the frac map
-  oss << mcnp_frac(fracs, frac_sign);
+  oss << mcnp_frac(fracs, frac_type);
 
   return oss.str();
 }
 
-std::string pyne::Material::mcnp_frac(std::map<int, double> fracs, std::string frac_sign){
+std::string pyne::Material::mcnp_frac(std::map<int, double> fracs, std::string frac_type){
 
+  std::string frac_sign = "";
+  if ("atom" != frac_type) {
+    frac_sign = "-";
+  }
+  
   // iterate through frac map
   // This is an awkward pre-C++11 way to put an int to a string
   std::ostringstream oss;

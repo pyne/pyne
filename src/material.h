@@ -173,7 +173,7 @@ namespace pyne
     /// Return an phits input deck record as a string
     std::string phits(std::string frac_type = "mass");
     /// return the compo fraction writen ala "mcnp"
-    std::string mcnp_frac(std::map<int, double> fracs, std::string frac_sign = "");
+    std::string mcnp_frac(std::map<int, double> fracs, std::string frac_type = "");
     ///
     /// Return an uwuw name
     std::string get_uwuw_name();
