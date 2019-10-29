@@ -163,6 +163,25 @@ std::string pyne::to_lower(std::string s) {
   return s;
 }
 
+std::ostringstream pyne::comment_line_wrapping(std::string line,
+                                               std::string comment_prefix,
+                                               int line_length) {
+  std::ostringstream oss;
+
+  line_length -= comment_prefix.length();
+    
+  // Include as is if short enough
+  while (line.length() > line_length) {
+    oss << comment_prefix << line.substr(0, line_length) << std::endl;
+    line.erase(0, line_length);
+  }
+
+  if (line.length() > 0) {
+    oss << comment_prefix << line << std::endl;
+  }
+
+  return oss;
+}
 
 std::string pyne::capitalize(std::string s) {
   unsigned int slen = s.length();
