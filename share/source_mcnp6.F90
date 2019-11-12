@@ -132,7 +132,6 @@ subroutine source
   logical, save :: first_run = .true.
   real(dknd), dimension(6) :: rands
   integer :: icl_tmp ! temporary cell index variable
-  integer :: find_cell
   integer :: tries
   integer, save :: cell_list_size = 0
   integer, dimension(:), allocatable, save :: cell_list
