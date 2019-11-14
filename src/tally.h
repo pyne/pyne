@@ -63,13 +63,13 @@ namespace pyne
     /// \param ints i,j,k vector<double> coordinate of the coarse meshes
     /// \param normalization the number required to normalize your tally
     Tally(std::string particule_name, std::string entity_geom, vector<double> orgn,
-          vector<double> i_mesh, vector<double> j_mesh, vector<double> k_mesh,
-          vector<int> bins_i = null_v_int, 
-          vector<int> bins_j = null_v_int, 
-          vector<int> bins_k = null_v_int, 
-          vector<double> e_bounds = null_v_dbl, vector<int> e_ints = null_v_int,
-          vector<double> vec =null_v_dbl, vector<double> axl = null_v_dbl,
-          std::string tally_name = "", double norm = 1.0);
+    vector<double> i_mesh, vector<double> j_mesh, vector<double> k_mesh,
+    vector<int> bins_i = null_v_int, 
+    vector<int> bins_j = null_v_int, 
+    vector<int> bins_k = null_v_int, 
+    vector<double> e_bounds = null_v_dbl, vector<int> e_ints = null_v_int,
+    vector<double> vec =null_v_dbl, vector<double> axl = null_v_dbl,
+    std::string tally_name = "", double norm = 1.0);
 
     ~Tally();  /// default destructor
  
@@ -145,7 +145,8 @@ namespace pyne
   };
 
   /// Converts a Tally to a string stream representation.
-  std::ostream& operator<<(std::ostream& os, Tally tally);
+  std::ostream& operator<< (std::ostream& os, Tally tally);
+
 
   /// A stuct for reprensenting fundemental data in a tally
   /// Maybe Useful for HDF5 representations.
