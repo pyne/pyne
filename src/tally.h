@@ -142,10 +142,6 @@ namespace pyne
     vector<int> bins[3];
     vector<double> e_bounds;    ///< Energy Mesh
     vector<int> e_bins;  ///< Bin per energy
-    std::string tally_name; ///< name of the tally
-    int entity_id; ///< id number of the entity being tallied upon
-    double entity_size; ///< the physical size of the entity
-    double normalization; ///< the tally normalization
   };
 
   /// Converts a Tally to a string stream representation.
