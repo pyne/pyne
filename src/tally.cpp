@@ -43,10 +43,11 @@ pyne::Tally::Tally() {
 }
 
 // Default constructor
-pyne::Tally::Tally(std::string type, std::string part_name,
-       int ent, std::string ent_type,
+pyne::Tally::Tally(std::string type, std::string part_name, 
+       int ent, std::string ent_type, 
        std::string ent_name, std::string tal_name,
        double size, double norm ) {
+
   // Empty Tally Constructor
   tally_type = type;
   particle_name = pyne::particle::name(part_name);
@@ -99,8 +100,8 @@ void pyne::Tally::from_hdf5(char* filename, char* datapath, int row) {
 }
 
 //
-void pyne::Tally::from_hdf5(std::string filename, std::string datapath,
-          int row) {
+void pyne::Tally::from_hdf5(std::string filename, std::string datapath, 
+          int row) { 
   // line of data to acces
   int data_row = row;
 
@@ -191,19 +192,19 @@ hid_t pyne::Tally::create_filetype() {
   hid_t strtype = H5Tcopy(H5T_C_S1);
   status = H5Tset_size(strtype, H5T_VARIABLE);
 
-  hid_t filetype = H5Tcreate(H5T_COMPOUND, 8 + 8 + 8 +
+  hid_t filetype = H5Tcreate(H5T_COMPOUND, 8 + 8 + 8 + 
            (3*sizeof(hvl_t)) + 8 + 8);
   status = H5Tinsert(filetype, "entity_id", 0, H5T_STD_I64BE);
   status = H5Tinsert(filetype, "entity_type", 8, H5T_STD_I64BE);
   status = H5Tinsert(filetype, "tally_type", 8 + 8, H5T_STD_I64BE);
   status = H5Tinsert(filetype, "particle_name", 8 + 8 + 8, strtype);
-  status = H5Tinsert(filetype, "entity_name", 8 + 8 + 8 +
+  status = H5Tinsert(filetype, "entity_name", 8 + 8 + 8 + 
          sizeof(hvl_t), strtype);
-  status = H5Tinsert(filetype, "tally_name", 8 + 8 + 8 +
+  status = H5Tinsert(filetype, "tally_name", 8 + 8 + 8 + 
          (2*sizeof(hvl_t)) , strtype);
-  status = H5Tinsert(filetype, "entity_size", 8 + 8 + 8 +
+  status = H5Tinsert(filetype, "entity_size", 8 + 8 + 8 + 
          (3*sizeof(hvl_t)), H5T_IEEE_F64BE);
-  status = H5Tinsert(filetype, "normalization", 8 + 8 + 8 +
+  status = H5Tinsert(filetype, "normalization", 8 + 8 + 8 + 
          (3*sizeof(hvl_t)) + 8, H5T_IEEE_F64BE);
   return filetype;
 }
@@ -311,8 +312,8 @@ void pyne::Tally::write_hdf5(std::string filename, std::string datapath) {
   if (is_exist && !is_h5)
     throw h5wrap::FileNotHDF5(filename);
 
-  if (!is_exist ) { // is a new file
-    hid_t file = H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT,
+  if (!is_exist ) { // is a new file        
+    hid_t file = H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, 
          H5P_DEFAULT);
     // create a dataspace
     hid_t dset = create_dataspace(file, datapath);
@@ -356,15 +357,15 @@ void pyne::Tally::write_hdf5(std::string filename, std::string datapath) {
       } else {
 
         dset = H5Dopen2(file, datapath.c_str(), H5P_DEFAULT);
-
+      
   // Get dataspace and allocate memory for read buffer.
   hid_t space = H5Dget_space(dset);
   int rank  = H5Sget_simple_extent_ndims(space);
-  hsize_t dims[1]; // for length of dataset
-
+  hsize_t dims[1]; // for length of dataset 
+  
   // get the length of the dataset
   int ndims = H5Sget_simple_extent_dims(space, dims, NULL);
-
+  
   // determine if chunked
   hid_t prop = H5Dget_create_plist(dset);
 
@@ -372,43 +373,43 @@ void pyne::Tally::write_hdf5(std::string filename, std::string datapath) {
   int rank_chunk;
   if (H5D_CHUNKED == H5Pget_layout(prop))
     rank_chunk = H5Pget_chunk(prop, rank, chunk_dimsr);
-
+  
   // allocate memory for data from file
   tally_struct* read_data = new tally_struct[dims[0]];
-
+  
   // Create variable-length string datatype.
   hid_t strtype = H5Tcopy(H5T_C_S1);
   int status  = H5Tset_size(strtype, H5T_VARIABLE);
-
+  
   // Create the compound datatype for memory.
   hid_t memtype = create_memtype();
-
+  
   // Create the compound datatype for the file
   hid_t filetype = create_filetype();
-
+  
   // Read the data.
   status = H5Dread(dset, memtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, read_data);
-
+      
   // resize dims
   dims[0] += 1;
-
+  
   // Extend the dataset
   status = H5Dextend(dset,dims);
   hid_t filespace = H5Dget_space(dset);
   // calculate the existing offset
-  hsize_t offset[1] = {dims[0] - 1};
-
+  hsize_t offset[1] = {dims[0] - 1};  
+  
   // select hyerslab
   hsize_t new_length[1] = {1};
   status = H5Sselect_hyperslab(filespace, H5S_SELECT_SET,offset , NULL,
              new_length, NULL);
-
+  
   // create dataspace for new data
   space = H5Screate_simple(1,new_length, NULL);
-
+  
   // Write the dataset to memory
   status = H5Dwrite(dset, memtype, space, filespace, H5P_DEFAULT, tally_data);
-
+  
   // tidy up
   status = H5Dvlen_reclaim(memtype, space, H5P_DEFAULT, read_data);
   delete[] read_data;
@@ -577,22 +578,22 @@ std::string pyne::Tally::fluka(std::string unit_number) {
   if (tally_type.find("Flux") != std::string::npos) {
       output << std::setw(10) << std::left  << "USRTRACK";
       output << std::setw(10) << std::right << "     1.0";
-      output << std::setw(10) << std::right
-      << pyne::particle::fluka(particle_name);
+      output << std::setw(10) << std::right 
+             << pyne::particle::fluka(particle_name);
       output << std::setw(10) << std::right << unit_number;
       output << std::setw(10) << std::right << entity_name;
       if(entity_size > 0.0) {
-  output << std::scientific;
-  output << std::setprecision(4);
+        output << std::scientific;
+        output << std::setprecision(4);
         output << std::setw(10) << std::right << entity_size;
       }
       else
-  output << std::setw(10) << std::right << 1.0;
+        output << std::setw(10) << std::right << 1.0;
 
       output << std::setw(10) << std::right << "   1000."; // number of ebins
       tally_name.resize(8);
-      output << std::setw(8) << std::left
-       << tally_name; // may need to make sure less than 10 chars
+      output << std::setw(8) << std::left 
+             << tally_name; // may need to make sure less than 10 chars
       output << std::endl;
       output << std::setw(10) << std::left  << "USRTRACK";
       output << std::setw(10) << std::right << "   10.E1";
@@ -606,19 +607,19 @@ std::string pyne::Tally::fluka(std::string unit_number) {
   } else if (tally_type.find("Current") != std::string::npos) {
       output << std::setw(10) << std::left  << "USRBDX  ";
       output << std::setw(10) << std::right << "   110.0";
-      output << std::setw(10) << std::right
-       << pyne::particle::fluka(particle_name);
+      output << std::setw(10) << std::right 
+             << pyne::particle::fluka(particle_name);
       output << std::setw(10) << std::right << unit_number;
       output << std::setw(10) << std::right << entity_name; // upstream
       output << std::setw(10) << std::right << entity_name; // downstream
       if ( entity_size > 0.0 )
-  output << std::setw(10) << std::right << entity_size; // area
+        output << std::setw(10) << std::right << entity_size; // area
       else
-  output << std::setw(10) << std::right << 1.0;
+        output << std::setw(10) << std::right << 1.0;
 
       tally_name.resize(8);
-      output << std::setw(8) << std::right
-       << tally_name; // may need to make sure less than 10 chars
+      output << std::setw(8) << std::right 
+             << tally_name; // may need to make sure less than 10 chars
       output << std::endl;
       output << std::setw(10) << std::left  << "USRBDX  ";
       output << std::setw(10) << std::right << "  10.0E1";
@@ -626,9 +627,9 @@ std::string pyne::Tally::fluka(std::string unit_number) {
       output << std::setw(10) << std::right << "  1000.0"; // number of bins
       output << std::setw(10) << std::right << "12.56637"; // 4pi
       output << std::setw(10) << std::right << "     0.0";
-      output << std::setw(10) << std::right
-       << "   240.0"; // number of angular bins
-      output << std::setw(8) << std::left << "       &";
+      output << std::setw(10) << std::right 
+             << "   240.0"; // number of angular bins
+      output << std::setw(8) << std::left << "       &";      
       // end of usrbdx
   } else {
     std::cout << "Unknown tally type" << std::endl;

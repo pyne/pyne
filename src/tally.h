@@ -1,5 +1,5 @@
 /// \brief The tally class and helper functions.
-/// 
+///
 /// The tally class is in essesence a structure containing attributes
 /// related to tallies.
 
@@ -40,11 +40,11 @@ namespace pyne
     /// Constructor from passed in vars
     /// \param type the type of tally (flux or current)
     /// \param particle_name the name of the particle type
-    /// \param entity the entity id of the tally (eg. surface index, 
+    /// \param entity the entity id of the tally (eg. surface index,
     ///          volume number)
     /// \param entity_type (volume or surface)
     /// \param entity_name string identifying the entity
-    /// \param tally_name string identifying the tally 
+    /// \param tally_name string identifying the tally
     /// \param entity_size the physical size of the tally volume
     /// \param normalization the number required to normalize your tally
     Tally(std::string type, std::string particle_name, int entity,
@@ -84,27 +84,27 @@ namespace pyne
 
     /// Dummy read method wrapper around c style strings
     /// \param filename the filename of the file to read from
-    /// \param datapath _name the name of the region where tallies 
+    /// \param datapath _name the name of the region where tallies
     ///          are stored
     /// \param row  the array index of data to access
     void from_hdf5(char* filename, char* datapath, int row = -1);
 
     /// Main read tally method
     /// \param filename the filename of the file to read from
-    /// \param datapath _name the name of the region where tallies 
+    /// \param datapath _name the name of the region where tallies
     ///          are stored
     /// \param row  the array index of data to access
     void from_hdf5(std::string filename, std::string datapath, int row = -1);
 
     /// Dummy write method wrapper around c style strings
     /// \param filename the filename of the file to write to
-    /// \param datapath _name the name of the region where tallies 
+    /// \param datapath _name the name of the region where tallies
     ///          are to be stored
     void write_hdf5(char* filename, char* datapath);
 
     /// Main write tally method
     /// \param filename the filename of the file to write to
-    /// \param datapath _name the name of the region where tallies 
+    /// \param datapath _name the name of the region where tallies
     ///          are to be stored
     void write_hdf5(std::string filename, std::string datapath);
 
@@ -119,7 +119,7 @@ namespace pyne
                                     std::string particle_token, int entity_id,
                                     double entity_size, double normalization);
 
-    // fluka tally 
+    // fluka tally
     std::string fluka(std::string unit_number = "-21");
 
     /// fundamental tally variables
@@ -142,6 +142,10 @@ namespace pyne
     vector<int> bins[3];
     vector<double> e_bounds;    ///< Energy Mesh
     vector<int> e_bins;  ///< Bin per energy
+    std::string tally_name; ///< name of the tally
+    int entity_id; ///< id number of the entity being tallied upon
+    double entity_size; ///< the physical size of the entity
+    double normalization; ///< the tally normalization
   };
 
   /// Converts a Tally to a string stream representation.

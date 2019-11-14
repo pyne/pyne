@@ -32,25 +32,25 @@
 class CartVect {
   private:
     double coords[3];
-    
+
   public:
-  
+
     inline CartVect() {}
-    
+
     inline CartVect( double tx, double ty, double tz ) { set(tx,ty,tz); }
-    
+
     inline CartVect( const CartVect& other ) { set( other.coords); }
-    
+
     inline void set( double tx, double ty, double tz )
       { coords[0] = tx; coords[1] = ty; coords[2] = tz; }
-    
+
     inline void set( const double* c )
       { coords[0] = c[0]; coords[1] = c[1]; coords[2] = c[2]; }
-    
+
     inline double x() const { return coords[0]; }
     inline double y() const { return coords[1]; }
     inline double z() const { return coords[2]; }
-  
+
     inline CartVect& operator+=( const CartVect& other )
     {
       coords[0] += other.coords[0];
@@ -58,7 +58,7 @@ class CartVect {
       coords[2] += other.coords[2];
       return *this;
     }
-    
+
     inline CartVect& operator-=( const CartVect& other )
     {
       coords[0] -= other.coords[0];
@@ -66,16 +66,16 @@ class CartVect {
       coords[2] -= other.coords[2];
       return *this;
     }
-    
+
     inline CartVect& operator*=( const CartVect& other );
 
     inline double lensqr() const;
-    
+
     inline double len() const;
-    
+
     inline CartVect operator~( ) const;
 
-      
+
     inline CartVect& operator*=( double a )
     {
       coords[0] *= a;
@@ -83,7 +83,7 @@ class CartVect {
       coords[2] *= a;
       return *this;
     }
-    
+
     inline CartVect& operator/=( double a )
     {
       coords[0] /= a;
@@ -91,8 +91,8 @@ class CartVect {
       coords[2] /= a;
       return *this;
     }
-   
-    
+
+
 };
 
 inline CartVect operator+( const CartVect& v1, const CartVect& v2 )
@@ -126,19 +126,19 @@ inline CartVect CartVect::operator~() const
   double invlen = 1.0 / len();
   return CartVect( invlen * x(), invlen * y(), invlen * z() );
 }
-     
+
 inline CartVect& CartVect::operator*=( const CartVect& other )
       { return *this = *this * other; }
 
 inline double CartVect::lensqr() const
       { return *this % *this; }
-    
+
 inline double CartVect::len() const
       { return sqrt(lensqr()); }
- 
+
 inline static double tet_volume( const CartVect& v0,
                                  const CartVect& v1,
-                                 const CartVect& v2, 
+                                 const CartVect& v2,
                                  const CartVect& v3 )
 {
   return 1./6. * ( ((v1 - v0) * (v2 - v0)) % (v3 - v0) );
@@ -171,7 +171,7 @@ double measure( moab::EntityType type,
       for (int i = 0; i < num_vertices; ++i)
         mid += coords[i];
       mid /= num_vertices;
-      
+
       double sum = 0.0;
       for (int i = 0; i < num_vertices; ++i)
       {
@@ -199,4 +199,4 @@ double measure( moab::EntityType type,
       return 0.0;
   }
 }
-      
+

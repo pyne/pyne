@@ -360,7 +360,7 @@ class SurfSrc(_BinaryReader):
                 self.np1 = tablelengths.get_long()[0]   # hist used to gen. src
                 self.nrss = tablelengths.get_long()[0]  # #tracks to surf src
 
-	    # values in surf src record
+        # values in surf src record
             # 6 for a spherical source
             # 11 otherwise
             self.ncrd = tablelengths.get_int()[0]

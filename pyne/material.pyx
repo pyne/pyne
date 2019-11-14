@@ -335,16 +335,35 @@ cdef class _Material:
         c_nucpath = nucpath_bytes
         self.mat_pointer.write_hdf5(c_filename, c_datapath, c_nucpath, row, chunksize)
 
-    def mcnp(self, frac_type='mass'):
-        """mcnp(frac_type)
-        Return an mcnp card
+    def phits(self, frac_type='mass'):
+        """phits(frac_type)
+        Return an phits card
         Parameters
         ----------
  	   int 0 means use "mass" as the frac_type
         """
         cdef std_string card
+        card = self.mat_pointer.phits(frac_type.encode())
+        return card.decode()
+
+    def mcnp(self, frac_type='mass'):
+        """mcnp(frac_type)
+        Return an mcnp card
+        Parameters
+        ----------
+        int 0 means use "mass" as the frac_type
+        """
+        cdef std_string card
         card = self.mat_pointer.mcnp(frac_type.encode())
         return card.decode()
+    
+    def get_uwuw_name(self):
+        """get_uwuw_name()
+        Return a uwuw material name
+        """
+        cdef std_string uwuw_name
+        uwuw_name = self.mat_pointer.get_uwuw_name()
+        return uwuw_name.decode()
 
     def openmc(self, frac_type='mass'):
         """openmc(frac_type)
@@ -361,7 +380,7 @@ cdef class _Material:
         compound record
         Parameters
         ----------
- 	   The sequential material id starting from 26 unless predefined
+        The sequential material id starting from 26 unless predefined
         """
         cdef std_string card
         card = self.mat_pointer.fluka(fid, frac_type.encode())
@@ -372,7 +391,7 @@ cdef class _Material:
         Return whether a string is in the fluka built-in list
         Parameters
         ----------
- 	   A string representing a FLUKA material name
+        A string representing a FLUKA material name
         """
         cdef cpp_bool card
         card = self.mat_pointer.not_fluka_builtin(fluka_name)
@@ -384,7 +403,7 @@ cdef class _Material:
         A single-component material is expected
         Parameters
         ----------
- 	   The sequential material id starting from 26 unless predefined
+        The sequential material id starting from 26 unless predefined
         """
         cdef std_string card
         card = self.mat_pointer.fluka_material_str(id)
@@ -395,7 +414,7 @@ cdef class _Material:
         Return the FLUKA MATERIAL record with the given id, nucid and name.
         Parameters
         ----------
- 	   The sequential material id, the (single) nucid, and the fluka name
+        The sequential material id, the (single) nucid, and the fluka name
         """
         cdef std_string card
         card = self.mat_pointer.fluka_material_component(id, nucid, fluka_name)
@@ -407,7 +426,7 @@ cdef class _Material:
         and fluka name
         Parameters
         ----------
- 	   The znum, atomic mass, material id, and the fluka name
+        The znum, atomic mass, material id, and the fluka name
         """
         cdef std_string card
         card = self.mat_pointer.fluka_material_line(znum, mass, id, name)
@@ -418,7 +437,7 @@ cdef class _Material:
         Return a string for a single field in the FLUKA MATERIAL record
         Parameters
         ----------
- 	   The field value
+        The field value
         """
         cdef std_string card
         card = self.mat_pointer.fluka_format_field(field)
@@ -427,10 +446,10 @@ cdef class _Material:
     def fluka_compound_str(self, id, frac_type='mass'):
         """fluka_compound_str()
         Return the FLUKA MATERIAL record for the compound, and the
-	FLUKA COMPOUND record for the components
+    FLUKA COMPOUND record for the components
         Parameters
         ----------
- 	   The sequential compound id starting from 26 unless predefined
+        The sequential compound id starting from 26 unless predefined
         """
         cdef std_string card
         card = self.mat_pointer.fluka_compound_str(id, frac_type)
@@ -604,9 +623,9 @@ cdef class _Material:
         """This provides the activity of the comp of the material.
 
         Returns
-	-------
-	nucvec : dict
-	    For a Material mat
+    -------
+    nucvec : dict
+        For a Material mat
 
         """
         cdef conv._MapIntDouble nucvec_proxy = conv.MapIntDouble()
@@ -706,7 +725,7 @@ cdef class _Material:
     def collapse_elements(self, nucset):
         """collapse_elements(self, nucset)
         Collapses the elements in the material, excluding the nucids in
-	the set nucset. This function returns a copy of the material.
+        the set nucset. This function returns a copy of the material.
 
         Parameters
         ----------

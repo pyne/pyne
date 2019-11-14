@@ -446,7 +446,7 @@ namespace nucname
   int openmc_to_id(const char * nuc);
   int openmc_to_id(std::string nuc);
   /// \}
-  
+
   /// \name FLUKA Form Functions
   /// \{
   /// This is the naming convention used by the FLUKA suite of codes.

@@ -1,4 +1,4 @@
- 
+
 /*********************************************************/
 /***            Symbolic Enrichment Functions          ***/
 /*** WARNING: This file is auto-generated.             ***/
@@ -21,9 +21,9 @@ pyne::enrichment::Cascade pyne::enrichment::solve_symbolic(pyne::enrichment::Cas
   //double xFj = casc.x_feed_j;
   double xTj = casc.x_tail_j;
   int ncomp = casc.mat_feed.comp.size();
-  double LpF = -1.0, PpF = -1.0, TpF = -1.0, 
-         SWUpF = -1.0, SWUpP = -1.0, 
-         NP_b = -1.0, NP_sqrt_base = -1.0, NP_2a = -1.0, 
+  double LpF = -1.0, PpF = -1.0, TpF = -1.0,
+         SWUpF = -1.0, SWUpP = -1.0,
+         NP_b = -1.0, NP_sqrt_base = -1.0, NP_2a = -1.0,
          NP1 = -1.0, NT1 = -1.0;
   double * MW = new double [ncomp];
   double * xP = new double [ncomp];
@@ -1029,7 +1029,7 @@ pyne::enrichment::Cascade pyne::enrichment::solve_symbolic(pyne::enrichment::Cas
          g65 = 0.0,
          n109 = 0.0,
          n108 = 0.0;
- 
+
   int nuc;
   int i = 2;
   MW[0] = pyne::atomic_mass(j);
@@ -10405,7 +10405,7 @@ pyne::enrichment::Cascade pyne::enrichment::solve_symbolic(pyne::enrichment::Cas
       xT[18] = g113*g222*g91;
       xT[19] = g113*g231*g92;
       break;
- 
+
   };
 
   i = 2;

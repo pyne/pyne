@@ -40,11 +40,9 @@ libraries = {0: 'ENDF/B', 1: 'ENDF/A', 2: 'JEFF', 3: 'EFF',
              4: 'ENDF/B High Energy', 5: 'CENDL', 6: 'JENDL',
              31: 'INDL/V', 32: 'INDL/A', 33: 'FENDL', 34: 'IRDF',
              35: 'BROND', 36: 'INGDB-90', 37: 'FENDL/A', 41: 'BROND'}
-FILE1_R = re.compile(r'1451 *\d{1,5}$')
-CONTENTS_R = re.compile(' +\d{1,2} +\d{1,3} +\d{1,10} +')
-SPACE66_R = re.compile(' {66}')
-NUMERICAL_DATA_R = re.compile('[\d\-+. ]{80}\n$')
-SPACE66_R = re.compile(' {66}')
+FILE1END = r'([1-9]\d{3}| [1-9]\d{2}|  [1-9]\d|   [1-9]) 1451(?= *[1-9]\d*$)[ \d]{5}$'
+FILE1_R = re.compile(r'^.{66}'+FILE1END)
+SPACEINT11_R = re.compile('^((?= *-?[1-9]\d*$)[ \d-]{11}| {10}0)$')      # I11 (FORTRAN77)
 
 def _radiation_type(value):
     p = {0: 'gamma', 1: 'beta-', 2: 'ec/beta+', 3: 'IT',
@@ -69,8 +67,7 @@ class Library(rxdata.RxLib):
                         12: self._linlin, 13: self._linlog, 14: self._loglin,
                         15: self._loglog, 21: self._histogram, 22: self._linlin,
                         23: self._linlog, 24: self._loglin, 25: self._loglog}
-        self.chars_til_now = 0
-        self.offset = 0
+        self.chars_til_now = 0 # offset (byte) from the top of the file for seek()ing
         self.fh = fh
         self._set_line_length()
         # read first line (Tape ID)
@@ -94,8 +91,11 @@ class Library(rxdata.RxLib):
         # two seem to be necessary for Windows-style terminators.
         fh.seek(0)
         fh.readline()
-        fh.readline()
-        self.line_length = 82 if fh.newlines=='\r\n' else 81
+        line = fh.readline()
+        self.line_length = len(line) # actual chars/line read
+        # self.offset now stores the diff. between the length of a line read
+        # and the length of a line in the ENDF-6 formatted file.
+        self.offset = len(fh.newlines) - (self.line_length - 80)
         fh.seek(0)
 
         if opened_here:
@@ -132,10 +132,21 @@ class Library(rxdata.RxLib):
             else:
                 fh = self.fh
             line = fh.readline()
-            self.chars_til_now = len(line) + self.line_length - 81
-            self.offset = self.line_length - self.chars_til_now
+            self.chars_til_now = len(line) + self.offset
         else:
             warn('TPID is the first line, has been read already', UserWarning)
+
+    def _isContentLine(self,parts):
+        """Check whether a line is consisted of 22*spaces and 4*(I11)s (FORTRAN77).
+
+        Parameters
+        -----------
+        parts: list
+            made by dividing 1-66 chars of an input line into 6 parts of equal length
+        """
+        return parts[0]+parts[1]==' '*22 and \
+        SPACEINT11_R.match(parts[2]) and SPACEINT11_R.match(parts[3]) and \
+        SPACEINT11_R.match(parts[4]) and SPACEINT11_R.match(parts[5])
 
     def _read_headers(self):
         cdef int nuc
@@ -152,8 +163,6 @@ class Library(rxdata.RxLib):
         # get mat_id
         line = fh.readline()
         mat_id = int(line[66:70].strip() or -1)
-        # store position of read
-        pos = fh.tell()
         # check for isomer (LIS0/LISO entry)
         matflagstring = line + fh.read(3*self.line_length)
         flagkeys = ['ZA', 'AWR', 'LRP', 'LFI', 'NLIB', 'NMOD', 'ELIS',
@@ -162,8 +171,6 @@ class Library(rxdata.RxLib):
                     0, 'NWD', 'NXC']
         flags = dict(zip(flagkeys, fromendf_tok(matflagstring)))
         nuc = cpp_nucname.id(<int> (<int> flags['ZA']*10000 + flags['LIS0']))
-        # go back to line after first line
-        fh.seek(pos)
         # Make a new dict in self.structure to contain the material data.
         if nuc not in self.structure:
             self.structure.update(
@@ -173,36 +180,35 @@ class Library(rxdata.RxLib):
                                         'mfs': {}}})
         # Parse header (all lines with 1451)
         mf = 1
-        start = (self.chars_til_now+self.offset)//self.line_length
+        start = self.chars_til_now//(self.line_length+self.offset) # present (the first) line number
         stop = start  # if no 451 can be found
+        line = fh.readline() # get the next line; start parsing from the 6th line
         while FILE1_R.search(line):
+            # divide 1-66 chars of the line into six 11-char parts
+            lineparts = [line[i:i+11] for i in range(0, 66, 11)]
             # parse contents section
-            if CONTENTS_R.match(line):
+            if self._isContentLine(lineparts):
                 # When MF and MT change, add offset due to SEND/FEND records.
                 old_mf = mf
-                mf, mt = int(line[22:33]), int(line[33:44])
+                mf, mt = int(lineparts[2]), int(lineparts[3])
                 if old_mf != mf:
                     start += 1
-                mt_length = int(line[44:55])
+                mt_length = int(lineparts[4])
                 stop = start + mt_length
-                self.mat_dict[nuc]['mfs'][mf, mt] = (self.line_length*start-self.offset,
-                                                     self.line_length*stop-self.offset)
+                # The first number in the tuple is the offset in the file to seek(),
+                # whereas the second stands for the number of characters to be read().
+                self.mat_dict[nuc]['mfs'][mf, mt] = ((self.line_length+self.offset)*start,
+                                                     self.line_length*stop)
                 start = stop + 1
                 line = fh.readline()
             # parse comment
-            elif SPACE66_R.match(line):
-                self.structure[nuc]['docs'].append(line[0:66])
-                line = fh.readline()
-            elif NUMERICAL_DATA_R.match(line):
-                line = fh.readline()
-                continue
             else:
                 self.structure[nuc]['docs'].append(line[0:66])
                 line = fh.readline()
         # Find where the end of the material is and then jump to it.
         # The end is 3 lines after the last mf,mt
         # combination (SEND, FEND, MEND)
-        self.chars_til_now = (stop + 3)*self.line_length - self.offset
+        self.chars_til_now = (stop + 3)*(self.line_length+self.offset) # at the end of a MAT
         fh.seek(self.chars_til_now)
         nextline = fh.readline()
         self.more_files = (nextline != '' and nextline[68:70] != '-1')
