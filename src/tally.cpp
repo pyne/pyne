@@ -507,13 +507,11 @@ std::string pyne::Tally::mcnp(int tally_index, std::string mcnp_version,
       output << sup_var.str();
     }
     if (e_bounds.size() > 0) {
-      output << indent_block << "EMESH=";
-      output << pyne::join_to_string(e_bounds);
+      output << indent_block << "EMESH=" << pyne::join_to_string(e_bounds);
     }
     output << "\n";
     if (e_bins.size() > 0) {
-      output << indent_block << "EINTS=";
-      output << pyne::join_to_string(e_bins);
+      output << indent_block << "EINTS=" << pyne::join_to_string(e_bins);
     }
     if (out.size() > 0) {
       output << "\n" << indent_block << "OUT=" << out;
@@ -525,6 +523,7 @@ std::string pyne::Tally::mcnp(int tally_index, std::string mcnp_version,
   // print sd card if area/volume specified
   return output.str();
 }
+
 template <typename T>
 bool pyne::Tally::is_zero(T vect) {
   int size = sizeof(vect) / sizeof(vect[0]);
