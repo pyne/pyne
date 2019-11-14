@@ -178,7 +178,7 @@ void pyne::Tally::from_hdf5(std::string filename, std::string datapath,
 }
 
 // Dummy Wrapper around C Style Functions
-void pyne::Tally::write_hdf5(char * filename, char* datapath) {
+void pyne::Tally::write_hdf5(char * filename, char * datapath) {
   std::string fname(filename);
   std::string groupname(datapath);
   write_hdf5(fname,groupname);
@@ -244,13 +244,13 @@ hid_t pyne::Tally::create_dataspace(hid_t file, std::string datapath) {
     // enable chunking 
     hid_t prop = H5Pcreate(H5P_DATASET_CREATE);
     // set chunk size
-    hsize_t chunk_dimensions[1]={1};  
+    hsize_t chunk_dimensions[1]={1};
     herr_t status = H5Pset_chunk(prop, 1, chunk_dimensions);
     
     // allow varaible length strings
     hid_t strtype = H5Tcopy(H5T_C_S1);
     status = H5Tset_size(strtype, H5T_VARIABLE);
-    
+
     // Create the compound datatype for memory.
     hid_t memtype = create_memtype();
     
@@ -260,7 +260,7 @@ hid_t pyne::Tally::create_dataspace(hid_t file, std::string datapath) {
     // max dims unlimted
     hsize_t max_dims[1] = {H5S_UNLIMITED};
     // only ever let 1 tally object be added
-    hsize_t dims[1] = {1};
+    hsize_t dims[1] = {1}; 
     // Create dataspace.  Setting maximum size to NULL sets the maximum
     hid_t space = H5Screate_simple(1, dims, max_dims);
 
@@ -600,7 +600,7 @@ std::string pyne::Tally::fluka(std::string unit_number) {
       output << std::setw(10) << std::right << "        ";
       output << std::setw(10) << std::right << "        ";
       output << std::setw(10) << std::right << "        ";
-      output << std::setw(8) << std::left << "       &";    
+      output << std::setw(8) << std::left << "       &";      
       // end of usrtrack
   } else if (tally_type.find("Current") != std::string::npos) {
       output << std::setw(10) << std::left  << "USRBDX  ";    
