@@ -454,7 +454,7 @@ def test_mcnp_mesh_tally_xyz():
     tally = Tally(particle, geometry, origin, i, j, k, i_ints, j_ints, k_ints,
             e, e_ints, tal_name=tal_name)
     mcnp_tally = "C Mesh Tally XYZ Proton\n"+\
-        "FMESH14:n  GEOM=XYZ  ORIGIN= 1.000000 2.000000 3.000000\n"+\
+        "FMESH14:n GEOM=XYZ ORIGIN= 1.000000 2.000000 3.000000\n"+\
         "           IMESH= 5.000000 10.000000 20.000000 25.000000 IINTS= 1 2 3 1\n"+\
         "           JMESH= 2.000000 12.000000 JINTS= 1\n"+\
         "           KMESH= 45.000000 KINTS= 1\n"+\
@@ -483,7 +483,7 @@ def test_mcnp_mesh_tally_cyl():
     tally = Tally(particle, geometry, origin, i, j, k, i_ints, j_ints, k_ints,
             e, e_ints, tal_name = tal_name, axl = axl, vec = vec)
     mcnp_tally = "C Mesh Tally XYZ Proton\n"+\
-        "FMESH14:n  GEOM=CYL  ORIGIN= 1.000000 2.000000 3.000000\n"+\
+        "FMESH14:n GEOM=CYL ORIGIN= 1.000000 2.000000 3.000000\n"+\
         "           IMESH= 5.000000 10.000000 20.000000 25.000000 IINTS= 1 2 3 1\n"+\
         "           JMESH= 2.000000 12.000000 JINTS= 1\n"+\
         "           KMESH= 45.000000 KINTS= 1\n"+\

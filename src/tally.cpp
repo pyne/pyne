@@ -476,7 +476,7 @@ std::string pyne::Tally::mcnp(int tally_index, std::string mcnp_version,
     // indentation block
     std::string indent_block = "           ";
 
-    output << "FMESH" << tally_index << "4:" << particle_token << "  ";
+    output << "FMESH" << tally_index << "4:" << particle_token << " ";
     output << "GEOM=";
     std::stringstream sup_var;
 
