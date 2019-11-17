@@ -330,7 +330,7 @@ def get_result_error_from_openmc_sp(filename, m):
     std_dev = std_dev.transpose()
     var_tot = np.sum(np.square(std_dev), axis=1)
     nonzero = res_tot > 0
-    rel_err_tot = np.sqrt(var_tot[nonzero]) / (res_tot[nonzero] * ve_vol)
+    rel_err_tot[nonzero] = np.sqrt(var_tot[nonzero]) / (res_tot[nonzero] * ve_vol)
 
     # In the result of OpenMC, x changes fastest
     # change the order to z changes fastest
