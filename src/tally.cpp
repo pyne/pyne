@@ -448,8 +448,7 @@ std::string pyne::Tally::mcnp(int tally_index, std::string mcnp_version,
   output << "C " << tally_name << std::endl;
   output << std::setiosflags(std::ios::fixed) << std::setprecision(6);
 
-  if (normalization != 1.0)
-    output << std::scientific;
+  if (normalization != 1.0) output << std::scientific;
   int tally_id = 0;
 
   // neednt check entity type
@@ -473,51 +472,13 @@ std::string pyne::Tally::mcnp(int tally_index, std::string mcnp_version,
                               entity_size, normalization);
 
   } else if (entity_type.find("Mesh") != std::string::npos) {
-    // indentation block
-    std::string indent_block = "           ";
+    output << form_mcnp_meshtally(tally_index, particle_token, entity_geometry,
+                                  axl, vec, origin, meshes, bins, e_bounds,
+                                  e_bins, out);
 
-    output << "FMESH" << tally_index << "4:" << particle_token << " ";
-    output << "GEOM=";
-    std::stringstream sup_var;
-
-    if (entity_geometry.find("Cartesian") != std::string::npos) {
-      output << "XYZ ";
-    } else if (entity_geometry.find("Cylinder") != std::string::npos) {
-      output << "CYL ";
-      if (!is_zero(axl)) {
-        sup_var << indent_block << "AXL=" << pyne::join_to_string(axl) << "\n";
-      }
-      if (!is_zero(vec)) {
-        sup_var << indent_block << "VEC=" << pyne::join_to_string(vec) << "\n";
-      }
-    }
-
-    output << "ORIGIN=" << pyne::join_to_string(origin) << "\n";
-    std::string dir_name[3] = {"I", "J", "K"};
-
-    for (int j = 0; j < 3; j++) {
-      output << indent_block;
-      output << dir_name[j] << "MESH=" << pyne::join_to_string(meshes[j]);
-      if (bins[j].size() > 0) {
-        output << " " << dir_name[j] << "INTS=" << pyne::join_to_string(bins[j]);
-      }
-      output << "\n";
-    }
-    if (sup_var.str().size() > 0) {
-      output << sup_var.str();
-    }
-    if (e_bounds.size() > 0) {
-      output << indent_block << "EMESH=" << pyne::join_to_string(e_bounds);
-    }
-    output << "\n";
-    if (e_bins.size() > 0) {
-      output << indent_block << "EINTS=" << pyne::join_to_string(e_bins);
-    }
-    if (out.size() > 0) {
-      output << "\n" << indent_block << "OUT=" << out;
-    }
   } else {
-    std::cout << "tally/entity combination makes no sense for MCNP" << std::endl;
+    std::cout << "tally/entity combination makes no sense for MCNP"
+              << std::endl;
   }
   // print sd card if area/volume specified
   return output.str();
@@ -532,28 +493,83 @@ bool pyne::Tally::is_zero(T vect) {
 }
 
 
-
 // Form the tally line as function of its properties
-std::string pyne::Tally::form_mcnp_tally(int tally_index, 
-                                               int type, 
-                                               std::string particle_token, 
-                                               int entity_id, double entity_size, 
-                                               double normalization) {
+std::string pyne::Tally::form_mcnp_tally(int tally_index, int type,
+                                         std::string particle_token,
+                                         int entity_id, double entity_size,
+                                         double normalization) {
   std::stringstream tally_stream;  // tally stream
   tally_stream << std::setiosflags(std::ios::fixed) << std::setprecision(6);
-  if (normalization != 1.0)
-    tally_stream << std::scientific;
-  
-  tally_stream << "F" << tally_index << type
-               << ":" << particle_token << " " << entity_id << std::endl;
-  
+  if (normalization != 1.0) tally_stream << std::scientific;
+
+  tally_stream << "F" << tally_index << type << ":" << particle_token << " "
+               << entity_id << std::endl;
+
   if (entity_size > 0.0)
-    tally_stream << "SD" << tally_index << type << " " << entity_size << std::endl;
-   
+    tally_stream << "SD" << tally_index << type << " " << entity_size
+                 << std::endl;
+
   if (normalization != 1.0)
-    tally_stream << "FM" << tally_index << type << " " << normalization << std::endl;
+    tally_stream << "FM" << tally_index << type << " " << normalization
+                 << std::endl;
 
   return tally_stream.str();
+}
+
+
+// Form the mesh tally line as function of its properties
+std::string pyne::Tally::form_mcnp_meshtally(
+    int tally_index, std::string particle_token, std::string entity_geometry,
+    std::vector<double> axl, std::vector<double> vec,
+    std::vector<double> origin, std::vector<double> meshes[3],
+    std::vector<int> bins[3], std::vector<double> e_bounds,
+    std::vector<int> e_bins, std::string out) {
+  std::stringstream mtally_stream;
+  // indentation block
+  std::string indent_block = "           ";
+
+  mtally_stream << "FMESH" << tally_index << "4:" << particle_token << " ";
+  mtally_stream << "GEOM=";
+  std::stringstream sup_var;
+
+  if (entity_geometry.find("Cartesian") != std::string::npos) {
+    mtally_stream << "XYZ ";
+  } else if (entity_geometry.find("Cylinder") != std::string::npos) {
+    mtally_stream << "CYL ";
+    if (!is_zero(axl)) {
+      sup_var << indent_block << "AXL=" << pyne::join_to_string(axl) << "\n";
+    }
+    if (!is_zero(vec)) {
+      sup_var << indent_block << "VEC=" << pyne::join_to_string(vec) << "\n";
+    }
+  }
+
+  mtally_stream << "ORIGIN=" << pyne::join_to_string(origin) << "\n";
+  std::string dir_name[3] = {"I", "J", "K"};
+
+  for (int j = 0; j < 3; j++) {
+    mtally_stream << indent_block;
+    mtally_stream << dir_name[j] << "MESH=" << pyne::join_to_string(meshes[j]);
+    if (bins[j].size() > 0) {
+      mtally_stream << " " << dir_name[j]
+                    << "INTS=" << pyne::join_to_string(bins[j]);
+    }
+    mtally_stream << "\n";
+  }
+  if (sup_var.str().size() > 0) {
+    mtally_stream << sup_var.str();
+  }
+  if (e_bounds.size() > 0) {
+    mtally_stream << indent_block << "EMESH=" << pyne::join_to_string(e_bounds);
+  }
+  mtally_stream << "\n";
+  if (e_bins.size() > 0) {
+    mtally_stream << indent_block << "EINTS=" << pyne::join_to_string(e_bins);
+  }
+  if (out.size() > 0) {
+    mtally_stream << "\n" << indent_block << "OUT=" << out;
+  }
+  return mtally_stream.str();
 }
 
 

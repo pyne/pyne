@@ -116,9 +116,16 @@ namespace pyne
 
     // Form the mcnp tally line as function of its properties
     std::string form_mcnp_tally(int tally_index, int type,
-                                    std::string particle_token, int entity_id,
-                                    double entity_size, double normalization);
-
+                                std::string particle_token, int entity_id,
+                                double entity_size, double normalization);
+    // Form the mesh tally line as function of its properties
+    std::string form_mcnp_meshtally(
+        int tally_index, std::string particle_token, std::string entity_geometry,
+        std::vector<double> axl, std::vector<double> vec,
+        std::vector<double> origin, std::vector<double> meshes[3],
+        std::vector<int> bins[3], std::vector<double> e_bounds,
+        std::vector<int> e_bins, std::string out);
+    
     // fluka tally
     std::string fluka(std::string unit_number = "-21");
 
@@ -135,13 +142,13 @@ namespace pyne
     /// fundemental mesh tally variables
     /// Mesh tally definition variable
     std::string entity_geometry;
-    vector<double> origin;
-    vector<double> vec;
-    vector<double> axl;
-    vector<double> meshes[3];
-    vector<int> bins[3];
-    vector<double> e_bounds;    ///< Energy Mesh
-    vector<int> e_bins;  ///< Bin per energy
+    std::vector<double> origin;
+    std::vector<double> vec;
+    std::vector<double> axl;
+    std::vector<double> meshes[3];
+    std::vector<int> bins[3];
+    std::vector<double> e_bounds;    ///< Energy Mesh
+    std::vector<int> e_bins;  ///< Bin per energy
   };
 
   /// Converts a Tally to a string stream representation.
