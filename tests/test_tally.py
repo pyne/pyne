@@ -448,12 +448,12 @@ def test_mcnp_mesh_tally_xyz():
     k_ints = [1]
     e = [0, 10, 100]
     e_ints = [1, 1, 2]
-    tal_name = "Mesh Tally XYZ Proton"
+    tal_name = "Mesh Tally XYZ Neutron"
     out = "IJ"
 
     tally = Tally(particle, geometry, origin, i, j, k, i_ints, j_ints, k_ints,
             e, e_ints, tal_name=tal_name)
-    mcnp_tally = "C Mesh Tally XYZ Proton\n"+\
+    mcnp_tally = "C Mesh Tally XYZ Neutron\n"+\
         "FMESH14:n GEOM=XYZ ORIGIN= 1.000000 2.000000 3.000000\n"+\
         "           IMESH= 5.000000 10.000000 20.000000 25.000000 IINTS= 1 2 3 1\n"+\
         "           JMESH= 2.000000 12.000000 JINTS= 1\n"+\
@@ -475,14 +475,14 @@ def test_mcnp_mesh_tally_cyl():
     k_ints = [1]
     e = [0, 10, 100]
     e_ints = [1, 1, 2]
-    tal_name = "Mesh Tally XYZ Proton"
+    tal_name = "Mesh Tally XYZ Neutron"
     vec = [ -1, 4, -2]
     axl = [ 12, -2, 5]
 
 
     tally = Tally(particle, geometry, origin, i, j, k, i_ints, j_ints, k_ints,
             e, e_ints, tal_name = tal_name, axl = axl, vec = vec)
-    mcnp_tally = "C Mesh Tally XYZ Proton\n"+\
+    mcnp_tally = "C Mesh Tally XYZ Neutron\n"+\
         "FMESH14:n GEOM=CYL ORIGIN= 1.000000 2.000000 3.000000\n"+\
         "           IMESH= 5.000000 10.000000 20.000000 25.000000 IINTS= 1 2 3 1\n"+\
         "           JMESH= 2.000000 12.000000 JINTS= 1\n"+\
