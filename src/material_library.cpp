@@ -210,7 +210,7 @@ void pyne::MaterialLibrary::del_material(const std::string& key) {
 }
 
 pyne::Material pyne::MaterialLibrary::get_material(
-    const std::string& mat_name) {
+    const std::string& mat_name) const {
   auto it = material_library.find(mat_name);
   if (it != material_library.end()) {
     return *(it->second);
