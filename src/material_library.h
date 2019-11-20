@@ -160,7 +160,7 @@ class MaterialLibrary {
    * \brief remove a material of the Library by name
    * \param mat_name name of the material to remove
   */
-  pyne::Material get_material(const std::string& mat_name);
+  pyne::Material get_material(const std::string& mat_name) const;
   /**
    * \brief Get a material of the Library by name
    * \param mat_name name of the material to return
@@ -170,17 +170,17 @@ class MaterialLibrary {
    * \brief Get the material Library
    * \return std::map<std::string, pyne::MaterialLibrary>
   */
-  pyne::mat_map get_mat_library() { return material_library; }
+  pyne::mat_map get_mat_library() const { return material_library; }
   /**
    * \brief Get the list of materials in the Library
    * \return std::set<std::string>
   */
-  pyne::matname_set get_keylist() { return keylist; }
+  pyne::matname_set get_keylist() const { return keylist; }
   /**
    * \brief Get the list of nuclides in the Library
    * \return std::set<int>
   */
-  pyne::nuc_set get_nuclist() { return nuclist; }
+  pyne::nuc_set get_nuclist() const { return nuclist; }
 
   std::set<int> mat_number_set;
   std::vector<std::string> name_order;

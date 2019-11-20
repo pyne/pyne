@@ -161,7 +161,7 @@ cdef class _MaterialLibrary:
         """Add a Material to this material library.
         Parameters
         ----------
-        key : str
+        key : str or int (converted to str)
             key to regisgter the material, if material has no name attribute
             will be added as the name metadata of the material
         mat : Material
@@ -208,7 +208,7 @@ cdef class _MaterialLibrary:
         """Get a Material from this material library.
         Parameters
         ----------
-        key : str
+        key : str or int (converted to str)
             key of the material to return 
         """
         # Get the correct cpp_material
