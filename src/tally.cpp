@@ -11,8 +11,8 @@
   #include "tally.h"
 #endif
 
-enum entity_type_enum { VOLUME, SURFACE, MESH }; // Enumeration for entity types
-enum tally_type_enum { FLUX, CURRENT };  // Enumeration for tally types
+enum entity_type_enum {VOLUME, SURFACE, MESH}; // Enumeration for entity types
+enum tally_type_enum {FLUX, CURRENT};  // Enumeration for tally types
 
 const std::string tally_type_enum2string[] = {"Flux", "Current"};
 const std::string entity_type_enum2string[] = {"Volume", "Surface", "Mesh"};
@@ -62,9 +62,9 @@ pyne::Tally::Tally(std::string type, std::string part_name,
 pyne::Tally::Tally(std::string part_name, std::string ent_geom,
                    std::vector<double> orgn,
                    std::vector<double> mesh_i, std::vector<double> mesh_j, std::vector<double> mesh_k,
-                   std::vector<int> bins_i, std::vector<int> bins_j, std::vector<int> bins_k,
+                   std::vector<int> ints_i, std::vector<int> ints_j, std::vector<int> ints_k,
                    std::vector<double> e_bounds_, std::vector<int> e_ints_,
-                   std::vector<double> vec_, std::vector<double> axl_,
+                   std::vector<double> axs_, std::vector<double> vec_,
                    std::string tal_name, double norm) {
   // Empty Tally Constructor
   entity_type = "Mesh";
@@ -76,15 +76,15 @@ pyne::Tally::Tally(std::string part_name, std::string ent_geom,
 
   origin = orgn;
   vec = vec_;
-  axl = axl_;
+  axs = axs_;
   meshes[0] = mesh_i;
   meshes[1] = mesh_j;
   meshes[2] = mesh_k;
-  bins[0] = bins_i;
-  bins[1] = bins_j;
-  bins[2] = bins_k;
+  ints[0] = ints_i;
+  ints[1] = ints_j;
+  ints[2] = ints_k;
   e_bounds = e_bounds_;       ///< Energy Mesh
-  e_bins = e_ints_;  ///< Bin per energy
+  e_ints = e_ints_;  ///< Bin per energy
   normalization = norm;
 }
 
@@ -473,8 +473,8 @@ std::string pyne::Tally::mcnp(int tally_index, std::string mcnp_version,
 
   } else if (entity_type.find("Mesh") != std::string::npos) {
     output << form_mcnp_meshtally(tally_index, particle_token, entity_geometry,
-                                  axl, vec, origin, meshes, bins, e_bounds,
-                                  e_bins, out);
+                                  axs, vec, origin, meshes, ints, e_bounds,
+                                  e_ints, out);
 
   } else {
     std::cout << "tally/entity combination makes no sense for MCNP"
@@ -520,10 +520,10 @@ std::string pyne::Tally::form_mcnp_tally(int tally_index, int type,
 // Form the mesh tally line as function of its properties
 std::string pyne::Tally::form_mcnp_meshtally(
     int tally_index, std::string particle_token, std::string entity_geometry,
-    std::vector<double> axl, std::vector<double> vec,
+    std::vector<double> axs, std::vector<double> vec,
     std::vector<double> origin, std::vector<double> meshes[3],
-    std::vector<int> bins[3], std::vector<double> e_bounds,
-    std::vector<int> e_bins, std::string out) {
+    std::vector<int> ints[3], std::vector<double> e_bounds,
+    std::vector<int> e_ints, std::string out) {
   std::stringstream mtally_stream;
   // indentation block
   std::string indent_block = "           ";
@@ -536,8 +536,8 @@ std::string pyne::Tally::form_mcnp_meshtally(
     mtally_stream << "XYZ ";
   } else if (entity_geometry.find("Cylinder") != std::string::npos) {
     mtally_stream << "CYL ";
-    if (!is_zero(axl)) {
-      sup_var << indent_block << "AXL=" << pyne::join_to_string(axl) << "\n";
+    if (!is_zero(axs)) {
+      sup_var << indent_block << "AXS=" << pyne::join_to_string(axs) << "\n";
     }
     if (!is_zero(vec)) {
       sup_var << indent_block << "VEC=" << pyne::join_to_string(vec) << "\n";
@@ -550,9 +550,9 @@ std::string pyne::Tally::form_mcnp_meshtally(
   for (int j = 0; j < 3; j++) {
     mtally_stream << indent_block;
     mtally_stream << dir_name[j] << "MESH=" << pyne::join_to_string(meshes[j]);
-    if (bins[j].size() > 0) {
+    if (ints[j].size() > 0) {
       mtally_stream << " " << dir_name[j]
-                    << "INTS=" << pyne::join_to_string(bins[j]);
+                    << "INTS=" << pyne::join_to_string(ints[j]);
     }
     mtally_stream << "\n";
   }
@@ -563,8 +563,8 @@ std::string pyne::Tally::form_mcnp_meshtally(
     mtally_stream << indent_block << "EMESH=" << pyne::join_to_string(e_bounds);
   }
   mtally_stream << "\n";
-  if (e_bins.size() > 0) {
-    mtally_stream << indent_block << "EINTS=" << pyne::join_to_string(e_bins);
+  if (e_ints.size() > 0) {
+    mtally_stream << indent_block << "EINTS=" << pyne::join_to_string(e_ints);
   }
   if (out.size() > 0) {
     mtally_stream << "\n" << indent_block << "OUT=" << out;
@@ -604,7 +604,7 @@ std::string pyne::Tally::fluka(std::string unit_number) {
       else
         output << std::setw(10) << std::right << 1.0;
 
-      output << std::setw(10) << std::right << "   1000."; // number of ebins
+      output << std::setw(10) << std::right << "   1000."; // number of eints
       tally_name.resize(8);
       output << std::setw(8) << std::left 
              << tally_name; // may need to make sure less than 10 chars
@@ -638,11 +638,11 @@ std::string pyne::Tally::fluka(std::string unit_number) {
       output << std::setw(10) << std::left  << "USRBDX  ";    
       output << std::setw(10) << std::right << "  10.0E1";
       output << std::setw(10) << std::right << "     0.0";
-      output << std::setw(10) << std::right << "  1000.0"; // number of bins
+      output << std::setw(10) << std::right << "  1000.0"; // number of ints
       output << std::setw(10) << std::right << "12.56637"; // 4pi
       output << std::setw(10) << std::right << "     0.0";
       output << std::setw(10) << std::right 
-             << "   240.0"; // number of angular bins
+             << "   240.0"; // number of angular ints
       output << std::setw(8) << std::left << "       &";      
       // end of usrbdx
   } else {

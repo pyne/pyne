@@ -716,7 +716,8 @@ cdef class Tally:
         tally_index : int
 
         mcnp_version : std::string
-
+        out : std::string
+              output format for the FMESH (only used for FMESH)
         Returns
         -------
         res1 : std::string

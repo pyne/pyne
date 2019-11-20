@@ -54,21 +54,25 @@ namespace pyne
  
     /// Constructor from passed in vars
     /// \param particle_name the name of the particle type
-    /// \param entity the entity id of the tally (eg. surface index,
-    ///          volume number)
     /// \param entity_geom (xyz, cylinder)
-    /// \param tally_name string identifying the tally
     /// \param origin double[3] origin of the meshtally
-    /// \param i,j,k vector<double> coordinate of the coarse meshes
-    /// \param ints i,j,k vector<double> coordinate of the coarse meshes
-    /// \param normalization the number required to normalize your tally
+    /// \param i_mesh, j_mesh, k_mesh vector<double> coordinate of the coarse meshes
+    /// \param i_ints, j_ints, k_ints vector<int> coordinate of the coarse meshes
+    /// \param e_bounds vector<double values of the coearse mesh points in energy in MeV
+    /// \param e_ints vector<int> number of fine mesh points within each corresponding
+    ///        coarse mesh in energy
+    /// \param axs vector<double> vector giving the direction of the axis of the
+    ///        cylindrical mesh
+    /// \param vec vector<double> vector defining along with axs the plane for Theta=0
+    /// \param tally_name string identifying the tally
+    /// \param norm the number required to normalize your tally
     Tally(std::string particule_name, std::string entity_geom, vector<double> orgn,
     vector<double> i_mesh, vector<double> j_mesh, vector<double> k_mesh,
-    vector<int> bins_i = null_v_int, 
-    vector<int> bins_j = null_v_int, 
-    vector<int> bins_k = null_v_int, 
+    vector<int> i_ints = null_v_int, 
+    vector<int> j_ints = null_v_int, 
+    vector<int> k_ints = null_v_int, 
     vector<double> e_bounds = null_v_dbl, vector<int> e_ints = null_v_int,
-    vector<double> vec =null_v_dbl, vector<double> axl = null_v_dbl,
+    vector<double> axs =null_v_dbl, vector<double> vec = null_v_dbl,
     std::string tally_name = "", double norm = 1.0);
 
     ~Tally();  /// default destructor
@@ -121,10 +125,10 @@ namespace pyne
     // Form the mesh tally line as function of its properties
     std::string form_mcnp_meshtally(
         int tally_index, std::string particle_token, std::string entity_geometry,
-        std::vector<double> axl, std::vector<double> vec,
+        std::vector<double> axs, std::vector<double> vec,
         std::vector<double> origin, std::vector<double> meshes[3],
-        std::vector<int> bins[3], std::vector<double> e_bounds,
-        std::vector<int> e_bins, std::string out);
+        std::vector<int> ints[3], std::vector<double> e_bounds,
+        std::vector<int> e_ints, std::string out);
     
     // fluka tally
     std::string fluka(std::string unit_number = "-21");
@@ -144,11 +148,11 @@ namespace pyne
     std::string entity_geometry;
     std::vector<double> origin;
     std::vector<double> vec;
-    std::vector<double> axl;
+    std::vector<double> axs;
     std::vector<double> meshes[3];
-    std::vector<int> bins[3];
+    std::vector<int> ints[3];
     std::vector<double> e_bounds;    ///< Energy Mesh
-    std::vector<int> e_bins;  ///< Bin per energy
+    std::vector<int> e_ints;  ///< Bin per energy
   };
 
   /// Converts a Tally to a string stream representation.

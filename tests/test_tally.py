@@ -440,9 +440,9 @@ def test_mcnp_mesh_tally_xyz():
     particle = "Neutron"
     geometry = "Cartesian"
     origin = [1,2,3]
-    i = [5, 10, 20, 25]
-    j = [2, 12]
-    k = [45]
+    i_mesh = [5, 10, 20, 25]
+    j_mesh = [2, 12]
+    k_mesh = [45]
     i_ints = [1, 2, 3, 1]
     j_ints = [1]
     k_ints = [1]
@@ -451,7 +451,7 @@ def test_mcnp_mesh_tally_xyz():
     tal_name = "Mesh Tally XYZ Neutron"
     out = "IJ"
 
-    tally = Tally(particle, geometry, origin, i, j, k, i_ints, j_ints, k_ints,
+    tally = Tally(particle, geometry, origin, i_mesh, j_mesh, k_mesh, i_ints, j_ints, k_ints,
             e, e_ints, tal_name=tal_name)
     mcnp_tally = "C Mesh Tally XYZ Neutron\n"+\
         "FMESH14:n GEOM=XYZ ORIGIN= 1.000000 2.000000 3.000000\n"+\
@@ -467,9 +467,9 @@ def test_mcnp_mesh_tally_cyl():
     particle = "Neutron"
     geometry = "Cylinder"
     origin = [1,2,3]
-    i = [5, 10, 20, 25]
-    j = [2, 12]
-    k = [45]
+    i_mesh = [5, 10, 20, 25]
+    j_mesh = [2, 12]
+    k_mesh = [45]
     i_ints = [1, 2, 3, 1]
     j_ints = [1]
     k_ints = [1]
@@ -480,15 +480,15 @@ def test_mcnp_mesh_tally_cyl():
     axl = [ 12, -2, 5]
 
 
-    tally = Tally(particle, geometry, origin, i, j, k, i_ints, j_ints, k_ints,
+    tally = Tally(particle, geometry, origin, i_mesh, j_mesh, k_mesh, i_ints, j_ints, k_ints,
             e, e_ints, tal_name = tal_name, axl = axl, vec = vec)
     mcnp_tally = "C Mesh Tally XYZ Neutron\n"+\
         "FMESH14:n GEOM=CYL ORIGIN= 1.000000 2.000000 3.000000\n"+\
         "           IMESH= 5.000000 10.000000 20.000000 25.000000 IINTS= 1 2 3 1\n"+\
         "           JMESH= 2.000000 12.000000 JINTS= 1\n"+\
         "           KMESH= 45.000000 KINTS= 1\n"+\
-        "           AXL= 12.000000 -2.000000 5.000000\n"+\
-        "           VEC= -1.000000 4.000000 -2.000000\n"+\
+        "           AXS= -1.000000 4.000000 -2.000000\n"+\
+        "           VEC= 12.000000 -2.000000 5.000000\n"+\
         "           EMESH= 0.000000 10.000000 100.000000\n"+\
         "           EINTS= 1 1 2";
     assert_equal(mcnp_tally, tally.mcnp(1,"mcnp6"))
