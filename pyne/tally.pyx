@@ -176,8 +176,9 @@ cdef class Tally:
 
     
     def _tally_tally_2(self, part_name, ent_geom, origin, i_mesh, j_mesh, k_mesh,
-            i_ints=[], j_ints=[], k_ints=[], e=[], e_ints=[], vec=[], axl=[], tal_name='', norm=1.0):
-        """Tally(self, type, part_name, ent, ent_type, ent_name, tal_name='', size=0.0, norm=1.0)
+            i_ints=[], j_ints=[], k_ints=[], e_mesh=[], e_ints=[], axs=[], vec=[], tal_name='', norm=1.0):
+        """Tally(self, type, part_name, ent_geom, origin, i_mesh, j_mesh,
+        k_mesh, i_ints=[], j_ints=[], k_ints=[], e_mesh=[], e_ints=[], axs=[], vec=[], tal_name='', norm=1.0)
          This method was overloaded in the C-based source. To overcome
         this we will put the relevant docstring for each version below.
         Each version will begin with a line of # characters.
@@ -188,17 +189,17 @@ cdef class Tally:
         ----------
         part_name : string
         ent_geom : string
-        origin : (3d) list 
-        i_mesh : list
-        j_mesh : list
-        k_mesh : list
-        i_ints : list (default: empty) 
-        j_ints : list (default: empty)
-        k_ints : list (default: empty)
-        e : list (default: empty)
-        e_ints : list (default: empty)
-        vec : (3d) list (default: empty)
-        axl : (3d) list (default: empty)
+        origin : (3d) list of float
+        i_mesh : list of float
+        j_mesh : list of float
+        k_mesh : list of float
+        i_ints : list of int (default: empty) 
+        j_ints : list of int (default: empty)
+        k_ints : list of int (default: empty)
+        e_mesh : list of float (default: empty)
+        e_ints : list of int (default: empty)
+        vec : (3d) list of float (default: empty)
+        axs : (3d) list of float (default: empty)
         tal_name string (default: "")
         norm : float (default: 1.0)
 
@@ -217,10 +218,10 @@ cdef class Tally:
         cdef vector[int] j_ints_proxy
         cdef vector[double] k_mesh_proxy
         cdef vector[int] k_ints_proxy
-        cdef vector[double] e_proxy
+        cdef vector[double] e_mesh_proxy
         cdef vector[int] e_ints_proxy
         cdef vector[double] vec_proxy
-        cdef vector[double] axl_proxy
+        cdef vector[double] axs_proxy
         
         part_name_bytes = part_name.encode()
         ent_geom_bytes = ent_geom.encode()
@@ -228,15 +229,15 @@ cdef class Tally:
         i_mesh_proxy = to_vector_double(i_mesh)
         j_mesh_proxy = to_vector_double(j_mesh)
         k_mesh_proxy = to_vector_double(k_mesh)
-        e_proxy = to_vector_double(e)
         i_ints_proxy = to_vector_int(i_ints)
         j_ints_proxy = to_vector_int(j_ints)
         k_ints_proxy = to_vector_int(k_ints)
+        e_mesh_proxy = to_vector_double(e_mesh)
         e_ints_proxy = to_vector_int(e_ints)
        
         origin_proxy = to_vector_double(origin)
         vec_proxy = to_vector_double(vec)
-        axl_proxy = to_vector_double(axl)
+        axs_proxy = to_vector_double(axs)
         
         self._inst = new cpp_tally.Tally(std_string(<char *> part_name_bytes), 
                 std_string(<char *> ent_geom_bytes), 
@@ -244,8 +245,8 @@ cdef class Tally:
                 <vector[double]> i_mesh_proxy, <vector[double]> j_mesh_proxy,
                 <vector[double]> k_mesh_proxy,
                 <vector[int]> i_ints_proxy, <vector[int]> j_ints_proxy, <vector[int]> k_ints_proxy, 
-                <vector[double]> e_proxy, <vector[int]> e_ints_proxy, 
-                <vector[double]> vec_proxy, <vector[double]> axl_proxy,
+                <vector[double]> e_mesh_proxy, <vector[int]> e_ints_proxy, 
+                <vector[double]> vec_proxy, <vector[double]> axs_proxy,
                 std_string(<char *> tal_name_bytes), <double> norm)
 
 
@@ -269,7 +270,7 @@ cdef class Tally:
         ("j", list), ("j_ints", list), 
         ("k", list), ("k_ints", list),
         ("e", list), ("e_ints", list),
-        ("vec", list), ("axl", list)))
+        ("vec", list), ("axs", list)))
 
     def __init__(self, *args, **kwargs):
         """Tally(self, type, part_name, ent, ent_type, ent_name, tal_name='', size=0.0, norm=1.0)
