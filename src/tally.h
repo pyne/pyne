@@ -55,7 +55,7 @@ namespace pyne
     /// Constructor from passed in vars
     /// \param particle_name the name of the particle type
     /// \param entity_geom (xyz, cylinder)
-    /// \param origin double[3] origin of the meshtally
+    /// \param orgn double[3] origin of the meshtally
     /// \param i_mesh, j_mesh, k_mesh vector<double> coordinate of the coarse meshes
     /// \param i_ints, j_ints, k_ints vector<int> coordinate of the coarse meshes
     /// \param e_bounds vector<double values of the coearse mesh points in energy in MeV

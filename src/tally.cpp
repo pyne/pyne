@@ -537,7 +537,7 @@ std::string pyne::Tally::form_mcnp_meshtally(
   } else if (entity_geometry.find("Cylinder") != std::string::npos) {
     mtally_stream << "CYL ";
     if (!is_zero(axs)) {
-      sup_var << indent_block << "AXS=" << pyne::join_to_string(axs) << "\n";
+      sup_var << indent_block << "AXS=" << pyne::join_to_string(axs) << std::endl;
     }
     if (!is_zero(vec)) {
       sup_var << indent_block << "VEC=" << pyne::join_to_string(vec) << "\n";
@@ -650,4 +650,3 @@ std::string pyne::Tally::fluka(std::string unit_number) {
   }
   return output.str();
 }
-
