@@ -425,8 +425,8 @@ void pyne::Tally::write_hdf5(std::string filename, std::string datapath) {
 std::ostream& operator<<(std::ostream& os, pyne::Tally tal) {
   //print the Tally to ostream
   os << "\t---------\n";
-  os << "\t Tallying " << tal.particle_name << " " << tal.tally_type << "\n";
-  os << "\t in/on " << tal.entity_type << " " << tal.entity_id << "\n";
+  os << "\t Tallying " << tal.particle_name << " " << tal.tally_type << std::endl;
+  os << "\t in/on " << tal.entity_type << " " << tal.entity_id << std::endl;
   return os;
 }
 
@@ -526,25 +526,25 @@ std::string pyne::Tally::form_mcnp_meshtally(
     std::vector<int> e_ints, std::string out) {
   std::stringstream mtally_stream;
   // indentation block
-  std::string indent_block = "           ";
+  std::string indent_block = "          ";
 
   mtally_stream << "FMESH" << tally_index << "4:" << particle_token << " ";
   mtally_stream << "GEOM=";
-  std::stringstream sup_var;
 
   if (entity_geometry.find("Cartesian") != std::string::npos) {
     mtally_stream << "XYZ ";
   } else if (entity_geometry.find("Cylinder") != std::string::npos) {
-    mtally_stream << "CYL ";
+    mtally_stream << "CYL" << std::endl;
     if (!is_zero(axs)) {
-      sup_var << indent_block << "AXS=" << pyne::join_to_string(axs) << std::endl;
+      mtally_stream << indent_block << "AXS=" << pyne::join_to_string(axs) << std::endl;
     }
     if (!is_zero(vec)) {
-      sup_var << indent_block << "VEC=" << pyne::join_to_string(vec) << "\n";
+      mtally_stream << indent_block << "VEC=" << pyne::join_to_string(vec) << std::endl;
     }
+    mtally_stream << indent_block;
   }
 
-  mtally_stream << "ORIGIN=" << pyne::join_to_string(origin) << "\n";
+  mtally_stream << "ORIGIN=" << pyne::join_to_string(origin) << std::endl;
   std::string dir_name[3] = {"I", "J", "K"};
 
   for (int j = 0; j < 3; j++) {
@@ -554,20 +554,17 @@ std::string pyne::Tally::form_mcnp_meshtally(
       mtally_stream << " " << dir_name[j]
                     << "INTS=" << pyne::join_to_string(ints[j]);
     }
-    mtally_stream << "\n";
-  }
-  if (sup_var.str().size() > 0) {
-    mtally_stream << sup_var.str();
+    mtally_stream << std::endl;
   }
   if (e_bounds.size() > 0) {
     mtally_stream << indent_block << "EMESH=" << pyne::join_to_string(e_bounds);
   }
-  mtally_stream << "\n";
+  mtally_stream << std::endl;
   if (e_ints.size() > 0) {
     mtally_stream << indent_block << "EINTS=" << pyne::join_to_string(e_ints);
   }
   if (out.size() > 0) {
-    mtally_stream << "\n" << indent_block << "OUT=" << out;
+    mtally_stream << std::endl << indent_block << "OUT=" << out;
   }
   return mtally_stream.str();
 }
