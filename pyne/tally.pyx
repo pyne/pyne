@@ -31,11 +31,14 @@ cdef vector[int] to_vector_int(value):
     cdef int * value_data
     # value is a ('vector', 'int32', 0)
     value_size = len(value)
+    value_proxy = vector[int](< size_t > value_size)
     if isinstance(value, np.ndarray) and (< np.ndarray > value).descr.type_num == np.NPY_INT64:
         value_data = <int * > np.PyArray_DATA( < np.ndarray > value)
-    value_proxy = vector[int](< size_t > value_size)
-    for ivalue in range(value_size):
-        value_proxy[ivalue] = <int > value[ivalue]
+        for ivalue in range(value_size):
+            value_proxy[ivalue] = value_data[ivalue]
+    else:
+        for ivalue in range(value_size):
+            value_proxy[ivalue] = <int > value[ivalue]
     return value_proxy
 
 
@@ -46,13 +49,12 @@ cdef vector[double] to_vector_double(value):
     cdef double * value_data
     # value is a ('vector', 'float64', 0)
     value_size = len(value)
+    value_proxy = vector[double](< size_t > value_size)
     if isinstance(value, np.ndarray) and (< np.ndarray > value).descr.type_num == np.NPY_FLOAT64:
         value_data = <double * > np.PyArray_DATA( < np.ndarray > value)
-        value_proxy = vector[double](< size_t > value_size)
         for ivalue in range(value_size):
             value_proxy[ivalue] = value_data[ivalue]
     else:
-        value_proxy = vector[double](< size_t > value_size)
         for ivalue in range(value_size):
             value_proxy[ivalue] = <double > value[ivalue]
     return value_proxy
