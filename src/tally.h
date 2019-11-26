@@ -37,7 +37,7 @@ namespace pyne
     /// Tally Constructors
     Tally (); /// empty constructor
 
-    /// Constructor from passed in vars
+    /// Constructor for regular tally
     /// \param type the type of tally (flux or current)
     /// \param particle_name the name of the particle type
     /// \param entity the entity id of the tally (eg. surface index,
@@ -52,7 +52,7 @@ namespace pyne
           std::string tally_name = "", double entity_size = 0.0, 
           double normalization = 1.0);
  
-    /// Constructor from passed in vars
+    /// Constructor for mesh tally
     /// \param particle_name the name of the particle type
     /// \param entity_geom (xyz, cylinder)
     /// \param orgn double[3] origin of the meshtally
