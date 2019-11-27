@@ -16,6 +16,7 @@
 #include <cctype>
 #include <stdlib.h>
 #include <iostream>
+#include <iomanip>
 #include <cmath>
 #include <exception>
 #include <sys/stat.h>
@@ -124,6 +125,10 @@ namespace pyne {
   /// Calculates a version of the string \a name that is also a valid variable name.
   /// That is to say that the return value uses only word characters.
   std::string natural_naming(std::string name);
+
+  // join the vector element into a string, each values will be delimited ny the delimiter
+  template<typename T>
+  std::string join_to_string(std::vector<T> vect, std::string delimiter = " ");
 
   /// Finds the slope of a line from the points (\a x1, \a y1) and (\a x2, \a y2).
   double slope (double x2, double y2, double x1, double y1);

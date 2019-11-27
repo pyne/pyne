@@ -4,61 +4,85 @@
 # Do not modify!!!                             #
 #                                              #
 #                                              #
+# With some edits from BaM241                  #
 #                    Come on, guys. I mean it! #
 ################################################
 
 
 from libcpp.map cimport map as cpp_map
-from libcpp.string cimport string as std_string
+from libcpp.string cimport string as cstr
+from libcpp.vector cimport vector
 
 cdef extern from "tally.h" namespace "pyne":
+    ctypedef double vec3[3]
+    ctypedef vector[double] vdbl
+    ctypedef vector[int] vint
+    
 
     cdef cppclass Tally:
         # constructors
         Tally() except +
-        Tally(std_string) except +
-        Tally(std_string, std_string) except +
-        Tally(std_string, std_string, int) except +
-        Tally(std_string, std_string, int, std_string) except +
-        Tally(std_string, std_string, int, std_string, std_string) except +
-        Tally(std_string, std_string, int, std_string, std_string, std_string) except +
-        Tally(std_string, std_string, int, std_string, std_string, std_string, double) except +
-        Tally(std_string, std_string, int, std_string, std_string, std_string, double, double) except +
+        Tally(cstr) except +
+        Tally(cstr, cstr) except +
+        Tally(cstr, cstr, int) except +
+        Tally(cstr, cstr, int, cstr) except +
+        Tally(cstr, cstr, int, cstr, cstr) except +
+        Tally(cstr, cstr, int, cstr, cstr, cstr) except +
+        Tally(cstr, cstr, int, cstr, cstr, cstr, double) except +
+        Tally(cstr, cstr, int, cstr, cstr, cstr, double, double) except +
+
+        Tally(cstr, cstr, vdbl, vdbl, vdbl, vdbl) except + 
+        Tally(cstr, cstr, vdbl, vdbl, vdbl, vdbl,  vint) except + 
+        Tally(cstr, cstr, vdbl, vdbl, vdbl, vdbl,  vint, vint) except + 
+        Tally(cstr, cstr, vdbl, vdbl, vdbl, vdbl,  vint, vint, vint) except + 
+        Tally(cstr, cstr, vdbl, vdbl, vdbl, vdbl,  vint, vint, vint,
+                vdbl) except + 
+        Tally(cstr, cstr, vdbl, vdbl, vdbl, vdbl,  vint, vint, vint,
+                vdbl, vint) except + 
+        Tally(cstr, cstr, vdbl, vdbl, vdbl, vdbl,  vint, vint, vint,
+                vdbl, vint, vdbl) except + 
+        Tally(cstr, cstr, vdbl, vdbl, vdbl, vdbl,  vint, vint, vint,
+                vdbl, vint, vdbl, vdbl) except + 
+        Tally(cstr, cstr, vdbl, vdbl, vdbl, vdbl,  vint, vint, vint,
+                vdbl, vint, vdbl, vdbl, cstr) except + 
+        Tally(cstr, cstr, vdbl, vdbl, vdbl, vdbl,  vint, vint, vint,
+                vdbl, vint, vdbl, vdbl, cstr, double) except + 
 
         # attributes
         int entity_id
-        std_string entity_name
+        cstr entity_name
         double entity_size
-        std_string entity_type
+        cstr entity_type
         double normalization
-        std_string particle_name
-        cpp_map[std_string, std_string] rx2fluka
-        cpp_map[std_string, std_string] rx2mcnp5
-        cpp_map[std_string, std_string] rx2mcnp6
-        std_string tally_name
-        std_string tally_type
+        cstr particle_name
+        cpp_map[cstr, cstr] rx2fluka
+        cpp_map[cstr, cstr] rx2mcnp5
+        cpp_map[cstr, cstr] rx2mcnp6
+        cstr tally_name
+        cstr tally_type
 
         # methods
         int create_dataspace() except +
         int create_dataspace(int) except +
-        int create_dataspace(int, std_string) except +
+        int create_dataspace(int, cstr) except +
         int create_filetype() except +
         int create_memtype() except +
-        std_string fluka() except +
-        std_string fluka(std_string) except +
+        cstr fluka() except +
+        cstr fluka(cstr) except +
         void from_hdf5() except +
-        void from_hdf5(std_string) except +
-        void from_hdf5(std_string, std_string) except +
-        void from_hdf5(std_string, std_string, int) except +
+        void from_hdf5(cstr) except +
+        void from_hdf5(cstr, cstr) except +
+        void from_hdf5(cstr, cstr, int) except +
         void from_hdf5(char *) except +
         void from_hdf5(char *, char *) except +
         void from_hdf5(char *, char *, int) except +
-        std_string mcnp() except +
-        std_string mcnp(int) except +
-        std_string mcnp(int, std_string) except +
+        cstr mcnp() except +
+        cstr mcnp(int) except +
+        cstr mcnp(int, cstr) except +
+        cstr mcnp(int, cstr, cstr) except +
         void write_hdf5() except +
-        void write_hdf5(std_string) except +
-        void write_hdf5(std_string, std_string) except +
+        void write_hdf5(cstr) except +
+        void write_hdf5(cstr, cstr) except +
         void write_hdf5(char *) except +
         void write_hdf5(char *, char *) except +
         pass
