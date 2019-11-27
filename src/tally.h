@@ -52,6 +52,20 @@ namespace pyne
           std::string entity_type, std::string entity_name,
           std::string tally_name = "", double entity_size = 0.0, 
           double normalization = 1.0);
+    /// Constructor for regular tally
+    /// \param type the type of tally (flux or current)
+    /// \param particles_name vector of the name of the particle types
+    /// \param entity the entity id of the tally (eg. surface index,
+    ///          volume number)
+    /// \param entity_type (volume or surface)
+    /// \param entity_name string identifying the entity
+    /// \param tally_name string identifying the tally
+    /// \param entity_size the physical size of the tally volume
+    /// \param normalization the number required to normalize your tally
+    Tally(std::string type, std::vector<std::string> particle_names, int entity,
+          std::string entity_type, std::string entity_name,
+          std::string tally_name = "", double entity_size = 0.0, 
+          double normalization = 1.0);
  
     /// Constructor for mesh tally
     /// \param particle_name the name of the particle type
@@ -138,7 +152,7 @@ namespace pyne
     /// Volume/Surface Tally variables
     std::string entity_type;   ///< the type of entity (volume,surface)
     std::string entity_name;   ///< the name of the entity (optional)
-    std::string particle_name; ///< particle name string
+    std::vector<std::string> particle_names; ///< particle names string
     std::string tally_type;    ///< type of tally flux or current
     std::string tally_name;    ///< name of the tally 
     int entity_id;             ///< id number of the entity being tallied upon    

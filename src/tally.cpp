@@ -296,7 +296,7 @@ void pyne::Tally::write_hdf5(std::string filename, std::string datapath) {
   // unpack from class to struct array
   tally_data[0].entity_id = entity_id;
   tally_data[0].entity_name = entity_name.c_str();
-  tally_data[0].particle_name = particle_name.c_str();
+  tally_data[0].particle_name = particle_names[0].c_str();
   tally_data[0].tally_name = tally_name.c_str();
   tally_data[0].entity_size = entity_size;
   tally_data[0].normalization = normalization;
