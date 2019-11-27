@@ -697,7 +697,7 @@ cdef class Tally:
         raise RuntimeError('method from_hdf5() could not be dispatched')
 
     def mcnp(self, tally_index=1, mcnp_version='mcnp5', out=''):
-        """mcnp(self, tally_index=1, mcnp_version='mcnp5')
+        """Write the tally in a format suitable for MCNP.
 
 
         Parameters
