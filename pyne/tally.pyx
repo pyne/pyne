@@ -28,7 +28,6 @@ cdef vector[int] to_vector_int(value):
     cdef vector[int] value_proxy
     cdef int ivalue
     cdef int value_size
-    cdef int * value_data
     
     value_size = len(value)
     value_proxy = vector[int](< size_t > value_size)
@@ -41,7 +40,6 @@ cdef vector[double] to_vector_double(value):
     cdef vector[double] value_proxy
     cdef int ivalue
     cdef int value_size
-    cdef double * value_data
     
     value_size = len(value)
     value_proxy = vector[double](< size_t > value_size)
