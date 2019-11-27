@@ -83,8 +83,8 @@ pyne::Tally::Tally(std::string part_name, std::string ent_geom,
   ints[0] = ints_i;
   ints[1] = ints_j;
   ints[2] = ints_k;
-  e_bounds = e_bounds_;       ///< Energy Mesh
-  e_ints = e_ints_;  ///< Bin per energy
+  e_bounds = e_bounds_;
+  e_ints = e_ints_;
   normalization = norm;
 }
 

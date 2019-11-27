@@ -479,7 +479,6 @@ def test_mcnp_mesh_tally_cyl():
     vec = [ -1, 4, -2]
     axs = [ 12, -2, 5]
 
-
     tally = Tally(particle, geometry, origin, i_mesh, j_mesh, k_mesh, i_ints, j_ints, k_ints,
             e, e_ints, tal_name = tal_name, axs = axs, vec = vec)
     mcnp_tally = "C Mesh Tally XYZ Neutron\n"+\

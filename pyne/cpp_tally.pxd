@@ -17,6 +17,8 @@ cdef extern from "tally.h" namespace "pyne":
     ctypedef double vec3[3]
     ctypedef vector[double] vdbl
     ctypedef vector[int] vint
+    
+
     cdef cppclass Tally:
         # constructors
         Tally() except +

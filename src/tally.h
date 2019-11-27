@@ -27,6 +27,7 @@ namespace pyne
   // default empty parameters for constructors
   const vector<double> null_v_dbl;
   const vector<int> null_v_int;
+  
   class Tally 
   {
   public:
@@ -133,26 +134,26 @@ namespace pyne
     // fluka tally
     std::string fluka(std::string unit_number = "-21");
 
-    /// fundamental tally variables
-    std::string entity_type; ///< the type of entity (volume,surface)
-    std::string entity_name; ///< the name of the entity (optional)
+    /// fundamental Tally variables
+    /// Volume/Surface Tally variables
+    std::string entity_type;   ///< the type of entity (volume,surface)
+    std::string entity_name;   ///< the name of the entity (optional)
     std::string particle_name; ///< particle name string
-    std::string tally_type; ///< type of tally flux or current
-    std::string tally_name; ///< name of the tally 
-    int entity_id; ///< id number of the entity being tallied upon    
-    double entity_size; ///< the physical size of the entity 
-    double normalization; ///< the tally normalization 
+    std::string tally_type;    ///< type of tally flux or current
+    std::string tally_name;    ///< name of the tally 
+    int entity_id;             ///< id number of the entity being tallied upon    
+    double entity_size;        ///< the physical size of the entity 
+    double normalization;      ///< the tally normalization 
 
-    /// fundemental mesh tally variables
-    /// Mesh tally definition variable
-    std::string entity_geometry;
-    std::vector<double> origin;
-    std::vector<double> vec;
-    std::vector<double> axs;
-    std::vector<double> meshes[3];
-    std::vector<int> ints[3];
-    std::vector<double> e_bounds;    ///< Energy Mesh
-    std::vector<int> e_ints;  ///< Bin per energy
+    /// Mesh Tally variables
+    std::string entity_geometry;   ///< Shape of the Mesh, XYZ or Cylindrical
+    std::vector<double> origin;    ///< Origin of the Mesh Tally
+    std::vector<double> vec;       ///< defining with axs the place for Theta=0 (Cyl Mesh)
+    std::vector<double> axs;       ///< dircetion of the axis of the cylindrical Mesh
+    std::vector<double> meshes[3]; ///< mesh interval coordinates
+    std::vector<int> ints[3];      ///< Bin per mesh interval
+    std::vector<double> e_bounds;  ///< Energy Mesh
+    std::vector<int> e_ints;       ///< Bin per energy
   };
 
   /// Converts a Tally to a string stream representation.

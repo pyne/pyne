@@ -47,7 +47,7 @@ cdef vector[double] to_vector_double(value):
     cdef int ivalue
     cdef int value_size
     cdef double * value_data
-    # value is a ('vector', 'float64', 0)
+    
     value_size = len(value)
     value_proxy = vector[double](< size_t > value_size)
     if isinstance(value, np.ndarray) and (< np.ndarray > value).descr.type_num == np.NPY_FLOAT64:
