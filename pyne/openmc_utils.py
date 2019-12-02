@@ -323,6 +323,7 @@ def get_result_error_from_openmc_sp(filename, m):
     rel_err = np.reshape(rel_err.flatten(), newshape=(num_e_groups, num_ves))
     rel_err = rel_err.transpose()
     # calculate rel_err_tot
+    # lack of covariance, this could be smaller than the true value
     rel_err_tot = np.zeros_like(res_tot)
     std_dev = np.reshape(flux.std_dev.flatten(),
                          newshape=(num_e_groups, num_ves))
