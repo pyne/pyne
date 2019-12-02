@@ -312,7 +312,6 @@ def get_result_error_from_openmc_sp(filename, m):
 
     # get result and res_tot
     result = flux.mean.flatten()
-    result = np.divide(result, ve_vol)
     result = np.reshape(result, newshape=(num_e_groups, num_ves))
     result = result.transpose()
     res_tot = np.sum(result, axis=1)
@@ -330,8 +329,11 @@ def get_result_error_from_openmc_sp(filename, m):
     std_dev = std_dev.transpose()
     var_tot = np.sum(np.square(std_dev), axis=1)
     nonzero = res_tot > 0
-    rel_err_tot[nonzero] = np.sqrt(var_tot[nonzero]) / (res_tot[nonzero] * ve_vol)
+    rel_err_tot[nonzero] = np.sqrt(var_tot[nonzero]) / res_tot[nonzero]
 
+    # get volume averged results
+    result = np.divide(result, ve_vol)
+    res_tot = np.divide(res_tot, ve_vol)
     # In the result of OpenMC, x changes fastest
     # change the order to z changes fastest
     result = result_changes_order(result, m.dims[3:6])
