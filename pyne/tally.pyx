@@ -151,7 +151,7 @@ cdef class Tally:
         entity_size : double
         entity : int
         normalization : double
-        particle_namei : std::string
+        particle_name : std::string
         type : std::string
         tally_name : std::string
 
