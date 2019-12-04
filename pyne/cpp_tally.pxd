@@ -54,7 +54,7 @@ cdef extern from "tally.h" namespace "pyne":
         double entity_size
         cstr entity_type
         double normalization
-        cstr particle_name
+        vector[cstr] particle_names
         cpp_map[cstr, cstr] rx2fluka
         cpp_map[cstr, cstr] rx2mcnp5
         cpp_map[cstr, cstr] rx2mcnp6

@@ -126,6 +126,9 @@ namespace pyne {
   /// That is to say that the return value uses only word characters.
   std::string natural_naming(std::string name);
 
+  // split a string into a vector of string using a delimiter
+  std::vector<std::string> split_string(std::string lists, std::string delimiter = " ");
+
   // join the vector element into a string, each values will be delimited ny the delimiter
   template<typename T>
   std::string join_to_string(std::vector<T> vect, std::string delimiter = " ");

@@ -300,17 +300,40 @@ std::string pyne::natural_naming(std::string name) {
   return nat_name;
 }
 
+
+std::vector<std::string> split_string(std::string lists, std::string delimiter) {
+  std::vector<std::string> output_vector;
+  
+  size_t prev_pos = 0; //item start position
+  size_t pos = 0; //item end position
+  
+  while( (pos = lists.find(delimiter)) != std::string::npos){
+    output_vector.push_back(lists.substr(prev_pos, pos));
+    prev_pos = pos + delimiter.length();
+  }
+  return output_vector;
+}
+
+
+
 template<typename T>
 std::string pyne::join_to_string(std::vector<T> vect, std::string delimiter){
   std::stringstream out;
   out << std::setiosflags(std::ios::fixed) << std::setprecision(6);
-  for( int i= 0; i < vect.size(); i++)
+  
+  // ensure there is at least 1 element in the vector
+  if (vect.size() == 0)
+    return out.str();
+  // no delimiter needed before the first element
+  out << vect[0];
+  for( int i = 1; i < vect.size(); i++)
     out << delimiter << vect[i];
   return out.str();
 }
 template std::string pyne::join_to_string(std::vector<int> vect, std::string delimiter);
 template std::string pyne::join_to_string(std::vector<double> vect,
                                  std::string delimiter);
+template std::string pyne::join_to_string(std::vector<std::string> vect, std::string delimiter);
 
 //
 // Math Helpers

@@ -47,6 +47,18 @@ cdef vector[double] to_vector_double(value):
         value_proxy[ivalue] = <double > value[ivalue]
     return value_proxy
 
+cdef vector[std_string] to_vector_string(value):
+    cdef vector[std_string] value_proxy
+    cdef int ivalue
+    cdef int value_size
+    
+    value_size = len(value)
+    value_proxy = vector[std_string](< size_t > value_size)
+    for ivalue in range(value_size):
+        
+        value_bytes = value[ivalue].encode()
+        value_proxy[ivalue] = <std_string > value_bytes
+    return value_proxy
 
 cdef class Tally:
     """
@@ -139,7 +151,7 @@ cdef class Tally:
         entity_size : double
         entity : int
         normalization : double
-        particle_name : std::string
+        particle_namei : std::string
         type : std::string
         tally_name : std::string
 
@@ -385,15 +397,18 @@ cdef class Tally:
             (<cpp_tally.Tally *> self._inst).normalization = <double> value
 
 
-    property particle_name:
-        """no docstring for particle_name, please file a bug report!"""
+    property particle_names:
+        """no docstring for particle_names, please file a bug report!"""
         def __get__(self):
-            return bytes(<char *> (<cpp_tally.Tally *> self._inst).particle_name.c_str()).decode()
+            proxy_value = []
+            for i in range(len((<cpp_tally.Tally *> self._inst).particle_names)):
+                b_value = bytes(<char *> (<cpp_tally.Tally *>
+                     self._inst).particle_names[i].c_str()).decode()
+                proxy_value.append(b_value)
+            return proxy_value
 
         def __set__(self, value):
-            cdef char * value_proxy
-            value_bytes = value.encode()
-            (<cpp_tally.Tally *> self._inst).particle_name = std_string(<char *> value_bytes)
+            (<cpp_tally.Tally *> self._inst).particle_names = to_vector_string(value) 
 
 
     property rx2fluka:
