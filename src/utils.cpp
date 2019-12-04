@@ -301,7 +301,7 @@ std::string pyne::natural_naming(std::string name) {
 }
 
 
-std::vector<std::string> split_string(std::string lists, std::string delimiter) {
+std::vector<std::string> pyne::split_string(std::string lists, std::string delimiter) {
   std::vector<std::string> output_vector;
   
   size_t prev_pos = 0; //item start position
