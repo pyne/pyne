@@ -33,7 +33,6 @@ const std::string geometry_type_enum2string[] = {"Cartesian", "Cylinder"};
 pyne::Tally::Tally() {
   // Empty Tally Constructor
   tally_type = "";
-  particle_name = "";
   entity_id = -1;
   entity_type = "";
   entity_name = "";
@@ -50,7 +49,7 @@ pyne::Tally::Tally(std::string type, std::string part_name,
 
   // Empty Tally Constructor
   tally_type = type;
-  particle_name = pyne::particle::name(part_name);
+  particle_names.push_back(pyne::particle::name(part_name));
   entity_id = ent;
   entity_type = ent_type;
   entity_name = ent_name;
@@ -69,7 +68,7 @@ pyne::Tally::Tally(std::string part_name, std::string ent_geom,
   // Empty Tally Constructor
   entity_type = "Mesh";
   entity_name = "";
-  particle_name = pyne::particle::name(part_name);
+  particle_names.push_back(pyne::particle::name(part_name));
   entity_geometry = ent_geom;
   tally_name = tal_name;
   entity_size = -1;
@@ -160,7 +159,7 @@ void pyne::Tally::from_hdf5(std::string filename, std::string datapath,
   entity_id = read_data[data_row].entity_id;
   entity_type = entity_type_enum2string[read_data[data_row].entity_type];
   tally_type = tally_type_enum2string[read_data[data_row].tally_type];
-  particle_name = std::string(read_data[data_row].particle_name);
+  particle_names = pyne::list_to_string_vector(std::string(read_data[data_row].particle_name));
   tally_name = std::string(read_data[data_row].tally_name);
   entity_name = std::string(read_data[data_row].entity_name);
   entity_size = read_data[data_row].entity_size;
@@ -227,7 +226,7 @@ hid_t pyne::Tally::create_memtype() {
   status = H5Tinsert(memtype, "tally_type",
          HOFFSET(tally_struct, tally_type), H5T_NATIVE_INT);
   status = H5Tinsert(memtype, "particle_name",
-         HOFFSET(tally_struct, particle_name),
+         HOFFSET(tally_struct, pyne::vector particle_names),
          strtype);
   status = H5Tinsert(memtype, "entity_name",HOFFSET(tally_struct, entity_name),
          strtype);
