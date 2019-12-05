@@ -71,7 +71,7 @@ cdef class Tally:
     entity_type (std::string) : fundamental tally variables  the
         type of entity (volume,surface)
     entity_name (std::string) : the name of the entity (optional)
-    particle_name (std::string) : particle name string
+    particle_names (std::vector<std::string>) : particle names vector<string>
     tally_type (std::string) : type of tally flux or current
     tally_name (std::string) : name of the tally
     entity_id (int) : id number of the entity being tallied upon

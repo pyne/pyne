@@ -301,16 +301,19 @@ std::string pyne::natural_naming(std::string name) {
 }
 
 
-std::vector<std::string> pyne::split_string(std::string lists, std::string delimiter) {
+std::vector<std::string> pyne::split_string(std::string particles_list, std::string delimiter) {
   std::vector<std::string> output_vector;
-  
   size_t prev_pos = 0; //item start position
   size_t pos = 0; //item end position
-  
-  while( (pos = lists.find(delimiter)) != std::string::npos){
-    output_vector.push_back(lists.substr(prev_pos, pos));
+ 
+  while( (pos = particles_list.find(delimiter)) != std::string::npos){
+    output_vector.push_back(particles_list.substr(prev_pos, pos));
     prev_pos = pos + delimiter.length();
   }
+  // catch list with a single particle
+  if (pos == std::string::npos && prev_pos == 0 && particles_list.length() >0)
+    output_vector.push_back(particles_list);
+
   return output_vector;
 }
 

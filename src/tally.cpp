@@ -159,7 +159,7 @@ void pyne::Tally::from_hdf5(std::string filename, std::string datapath,
   entity_id = read_data[data_row].entity_id;
   entity_type = entity_type_enum2string[read_data[data_row].entity_type];
   tally_type = tally_type_enum2string[read_data[data_row].tally_type];
-  particle_names = pyne::split_string(std::string(read_data[data_row].particle_name, ","));
+  particle_names = pyne::split_string(std::string(read_data[data_row].particle_name), ",");
   tally_name = std::string(read_data[data_row].tally_name);
   entity_name = std::string(read_data[data_row].entity_name);
   entity_size = read_data[data_row].entity_size;
@@ -216,7 +216,6 @@ hid_t pyne::Tally::create_memtype() {
   //
   hid_t strtype = H5Tcopy(H5T_C_S1);
   status = H5Tset_size(strtype, H5T_VARIABLE);
-
   // Create the compound datatype for memory.
   hid_t memtype = H5Tcreate(H5T_COMPOUND, sizeof(tally_struct));
   status = H5Tinsert(memtype, "entity_id",
@@ -226,8 +225,7 @@ hid_t pyne::Tally::create_memtype() {
   status = H5Tinsert(memtype, "tally_type",
          HOFFSET(tally_struct, tally_type), H5T_NATIVE_INT);
   status = H5Tinsert(memtype, "particle_name",
-         HOFFSET(tally_struct, particle_name),
-         strtype);
+         HOFFSET(tally_struct, particle_name), strtype);
   status = H5Tinsert(memtype, "entity_name",HOFFSET(tally_struct, entity_name),
          strtype);
   status = H5Tinsert(memtype, "tally_name",HOFFSET(tally_struct, tally_name),
@@ -293,9 +291,10 @@ void pyne::Tally::write_hdf5(std::string filename, std::string datapath) {
     tally_data[0].tally_type = CURRENT;
 
   // unpack from class to struct array
+  std::string particle_name = pyne::join_to_string(particle_names, ",");
   tally_data[0].entity_id = entity_id;
   tally_data[0].entity_name = entity_name.c_str();
-  tally_data[0].particle_name = pyne::join_to_string(particle_names, ",").c_str();
+  tally_data[0].particle_name = particle_name.c_str();
   tally_data[0].tally_name = tally_name.c_str();
   tally_data[0].entity_size = entity_size;
   tally_data[0].normalization = normalization;
@@ -543,32 +542,32 @@ std::string pyne::Tally::form_mcnp_meshtally(
   } else if (entity_geometry.find("Cylinder") != std::string::npos) {
     mtally_stream << "CYL" << std::endl;
     if (!is_zero(axs)) {
-      mtally_stream << indent_block << "AXS=" << pyne::join_to_string(axs) << std::endl;
+      mtally_stream << indent_block << "AXS= " << pyne::join_to_string(axs) << std::endl;
     }
     if (!is_zero(vec)) {
-      mtally_stream << indent_block << "VEC=" << pyne::join_to_string(vec) << std::endl;
+      mtally_stream << indent_block << "VEC= " << pyne::join_to_string(vec) << std::endl;
     }
     mtally_stream << indent_block;
   }
 
-  mtally_stream << "ORIGIN=" << pyne::join_to_string(origin) << std::endl;
+  mtally_stream << "ORIGIN= " << pyne::join_to_string(origin) << std::endl;
   std::string dir_name[3] = {"I", "J", "K"};
 
   for (int j = 0; j < 3; j++) {
     mtally_stream << indent_block;
-    mtally_stream << dir_name[j] << "MESH=" << pyne::join_to_string(meshes[j]);
+    mtally_stream << dir_name[j] << "MESH= " << pyne::join_to_string(meshes[j]);
     if (ints[j].size() > 0) {
       mtally_stream << " " << dir_name[j]
-                    << "INTS=" << pyne::join_to_string(ints[j]);
+                    << "INTS= " << pyne::join_to_string(ints[j]);
     }
     mtally_stream << std::endl;
   }
   if (e_bounds.size() > 0) {
-    mtally_stream << indent_block << "EMESH=" << pyne::join_to_string(e_bounds);
+    mtally_stream << indent_block << "EMESH= " << pyne::join_to_string(e_bounds);
   }
   mtally_stream << std::endl;
   if (e_ints.size() > 0) {
-    mtally_stream << indent_block << "EINTS=" << pyne::join_to_string(e_ints);
+    mtally_stream << indent_block << "EINTS= " << pyne::join_to_string(e_ints);
   }
   if (out.size() > 0) {
     mtally_stream << std::endl << indent_block << "OUT=" << out;

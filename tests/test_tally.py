@@ -30,7 +30,7 @@ def write_neutron(file_name):
 # writes the photon tally to the file filename
 def write_photon(file_name):
     tally = Tally("Flux","Photon",12,"Volume","Volume 12","Photon Flux in Cell 12",35.0,123.0)
-    tally.write_hdf5(file_name,"/tally")
+    tally.write_hdf5(file_name,"tally")
 
 # writes the neutron tally to arb file and path
 def write_arb_n(file_name,path):
@@ -51,7 +51,7 @@ def test_tally1():
 
 def test_tally2():
     tally = Tally()
-    assert_equal(tally.particle_name,"")
+    assert_equal(tally.particle_names,[])
 
 def test_tally3():
     tally = Tally()
@@ -86,7 +86,7 @@ def test_tally8():
 
 def test_tally9():
     tally = Tally("Flux","Photon",12,"Volume","Volume 12","Photon Flux in Cell 12",35.0)
-    assert_equal(tally.particle_name,"Photon")
+    assert_equal(tally.particle_names,["Photon"])
 
 def test_tally10():
     tally = Tally("Flux","Photon",12,"Volume","Volume 12","Photon Flux in Cell 12",35.0)
@@ -122,7 +122,7 @@ def test_tally15():
 
     new_tally = Tally()
     new_tally.from_hdf5("test_tally.h5","tally",0)
-    assert_equal(tally.tally_type,new_tally.tally_type)
+    assert_equal(tally.tally_type, new_tally.tally_type)
 
 def test_tally16():
     clean(["test_tally.h5"])
@@ -131,7 +131,7 @@ def test_tally16():
    
     new_tally = Tally()
     new_tally.from_hdf5("test_tally.h5","tally",0)
-    assert_equal(tally.particle_name,new_tally.particle_name)
+    assert_equal(tally.particle_names,new_tally.particle_names)
 
 def test_tally17():
     clean(["test_tally.h5"])
@@ -142,7 +142,7 @@ def test_tally17():
     new_tally.from_hdf5("test_tally.h5","tally",0)
     assert_equal(tally.entity_type,new_tally.entity_type)
 
-7
+
 def test_tally18():
     clean(["test_tally.h5"])
     tally = Tally("Flux","Photon",12,"Volume","Volume 12","Photon Flux in Cell 12",35.0,123.0)
@@ -182,12 +182,12 @@ def test_tally21():
     assert_equal(tally.entity_size,new_tally.entity_size)
 
 def test_tally21a():
-    clean(["test_tally_21.h5"])
+    clean(["test_tally.h5"])
     tally = Tally("Flux","Photon",12,"Volume","Volume 12","Photon Flux in Cell 12",35.0,123.0)
-    write_photon("test_tally_21.h5")
+    write_photon("test_tally.h5")
 
     new_tally = Tally()
-    new_tally.from_hdf5("test_tally_21.h5","/tally",0)
+    new_tally.from_hdf5("test_tally.h5","/tally",0)
 
     assert_equal(tally.normalization,new_tally.normalization)
 
@@ -213,8 +213,7 @@ def test_tally23():
     tally = Tally("Current","Neutron",14,"Surface","Surface 14","Neutron Current Across surface 14",100.0) 
     new_tally = Tally()
     new_tally.from_hdf5("test_tally.h5","tally",1)
-
-    assert_equal(tally.particle_name,new_tally.particle_name)
+    assert_equal(tally.particle_names,new_tally.particle_names)
 
 def test_tally24():
     clean(["test_tally.h5"])
@@ -278,18 +277,6 @@ def test_tally28():
 
     assert_equal(tally.entity_size,new_tally.entity_size)
 
-def test_tally28():
-    clean(["test_tally.h5"])
-    write_photon("test_tally.h5")
-    write_neutron("test_tally.h5")
-
-    # there are now two tallies in the h5 file
-    tally = Tally("Current","Neutron",14,"Surface","Surface 14","Neutron Current Across surface 14",100.0) 
-    new_tally = Tally()
-    new_tally.from_hdf5("test_tally.h5","tally",1)
-
-    assert_equal(tally.normalization,new_tally.normalization)
-
 
 ################################################################################
 # tests the load abilty
@@ -313,7 +300,7 @@ def test_tally30():
     new_tally = Tally()
     new_tally.from_hdf5("test_tally.h5","tally",0)
 
-    assert_not_equal(tally.particle_name,new_tally.particle_name)
+    assert_not_equal(tally.particle_names,new_tally.particle_names)
 
 def test_tally31():
     clean(["test_tally.h5"])
