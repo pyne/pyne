@@ -404,7 +404,9 @@ cdef class Tally:
             for i in range(len((<cpp_tally.Tally *> self._inst).particle_names)):
                 b_value = bytes(<char *> (<cpp_tally.Tally *>
                      self._inst).particle_names[i].c_str()).decode()
+                
                 proxy_value.append(b_value)
+            
             return proxy_value
 
         def __set__(self, value):

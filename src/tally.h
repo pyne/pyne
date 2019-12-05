@@ -52,6 +52,7 @@ namespace pyne
           std::string entity_type, std::string entity_name,
           std::string tally_name = "", double entity_size = 0.0, 
           double normalization = 1.0);
+    
     /// Constructor for regular tally
     /// \param type the type of tally (flux or current)
     /// \param particles_name vector of the name of the particle types
