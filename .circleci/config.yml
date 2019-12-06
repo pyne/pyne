@@ -27,6 +27,9 @@ executors:
     py3_dagmc_pymoab:
         docker:
             - image: pyne/ubuntu_18.04_py3_dagmc_pymoab_pyne-deps:latest
+    py3_dagmc_pymoab_openmc:
+        docker:
+            - image: pyne/ubuntu_18.04_py3_dagmc_pymoab_openmc_pyne-deps:latest
 
 
 # Commands:
@@ -103,7 +106,6 @@ commands:
       - run: |
           cd ~/repo/tests
           ./travis-run-tests.sh << parameters.flags >>
-
   # Build and push PyNE website
   website_build_push:
     description: "build PyNE website and push it either on the test branch (default) or on the deployed branch"
@@ -127,7 +129,6 @@ commands:
               cd docs/
               make html
               make push-<< parameters.push_option >>
-
 # Jobs part:
 # Define the different job that will be ran this separate building form
 # testing for each configuration allowing to get more information out of the CI
@@ -195,6 +196,22 @@ jobs:
           flags: "python3"
           build: "python3_dagmc_pymoab"
 
+  py3_dagmc_pymoab_openmc_build:
+      executor:
+        name: py3_dagmc_pymoab_openmc
+      working_directory: ~/repo
+      steps:
+        - checkout_build:
+            flags: "--moab $HOME/opt/moab --dagmc $HOME/opt/dagmc"
+            build: "python3_dagmc_pymoab_openmc"
+  py3_dagmc_pymoab_openmc_test:
+      executor:
+        name: py3_dagmc_pymoab_openmc
+      working_directory: ~/repo
+      steps:
+        - run_test:
+            flags: "python3"
+            build: "python3_dagmc_pymoab_openmc"
 
 # Python 2 jobs
 # without optional depedencies
@@ -303,6 +320,13 @@ workflows:
       - py3_dagmc_pymoab_test:
           requires:
             - py3_dagmc_pymoab_build
+
+      - py3_dagmc_pymoab_openmc_build:
+          requires:
+            - py3_dagmc_pymoab_build
+      - py3_dagmc_pymoab_openmc_test:
+          requires:
+            - py3_dagmc_pymoab_openmc_build
 
       - py2_build
       - py2_test:
