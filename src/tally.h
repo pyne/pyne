@@ -63,7 +63,7 @@ namespace pyne
     /// \param tally_name string identifying the tally
     /// \param entity_size the physical size of the tally volume
     /// \param normalization the number required to normalize your tally
-    Tally(std::string type, std::vector<std::string> particle_names, int entity,
+    Tally(std::string type, std::vector<std::string> part_names, int entity,
           std::string entity_type, std::string entity_name,
           std::string tally_name = "", double entity_size = 0.0, 
           double normalization = 1.0);

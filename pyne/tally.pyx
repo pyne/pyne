@@ -172,6 +172,42 @@ cdef class Tally:
         tal_name_bytes = tal_name.encode()
         self._inst = new cpp_tally.Tally(std_string(<char *> type_bytes), std_string(<char *> part_name_bytes), <int> ent, std_string(<char *> ent_type_bytes), std_string(<char *> ent_name_bytes), std_string(<char *> tal_name_bytes), <double> size, <double> norm)
 
+
+    def _tally_tally_1b(self, type, part_names, ent, ent_type, ent_name, tal_name='', size=0.0, norm=1.0):
+        """Tally(self, type, part_names, ent, ent_type, ent_name, tal_name='', size=0.0, norm=1.0)
+         This method was overloaded in the C-based source. To overcome
+        this we ill put the relevant docstring for each version below.
+        Each version will begin with a line of # characters.
+
+        Parameters
+        ----------
+        entity_name : std::string
+        entity_type : std::string
+        entity_size : double
+        entity : int
+        normalization : double
+        particle_name : std::vector<std::string>
+        type : std::string
+        tally_name : std::string
+
+        Returns
+        -------
+        None
+
+        """
+        cdef char * type_proxy
+        cdef vector[std_string] part_name_proxy
+        cdef char * ent_type_proxy
+        cdef char * ent_name_proxy
+        cdef char * tal_name_proxy
+        type_bytes = type.encode()
+        part_names_proxy = to_vector_string(part_names)
+        ent_type_bytes = ent_type.encode()
+        ent_name_bytes = ent_name.encode()
+        tal_name_bytes = tal_name.encode()
+        self._inst = new cpp_tally.Tally(std_string(<char *>
+            type_bytes),<vector[std_string]> part_name_proxy, <int> ent, std_string(<char *> ent_type_bytes), std_string(<char *> ent_name_bytes), std_string(<char *> tal_name_bytes), <double> size, <double> norm)
+
     
     def _tally_tally_2(self, part_name, ent_geom, origin, i_mesh, j_mesh, k_mesh,
             i_ints=[], j_ints=[], k_ints=[], e_mesh=[], e_ints=[], axs=[], vec=[], tal_name='', norm=1.0):

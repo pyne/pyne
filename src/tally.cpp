@@ -58,6 +58,25 @@ pyne::Tally::Tally(std::string type, std::string part_name,
   normalization = norm;
 }
 
+pyne::Tally::Tally(std::string type, std::vector<std::string> part_names, 
+       int ent, std::string ent_type, 
+       std::string ent_name, std::string tal_name,
+       double size, double norm ) {
+
+  // Empty Tally Constructor
+  tally_type = type;
+  particle_names = part_names;
+  for (int i = 0; particle_names.size(); i++){
+    particle_names[i] = pyne::particle::name(particle_names[i]);
+  }
+  entity_id = ent;
+  entity_type = ent_type;
+  entity_name = ent_name;
+  tally_name = tal_name;
+  entity_size = size;
+  normalization = norm;
+}
+
 pyne::Tally::Tally(std::string part_name, std::string ent_geom,
                    std::vector<double> orgn,
                    std::vector<double> mesh_i, std::vector<double> mesh_j, std::vector<double> mesh_k,
