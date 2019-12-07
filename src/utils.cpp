@@ -2,6 +2,7 @@
 #ifndef PYNE_IS_AMALGAMATED
 extern "C" double endftod_(char *str, int len);
 #endif
+#include <iomanip>
 
 #ifndef PYNE_IS_AMALGAMATED
 #include "utils.h"
@@ -306,7 +307,7 @@ std::vector<std::string> pyne::split_string(std::string particles_list, std::str
   size_t prev_pos = 0; //item start position
   size_t pos = 0; //item end position
  
-  while( (pos = particles_list.find(delimiter)) != std::string::npos){
+  while( (pos = particles_list.find(delimiter, prev_pos)) != std::string::npos){
     output_vector.push_back(particles_list.substr(prev_pos, pos));
     prev_pos = pos + delimiter.length();
   }

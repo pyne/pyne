@@ -383,6 +383,18 @@ def test_tally37():
     new_tally.from_hdf5("test_tally.h5","bob_geldof",1)
     assert_equal(tally.tally_type,new_tally.tally_type)
 
+# test multi-particule tally
+def test_tally37():
+    clean(["test_tally.h5"])
+
+    tally = Tally("Current",["Neutron", "Proton"],14,"Surface","Surface 14","Neutron Current Across surface 14",100.0)
+    tally.write_hdf5("test_tally.h5", "tally")
+    
+    new_tally = Tally()
+    new_tally.from_hdf5("test_tally.h5","tally")
+    
+    assert_not_equal(tally.particle_names,new_tally.particle_names)
+
 # test write particle for mcnp
 def test_mcnp5_tally_surf_current():
     tally = Tally("Current","Neutron",12,"Surface","Surface 12","Neutron Current across surface 12",-1.0)

@@ -47,7 +47,6 @@ pyne::Tally::Tally(std::string type, std::string part_name,
        std::string ent_name, std::string tal_name,
        double size, double norm ) {
 
-  // Empty Tally Constructor
   tally_type = type;
   particle_names.push_back(pyne::particle::name(part_name));
   entity_id = ent;
@@ -62,11 +61,10 @@ pyne::Tally::Tally(std::string type, std::vector<std::string> part_names,
        int ent, std::string ent_type, 
        std::string ent_name, std::string tal_name,
        double size, double norm ) {
-
-  // Empty Tally Constructor
+  
   tally_type = type;
   particle_names = part_names;
-  for (int i = 0; particle_names.size(); i++){
+  for (int i = 0; i < particle_names.size(); i++){
     particle_names[i] = pyne::particle::name(particle_names[i]);
   }
   entity_id = ent;
@@ -160,7 +158,6 @@ void pyne::Tally::from_hdf5(std::string filename, std::string datapath,
   if ( row >= dims[0] )
     data_row = dims[0]-1;
     
-  
   // Create variable-length string datatype.
   hid_t strtype = H5Tcopy(H5T_C_S1);
   int status  = H5Tset_size(strtype, H5T_VARIABLE);
@@ -178,7 +175,7 @@ void pyne::Tally::from_hdf5(std::string filename, std::string datapath,
   entity_id = read_data[data_row].entity_id;
   entity_type = entity_type_enum2string[read_data[data_row].entity_type];
   tally_type = tally_type_enum2string[read_data[data_row].tally_type];
-  particle_names = pyne::split_string(std::string(read_data[data_row].particle_name), ",");
+  particle_names = pyne::split_string(read_data[data_row].particle_name, ",");
   tally_name = std::string(read_data[data_row].tally_name);
   entity_name = std::string(read_data[data_row].entity_name);
   entity_size = read_data[data_row].entity_size;

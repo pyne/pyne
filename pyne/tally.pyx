@@ -51,11 +51,9 @@ cdef vector[std_string] to_vector_string(value):
     cdef vector[std_string] value_proxy
     cdef int ivalue
     cdef int value_size
-    
     value_size = len(value)
     value_proxy = vector[std_string](< size_t > value_size)
     for ivalue in range(value_size):
-        
         value_bytes = value[ivalue].encode()
         value_proxy[ivalue] = <std_string > value_bytes
     return value_proxy
@@ -206,7 +204,7 @@ cdef class Tally:
         ent_name_bytes = ent_name.encode()
         tal_name_bytes = tal_name.encode()
         self._inst = new cpp_tally.Tally(std_string(<char *>
-            type_bytes),<vector[std_string]> part_name_proxy, <int> ent, std_string(<char *> ent_type_bytes), std_string(<char *> ent_name_bytes), std_string(<char *> tal_name_bytes), <double> size, <double> norm)
+            type_bytes),<vector[std_string]> part_names_proxy, <int> ent, std_string(<char *> ent_type_bytes), std_string(<char *> ent_name_bytes), std_string(<char *> tal_name_bytes), <double> size, <double> norm)
 
     
     def _tally_tally_2(self, part_name, ent_geom, origin, i_mesh, j_mesh, k_mesh,
@@ -289,6 +287,15 @@ cdef class Tally:
         (3, str), (4, str), (5, str), (6, float), (7, float), ("type", str), 
         ("part_name", str), ("ent", int), ("ent_type", str), ("ent_name", str), 
         ("tal_name", str), ("size", float), ("norm", float)))
+    _tally_tally_1b_argtypes = frozenset((
+        (0, str), (1, list), 
+        (2, int), (3, str), 
+        (4, str), (5, str), 
+        (6, float), (7, float), 
+        ("type", str), ("part_name", str), 
+        ("ent", int), ("ent_type", str), 
+        ("ent_name", str), ("tal_name", str), 
+        ("size", float), ("norm", float)))
     _tally_tally_2_argtypes = frozenset(((0, str), (1, str), 
         (2, list), 
         (3, list), (4, list),
@@ -309,7 +316,7 @@ cdef class Tally:
     def __init__(self, *args, **kwargs):
         """Tally(self, type, part_name, ent, ent_type, ent_name, tal_name='', size=0.0, norm=1.0)
          This method was overloaded in the C-based source. To overcome
-        this we ill put the relevant docstring for each version below.
+        this we ilL put the relevant docstring for each version below.
         Each version will begin with a line of # characters.
 
 
@@ -358,6 +365,9 @@ cdef class Tally:
         if types <= self._tally_tally_1_argtypes:
             self._tally_tally_1(*args, **kwargs)
             return
+        if types <= self._tally_tally_1b_argtypes:
+            self._tally_tally_1b(*args, **kwargs)
+            return
         if types <= self._tally_tally_2_argtypes:
             self._tally_tally_2(*args, **kwargs)
             return
@@ -369,6 +379,11 @@ cdef class Tally:
             pass
         try:
             self._tally_tally_1(*args, **kwargs)
+            return
+        except (RuntimeError, TypeError, NameError):
+            pass
+        try:
+            self._tally_tally_1b(*args, **kwargs)
             return
         except (RuntimeError, TypeError, NameError):
             pass
