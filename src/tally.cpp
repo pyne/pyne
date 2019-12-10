@@ -554,24 +554,25 @@ std::string pyne::Tally::form_mcnp_meshtally(
   mtally_stream << "GEOM=";
 
   if (entity_geometry.find("Cartesian") != std::string::npos) {
-    mtally_stream << "XYZ ";
+    mtally_stream << "XYZ" << std::endl;
+    mtally_stream << indent_block;
   } else if (entity_geometry.find("Cylinder") != std::string::npos) {
     mtally_stream << "CYL" << std::endl;
     if (!is_zero(axs)) {
-      mtally_stream << indent_block << "AXS= " << pyne::join_to_string(axs) << std::endl;
+      mtally_stream << indent_block << "AXS=" << pyne::join_to_string(axs) << std::endl;
     }
     if (!is_zero(vec)) {
-      mtally_stream << indent_block << "VEC= " << pyne::join_to_string(vec) << std::endl;
+      mtally_stream << indent_block << "VEC=" << pyne::join_to_string(vec) << std::endl;
     }
     mtally_stream << indent_block;
   }
 
-  mtally_stream << "ORIGIN= " << pyne::join_to_string(origin) << std::endl;
+  mtally_stream << "ORIGIN=" << pyne::join_to_string(origin) << std::endl;
   std::string dir_name[3] = {"I", "J", "K"};
 
   for (int j = 0; j < 3; j++) {
     mtally_stream << indent_block;
-    mtally_stream << dir_name[j] << "MESH= " << pyne::join_to_string(meshes[j]);
+    mtally_stream << dir_name[j] << "MESH=" << pyne::join_to_string(meshes[j]);
     if (ints[j].size() > 0) {
       mtally_stream << " " << dir_name[j]
                     << "INTS= " << pyne::join_to_string(ints[j]);
@@ -579,11 +580,11 @@ std::string pyne::Tally::form_mcnp_meshtally(
     mtally_stream << std::endl;
   }
   if (e_bounds.size() > 0) {
-    mtally_stream << indent_block << "EMESH= " << pyne::join_to_string(e_bounds);
+    mtally_stream << indent_block << "EMESH=" << pyne::join_to_string(e_bounds);
   }
   mtally_stream << std::endl;
   if (e_ints.size() > 0) {
-    mtally_stream << indent_block << "EINTS= " << pyne::join_to_string(e_ints);
+    mtally_stream << indent_block << "EINTS=" << pyne::join_to_string(e_ints);
   }
   if (out.size() > 0) {
     mtally_stream << std::endl << indent_block << "OUT=" << out;
