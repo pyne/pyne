@@ -500,7 +500,7 @@ def test_mcnp_mesh_tally_cyl():
         "          ORIGIN=1.000000 2.000000 3.000000\n"+\
         "          IMESH=5.000000 10.000000 20.000000 25.000000 IINTS=1 2 3 1\n"+\
         "          JMESH=2.000000 12.000000 JINTS=1\n"+\
-        "          KMESH=45.000000 KINTS= 1\n"+\
+        "          KMESH=45.000000 KINTS=1\n"+\
         "          EMESH=0.000000 10.000000 100.000000\n"+\
         "          EINTS=1 1 2";
     assert_equal(mcnp_tally, tally.mcnp(1,"mcnp6"))
