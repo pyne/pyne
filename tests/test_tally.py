@@ -277,7 +277,7 @@ def test_tally28():
 
     assert_equal(tally.entity_size,new_tally.entity_size)
 
-def test_tally28():
+def test_tally28a():
     clean(["test_tally.h5"])
     write_photon("test_tally.h5")
     write_neutron("test_tally.h5")
@@ -396,7 +396,7 @@ def test_tally37():
     assert_equal(tally.tally_type,new_tally.tally_type)
 
 # test multi-particle tally
-def test_tally37():
+def test_tally38():
     clean(["test_tally.h5"])
 
     tally = Tally("Current",["Neutron", "Proton"],14,"Surface","Surface 14","Neutron Current Across surface 14",100.0)
