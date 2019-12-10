@@ -449,7 +449,7 @@ cdef class Tally:
 
 
     property particle_names:
-        """no docstring for particle_names, please file a bug report!"""
+        """vector[double] : list of the particle names to tally"""
         def __get__(self):
             proxy_value = []
             for i in range(len((<cpp_tally.Tally *> self._inst).particle_names)):
