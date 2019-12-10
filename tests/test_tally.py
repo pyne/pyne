@@ -383,7 +383,7 @@ def test_tally37():
     new_tally.from_hdf5("test_tally.h5","bob_geldof",1)
     assert_equal(tally.tally_type,new_tally.tally_type)
 
-# test multi-particule tally
+# test multi-particle tally
 def test_tally37():
     clean(["test_tally.h5"])
 

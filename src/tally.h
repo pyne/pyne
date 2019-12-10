@@ -82,7 +82,7 @@ namespace pyne
     /// \param vec vector<double> vector defining along with axs the plane for Theta=0
     /// \param tally_name string identifying the tally
     /// \param norm the number required to normalize your tally
-    Tally(std::string particule_name, std::string entity_geom, vector<double> orgn,
+    Tally(std::string particle_name, std::string entity_geom, vector<double> orgn,
     vector<double> i_mesh, vector<double> j_mesh, vector<double> k_mesh,
     vector<int> i_ints = null_v_int, 
     vector<int> j_ints = null_v_int, 
