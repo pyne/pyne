@@ -110,7 +110,7 @@ cdef class Tally:
     def _tally_tally_0(self, ):
         """Tally(self, )
          This method was overloaded in the C-based source. To overcome
-        this we ill put the relevant docstring for each version below.
+        this we will put the relevant docstring for each version below.
         Each version will begin with a line of # characters.
 
 
@@ -139,7 +139,7 @@ cdef class Tally:
     def _tally_tally_1(self, type, part_name, ent, ent_type, ent_name, tal_name='', size=0.0, norm=1.0):
         """Tally(self, type, part_name, ent, ent_type, ent_name, tal_name='', size=0.0, norm=1.0)
          This method was overloaded in the C-based source. To overcome
-        this we ill put the relevant docstring for each version below.
+        this we will put the relevant docstring for each version below.
         Each version will begin with a line of # characters.
 
         Parameters
@@ -174,7 +174,7 @@ cdef class Tally:
     def _tally_tally_1b(self, type, part_names, ent, ent_type, ent_name, tal_name='', size=0.0, norm=1.0):
         """Tally(self, type, part_names, ent, ent_type, ent_name, tal_name='', size=0.0, norm=1.0)
          This method was overloaded in the C-based source. To overcome
-        this we ill put the relevant docstring for each version below.
+        this we will put the relevant docstring for each version below.
         Each version will begin with a line of # characters.
 
         Parameters
@@ -619,7 +619,7 @@ cdef class Tally:
     def _tally_from_hdf5_0(self, filename, datapath, row=-1):
         """from_hdf5(self, filename, datapath, row=-1)
          This method was overloaded in the C-based source. To overcome
-        this we ill put the relevant docstring for each version below.
+        this we will put the relevant docstring for each version below.
         Each version will begin with a line of # characters.
 
         Main read tally method
@@ -663,7 +663,7 @@ cdef class Tally:
     def _tally_from_hdf5_1(self, filename, datapath, row=-1):
         """from_hdf5(self, filename, datapath, row=-1)
          This method was overloaded in the C-based source. To overcome
-        this we ill put the relevant docstring for each version below.
+        this we will put the relevant docstring for each version below.
         Each version will begin with a line of # characters.
 
         Main read tally method
@@ -710,7 +710,7 @@ cdef class Tally:
     def from_hdf5(self, *args, **kwargs):
         """from_hdf5(self, filename, datapath, row=-1)
          This method was overloaded in the C-based source. To overcome
-        this we ill put the relevant docstring for each version below.
+        this we will put the relevant docstring for each version below.
         Each version will begin with a line of # characters.
 
         Main read tally method
@@ -790,7 +790,7 @@ cdef class Tally:
     def _tally_write_hdf5_0(self, filename, datapath):
         """write_hdf5(self, filename, datapath)
          This method was overloaded in the C-based source. To overcome
-        this we ill put the relevant docstring for each version below.
+        this we will put the relevant docstring for each version below.
         Each version will begin with a line of # characters.
 
         Dummy write method wrapper around c style strings
@@ -830,7 +830,7 @@ cdef class Tally:
     def _tally_write_hdf5_1(self, filename, datapath):
         """write_hdf5(self, filename, datapath)
          This method was overloaded in the C-based source. To overcome
-        this we ill put the relevant docstring for each version below.
+        this we will put the relevant docstring for each version below.
         Each version will begin with a line of # characters.
 
         Dummy write method wrapper around c style strings
@@ -873,7 +873,7 @@ cdef class Tally:
     def write_hdf5(self, *args, **kwargs):
         """write_hdf5(self, filename, datapath)
          This method was overloaded in the C-based source. To overcome
-        this we ill put the relevant docstring for each version below.
+        this we will put the relevant docstring for each version below.
         Each version will begin with a line of # characters.
 
         Dummy write method wrapper around c style strings
