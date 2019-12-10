@@ -277,6 +277,18 @@ def test_tally28():
 
     assert_equal(tally.entity_size,new_tally.entity_size)
 
+def test_tally28():
+    clean(["test_tally.h5"])
+    write_photon("test_tally.h5")
+    write_neutron("test_tally.h5")
+
+    # there are now two tallies in the h5 file
+    tally = Tally("Current","Neutron",14,"Surface","Surface 14","Neutron Current Across surface 14",100.0) 
+    new_tally = Tally()
+    new_tally.from_hdf5("test_tally.h5","tally",1)
+
+    assert_equal(tally.normalization,new_tally.normalization)
+
 
 ################################################################################
 # tests the load abilty

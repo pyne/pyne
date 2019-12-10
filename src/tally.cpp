@@ -575,7 +575,7 @@ std::string pyne::Tally::form_mcnp_meshtally(
     mtally_stream << dir_name[j] << "MESH=" << pyne::join_to_string(meshes[j]);
     if (ints[j].size() > 0) {
       mtally_stream << " " << dir_name[j]
-                    << "INTS= " << pyne::join_to_string(ints[j]);
+                    << "INTS=" << pyne::join_to_string(ints[j]);
     }
     mtally_stream << std::endl;
   }
