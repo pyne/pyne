@@ -275,7 +275,7 @@ cdef class Sampler:
     def _sampler_sampler_0(self, filename, src_tag_name, e_bounds, bias_tag_name):
         """Sampler(self, filename, src_tag_name, e_bounds, bias_tag_name)
          This method was overloaded in the C-based source. To overcome
-        this we ill put the relevant docstring for each version below.
+        this we will put the relevant docstring for each version below.
         Each version will begin with a line of # characters.
         
         Constuctor for analog and uniform sampling
@@ -313,7 +313,7 @@ cdef class Sampler:
     def _sampler_sampler_1(self, filename, src_tag_name, e_bounds, uniform):
         """Sampler(self, filename, src_tag_name, e_bounds, uniform)
          This method was overloaded in the C-based source. To overcome
-        this we ill put the relevant docstring for each version below.
+        this we will put the relevant docstring for each version below.
         Each version will begin with a line of # characters.
         
         Constuctor for analog and uniform sampling
@@ -411,7 +411,7 @@ cdef class Sampler:
     def __init__(self, *args, **kwargs):
         """Sampler(self, filename, src_tag_name, e_bounds, uniform)
          This method was overloaded in the C-based source. To overcome
-        this we ill put the relevant docstring for each version below.
+        this we will put the relevant docstring for each version below.
         Each version will begin with a line of # characters.
         
         Constuctor for analog and uniform sampling
