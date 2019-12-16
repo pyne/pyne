@@ -68,8 +68,8 @@ class Tag(object):
             The name of the tag.
         doc : str, optional
             Documentation string for the tag.
-
         """
+
         if mesh is None or name is None:
             self._lazy_args = {'mesh': mesh, 'name': name, 'doc': doc}
             return
@@ -365,8 +365,8 @@ class NativeMeshTag(Tag):
             The name of the tag.
         doc : str, optional
             Documentation string for the tag.
-
         """
+
         super(NativeMeshTag, self).__init__(mesh=mesh, name=name, doc=doc)
 
         if mesh is None or name is None:
@@ -548,6 +548,7 @@ class NativeMeshTag(Tag):
 
         are created and the data is tagged accordingly.
         """
+
         if self.size < 2:
             raise TypeError("Cannot expand a tag that is already a scalar.")
         for j in range(self.size):
@@ -583,7 +584,6 @@ class ComputedTag(Tag):
     The results of computed tags are not stored and the function object itself
     is also not persisted.  Therefore, you must manually re-tag the mesh with
     the desired functions each session.
-
     '''
 
     def __init__(self, f, mesh=None, name=None, doc=None):
@@ -597,8 +597,8 @@ class ComputedTag(Tag):
             The name of the tag.
         doc : str, optional
             Documentation string for the tag.
-
         """
+
         doc = doc or f.__doc__
         super(ComputedTag, self).__init__(mesh=mesh, name=name, doc=doc)
         if mesh is None or name is None:
@@ -703,8 +703,8 @@ class Mesh(object):
             where each value is a volume element index number. Typically volume
             elements should be indexed from 0. The "BOX_DIMS" information is
             stored in self.dims.
-
         """
+
         # if Mesh is made and no parameters passed, raise MeshError
         if (mesh is None) and (not structured) and (structured_coords is None) \
             and (structured_set is None) and (structured_ordering == 'xyz') \
@@ -916,6 +916,7 @@ class Mesh(object):
         """Iterates through the mesh and at each step yield the volume element
         index i, the material mat, and the volume element itself ve.
         """
+
         mats = self.mats
         if mats is None:
             for i, ve in enumerate(self.iter_ve()):
@@ -925,8 +926,7 @@ class Mesh(object):
                 yield i, mats[i], ve
 
     def iter_ve(self):
-        """Returns an iterator that yields on the volume elements.
-        """
+        """Returns an iterator that yields on the volume elements."""
         if self.structured:
             return self.structured_iterate_hex(self.structured_ordering)
         else:
@@ -966,8 +966,8 @@ class Mesh(object):
         dtype : numpy dtype, optional
             The data type of the tag. This only applies to NativeMeshTags. See PyMOAB
             for more details.
-
         """
+
         if name in self.tags:
             raise KeyError('{0} tag already exists on the mesh'.format(name))
         if tagtype is None:
@@ -1033,38 +1033,32 @@ class Mesh(object):
             delattr(self, tag_name)
 
     def __iadd__(self, other):
-        """Adds the common tags of other to the mesh object.
-        """
+        """Adds the common tags of other to the mesh object."""
         tags = self.common_ve_tags(other)
         return self._do_op(other, tags, "+")
 
     def __isub__(self, other):
-        """Substracts the common tags of other to the mesh object.
-        """
+        """Substracts the common tags of other to the mesh object."""
         tags = self.common_ve_tags(other)
         return self._do_op(other, tags, "-")
 
     def __imul__(self, other):
-        """Multiplies the common tags of other to the mesh object.
-        """
+        """Multiplies the common tags of other to the mesh object."""
         tags = self.common_ve_tags(other)
         return self._do_op(other, tags, "*")
 
     def __idiv__(self, other):
-        """Divides the common tags of other to the mesh object.
-        """
+        """Divides the common tags of other to the mesh object."""
         tags = self.common_ve_tags(other)
         return self._do_op(other, tags, "/")
 
     def __itruediv__(self, other):
-        """Divides the common tags of other to the mesh object.
-        """
+        """Divides the common tags of other to the mesh object."""
         tags = self.common_ve_tags(other)
         return self._do_op(other, tags, "/")
 
     def _do_op(self, other, tags, op, in_place=True):
-        """Private function to do mesh +, -, *, /.
-        """
+        """Private function to do mesh +, -, *, /."""
         # Exclude error tags in a case a StatMesh is mistakenly initialized as
         # a Mesh object.
         tags = set(tag for tag in tags if not tag.endswith('_error'))
@@ -1088,8 +1082,7 @@ class Mesh(object):
         return mesh_1
 
     def common_ve_tags(self, other):
-        """Returns the volume element tags in common between self and other.
-        """
+        """Returns the volume element tags in common between self and other."""
         self_it = MeshSetIterator(self.mesh,
                                   self.structured_set,
                                   types.MBMAXTYPE,
@@ -1131,6 +1124,7 @@ class Mesh(object):
         .. : float
             Element's volume. Returns None if volume is not a hex or tet.
         """
+
         coord = self.mesh.get_coords(
             self.mesh.get_connectivity(ve)).reshape(-1, 3)
         num_coords = coord.shape[0]
@@ -1158,6 +1152,7 @@ class Mesh(object):
         center : tuple
            The (x, y, z) coordinates of the center of the mesh volume element.
         """
+
         ve_handle = _eh_py_type(ve)
         coords = self.mesh.get_coords(
             self.mesh.get_connectivity(ve_handle)).reshape(-1, 3)
@@ -1233,6 +1228,7 @@ class Mesh(object):
                                         values change fastest, j-values least
                                         fast.
         """
+
         self._structured_check()
 
         # special case: zyx order is the standard pytaps iteration order,
@@ -1257,6 +1253,7 @@ class Mesh(object):
         See structured_iterate_hex() for an explanation of the order argument
         and the available keyword arguments.
         """
+
         self._structured_check()
         # special case: zyx order without kw is equivalent to an iterator
         if order == "zyx" and not kw:
@@ -1276,6 +1273,7 @@ class Mesh(object):
         See structured_iterate_hex() for an explanation of the order argument
         and the available keyword arguments.
         """
+
         self._structured_check()
         indices, _ = _structured_iter_setup(self.dims, order, **kw)
         # Use an inefficient but simple approach: call structured_hex_volume()
@@ -1301,6 +1299,7 @@ class Mesh(object):
         order : str, optional
             The requested iteration order (e.g. 'zyx').
         """
+
         self._structured_check()
         if not order:
             order = self.structured_ordering
@@ -1316,6 +1315,7 @@ class Mesh(object):
         Given a dimension "x", "y", or "z", return a list of the mesh vertices
         along that dimension.
         """
+
         self._structured_check()
 
         ## sometimes the dim is the ascii of the 'x', 'y', 'z'
@@ -1362,8 +1362,8 @@ class Mesh(object):
         cell_mats : dict
             Maps geometry cell numbers to Material objects that represent what
             material each cell is made of.
-
         """
+
         for i in range(len(self)):
             mat_col = {}  # Collection of materials in the ith ve.
             for row in cell_fracs[cell_fracs['idx'] == i]:
@@ -1393,8 +1393,8 @@ class Mesh(object):
 
             The array must be sorted with respect to both idx and cell, with
             cell changing fastest.
-
         """
+
         num_vol_elements = len(self)
         # sort cell_fracs
         cell_fracs = _cell_fracs_sort_vol_frac_reverse(cell_fracs)
@@ -1470,6 +1470,7 @@ class StatMesh(Mesh):
         """Private function to do mesh +, -, *, /. Called by operater
         overloading functions.
         """
+
         # Exclude error tags because result and error tags are treated
         # simultaneously so there is not need to include both in the tag
         # list to iterate through.
@@ -1555,10 +1556,7 @@ class MeshTally(StatMesh):
     """
 
     def __init__(self):
-        """
-        Create an empty MeshTally object and set default values.
-        """
-
+        """Create an empty MeshTally object and set default values."""
         if not HAVE_PYMOAB:
             raise RuntimeError("PyMOAB is not available, "
                                "unable to create Meshtally Mesh.")
@@ -1587,6 +1585,7 @@ class MeshTally(StatMesh):
         rel_err_tot : list
             Relative error of total results.
         """
+
         num_ves = len(self)
         self.tag(name=self.tag_names[0], value=result,
                  doc='{0} flux'.format(self.particle),
@@ -1618,6 +1617,7 @@ def _structured_find_idx(dims, ijk):
 
     For tuple (i,j,k), return the number N in the appropriate iterator.
     """
+
     dim0 = [0] * 3
     for i in range(0, 3):
         if (dims[i] > ijk[i] or dims[i + 3] <= ijk[i]):
@@ -1635,6 +1635,7 @@ def _structured_step_iter(it, n):
 
     Return the nth item in the iterator.
     """
+
     it.step(n)
     r = next(it)
     it.reset()
@@ -1649,6 +1650,7 @@ def _structured_iter_setup(dims, order, **kw):
     with fastest-changing coordinate in the last column), and the
     ordmap used by _structured_iter to reorder each coodinate to (i,j,k).
     """
+
     # a valid order has the letters "x", "y", and "z"
     # in any order without duplicates
     if not (len(order) <= 3 and
@@ -1688,6 +1690,7 @@ def _structured_iter(indices, ordmap, dims, it):
     """Iterate over the indices lists, yielding _structured_step_iter(it) for
     each.
     """
+
     d = [0, 0, 1]
     d[1] = (dims[3] - dims[0])
     d[0] = (dims[4] - dims[1]) * d[1]
@@ -1786,6 +1789,7 @@ def _cell_fracs_sort_vol_frac_reverse(cell_fracs):
     cell_fracs : structured array
         Sorted cell_fracs.
     """
+
     # sort ascending along idx and vol_frac
     # ndarray.sort can't sort using desending sequence.
     # Multiply the vol_frac to -1.0 to sort the vol_frac in reverse order.
