@@ -1510,6 +1510,104 @@ class StatMesh(Mesh):
 
         return mesh_1
 
+
+class MeshTally(StatMesh):
+    """This class stores all information from all single mesh tally that
+    exists within some meshtal or state point file. Header information is
+    stored as attributes and the "mesh" attribute is a MOAB mesh with all
+    result and relative error data tagged. This class inherits from StatMesh,
+    exposing all statistical mesh manipulation methods.
+    Attributes
+    ----------
+    tally_number : int
+        The tally number.
+        For mesh tally from MCNP, it must end with 4 (e.g. 4, 14, 214).
+        For mesh tally from OpenMC, it could be any int.
+    particle : string
+        Either "neutron" for a neutron mesh tally or "photon" for a photon mesh
+        tally.
+    dose_response : bool
+        True is the tally is modified by a dose response function.
+    x_bounds : list of floats
+        The locations of mesh vertices in the x direction.
+    y_bounds : list of floats
+        The locations of mesh vertices in the y direction.
+    z_bounds : list of floats
+        The locations of mesh vertices in the z direction.
+    dims : list
+        Dimensions of the mesh.
+    num_ves : int
+        Number of volume elements.
+    e_bounds : list of floats
+        The minimum and maximum bounds for energy bins.
+    num_e_groups: int
+        Number of energy groups.
+    mesh :
+        An PyMOAB core instance tagged with all results and
+        relative errors.
+    tag_names : iterable
+        Four strs that specify the tag names for the results, relative errors,
+        total results, and relative errors of the total results.
+    Notes
+    -----
+    All Mesh/StatMesh attributes are also present via a super() call to
+    StatMesh.__init__().
+    """
+
+    def __init__(self):
+        """
+        Create an empty MeshTally object and set default values.
+        """
+
+        if not HAVE_PYMOAB:
+            raise RuntimeError("PyMOAB is not available, "
+                               "unable to create Meshtally Mesh.")
+
+        self.tally_number = None
+        self.particle = 'neutron'
+        self.tag_names = None
+
+    def tag_flux_error_from_tally_results(self, result, rel_err, res_tot,
+                                          rel_err_tot):
+        """
+        This function uses the output tally result, rel_err, res_tot and the
+        rel_err_tot to set the flux and error tags.
+        Parameters
+        ----------
+        result : numpy array
+            This numpy array contains the flux data read from MCNP meshtal or
+            OpenMC state point file.
+            The shape of this numpy array is (ves, num_e_groups).
+        rel_err : numpy array
+            This numpy array contains the relative error data read from MCNP
+            meshtal or OpenMC state point file. The shape of this numpy array
+            is (num_ves, num_e_groups).
+        res_tot : list
+            The total results.
+        rel_err_tot : list
+            Relative error of total results.
+        """
+        num_ves = len(self)
+        self.tag(name=self.tag_names[0], value=result,
+                 doc='{0} flux'.format(self.particle),
+                 tagtype=NativeMeshTag, size=self.num_e_groups, dtype=float)
+        # set result_rel_error tag
+        self.tag(name=self.tag_names[1],
+                 value=rel_err,
+                 doc='{0} flux relative error'.format(self.particle),
+                 tagtype=NativeMeshTag, size=self.num_e_groups, dtype=float)
+        # set result_total tag
+        self.tag(name=self.tag_names[2],
+                 value=res_tot,
+                 doc='total {0} flux'.format(self.particle),
+                 tagtype=NativeMeshTag, size=1, dtype=float)
+        # set result_total_rel_error tag
+        self.tag(name=self.tag_names[3],
+                 value=rel_err_tot,
+                 doc='total {0} flux relative error'.format(self.particle),
+                 tagtype=NativeMeshTag, size=1, dtype=float)
+
+
 ######################################################
 # private helper functions for structured mesh methods
 ######################################################
