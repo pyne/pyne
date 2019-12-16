@@ -33,7 +33,6 @@ const std::string geometry_type_enum2string[] = {"Cartesian", "Cylinder"};
 pyne::Tally::Tally() {
   // Empty Tally Constructor
   tally_type = "";
-  particle_name = "";
   entity_id = -1;
   entity_type = "";
   entity_name = "";
@@ -48,9 +47,26 @@ pyne::Tally::Tally(std::string type, std::string part_name,
        std::string ent_name, std::string tal_name,
        double size, double norm ) {
 
-  // Empty Tally Constructor
   tally_type = type;
-  particle_name = pyne::particle::name(part_name);
+  particle_names.push_back(pyne::particle::name(part_name));
+  entity_id = ent;
+  entity_type = ent_type;
+  entity_name = ent_name;
+  tally_name = tal_name;
+  entity_size = size;
+  normalization = norm;
+}
+
+pyne::Tally::Tally(std::string type, std::vector<std::string> part_names, 
+       int ent, std::string ent_type, 
+       std::string ent_name, std::string tal_name,
+       double size, double norm ) {
+  
+  tally_type = type;
+  particle_names = part_names;
+  for (int i = 0; i < particle_names.size(); i++){
+    particle_names[i] = pyne::particle::name(particle_names[i]);
+  }
   entity_id = ent;
   entity_type = ent_type;
   entity_name = ent_name;
@@ -69,7 +85,7 @@ pyne::Tally::Tally(std::string part_name, std::string ent_geom,
   // Empty Tally Constructor
   entity_type = "Mesh";
   entity_name = "";
-  particle_name = pyne::particle::name(part_name);
+  particle_names.push_back(pyne::particle::name(part_name));
   entity_geometry = ent_geom;
   tally_name = tal_name;
   entity_size = -1;
@@ -142,7 +158,6 @@ void pyne::Tally::from_hdf5(std::string filename, std::string datapath,
   if ( row >= dims[0] )
     data_row = dims[0]-1;
     
-  
   // Create variable-length string datatype.
   hid_t strtype = H5Tcopy(H5T_C_S1);
   int status  = H5Tset_size(strtype, H5T_VARIABLE);
@@ -160,7 +175,7 @@ void pyne::Tally::from_hdf5(std::string filename, std::string datapath,
   entity_id = read_data[data_row].entity_id;
   entity_type = entity_type_enum2string[read_data[data_row].entity_type];
   tally_type = tally_type_enum2string[read_data[data_row].tally_type];
-  particle_name = std::string(read_data[data_row].particle_name);
+  particle_names = pyne::split_string(read_data[data_row].particle_name, ",");
   tally_name = std::string(read_data[data_row].tally_name);
   entity_name = std::string(read_data[data_row].entity_name);
   entity_size = read_data[data_row].entity_size;
@@ -217,7 +232,6 @@ hid_t pyne::Tally::create_memtype() {
   //
   hid_t strtype = H5Tcopy(H5T_C_S1);
   status = H5Tset_size(strtype, H5T_VARIABLE);
-
   // Create the compound datatype for memory.
   hid_t memtype = H5Tcreate(H5T_COMPOUND, sizeof(tally_struct));
   status = H5Tinsert(memtype, "entity_id",
@@ -227,8 +241,7 @@ hid_t pyne::Tally::create_memtype() {
   status = H5Tinsert(memtype, "tally_type",
          HOFFSET(tally_struct, tally_type), H5T_NATIVE_INT);
   status = H5Tinsert(memtype, "particle_name",
-         HOFFSET(tally_struct, particle_name),
-         strtype);
+         HOFFSET(tally_struct, particle_name), strtype);
   status = H5Tinsert(memtype, "entity_name",HOFFSET(tally_struct, entity_name),
          strtype);
   status = H5Tinsert(memtype, "tally_name",HOFFSET(tally_struct, tally_name),
@@ -294,6 +307,7 @@ void pyne::Tally::write_hdf5(std::string filename, std::string datapath) {
     tally_data[0].tally_type = CURRENT;
 
   // unpack from class to struct array
+  std::string particle_name = pyne::join_to_string(particle_names, ",");
   tally_data[0].entity_id = entity_id;
   tally_data[0].entity_name = entity_name.c_str();
   tally_data[0].particle_name = particle_name.c_str();
@@ -425,7 +439,7 @@ void pyne::Tally::write_hdf5(std::string filename, std::string datapath) {
 std::ostream& operator<<(std::ostream& os, pyne::Tally tal) {
   //print the Tally to ostream
   os << "\t---------\n";
-  os << "\t Tallying " << tal.particle_name << " " << tal.tally_type << std::endl;
+  os << "\t Tallying " << pyne::join_to_string(tal.particle_names, ", ") << " " << tal.tally_type << std::endl;
   os << "\t in/on " << tal.entity_type << " " << tal.entity_id << std::endl;
   return os;
 }
@@ -435,15 +449,23 @@ std::ostream& operator<<(std::ostream& os, pyne::Tally tal) {
 std::string pyne::Tally::mcnp(int tally_index, std::string mcnp_version,
                               std::string out) {
   std::stringstream output;  // output stream
-  std::string particle_token;
-  // particle token
-  if (mcnp_version.find("mcnp5") != std::string::npos)
-    particle_token = pyne::particle::mcnp(particle_name);
-  else if (mcnp_version.find("mcnp6") != std::string::npos)
-    particle_token = pyne::particle::mcnp6(particle_name);
-  else
-    particle_token = "?";
+  std::string particle_token = "";
 
+  if (particle_names.size() == 0) {
+      particle_token = "?";
+  }
+
+  // particle token
+  for (int i = 0; i < particle_names.size(); i++ ){
+    if (i > 0)
+      particle_token += ",";
+    if (mcnp_version.find("mcnp5") != std::string::npos)
+      particle_token += pyne::particle::mcnp(particle_names[i]);
+    else if (mcnp_version.find("mcnp6") != std::string::npos)
+      particle_token += pyne::particle::mcnp6(particle_names[i]);
+    else
+      particle_token += "?";
+  }
   // print out comment line
   output << "C " << tally_name << std::endl;
   output << std::setiosflags(std::ios::fixed) << std::setprecision(6);
@@ -532,7 +554,8 @@ std::string pyne::Tally::form_mcnp_meshtally(
   mtally_stream << "GEOM=";
 
   if (entity_geometry.find("Cartesian") != std::string::npos) {
-    mtally_stream << "XYZ ";
+    mtally_stream << "XYZ" << std::endl;
+    mtally_stream << indent_block;
   } else if (entity_geometry.find("Cylinder") != std::string::npos) {
     mtally_stream << "CYL" << std::endl;
     if (!is_zero(axs)) {
@@ -573,6 +596,12 @@ std::string pyne::Tally::form_mcnp_meshtally(
 // Produces valid fluka tally
 std::string pyne::Tally::fluka(std::string unit_number) {
   std::stringstream output; // output stream
+  
+  if (particle_names.size() != 1) {
+    std::cout << "Fluka multi-particles tally have not been yet implemented!" << std:: endl;
+    exit(1);
+  }
+  std::string particle_name = particle_names[0];
 
   // check entity type
   if (entity_type.find("Volume") != std::string::npos) {

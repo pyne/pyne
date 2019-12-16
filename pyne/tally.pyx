@@ -47,6 +47,16 @@ cdef vector[double] to_vector_double(value):
         value_proxy[ivalue] = <double > value[ivalue]
     return value_proxy
 
+cdef vector[std_string] to_vector_string(value):
+    cdef vector[std_string] value_proxy
+    cdef int ivalue
+    cdef int value_size
+    value_size = len(value)
+    value_proxy = vector[std_string](< size_t > value_size)
+    for ivalue in range(value_size):
+        value_bytes = value[ivalue].encode()
+        value_proxy[ivalue] = <std_string > value_bytes
+    return value_proxy
 
 cdef class Tally:
     """
@@ -59,7 +69,7 @@ cdef class Tally:
     entity_type (std::string) : fundamental tally variables  the
         type of entity (volume,surface)
     entity_name (std::string) : the name of the entity (optional)
-    particle_name (std::string) : particle name string
+    particle_names (std::vector<std::string>) : particle names vector<string>
     tally_type (std::string) : type of tally flux or current
     tally_name (std::string) : name of the tally
     entity_id (int) : id number of the entity being tallied upon
@@ -100,7 +110,7 @@ cdef class Tally:
     def _tally_tally_0(self, ):
         """Tally(self, )
          This method was overloaded in the C-based source. To overcome
-        this we ill put the relevant docstring for each version below.
+        this we will put the relevant docstring for each version below.
         Each version will begin with a line of # characters.
 
 
@@ -129,7 +139,7 @@ cdef class Tally:
     def _tally_tally_1(self, type, part_name, ent, ent_type, ent_name, tal_name='', size=0.0, norm=1.0):
         """Tally(self, type, part_name, ent, ent_type, ent_name, tal_name='', size=0.0, norm=1.0)
          This method was overloaded in the C-based source. To overcome
-        this we ill put the relevant docstring for each version below.
+        this we will put the relevant docstring for each version below.
         Each version will begin with a line of # characters.
 
         Parameters
@@ -159,6 +169,42 @@ cdef class Tally:
         ent_name_bytes = ent_name.encode()
         tal_name_bytes = tal_name.encode()
         self._inst = new cpp_tally.Tally(std_string(<char *> type_bytes), std_string(<char *> part_name_bytes), <int> ent, std_string(<char *> ent_type_bytes), std_string(<char *> ent_name_bytes), std_string(<char *> tal_name_bytes), <double> size, <double> norm)
+
+
+    def _tally_tally_1b(self, type, part_names, ent, ent_type, ent_name, tal_name='', size=0.0, norm=1.0):
+        """Tally(self, type, part_names, ent, ent_type, ent_name, tal_name='', size=0.0, norm=1.0)
+         This method was overloaded in the C-based source. To overcome
+        this we will put the relevant docstring for each version below.
+        Each version will begin with a line of # characters.
+
+        Parameters
+        ----------
+        entity_name : std::string
+        entity_type : std::string
+        entity_size : double
+        entity : int
+        normalization : double
+        particle_name : std::vector<std::string>
+        type : std::string
+        tally_name : std::string
+
+        Returns
+        -------
+        None
+
+        """
+        cdef char * type_proxy
+        cdef vector[std_string] part_name_proxy
+        cdef char * ent_type_proxy
+        cdef char * ent_name_proxy
+        cdef char * tal_name_proxy
+        type_bytes = type.encode()
+        part_names_proxy = to_vector_string(part_names)
+        ent_type_bytes = ent_type.encode()
+        ent_name_bytes = ent_name.encode()
+        tal_name_bytes = tal_name.encode()
+        self._inst = new cpp_tally.Tally(std_string(<char *>
+            type_bytes),<vector[std_string]> part_names_proxy, <int> ent, std_string(<char *> ent_type_bytes), std_string(<char *> ent_name_bytes), std_string(<char *> tal_name_bytes), <double> size, <double> norm)
 
     
     def _tally_tally_2(self, part_name, ent_geom, origin, i_mesh, j_mesh, k_mesh,
@@ -241,6 +287,15 @@ cdef class Tally:
         (3, str), (4, str), (5, str), (6, float), (7, float), ("type", str), 
         ("part_name", str), ("ent", int), ("ent_type", str), ("ent_name", str), 
         ("tal_name", str), ("size", float), ("norm", float)))
+    _tally_tally_1b_argtypes = frozenset((
+        (0, str), (1, list), 
+        (2, int), (3, str), 
+        (4, str), (5, str), 
+        (6, float), (7, float), 
+        ("type", str), ("part_name", str), 
+        ("ent", int), ("ent_type", str), 
+        ("ent_name", str), ("tal_name", str), 
+        ("size", float), ("norm", float)))
     _tally_tally_2_argtypes = frozenset(((0, str), (1, str), 
         (2, list), 
         (3, list), (4, list),
@@ -261,7 +316,7 @@ cdef class Tally:
     def __init__(self, *args, **kwargs):
         """Tally(self, type, part_name, ent, ent_type, ent_name, tal_name='', size=0.0, norm=1.0)
          This method was overloaded in the C-based source. To overcome
-        this we ill put the relevant docstring for each version below.
+        this we ilL put the relevant docstring for each version below.
         Each version will begin with a line of # characters.
 
 
@@ -310,6 +365,9 @@ cdef class Tally:
         if types <= self._tally_tally_1_argtypes:
             self._tally_tally_1(*args, **kwargs)
             return
+        if types <= self._tally_tally_1b_argtypes:
+            self._tally_tally_1b(*args, **kwargs)
+            return
         if types <= self._tally_tally_2_argtypes:
             self._tally_tally_2(*args, **kwargs)
             return
@@ -321,6 +379,11 @@ cdef class Tally:
             pass
         try:
             self._tally_tally_1(*args, **kwargs)
+            return
+        except (RuntimeError, TypeError, NameError):
+            pass
+        try:
+            self._tally_tally_1b(*args, **kwargs)
             return
         except (RuntimeError, TypeError, NameError):
             pass
@@ -385,15 +448,20 @@ cdef class Tally:
             (<cpp_tally.Tally *> self._inst).normalization = <double> value
 
 
-    property particle_name:
-        """no docstring for particle_name, please file a bug report!"""
+    property particle_names:
+        """vector[double] : list of the particle names to tally"""
         def __get__(self):
-            return bytes(<char *> (<cpp_tally.Tally *> self._inst).particle_name.c_str()).decode()
+            proxy_value = []
+            for i in range(len((<cpp_tally.Tally *> self._inst).particle_names)):
+                b_value = bytes(<char *> (<cpp_tally.Tally *>
+                     self._inst).particle_names[i].c_str()).decode()
+                
+                proxy_value.append(b_value)
+            
+            return proxy_value
 
         def __set__(self, value):
-            cdef char * value_proxy
-            value_bytes = value.encode()
-            (<cpp_tally.Tally *> self._inst).particle_name = std_string(<char *> value_bytes)
+            (<cpp_tally.Tally *> self._inst).particle_names = to_vector_string(value) 
 
 
     property rx2fluka:
@@ -551,7 +619,7 @@ cdef class Tally:
     def _tally_from_hdf5_0(self, filename, datapath, row=-1):
         """from_hdf5(self, filename, datapath, row=-1)
          This method was overloaded in the C-based source. To overcome
-        this we ill put the relevant docstring for each version below.
+        this we will put the relevant docstring for each version below.
         Each version will begin with a line of # characters.
 
         Main read tally method
@@ -595,7 +663,7 @@ cdef class Tally:
     def _tally_from_hdf5_1(self, filename, datapath, row=-1):
         """from_hdf5(self, filename, datapath, row=-1)
          This method was overloaded in the C-based source. To overcome
-        this we ill put the relevant docstring for each version below.
+        this we will put the relevant docstring for each version below.
         Each version will begin with a line of # characters.
 
         Main read tally method
@@ -642,7 +710,7 @@ cdef class Tally:
     def from_hdf5(self, *args, **kwargs):
         """from_hdf5(self, filename, datapath, row=-1)
          This method was overloaded in the C-based source. To overcome
-        this we ill put the relevant docstring for each version below.
+        this we will put the relevant docstring for each version below.
         Each version will begin with a line of # characters.
 
         Main read tally method
@@ -722,7 +790,7 @@ cdef class Tally:
     def _tally_write_hdf5_0(self, filename, datapath):
         """write_hdf5(self, filename, datapath)
          This method was overloaded in the C-based source. To overcome
-        this we ill put the relevant docstring for each version below.
+        this we will put the relevant docstring for each version below.
         Each version will begin with a line of # characters.
 
         Dummy write method wrapper around c style strings
@@ -762,7 +830,7 @@ cdef class Tally:
     def _tally_write_hdf5_1(self, filename, datapath):
         """write_hdf5(self, filename, datapath)
          This method was overloaded in the C-based source. To overcome
-        this we ill put the relevant docstring for each version below.
+        this we will put the relevant docstring for each version below.
         Each version will begin with a line of # characters.
 
         Dummy write method wrapper around c style strings
@@ -805,7 +873,7 @@ cdef class Tally:
     def write_hdf5(self, *args, **kwargs):
         """write_hdf5(self, filename, datapath)
          This method was overloaded in the C-based source. To overcome
-        this we ill put the relevant docstring for each version below.
+        this we will put the relevant docstring for each version below.
         Each version will begin with a line of # characters.
 
         Dummy write method wrapper around c style strings

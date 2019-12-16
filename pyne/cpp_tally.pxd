@@ -17,6 +17,7 @@ cdef extern from "tally.h" namespace "pyne":
     ctypedef double vec3[3]
     ctypedef vector[double] vdbl
     ctypedef vector[int] vint
+    ctypedef vector[cstr] vstr
     
 
     cdef cppclass Tally:
@@ -30,6 +31,14 @@ cdef extern from "tally.h" namespace "pyne":
         Tally(cstr, cstr, int, cstr, cstr, cstr) except +
         Tally(cstr, cstr, int, cstr, cstr, cstr, double) except +
         Tally(cstr, cstr, int, cstr, cstr, cstr, double, double) except +
+        
+        Tally(cstr, vstr) except +
+        Tally(cstr, vstr, int) except +
+        Tally(cstr, vstr, int, cstr) except +
+        Tally(cstr, vstr, int, cstr, cstr) except +
+        Tally(cstr, vstr, int, cstr, cstr, cstr) except +
+        Tally(cstr, vstr, int, cstr, cstr, cstr, double) except +
+        Tally(cstr, vstr, int, cstr, cstr, cstr, double, double) except +
 
         Tally(cstr, cstr, vdbl, vdbl, vdbl, vdbl) except + 
         Tally(cstr, cstr, vdbl, vdbl, vdbl, vdbl,  vint) except + 
@@ -54,7 +63,7 @@ cdef extern from "tally.h" namespace "pyne":
         double entity_size
         cstr entity_type
         double normalization
-        cstr particle_name
+        vector[cstr] particle_names
         cpp_map[cstr, cstr] rx2fluka
         cpp_map[cstr, cstr] rx2mcnp5
         cpp_map[cstr, cstr] rx2mcnp6

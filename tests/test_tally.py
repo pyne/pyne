@@ -30,7 +30,7 @@ def write_neutron(file_name):
 # writes the photon tally to the file filename
 def write_photon(file_name):
     tally = Tally("Flux","Photon",12,"Volume","Volume 12","Photon Flux in Cell 12",35.0,123.0)
-    tally.write_hdf5(file_name,"/tally")
+    tally.write_hdf5(file_name,"tally")
 
 # writes the neutron tally to arb file and path
 def write_arb_n(file_name,path):
@@ -51,7 +51,7 @@ def test_tally1():
 
 def test_tally2():
     tally = Tally()
-    assert_equal(tally.particle_name,"")
+    assert_equal(tally.particle_names,[])
 
 def test_tally3():
     tally = Tally()
@@ -86,7 +86,7 @@ def test_tally8():
 
 def test_tally9():
     tally = Tally("Flux","Photon",12,"Volume","Volume 12","Photon Flux in Cell 12",35.0)
-    assert_equal(tally.particle_name,"Photon")
+    assert_equal(tally.particle_names,["Photon"])
 
 def test_tally10():
     tally = Tally("Flux","Photon",12,"Volume","Volume 12","Photon Flux in Cell 12",35.0)
@@ -122,7 +122,7 @@ def test_tally15():
 
     new_tally = Tally()
     new_tally.from_hdf5("test_tally.h5","tally",0)
-    assert_equal(tally.tally_type,new_tally.tally_type)
+    assert_equal(tally.tally_type, new_tally.tally_type)
 
 def test_tally16():
     clean(["test_tally.h5"])
@@ -131,7 +131,7 @@ def test_tally16():
    
     new_tally = Tally()
     new_tally.from_hdf5("test_tally.h5","tally",0)
-    assert_equal(tally.particle_name,new_tally.particle_name)
+    assert_equal(tally.particle_names,new_tally.particle_names)
 
 def test_tally17():
     clean(["test_tally.h5"])
@@ -142,7 +142,7 @@ def test_tally17():
     new_tally.from_hdf5("test_tally.h5","tally",0)
     assert_equal(tally.entity_type,new_tally.entity_type)
 
-7
+
 def test_tally18():
     clean(["test_tally.h5"])
     tally = Tally("Flux","Photon",12,"Volume","Volume 12","Photon Flux in Cell 12",35.0,123.0)
@@ -182,12 +182,12 @@ def test_tally21():
     assert_equal(tally.entity_size,new_tally.entity_size)
 
 def test_tally21a():
-    clean(["test_tally_21.h5"])
+    clean(["test_tally.h5"])
     tally = Tally("Flux","Photon",12,"Volume","Volume 12","Photon Flux in Cell 12",35.0,123.0)
-    write_photon("test_tally_21.h5")
+    write_photon("test_tally.h5")
 
     new_tally = Tally()
-    new_tally.from_hdf5("test_tally_21.h5","/tally",0)
+    new_tally.from_hdf5("test_tally.h5","/tally",0)
 
     assert_equal(tally.normalization,new_tally.normalization)
 
@@ -213,8 +213,7 @@ def test_tally23():
     tally = Tally("Current","Neutron",14,"Surface","Surface 14","Neutron Current Across surface 14",100.0) 
     new_tally = Tally()
     new_tally.from_hdf5("test_tally.h5","tally",1)
-
-    assert_equal(tally.particle_name,new_tally.particle_name)
+    assert_equal(tally.particle_names,new_tally.particle_names)
 
 def test_tally24():
     clean(["test_tally.h5"])
@@ -278,7 +277,7 @@ def test_tally28():
 
     assert_equal(tally.entity_size,new_tally.entity_size)
 
-def test_tally28():
+def test_tally28a():
     clean(["test_tally.h5"])
     write_photon("test_tally.h5")
     write_neutron("test_tally.h5")
@@ -313,7 +312,7 @@ def test_tally30():
     new_tally = Tally()
     new_tally.from_hdf5("test_tally.h5","tally",0)
 
-    assert_not_equal(tally.particle_name,new_tally.particle_name)
+    assert_not_equal(tally.particle_names,new_tally.particle_names)
 
 def test_tally31():
     clean(["test_tally.h5"])
@@ -396,6 +395,18 @@ def test_tally37():
     new_tally.from_hdf5("test_tally.h5","bob_geldof",1)
     assert_equal(tally.tally_type,new_tally.tally_type)
 
+# test multi-particle tally
+def test_tally38():
+    clean(["test_tally.h5"])
+
+    tally = Tally("Current",["Neutron", "Proton"],14,"Surface","Surface 14","Neutron Current Across surface 14",100.0)
+    tally.write_hdf5("test_tally.h5", "tally")
+    
+    new_tally = Tally()
+    new_tally.from_hdf5("test_tally.h5","tally")
+    
+    assert_not_equal(tally.particle_names,new_tally.particle_names)
+
 # test write particle for mcnp
 def test_mcnp5_tally_surf_current():
     tally = Tally("Current","Neutron",12,"Surface","Surface 12","Neutron Current across surface 12",-1.0)
@@ -454,12 +465,13 @@ def test_mcnp_mesh_tally_xyz():
     tally = Tally(particle, geometry, origin, i_mesh, j_mesh, k_mesh, i_ints, j_ints, k_ints,
             e, e_ints, tal_name=tal_name)
     mcnp_tally = "C Mesh Tally XYZ Neutron\n"+\
-        "FMESH14:n GEOM=XYZ ORIGIN= 1.000000 2.000000 3.000000\n"+\
-        "          IMESH= 5.000000 10.000000 20.000000 25.000000 IINTS= 1 2 3 1\n"+\
-        "          JMESH= 2.000000 12.000000 JINTS= 1\n"+\
-        "          KMESH= 45.000000 KINTS= 1\n"+\
-        "          EMESH= 0.000000 10.000000 100.000000\n"+\
-        "          EINTS= 1 1 2\n"+\
+        "FMESH14:n GEOM=XYZ\n"+\
+        "          ORIGIN=1.000000 2.000000 3.000000\n"+\
+        "          IMESH=5.000000 10.000000 20.000000 25.000000 IINTS=1 2 3 1\n"+\
+        "          JMESH=2.000000 12.000000 JINTS=1\n"+\
+        "          KMESH=45.000000 KINTS=1\n"+\
+        "          EMESH=0.000000 10.000000 100.000000\n"+\
+        "          EINTS=1 1 2\n"+\
         "          OUT=IJ"
     assert_equal(mcnp_tally, tally.mcnp(1,"mcnp6", out))
 
@@ -483,14 +495,14 @@ def test_mcnp_mesh_tally_cyl():
             e, e_ints, tal_name = tal_name, axs = axs, vec = vec)
     mcnp_tally = "C Mesh Tally XYZ Neutron\n"+\
         "FMESH14:n GEOM=CYL\n"+\
-        "          AXS= -1.000000 4.000000 -2.000000\n"+\
-        "          VEC= 12.000000 -2.000000 5.000000\n"+\
-        "          ORIGIN= 1.000000 2.000000 3.000000\n"+\
-        "          IMESH= 5.000000 10.000000 20.000000 25.000000 IINTS= 1 2 3 1\n"+\
-        "          JMESH= 2.000000 12.000000 JINTS= 1\n"+\
-        "          KMESH= 45.000000 KINTS= 1\n"+\
-        "          EMESH= 0.000000 10.000000 100.000000\n"+\
-        "          EINTS= 1 1 2";
+        "          AXS=-1.000000 4.000000 -2.000000\n"+\
+        "          VEC=12.000000 -2.000000 5.000000\n"+\
+        "          ORIGIN=1.000000 2.000000 3.000000\n"+\
+        "          IMESH=5.000000 10.000000 20.000000 25.000000 IINTS=1 2 3 1\n"+\
+        "          JMESH=2.000000 12.000000 JINTS=1\n"+\
+        "          KMESH=45.000000 KINTS=1\n"+\
+        "          EMESH=0.000000 10.000000 100.000000\n"+\
+        "          EINTS=1 1 2";
     assert_equal(mcnp_tally, tally.mcnp(1,"mcnp6"))
 
 # test write particle for fluka

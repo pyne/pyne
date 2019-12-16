@@ -17,6 +17,7 @@ from pyne cimport stlcontainers
 
 cdef vector[double] to_vector_double(value)
 cdef vector[int] to_vector_int(value)
+cdef vector[std_string] to_vector_string(value)
 
 
 cdef class Tally:
