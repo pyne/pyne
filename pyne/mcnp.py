@@ -2205,7 +2205,7 @@ class Meshtal(object):
         # If "total" data exists (i.e. if there is more than
         # 1 energy group) get it and tag it onto the mesh.
         if num_e_groups > 1:
-            for i in range(0, num_ves):
+            for i in range(num_ves):
                 line = f.readline().split()
                 res_tot.append(float(line[column_idx["Result"]]))
                 rel_err_tot.append(
