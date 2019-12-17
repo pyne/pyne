@@ -1558,7 +1558,7 @@ class MeshTally(StatMesh):
     def __init__(self):
         """Create an empty MeshTally object and set default values."""
         if not HAVE_PYMOAB:
-            raise RuntimeError("PyMOAB is not available, "
+            raise NotImplementedError("PyMOAB is not available, "
                                "unable to create Meshtally Mesh.")
 
         self.tally_number = None
