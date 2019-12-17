@@ -17,7 +17,9 @@ from pyne.mesh import HAVE_PYMOAB
 from pyne.mesh import Mesh, StatMesh, MeshError
 from pyne.alara import mesh_to_fluxin, photon_source_to_hdf5, \
     photon_source_hdf5_to_mesh, mesh_to_geom, num_density_to_mesh, \
-    irradiation_blocks, record_to_geom, phtn_src_energy_bounds
+    irradiation_blocks, record_to_geom, phtn_src_energy_bounds, \
+    responses_output_zone, _is_data, read_decay_times, _get_zone_idx, \
+    get_alara_lib
 from pyne.material import Material
 from pyne.utils import QAWarning, str_to_unicode, file_almost_same
 warnings.simplefilter("ignore", QAWarning)
@@ -186,16 +188,16 @@ def test_photon_source_to_hdf5():
         count = 0
         old = ""
         for i, row in enumerate(obs):
-            ls = lines[i].strip().split('\t')
-            if ls[0] != 'TOTAL' and old == 'TOTAL':
+            tokens = lines[i].strip().split('\t')
+            if tokens[0] != 'TOTAL' and old == 'TOTAL':
                 count += 1
 
             assert_equal(count, row['idx'])
-            assert_equal(ls[0].strip(), row['nuc'].decode())
-            assert_equal(ls[1].strip(), row['time'].decode())
-            assert_array_equal(np.array(ls[2:], dtype=np.float64),
+            assert_equal(tokens[0].strip(), row['nuc'].decode())
+            assert_equal(tokens[1].strip(), row['time'].decode())
+            assert_array_equal(np.array(tokens[2:], dtype=np.float64),
                                row['phtn_src'])
-            old = ls[0]
+            old = tokens[0]
 
     if os.path.isfile(filename + '.h5'):
         os.remove(filename + '.h5')
@@ -649,3 +651,81 @@ def test_phtn_src_energy_bounds():
                          1.00E7, 1.20E7, 1.40E7, 2.00E7]
 
     assert_array_equal(e_bounds, expected_e_bounds)
+
+
+def test_alara_responses_output_zone():
+    # test decay_heat
+    response = ['decay_heat', 'specific_activity']
+    exp_response_code = \
+"""output zone
+      total_heat
+      specific_activity
+end"""
+    response_code = responses_output_zone(response)
+    assert_equal(response_code, exp_response_code)
+    # wrong nuc option raise test
+    assert_raises(ValueError, responses_output_zone, 'test')
+
+
+def test_is_data():
+    """
+    This function tests alara.is_data, which checks whether a line in the output
+    file of ALARA output file output.txt contains data or not.
+    """
+    lines = ["ALARA 2.9.1rc",
+             "isotope  shutdown      1000 s        12 h         3 d",
+             "Zone #1: zone_0"]
+    for line in lines:
+        assert_equal(_is_data(line), False)
+
+    lines = ["h-3     9.5258e-18  9.5258e-18  9.5251e-18  9.5214e-18",
+             "n-16    3.1588e-09  0.0000e+00  0.0000e+00  0.0000e+00",
+             "total   1.4597e-08  9.3939e-09  5.3291e-10  8.3915e-11"]
+    for line in lines:
+        assert_equal(_is_data(line), True)
+    # test special line
+    line = "===========\n"
+    assert_equal(_is_data(line), False)
+
+
+def test_read_decay_times():
+    """
+    This function tests alara.read_decay_times(line).
+    """
+    line = "isotope  shutdown      1000 s        12 h         3 d"
+    exp_decay_times = ['shutdown', '1000 s', '12 h', '3 d']
+    decay_times = read_decay_times(line)
+    assert_array_equal(decay_times, exp_decay_times)
+
+
+def test_get_zone_idx():
+    line = "Zone #1: zone_0"
+    assert_equal(_get_zone_idx(line), 0)
+
+
+def test_get_alara_lib():
+    alara_params = \
+"""material_lib alara_matlib
+element_lib data/nuclib
+data_library alaralib data/fendl2.0bin
+
+#     flux name    fluxin file   norm   shift   unused
+flux  my_flux     alara_fluxin  1e10     0      default
+
+# Specify the irradiation schedule below.
+# Syntax is found in the ALARA user manual
+# This example is for a single 3.5 h pulse
+schedule    my_schedule
+    3.5 d my_flux my_pulse_history 0  s
+end
+pulsehistory  my_pulse_history
+    1    0.0    s
+end
+
+#other parameters
+truncation 1e-12
+impurity 5e-6 1e-3
+dump_file dump.file"""
+    alara_lib = get_alara_lib(alara_params)
+    exp_alara_lib = "data/fendl2.0bin"
+    assert_equal(alara_lib, exp_alara_lib)

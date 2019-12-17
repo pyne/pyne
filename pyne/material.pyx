@@ -335,6 +335,17 @@ cdef class _Material:
         c_nucpath = nucpath_bytes
         self.mat_pointer.write_hdf5(c_filename, c_datapath, c_nucpath, row, chunksize)
 
+    def phits(self, frac_type='mass'):
+        """phits(frac_type)
+        Return an phits card
+        Parameters
+        ----------
+ 	   int 0 means use "mass" as the frac_type
+        """
+        cdef std_string card
+        card = self.mat_pointer.phits(frac_type.encode())
+        return card.decode()
+
     def mcnp(self, frac_type='mass'):
         """mcnp(frac_type)
         Return an mcnp card
@@ -345,6 +356,14 @@ cdef class _Material:
         cdef std_string card
         card = self.mat_pointer.mcnp(frac_type.encode())
         return card.decode()
+    
+    def get_uwuw_name(self):
+        """get_uwuw_name()
+        Return a uwuw material name
+        """
+        cdef std_string uwuw_name
+        uwuw_name = self.mat_pointer.get_uwuw_name()
+        return uwuw_name.decode()
 
     def openmc(self, frac_type='mass'):
         """openmc(frac_type)

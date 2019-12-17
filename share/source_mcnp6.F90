@@ -54,7 +54,6 @@ subroutine find_cell(cell_list, cell_list_size, icl_tmp, count_1, count_2, count
 
   integer :: i ! iterator variable
   integer :: j ! temporary cell test
-  integer :: icl_tmp ! temporary cell variable
   integer, intent(in) :: cell_list_size
   integer, dimension(cell_list_size), intent(in) :: cell_list
   integer, intent(out) :: icl_tmp ! temporary cell variable
@@ -133,7 +132,6 @@ subroutine source
   logical, save :: first_run = .true.
   real(dknd), dimension(6) :: rands
   integer :: icl_tmp ! temporary cell index variable
-  integer :: find_cell
   integer :: tries
   integer, save :: cell_list_size = 0
   integer, dimension(:), allocatable, save :: cell_list

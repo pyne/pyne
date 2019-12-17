@@ -1261,6 +1261,6 @@ def test_mesh_to_geom():
         "C name: 5\n"
         "C density = 5.0\n"
         "m6\n"
-        "     1002 -1.0000e+00\n")
+        "     1002 -5.0000e+00\n")
 
     assert_equal(geom, exp_geom)

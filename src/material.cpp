@@ -15,7 +15,7 @@
 
 // h5wrap template
 template double h5wrap::get_array_index(hid_t, int, hid_t);
-
+const int mcnp_line_length = 79;
 
 
 /***************************/
@@ -562,10 +562,9 @@ std::string pyne::Material::openmc(std::string frac_type) {
   }
 
   // add name if specified
-  if (temp_mat.metadata.isMember("mat_name")) {
-    oss << "name=" << new_quote << temp_mat.metadata["mat_name"].asString() << end_quote;
+  if (temp_mat.metadata.isMember("name")) {
+    oss << "name=" << new_quote << temp_mat.metadata["name"].asString() << end_quote;
   }
-
   // close the material tag
   oss << ">";
   // new line
@@ -654,9 +653,32 @@ std::string pyne::Material::openmc(std::string frac_type) {
   return oss.str();
 }
 
+///---------------------------------------------------------------------------//
+std::string pyne::Material::get_uwuw_name() {
+  // standard uwuw material name is : "mat:<Name of Material>/rho:<density>"
+  if (! metadata.isMember("name")) {
+    pyne::warning("The material has no name");
+    return "";
+  }
+  std::ostringstream uwuw_name;
+  uwuw_name << "mat:";
+  uwuw_name << metadata["name"].asString();
+  if (density > 0) {
+    uwuw_name << "/rho:" << std::setprecision(5) << density;
+  } else {
+    pyne::warning("No Density defined for this Material");
+  }
+
+  return uwuw_name.str();
+}
+
+///---------------------------------------------------------------------------//
 std::string pyne::Material::mcnp(std::string frac_type) {
   //////////////////// Begin card creation ///////////////////////
   std::ostringstream oss;
+
+  std::string comment_prefix = "C ";
+  
   // 'name'
   if (metadata.isMember("name")) {
     oss << "C name: " << metadata["name"].asString() << std::endl;
@@ -674,21 +696,7 @@ std::string pyne::Material::mcnp(std::string frac_type) {
   // Metadata comments
   if (metadata.isMember("comments")) {
     std::string comment_string = "comments: " + metadata["comments"].asString();
-    // Include as is if short enough
-    if (comment_string.length() <= 77) {
-      oss << "C " << comment_string << std::endl;
-    }
-    else { // otherwise create a remainder string and iterate/update it
-      oss << "C " << comment_string.substr(0,77) << std::endl;
-      std::string remainder_string = comment_string.substr(77);
-      while (remainder_string.length() > 77) {
-        oss << "C " << remainder_string.substr(0,77) << std::endl;
-        remainder_string.erase(0,77);
-      }
-      if (remainder_string.length() > 0) {
-        oss << "C " << remainder_string << std::endl;
-      }
-    }
+    oss << pyne::comment_line_wrapping(comment_string, comment_prefix, mcnp_line_length).str();
   }
 
   // Metadata mat_num
@@ -701,27 +709,81 @@ std::string pyne::Material::mcnp(std::string frac_type) {
   }
 
   // Set up atom or mass frac map
-  std::map<int, double> fracs;
-  std::string frac_sign;
+  std::map<int, double> fracs = get_density_frac(frac_type);
+  std::string frac_sign = "";
 
-  if ("atom" == frac_type) {
-    fracs = to_atom_frac();
-    frac_sign = "";
-  } else {
-    fracs = comp;
-    frac_sign = "-";
+  // write the frac map
+  oss << mcnp_frac(fracs, frac_type);
+
+  return oss.str();
+}
+
+
+///---------------------------------------------------------------------------//
+std::string pyne::Material::phits(std::string frac_type) {
+  //////////////////// Begin card creation ///////////////////////
+  std::ostringstream oss;
+
+  std::string comment_prefix = "C ";
+  
+  // 'name'
+  if (metadata.isMember("name")) {
+    oss << "C name: " << metadata["name"].asString() << std::endl;
+  }
+  // Metadata comments
+  if (metadata.isMember("comments")) {
+    std::string comment_string = "comments: " + metadata["comments"].asString();
+    oss << pyne::comment_line_wrapping(comment_string, comment_prefix, mcnp_line_length).str();
   }
 
+  // Metadata mat_num
+  oss << "M[ ";
+  if (metadata.isMember("mat_number")) {
+    int mat_num = metadata["mat_number"].asInt();
+    oss << mat_num;
+  } else {
+    oss << "?";
+  }
+  oss << " ]" << std::endl;
+
+  // check for metadata
+  std::string keyworkds[6] = {"GAS", "ESTEP", "NLIB", "PLIB", "ELIB", "HLIB"};
+  for (auto keyword : keyworkds){
+    if (metadata.isMember(keyword)){
+      oss << "     "<< keyword << "=" << metadata[keyword].asInt() << std::endl;
+    }
+  }
+  // COND should be "<" or "=" or ">" if present
+  if (metadata.isMember("COND")){
+    oss << "     COND" << metadata["COND"].asString() << "0" << std::endl;
+  }
+
+  // Set up atom or mass frac map
+  std::map<int, double> fracs = get_density_frac(frac_type);
+  std::string frac_sign = "";
+
+  // write the frac map
+  oss << mcnp_frac(fracs, frac_type);
+
+  return oss.str();
+}
+
+std::string pyne::Material::mcnp_frac(std::map<int, double> fracs, std::string frac_type){
+
+  std::string frac_sign = "";
+  if ("atom" != frac_type) {
+    frac_sign = "-";
+  }
+  
   // iterate through frac map
   // This is an awkward pre-C++11 way to put an int to a string
-  std::stringstream ss;
-  std::string nucmcnp;
-  std::string table_item;
+  std::ostringstream oss;
   for(pyne::comp_iter i = fracs.begin(); i != fracs.end(); ++i) {
     if (i->second > 0.0) {
       // Clear first
-      ss.str(std::string());
-      ss.str("");
+      std::stringstream ss;
+      std::string nucmcnp;
+      std::string table_item;
       ss << pyne::nucname::mcnp(i->first);
       nucmcnp = ss.str();
 
@@ -730,18 +792,16 @@ std::string pyne::Material::mcnp(std::string frac_type) {
       // Spaces are important for tests
       table_item = metadata["table_ids"][nucmcnp].asString();
       if (!table_item.empty()) {
-  oss << "     " << mcnp_id << "." << table_item << " ";
+        oss << "     " << mcnp_id << "." << table_item << " ";
       } else {
-  oss << "     " << mcnp_id << " ";
+        oss << "     " << mcnp_id << " ";
       }
       // The int needs a little formatting
       std::stringstream fs;
-      fs << std::setprecision(4) << std::scientific << frac_sign << i->second \
-   << std::endl;
+      fs << std::setprecision(4) << std::scientific << frac_sign << i->second << std::endl;
       oss << fs.str();
     }
   }
-
   return oss.str();
 }
 
@@ -1464,6 +1524,33 @@ pyne::Material pyne::Material::collapse_elements(int** int_ptr_arry ) {
     }
     return collapse_elements(nucvec);
 }
+
+  // Set up atom or mass frac map
+
+std::map<int, double> pyne::Material::get_density_frac(std::string frac_type){
+  std::map<int, double> fracs;
+
+  if ("atom" == frac_type) {
+    if (density != -1.0) {
+      fracs = to_atom_dens();
+      for (comp_iter ci = fracs.begin(); ci != fracs.end(); ci++){
+        ci->second *= pyne::cm2_per_barn; // unit requirememt is [10^24 atoms/cm3] = [atoms/b.cm]
+      }
+    } else {
+      fracs = to_atom_frac();
+    }
+  } else {
+    fracs = comp;
+    if (density != -1.0) {
+      for (comp_iter ci = fracs.begin(); ci != fracs.end(); ci++){
+        ci->second *= density;
+      }
+    }
+  }
+  return fracs;
+}
+
+
 
 double pyne::Material::mass_density(double num_dens, double apm) {
   if (0.0 <= num_dens) {
