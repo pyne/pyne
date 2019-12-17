@@ -2014,8 +2014,6 @@ class Meshtal(object):
             Filestream of the meshtal file.
         tally_number : int
             The MCNP fmesh4 tally number (e.g. 4, 14, 24).
-        particle : str
-            The particle type, 'neutron' or 'photon'.
         tag_names : iterable, optional
             Four strs that specify the tag names for the results, relative
             errors, total results and relative errors of the total results.
