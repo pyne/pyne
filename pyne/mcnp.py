@@ -2050,7 +2050,7 @@ class Meshtal(object):
         m.num_ves = (len(m.x_bounds)-1) * (len(m.y_bounds)-1)\
             * (len(m.z_bounds)-1)
         m.num_e_groups = len(m.e_bounds)-1
-        column_idx = self.read_column_order(f)
+        self.read_column_order(f)
         # create mesh
         mats = () if mesh_has_mats is True else None
         super(MeshTally, m).__init__(
@@ -2059,8 +2059,7 @@ class Meshtal(object):
 
         # read result, rel_error, res_tot and rel_err_tot
         result, rel_error, res_tot, rel_err_tot = \
-                self.read_tally_results_rel_error(f, m.num_e_groups, m.num_ves,
-                column_idx)
+                self.read_tally_results_rel_error(f, m.num_e_groups, m.num_ves)
         m.tag_flux_error_from_tally_results(result, rel_error,
                 res_tot, rel_err_tot)
         return m
@@ -2155,11 +2154,9 @@ class Meshtal(object):
         line = f.readline()
         column_names = line.replace('Rel ', 'Rel_').replace(
             'Rslt * ', 'Rslt_*_').strip().split()
-        column_idx = dict(zip(column_names, range(0, len(column_names))))
-        return column_idx
+        self.column_idx = dict(zip(column_names, range(0, len(column_names))))
 
-    def read_tally_results_rel_error(self, f, num_e_groups, num_ves,
-            column_idx):
+    def read_tally_results_rel_error(self, f, num_e_groups, num_ves):
         """
         Read meshtally results and relative error data.
     
@@ -2171,8 +2168,6 @@ class Meshtal(object):
             Number of energy groups.
         num_ves: int
             Number of volume elements.
-        column_idx : dict
-            Dictionary of the column index.
 
         Returns
         -------
@@ -2194,9 +2189,9 @@ class Meshtal(object):
             rel_error_row = []
             for j in range(num_ves):
                 line = f.readline().split()
-                result_row.append(float(line[column_idx["Result"]]))
+                result_row.append(float(line[self.column_idx["Result"]]))
                 rel_error_row.append(
-                    float(line[column_idx["Rel_Error"]]))
+                    float(line[self.column_idx["Rel_Error"]]))
             result[i] = result_row
             rel_error[i] = rel_error_row
 
@@ -2207,9 +2202,9 @@ class Meshtal(object):
         if num_e_groups > 1:
             for i in range(num_ves):
                 line = f.readline().split()
-                res_tot.append(float(line[column_idx["Result"]]))
+                res_tot.append(float(line[self.column_idx["Result"]]))
                 rel_err_tot.append(
-                    float(line[column_idx["Rel_Error"]]))
+                    float(line[self.column_idx["Rel_Error"]]))
         else:
             res_tot = result.flatten()
             rel_err_tot = rel_error.flatten()
