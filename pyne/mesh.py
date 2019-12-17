@@ -1548,7 +1548,7 @@ class MeshTally(StatMesh):
         relative errors.
     tag_names : iterable
         Four strs that specify the tag names for the results, relative errors,
-        total results, and relative errors of the total results.
+        total results, and total relative error.
     Notes
     -----
     All Mesh/StatMesh attributes are also present via a super() call to
