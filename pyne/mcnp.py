@@ -2192,7 +2192,7 @@ class Meshtal(object):
         for i in range(0, num_e_groups):
             result_row = []
             rel_error_row = []
-            for j in range(0, num_ves):
+            for j in range(num_ves):
                 line = f.readline().split()
                 result_row.append(float(line[column_idx["Result"]]))
                 rel_error_row.append(
