@@ -1515,7 +1515,7 @@ class StatMesh(Mesh):
 class MeshTally(StatMesh):
     """This class stores all information from a single mesh tally that
     exists within some meshtal or state point file. Header information is
-    stored as attributes and the "mesh" attribute is a MOAB mesh with all
+    stored as attributes and the "mesh" attribute is a PyNE mesh object with all
     result and relative error data tagged. This class inherits from StatMesh,
     exposing all statistical mesh manipulation methods.
     Attributes
