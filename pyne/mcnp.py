@@ -2205,7 +2205,7 @@ class Meshtal(object):
         # convert the shape of result and rel_err to (num_ves, num_e_groups)
         result = result.transpose()
         rel_error = rel_error.transpose()
-        return result, rel_error, res_tot, rel_err_tot
+        return result, rel_error, np.array(res_tot), np.array(rel_err_tot)
 
 def mesh_to_geom(mesh, frac_type='mass', title_card="Generated from PyNE Mesh"):
     """This function reads a structured Mesh object and returns the geometry
