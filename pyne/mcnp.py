@@ -24,7 +24,7 @@ from warnings import warn
 import numpy as np
 import tables
 
-from pyne.utils import QAWarning
+from pyne.utils import QAWarning, check_iterable
 from pyne.material import Material
 from pyne.material import MultiMaterial
 from pyne import nucname
@@ -2038,10 +2038,11 @@ class Meshtal(object):
         # assign tag_names
         if tag_names is None:
             m.tag_names = ("{0}_result".format(m.particle),
-                              "{0}_result_rel_error".format(m.particle),
-                              "{0}_result_total".format(m.particle),
-                              "{0}_result_total_rel_error".format(m.particle))
+                           "{0}_result_rel_error".format(m.particle),
+                           "{0}_result_total".format(m.particle),
+                           "{0}_result_total_rel_error".format(m.particle))
         else:
+            _check_tag_names(tag_names)
             m.tag_names = tag_names
 
         m.x_bounds, m.y_bounds, m.z_bounds, m.e_bounds = \
@@ -2052,13 +2053,14 @@ class Meshtal(object):
         column_idx = self.read_column_order(f)
         # create mesh
         mats = () if mesh_has_mats is True else None
-        super(MeshTally, m).__init__(structured_coords=[m.x_bounds,
-            m.y_bounds, m.z_bounds], structured=True, mats=mats)
+        super(MeshTally, m).__init__(
+                structured_coords=[m.x_bounds, m.y_bounds, m.z_bounds],
+                structured=True, mats=mats)
 
         # read result, rel_error, res_tot and rel_err_tot
         result, rel_error, res_tot, rel_err_tot = \
                 self.read_tally_results_rel_error(f, m.num_e_groups, m.num_ves,
-                        column_idx)
+                column_idx)
         m.tag_flux_error_from_tally_results(result, rel_error,
                 res_tot, rel_err_tot)
         return m
@@ -2307,3 +2309,24 @@ def _mesh_to_mat_cards(mesh, divs, frac_type):
         mat_cards += mesh.mats[i].mcnp(frac_type=frac_type)
 
     return mat_cards
+
+def _check_tag_names(tag_names):
+    """Make sure tag_names is an iterable of 4 strings."""
+    # check iterable
+    if check_iterable(tag_names):
+        # check length of 4
+        if len(tag_names) == 4:
+            # check content strings
+            for item in tag_names:
+                if not isinstance(item, str):
+                    raise ValueError("The content of tag_names ",
+                            "should be strings")
+            # tag_names should be a string with lenght of 4
+            if isinstance(tag_names, str):
+                raise ValueError("The tag_names should not be a single string")
+            return True
+        else:
+            raise ValueError("The length of tag_names is not 4.")
+
+    else:
+        raise ValueError("The given tag_names is not an Iterable.")
