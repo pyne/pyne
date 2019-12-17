@@ -750,7 +750,7 @@ class Xsdir(object):
         self.read()
 
     def read(self):
-        """Populate the Xsdir object by reading the file."""
+        """Populate the xsdir object by reading the file."""
         # Go to beginning of file
         self.f.seek(0)
 
