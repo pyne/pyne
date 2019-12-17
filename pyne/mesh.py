@@ -1513,7 +1513,7 @@ class StatMesh(Mesh):
 
 
 class MeshTally(StatMesh):
-    """This class stores all information from all single mesh tally that
+    """This class stores all information from a single mesh tally that
     exists within some meshtal or state point file. Header information is
     stored as attributes and the "mesh" attribute is a MOAB mesh with all
     result and relative error data tagged. This class inherits from StatMesh,
@@ -1797,4 +1797,3 @@ def _cell_fracs_sort_vol_frac_reverse(cell_fracs):
     cell_fracs.sort(order=['idx', 'vol_frac'])
     cell_fracs['vol_frac'] *= -1.0
     return cell_fracs
-
