@@ -2176,10 +2176,10 @@ class Meshtal(object):
 
         Returns
         -------
-        results : numpy array
-            Tally results data, shape=(num_ves, num_e_groups)
-        rel_error : numpy array
-            Tally relative error data, shape=(num_ves, num_e_groups)
+        results : numpy array, shape=(num_ves, num_e_groups)
+            Tally results data.
+        rel_error : numpy array, shape=(num_ves, num_e_groups)
+            Tally relative error data.
         res_tot : numpy array
             Tally total flux result.
         rel_err_tot : numpy array
