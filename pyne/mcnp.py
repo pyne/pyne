@@ -2189,7 +2189,7 @@ class Meshtal(object):
         # get result and relative error data from file
         result = np.empty(shape=(num_e_groups, num_ves))
         rel_error = np.empty(shape=(num_e_groups, num_ves))
-        for i in range(0, num_e_groups):
+        for i in range(num_e_groups):
             result_row = []
             rel_error_row = []
             for j in range(num_ves):
