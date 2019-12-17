@@ -1528,7 +1528,7 @@ class MeshTally(StatMesh):
         Either "neutron" for a neutron mesh tally or "photon" for a photon mesh
         tally.
     dose_response : bool
-        True is the tally is modified by a dose response function.
+        True if the tally is modified by a dose response function.
     x_bounds : list of floats
         The locations of mesh vertices in the x direction.
     y_bounds : list of floats
