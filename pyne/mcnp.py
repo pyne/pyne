@@ -2139,11 +2139,6 @@ class Meshtal(object):
         ----------
         f : str or filestream
             Filestream of the meshtal file.
-    
-        Returns
-        -------
-        column_idx : dict
-            Dictionary of the column index.
         """
 
         # skip blank line between enery bin boundaries and table headings
