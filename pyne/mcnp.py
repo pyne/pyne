@@ -2161,7 +2161,7 @@ class Meshtal(object):
     def read_tally_results_rel_error(self, f, num_e_groups, num_ves,
             column_idx):
         """
-        Read meshtally results and reletive error data.
+        Read meshtally results and relative error data.
     
         Parameters
         ----------
