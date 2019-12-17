@@ -145,7 +145,7 @@ def test_photon_sampling_setup_structured():
     m = Mesh(structured=True, structured_coords=coords)
     tags = {(10010000, "1 h"): "tag1", ("TOTAL", "shutdown"): "tag2"}
     photon_sampling_setup(m, phtn_src, tags)
-    os.remove(phtn_src+".h5")
+    os.remove(phtn_src + ".h5")
 
     exp_tag1 = [[1.1, 2.2], [3.3, 4.4], [5.5, 6.6], [7.7, 8.8]]
     exp_tag2 = [[11.1, 12.2], [13.3, 14.4], [15.5, 16.6], [17.7, 18.8]]
