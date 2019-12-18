@@ -2314,7 +2314,7 @@ def _check_tag_names(tag_names):
             raise ValueError("The content of tag_names ",
                             "should be strings")
 
-    # tag_names should be a string with lenght of 4
+    # tag_names should be a string with length of 4
     if isinstance(tag_names, str):
         raise ValueError("The tag_names should not be a single string")
 
