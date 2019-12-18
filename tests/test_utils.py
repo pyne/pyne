@@ -349,6 +349,20 @@ def test_file_block_almost_same():
     f2 = """block1\n\nblock3"""
     assert(utils.file_block_almost_same(f1, f2) == False)
 
+def test_check_iterable():
+    # list
+    obj = ['a', 1, 1.0]
+    assert(utils.check_iterable(obj))
+    # tuple
+    obj = ('a', 1, 1.0)
+    assert(utils.check_iterable(obj))
+    # dict
+    obj = {1:'a', 2:1, 3:1.0}
+    assert(utils.check_iterable(obj))
+    # set
+    obj = set(['a', 1, 1.0])
+    assert(utils.check_iterable(obj))
+
 
 if __name__ == "__main__":
     nose.runmodule()
