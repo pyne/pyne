@@ -305,15 +305,12 @@ void pyne::Material::from_hdf5(std::string filename, std::string datapath, std::
 
 
 
-
-
 void pyne::Material::write_hdf5(char * filename, char * datapath, char * nucpath, float row, int chunksize) {
   std::string fname (filename);
   std::string groupname (datapath);
   std::string nuclist (nucpath);
   write_hdf5(fname, groupname, nuclist, row, chunksize);
 }
-
 
 
 void pyne::Material::write_hdf5(std::string filename, std::string datapath,
