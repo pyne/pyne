@@ -1,7 +1,7 @@
 **Added:** None
 
 **Changed:** 
-revert internal nucpath change when testing internal data
+revert internal nuc_data_path to origin value after internal data test 
 
 **Deprecated:** None
 
