@@ -42,6 +42,7 @@ def test_with_internal_data():
     assert_equal(id('Fe56') in mat.comp,True)
     assert_equal(id('Mn55') in mat.comp,True)
    
+    pyne_conf.NUC_DATA_PATH = orig
 
 
 # Run as script
