@@ -66,3 +66,5 @@ rever/
 
 # exceptions for test files
 !tests/files_test_activation_responses/activation_responses_examples/*.h5
+!tests/files_test_openmc/*.h5
+
