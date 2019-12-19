@@ -6,7 +6,7 @@ import copy
 import itertools
 from collections import Iterable, Sequence
 from warnings import warn
-from pyne.utils import QAWarning
+from pyne.utils import QAWarning, check_iterable
 
 import numpy as np
 import tables as tb
@@ -1797,3 +1797,25 @@ def _cell_fracs_sort_vol_frac_reverse(cell_fracs):
     cell_fracs.sort(order=['idx', 'vol_frac'])
     cell_fracs['vol_frac'] *= -1.0
     return cell_fracs
+
+def check_meshtally_tag_names(tag_names):
+    """Make sure tag_names is an iterable of 4 strings."""
+    # check iterable
+    if not check_iterable(tag_names):
+        raise ValueError("The given tag_names is not an Iterable.")
+
+    # check length of 4
+    if len(tag_names) != 4:
+        raise ValueError("The length of tag_names is not 4.")
+
+    # check content strings
+    for item in tag_names:
+        if not isinstance(item, str):
+            raise ValueError("The content of tag_names ",
+                            "should be strings")
+
+    # tag_names should be a string with length of 4
+    if isinstance(tag_names, str):
+        raise ValueError("The tag_names should not be a single string")
+
+    return True

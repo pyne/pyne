@@ -12,7 +12,8 @@ available to use.
 
 """
 from __future__ import print_function, division
-from pyne.mesh import Mesh, StatMesh, MeshTally, HAVE_PYMOAB
+from pyne.mesh import Mesh, StatMesh, MeshTally, HAVE_PYMOAB, \
+        check_meshtally_tag_names
 import sys
 import struct
 import math
@@ -24,7 +25,7 @@ from warnings import warn
 import numpy as np
 import tables
 
-from pyne.utils import QAWarning, check_iterable
+from pyne.utils import QAWarning
 from pyne.material import Material
 from pyne.material import MultiMaterial
 from pyne import nucname
@@ -2040,7 +2041,7 @@ class Meshtal(object):
                            "{0}_result_total".format(m.particle),
                            "{0}_result_total_rel_error".format(m.particle))
         else:
-            _check_tag_names(tag_names)
+            check_meshtally_tag_names(tag_names)
             m.tag_names = tag_names
 
         m.x_bounds, m.y_bounds, m.z_bounds, m.e_bounds = \
@@ -2298,24 +2299,3 @@ def _mesh_to_mat_cards(mesh, divs, frac_type):
 
     return mat_cards
 
-def _check_tag_names(tag_names):
-    """Make sure tag_names is an iterable of 4 strings."""
-    # check iterable
-    if not check_iterable(tag_names):
-        raise ValueError("The given tag_names is not an Iterable.")
-
-    # check length of 4
-    if len(tag_names) != 4:
-        raise ValueError("The length of tag_names is not 4.")
-
-    # check content strings
-    for item in tag_names:
-        if not isinstance(item, str):
-            raise ValueError("The content of tag_names ",
-                            "should be strings")
-
-    # tag_names should be a string with length of 4
-    if isinstance(tag_names, str):
-        raise ValueError("The tag_names should not be a single string")
-
-    return True

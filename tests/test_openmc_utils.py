@@ -213,7 +213,7 @@ def test_get_result_error_from_openmc_sp():
     assert_array_almost_equal(res_tot, exp_res_tot)
     assert_array_almost_equal(rel_err_tot, exp_rel_err_tot)
 
-def test_meshtally_from_openmc_statepoint():
+def test_create_meshtally():
     if not HAVE_PYMOAB or sys.version_info[0] == 2:
         raise SkipTest
     try:
