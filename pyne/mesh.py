@@ -1563,7 +1563,18 @@ class MeshTally(StatMesh):
 
         self.tally_number = None
         self.particle = 'neutron'
-        self.tag_names = None
+        self.tag_names = {"neutron_result", "neutron_result_rel_error",
+                "neutron_result_total", "neutron_result_total_rel_error"}
+
+    @property
+    def tag_names(self):
+        return self._tag_names
+
+    @tag_names.setter
+    def tag_names(self, tag_names):
+        _check_meshtally_tag_names(tag_names)
+        self._tag_names = tag_names
+
 
     def tag_flux_error_from_tally_results(self, result, rel_err, res_tot,
                                           rel_err_tot):
@@ -1798,7 +1809,7 @@ def _cell_fracs_sort_vol_frac_reverse(cell_fracs):
     cell_fracs['vol_frac'] *= -1.0
     return cell_fracs
 
-def check_meshtally_tag_names(tag_names):
+def _check_meshtally_tag_names(tag_names):
     """Make sure tag_names is an iterable of 4 strings."""
     # check iterable
     if not check_iterable(tag_names):

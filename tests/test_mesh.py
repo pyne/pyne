@@ -34,7 +34,7 @@ from pyne.mesh import HAVE_PYMOAB
 if not HAVE_PYMOAB:
     raise SkipTest
 from pyne.mesh import NativeMeshTag, ComputedTag, MetadataTag, MeshTally, \
-        check_meshtally_tag_names
+        _check_meshtally_tag_names
 from pymoab.types import _eh_py_type
 from pymoab import core as mb_core, hcoord, scd, types
 from pyne.mesh import Mesh, StatMesh, MeshError, meshset_iterate, \
@@ -1043,17 +1043,16 @@ def test_check_meshtally_tag_names():
     # correct case
     tag_names = ("n_result", "n_result_rel_error", "n_result_total",
             "n_result_total_rel_error")
-    assert(check_meshtally_tag_names(tag_names))
+    assert(_check_meshtally_tag_names(tag_names))
     # not iterable
     tag_names = "a"
-    assert_raises(ValueError, check_meshtally_tag_names, tag_names)
+    assert_raises(ValueError, _check_meshtally_tag_names, tag_names)
     # wrong length
     tag_names = ("a", "b", "c")
-    assert_raises(ValueError, check_meshtally_tag_names, tag_names)
+    assert_raises(ValueError, _check_meshtally_tag_names, tag_names)
     # wrong content
     tag_names = (1, 2, 3, 4)
-    assert_raises(ValueError, check_meshtally_tag_names, tag_names)
+    assert_raises(ValueError, _check_meshtally_tag_names, tag_names)
     # a string of length 4
     tag_names = "abcd"
-    assert_raises(ValueError, check_meshtally_tag_names, tag_names)
-
+    assert_raises(ValueError, _check_meshtally_tag_names, tag_names)

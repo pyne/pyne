@@ -15,7 +15,7 @@ else:
     from html.parser import HTMLParser
 
 from pyne.utils import QAWarning
-from pyne.mesh import MeshTally, HAVE_PYMOAB, check_meshtally_tag_names
+from pyne.mesh import MeshTally, HAVE_PYMOAB
 if HAVE_PYMOAB:
     from pyne.mesh import NativeMeshTag
 else:
@@ -422,7 +422,6 @@ def create_meshtally(filename, tally_id, mesh_id=None, particle=None,
                        "{0}_result_total".format(m.particle),
                        "{0}_result_total_rel_error".format(m.particle))
     else:
-        check_meshtally_tag_names(tag_names)
         m.tag_names = tag_names
     # check tally_num exist
     structured_coords = get_structured_coords_from_openmc_sp(

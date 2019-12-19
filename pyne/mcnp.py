@@ -12,8 +12,7 @@ available to use.
 
 """
 from __future__ import print_function, division
-from pyne.mesh import Mesh, StatMesh, MeshTally, HAVE_PYMOAB, \
-        check_meshtally_tag_names
+from pyne.mesh import Mesh, StatMesh, MeshTally, HAVE_PYMOAB
 import sys
 import struct
 import math
@@ -2041,7 +2040,7 @@ class Meshtal(object):
                            "{0}_result_total".format(m.particle),
                            "{0}_result_total_rel_error".format(m.particle))
         else:
-            check_meshtally_tag_names(tag_names)
+#            check_meshtally_tag_names(tag_names)
             m.tag_names = tag_names
 
         m.x_bounds, m.y_bounds, m.z_bounds, m.e_bounds = \
