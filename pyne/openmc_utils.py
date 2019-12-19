@@ -42,6 +42,7 @@ class AceTable(namedtuple('_AceTable', ['alias', 'awr', 'location', 'metastable'
     """A simple data structure reprsenenting an <ace_table /> tag in a
     cross_sections.xml file.
     """
+
     def __new__(cls, alias=None, awr=None, location=None, metastable=None,
                 name=None, path=None, temperature=None, zaid=None,
                 cross_sections_path=None):
@@ -77,6 +78,7 @@ class AceTable(namedtuple('_AceTable', ['alias', 'awr', 'location', 'metastable'
             If this and path are both present then the abspath attribute will be
             set.
         """
+
         super(AceTable, self).__init__()
         nuc = None
         if zaid is not None or zaid != '0':
@@ -97,8 +99,7 @@ class AceTable(namedtuple('_AceTable', ['alias', 'awr', 'location', 'metastable'
         self.abspath = abspath
 
     def xml(self):
-        """Creates an XML representation of the ACE Table.
-        """
+        """Creates an XML representation of the ACE Table."""
         s = '<ace_table '
         s += " ".join(['{0}="{1}"'.format(f, getattr(self, f)) for f in self._fields
                        if getattr(self, f) is not None])
@@ -107,8 +108,7 @@ class AceTable(namedtuple('_AceTable', ['alias', 'awr', 'location', 'metastable'
 
 
 class CrossSections(HTMLParser):
-    """This class represents an OpenMC cross_sections.xml file.
-    """
+    """This class represents an OpenMC cross_sections.xml file."""
 
     def __init__(self, f=None):
         """Parameters
@@ -162,8 +162,7 @@ class CrossSections(HTMLParser):
         self.ace_tables.append(ace_table)
 
     def xml(self):
-        """Returns an XML representation of the cross sections file.
-        """
+        """Returns an XML representation of the cross sections file."""
         template = ('<?xml version="1.0" ?>\n'
                     '<cross_sections>\n'
                     '  <filetype>{filetype}</filetype>\n'

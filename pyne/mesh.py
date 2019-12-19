@@ -1518,6 +1518,7 @@ class MeshTally(StatMesh):
     stored as attributes and the "mesh" attribute is a PyNE mesh object tagged
     with all result and relative error data. This class inherits from StatMesh,
     exposing all statistical mesh manipulation methods.
+
     Attributes
     ----------
     tally_number : int
@@ -1549,6 +1550,7 @@ class MeshTally(StatMesh):
     tag_names : iterable
         Four strs that specify the tag names for the results, relative errors,
         total results, and total relative error.
+
     Notes
     -----
     All Mesh/StatMesh attributes are also present via a super() call to
@@ -1575,7 +1577,7 @@ class MeshTally(StatMesh):
         self._tag_names = tag_names
 
     def set_default_tag_names(self):
-        """Set default tag_names according to particle."""
+        """Set default tag_names according to particle type."""
         self.tag_names = ("{0}_result".format(self.particle),
                           "{0}_result_rel_error".format(self.particle),
                           "{0}_result_total".format(self.particle),
@@ -1586,6 +1588,7 @@ class MeshTally(StatMesh):
         """
         This function uses the output tally result, rel_err, res_tot and the
         rel_err_tot to set the flux and error tags.
+
         Parameters
         ----------
         result : numpy array
