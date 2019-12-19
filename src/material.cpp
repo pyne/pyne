@@ -103,10 +103,24 @@ void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath, int ro
   nucpath = std::string(nucpathbuf, nuc_attr_len);
   delete[] nucpathbuf;
   H5Tclose(str_attr);
+  std::cout << "nucpath found in: " << nucpath << std::endl;
   _load_comp_protocol1(db, datapath, nucpath, row);
 }
 
 void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath, std::string nucpath, int row) {
+  bool datapath_exists = h5wrap::path_exists(db, datapath);
+  bool nucpath_exists = h5wrap::path_exists(db, nucpath);
+  if (!nucpath_exists) {
+    std::cout << "in read1: " << nucpath << std::endl;
+    std::cout << "change path in read" << std::endl;
+    nucpath = datapath + "_" + nucpath.erase(1, nucpath.size());
+    nucpath_exists = h5wrap::path_exists(db, nucpath);
+    if(!nucpath_exists) {
+      std::cout << "in read2: " << nucpath << std::endl;
+      std::cout << "can't fin it anywhere!!! :'(" << std::endl;
+    }
+  }
+
   hid_t data_set = H5Dopen2(db, datapath.c_str(), H5P_DEFAULT);
 
   hsize_t data_offset[1] = {static_cast<hsize_t>(row)};
@@ -339,6 +353,12 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
   // Read in nuclist if available, write it out if not
   //
   bool nucpath_exists = h5wrap::path_exists(db, nucpath);
+
+  if (!nucpath_exists) {
+    std::cout << "changing nucpath" << std::endl;
+    nucpath = datapath + "_" + nucpath.erase(1, nucpath.size());
+    nucpath_exists = h5wrap::path_exists(db, nucpath);
+  }
   std::vector<int> nuclides;
   int nuc_size;
   hsize_t nuc_dims[1];
