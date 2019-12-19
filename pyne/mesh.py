@@ -1563,8 +1563,7 @@ class MeshTally(StatMesh):
 
         self.tally_number = None
         self.particle = 'neutron'
-        self.tag_names = {"neutron_result", "neutron_result_rel_error",
-                "neutron_result_total", "neutron_result_total_rel_error"}
+        self.set_default_tag_names()
 
     @property
     def tag_names(self):
@@ -1575,6 +1574,12 @@ class MeshTally(StatMesh):
         _check_meshtally_tag_names(tag_names)
         self._tag_names = tag_names
 
+    def set_default_tag_names(self):
+        """Set default tag_names according to particle."""
+        self.tag_names = ("{0}_result".format(self.particle),
+                          "{0}_result_rel_error".format(self.particle),
+                          "{0}_result_total".format(self.particle),
+                          "{0}_result_total_rel_error".format(self.particle))
 
     def tag_flux_error_from_tally_results(self, result, rel_err, res_tot,
                                           rel_err_tot):

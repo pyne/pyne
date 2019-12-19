@@ -417,10 +417,7 @@ def create_meshtally(filename, tally_id, mesh_id=None, particle=None,
         m.particle = particle
     # assign tag_names
     if tag_names is None:
-        m.tag_names = ("{0}_result".format(m.particle),
-                       "{0}_result_rel_error".format(m.particle),
-                       "{0}_result_total".format(m.particle),
-                       "{0}_result_total_rel_error".format(m.particle))
+        m.set_default_tag_names()
     else:
         m.tag_names = tag_names
     # check tally_num exist

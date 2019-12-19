@@ -2035,12 +2035,8 @@ class Meshtal(object):
         m.particle, m.dose_response = self.read_meshtally_head(f)
         # assign tag_names
         if tag_names is None:
-            m.tag_names = ("{0}_result".format(m.particle),
-                           "{0}_result_rel_error".format(m.particle),
-                           "{0}_result_total".format(m.particle),
-                           "{0}_result_total_rel_error".format(m.particle))
+            m.set_default_tag_names()
         else:
-#            check_meshtally_tag_names(tag_names)
             m.tag_names = tag_names
 
         m.x_bounds, m.y_bounds, m.z_bounds, m.e_bounds = \
