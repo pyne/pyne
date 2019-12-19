@@ -442,3 +442,12 @@ def file_block_almost_same(f1, f2, rel_tol=1e-9):
 
     # no difference found
     return True
+
+def check_iterable(obj):
+    """Check whether the object is Iterable."""
+    try:
+        obj_iterator = iter(obj)
+    except TypeError as te:
+        print(obj.__str__(), "is not iterable")
+        return False
+    return True

@@ -33,7 +33,7 @@ from pyne.utils import QAWarning
 from pyne.mesh import HAVE_PYMOAB
 if not HAVE_PYMOAB:
     raise SkipTest
-from pyne.mesh import NativeMeshTag, ComputedTag, MetadataTag
+from pyne.mesh import NativeMeshTag, ComputedTag, MetadataTag, MeshTally
 from pymoab.types import _eh_py_type
 from pymoab import core as mb_core, hcoord, scd, types
 from pyne.mesh import Mesh, StatMesh, MeshError, meshset_iterate, \

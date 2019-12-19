@@ -1264,3 +1264,22 @@ def test_mesh_to_geom():
         "     1002 -5.0000e+00\n")
 
     assert_equal(geom, exp_geom)
+
+def test_check_tag_names():
+    # correct case
+    tag_names = ("n_result", "n_result_rel_error", "n_result_total",
+            "n_result_total_rel_error")
+    assert(mcnp._check_tag_names(tag_names))
+    # not iterable
+    tag_names = "a"
+    assert_raises(ValueError, mcnp._check_tag_names, tag_names)
+    # wrong length
+    tag_names = ("a", "b", "c")
+    assert_raises(ValueError, mcnp._check_tag_names, tag_names)
+    # wrong content
+    tag_names = (1, 2, 3, 4)
+    assert_raises(ValueError, mcnp._check_tag_names, tag_names)
+    # a string of length 4
+    tag_names = "abcd"
+    assert_raises(ValueError, mcnp._check_tag_names, tag_names)
+
