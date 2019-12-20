@@ -370,14 +370,12 @@ def result_changes_order(result, dims):
         (num_ves, ), with changes the fastest.
     """
 
-    result_ = np.zeros_like(result)
     x_dim, y_dim, z_dim = dims[0], dims[1], dims[2]
-    for i in range(x_dim):
-        for j in range(y_dim):
-            for k in range(z_dim):
-                idx = k * (x_dim * y_dim) + j * x_dim + i
-                idx_ = i * (y_dim * z_dim) + j * z_dim + k
-                result_[idx_] = result[idx]
+    num_e_groups = len(result.flatten()) // (x_dim * y_dim * z_dim)
+    result_ = np.reshape(result, newshape=(z_dim, y_dim, x_dim, num_e_groups))
+    # set energy changes fastest, z next, y next and then x
+    result_ = np.moveaxis(result_, [0, 1, 2, 3], [2, 1, 0, 3])
+    result_ = np.reshape(result_, newshape=(x_dim*y_dim*z_dim, num_e_groups))
     return result_
 
 
