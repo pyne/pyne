@@ -103,7 +103,6 @@ void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath, int ro
   nucpath = std::string(nucpathbuf, nuc_attr_len);
   delete[] nucpathbuf;
   H5Tclose(str_attr);
-  std::cout << "nucpath found in: " << nucpath << std::endl;
   _load_comp_protocol1(db, datapath, nucpath, row);
 }
 
@@ -111,9 +110,9 @@ void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath, std::s
   bool datapath_exists = h5wrap::path_exists(db, datapath);
   bool nucpath_exists = h5wrap::path_exists(db, nucpath);
   
-      std::cout << "in read2: " << nucpath << std::endl;
   if (!nucpath_exists) {
-      std::cout << "can't fin it anywhere!!! :'(" << std::endl;
+    nucpath = datapath + "_" + nucpath.substr(1);  
+    nucpath_exists = h5wrap::path_exists(db, nucpath);
   }
 
   hid_t data_set = H5Dopen2(db, datapath.c_str(), H5P_DEFAULT);
@@ -348,6 +347,11 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
   // Read in nuclist if available, write it out if not
   //
   bool nucpath_exists = h5wrap::path_exists(db, nucpath);
+  // if no nucpath exists use the nested version...
+  if (!nucpath_exists) {
+    nucpath = datapath + "_" + nucpath.substr(1);  
+    nucpath_exists = h5wrap::path_exists(db, nucpath);
+  }
 
   std::vector<int> nuclides;
   int nuc_size;
@@ -369,7 +373,6 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
       nuc_data[n] = nuclides[n];
     nuc_dims[0] = nuc_size;
     hid_t nuc_space = H5Screate_simple(1, nuc_dims, NULL);
-    std::cout << "writing in " << nucpath << std::endl; 
     hid_t nuc_set = H5Dcreate2(db, nucpath.c_str(), H5T_NATIVE_INT, nuc_space,
                                H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     H5Dwrite(nuc_set, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, nuc_data);
@@ -413,7 +416,6 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
   // get / make the data set
   bool datapath_exists = h5wrap::path_exists(db, datapath);
   if (datapath_exists) {
-    std::cout << "writing in an already existing path" << std::endl;
     data_set = H5Dopen2(db, datapath.c_str(), H5P_DEFAULT);
     data_space = H5Dget_space(data_set);
     data_rank = H5Sget_simple_extent_dims(data_space, data_dims, data_max_dims);
