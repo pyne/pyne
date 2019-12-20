@@ -1530,17 +1530,17 @@ class MeshTally(StatMesh):
         tally.
     dose_response : bool
         True if the tally is modified by a dose response function.
-    x_bounds : list of floats
+    x_bounds : tuple of floats
         The locations of mesh vertices in the x direction.
-    y_bounds : list of floats
+    y_bounds : tuple of floats
         The locations of mesh vertices in the y direction.
-    z_bounds : list of floats
+    z_bounds : tuple of floats
         The locations of mesh vertices in the z direction.
     dims : list
         Dimensions of the mesh.
     num_ves : int
         Number of volume elements.
-    e_bounds : list of floats
+    e_bounds : tuple of floats
         The minimum and maximum bounds for energy bins.
     num_e_groups: int
         Number of energy groups.

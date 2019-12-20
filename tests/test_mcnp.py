@@ -1034,16 +1034,16 @@ def test_single_meshtally_meshtal():
     assert_equal(meshtal_object.tally[4].dose_response, True)
     assert_equal(
         meshtal_object.tally[4].x_bounds,
-        [-200.00, -66.67, 66.67, 200.00])
+        (-200.00, -66.67, 66.67, 200.00))
     assert_equal(
         meshtal_object.tally[4].y_bounds,
-        [-200.00, -120.00, -40.00, 40.00, 120.00, 200.00])
+        (-200.00, -120.00, -40.00, 40.00, 120.00, 200.00))
     assert_equal(
         meshtal_object.tally[4].z_bounds,
-        [-200.00, -50.00, 100.00, 200.00])
+        (-200.00, -50.00, 100.00, 200.00))
     assert_equal(
         meshtal_object.tally[4].e_bounds,
-        [0.00E+00, 1.00E-01, 2.00E-01, 1.00E+00])
+        (0.00E+00, 1.00E-01, 2.00E-01, 1.00E+00))
 
     # test vector tags
     for v_e, expected_v_e in zip(

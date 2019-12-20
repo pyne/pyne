@@ -422,19 +422,22 @@ def create_meshtally(filename, tally_id, mesh_id=None, particle=None,
     else:
         m.tag_names = tag_names
     # parameters to create mesh
-    m.x_bounds, m.y_bounds, m.z_bounds = get_structured_coords_from_openmc_sp(
+    structured_coords = get_structured_coords_from_openmc_sp(
         filename, tally_id=m.tally_number)
+    m.x_bounds = tuple(structured_coords[0])
+    m.y_bounds = tuple(structured_coords[1])
+    m.z_bounds = tuple(structured_coords[2])
     m.dims = [len(m.x_bounds) - 1, len(m.y_bounds) - 1, len(m.z_bounds) - 1]
     m.num_ves = (len(m.x_bounds)-1) * (len(m.y_bounds)-1) * (len(m.z_bounds)-1)
-    m.e_bounds = get_e_bounds_from_openmc_sp(filename, m.tally_number)
+    m.e_bounds = tuple(get_e_bounds_from_openmc_sp(filename, m.tally_number))
     m.num_e_groups = len(m.e_bounds) - 1
     if mesh_has_mats:
         raise NotImplementedError("mesh_has_mats is currently not supported "
                 "for OpenMC")
     else:
         mats = None
-    super(MeshTally, m).__init__(structured_coords=[m.x_bounds,
-        m.y_bounds, m.z_bounds], structured=True, mats=mats)
+    super(MeshTally, m).__init__(structured_coords=structured_coords,
+            structured=True, mats=mats)
     result, rel_err, res_tot, rel_err_tot = get_result_error_from_openmc_sp(
         filename, m)
     m.tag_flux_error_from_tally_results(result, rel_err, res_tot, rel_err_tot)
