@@ -1830,7 +1830,7 @@ def _check_meshtally_tag_names(tag_names):
     # check content strings
     for item in tag_names:
         if not isinstance(item, str):
-            raise ValueError("The content of tag_names ",
+            raise ValueError("The content of tag_names "
                             "should be strings")
 
     # tag_names should be a string with length of 4
