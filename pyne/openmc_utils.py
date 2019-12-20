@@ -421,11 +421,9 @@ def create_meshtally(filename, tally_id, mesh_id=None, particle=None,
         m.set_default_tag_names()
     else:
         m.tag_names = tag_names
-    # check tally_num exist
+    # parameters to create mesh
     structured_coords = get_structured_coords_from_openmc_sp(
         filename, tally_id=m.tally_number)
-
-    # parameters to create mesh
     m.x_bounds = structured_coords[0]
     m.y_bounds = structured_coords[1]
     m.z_bounds = structured_coords[2]
