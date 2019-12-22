@@ -295,7 +295,7 @@ def get_result_error_from_openmc_sp(filename, m):
     Returns:
     --------
     result : numpy array
-        This numpy array contains the flux data read from OpenMC state point
+        This numpy array contains the flux data read from the OpenMC state point
         file. The shape of this numpy array is (num_ves*num_e_groups), with z
         changes fastest.
     rel_error: numpy array
