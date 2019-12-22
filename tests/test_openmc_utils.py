@@ -136,12 +136,6 @@ def test_get_e_bounds_from_openmc_sp():
     assert_array_equal(e_bounds, exp_e_bounds)
 
 def test_flux_changes_order():
-    if not HAVE_PYMOAB or sys.version_info[0] == 2:
-        raise SkipTest
-    try:
-        import openmc
-    except:
-        raise SkipTest
     # test mesh dimensions: (3, 2, 1), num_e_groups: 2
     dims = np.array([3, 2, 1])
     result = np.array([['x0y0z0e0', 'x0y0z0e1'],
