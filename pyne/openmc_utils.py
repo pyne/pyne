@@ -244,7 +244,7 @@ def get_structured_coords_from_openmc_sp(filename, tally_id):
 
 def calc_structured_coords(lower_left, upper_right, dimension):
     """
-    This function calculate the structured mesh coordinations from OpenMC mesh
+    This function calculates the structured mesh coordinates from an OpenMC mesh
     parameters.
 
     Parameters:
