@@ -211,9 +211,6 @@ def get_structured_coords_from_openmc_sp(filename, tally_id):
         OpenMC state point filename.
     tally_id : int
         Tally id.
-    mesh_id : int
-        The mesh id used in this tally. Required if multiple meshes exist in
-        the state point file.
 
     Returns:
     --------
@@ -390,7 +387,7 @@ def result_changes_order(result, dims):
     return result_
 
 
-def create_meshtally(filename, tally_id, mesh_id=None, particle=None,
+def create_meshtally(filename, tally_id, particle=None,
                      tag_names=None, mesh_has_mats=False):
     """
     This function creates a MeshTally instance from OpenMC state point file.
@@ -402,9 +399,6 @@ def create_meshtally(filename, tally_id, mesh_id=None, particle=None,
         eg: "statepoint.10.h5".
     tally_id : int
         Tally number.
-    mesh_id : int
-        Mesh id of this tally used. Required if multiple meshes exist in the
-        OpenMC state point file.
     particle : str
         The particle type, 'neutron' or 'photon'.
     tag_names : iterable, optional
