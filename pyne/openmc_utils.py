@@ -302,7 +302,7 @@ def get_result_error_from_openmc_sp(filename, m):
         This numpy array contains the relative error data.
     res_tot : numpy array
         The total results.
-    rel_err_tot : list
+    rel_err_tot : numpy array
         Relative error of total results.
     """
 
