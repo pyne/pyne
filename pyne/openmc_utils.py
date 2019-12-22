@@ -372,7 +372,7 @@ def result_changes_order(result, dims):
     """
 
     x_dim, y_dim, z_dim = dims[0], dims[1], dims[2]
-    num_e_groups = len(result.flatten()) // (x_dim * y_dim * z_dim)
+    num_e_groups = result.size // (x_dim * y_dim * z_dim)
     result_ = np.reshape(result, newshape=(z_dim, y_dim, x_dim, num_e_groups))
     # set energy changes fastest, z next, y next and then x
     result_ = np.moveaxis(result_, [0, 1, 2, 3], [2, 1, 0, 3])
