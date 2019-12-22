@@ -300,7 +300,7 @@ def get_result_error_from_openmc_sp(filename, m):
         changes fastest.
     rel_error: numpy array
         This numpy array contains the relative error data.
-    res_tot : list
+    res_tot : numpy array
         The total results.
     rel_err_tot : list
         Relative error of total results.
