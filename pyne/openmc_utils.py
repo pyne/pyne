@@ -358,7 +358,7 @@ def result_changes_order(result, dims):
     -----------
     result : numpy array
         This numpy array contains the flux data read from OpenMC state point
-        file. The shape of this numpy array is (num_ves*num_e_groups) or
+        file. The shape of this numpy array is (num_ves, num_e_groups) or
         (num_ves, ), with x changes the fastest.
     dims : list
         The dimension of x, y, z.
