@@ -311,7 +311,7 @@ def get_result_error_from_openmc_sp(filename, m):
     flux = tally.get_slice(scores=['flux'])
 
     num_ves = len(m)
-    # currently, the openmc mesh are uniform
+    # assumption: openmc mesh voxels volumes are uniform for a regular mesh
     ve_vol = m.structured_hex_volume(0, 0, 0)
     num_e_groups = len(flux.mean.flatten()) // num_ves
 
