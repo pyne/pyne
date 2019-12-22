@@ -429,7 +429,7 @@ def create_meshtally(filename, tally_id, mesh_id=None, particle=None,
     m.y_bounds = tuple(structured_coords[1])
     m.z_bounds = tuple(structured_coords[2])
     m.dims = [len(m.x_bounds) - 1, len(m.y_bounds) - 1, len(m.z_bounds) - 1]
-    m.num_ves = (len(m.x_bounds)-1) * (len(m.y_bounds)-1) * (len(m.z_bounds)-1)
+    m.num_ves = np.prod(m.dims)
     m.e_bounds = tuple(get_e_bounds_from_openmc_sp(filename, m.tally_number))
     m.num_e_groups = len(m.e_bounds) - 1
     if mesh_has_mats:
