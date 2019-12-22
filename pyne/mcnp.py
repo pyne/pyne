@@ -2120,10 +2120,10 @@ class Meshtal(object):
             line = f.readline()
 
         x_bounds = tuple(float(x) for x in f.readline().split()[2:])
-        y_bounds = tuple([float(x) for x in f.readline().split()[2:]])
-        z_bounds = tuple([float(x) for x in f.readline().split()[2:]])
+        y_bounds = tuple(float(x) for x in f.readline().split()[2:])
+        z_bounds = tuple(float(x) for x in f.readline().split()[2:])
         # "Energy bin boundaries" contain one more word than "X boundaries"
-        e_bounds = tuple([float(x) for x in f.readline().split()[3:]])
+        e_bounds = tuple(float(x) for x in f.readline().split()[3:])
         return x_bounds, y_bounds, z_bounds, e_bounds
 
     def read_column_order(self, f):
