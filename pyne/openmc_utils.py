@@ -351,7 +351,7 @@ def get_result_error_from_openmc_sp(filename, m):
 def result_changes_order(result, dims):
     """
     This function changes the order of openmc flux data. The default order of
-    OpenMC flux is x changes the fastest. This function changes it to the order
+    OpenMC flux is x changes the fastest. This function reorganizes the data such that z changes fastest (the same order as the MCNP meshtal file).
     which z changes the fasest (the same order as MCNP meshtal).
 
     Parameters:
