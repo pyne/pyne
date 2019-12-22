@@ -383,7 +383,7 @@ def result_changes_order(result, dims):
 def create_meshtally(filename, tally_id, mesh_id=None, particle=None,
                      tag_names=None, mesh_has_mats=False):
     """
-    This function creates a MeshTally instance from OpenMC statepoint file.
+    This function creates a MeshTally instance from OpenMC state point file.
 
     Parameters:
     -----------
