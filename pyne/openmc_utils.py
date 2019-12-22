@@ -187,7 +187,7 @@ def get_e_bounds_from_openmc_sp(filename, tally_id):
     Returns:
     --------
     e_bounds : numpy array
-        Energy boundries with size of (num_e_gourps + 1).
+        Energy boundries with size of (num_e_groups + 1).
     """
 
     sp = openmc.StatePoint(filename)
@@ -202,7 +202,7 @@ def get_e_bounds_from_openmc_sp(filename, tally_id):
 
 def get_structured_coords_from_openmc_sp(filename, tally_id):
     """
-    This function read the OpenMC state point file and get the structured
+    This function reads the OpenMC state point file and gets the structured
     coordinates of the mesh.
 
     Parameters:
