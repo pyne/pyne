@@ -253,7 +253,7 @@ def calc_structured_coords(lower_left, upper_right, dimension):
         The lower left coordinate of the mesh. A numpy array of length 3.
         Format: [x_min, y_min, z_min].
     upper_right : numpy array of float
-        The upper right coordinate of the mesh. A numpy array of lenght 3.
+        The upper right coordinate of the mesh. A numpy array of length 3.
         Format: [x_max, y_max, z_max].
     dimension : numpy array of int
         Number of mesh intervals in each dimension. A numpy array of length 3.
