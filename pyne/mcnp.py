@@ -2119,7 +2119,7 @@ class Meshtal(object):
         while line.strip() != 'Tally bin boundaries:':
             line = f.readline()
 
-        x_bounds = tuple([float(x) for x in f.readline().split()[2:]])
+        x_bounds = tuple(float(x) for x in f.readline().split()[2:])
         y_bounds = tuple([float(x) for x in f.readline().split()[2:]])
         z_bounds = tuple([float(x) for x in f.readline().split()[2:]])
         # "Energy bin boundaries" contain one more word than "X boundaries"
@@ -2293,4 +2293,3 @@ def _mesh_to_mat_cards(mesh, divs, frac_type):
         mat_cards += mesh.mats[i].mcnp(frac_type=frac_type)
 
     return mat_cards
-
