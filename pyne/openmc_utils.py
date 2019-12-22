@@ -232,8 +232,9 @@ def get_structured_coords_from_openmc_sp(filename, tally_id):
             if isinstance(flt.mesh, openmc.RegularMesh):
                 mesh_filter = flt
             else:
-                raise NotImplementedError("Current MeshFilter.mesh is "
-                    "not supported yet, please use a openmc.RegularMesh")
+                raise NotImplementedError("The mesh on this tally: {0} is not "
+                "yet supported. Please use an openmc.RegularMesh".format(
+                    tally_id))
     structured_coords = calc_structured_coords(
         mesh_filter.mesh.lower_left[:],
         mesh_filter.mesh.upper_right[:],
