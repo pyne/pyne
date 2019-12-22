@@ -351,7 +351,8 @@ def get_result_error_from_openmc_sp(filename, m):
 def result_changes_order(result, dims):
     """
     This function changes the order of openmc flux data. The default order of
-    OpenMC flux is x changes the fastest. This function reorganizes the data such that z changes fastest (the same order as the MCNP meshtal file).
+    OpenMC flux is x changes the fastest. This function reorganizes the data
+    such that z changes fastest (the same order as the MCNP meshtal file).
     which z changes the fasest (the same order as MCNP meshtal).
 
     Parameters:
@@ -373,10 +374,19 @@ def result_changes_order(result, dims):
 
     x_dim, y_dim, z_dim = dims[0], dims[1], dims[2]
     num_e_groups = result.size // (x_dim * y_dim * z_dim)
+    # the original result, energy changes the fastest, x next, y next, then z
+    # reshape result to 4 dimension (z, y, x, e, with e changes fastest) array
     result_ = np.reshape(result, newshape=(z_dim, y_dim, x_dim, num_e_groups))
-    # set energy changes fastest, z next, y next and then x
+
+    # the target sequence, energy changes fastest, z next, y next, then x
+    # move the axis from [0, 1, 2, 3] (z, y, x, e) to
+    #                    [2, 1, 0, 3] (x, y, z, e)
     result_ = np.moveaxis(result_, [0, 1, 2, 3], [2, 1, 0, 3])
+
+    # reshape the 4 dimension (x, y, z, e, with e changes fastest) array to
+    #             2 dimension (x_dim*y_dim*z_dim, num_e_groups) array
     result_ = np.reshape(result_, newshape=(x_dim * y_dim * z_dim, num_e_groups))
+
     return result_
 
 
