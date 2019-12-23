@@ -6,7 +6,7 @@ import copy
 import itertools
 from collections import Iterable, Sequence
 from warnings import warn
-from pyne.utils import QAWarning
+from pyne.utils import QAWarning, check_iterable
 
 import numpy as np
 import tables as tb
@@ -1518,6 +1518,7 @@ class MeshTally(StatMesh):
     stored as attributes and the "mesh" attribute is a PyNE mesh object tagged
     with all result and relative error data. This class inherits from StatMesh,
     exposing all statistical mesh manipulation methods.
+
     Attributes
     ----------
     tally_number : int
@@ -1529,17 +1530,17 @@ class MeshTally(StatMesh):
         tally.
     dose_response : bool
         True if the tally is modified by a dose response function.
-    x_bounds : list of floats
+    x_bounds : tuple of floats
         The locations of mesh vertices in the x direction.
-    y_bounds : list of floats
+    y_bounds : tuple of floats
         The locations of mesh vertices in the y direction.
-    z_bounds : list of floats
+    z_bounds : tuple of floats
         The locations of mesh vertices in the z direction.
     dims : list
         Dimensions of the mesh.
     num_ves : int
         Number of volume elements.
-    e_bounds : list of floats
+    e_bounds : tuple of floats
         The minimum and maximum bounds for energy bins.
     num_e_groups: int
         Number of energy groups.
@@ -1549,6 +1550,7 @@ class MeshTally(StatMesh):
     tag_names : iterable
         Four strs that specify the tag names for the results, relative errors,
         total results, and total relative error.
+
     Notes
     -----
     All Mesh/StatMesh attributes are also present via a super() call to
@@ -1563,13 +1565,30 @@ class MeshTally(StatMesh):
 
         self.tally_number = None
         self.particle = 'neutron'
-        self.tag_names = None
+        self.set_default_tag_names()
+
+    @property
+    def tag_names(self):
+        return self._tag_names
+
+    @tag_names.setter
+    def tag_names(self, tag_names):
+        _check_meshtally_tag_names(tag_names)
+        self._tag_names = tag_names
+
+    def set_default_tag_names(self):
+        """Set default tag_names according to particle type."""
+        self.tag_names = ("{0}_result".format(self.particle),
+                          "{0}_result_rel_error".format(self.particle),
+                          "{0}_result_total".format(self.particle),
+                          "{0}_result_total_rel_error".format(self.particle))
 
     def tag_flux_error_from_tally_results(self, result, rel_err, res_tot,
                                           rel_err_tot):
         """
         This function uses the output tally result, rel_err, res_tot and the
         rel_err_tot to set the flux and error tags.
+
         Parameters
         ----------
         result : numpy array
@@ -1797,3 +1816,25 @@ def _cell_fracs_sort_vol_frac_reverse(cell_fracs):
     cell_fracs.sort(order=['idx', 'vol_frac'])
     cell_fracs['vol_frac'] *= -1.0
     return cell_fracs
+
+def _check_meshtally_tag_names(tag_names):
+    """Make sure tag_names is an iterable of 4 strings."""
+    # check iterable
+    if not check_iterable(tag_names):
+        raise ValueError("The given tag_names is not an Iterable.")
+
+    # check length of 4
+    if len(tag_names) != 4:
+        raise ValueError("The length of tag_names is not 4.")
+
+    # check content strings
+    for item in tag_names:
+        if not isinstance(item, str):
+            raise ValueError("The content of tag_names "
+                            "should be strings")
+
+    # tag_names should be a string with length of 4
+    if isinstance(tag_names, str):
+        raise ValueError("The tag_names should not be a single string")
+
+    return True
