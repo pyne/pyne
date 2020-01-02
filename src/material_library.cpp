@@ -30,6 +30,7 @@ void pyne::MaterialLibrary::from_hdf5(char* fname, char* dpath, char* npath,
   std::string nucpath(npath);
   from_hdf5(filename, datapath, npath, protocol);
 }
+
 // Append Material to the library from hdf5 file
 void pyne::MaterialLibrary::from_hdf5(const std::string& filename,
                                       const std::string& datapath,

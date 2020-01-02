@@ -263,7 +263,6 @@ void pyne::Material::from_hdf5(char * filename, char * datapath, char * nucpath,
   from_hdf5(fname, dpath, nucpath, row, protocol);
 }
 
-
 void pyne::Material::from_hdf5(std::string filename, std::string datapath, std::string nucpath, int row, int protocol) {
   // Turn off annoying HDF5 errors
   herr_t status;

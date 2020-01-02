@@ -177,7 +177,7 @@ cdef class _MaterialLibrary:
             raise TypeError("Material must be a PyNE Material or a string but is a "
                             "{0}".format(type(mat)))
 
-    def del_material(self, mat):
+    def remove_material(self, mat):
         """Remove a Material from this material library.
         Parameters
         ----------
@@ -188,15 +188,10 @@ cdef class _MaterialLibrary:
         """
 
         cdef std_string c_matname
-        if isinstance(mat, material._Material):
-            if "name" not in mat.metadata:
-                raise TypeError("Material needs a name to be removed form" +
-                    " the material library")
-            c_matname = std_string(< char * > mat).mat_pointer.metadata["name"] 
-        elif isinstance(mat, basestring):
+        if isinstance(mat, basestring):
             c_matname = std_string(< char * > mat)
         else:
-            raise TypeError("the material must be a material or a string but is a "
+            raise TypeError("the argument must be a string (material name) but is a "
                             "{0}".format(type(mat)))
         self._inst.del_material(c_matname)
 
@@ -240,7 +235,6 @@ cdef class _MaterialLibrary:
 
     cdef cpp_set[int] get_nuclist(self):
         return self._inst.get_nuclist()
-
 
     def load_json(self, json):
         """load_json(json)
@@ -354,9 +348,7 @@ class MaterialLibrary(_MaterialLibrary, collections.MutableMapping):
         return "pyne.material.MaterialLibrary({0})".format(libs)
         
         
-        
-# <string, Material *>
-
+# Python dict to u_map<string, Material *> 
 cdef cpp_umap[std_string, cpp_material.Material*] dict_to_map_str_matp(dict pydict):
     cdef cpp_material.Material * cpp_matp
     cdef cpp_umap[std_string, matp ] cppmap = cpp_umap[std_string, matp ]()
@@ -372,7 +364,7 @@ cdef cpp_umap[std_string, cpp_material.Material*] dict_to_map_str_matp(dict pydi
 
     return cppmap
 
-
+# u_map<string, Material *> to python dict
 cdef dict map_to_dict_str_matp(cpp_umap[std_string, cpp_material.Material*] cppmap):
     pydict = {}
     cdef cpp_umap[std_string, cpp_material.Material*].iterator mapiter = cppmap.begin()
