@@ -181,10 +181,7 @@ cdef class _MaterialLibrary:
         """Remove a Material from this material library.
         Parameters
         ----------
-        mat : Material or str
-            PyNE material object or material name be removed from this material library
-            if a material is provided it needs a name metadata as material are
-            removed according to their names
+        mat : str Name of the material be removed from this material library
         """
 
         cdef std_string c_matname
