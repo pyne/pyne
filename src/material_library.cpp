@@ -268,14 +268,9 @@ void pyne::MaterialLibrary::write_hdf5(const std::string& filename,
   } else
     db = H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
 
-  pyne::mat_map material_library_tmp = material_library;
-  pyne::nuc_set nuclist_tmp = nuclist;
-  // We are using material_library and nuclist copy to allow adding exisitng
-  // nuclide/materials from the file
-
   std::vector<int> nuclides;
   nuclides.clear();
-  std::copy(nuclist_tmp.begin(), nuclist_tmp.end(),
+  std::copy(nuclist.begin(), nuclist.end(),
             inserter(nuclides, nuclides.begin()));
 
   int nuclide_size;
