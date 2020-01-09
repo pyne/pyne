@@ -74,8 +74,8 @@ cdef class _MaterialLibrary:
             The path in the heirarchy to the nuclide array in an HDF5 file.
         """
         if lib != None:
-            #if sys.version_info[0] >= 3 and isinstance(lib, bytes):
-            #    lib = lib.decode()
+            if sys.version_info[0] >= 3 and isinstance(lib, bytes):
+                lib = lib.decode()
             if isinstance(lib, collections.Mapping):
                 self._inst = new cpp_material_library.MaterialLibrary()
                 list_ = []
