@@ -18,6 +18,7 @@ cdef extern from "material_library.h" namespace "pyne":
         MaterialLibrary()
         MaterialLibrary(std_string) except +
         MaterialLibrary(std_string, std_string) except +
+        MaterialLibrary(std_string, std_string, std_string) except +
 
         # Attributes
         unordered_map[std_string, cpp_material.Material*] material_library

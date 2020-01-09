@@ -10,7 +10,8 @@ pyne::MaterialLibrary::MaterialLibrary(){};
 
 // Default constructor
 pyne::MaterialLibrary::MaterialLibrary(const std::string& file,
-                                       const std::string& datapath) {
+                                       const std::string& datapath,
+                                       const std::string& nucpath) {
   if (!pyne::file_exists(file)) {
     throw std::runtime_error("File " + file +
                              " not found or no read permission");
@@ -20,7 +21,7 @@ pyne::MaterialLibrary::MaterialLibrary(const std::string& file,
                              " is empty.");
   }
   // load materials
-  from_hdf5(file, datapath);
+  from_hdf5(file, datapath, nucpath);
 };
 
 void pyne::MaterialLibrary::from_hdf5(char* fname, char* dpath, char* npath,

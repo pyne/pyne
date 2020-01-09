@@ -62,9 +62,12 @@ class MaterialLibrary {
    * Constructor from file
    * \param filename path to file on disk, this file may be either in plaintext
    *                 or HDF5 format.
+   * \param datapath Path to the materials in the file.
+   * \param nucpath Path to the nuclides set in the file.
   */
   MaterialLibrary(const std::string& filename,
-                  const std::string& datapath = "/materials");
+                  const std::string& datapath = "/materials",
+                  const std::string& nucpath = "");
 
   ~MaterialLibrary() {};  //< default destructor
 
@@ -72,6 +75,7 @@ class MaterialLibrary {
    * \brief loads the pyne materials in map of name vs Material
     /// \param filename Path on disk to the HDF5 file.
     /// \param datapath Path to the materials in the file.
+    /// \param nucpath Path to the nuclides set in the file.
     /// \param protocol Flag for layout of material on disk.
   */
   void from_hdf5(const std::string& filename,
@@ -81,6 +85,7 @@ class MaterialLibrary {
    * \brief loads the pyne materials in map of name vs Material
     /// \param filename Path on disk to the HDF5 file.
     /// \param datapath Path to the materials in the file.
+    /// \param nucpath Path to the nuclides set in the file.
     /// \param protocol Flag for layout of material on disk.
   */
   void from_hdf5(char* filename, char* datapath = "/materials" , char* nucpath = "", int protocol = 1);
