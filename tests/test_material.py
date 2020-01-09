@@ -1292,7 +1292,7 @@ def test_mcnp():
 
     mass = leu.mcnp()
     mass_exp = ('C name: leu\n'
-                'C density = 19.1\n'
+                'C density = 19.10000\n'
                 'C source: Some URL\n'
                 'C comments: this is a long comment that will definitly go over the 80 character\n'
                 'C  limit, for science\n'
@@ -1303,7 +1303,7 @@ def test_mcnp():
 
     atom = leu.mcnp(frac_type='atom')
     atom_exp = ('C name: leu\n'
-                'C density = 19.1\n'
+                'C density = 19.10000\n'
                 'C source: Some URL\n'
                 'C comments: this is a long comment that will definitly go over the 80 character\n'
                 'C  limit, for science\n'
@@ -1325,7 +1325,7 @@ def test_mcnp_mat0():
 
     mass = leu.mcnp()
     mass_exp = ('C name: leu\n'
-                'C density = 19.1\n'
+                'C density = 19.10000\n'
                 'C source: Some URL\n'
                 'C comments: this is a long comment that will definitly go over the 80 character\n'
                 'C  limit, for science\n'
@@ -1459,7 +1459,7 @@ def test_write_mcnp():
     with open('mcnp_mass_fracs.txt') as f:
         written = f.read()
     expected = ('C name: leu\n'
-                'C density = 19.1\n'
+                'C density = 19.10000\n'
                 'C source: Some URL\n'
                 'C comments: this is a long comment that will definitly go over the 80 character\n'
                 'C  limit, for science\n'
@@ -1467,7 +1467,7 @@ def test_write_mcnp():
                 '     92235.15c -7.6400e-01\n'
                 '     92238.25c -1.8336e+01\n'
                 'C name: leu\n'
-                'C density = 19.1\n'
+                'C density = 19.10000\n'
                 'C source: Some URL\n'
                 'C comments: this is a long comment that will definitly go over the 80 character\n'
                 'C  limit, for science\n'

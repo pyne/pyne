@@ -1034,16 +1034,16 @@ def test_single_meshtally_meshtal():
     assert_equal(meshtal_object.tally[4].dose_response, True)
     assert_equal(
         meshtal_object.tally[4].x_bounds,
-        [-200.00, -66.67, 66.67, 200.00])
+        (-200.00, -66.67, 66.67, 200.00))
     assert_equal(
         meshtal_object.tally[4].y_bounds,
-        [-200.00, -120.00, -40.00, 40.00, 120.00, 200.00])
+        (-200.00, -120.00, -40.00, 40.00, 120.00, 200.00))
     assert_equal(
         meshtal_object.tally[4].z_bounds,
-        [-200.00, -50.00, 100.00, 200.00])
+        (-200.00, -50.00, 100.00, 200.00))
     assert_equal(
         meshtal_object.tally[4].e_bounds,
-        [0.00E+00, 1.00E-01, 2.00E-01, 1.00E+00])
+        (0.00E+00, 1.00E-01, 2.00E-01, 1.00E+00))
 
     # test vector tags
     for v_e, expected_v_e in zip(
@@ -1237,49 +1237,31 @@ def test_mesh_to_geom():
         "9 pz 1.0\n"
         "\n"
         "C name: 0\n"
-        "C density = 42.0\n"
+        "C density = 42.00000\n"
         "m1\n"
         "     1001 -2.1000e+01\n"
         "     19039 -2.1000e+01\n"
         "C name: 1\n"
-        "C density = 43.0\n"
+        "C density = 43.00000\n"
         "m2\n"
         "     1001 -3.9091e+00\n"
         "     8016 -3.9091e+01\n"
         "C name: 2\n"
-        "C density = 44.0\n"
+        "C density = 44.00000\n"
         "m3\n"
         "     2004 -4.4000e+01\n"
         "C name: 3\n"
-        "C density = 45.0\n"
+        "C density = 45.00000\n"
         "m4\n"
         "     69171 -4.5000e+01\n"
         "C name: 4\n"
-        "C density = 47.0\n"
+        "C density = 47.00000\n"
         "m5\n"
         "     6012 -4.7000e+01\n"
         "C name: 5\n"
-        "C density = 5.0\n"
+        "C density = 5.00000\n"
         "m6\n"
         "     1002 -5.0000e+00\n")
 
     assert_equal(geom, exp_geom)
-
-def test_check_tag_names():
-    # correct case
-    tag_names = ("n_result", "n_result_rel_error", "n_result_total",
-            "n_result_total_rel_error")
-    assert(mcnp._check_tag_names(tag_names))
-    # not iterable
-    tag_names = "a"
-    assert_raises(ValueError, mcnp._check_tag_names, tag_names)
-    # wrong length
-    tag_names = ("a", "b", "c")
-    assert_raises(ValueError, mcnp._check_tag_names, tag_names)
-    # wrong content
-    tag_names = (1, 2, 3, 4)
-    assert_raises(ValueError, mcnp._check_tag_names, tag_names)
-    # a string of length 4
-    tag_names = "abcd"
-    assert_raises(ValueError, mcnp._check_tag_names, tag_names)
 

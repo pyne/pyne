@@ -696,7 +696,7 @@ std::string pyne::Material::mcnp(std::string frac_type) {
   // 'density'
   if (density != -1.0) {
      std::stringstream ds;
-     ds << std::setprecision(1) << std::fixed << "C density = " << density << std::endl;
+     ds << std::setprecision(5) << std::fixed << "C density = " << density << std::endl;
      oss << ds.str();
   }
   // 'source'

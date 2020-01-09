@@ -24,7 +24,7 @@ from warnings import warn
 import numpy as np
 import tables
 
-from pyne.utils import QAWarning, check_iterable
+from pyne.utils import QAWarning
 from pyne.material import Material
 from pyne.material import MultiMaterial
 from pyne import nucname
@@ -2035,12 +2035,8 @@ class Meshtal(object):
         m.particle, m.dose_response = self.read_meshtally_head(f)
         # assign tag_names
         if tag_names is None:
-            m.tag_names = ("{0}_result".format(m.particle),
-                           "{0}_result_rel_error".format(m.particle),
-                           "{0}_result_total".format(m.particle),
-                           "{0}_result_total_rel_error".format(m.particle))
+            m.set_default_tag_names()
         else:
-            _check_tag_names(tag_names)
             m.tag_names = tag_names
 
         m.x_bounds, m.y_bounds, m.z_bounds, m.e_bounds = \
@@ -2108,13 +2104,13 @@ class Meshtal(object):
     
         Returns
         -------
-        x_bounds : list of float
+        x_bounds : tuple of float
             Mesh boundaries of X dimension.
-        y_bounds : list of float
+        y_bounds : tuple of float
             Mesh boundaries of Y dimension.
-        z_bounds : list of float
+        z_bounds : tuple of float
             Mesh boundaries of Z dimension.
-        e_bounds : list of float
+        e_bounds : tuple of float
             Energy boundaries.
         """
 
@@ -2123,11 +2119,11 @@ class Meshtal(object):
         while line.strip() != 'Tally bin boundaries:':
             line = f.readline()
 
-        x_bounds = [float(x) for x in f.readline().split()[2:]]
-        y_bounds = [float(x) for x in f.readline().split()[2:]]
-        z_bounds = [float(x) for x in f.readline().split()[2:]]
+        x_bounds = tuple(float(x) for x in f.readline().split()[2:])
+        y_bounds = tuple(float(x) for x in f.readline().split()[2:])
+        z_bounds = tuple(float(x) for x in f.readline().split()[2:])
         # "Energy bin boundaries" contain one more word than "X boundaries"
-        e_bounds = [float(x) for x in f.readline().split()[3:]]
+        e_bounds = tuple(float(x) for x in f.readline().split()[3:])
         return x_bounds, y_bounds, z_bounds, e_bounds
 
     def read_column_order(self, f):
@@ -2297,25 +2293,3 @@ def _mesh_to_mat_cards(mesh, divs, frac_type):
         mat_cards += mesh.mats[i].mcnp(frac_type=frac_type)
 
     return mat_cards
-
-def _check_tag_names(tag_names):
-    """Make sure tag_names is an iterable of 4 strings."""
-    # check iterable
-    if not check_iterable(tag_names):
-        raise ValueError("The given tag_names is not an Iterable.")
-
-    # check length of 4
-    if len(tag_names) != 4:
-        raise ValueError("The length of tag_names is not 4.")
-
-    # check content strings
-    for item in tag_names:
-        if not isinstance(item, str):
-            raise ValueError("The content of tag_names ",
-                            "should be strings")
-
-    # tag_names should be a string with length of 4
-    if isinstance(tag_names, str):
-        raise ValueError("The tag_names should not be a single string")
-
-    return True
