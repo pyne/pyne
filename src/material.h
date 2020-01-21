@@ -172,9 +172,9 @@ namespace pyne
     /// datapath_nucpath, allowing multiple single-material 
     /// to be written in the same file.. 
     /// If trying to overwrite in a pre-existing file, in an 
-    /// existing datapath, this will fallback an previous 
+    /// existing nucpath, this will fallback an previous 
     /// behavior: append the new material composition on the 
-    /// existing nuclist, without add the new nuclides if any.
+    /// existing datapath, without adding the new nuclides if any.
     ///
     /// \param filename Path on disk to the HDF5 file.
     /// \param datapath Path to the the material in the file.
