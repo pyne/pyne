@@ -169,8 +169,8 @@ namespace pyne
     /// Writes this material out to an HDF5 file.
     /// This happens according to protocol 1.
     /// If datapath does not exists, write the nucpath in 
-    /// datapath_nucpath, allowing multiple single material 
-    /// to be written in the same file. 
+    /// datapath_nucpath, allowing multiple single-material 
+    /// to be written in the same file.. 
     /// If trying to overwrite in a pre-existing file, in an 
     /// existing datapath, this will fallback an previous 
     /// behavior: append the new material composition on the 
