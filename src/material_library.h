@@ -107,7 +107,7 @@ class MaterialLibrary {
    * Writes MaterialLibrary out to an HDF5 file.
    *  This happens according to protocol 1.
    *  Writting in a file already containing 
-   *  the nuclist (same name) will be overwritten 
+   *  the nucpath (same name) will be overwritten 
    *  the existing one. This might cause issue to 
    *  read material already present in the datapath, 
    *  and for the new materials if written in the 
@@ -121,7 +121,7 @@ class MaterialLibrary {
    * Writes MaterialLibrary out to an HDF5 file.
    *  This happens according to protocol 1.
    *  Writting in a file already containing 
-   *  the nuclist (same name) will be overwritten 
+   *  the nucpath (same name) will be overwritten 
    *  the existing one. This might cause issue to 
    *  read material already present in the datapath, 
    *  and for the new materials if written in the 
