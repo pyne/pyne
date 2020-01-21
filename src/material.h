@@ -135,6 +135,14 @@ namespace pyne
     void _load_comp_protocol1(hid_t db, std::string datapath, std::string nucpath, int row);
 
     /// Loads a material from an HDF5 file into this object.
+    /// If datapath does not exists, write the nucpath in 
+    /// datapath_nucpath, allowing multiple single material 
+    /// to be written in the same file. 
+    /// If trying to overwrite in a pre-existing file, in an 
+    /// existing datapath, this will fallback an previous 
+    /// behavior: append the new material composition on the 
+    /// existing nuclist, without add the new nuclides if any.
+    ///
     /// \param filename Path on disk to the HDF5 file.
     /// \param datapath Path to the the material in the file.
     /// \param row The index to read out, may be negative.
@@ -142,6 +150,14 @@ namespace pyne
     void from_hdf5(char * filename, char * datapath, int row=-1, int protocol=1);
     
     /// Loads a material from an HDF5 file into this object.
+    /// If datapath does not exists, write the nucpath in 
+    /// datapath_nucpath, allowing multiple single material 
+    /// to be written in the same file. 
+    /// If trying to overwrite in a pre-existing file, in an 
+    /// existing datapath, this will fallback an previous 
+    /// behavior: append the new material composition on the 
+    /// existing nuclist, without add the new nuclides if any.
+    ///
     /// \param filename Path on disk to the HDF5 file.
     /// \param datapath Path to the the material in the file.
     /// \param row The index to read out, may be negative.
