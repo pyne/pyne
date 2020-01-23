@@ -20,6 +20,8 @@ have two main attributes which define them.
 1. **comp**: a normalized composition mapping from nuclides (zzaaam-ints) to mass-weights (floats).
 2. **mass**: the mass of the material.
 
+The :ref:`pyne_material_library` class is available to efficeintly manipulate collections of materials.
+   
 The material class is presented below.  For more information please refer to :ref:`usersguide_material`.
 
 **************
@@ -43,11 +45,4 @@ The following top-level module functions are used to generate materials from var
 ---------
 
 .. autofunction:: from_text
-
-****************
-Material Library
-****************
-.. autoclass:: MaterialLibrary(lib=None, datapath="/materials", nucpath="/nucid")
-   :members:
-   :inherited-members:
 
