@@ -457,7 +457,10 @@ def test_xsdir():
     assert_equal(xsdir.tables[0].entries, 0)
     assert_equal(xsdir.tables[0].temperature, 5.5555E+05)
     assert_false(xsdir.tables[0].ptable)
+    assert_equal(xsdir.tables[0].filename, 'such_data/1001.777nc')
     assert_true(xsdir.tables[1].ptable)
+    assert_equal(xsdir.tables[2].filename, 'more_data/1001.999nc')
+    assert_true(xsdir.tables[2].ptable)
 
 
 def test_xsdir_find_table():
@@ -465,6 +468,7 @@ def test_xsdir_find_table():
     table = xsdir.find_table('1001')
     assert_equal(table[0].name, '1001.44c')
     assert_equal(table[1].name, '1001.66c')
+    assert_equal(table[2].name, '1001.70c')
 
 
 def test_xsdir_to_serpent():
@@ -478,7 +482,10 @@ def test_xsdir_to_serpent():
     exp = [("1001.44c 1001.44c 1 1001 0 1.111111 6.44688328094e+15 0"
             " many_xs/1001.555nc\n"),
            ("1001.66c 1001.66c 1 1001 0 1.111111 6.44688328094e+15 0"
-            " such_data/1001.777nc\n")]
+            " such_data/1001.777nc\n"),
+           ("1001.66c 1001.66c 1 1001 0 1.111111 6.44688328094e+15 0"
+            " more_data/1001.777nc\n")]
+]
 
     assert_equal(lines, exp)
     os.remove(output)
