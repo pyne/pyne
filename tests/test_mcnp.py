@@ -485,7 +485,6 @@ def test_xsdir_to_serpent():
             " such_data/1001.777nc\n"),
            ("1001.66c 1001.66c 1 1001 0 1.111111 6.44688328094e+15 0"
             " more_data/1001.777nc\n")]
-]
 
     assert_equal(lines, exp)
     os.remove(output)
@@ -1271,4 +1270,3 @@ def test_mesh_to_geom():
         "     1002 -5.0000e+00\n")
 
     assert_equal(geom, exp_geom)
-
