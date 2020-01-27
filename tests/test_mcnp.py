@@ -457,7 +457,7 @@ def test_xsdir():
     assert_equal(xsdir.tables[0].entries, 0)
     assert_equal(xsdir.tables[0].temperature, 5.5555E+05)
     assert_false(xsdir.tables[0].ptable)
-    assert_equal(xsdir.tables[0].filename, 'such_data/1001.777nc')
+    assert_equal(xsdir.tables[1].filename, 'such_data/1001.777nc')
     assert_true(xsdir.tables[1].ptable)
     assert_equal(xsdir.tables[2].filename, 'more_data/1001.999nc')
     assert_true(xsdir.tables[2].ptable)
