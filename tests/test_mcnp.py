@@ -483,8 +483,8 @@ def test_xsdir_to_serpent():
             " many_xs/1001.555nc\n"),
            ("1001.66c 1001.66c 1 1001 0 1.111111 6.44688328094e+15 0"
             " such_data/1001.777nc\n"),
-           ("1001.66c 1001.66c 1 1001 0 1.111111 6.44688328094e+15 0"
-            " more_data/1001.777nc\n")]
+           ("1001.70c 1001.70c 1 1001 0 1.111111 6.44688328094e+15 0"
+            " more_data/1001.999nc\n")]
 
     assert_equal(lines, exp)
     os.remove(output)
