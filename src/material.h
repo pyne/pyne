@@ -162,10 +162,13 @@ namespace pyne
     ///            float.  A value of -0.0 indicates that the material should be
     ///            appended to the end of the dataset.
     /// \param chunksize The chunksize for all material data on disk.
-    void write_hdf5(std::string filename, std::string datapath="/material",
-                    std::string nucpath="/nucid", float row=-0.0, int chunksize=100);
-
+    void write_hdf5(std::string filename, std::string datapath,
+                    std::string nucpath, float row=-0.0, int chunksize=100);
+    void write_hdf5(std::string filename);
     std::vector<int> write_hdf5_nucpath(hid_t db, std::string nucpath);
+    void write_hdf5_datapath(hid_t db, std::string datapath, float row, int chunksize, std::vector<int> nuclides);
+
+    void write_hdf5(std::string filename, std::string datapath, float row=-0.0, int chunksize= 100);
 
     /// Return an openmc xml material element as a string
     std::string openmc(std::string fact_type = "mass");
