@@ -86,18 +86,10 @@ void pyne::Material::_load_comp_protocol0(hid_t db, std::string datapath, int ro
 }
 
 
-
-void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath, int row) {
+void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath,
+                                          int row) {
   std::string nucpath;
   hid_t data_set = H5Dopen2(db, datapath.c_str(), H5P_DEFAULT);
-  hsize_t data_offset[1] = {static_cast<hsize_t>(row)};
-  if (row < 0) {
-    // Handle negative row indices
-    hid_t data_space = H5Dget_space(data_set);
-    hsize_t data_dims[1];
-    H5Sget_simple_extent_dims(data_space, data_dims, NULL);
-    data_offset[0] += data_dims[0];
-  }
 
   // Grab the nucpath
   hid_t nuc_attr = H5Aopen(data_set, "nucpath", H5P_DEFAULT);
@@ -106,10 +98,34 @@ void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath, int ro
   hsize_t nuc_attr_len = nuc_info.data_size;
   hid_t str_attr = H5Tcopy(H5T_C_S1);
   H5Tset_size(str_attr, nuc_attr_len);
-  char * nucpathbuf = new char [nuc_attr_len];
+  char* nucpathbuf = new char[nuc_attr_len];
   H5Aread(nuc_attr, str_attr, nucpathbuf);
   nucpath = std::string(nucpathbuf, nuc_attr_len);
   delete[] nucpathbuf;
+  H5Tclose(str_attr);
+  _load_comp_protocol1(db, datapath, nucpath, row);
+}
+
+void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath,
+                                          std::string nucpath, int row) {
+  bool datapath_exists = h5wrap::path_exists(db, datapath);
+  bool nucpath_exists = h5wrap::path_exists(db, nucpath);
+
+  if (!nucpath_exists) {
+    nucpath = datapath + "_" + nucpath.substr(1);
+    nucpath_exists = h5wrap::path_exists(db, nucpath);
+  }
+
+  hid_t data_set = H5Dopen2(db, datapath.c_str(), H5P_DEFAULT);
+
+  hsize_t data_offset[1] = {static_cast<hsize_t>(row)};
+  if (row < 0) {
+    // Handle negative row indices
+    hid_t data_space = H5Dget_space(data_set);
+    hsize_t data_dims[1];
+    H5Sget_simple_extent_dims(data_space, data_dims, NULL);
+    data_offset[0] += data_dims[0];
+  }
 
   // Grab the nuclides
   std::vector<int> nuclides = h5wrap::h5_array_to_cpp_vector_1d<int>(db, nucpath, H5T_NATIVE_INT);
@@ -150,7 +166,6 @@ void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath, int ro
     comp[nuclides[i]] = (double) (*mat_data).comp[i];
 
   delete[] mat_data;
-  H5Tclose(str_attr);
 
   //
   // Get metadata from associated dataset, if available
@@ -270,9 +285,10 @@ std::vector<int> pyne::Material::write_hdf5_nucpath(hid_t db, std::string nucpat
     nuc_dims[0] = nuc_size;
     bool missing_nucs = false;
     for ( pyne::comp_iter i = comp.begin(); i != comp.end(); i++ ) {
-      missing_nucs |= std::binary_search(nuclides.begin(), nuclides.end(), i->first);
-      if (missing_nucs)
+      missing_nucs |= !std::binary_search(nuclides.begin(), nuclides.end(), i->first);
+      if (missing_nucs) {
         break;
+    }
     }
     if (missing_nucs)
       std::cout
@@ -303,9 +319,9 @@ std::vector<int> pyne::Material::write_hdf5_nucpath(hid_t db, std::string nucpat
 
 
 void pyne::Material::write_hdf5_datapath(hid_t db, std::string datapath, float row, int chunksize, std::vector<int> nuclides) {
-  
+
   int row_num = (int)row;
-  
+
   hsize_t nuc_dims[1];
   int nuc_size = nuc_dims[0] = nuclides.size();
   //
@@ -486,7 +502,7 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
     herr_t status;
     status = H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
     status = H5Gget_objinfo(db, "/material", 0, NULL);
-    
+
     // Group "/material" does not exist
     if (status != 0) {
       // Check if path exists
@@ -556,10 +572,12 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
   //
   std::vector<int> nuclides = write_hdf5_nucpath(db, nucpath);
 
+  // Check is datapath already exist
   bool datapath_exists = h5wrap::path_exists(db, datapath);
+  // write mat composition in datapath
   write_hdf5_datapath(db, datapath, row, chunksize, nuclides);
 
-  // if datapath has been create register location of nucpath
+  // if datapath has just been create register location of nucpath
   if (!datapath_exists) {
     hid_t data_set = H5Dopen2(db, datapath.c_str(), H5P_DEFAULT);
     // Add attribute pointing to nuc path

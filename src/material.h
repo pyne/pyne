@@ -126,7 +126,15 @@ namespace pyne
     /// \param datapath Path to the base node for the material in \a db.
     /// \param row The index to read out, may be negative.
     void _load_comp_protocol1(hid_t db, std::string datapath, int row);
-
+    
+    /// Loads the matrial composition from an HDF5 file according to the layout
+    /// defined by protocol 1.  This protocol should be used in favor of protocol 0.
+    /// \param db HDF5 id for the open HDF5 file.
+    /// \param datapath Path to the base node for the material in a db.
+    /// \param nucpath Path to the base node for nuclide list in a db.
+    /// \param row The index to read out, may be negative.
+    void _load_comp_protocol1(hid_t db, std::string datapath, std::string nucpath, int row);
+    
     /// Loads a material from an HDF5 file into this object.
     /// \param filename Path on disk to the HDF5 file.
     /// \param datapath Path to the the material in the file.
