@@ -149,7 +149,6 @@ namespace pyne
     /// \param protocol Flag for layout of material on disk.
     void from_hdf5(std::string filename, std::string datapath="/material",
                                                           int row=-1, int protocol=1);
-
     /// Writes this material out to an HDF5 file.
     /// This happens according to protocol 1.
     /// \param filename Path on disk to the HDF5 file.
@@ -172,11 +171,9 @@ namespace pyne
     /// \param chunksize The chunksize for all material data on disk.
     void write_hdf5(std::string filename, std::string datapath,
                     std::string nucpath, float row=-0.0, int chunksize=100);
-    /// Readd the missing default write_hdf5
-    void write_hdf5(std::string filename);
     
     /// New write_hdf5 which fallback on the old one when required
-    void write_hdf5(std::string filename, std::string datapath, float row=-0.0, int chunksize= 100);
+    void write_hdf5(std::string filename, std::string datapath="/material", float row=-0.0, int chunksize= 100);
 
     /// write nucpath method
     std::vector<int> write_hdf5_nucpath(hid_t db, std::string nucpath);

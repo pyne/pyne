@@ -20,7 +20,28 @@ have two main attributes which define them.
 1. **comp**: a normalized composition mapping from nuclides (zzaaam-ints) to mass-weights (floats).
 2. **mass**: the mass of the material.
 
+The :ref:`pyne_material_library` class is available to efficiently manipulate
+collections of materials.
 The material class is presented below.  For more information please refer to :ref:`usersguide_material`.
+
+When using the `write_hdf5` method, the default structure for the `HDF5` file
+is:
+.. verbatim::
+    /material/
+    /material/my_mat/
+    /material/my_mat/composition
+    /material/my_mat/nucid
+    /material/my_mat/composition_metadata
+
+
+Where, `/material` and `/material/my_mat` are HDF5 groups, (`my_mat` value shall provided
+as the datapath by the user).
+
+Older structure are still available to written when providing a `nucpath` to
+the `write_hdf5()` method.
+
+`from_hdf5()` will detect the structure (old or new) of the file (when using `protocol1`).
+
 
 **************
 Material Class
