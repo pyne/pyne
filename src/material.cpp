@@ -550,11 +550,6 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
 }
 
 
-void pyne::Material::write_hdf5(std::string filename) {
-  write_hdf5(filename, "/material", "/nucid", -0.0, 100);
-}
-
-
 void pyne::Material::write_hdf5(std::string filename, std::string datapath,
                                 std::string nucpath, float row, int chunksize) {
   int row_num = (int)row;
