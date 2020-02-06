@@ -122,7 +122,6 @@ void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath,
     H5Sget_simple_extent_dims(data_space, data_dims, NULL);
     data_offset[0] += data_dims[0];
   }
-
   // Grab the nuclides
   std::vector<int> nuclides = h5wrap::h5_array_to_cpp_vector_1d<int>(db, nucpath, H5T_NATIVE_INT);
   int nuc_size = nuclides.size();
@@ -233,7 +232,6 @@ void pyne::Material::from_hdf5(std::string filename, std::string datapath, int r
 
   // Clear current content
   comp.clear();
-
   // Load via various protocols
   if (protocol == 0) {
     _load_comp_protocol0(db, datapath, row);
@@ -248,9 +246,9 @@ void pyne::Material::from_hdf5(std::string filename, std::string datapath, int r
     if (object_info.type == H5O_TYPE_DATASET) {
       _load_comp_protocol1(db, datapath, row);
     } else if (object_info.type == H5O_TYPE_GROUP) {
-      datapath = "/material" + datapath + "/composition";
+      std::string full_datapath = "/material" + datapath + "/composition";
       std::string nucpath = "/material" + datapath + "/nucid";
-      _load_comp_protocol1(db, datapath, nucpath, row);
+      _load_comp_protocol1(db, full_datapath, nucpath, row);
     }
   } else
     throw pyne::MaterialProtocolError();
@@ -509,9 +507,8 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
     status = H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
     status = H5Oget_info_by_name(db, "/material", &object_info, H5P_DEFAULT);
 
-    // Group "/material" does not exist
     if (object_info.type == H5O_TYPE_DATASET)
-      if (status != 0) {
+       {
         // Check if path exists
         bool datapath_exists = h5wrap::path_exists(db, datapath);
         // no Group but path fallback on old method using default
@@ -520,12 +517,13 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
           write_hdf5(filename, datapath, "/nucid", row, chunksize);
           return;
         }
-      } else if (object_info.type == H5O_TYPE_UNKNOWN) {
+      } else if ( object_info.type >= H5O_TYPE_NTYPES || object_info.type < H5O_TYPE_UNKNOWN ) {
         // create Group
         H5Gcreate2(db, "/material", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
       } else if (object_info.type != H5O_TYPE_GROUP) {
-        std::cout << "A non-group/non-dataset object /Material already exists "
+        std::cout << "Non-group/non-dataset object /Material already exists "
                      "in the file. Can't write the Material" << std::endl;
+        exit(1);
       }
   } else {
     // Create the file
@@ -560,7 +558,6 @@ void pyne::Material::write_hdf5(std::string filename) {
 void pyne::Material::write_hdf5(std::string filename, std::string datapath,
                                 std::string nucpath, float row, int chunksize) {
   int row_num = (int)row;
-
   // Turn off annoying HDF5 errors
   H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
