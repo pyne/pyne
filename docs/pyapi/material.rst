@@ -34,7 +34,7 @@ is:
     /material/my_mat/composition_metadata
 
 
-Where, `/material` and `/material/my_mat` are HDF5 groups, (`my_mat` value shall provided
+Where, `/material` and `/material/my_mat` are HDF5 groups, (`my_mat` value shall be provided
 as the datapath by the user).
 
 Older structure are still available to written when providing a `nucpath` to
