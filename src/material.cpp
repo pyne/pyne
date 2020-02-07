@@ -291,7 +291,7 @@ std::vector<int> pyne::Material::write_hdf5_nucpath(hid_t db, std::string nucpat
       missing_nucs |= !std::binary_search(nuclides.begin(), nuclides.end(), i->first);
       if (missing_nucs) {
         break;
-    }
+      }
     }
     if (missing_nucs)
       std::cout
