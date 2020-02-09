@@ -521,7 +521,7 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
         // create Group
         H5Gcreate2(db, "/material", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
       } else if (object_info.type != H5O_TYPE_GROUP) {
-        std::cout << "Non-group/non-dataset object /Material already exists "
+        std::cout << "Non-group/non-dataset object /material already exists "
                      "in the file. Can't write the Material" << std::endl;
         exit(1);
       }
