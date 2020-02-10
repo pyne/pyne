@@ -487,6 +487,9 @@ void pyne::Material::write_hdf5_datapath(hid_t db, std::string datapath, float r
 
 void pyne::Material::write_hdf5(std::string filename, std::string datapath,
                                 float row, int chunksize) {
+  hid_t material_grp_id; // Holder of HDF5 Id of the "/material" group 
+  hid_t data_id; // Holder of HDF5 Id of the data group to write the data (located in "/material/datapath"
+
   // Turn off annoying HDF5 errors
   H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
@@ -496,57 +499,56 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
   H5Pset_fclose_degree(fapl, H5F_CLOSE_STRONG);
   // Create new/open datafile.
   hid_t db;
-  if (pyne::file_exists(filename)) {
+  if (!pyne::file_exists(filename)) {
+   // Create the file
+    db = H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+  } else {
     bool ish5 = H5Fis_hdf5(filename.c_str());
     if (!ish5) throw h5wrap::FileNotHDF5(filename);
     db = H5Fopen(filename.c_str(), H5F_ACC_RDWR, fapl);
 
-    // Check is /material type
-    herr_t status;
-    H5O_info_t object_info;
-    status = H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
-    status = H5Oget_info_by_name(db, "/material", &object_info, H5P_DEFAULT);
+    // no Group but path fallback on old method using default
+    if (h5wrap::path_exists(db, datapath)) {
+      H5Fclose(db);
+      deprecated_write_hdf5(filename, datapath, "/nucid", row, chunksize);
+      return;
+    }
+  } 
+  // Check if /material exist and what type it is
+  herr_t status;
+  H5O_info_t object_info;
+  status = H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
+  status = H5Oget_info_by_name(db, "/material", &object_info, H5P_DEFAULT);
 
-    if (object_info.type == H5O_TYPE_DATASET)
-       {
-        // Check if path exists
-        bool datapath_exists = h5wrap::path_exists(db, datapath);
-        // no Group but path fallback on old method using default
-        if (datapath_exists) {
-          H5Fclose(db);
-          write_hdf5(filename, datapath, "/nucid", row, chunksize);
-          return;
-        }
-      } else if ( object_info.type >= H5O_TYPE_NTYPES || object_info.type < H5O_TYPE_UNKNOWN ) {
-        // create Group
-        H5Gcreate2(db, "/material", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-      } else if (object_info.type != H5O_TYPE_GROUP) {
-        std::cout << "Non-group/non-dataset object /material already exists "
-                     "in the file. Can't write the Material" << std::endl;
-        exit(1);
-      }
-  } else {
-    // Create the file
-    db = H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
-    // create Group
-    H5Gcreate2(db, "/material", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  // check if "/material" exists
+  if( status == 0) { 
+    if(object_info.type == H5O_TYPE_DATASET) {// "/material" is a dataset -> old format use deprecated write_hdf5
+      H5Fclose(db);
+      deprecated_write_hdf5(filename, datapath, "/nucid", row, chunksize);
+      return;
+    } else if( object_info.type != H5O_TYPE_GROUP) { // "/material" either a dataset or a group: fail! 
+      std::cout << "Non-group/non-dataset object /material already exists "
+                   "in the file. Can't write the Material" << std::endl;
+      exit(1);
+    } else { // "/material" is a group get his hid 
+    material_grp_id = H5Gopen2(db, "/material", H5P_DEFAULT);
+    }
+  } else { // "/material" do not exist -> create it !
+    material_grp_id = H5Gcreate2(db, "/material", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT); 
   }
-
-  std::string full_datapath = "/material" + datapath;
 
   // Check is /material exist as a Group
   herr_t status;
   status = H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
-  status = H5Gget_objinfo(db, full_datapath.c_str(), 0, NULL);
+  status = H5Gget_objinfo( material_grp_id, datapath.c_str(), 0, NULL);
   // Group "/material/datapath" does not exist create it
   if (status != 0) {
-    H5Gcreate2(db, full_datapath.c_str(), H5P_DEFAULT, H5P_DEFAULT,
+    data_id = H5Gcreate2(material_grp_id, datapath.c_str(), H5P_DEFAULT, H5P_DEFAULT,
                H5P_DEFAULT);
   }
-  std::string full_nucpath = full_datapath + "/nucid";
-  std::vector<int> nuclides = write_hdf5_nucpath(db, full_nucpath);
-  write_hdf5_datapath(db, (full_datapath + "/composition").c_str(), row,
-                      chunksize, nuclides);
+  std::string nucpath = "/nuclidelist";
+  std::vector<int> nuclides = write_hdf5_nucpath(data_id, full_nucpath);
+  write_hdf5_datapath(data_id, "/composition", row, chunksize, nuclides);
 }
 
 
