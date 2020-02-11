@@ -335,7 +335,7 @@ cdef class _Material:
         if nucpath != "":
             nucpath_bytes = nucpath.encode('UTF-8')
             c_nucpath = nucpath_bytes
-            self.mat_pointer.write_hdf5(c_filename, c_datapath, c_nucpath, row, chunksize)
+            self.mat_pointer.deprecated_write_hdf5(c_filename, c_datapath, c_nucpath, row, chunksize)
         else:
             self.mat_pointer.write_hdf5(c_filename, c_datapath, row, chunksize)
 
