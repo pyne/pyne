@@ -158,7 +158,7 @@ namespace pyne
     ///            float.  A value of -0.0 indicates that the material should be
     ///            appended to the end of the dataset.
     /// \param chunksize The chunksize for all material data on disk.
-    void write_hdf5(char * filename, char * datapath, char * nucpath, float row=-0.0,
+    void deprecated_write_hdf5(char * filename, char * datapath, char * nucpath, float row=-0.0,
                                                                     int chunksize=100);
     /// Writes this material out to an HDF5 file.
     /// This happens according to protocol 1.
@@ -169,7 +169,7 @@ namespace pyne
     ///            float.  A value of -0.0 indicates that the material should be
     ///            appended to the end of the dataset.
     /// \param chunksize The chunksize for all material data on disk.
-    void write_hdf5(std::string filename, std::string datapath,
+    void deprecated_write_hdf5(std::string filename, std::string datapath,
                     std::string nucpath, float row=-0.0, int chunksize=100);
     
     /// Writes this material out to an HDF5 file.
@@ -191,7 +191,17 @@ namespace pyne
     /// \return list of nuclide writen in the file (or the existing list if the nuclides 
     /// list was already in the file 
     std::vector<int> write_hdf5_nucpath(hid_t db, std::string nucpath);
-    
+   
+    /// Looking for the nuclide list path in the nucpath attribute of the dataset.
+    /// This happens according to protocol 1.
+    /// \param dataset hid of the dataset.
+    /// \param nucpath address of the path to the nuclides list in the file 
+    /// (update when nucpath is found).
+    /// \return true if the nucpath attribure is present in the dataset
+    bool detect_nuclidelist(hid_t dataset, std::string& nucpath);
+
+
+
     /// Writes this datapath to an HDF5 file.
     /// This happens according to protocol 1.
     /// \param db HDF5 id for the open HDF5 file.
