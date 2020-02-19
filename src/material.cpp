@@ -45,10 +45,6 @@ void pyne::Material::norm_comp() {
 }
 
 
-
-
-
-
 void pyne::Material::_load_comp_protocol0(hid_t db, std::string datapath, int row) {
   hid_t matgroup = H5Gopen2(db, datapath.c_str(), H5P_DEFAULT);
   hid_t nucset;
@@ -85,33 +81,52 @@ void pyne::Material::_load_comp_protocol0(hid_t db, std::string datapath, int ro
   atoms_per_molecule = -1.0;
 }
 
-
-
-void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath, int row) {
-  std::string nucpath;
-  hid_t data_set = H5Dopen2(db, datapath.c_str(), H5P_DEFAULT);
-
-  // Grab the nucpath
+bool pyne::Material::detect_nuclidelist(hid_t data_set, std::string& nucpath){
   hid_t nuc_attr = H5Aopen(data_set, "nucpath", H5P_DEFAULT);
+  
+  // can't find the "nucpath" Attribute
+  if(nuc_attr < 0) 
+    return false;
+  
   H5A_info_t nuc_info;
   H5Aget_info(nuc_attr, &nuc_info);
   hsize_t nuc_attr_len = nuc_info.data_size;
   hid_t str_attr = H5Tcopy(H5T_C_S1);
   H5Tset_size(str_attr, nuc_attr_len);
-  char * nucpathbuf = new char [nuc_attr_len];
+  char* nucpathbuf = new char[nuc_attr_len];
   H5Aread(nuc_attr, str_attr, nucpathbuf);
   nucpath = std::string(nucpathbuf, nuc_attr_len);
   delete[] nucpathbuf;
   H5Tclose(str_attr);
-  _load_comp_protocol1(db, datapath, nucpath, row);
+  return true;
 }
 
-void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath, std::string nucpath, int row) {
+
+void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath,
+                                          int row) {
+  std::string nucpath;
+  hid_t data_set = H5Dopen2(db, datapath.c_str(), H5P_DEFAULT);
+
+  // Grab the nucpath
+  if (detect_nuclidelist(data_set, nucpath)){
+    H5Dclose(data_set);
+  _load_comp_protocol1(db, datapath, nucpath, row);
+  } else {
+    H5Dclose(data_set);
+    std::cout << "Can't find location of the nuclide list: nucpath attribute not found!" << std::endl;
+    exit(1);
+  }
+  
+}
+
+void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath,
+                                          std::string nucpath, int row) {
   bool datapath_exists = h5wrap::path_exists(db, datapath);
   bool nucpath_exists = h5wrap::path_exists(db, nucpath);
-  
+
   if (!nucpath_exists) {
-    nucpath = datapath + "_" + nucpath.substr(1);  
+    std::cout << "nucpath not found "<< std::endl;
+    //nucpath = datapath + "_" + nucpath.substr(1);
     nucpath_exists = h5wrap::path_exists(db, nucpath);
   }
 
@@ -125,7 +140,6 @@ void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath, std::s
     H5Sget_simple_extent_dims(data_space, data_dims, NULL);
     data_offset[0] += data_dims[0];
   }
-
   // Grab the nuclides
   std::vector<int> nuclides = h5wrap::h5_array_to_cpp_vector_1d<int>(db, nucpath, H5T_NATIVE_INT);
   int nuc_size = nuclides.size();
@@ -162,10 +176,10 @@ void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath, std::s
   density = (*mat_data).density;
   atoms_per_molecule = (*mat_data).atoms_per_mol;
   for (int i = 0; i < nuc_size; i++)
-    if((double) (*mat_data).comp[i] != 0) {
-      comp[nuclides[i]] = (double) (*mat_data).comp[i];
-    }
+    comp[nuclides[i]] = (double) (*mat_data).comp[i];
+
   delete[] mat_data;
+
   //
   // Get metadata from associated dataset, if available
   //
@@ -202,15 +216,11 @@ void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath, std::s
 }
 
 
-
-
-
 void pyne::Material::from_hdf5(char * filename, char * datapath, int row, int protocol) {
   std::string fname (filename);
   std::string dpath (datapath);
   from_hdf5(fname, dpath, row, protocol);
 }
-
 
 
 void pyne::Material::from_hdf5(std::string filename, std::string datapath, int row, int protocol) {
@@ -240,69 +250,27 @@ void pyne::Material::from_hdf5(std::string filename, std::string datapath, int r
 
   // Clear current content
   comp.clear();
-
-  // Load via various protocols
-  if (protocol == 0)
-    _load_comp_protocol0(db, datapath, row);
-  else if (protocol == 1)
-    _load_comp_protocol1(db, datapath, row);
-  else
-    throw pyne::MaterialProtocolError();
-
-  // Close the database
-  status = H5Fclose(db);
-
-  // Renormalize the composition, just to be safe.
-  norm_comp();
-}
-
-void pyne::Material::from_hdf5(char * filename, char * datapath, char * nucpath, int row, int protocol) {
-  std::string fname (filename);
-  std::string dpath (datapath);
-  std::string npath (nucpath);
-  from_hdf5(fname, dpath, nucpath, row, protocol);
-}
-
-void pyne::Material::from_hdf5(std::string filename, std::string datapath, std::string nucpath, int row, int protocol) {
-  // Turn off annoying HDF5 errors
-  herr_t status;
-  H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
-
-  // Check that the file is there
-  std::string dpath (datapath);
-  if (!pyne::file_exists(filename))
-    throw pyne::FileNotFound(filename);
-
-  // Check to see if the file is in HDF5 format.
-  bool ish5 = H5Fis_hdf5(filename.c_str());
-  if (!ish5)
-    throw h5wrap::FileNotHDF5(filename);
-
-  //Set file access properties so it closes cleanly
-  hid_t fapl;
-  fapl = H5Pcreate(H5P_FILE_ACCESS);
-  H5Pset_fclose_degree(fapl,H5F_CLOSE_STRONG);
-  // Open the database
-  hid_t db = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, fapl);
-
-  bool datapath_exists = h5wrap::path_exists(db, datapath);
-  if (!datapath_exists)
-    throw h5wrap::PathNotFound(filename, datapath);
-  bool nucpath_exists = h5wrap::path_exists(db, nucpath);
-  if (!nucpath_exists)
-    throw h5wrap::PathNotFound(filename, nucpath);
-
-  // Clear current content
-  comp.clear();
-
   // Load via various protocols
   if (protocol == 0) {
     _load_comp_protocol0(db, datapath, row);
   } else if (protocol == 1) {
-    _load_comp_protocol1(db, datapath, nucpath, row);
-  } else {
+    
+    // Check is /material type
+    herr_t status;
+    H5O_info_t object_info;
+    status = H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
+    status = H5Oget_info_by_name(db, "/material" , &object_info, H5P_DEFAULT);
+    // Group "/material" does not exist
+    if (object_info.type == H5O_TYPE_DATASET) {
+      _load_comp_protocol1(db, datapath, row);
+    } else if (object_info.type == H5O_TYPE_GROUP) {
+      std::string full_datapath = "/material" + datapath + "/composition";
+      std::string nucpath = "/material" + datapath + "/nuclidelist";
+      _load_comp_protocol1(db, full_datapath, nucpath, row);
+    }
+  } else
     throw pyne::MaterialProtocolError();
-  }
+
   // Close the database
   status = H5Fclose(db);
 
@@ -311,55 +279,43 @@ void pyne::Material::from_hdf5(std::string filename, std::string datapath, std::
 }
 
 
-
-void pyne::Material::write_hdf5(char * filename, char * datapath, char * nucpath, float row, int chunksize) {
+void pyne::Material::deprecated_write_hdf5(char * filename, char * datapath, char * nucpath, float row, int chunksize) {
   std::string fname (filename);
   std::string groupname (datapath);
   std::string nuclist (nucpath);
-  write_hdf5(fname, groupname, nuclist, row, chunksize);
+  deprecated_write_hdf5(fname, groupname, nuclist, row, chunksize);
 }
 
 
-void pyne::Material::write_hdf5(std::string filename, std::string datapath,
-                                std::string nucpath, float row, int chunksize) {
-  int row_num = (int) row;
-
-  // Turn off annoying HDF5 errors
-  H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
-
-  //Set file access properties so it closes cleanly
-  hid_t fapl;
-  fapl = H5Pcreate(H5P_FILE_ACCESS);
-  H5Pset_fclose_degree(fapl,H5F_CLOSE_STRONG);
-  // Create new/open datafile.
-  hid_t db;
-  if (pyne::file_exists(filename)) {
-    bool ish5 = H5Fis_hdf5(filename.c_str());
-    if (!ish5)
-      throw h5wrap::FileNotHDF5(filename);
-    db = H5Fopen(filename.c_str(), H5F_ACC_RDWR, fapl);
-  }
-  else
-    db = H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+std::vector<int> pyne::Material::write_hdf5_nucpath(hid_t db, std::string nucpath) {
 
   //
   // Read in nuclist if available, write it out if not
   //
   bool nucpath_exists = h5wrap::path_exists(db, nucpath);
-  // if no nucpath exists use the nested version...
-  if (!nucpath_exists) {
-    nucpath = datapath + "_" + nucpath.substr(1);  
-    nucpath_exists = h5wrap::path_exists(db, nucpath);
-  }
-
   std::vector<int> nuclides;
   int nuc_size;
   hsize_t nuc_dims[1];
 
+  // if nucpath exist: get it and check against the one we have!
   if (nucpath_exists) {
-    nuclides = h5wrap::h5_array_to_cpp_vector_1d<int>(db, nucpath, H5T_NATIVE_INT);
+    nuclides =
+        h5wrap::h5_array_to_cpp_vector_1d<int>(db, nucpath, H5T_NATIVE_INT);
     nuc_size = nuclides.size();
     nuc_dims[0] = nuc_size;
+    bool missing_nucs = false;
+    for ( pyne::comp_iter i = comp.begin(); i != comp.end(); i++ ) {
+      missing_nucs |= !std::binary_search(nuclides.begin(), nuclides.end(), i->first);
+      if (missing_nucs) {
+        break;
+      }
+    }
+    if (missing_nucs)
+      std::cout
+          << "One or more nuclides are missing from the existing nuclides "
+             "list, material will likely not be written correctly."
+          << std::endl;
+
   } else {
     nuclides = std::vector<int>();
     for (pyne::comp_iter i = comp.begin(); i != comp.end(); i++)
@@ -367,18 +323,27 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
     nuc_size = nuclides.size();
 
     // Create the data if it doesn't exist
-    int nuc_data [nuc_size];
-    for (int n = 0; n != nuc_size; n++)
-      nuc_data[n] = nuclides[n];
+    int nuc_data[nuc_size];
+    for (int n = 0; n != nuc_size; n++) nuc_data[n] = nuclides[n];
     nuc_dims[0] = nuc_size;
     hid_t nuc_space = H5Screate_simple(1, nuc_dims, NULL);
     hid_t nuc_set = H5Dcreate2(db, nucpath.c_str(), H5T_NATIVE_INT, nuc_space,
                                H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     H5Dwrite(nuc_set, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, nuc_data);
     H5Fflush(db, H5F_SCOPE_GLOBAL);
+
+    H5Dclose(nuc_set);
   }
+  return nuclides;
+}
 
 
+void pyne::Material::write_hdf5_datapath(hid_t db, std::string datapath, float row, int chunksize, std::vector<int> nuclides) {
+
+  int row_num = (int)row;
+
+  hsize_t nuc_dims[1];
+  int nuc_size = nuc_dims[0] = nuclides.size();
   //
   // Write out the data itself to the file
   //
@@ -446,13 +411,6 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
                             data_set_params, H5P_DEFAULT);
     H5Dset_extent(data_set, data_dims);
 
-    // Add attribute pointing to nuc path
-    hid_t nuc_attr_type = H5Tcopy(H5T_C_S1);
-    H5Tset_size(nuc_attr_type, nucpath.length());
-    hid_t nuc_attr_space = H5Screate(H5S_SCALAR);
-    hid_t nuc_attr = H5Acreate2(data_set, "nucpath", nuc_attr_type, nuc_attr_space,
-                                H5P_DEFAULT, H5P_DEFAULT);
-    H5Awrite(nuc_attr, nuc_attr_type, nucpath.c_str());
     H5Fflush(db, H5F_SCOPE_GLOBAL);
   }
 
@@ -539,12 +497,164 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
   H5Sclose(metadatapace);
   H5Tclose(attrtype);
 
+  delete[] mat_data;
+
+}
+
+
+void pyne::Material::write_hdf5(std::string filename, std::string datapath,
+                                float row, int chunksize) {
+  hid_t material_grp_id;  // Holder of HDF5 Id of the "/material" group
+  hid_t data_id;  // Holder of HDF5 Id of the data group to write the data
+                  // (located in "/material/datapath"
+
+  // Turn off annoying HDF5 errors
+  H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
+
+  // Set file access properties so it closes cleanly
+  hid_t fapl;
+  fapl = H5Pcreate(H5P_FILE_ACCESS);
+  H5Pset_fclose_degree(fapl, H5F_CLOSE_STRONG);
+  // Create new/open datafile.
+  
+  // This complicated algorythm is required to allow backward compatibility with
+  // previous version of write_hdf5 (where data were written in a hdf5 DATASET)
+  // FILE EXIST ?
+  //    NO -> create file with a "/material" group, write the data in it
+  //    YES:
+  //      - DATAPTH exist: 
+  //        - YES && != /material -> Detect NUCPATH + old write_hdf5
+  //        - NO -> CONTINUE
+  //          - "/material" EXIST:
+  //            - NO -> create "/material" group and write everyting in it
+  //            - YES:
+  //              - "/material" is a DATASET -> detect NUCPATH + old write_hdf5
+  //              - "/material" is a GROUP -> add data in it
+  //              - "/material" isn't a GROUP nor a DATASET -> fail and complain
+  
+  hid_t db;
+  if (!pyne::file_exists(filename)) {
+    // Create the file
+    db = H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+
+  } else {
+    bool ish5 = H5Fis_hdf5(filename.c_str());
+    if (!ish5) throw h5wrap::FileNotHDF5(filename);
+    db = H5Fopen(filename.c_str(), H5F_ACC_RDWR, fapl);
+    
+    // if datapath != /material and exist -> old format
+    if (h5wrap::path_exists(db, datapath) && datapath != "/material") {
+      std::string nucpath;
+      hid_t data_set = H5Dopen2(db, datapath.c_str(), H5P_DEFAULT);
+
+      // Grab the nucpath
+      if (detect_nuclidelist(data_set, nucpath)) {
+        H5Fclose(db);
+        deprecated_write_hdf5(filename, datapath, nucpath, row, chunksize);
+        return;
+      } else {  // can't find a valid nuclide list path form datapath... fail
+        std::cout
+            << "Can't find the nuclide list path in the existing datapath." << std::endl 
+            << "Can't add your material to the datapath."
+            << std::endl;
+        exit(1);
+      }
+    }
+  }
+  // Check if /material exist and what type it is
+  herr_t status;
+  H5O_info_t object_info;
+  status = H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
+  status = H5Oget_info_by_name(db, "/material", &object_info, H5P_DEFAULT);
+  // check if "/material" exists
+  if (status == 0) {
+    if (object_info.type ==
+        H5O_TYPE_DATASET) {  // "/material" is a dataset -> old format use
+                             // deprecated write_hdf5
+      H5Fclose(db);
+      deprecated_write_hdf5(filename, datapath, "/nucid", row, chunksize);
+      return;
+
+    } else if (object_info.type != H5O_TYPE_GROUP) {  // "/material" either a dataset or a group:
+                                  // fail!
+      std::cout << "Non-group/non-dataset object /material already exists "
+                   "in the file. Can't write the Material"
+                << std::endl;
+      exit(1);
+    } else {  // "/material" is a group get his hid
+      material_grp_id = H5Gopen2(db, "/material", H5P_DEFAULT);
+    }
+  } else {  // "/material" do not exist -> create it !
+    material_grp_id =
+        H5Gcreate2(db, "/material", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  }
+  // Check is /material exist as a Group
+  // Group "/material/datapath" does not exist create it
+  if (!h5wrap::path_exists(db, "/material" + datapath)) {
+    data_id = H5Gcreate2(db, ("/material"+datapath).c_str(), H5P_DEFAULT,
+                         H5P_DEFAULT, H5P_DEFAULT);
+  } else {
+    data_id = H5Gopen2(material_grp_id, datapath.c_str(), H5P_DEFAULT);
+  }
+  //std::string nucpath = "/nuclidelist";
+  std::string full_datapath = "/material" + datapath + "/composition";
+  std::string nucpath = "/material" + datapath + "/nuclidelist";
+  std::vector<int> nuclides = write_hdf5_nucpath(data_id, nucpath);
+  write_hdf5_datapath(data_id, full_datapath, row, chunksize, nuclides);
+  H5Gclose(data_id);
+  H5Gclose(material_grp_id);
+  H5Fclose(db);
+}
+
+
+void pyne::Material::deprecated_write_hdf5(std::string filename, std::string datapath,
+                                std::string nucpath, float row, int chunksize) {
+  int row_num = (int)row;
+  // Turn off annoying HDF5 errors
+  H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
+
+  // Set file access properties so it closes cleanly
+  hid_t fapl;
+  fapl = H5Pcreate(H5P_FILE_ACCESS);
+  H5Pset_fclose_degree(fapl, H5F_CLOSE_STRONG);
+  // Create new/open datafile.
+  hid_t db;
+  if (pyne::file_exists(filename)) {
+    bool ish5 = H5Fis_hdf5(filename.c_str());
+    if (!ish5) throw h5wrap::FileNotHDF5(filename);
+    db = H5Fopen(filename.c_str(), H5F_ACC_RDWR, fapl);
+  } else
+    db = H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+
+  //
+  // Read in nuclist if available, write it out if not
+  //
+  std::vector<int> nuclides = write_hdf5_nucpath(db, nucpath);
+
+  // Check is datapath already exist
+  bool datapath_exists = h5wrap::path_exists(db, datapath);
+  // write mat composition in datapath
+  write_hdf5_datapath(db, datapath, row, chunksize, nuclides);
+
+  // if datapath has just been create register location of nucpath
+  if (!datapath_exists) {
+    hid_t data_set = H5Dopen2(db, datapath.c_str(), H5P_DEFAULT);
+    // Add attribute pointing to nuc path
+    hid_t nuc_attr_type = H5Tcopy(H5T_C_S1);
+    H5Tset_size(nuc_attr_type, nucpath.length());
+    hid_t nuc_attr_space = H5Screate(H5S_SCALAR);
+    hid_t nuc_attr = H5Acreate2(data_set, "nucpath", nuc_attr_type,
+                                nuc_attr_space, H5P_DEFAULT, H5P_DEFAULT);
+    H5Awrite(nuc_attr, nuc_attr_type, nucpath.c_str());
+    H5Fflush(db, H5F_SCOPE_GLOBAL);
+    H5Dclose(data_set);
+  }
   // Close out the HDF5 file
   H5Fclose(db);
   // Remember the milk!
   // ...by which I mean to deallocate
-  delete[] mat_data;
 }
+
 
 std::string pyne::Material::openmc(std::string frac_type) {
   std::ostringstream oss;
