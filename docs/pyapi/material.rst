@@ -12,17 +12,17 @@ All functionality may be found in the ``material`` package::
 
  from pyne import material
 
-Materials are the primary container for radionuclides. They map nuclides to **mass weights**, 
-though they contain methods for converting to/from atom fractions as well.
-In many ways they take inspiration from numpy arrays and python dictionaries.  Materials
-have two main attributes which define them.
+Materials are the primary container for radionuclides. They map nuclides to
+**mass weights**, though they contain methods for converting to/from atom
+fractions as well.  In many ways they take inspiration from numpy arrays and
+python dictionaries.  Materials have two main attributes which define them.
 
-1. **comp**: a normalized composition mapping from nuclides (zzaaam-ints) to mass-weights (floats).
-2. **mass**: the mass of the material.
+1. **comp**: a normalized composition mapping from nuclides (zzaaam-ints) to
+   mass-weights (floats).  2. **mass**: the mass of the material.
 
 The :ref:`pyne_material_library` class is available to efficiently manipulate
-collections of materials.
-The material class is presented below.  For more information please refer to :ref:`usersguide_material`.
+collections of materials.  The material class is presented below.  For more
+information please refer to :ref:`usersguide_material`.
 
 When using the `write_hdf5` method, the default structure for the `HDF5` file
 is:
@@ -34,13 +34,15 @@ is:
     /material/my_mat/composition_metadata
 
 
-Where, `/material` and `/material/my_mat` are HDF5 groups, (`my_mat` value shall be provided
-as the datapath by the user).
+Where, `/material` and `/material/my_mat` are HDF5 groups, (`my_mat` value shall
+be provided as the datapath by the user). IF the `$datapath` or `/material`
+exist as a dataset in the file, then the old writing method will ne used.
 
-Older structure are still available to written when providing a `nucpath` to
-the `write_hdf5()` method.
+Older structure are still available to written when providing a `nucpath` to the
+`write_hdf5()` method.
 
-`from_hdf5()` will detect the structure (old or new) of the file (when using `protocol1`).
+`from_hdf5()` will detect the structure (old or new) of the file (when using
+`protocol1`).
 
 
 **************
