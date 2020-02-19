@@ -516,13 +516,13 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
   fapl = H5Pcreate(H5P_FILE_ACCESS);
   H5Pset_fclose_degree(fapl, H5F_CLOSE_STRONG);
   // Create new/open datafile.
-  
+
   // This complicated algorithm is required to allow backward compatibility with
   // previous version of write_hdf5 (where data were written in a hdf5 DATASET)
   // FILE EXIST ?
   //    NO -> create file with a "/material" group, write the data in it
   //    YES:
-  //      - DATAPTH exist: 
+  //      - DATAPTH exist:
   //        - YES && != /material -> Detect NUCPATH + old write_hdf5
   //        - NO -> CONTINUE
   //          - "/material" EXIST:
@@ -531,7 +531,7 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
   //              - "/material" is a DATASET -> detect NUCPATH + old write_hdf5
   //              - "/material" is a GROUP -> add data in it
   //              - "/material" isn't a GROUP nor a DATASET -> fail and complain
-  
+
   hid_t db;
   if (!pyne::file_exists(filename)) {
     // Create the file
@@ -541,7 +541,7 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
     bool ish5 = H5Fis_hdf5(filename.c_str());
     if (!ish5) throw h5wrap::FileNotHDF5(filename);
     db = H5Fopen(filename.c_str(), H5F_ACC_RDWR, fapl);
-    
+
     // if datapath != /material and exist -> old format
     if (h5wrap::path_exists(db, datapath) && datapath != "/material") {
       std::string nucpath;
@@ -554,9 +554,9 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
         return;
       } else {  // can't find a valid nuclide list path form datapath... fail
         std::cout
-            << "Can't find the nuclide list path in the existing datapath." << std::endl 
-            << "Can't add your material to the datapath."
-            << std::endl;
+            << "Can't find the nuclide list path in the existing datapath."
+            << std::endl
+            << "Can't add your material to the datapath." << std::endl;
         exit(1);
       }
     }
@@ -575,7 +575,8 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
       deprecated_write_hdf5(filename, datapath, "/nucid", row, chunksize);
       return;
 
-    } else if (object_info.type != H5O_TYPE_GROUP) {  // "/material" either a dataset or a group:
+    } else if (object_info.type !=
+               H5O_TYPE_GROUP) {  // "/material" either a dataset or a group:
                                   // fail!
       std::cout << "Non-group/non-dataset object /material already exists "
                    "in the file. Can't write the Material"
@@ -591,12 +592,12 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
   // Check is /material exist as a Group
   // Group "/material/datapath" does not exist create it
   if (!h5wrap::path_exists(db, "/material" + datapath)) {
-    data_id = H5Gcreate2(db, ("/material"+datapath).c_str(), H5P_DEFAULT,
+    data_id = H5Gcreate2(db, ("/material" + datapath).c_str(), H5P_DEFAULT,
                          H5P_DEFAULT, H5P_DEFAULT);
   } else {
     data_id = H5Gopen2(material_grp_id, datapath.c_str(), H5P_DEFAULT);
   }
-  //std::string nucpath = "/nuclidelist";
+  // std::string nucpath = "/nuclidelist";
   std::string full_datapath = "/material" + datapath + "/composition";
   std::string nucpath = "/material" + datapath + "/nuclidelist";
   std::vector<int> nuclides = write_hdf5_nucpath(data_id, nucpath);
@@ -605,8 +606,6 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
   H5Gclose(material_grp_id);
   H5Fclose(db);
 }
-
-
 void pyne::Material::deprecated_write_hdf5(std::string filename, std::string datapath,
                                 std::string nucpath, float row, int chunksize) {
   int row_num = (int)row;
