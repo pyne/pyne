@@ -53,9 +53,8 @@ cdef extern from "material.h" namespace "pyne":
         void from_hdf5(char *, char *, int) except +
         void from_hdf5(char *, char *, int, int) except +
 
-        void write_hdf5(char *, char *, char *) except +
-        void write_hdf5(char *, char *, char *, float) except +
-        void write_hdf5(char *, char *, char *, float, int) except +
+        void deprecated_write_hdf5(char *, char *, char *, float, int) except +
+        void write_hdf5(char *, char *, float, int) except +
 
         void from_text(char *) except +
 

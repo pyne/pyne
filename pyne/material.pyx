@@ -277,9 +277,9 @@ cdef class _Material:
         self.mat_pointer.from_hdf5(c_filename, c_datapath, row, protocol)
 
 
-    def write_hdf5(self, filename, datapath="/material", nucpath="/nucid",
+    def write_hdf5(self, filename, datapath="/material", nucpath="",
                    row=-0.0, chunksize=100):
-        """write_hdf5(filename, datapath="/material", nucpath="/nucid", row=-0.0, chunksize=100)
+        """write_hdf5(filename, datapath="/material", nucpath="", row=-0.0, chunksize=100)
         Writes the material to an HDF5 file, using Protocol 1 (see the
         from_hdf5() method).
 
@@ -331,9 +331,14 @@ cdef class _Material:
         datapath_bytes = datapath.encode('UTF-8')
         c_datapath = datapath_bytes
         cdef char * c_nucpath
-        nucpath_bytes = nucpath.encode('UTF-8')
-        c_nucpath = nucpath_bytes
-        self.mat_pointer.write_hdf5(c_filename, c_datapath, c_nucpath, row, chunksize)
+        
+        if nucpath != "":
+            nucpath_bytes = nucpath.encode('UTF-8')
+            c_nucpath = nucpath_bytes
+            self.mat_pointer.deprecated_write_hdf5(c_filename, c_datapath, c_nucpath, row, chunksize)
+        else:
+            self.mat_pointer.write_hdf5(c_filename, c_datapath, row, chunksize)
+
 
     def phits(self, frac_type='mass'):
         """phits(frac_type)
