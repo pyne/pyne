@@ -61,17 +61,16 @@ cdef class _MaterialLibrary:
     """
 
 
-    def __cinit__(self, lib=None, datapath="/materials", nucpath="/nucid"):
+    def __cinit__(self, lib=None, datapath="/materials"):
         """
         Parameters
         ----------
         lib : dict-like, str, or None, optional
-            The data to intialize the material library with.  If this is a
+            The data to initialize the material library with.  If this is a
             string, it is interpreted as a path to a file.
         datapath : str, optional
-            The path in the heirarchy to the data table in an HDF5 file.
-        nucpath : str, optional
-            The path in the heirarchy to the nuclide array in an HDF5 file.
+            The path in the hierarchy to the data table in an HDF5 file.
+            The path in the hierarchy to the nuclide array in an HDF5 file.
         """
         if lib != None:
             if sys.version_info[0] >= 3 and isinstance(lib, bytes):
@@ -86,8 +85,7 @@ cdef class _MaterialLibrary:
                 # Python2: basestring = (std + unicode)
                 c_filename = lib.encode('UTF-8')
                 c_datapath = datapath.encode('UTF-8')
-                c_nucpath = nucpath.encode('UTF-8')
-                self._inst = new cpp_material_library.MaterialLibrary(c_filename, c_datapath, c_nucpath)
+                self._inst = new cpp_material_library.MaterialLibrary(c_filename, c_datapath)
             elif isinstance(lib, collections.Sequence):
                 self._inst = new cpp_material_library.MaterialLibrary()
                 for key in sorted(lib.keys()):
@@ -103,16 +101,15 @@ cdef class _MaterialLibrary:
         """MaterialLibrary C++ destructor."""
         del self._inst
 
-    def from_hdf5(self, filename, datapath="/materials", nucpath="", protocol=1):
+    def from_hdf5(self, filename, datapath, protocol=1):
         """Loads data from an HDF5 file into this material library.
         Parameters
         ----------
         file : str
             A path to an HDF5 file.
         datapath : str, optional
-            The path in the heirarchy to the data table in an HDF5 file.
-        nucpath : str, optional
-            The path in the heirarchy to the nuclide array in an HDF5 file.
+            The path in the hierarchy to the data table in an HDF5 file.
+            The path in the hierarchy to the nuclide array in an HDF5 file.
         protocol : int, optional
             Specifies the protocol to use to read in the data.  Different
             protocols are used to represent different internal structures in
@@ -125,22 +122,17 @@ cdef class _MaterialLibrary:
         cdef char * c_datapath
         datapath_bytes = datapath.encode('UTF-8')
         c_datapath = datapath_bytes
-        cdef char * c_nucpath
-        nucpath_bytes = nucpath.encode('UTF-8')
-        c_nucpath = nucpath_bytes
-        self._inst.from_hdf5(c_filename, c_datapath, c_nucpath, protocol)
+        self._inst.from_hdf5(c_filename, c_datapath, protocol)
 
 
-    def write_hdf5(self, filename, datapath="/materials", nucpath="/nucid"):
+    def write_hdf5(self, filename, datapath):
         """Writes this material library to an HDF5 file.
         Parameters
         ----------
         filename : str
             A path to an HDF5 file.
         datapath : str, optional
-            The path in the heirarchy to the data table in an HDF5 file.
-        nucpath : str, optional
-            The path in the heirarchy to the nuclide array in an HDF5 file.
+            The path in the hierarchy to the data table in an HDF5 file.
         """
         
         cdef char * c_filename
@@ -149,17 +141,14 @@ cdef class _MaterialLibrary:
         cdef char * c_datapath
         datapath_bytes = datapath.encode('UTF-8')
         c_datapath = datapath_bytes
-        cdef char * c_nucpath
-        nucpath_bytes = nucpath.encode('UTF-8')
-        c_nucpath = nucpath_bytes
-        self._inst.write_hdf5(c_filename, c_datapath, c_nucpath)
+        self._inst.write_hdf5(c_filename, c_datapath)
 
     def add_material(self, key, mat):
         """Add a Material to this material library.
         Parameters
         ----------
         key : str or int (converted to str)
-            key to regisgter the material, if material has no name attribute
+            key to register the material, if material has no name attribute
             will be added as the name metadata of the material
         mat : Material
             PyNE material object be added to this material library
@@ -223,7 +212,7 @@ cdef class _MaterialLibrary:
         """
 
         if isinstance(mat_library, _MaterialLibrary):
-            self._inst.merge(mat_library._inst)
+            self._inst.merge(<cpp_material_library.MaterialLibrary*>(<_MaterialLibrary>mat_library)._inst)
         else:
             raise TypeError("the material library must be a MaterialLibrary but is a "
                             "{0}".format(type(mat_library)))

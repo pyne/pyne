@@ -63,11 +63,9 @@ class MaterialLibrary {
    * \param filename path to file on disk, this file may be either in plaintext
    *                 or HDF5 format.
    * \param datapath Path to the materials in the file.
-   * \param nucpath Path to the nuclides set in the file.
   */
   MaterialLibrary(const std::string& filename,
-                  const std::string& datapath = "/materials",
-                  const std::string& nucpath = "");
+                  const std::string& datapath);
 
   ~MaterialLibrary() {};  //< default destructor
 
@@ -75,25 +73,10 @@ class MaterialLibrary {
    * \brief loads the pyne materials in map of name vs Material
     /// \param filename Path on disk to the HDF5 file.
     /// \param datapath Path to the materials in the file.
-    /// \param nucpath Path to the nuclides set in the file.
     /// \param protocol Flag for layout of material on disk.
   */
   void from_hdf5(const std::string& filename,
-                 const std::string& datapath = "/materials",
-                 const std::string& nucpath = "", int protocol = 1);
-  /**
-   * \brief loads the pyne materials in map of name vs Material
-    /// \param filename Path on disk to the HDF5 file.
-    /// \param datapath Path to the materials in the file.
-    /// \param nucpath Path to the nuclides set in the file.
-    /// \param protocol Flag for layout of material on disk.
-  */
-  void from_hdf5(char* filename, char* datapath = "/materials" , char* nucpath = "", int protocol = 1);
-  /**
-   * \brief loads the pyne materials in map of name vs Material
-    /// \param filename Path on disk to the json file.
-  */
-  void from_json(char* filename);
+                 const std::string& datapath, int protocol = 1);
   /**
    * \brief loads the pyne materials in map of name vs Material
     /// \param filename Path on disk to the json file.
@@ -102,53 +85,36 @@ class MaterialLibrary {
   void load_json(Json::Value json);
   Json::Value dump_json();
   void write_json(const std::string& filename);
-  void write_json(char* filename);
   /**
    * Writes MaterialLibrary out to an HDF5 file.
    *  This happens according to protocol 1.
    *  Writting in a file already containing 
-   *  the nucpath (same name) will be overwritten 
-   *  the existing one. This might cause issue to 
+   *  This might cause issue to 
    *  read material already present in the datapath, 
    *  and for the new materials if written in the 
    *  same datapath.
    *  \param filename Path on disk to the HDF5 file.
    *  \param datapath Path to the the material in the file.
-   *  \param nucpath Path to the nuclides set in the file.
-  */
-  void write_hdf5(char* filename, char* datapath = "/materials", char* nucpath = "/nucid");
-  /**
-   * Writes MaterialLibrary out to an HDF5 file.
-   *  This happens according to protocol 1.
-   *  Writting in a file already containing 
-   *  the nucpath (same name) will be overwritten 
-   *  the existing one. This might cause issue to 
-   *  read material already present in the datapath, 
-   *  and for the new materials if written in the 
-   *  same datapath.
-   *  \param filename Path on disk to the HDF5 file.
-   *  \param datapath Path to the the material in the file.
-   *  \param nucpath Path to the nuclides set in the file.
   */
   void write_hdf5(const std::string& filename,
-                  const std::string& datapath = "/materials",
-                  const std::string& nucpath = "/nucid");
+                  const std::string& datapath = "/materials");
+  /// Writes this nucpath to an HDF5 file.
+  /// This happens according to protocol 1.
+  /// \param db HDF5 id for the open HDF5 file.
+  /// \param nucpath Path to the nuclides list in the file.
+  void write_hdf5_nucpath(hid_t db, std::string nucpath);
   /**
    * \brief Merge a material library into the current one
    * \param mat_library pyne material library to merge
   */
   void merge(pyne::MaterialLibrary mat_lib);
+  void merge(pyne::MaterialLibrary* mat_lib);
 
   /**
    * \brief Add a material to the library
    * \param mat material to add
   */
   void add_material(pyne::Material mat);
-  /**
-   * \brief Add a material to the library
-   * \param mat material to add
-  */
-  void add_material(char* mat_name, pyne::Material mat);
   /**
    * \brief Add a material to the library
    * \param mat_name name of the material to add(will overwrite material name 

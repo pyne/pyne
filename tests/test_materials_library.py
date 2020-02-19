@@ -81,8 +81,7 @@ def test_against_nuc_data():
     if not os.path.isfile(nuc_data):
         raise RuntimeError("Tests require nuc_data.h5. Please run nuc_data_make.")
     obs_matslib = MaterialLibrary(nuc_data,
-                                  datapath="/material_library/materials",
-                                  nucpath="/material_library/nucid")
+                                  datapath="/material_library/materials")
     gasoline = Material({
         "H": 0.157000,
         "C": 0.843000,
@@ -144,13 +143,13 @@ def test_matlib_hdf5():
     water.metadata["name"] = "Aqua sera."
     lib = { "leu": Material(leu),"nucvec": nucvec,"aqua": water}
     wmatlib = MaterialLibrary(lib)
-    wmatlib.write_hdf5(filename)
+    wmatlib.write_hdf5(filename, "/mats1")
     rmatlib = MaterialLibrary()
-    rmatlib.from_hdf5(filename)
+    rmatlib.from_hdf5(filename, "/mats1")
     os.remove(filename)
     # Round trip!
-    rmatlib.write_hdf5(filename)
-    wmatlib = MaterialLibrary(filename)
+    rmatlib.write_hdf5(filename, "/mats1")
+    wmatlib = MaterialLibrary(filenamei, "/mats1")
     assert_equal(set(wmatlib), set(rmatlib))
     for key in rmatlib:
         assert_mat_almost_equal(wmatlib[key], rmatlib[key])

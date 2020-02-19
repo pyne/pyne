@@ -261,7 +261,7 @@ void pyne::Material::from_hdf5(std::string filename, std::string datapath, int r
     status = H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
     status = H5Oget_info_by_name(db, "/material" , &object_info, H5P_DEFAULT);
     // Group "/material" does not exist
-    if (object_info.type == H5O_TYPE_DATASET) {
+    if (status !=0 || object_info.type == H5O_TYPE_DATASET) {
       _load_comp_protocol1(db, datapath, row);
     } else if (object_info.type == H5O_TYPE_GROUP) {
       std::string full_datapath = "/material" + datapath + "/composition";

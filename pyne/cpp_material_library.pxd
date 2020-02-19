@@ -18,7 +18,6 @@ cdef extern from "material_library.h" namespace "pyne":
         MaterialLibrary()
         MaterialLibrary(std_string) except +
         MaterialLibrary(std_string, std_string) except +
-        MaterialLibrary(std_string, std_string, std_string) except +
 
         # Attributes
         unordered_map[std_string, cpp_material.Material*] material_library
@@ -27,25 +26,21 @@ cdef extern from "material_library.h" namespace "pyne":
         vector[std_string] name_order
 
         # Methods
-        void from_hdf5(char*) except +
-        void from_hdf5(char*, char*) except +
-        void from_hdf5(char*, char*, char*) except +
-        void from_hdf5(char*, char*, char*, int) except +
-        void from_hdf5(char*, char*, int) except +
+        void from_hdf5(std_string, std_string, int) except +
         
         void load_json(cpp_jsoncpp.Value) except +
         cpp_jsoncpp.Value dump_json() except +
-        void from_json(char *) except +
-        void write_json(char *) except +
+        void from_json(std_string) except +
+        void write_json(std_string) except +
 
-        void write_hdf5(char*, char*, char*) except +
+        void write_hdf5(std_string, std_string) except +
         
         void add_material(cpp_material.Material) except +
-        void add_material(char*, cpp_material.Material) except +
+        void add_material(std_string, cpp_material.Material) except +
         
         void del_material(cpp_material.Material) except +
         void del_material(std_string) except +
-        void merge(std_string) except +
+        void merge(MaterialLibrary*) except +
         void replace(int, cpp_material.Material) except +
 
         cpp_material.Material get_material(std_string) except +
