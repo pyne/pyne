@@ -76,7 +76,7 @@ class MaterialLibrary {
     /// \param protocol Flag for layout of material on disk.
   */
   void from_hdf5(const std::string& filename,
-                 const std::string& datapath, int protocol = 1);
+                 const std::string& datapath);
   /**
    * \brief loads the pyne materials in map of name vs Material
     /// \param filename Path on disk to the json file.

@@ -11,33 +11,56 @@ pyne::MaterialLibrary::MaterialLibrary(){};
 // Default constructor
 pyne::MaterialLibrary::MaterialLibrary(const std::string& file,
                                        const std::string& datapath) {
-  if (!pyne::file_exists(file)) {
-    throw std::runtime_error("File " + file +
-                             " not found or no read permission");
-  }
-  if (!hdf5_path_exists(file, datapath)) {
-    throw std::runtime_error("The datapath, " + datapath + ", in " + file +
-                             " is empty.");
-  }
   // load materials
   from_hdf5(file, datapath);
 };
 
 // Append Material to the library from hdf5 file
 void pyne::MaterialLibrary::from_hdf5(const std::string& filename,
-                                      const std::string& datapath,
-                                      int protocol) {
-  if (!hdf5_path_exists(filename, datapath)) {
-    throw std::runtime_error("The datapath, " + datapath + ", in " + filename +
-                             " is empty.");
+                                      const std::string& datapath) {
+  if (!pyne::file_exists(filename)) {
+    throw std::runtime_error("File " + filename +
+                             " not found or no read permission");
+  }
+  std::string nucpath;
+  std::string full_datapath = datapath;
+
+  
+  // Set file access properties so it closes cleanly
+  hid_t fapl;
+  fapl = H5Pcreate(H5P_FILE_ACCESS);
+  H5Pset_fclose_degree(fapl, H5F_CLOSE_STRONG);
+  
+  // Open the database
+  hid_t db = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, fapl);
+  
+  // Get datapath status in the hdf5 file
+  herr_t status;
+  status = H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
+  hid_t matlib_group_id = db;
+  H5O_info_t object_info;
+  status = H5Oget_info_by_name(db, datapath.c_str(), &object_info, H5P_DEFAULT);
+  
+  // if datapath exist and is a dataset -> old hdf5 mat_lib format
+  // else if datapath does not exist -> new hdf5 mat lib format
+  // else don't know what to do with it: fail !
+  if (status == 0 && object_info.type == H5O_TYPE_DATASET) {
+    // Open dataset to retrieve nucclide list location form nucpath attribute
+    hid_t data_set = H5Dopen2(db, datapath.c_str(), H5P_DEFAULT);
+    pyne::detect_nuclidelist(data_set, nucpath);
+    H5Dclose(data_set);
+  } else if (status != 0) {
+    full_datapath = "/material_library" + datapath + "/composition";
+    nucpath = "/material_library" + datapath + "/nuclidelist";
+  } else {
+    throw std::runtime_error(datapath + " exist but is not a dataset.");
   }
 
-  int file_num_materials = get_length_of_table(filename, datapath);
+  int file_num_materials = get_length_of_table(filename, full_datapath);
   int library_length = material_library.size();
   for (int i = 0; i < file_num_materials; i++) {
     pyne::Material mat = pyne::Material();
-    // Get material from the hdf5 file
-    mat.from_hdf5(filename, datapath, i, protocol);
+    mat._load_comp_protocol1(db, full_datapath, nucpath, i);
     (*this).add_material(mat);
   }
 }
@@ -239,12 +262,11 @@ void pyne::MaterialLibrary::write_hdf5(const std::string& filename,
       H5Oget_info_by_name(db, "/material_library", &object_info, H5P_DEFAULT);
   // check if "/material" exists
   if (status == 0) {
-    if (object_info.type !=
-        H5O_TYPE_GROUP) {  // "/material_library" not a group: fail!
-      std::cout << "Non-group/non-dataset object /material_library already exists "
-                   "in the file. Can't write the Material"
-                << std::endl;
-      exit(1);
+    // "/material_library" not a group: fail!
+    if (object_info.type != H5O_TYPE_GROUP) {
+      throw std::runtime_error(
+          "Non-group/non-dataset object /material_library already exists in "
+          "the file. Can't write the Material");
     } else {  // "/material" is a group get his hid
       matlib_grp_id = H5Gopen2(db, "/material_library", H5P_DEFAULT);
     }
@@ -272,7 +294,6 @@ void pyne::MaterialLibrary::write_hdf5(const std::string& filename,
   H5Gclose(matlib_grp_id);
   H5Fclose(db);
 }
-
 void pyne::MaterialLibrary::write_hdf5_nucpath(hid_t db, std::string nucpath) {
   //
   // Read in nuclist if available, write it out if not

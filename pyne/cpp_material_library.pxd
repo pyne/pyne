@@ -26,7 +26,7 @@ cdef extern from "material_library.h" namespace "pyne":
         vector[std_string] name_order
 
         # Methods
-        void from_hdf5(std_string, std_string, int) except +
+        void from_hdf5(std_string, std_string) except +
         
         void load_json(cpp_jsoncpp.Value) except +
         cpp_jsoncpp.Value dump_json() except +
