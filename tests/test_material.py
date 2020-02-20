@@ -202,7 +202,6 @@ def test_hdf5_protocol_1():
     if 'proto1.h5' in os.listdir('.'):
         os.remove('proto1.h5')
 
-    print("done")
     # Test material writing
     leu = Material({'U235': 0.04, 'U238': 0.96}, 4.2, 2.72, 1.0)
     leu.metadata['comment'] = 'first light'
@@ -212,10 +211,8 @@ def test_hdf5_protocol_1():
         leu = Material({'U235': 0.04, 'U238': 0.96}, i*4.2, 2.72, 1.0*i)
         leu.metadata['comment'] = 'fire in the disco - {0}'.format(i)
         leu.write_hdf5('proto1.h5')
-    print("done2")
 
     # Loads with protocol 1 now.
-    print("done3")
     m = Material()
     m.from_hdf5('proto1.h5', '/material', -3, 1)
     assert_equal(m.density, 2.72)
@@ -224,16 +221,13 @@ def test_hdf5_protocol_1():
     assert_equal(m.comp, {922350000: 0.04, 922380000: 0.96})
     assert_equal(m.metadata['comment'], 'fire in the disco - 8')
 
-    print("done4")
     m = from_hdf5('proto1.h5', '/material', 3, 1)
     assert_equal(m.density, 2.72)
     assert_equal(m.atoms_per_molecule, 4.0)
     assert_equal(m.mass, 16.8)
     assert_equal(m.comp, {922350000: 0.04, 922380000: 0.96})
     assert_equal(m.metadata['comment'], 'fire in the disco - 4')
-    print("done5")
-    #os.remove('proto1.h5')
-    print("kill")
+    os.remove('proto1.h5')
 
 class TestMaterialMethods(TestCase):
     "Tests that the Material member functions work."
