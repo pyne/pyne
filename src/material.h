@@ -43,6 +43,13 @@ namespace pyne
   }  // namespace decayers
   #endif
 
+  /// Looking for the nuclide list path in the nucpath attribute of the dataset.
+  /// This happens according to protocol 1.
+  /// \param dataset hid of the dataset.
+  /// \param nucpath address of the path to the nuclides list in the file 
+  /// (update when nucpath is found).
+  /// \return true if the nucpath attribure is present in the dataset
+  bool detect_nuclidelist(hid_t dataset, std::string& nucpath);
 
   // These 37 strings are predefined FLUKA materials.
   // Materials not on this list requires a MATERIAL card.
@@ -191,16 +198,6 @@ namespace pyne
     /// \return list of nuclide writen in the file (or the existing list if the nuclides 
     /// list was already in the file 
     std::vector<int> write_hdf5_nucpath(hid_t db, std::string nucpath);
-   
-    /// Looking for the nuclide list path in the nucpath attribute of the dataset.
-    /// This happens according to protocol 1.
-    /// \param dataset hid of the dataset.
-    /// \param nucpath address of the path to the nuclides list in the file 
-    /// (update when nucpath is found).
-    /// \return true if the nucpath attribure is present in the dataset
-    bool detect_nuclidelist(hid_t dataset, std::string& nucpath);
-
-
 
     /// Writes this datapath to an HDF5 file.
     /// This happens according to protocol 1.
