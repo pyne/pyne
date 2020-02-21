@@ -156,7 +156,11 @@ namespace pyne
     /// \param protocol Flag for layout of material on disk.
     void from_hdf5(std::string filename, std::string datapath="/material",
                                                           int row=-1, int protocol=1);
-    /// Writes this material out to an HDF5 file.
+    /// Writes this material out to an HDF5 file in the old data structure
+    /// format.
+    /// Now deprecated, as material data structure in HDF5 format has been
+    /// refactored. Will only be used when adding material in a file containing
+    /// old material data structure
     /// This happens according to protocol 1.
     /// \param filename Path on disk to the HDF5 file.
     /// \param datapath Path to the the material in the file.
