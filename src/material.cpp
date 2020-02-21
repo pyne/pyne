@@ -537,8 +537,8 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
 
       // Grab the nucpath
       if (detect_nuclidelist(data_set, nucpath)) {
-        H5Fclose(db);
-        deprecated_write_hdf5(filename, datapath, nucpath, row, chunksize);
+      deprecated_write_hdf5(db, datapath, "/nucid", row, chunksize);
+      H5Fclose(db);
         return;
       } else {  // can't find a valid nuclide list path form datapath... fail
         throw std::runtime_error(
@@ -558,8 +558,8 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
     if (object_info.type ==
         H5O_TYPE_DATASET) {  // "/material" is a dataset -> old format use
                              // deprecated write_hdf5
+      deprecated_write_hdf5(db, datapath, "/nucid", row, chunksize);
       H5Fclose(db);
-      deprecated_write_hdf5(filename, datapath, "/nucid", row, chunksize);
       return;
 
     } else if (object_info.type != H5O_TYPE_GROUP) {
@@ -593,9 +593,9 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
   H5Fclose(db);
 }
 
+
 void pyne::Material::deprecated_write_hdf5(std::string filename, std::string datapath,
                                 std::string nucpath, float row, int chunksize) {
-  int row_num = (int)row;
   // Turn off annoying HDF5 errors
   H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
@@ -611,6 +611,15 @@ void pyne::Material::deprecated_write_hdf5(std::string filename, std::string dat
     db = H5Fopen(filename.c_str(), H5F_ACC_RDWR, fapl);
   } else
     db = H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+
+  deprecated_write_hdf5(db, datapath, nucpath, row, chunksize);
+
+  H5Fclose(db);
+}
+
+void pyne::Material::deprecated_write_hdf5(hid_t db, std::string datapath,
+                                std::string nucpath, float row, int chunksize) {
+  int row_num = (int)row;
 
   //
   // Read in nuclist if available, write it out if not
@@ -635,10 +644,6 @@ void pyne::Material::deprecated_write_hdf5(std::string filename, std::string dat
     H5Fflush(db, H5F_SCOPE_GLOBAL);
     H5Dclose(data_set);
   }
-  // Close out the HDF5 file
-  H5Fclose(db);
-  // Remember the milk!
-  // ...by which I mean to deallocate
 }
 
 
