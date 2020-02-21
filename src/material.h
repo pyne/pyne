@@ -171,6 +171,21 @@ namespace pyne
     /// \param chunksize The chunksize for all material data on disk.
     void deprecated_write_hdf5(char * filename, char * datapath, char * nucpath, float row=-0.0,
                                                                     int chunksize=100);
+    /// Writes this material out to an HDF5 file in the old data structure
+    /// format.
+    /// Now deprecated, as material data structure in HDF5 format has been
+    /// refactored. Only used when adding material in a file containing
+    /// old material data structure.
+    /// This happens according to protocol 1.
+    /// \param db HDF5 id for the open HDF5 file.
+    /// \param datapath Path to the the material in the file.
+    /// \param nucpath Path to the nuclides set in the file.
+    /// \param row The index to read out, may be negative. Also note that this is a
+    ///            float.  A value of -0.0 indicates that the material should be
+    ///            appended to the end of the dataset.
+    /// \param chunksize The chunksize for all material data on disk.
+    void deprecated_write_hdf5(hid_t db, std::string datapath, std::string nucpath, float row=-0.0,
+                                                                    int chunksize=100);
     /// Writes this material out to an HDF5 file.
     /// This happens according to protocol 1.
     /// \param filename Path on disk to the HDF5 file.
