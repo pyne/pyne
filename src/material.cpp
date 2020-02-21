@@ -237,7 +237,7 @@ void pyne::Material::from_hdf5(std::string filename, std::string datapath, int r
     _load_comp_protocol0(db, datapath, row);
   } else if (protocol == 1) {
     
-    // Check is /material type
+    // Check /material type
     herr_t status;
     H5O_info_t object_info;
     status = H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
@@ -546,6 +546,7 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
       }
     }
   }
+  
   // Check if /material exist and what type it is
   herr_t status;
   H5O_info_t object_info;
@@ -570,7 +571,7 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
     material_grp_id =
         H5Gcreate2(db, "/material", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   }
-  // Check is /material exist as a Group
+  // Check if /material exist as a Group
   // Group "/material/datapath" does not exist create it
   if (!h5wrap::path_exists(db, "/material" + datapath)) {
     data_id = H5Gcreate2(db, ("/material" + datapath).c_str(), H5P_DEFAULT,
@@ -578,11 +579,14 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
   } else {
     data_id = H5Gopen2(material_grp_id, datapath.c_str(), H5P_DEFAULT);
   }
-  // std::string nucpath = "/nuclidelist";
-  std::string full_datapath = "/material" + datapath + "/composition";
+  //write nuclide list
   std::string nucpath = "/material" + datapath + "/nuclidelist";
   std::vector<int> nuclides = write_hdf5_nucpath(data_id, nucpath);
+  // write data 
+  std::string full_datapath = "/material" + datapath + "/composition";
   write_hdf5_datapath(data_id, full_datapath, row, chunksize, nuclides);
+  
+  //close all groups and files
   H5Gclose(data_id);
   H5Gclose(material_grp_id);
   H5Fclose(db);
@@ -612,7 +616,7 @@ void pyne::Material::deprecated_write_hdf5(std::string filename, std::string dat
   //
   std::vector<int> nuclides = write_hdf5_nucpath(db, nucpath);
 
-  // Check is datapath already exist
+  // Check if datapath already exist
   bool datapath_exists = h5wrap::path_exists(db, datapath);
   // write mat composition in datapath
   write_hdf5_datapath(db, datapath, row, chunksize, nuclides);
