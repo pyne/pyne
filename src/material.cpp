@@ -169,7 +169,8 @@ void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath,
   //
   std::string attrpath = datapath + "_metadata";
   bool attrpath_exists = h5wrap::path_exists(db, attrpath);
-  if (!attrpath_exists) return;
+  if (!attrpath_exists)
+    return;
 
   hid_t metadatapace, attrtype, metadataet, metadatalab, attrmemspace;
   int attrrank;
