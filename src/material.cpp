@@ -243,8 +243,13 @@ void pyne::Material::from_hdf5(std::string filename, std::string datapath, int r
     H5O_info_t object_info;
     status = H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
     status = H5Oget_info_by_name(db, "/material" , &object_info, H5P_DEFAULT);
+    herr_t status2;
+    H5O_info_t object_info2;
+    status2 = H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
+    status2 = H5Oget_info_by_name(db, datapath.c_str(), &object_info, H5P_DEFAULT);
     // Group "/material" does not exist
-    if (status !=0 || object_info.type == H5O_TYPE_DATASET) {
+    if (status != 0 || object_info.type == H5O_TYPE_DATASET ||
+        status2 != 0 || object_info2.type == H5O_TYPE_DATASET) {
       bool datapath_exists = h5wrap::path_exists(db, datapath);
       if (!datapath_exists)
         throw h5wrap::PathNotFound(filename, datapath);
