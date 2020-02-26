@@ -492,6 +492,9 @@ void pyne::Material::write_hdf5_datapath(hid_t db, std::string datapath, float r
 
 void pyne::Material::write_hdf5(std::string filename, std::string datapath,
                                 float row, int chunksize) {
+  if (datapath.front() != '/')
+    datapath = '/' + datapath;
+  
   hid_t material_grp_id;  // Holder of HDF5 Id of the "/material" group
   hid_t data_id;  // Holder of HDF5 Id of the data group to write the data
                   // (located in "/material/datapath")
