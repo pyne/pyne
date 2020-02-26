@@ -156,6 +156,39 @@ namespace pyne
     /// \param protocol Flag for layout of material on disk.
     void from_hdf5(std::string filename, std::string datapath="/material",
                                                           int row=-1, int protocol=1);
+    /// Writes this material out to an HDF5 file.
+    /// This happens according to protocol 1.
+    /// \param filename Path on disk to the HDF5 file.
+    /// \param datapath Path to the the material in the file.
+    /// \param row The index to read out, may be negative. Also note that this is a
+    ///            float.  A value of -0.0 indicates that the material should be
+    ///            appended to the end of the dataset.
+    /// \param chunksize The chunksize for all material data on disk.
+    /// New write_hdf5 which fallback on the old one when required
+    void write_hdf5(std::string filename, std::string datapath="/material", 
+        float row=-0.0, int chunksize= 100);
+
+    /// Writes this nucpath to an HDF5 file.
+    /// This happens according to protocol 1.
+    /// \param db HDF5 id for the open HDF5 file.
+    /// \param nucpath Path to the nuclides list in the file.
+    /// \return list of nuclide writen in the file (or the existing list if the nuclides 
+    /// list was already in the file 
+    std::vector<int> write_hdf5_nucpath(hid_t db, std::string nucpath);
+
+    /// Writes this datapath to an HDF5 file.
+    /// This happens according to protocol 1.
+    /// \param db HDF5 id for the open HDF5 file.
+    /// \param datapath Path to the the material in the file.
+    /// \param nucpath Path to the nuclides list in the file.
+    /// \param row The index to read out, may be negative. Also note that this is a
+    ///            float.  A value of -0.0 indicates that the material should be
+    ///            appended to the end of the dataset.
+    /// \param chunksize The chunksize for all material data on disk.
+    /// Only the nuclides present in the nuclides list can be part of the composition 
+    /// of the material, additional nuclides will be ignored, and a warning will be thrown
+    void write_hdf5_datapath(hid_t db, std::string datapath, float row, int chunksize, 
+        std::vector<int> nuclides);
     /// Writes this material out to an HDF5 file in the old data structure
     /// format.
     /// Now deprecated, as material data structure in HDF5 format has been
@@ -197,41 +230,6 @@ namespace pyne
     /// \param chunksize The chunksize for all material data on disk.
     void deprecated_write_hdf5(std::string filename, std::string datapath,
                     std::string nucpath, float row=-0.0, int chunksize=100);
-    
-    /// Writes this material out to an HDF5 file.
-    /// This happens according to protocol 1.
-    /// \param filename Path on disk to the HDF5 file.
-    /// \param datapath Path to the the material in the file.
-    /// \param row The index to read out, may be negative. Also note that this is a
-    ///            float.  A value of -0.0 indicates that the material should be
-    ///            appended to the end of the dataset.
-    /// \param chunksize The chunksize for all material data on disk.
-    /// New write_hdf5 which fallback on the old one when required
-    void write_hdf5(std::string filename, std::string datapath="/material", 
-        float row=-0.0, int chunksize= 100);
-
-    /// Writes this nucpath to an HDF5 file.
-    /// This happens according to protocol 1.
-    /// \param db HDF5 id for the open HDF5 file.
-    /// \param nucpath Path to the nuclides list in the file.
-    /// \return list of nuclide writen in the file (or the existing list if the nuclides 
-    /// list was already in the file 
-    std::vector<int> write_hdf5_nucpath(hid_t db, std::string nucpath);
-
-    /// Writes this datapath to an HDF5 file.
-    /// This happens according to protocol 1.
-    /// \param db HDF5 id for the open HDF5 file.
-    /// \param datapath Path to the the material in the file.
-    /// \param nucpath Path to the nuclides list in the file.
-    /// \param row The index to read out, may be negative. Also note that this is a
-    ///            float.  A value of -0.0 indicates that the material should be
-    ///            appended to the end of the dataset.
-    /// \param chunksize The chunksize for all material data on disk.
-    /// Only the nuclides present in the nuclides list can be part of the composition 
-    /// of the material, additional nuclides will be ignored, and a warning will be thrown
-    void write_hdf5_datapath(hid_t db, std::string datapath, float row, int chunksize, 
-        std::vector<int> nuclides);
-
     /// Return an openmc xml material element as a string
     std::string openmc(std::string fact_type = "mass");
 
