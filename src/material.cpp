@@ -530,7 +530,12 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
     if (!ish5) throw h5wrap::FileNotHDF5(filename);
     db = H5Fopen(filename.c_str(), H5F_ACC_RDWR, fapl);
 
-    // if datapath != /material and exist -> old format
+    // there are a few things that may be true here:
+    // datapath does not exist - there are many possible reasons for this, including
+    //         datapath = "non_default_path" without a leading slash (/) --> assume this is a modifier for a new format
+    // datapath does exist:
+    //         datapath = "/non_default_path" --> old format
+    //         datapath = "/material"   --> new format
     if (h5wrap::path_exists(db, datapath) && datapath != "/material") {
       std::string nucpath;
       hid_t data_set = H5Dopen2(db, datapath.c_str(), H5P_DEFAULT);
@@ -2081,4 +2086,3 @@ bool pyne::detect_nuclidelist(hid_t data_set, std::string& nucpath){
   H5Tclose(nuc_attr);
   return true;
 }
-
