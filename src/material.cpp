@@ -594,7 +594,6 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
     material_grp_id =
         H5Gcreate2(db, "/material", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   }
-  // Check if /material exist as a Group
   // Group "/material/datapath" does not exist create it
   if (!h5wrap::path_exists(db, "/material" + datapath)) {
     data_id = H5Gcreate2(db, ("/material" + datapath).c_str(), H5P_DEFAULT,
