@@ -238,22 +238,26 @@ void pyne::Material::from_hdf5(std::string filename, std::string datapath, int r
     _load_comp_protocol0(db, datapath, row);
   } else if (protocol == 1) {
     
-    // Check /material type
-    // set test variables
+    // Check /material type:
+    // Valid status are: 
+    //     - old format: "/material" or datapath as a dataset
+    //     - new format: "/material" as a groupset
+    // Testing for datapath first and "/material" in second so one can check 
+    // in the "else if" statement if "/material" exist otherwise as a group
+    // Initialize test variables
     herr_t status= H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
     H5O_info_t object_info;
     
-    // Reset status and test if datapath exist as a non-dataset
+    // Test if datapath exist as a non-dataset
     status = H5Oget_info_by_name(db, datapath.c_str(), &object_info, H5P_DEFAULT);
     bool datapath_notdataset_exists = (status == 0 && object_info.type != H5O_TYPE_DATASET);
     
-    // check "/material" path exist as a non-dataset
+    // Reset status and test "/material" path exist as a non-dataset
     status = H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
     status = H5Oget_info_by_name(db, "/material" , &object_info, H5P_DEFAULT);
     bool material_notdataset_exists = (status == 0 && object_info.type != H5O_TYPE_DATASET);
-   
     
-    // Group "/material" does not exist as a non-dataset
+    // Group "/material" & datapath do not exist as a non-dataset
     if (!material_notdataset_exists || !datapath_notdataset_exists) {
       bool datapath_exists = h5wrap::path_exists(db, datapath);
       if (!datapath_exists)
