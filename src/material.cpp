@@ -239,7 +239,7 @@ void pyne::Material::from_hdf5(std::string filename, std::string datapath, int r
   } else if (protocol == 1) {
     
     // Check /material type:
-    // Valid status are: 
+    // Valid options are: 
     //     - old format: "/material" or datapath as a dataset
     //     - new format: "/material" as a groupset
     // Testing for datapath first and "/material" in second so one can check 
