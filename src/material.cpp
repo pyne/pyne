@@ -243,14 +243,15 @@ void pyne::Material::from_hdf5(std::string filename, std::string datapath, int r
     herr_t status= H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
     H5O_info_t object_info;
     
+    // Reset status and test if datapath exist as a non-dataset
+    status = H5Oget_info_by_name(db, datapath.c_str(), &object_info, H5P_DEFAULT);
+    bool datapath_notdataset_exists = (status == 0 && object_info.type != H5O_TYPE_DATASET);
+    
     // check "/material" path exist as a non-dataset
+    status = H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
     status = H5Oget_info_by_name(db, "/material" , &object_info, H5P_DEFAULT);
     bool material_notdataset_exists = (status == 0 && object_info.type != H5O_TYPE_DATASET);
    
-    // Reset status and test if datapath exist as a non-dataset
-    status = H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
-    status = H5Oget_info_by_name(db, datapath.c_str(), &object_info, H5P_DEFAULT);
-    bool datapath_notdataset_exists = (status == 0 && object_info.type != H5O_TYPE_DATASET);
     
     // Group "/material" does not exist as a non-dataset
     if (!material_notdataset_exists || !datapath_notdataset_exists) {
