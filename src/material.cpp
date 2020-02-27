@@ -243,6 +243,7 @@ void pyne::Material::from_hdf5(std::string filename, std::string datapath, int r
     H5O_info_t object_info;
     status = H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
     status = H5Oget_info_by_name(db, "/material" , &object_info, H5P_DEFAULT);
+    bool material_path_exists = (status ==0 && object_info.type != H5O_TYPE_DATASET)
     herr_t status2;
     H5O_info_t object_info2;
     status2 = H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
