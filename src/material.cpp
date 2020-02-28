@@ -206,6 +206,39 @@ void pyne::Material::from_hdf5(char * filename, char * datapath, int row, int pr
   from_hdf5(fname, dpath, row, protocol);
 }
 
+int pyne::Material::detect_hdf5_layout(hid_t db, std::string path){
+  // Check hdf5 material layout:
+  // return options are: 
+  //     -"-1": path and "/material" do not exist
+  //     - "0": path and/or "/material" exist but either as a group or a dataset
+  //     - "1": path exists as a dataset -> old layout
+  //     - "2": "/material" exists as a group-> new layout
+  
+  // Initialize test variables
+  herr_t status= H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
+  
+  // Test if datapath exist as a non-dataset
+  H5O_info_t path_info;
+  status = H5Oget_info_by_name(db, path.c_str(), &path_info, H5P_DEFAULT);
+  bool path_exists = (status == 0);
+  
+  // Reset status and test "/material" path exist as a non-dataset
+  H5O_info_t matpath_info;
+  status = H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
+  status = H5Oget_info_by_name(db, "/material" , &matpath_info, H5P_DEFAULT);
+  bool matpath_exists = (status == 0);
+  
+  if (!matpath_exists && !path_exists){
+    return -1;
+  } else if (path_info.type == H5O_TYPE_DATASET){
+    return 1;
+  } else if (matpath_info.type == H5O_TYPE_GROUP) {
+    return 2;
+  } else {
+    return 0;
+  }
+}
+
 
 void pyne::Material::from_hdf5(std::string filename, std::string datapath, int row, int protocol) {
   // Turn off annoying HDF5 errors
@@ -237,38 +270,27 @@ void pyne::Material::from_hdf5(std::string filename, std::string datapath, int r
       throw h5wrap::PathNotFound(filename, datapath);
     _load_comp_protocol0(db, datapath, row);
   } else if (protocol == 1) {
+    enum prot1_layout {path_donotexists=-1, unknown, old_layout, new_layout};
     
-    // Check /material type:
-    // Valid options are: 
-    //     - old format: "/material" or datapath as a dataset
-    //     - new format: "/material" as a groupset
-    // Testing for datapath first and "/material" in second so one can check 
-    // in the "else if" statement if "/material" exist otherwise as a group
-    // Initialize test variables
-    herr_t status= H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
-    H5O_info_t object_info;
-    
-    // Test if datapath exist as a non-dataset
-    status = H5Oget_info_by_name(db, datapath.c_str(), &object_info, H5P_DEFAULT);
-    bool datapath_notdataset_exists = (status == 0 && object_info.type != H5O_TYPE_DATASET);
-    
-    // Reset status and test "/material" path exist as a non-dataset
-    status = H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
-    status = H5Oget_info_by_name(db, "/material" , &object_info, H5P_DEFAULT);
-    bool material_notdataset_exists = (status == 0 && object_info.type != H5O_TYPE_DATASET);
-    
-    // Group "/material" & datapath do not exist as a non-dataset
-    if (!material_notdataset_exists || !datapath_notdataset_exists) {
-      bool datapath_exists = h5wrap::path_exists(db, datapath);
-      if (!datapath_exists)
-        throw h5wrap::PathNotFound(filename, datapath);
-      _load_comp_protocol1(db, datapath, row);
-    } else if (object_info.type == H5O_TYPE_GROUP) {
-      std::string full_datapath = "/material" + datapath + "/composition";
-      std::string nucpath = "/material" + datapath + "/nuclidelist";
-      _load_comp_protocol1(db, full_datapath, nucpath, row);
-    } else {
-      throw std::runtime_error("/material entity is neither a group nor a dataset.");
+    int prot1_hdf5_layout = detect_hdf5_layout(db, datapath);
+    switch(prot1_hdf5_layout) {
+      case path_donotexists:
+        throw std::runtime_error("/material and " +datapath+ " path do not exist.");
+        break;
+
+      case unknown:
+        throw std::runtime_error(datapath + " is not a dataset and /material entity is not a group.");
+        break;
+
+      case old_layout:
+        _load_comp_protocol1(db, datapath, row);
+        break;
+      
+      case new_layout:
+        std::string full_datapath = "/material" + datapath + "/composition";
+        std::string nucpath = "/material" + datapath + "/nuclidelist";
+        _load_comp_protocol1(db, full_datapath, nucpath, row);
+        break;
     }
   } else
     throw pyne::MaterialProtocolError();
