@@ -156,6 +156,17 @@ namespace pyne
     /// \param protocol Flag for layout of material on disk.
     void from_hdf5(std::string filename, std::string datapath="/material",
                                                           int row=-1, int protocol=1);
+    
+    /// Detect the HDF5 file assuming protocol1.
+    /// \param db HDF5 id for the open HDF5 file.
+    /// \param datapath Path to look for the material in the file.
+    /// Return options are: 
+    ///     -"-1": datapath and "/material" do not exist
+    ///     - "0": datapath and/or "/material" exist but either as a group or a dataset
+    ///     - "1": datapath exists as a dataset -> old layout
+    ///     - "2": "/material" exists as a group-> new layout
+    int detect_hdf5_layout(hid_t db, std::string path);
+    
     /// Writes this material out to an HDF5 file.
     /// This happens according to protocol 1.
     /// \param filename Path on disk to the HDF5 file.
