@@ -275,7 +275,7 @@ void pyne::Material::from_hdf5(std::string filename, std::string datapath, int r
     int prot1_hdf5_layout = detect_hdf5_layout(db, datapath);
     switch(prot1_hdf5_layout) {
       case path_donotexists:
-        throw std::runtime_error("/material and " +datapath+ " path do not exist.");
+        throw std::runtime_error("/material and " +datapath+ " paths do not exist.");
         break;
 
       case unknown:
