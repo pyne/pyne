@@ -541,7 +541,7 @@ void pyne::Material::write_hdf5(std::string filename, std::string mat_name,
   H5Pset_fclose_degree(fapl, H5F_CLOSE_STRONG);
   // Create new/open datafile.
 
-  // This complicated algorythm is required to allow backward compatibility with
+  // This complicated algorithm is required to allow backward compatibility with
   // previous version of write_hdf5 (where data were written in a hdf5 DATASET)
   // FILE EXIST ?
   //    NO -> create file with a "/material" group, write the data in it
@@ -550,7 +550,7 @@ void pyne::Material::write_hdf5(std::string filename, std::string mat_name,
   //        - YES && != /material -> Detect NUCPATH + old write_hdf5
   //        - NO -> CONTINUE
   //          - "/material" EXIST:
-  //            - NO -> create "/material" group and write everyting in it
+  //            - NO -> create "/material" group and write everything in it
   //            - YES:
   //              - "/material" is a DATASET -> detect NUCPATH + old write_hdf5
   //              - "/material" is a GROUP -> add data in it
