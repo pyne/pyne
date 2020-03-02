@@ -195,8 +195,48 @@ def test_hdf5_protocol_1_old():
     assert_equal(m.comp, {922350000: 0.04, 922380000: 0.96})
     assert_equal(m.metadata['comment'], 'fire in the disco - 4')
 
-    os.remove('proto1.h5')
+    # Test mateiral old format detection
+    leu = Material({'U235': 0.02, 'U238': 0.98}, 6.34, 2.72, 1.0)
+    leu.metadata['comment'] = 'hitting the dancefloor'
+    leu.write_hdf5('proto1.h5', datapath="/new_mat", chunksize=10)
 
+    # Loads with protocol 1 now.
+    m = Material()
+    m.from_hdf5('proto1.h5', '/new_mat',  -0, 1)
+    assert_equal(m.density, 2.72)
+    assert_equal(m.atoms_per_molecule, 1.0)
+    assert_equal(m.mass, 6.34)
+    assert_equal(m.comp, {922350000: 0.02, 922380000: 0.98})
+    assert_equal(m.metadata['comment'], 'hitting the dancefloor')
+
+    os.remove('proto1.h5')
+    
+    leu = Material({'U235': 0.02, 'U238': 0.98}, 6.34, 2.72, 1.0)
+    leu.metadata['comment'] = 'hitting the dancefloor'
+    leu.write_hdf5('proto1.h5', datapath="/new_mat", nucpath="/nucid", chunksize=10)
+    # Test material writing
+    leu = Material({'U235': 0.04, 'U238': 0.96}, 4.2, 2.72, 1.0)
+    leu.metadata['comment'] = 'first light'
+    leu.write_hdf5('proto1.h5', datapath="/new_mat", chunksize=10)
+    # Loads with protocol 1 now.
+    m = Material()
+    m.from_hdf5('proto1.h5', '/new_mat',  -0, 1)
+    assert_equal(m.density, 2.72)
+    assert_equal(m.atoms_per_molecule, 1.0)
+    assert_equal(m.mass, 6.34)
+    assert_equal(m.comp, {922350000: 0.02, 922380000: 0.98})
+    assert_equal(m.metadata['comment'], 'hitting the dancefloor')
+    # Loads with protocol 1 now.
+    m = Material()
+    m.from_hdf5('proto1.h5', '/new_mat', -1, 1)
+    assert_equal(m.density, 2.72)
+    assert_equal(m.atoms_per_molecule, 1.0)
+    assert_equal(m.mass, 4.2)
+    assert_equal(m.comp, {922350000: 0.04, 922380000: 0.96})
+    assert_equal(m.metadata['comment'], 'first light')
+    
+    os.remove('proto1.h5')
+    
 def test_hdf5_protocol_1():
     if 'proto1.h5' in os.listdir('.'):
         os.remove('proto1.h5')
@@ -222,10 +262,10 @@ def test_hdf5_protocol_1():
 
     m = from_hdf5('proto1.h5', '/material', 3, 1)
     assert_equal(m.density, 2.72)
-    assert_equal(m.atoms_per_molecule, 4.0)
-    assert_equal(m.mass, 16.8)
+    assert_equal(m.atoms_per_molecule, 5.0)
+    assert_equal(m.mass, 21.0)
     assert_equal(m.comp, {922350000: 0.04, 922380000: 0.96})
-    assert_equal(m.metadata['comment'], 'fire in the disco - 4')
+    assert_equal(m.metadata['comment'], 'fire in the disco - 5')
     os.remove('proto1.h5')
 
 class TestMaterialMethods(TestCase):
