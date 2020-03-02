@@ -263,10 +263,10 @@ def test_hdf5_protocol_1():
 
     m = from_hdf5('proto1.h5', '/material', 3, 1)
     assert_equal(m.density, 2.72)
-    assert_equal(m.atoms_per_molecule, 4.0)
-    assert_equal(m.mass, 16.8)
+    assert_equal(m.atoms_per_molecule, 5.0)
+    assert_equal(m.mass, 21.0)
     assert_equal(m.comp, {922350000: 0.04, 922380000: 0.96})
-    assert_equal(m.metadata['comment'], 'fire in the disco - 4')
+    assert_equal(m.metadata['comment'], 'fire in the disco - 5')
     os.remove('proto1.h5')
 
 class TestMaterialMethods(TestCase):
