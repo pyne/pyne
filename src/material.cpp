@@ -571,10 +571,11 @@ void pyne::Material::write_hdf5(std::string filename, std::string mat_name,
       case prot1_layout::unknown: {
         throw std::runtime_error(
             mat_name +
-            " is not a dataset and /material entity is not a group.");
+            " is not a dataset and /material entity is neither a group nor a dataset.");
         break;
       }
-
+      
+      // old layout
       case prot1_layout::old_layout: {
         std::string nucpath = "/nucid";
         hid_t data_set = H5Dopen2(db, mat_name.c_str(), H5P_DEFAULT);
@@ -596,11 +597,14 @@ void pyne::Material::write_hdf5(std::string filename, std::string mat_name,
         break;
       }
 
+      // no "/material or matname in the hdf5 file -> build the new layout
       case prot1_layout::path_donotexists: {
         material_grp_id =
             H5Gcreate2(db, "/material", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         break;
       }
+
+      // /material as a group -> new layout: open the "/material" group
       case prot1_layout::new_layout: {
         material_grp_id = H5Gopen2(db, "/material", H5P_DEFAULT);
         break;
