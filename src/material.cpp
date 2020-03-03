@@ -564,65 +564,66 @@ void pyne::Material::write_hdf5(std::string filename, std::string mat_name,
     bool ish5 = H5Fis_hdf5(filename.c_str());
     if (!ish5) throw h5wrap::FileNotHDF5(filename);
     db = H5Fopen(filename.c_str(), H5F_ACC_RDWR, fapl);
+  }
+  int prot1_hdf5_layout = detect_hdf5_layout(db, mat_name);
+  switch (prot1_hdf5_layout) {
+    case prot1_layout::unknown: {
+      throw std::runtime_error(
+          mat_name +
+          " is not a dataset and /material entity is neither a group nor a dataset.");
+      break;
+    }
+    
+    // old layout
+    case prot1_layout::old_layout: {
+      std::string nucpath = "/nucid";
+      hid_t data_set = H5Dopen2(db, mat_name.c_str(), H5P_DEFAULT);
 
-    int prot1_hdf5_layout = detect_hdf5_layout(db, mat_name);
-    switch (prot1_hdf5_layout) {
-      case prot1_layout::unknown: {
-        throw std::runtime_error(
-            mat_name +
-            " is not a dataset and /material entity is neither a group nor a dataset.");
-        break;
-      }
-      
-      // old layout
-      case prot1_layout::old_layout: {
-        std::string nucpath = "/nucid";
-        hid_t data_set = H5Dopen2(db, mat_name.c_str(), H5P_DEFAULT);
-
-        if (h5wrap::path_exists(db, mat_name)) {
-          // if path exists grab the nucpath
-          bool nucpath_detetcted = detect_nuclidelist(data_set, nucpath);
-          if (!nucpath_detetcted) {  // can't find a valid nuclide list path
-                                     // from mat_name... fail
-            throw std::runtime_error(
-                "Can't find the nuclide list path in the existing mat_name. "
-                "Can't "
-                "add your material to the mat_name.");
-          }
+      if (h5wrap::path_exists(db, mat_name)) {
+        // if path exists grab the nucpath
+        bool nucpath_detetcted = detect_nuclidelist(data_set, nucpath);
+        if (!nucpath_detetcted) {  // can't find a valid nuclide list path
+                                   // from mat_name... fail
+          throw std::runtime_error(
+              "Can't find the nuclide list path in the existing mat_name. "
+              "Can't "
+              "add your material to the mat_name.");
         }
-        deprecated_write_hdf5(db, mat_name, nucpath, row, chunksize);
-        H5Fclose(db);
-        return;
-        break;
       }
+      deprecated_write_hdf5(db, mat_name, nucpath, row, chunksize);
+      H5Fclose(db);
+      return;
+      break;
+    }
 
-      // no "/material or matname in the hdf5 file -> build the new layout
-      case prot1_layout::path_donotexists: {
-        material_grp_id =
-            H5Gcreate2(db, "/material", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-        break;
-      }
+    // no "/material or matname in the hdf5 file -> build the new layout
+    case prot1_layout::path_donotexists: {
+      material_grp_id =
+          H5Gcreate2(db, "/material", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+      break;
+    }
 
-      // /material as a group -> new layout: open the "/material" group
-      case prot1_layout::new_layout: {
-        material_grp_id = H5Gopen2(db, "/material", H5P_DEFAULT);
-        break;
-      }
+    // /material as a group -> new layout: open the "/material" group
+    case prot1_layout::new_layout: {
+      material_grp_id = H5Gopen2(db, "/material", H5P_DEFAULT);
+      break;
     }
   }
+  
 
+  //mat_name is proided with a "/" so need to open with fullpath
   // Group "/material/mat_name" does not exist create it
   if (!h5wrap::path_exists(db, "/material" + mat_name)) {
     data_id = H5Gcreate2(db, ("/material" + mat_name).c_str(), H5P_DEFAULT,
                          H5P_DEFAULT, H5P_DEFAULT);
   } else {
-    data_id = H5Gopen2(material_grp_id, mat_name.c_str(), H5P_DEFAULT);
+    data_id = H5Gopen2(db, ("/material"+mat_name).c_str(), H5P_DEFAULT);
   }
   // write nuclide list
-  std::string nucpath = "/material" + mat_name + "/nuclidelist";
+  std::string nucpath = "nuclidelist";
   std::vector<int> nuclides = write_hdf5_nucpath(data_id, nucpath);
   // write data
-  std::string full_datapath = "/material" + mat_name + "/composition";
+  std::string full_datapath = "composition";
   write_hdf5_datapath(data_id, full_datapath, row, chunksize, nuclides);
 
   // close all groups and files
