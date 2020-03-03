@@ -241,18 +241,19 @@ void pyne::MaterialLibrary::write_hdf5(const std::string& filename,
                                        const std::string& datapath) {
   // Turn off annoying HDF5 errors
   H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
-
   // Set file access properties so it closes cleanly
   hid_t fapl;
   fapl = H5Pcreate(H5P_FILE_ACCESS);
   H5Pset_fclose_degree(fapl, H5F_CLOSE_STRONG);
-
   hid_t matlib_grp_id;
   hid_t data_id;
   hid_t db;
   if (!pyne::file_exists(filename)) {
     // Create the file
     db = H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+  }
+  else {
+    db = H5Fopen(filename.c_str(), H5F_ACC_RDWR, fapl);
   }
   // Check if /material exist and what type it is
   herr_t status;
@@ -282,40 +283,46 @@ void pyne::MaterialLibrary::write_hdf5(const std::string& filename,
   } else {
     data_id = H5Gopen2(matlib_grp_id, datapath.c_str(), H5P_DEFAULT);
   }
-  std::string full_datapath = "/material_library" + datapath + "/composition";
-  std::string nucpath = "/material_library" + datapath + "/nuclidelist";
-  write_hdf5_nucpath(db, nucpath);
+  std::string full_datapath = "composition";
+  std::string nucpath = "nuclidelist";
+  write_hdf5_nucpath(data_id, nucpath);
   for (auto mat : material_library) {
     std::vector<int> nuc_list;
     nuc_list.assign(nuclist.begin(), nuclist.end());
-    mat.second->write_hdf5_datapath(db, full_datapath, -0.0, 100, nuc_list);
+    mat.second->write_hdf5_datapath(data_id, full_datapath, -0.0, 100, nuc_list);
   }
+  
+  H5Fflush(db, H5F_SCOPE_GLOBAL);
   H5Gclose(data_id);
   H5Gclose(matlib_grp_id);
   H5Fclose(db);
 }
+
 void pyne::MaterialLibrary::write_hdf5_nucpath(hid_t db, std::string nucpath) {
   //
   // Read in nuclist if available, write it out if not
   //
-  bool nucpath_exists = h5wrap::path_exists(db, nucpath);
+//bool nucpath_exists = h5wrap::path_exists(db, nucpath);
   int nuc_size;
-  hsize_t nuc_dims[1];
-
+  nuc_size = nuclist.size();
   // Create the data if it doesn't exist
   int nuc_data[nuc_size];
-  int i = 0;
-  for (auto nuc : nuclist) {
-    nuc_data[i] = nuc;
-    i++;
+  {
+    int n = 0;
+    for (auto nuc : nuclist) {
+      nuc_data[n] = nuc;
+      n++;
+    }
   }
+  hsize_t nuc_dims[1];
   nuc_dims[0] = nuc_size;
   hid_t nuc_space = H5Screate_simple(1, nuc_dims, NULL);
   hid_t nuc_set = H5Dcreate2(db, nucpath.c_str(), H5T_NATIVE_INT, nuc_space,
                              H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   H5Dwrite(nuc_set, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, nuc_data);
-  H5Fflush(db, H5F_SCOPE_GLOBAL);
-
+  
+  H5Gflush(db);
+  H5Sclose(nuc_space);
   H5Dclose(nuc_set);
 }
 
