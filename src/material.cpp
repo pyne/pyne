@@ -168,6 +168,7 @@ void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath,
   // Get metadata from associated dataset, if available
   //
   std::string attrpath = datapath + "_metadata";
+  std::cout << attrpath << std::endl;
   bool attrpath_exists = h5wrap::path_exists(db, attrpath);
   if (!attrpath_exists) return;
 
@@ -183,9 +184,9 @@ void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath,
   H5Sselect_hyperslab(metadatalab, H5S_SELECT_SET, data_offset, NULL,
                       data_count, NULL);
   attrmemspace = H5Screate_simple(1, data_count, NULL);
-  H5Dread(metadataet, attrtype, attrmemspace, metadatalab, H5P_DEFAULT,
+  herr_t read_status = H5Dread(metadataet, attrtype, attrmemspace, metadatalab, H5P_DEFAULT,
           attrdata);
-
+  std::cout << "stataus: "<< read_status << std::endl;
   // convert to in-memory JSON
   Json::Reader reader;
   reader.parse((char *)attrdata[0].p, (char *)attrdata[0].p + attrdata[0].len,

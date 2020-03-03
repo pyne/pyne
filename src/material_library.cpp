@@ -255,13 +255,14 @@ void pyne::MaterialLibrary::write_hdf5(const std::string& filename,
   else {
     db = H5Fopen(filename.c_str(), H5F_ACC_RDWR, fapl);
   }
-  // Check if /material exist and what type it is
+  // Check if root_path exist and what type it is
+  std::string root_path = "/material_library";
   herr_t status;
   H5O_info_t object_info;
   status = H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
-  status =
-      H5Oget_info_by_name(db, "/material_library", &object_info, H5P_DEFAULT);
-  // check if "/material" exists
+  
+  // Check if root_path exist and what type it is
+  status = H5Oget_info_by_name(db, root_path.c_str(), &object_info, H5P_DEFAULT);
   if (status == 0) {
     // "/material_library" not a group: fail!
     if (object_info.type != H5O_TYPE_GROUP) {
@@ -269,27 +270,26 @@ void pyne::MaterialLibrary::write_hdf5(const std::string& filename,
           "Non-group/non-dataset object /material_library already exists in "
           "the file. Can't write the Material");
     } else {  // "/material" is a group get his hid
-      matlib_grp_id = H5Gopen2(db, "/material_library", H5P_DEFAULT);
+      matlib_grp_id = H5Gopen2(db, root_path.c_str(), H5P_DEFAULT);
     }
   } else {  // "/material" do not exist -> create it !
-    matlib_grp_id = H5Gcreate2(db, "/material_library", H5P_DEFAULT,
-                               H5P_DEFAULT, H5P_DEFAULT);
+    matlib_grp_id = H5Gcreate2(db, root_path.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   }
-  // Check is /material exist as a Group
-  // Group "/material/datapath" does not exist create it
-  if (!h5wrap::path_exists(db, "/material_library" + datapath)) {
-    data_id = H5Gcreate2(db, ("/material_library" + datapath).c_str(),
-                         H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  
+  // Group "/root_path/datapath" does not exist create it
+  std::string full_path = root_path + datapath;
+  if (!h5wrap::path_exists(db, full_path)) {
+    data_id = H5Gcreate2(db, full_path.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   } else {
-    data_id = H5Gopen2(matlib_grp_id, datapath.c_str(), H5P_DEFAULT);
+    data_id = H5Gopen2(db, full_path.c_str(), H5P_DEFAULT);
   }
-  std::string full_datapath = "composition";
+  std::string compath = "composition";
   std::string nucpath = "nuclidelist";
   write_hdf5_nucpath(data_id, nucpath);
   for (auto mat : material_library) {
     std::vector<int> nuc_list;
     nuc_list.assign(nuclist.begin(), nuclist.end());
-    mat.second->write_hdf5_datapath(data_id, full_datapath, -0.0, 100, nuc_list);
+    mat.second->write_hdf5_datapath(data_id, compath, -0.0, 100, nuc_list);
   }
   
   H5Fflush(db, H5F_SCOPE_GLOBAL);
@@ -321,7 +321,7 @@ void pyne::MaterialLibrary::write_hdf5_nucpath(hid_t db, std::string nucpath) {
                              H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   H5Dwrite(nuc_set, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, nuc_data);
   
-  H5Gflush(db);
+  H5Fflush(db, H5F_SCOPE_GLOBAL);
   H5Sclose(nuc_space);
   H5Dclose(nuc_set);
 }
