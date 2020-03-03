@@ -245,28 +245,36 @@ def test_hdf5_protocol_1():
     # Test material writing
     leu = Material({'U235': 0.04, 'U238': 0.96}, 4.2, 2.72, 1.0)
     leu.metadata['comment'] = 'first light'
-    leu.write_hdf5('proto1.h5', chunksize=10)
-
+    leu.write_hdf5('proto1.h5')
+    
     for i in range(2, 11):
         leu = Material({'U235': 0.04, 'U238': 0.96}, i*4.2, 2.72, 1.0*i)
         leu.metadata['comment'] = 'fire in the disco - {0}'.format(i)
         leu.write_hdf5('proto1.h5')
 
     # Loads with protocol 1 now.
-    m = Material()
-    m.from_hdf5('proto1.h5', '/material', -3, 1)
+    for i in range(2, 11):
+        m = Material()
+        m.from_hdf5('proto1.h5', '/material', i-1, 1)
+        assert_equal(m.density, 2.72)
+        assert_equal(m.atoms_per_molecule, 1.0*i)
+        assert_equal(m.mass, i*4.2)
+        assert_equal(m.comp, {922350000: 0.04, 922380000: 0.96})
+        assert_equal(m.metadata['comment'], 'fire in the disco - {0}'.format(i))
+    
+    m = from_hdf5('proto1.h5', '/material', -1, 1)
     assert_equal(m.density, 2.72)
-    assert_equal(m.atoms_per_molecule, 8.0)
-    assert_equal(m.mass, 33.6)
+    assert_equal(m.atoms_per_molecule, 10.0)
+    assert_equal(m.mass, 42.0)
     assert_equal(m.comp, {922350000: 0.04, 922380000: 0.96})
-    assert_equal(m.metadata['comment'], 'fire in the disco - 8')
+    assert_equal(m.metadata['comment'], 'fire in the disco - 10')
 
-    m = from_hdf5('proto1.h5', '/material', 3, 1)
+    m = from_hdf5('proto1.h5', '/material', 0, 1)
     assert_equal(m.density, 2.72)
-    assert_equal(m.atoms_per_molecule, 5.0)
-    assert_equal(m.mass, 21.0)
+    assert_equal(m.atoms_per_molecule, 1.0)
+    assert_equal(m.mass, 4.2) 
     assert_equal(m.comp, {922350000: 0.04, 922380000: 0.96})
-    assert_equal(m.metadata['comment'], 'fire in the disco - 5')
+    assert_equal(m.metadata['comment'], 'first light')
     os.remove('proto1.h5')
 
 class TestMaterialMethods(TestCase):
