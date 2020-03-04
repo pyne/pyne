@@ -1274,7 +1274,16 @@ def test_phits():
                 '     92235.15c -7.6400e-01\n'
                 '     92238.25c -1.8336e+01\n')
     assert_equal(mass, mass_exp)
-    
+
+    mass_frac = leu.phits(mult_den=False)
+    mass_frac_exp = ('C name: leu\n'
+                     'C comments: this is a long comment that will definitly go over the 80 character\n'
+                     'C  limit, for science\n'
+                     'M[ 2 ]\n'
+                     '     92235.15c -4.0000e-02\n'
+                     '     92238.25c -9.6000e-01\n')
+    assert_equal(mass_frac, mass_frac_exp)
+
     atom = leu.phits(frac_type='atom')
     atom_exp = ('C name: leu\n'
                 'C comments: this is a long comment that will definitly go over the 80 character\n'
@@ -1305,6 +1314,17 @@ def test_mcnp():
                 '     92235.15c -7.6400e-01\n'
                 '     92238.25c -1.8336e+01\n')
     assert_equal(mass, mass_exp)
+
+    mass_frac = leu.mcnp(mult_den=False)
+    mass_frac_exp = ('C name: leu\n'
+                     'C density = 19.10000\n'
+                     'C source: Some URL\n'
+                     'C comments: this is a long comment that will definitly go over the 80 character\n'
+                     'C  limit, for science\n'
+                     'm2\n'
+                     '     92235.15c -4.0000e-02\n'
+                     '     92238.25c -9.6000e-01\n')
+    assert_equal(mass_frac, mass_frac_exp)
 
     atom = leu.mcnp(frac_type='atom')
     atom_exp = ('C name: leu\n'
