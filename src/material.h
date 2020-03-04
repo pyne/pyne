@@ -154,7 +154,7 @@ namespace pyne
     /// \param mat_name Path to the the material in the file.
     /// \param row The index to read out, may be negative.
     /// \param protocol Flag for layout of material on disk.
-    void from_hdf5(std::string filename, std::string mat_name="/material",
+    void from_hdf5(std::string filename, std::string mat_name="/mat_name",
                                                           int row=-1, int protocol=1);
    
   private:
@@ -182,7 +182,7 @@ namespace pyne
     ///            appended to the end of the dataset.
     /// \param chunksize The chunksize for all material data on disk.
     /// New write_hdf5 which fallback on the old one when required
-    void write_hdf5(std::string filename, std::string mat_name="/material", 
+    void write_hdf5(std::string filename, std::string mat_name="/mat_name", 
         float row=-0.0, int chunksize= 100);
 
     /// Writes this nucpath to an HDF5 file.
