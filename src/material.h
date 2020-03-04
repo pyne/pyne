@@ -169,9 +169,9 @@ namespace pyne
     std::string openmc(std::string fact_type = "mass");
 
     /// Return an mcnp input deck record as a string
-    std::string mcnp(std::string frac_type = "mass");
+    std::string mcnp(std::string frac_type = "mass", bool mult_den = "true");
     /// Return an phits input deck record as a string
-    std::string phits(std::string frac_type = "mass");
+    std::string phits(std::string frac_type = "mass", bool mult_den = "true");
     /// return the compo fraction writen ala "mcnp"
     std::string mcnp_frac(std::map<int, double> fracs, std::string frac_type = "");
     ///
@@ -273,10 +273,10 @@ namespace pyne
     /// atoms per molecule (atoms_per_molecule) in this function using \a apm.
     double mass_density(double num_dens=-1.0, double apm=-1.0);
     // void print_material( pyne::Material test_mat);
-    /// Computes, sets, and returns the mass density when the material density is
-    /// definied otherwise return fraction. Fraction density is returned per atom 
+    /// Computes, sets, and returns the mass density if \a mult_den is true
+    /// otherwise return mass fraction. Fraction density is returned per atom
     /// (default) in atom per barn cm or as a mass density.
-    std::map<int, double> get_density_frac(std::string frac_type="atom");
+    std::map<int, double> get_density_frac(std::string frac_type="atom", bool mult_den);
     /// Computes and returns the number density of the material using the
     /// mass density if \a mass_dens is greater than or equal to zero.  If
     /// \a mass_dens is negative, the denisty member variable is used instead.
