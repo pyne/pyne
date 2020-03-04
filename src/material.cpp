@@ -613,7 +613,7 @@ std::string pyne::Material::get_uwuw_name() {
 }
 
 ///---------------------------------------------------------------------------//
-std::string pyne::Material::mcnp(std::string frac_type) {
+std::string pyne::Material::mcnp(std::string frac_type, bool mult_den) {
   //////////////////// Begin card creation ///////////////////////
   std::ostringstream oss;
 
@@ -649,7 +649,7 @@ std::string pyne::Material::mcnp(std::string frac_type) {
   }
 
   // Set up atom or mass frac map
-  std::map<int, double> fracs = get_density_frac(frac_type);
+  std::map<int, double> fracs = get_density_frac(frac_type, mult_den);
   std::string frac_sign = "";
 
   // write the frac map
@@ -660,7 +660,7 @@ std::string pyne::Material::mcnp(std::string frac_type) {
 
 
 ///---------------------------------------------------------------------------//
-std::string pyne::Material::phits(std::string frac_type) {
+std::string pyne::Material::phits(std::string frac_type, bool mult_den) {
   //////////////////// Begin card creation ///////////////////////
   std::ostringstream oss;
 
@@ -699,7 +699,7 @@ std::string pyne::Material::phits(std::string frac_type) {
   }
 
   // Set up atom or mass frac map
-  std::map<int, double> fracs = get_density_frac(frac_type);
+  std::map<int, double> fracs = get_density_frac(frac_type, mult_den);
   std::string frac_sign = "";
 
   // write the frac map
@@ -1467,7 +1467,7 @@ pyne::Material pyne::Material::collapse_elements(int** int_ptr_arry ) {
 
   // Set up atom or mass frac map
 
-std::map<int, double> pyne::Material::get_density_frac(std::string frac_type){
+std::map<int, double> pyne::Material::get_density_frac(std::string frac_type, bool mult_den){
   std::map<int, double> fracs;
 
   if ("atom" == frac_type) {
@@ -1483,7 +1483,9 @@ std::map<int, double> pyne::Material::get_density_frac(std::string frac_type){
     fracs = comp;
     if (density != -1.0) {
       for (comp_iter ci = fracs.begin(); ci != fracs.end(); ci++){
-        ci->second *= density;
+        if (mult_den) {
+          ci->second *= density;
+        }
       }
     }
   }
