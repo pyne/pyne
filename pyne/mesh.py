@@ -828,7 +828,7 @@ class Mesh(object):
         mats_in_mesh_file = False
         if isinstance(mesh, basestring) and len(mats) == 0:
             with tb.open_file(mesh) as h5f:
-                if '/materials' in h5f:
+                if '/mat_name' in h5f or '/materials' in h5f:
                     mats_in_mesh_file = True
             if mats_in_mesh_file:
                 mats = MaterialLibrary(mesh)
