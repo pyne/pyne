@@ -567,7 +567,6 @@ def test_matlib():
 
     m.write_hdf5('test_matlib.h5m')
     shutil.copy('test_matlib.h5m', 'test_matlib2.h5m')
-    shutil.copy('test_matlib.h5m', 'test_matlib2_.h5m')
     m2 = Mesh(mesh='test_matlib2.h5m')  # MOAB fails to flush
     for i, mat, ve in m2:
         assert_equal(len(mat.comp), len(mats[i].comp))
