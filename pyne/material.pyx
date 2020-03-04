@@ -198,7 +198,7 @@ cdef class _Material:
             Path to HDF5 file that contains the data to read in.
         datapath : str
             Path to HDF5 table or group that represents the data.
-            In the example below, datapath = "/material".
+            In the example below, datapath = "/mat_name".
         row : int, optional
             The index of the arrays from which to read the data.  This
             ranges from 0 to N-1.  Defaults to the last element of the array.
@@ -277,9 +277,9 @@ cdef class _Material:
         self.mat_pointer.from_hdf5(c_filename, c_datapath, row, protocol)
 
 
-    def write_hdf5(self, filename, datapath="/material", nucpath="",
+    def write_hdf5(self, filename, datapath="/mat_name", nucpath="",
                    row=-0.0, chunksize=100):
-        """write_hdf5(filename, datapath="/material", nucpath="", row=-0.0, chunksize=100)
+        """write_hdf5(filename, datapath="/mat_name", nucpath="", row=-0.0, chunksize=100)
         Writes the material to an HDF5 file, using Protocol 1 (see the
         from_hdf5() method).
 

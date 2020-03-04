@@ -50,7 +50,7 @@ def setup():
         urlretrieve(o2benchurl, H5NAME)
         sys.stderr.write("done.\n")
         sys.stderr.flush()
-    MATS = MaterialLibrary(H5NAME)
+    MATS = MaterialLibrary(H5NAME, "/materials")
     with open('o2hls.json', 'r') as f:
         O2HLS = json.load(f)
     O2HLS = {int(nuc): v for nuc, v in O2HLS.items()}
