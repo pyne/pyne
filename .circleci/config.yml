@@ -224,7 +224,7 @@ jobs:
           build: "python3_dagmc_pymoab_openmc"
       - run: |
           cd ~/repo/tests
-          nosetests test_endf.py --no-skip 
+          nosetest test_endf.py --no-skip 
 
 # Python 2 jobs
 # without optional depedencies
