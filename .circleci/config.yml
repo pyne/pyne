@@ -107,6 +107,7 @@ commands:
           cd ~/repo/tests
           ./travis-run-tests.sh << parameters.flags >>
 
+
   # Build and push PyNE website
   website_build_push:
     description: "build PyNE website and push it either on the test branch (default) or on the deployed branch"
@@ -214,6 +215,17 @@ jobs:
         - run_test:
             flags: "python3"
             build: "python3_dagmc_pymoab_openmc"
+  # Test endf separately
+  endf_test:
+    executor:
+      name: py3_dagmc_pymoab_openmc
+    working_directory: ~/repo
+    steps:
+      - pull_container:
+          build: "python3_dagmc_pymoab"
+      - run: |
+          cd ~/repo/tests
+          nosetests test_endf.py --no-skip 
 
 # Python 2 jobs
 # without optional depedencies
