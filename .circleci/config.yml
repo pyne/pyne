@@ -222,7 +222,7 @@ jobs:
     working_directory: ~/repo
     steps:
       - pull_container:
-          build: "python3_dagmc_pymoab"
+          build: "python3_dagmc_pymoab_openmc"
       - run: |
           cd ~/repo/tests
           nosetests test_endf.py --no-skip 
@@ -339,6 +339,9 @@ workflows:
           requires:
             - py3_dagmc_pymoab_build
       - py3_dagmc_pymoab_openmc_test:
+          requires:
+            - py3_dagmc_pymoab_openmc_build
+      - endf_test:
           requires:
             - py3_dagmc_pymoab_openmc_build
 
