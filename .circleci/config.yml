@@ -107,7 +107,6 @@ commands:
           cd ~/repo/tests
           ./travis-run-tests.sh << parameters.flags >>
 
-
   # Build and push PyNE website
   website_build_push:
     description: "build PyNE website and push it either on the test branch (default) or on the deployed branch"
