@@ -1471,7 +1471,7 @@ std::map<int, double> pyne::Material::get_density_frac(std::string frac_type, bo
   std::map<int, double> fracs;
 
   if ("atom" == frac_type) {
-    if (density != -1.0 && !mult_den) {
+    if (density != -1.0 && mult_den) {
       fracs = to_atom_dens();
       for (comp_iter ci = fracs.begin(); ci != fracs.end(); ci++){
         ci->second *= pyne::cm2_per_barn; // unit requirememt is [10^24 atoms/cm3] = [atoms/b.cm]
@@ -1481,7 +1481,7 @@ std::map<int, double> pyne::Material::get_density_frac(std::string frac_type, bo
     }
   } else {
     fracs = comp;
-    if (density != -1.0 && !mult_den) {
+    if (density != -1.0 && mult_den) {
       for (comp_iter ci = fracs.begin(); ci != fracs.end(); ci++){
         ci->second *= density;
       }
