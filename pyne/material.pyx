@@ -335,28 +335,38 @@ cdef class _Material:
         c_nucpath = nucpath_bytes
         self.mat_pointer.write_hdf5(c_filename, c_datapath, c_nucpath, row, chunksize)
 
-    def phits(self, frac_type='mass'):
-        """phits(frac_type)
+    def phits(self, frac_type='mass', mult_den=True):
+        """phits(frac_type='mass', mult_den=True)
         Return an phits card
         Parameters
         ----------
- 	   int 0 means use "mass" as the frac_type
+        frac_type : str, optional
+            Either 'mass' or 'atom'. Speficies whether mass or atom fractions
+            are used to describe material composition. (default 'mass')
+        mult_den : bool, optional
+            Flag for whether material cards are written in mass density if True,
+            or mass fraction if False. (default True)
         """
         cdef std_string card
-        card = self.mat_pointer.phits(frac_type.encode())
+        card = self.mat_pointer.phits(frac_type.encode(), mult_den)
         return card.decode()
 
-    def mcnp(self, frac_type='mass'):
-        """mcnp(frac_type)
+    def mcnp(self, frac_type='mass', mult_den=True):
+        """mcnp(frac_type='mass', mult_den=True)
         Return an mcnp card
         Parameters
         ----------
-        int 0 means use "mass" as the frac_type
+        frac_type : str, optional
+            Either 'mass' or 'atom'. Speficies whether mass or atom fractions
+            are used to describe material composition. (default 'mass')
+        mult_den : bool, optional
+            Flag for whether material cards are written in mass density if True,
+            or mass fraction if False. (default True)
         """
         cdef std_string card
-        card = self.mat_pointer.mcnp(frac_type.encode())
+        card = self.mat_pointer.mcnp(frac_type.encode(), mult_den)
         return card.decode()
-    
+
     def get_uwuw_name(self):
         """get_uwuw_name()
         Return a uwuw material name
