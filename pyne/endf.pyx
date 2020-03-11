@@ -2027,7 +2027,7 @@ class Evaluation(object):
         #Read teff curves for non-principal atoms with SCT approximation indicated:
         for i in range(len(B)//6-1):
             if B[6*(i+1)]==0.0:
-                params, teff = _self._get_tab1_record()
+                params, teff = self._get_tab1_record()
                 inel['teff_%i'%(i+1)] = teff#Store as teff_1, teff_2, etc.
 
 
