@@ -183,8 +183,9 @@ void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath,
   H5Sselect_hyperslab(metadatalab, H5S_SELECT_SET, data_offset, NULL,
                       data_count, NULL);
   attrmemspace = H5Screate_simple(1, data_count, NULL);
-  herr_t read_status = H5Dread(metadataet, attrtype, attrmemspace, metadatalab, H5P_DEFAULT,
+  H5Dread(metadataet, attrtype, attrmemspace, metadatalab, H5P_DEFAULT,
           attrdata);
+
   // convert to in-memory JSON
   Json::Reader reader;
   reader.parse((char *)attrdata[0].p, (char *)attrdata[0].p + attrdata[0].len,
@@ -539,7 +540,7 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
   H5Pset_fclose_degree(fapl, H5F_CLOSE_STRONG);
   // Create new/open datafile.
 
-  // This complicated algorythm is required to allow backward compatibility with
+  // This complicated algorithm is required to allow backward compatibility with
   // previous version of write_hdf5 (where data were written in a hdf5 DATASET)
   // FILE EXIST ?
   //    NO -> create file with a "/material" group, write the data in it
@@ -820,7 +821,7 @@ std::string pyne::Material::get_uwuw_name() {
 }
 
 ///---------------------------------------------------------------------------//
-std::string pyne::Material::mcnp(std::string frac_type) {
+std::string pyne::Material::mcnp(std::string frac_type, bool mult_den) {
   //////////////////// Begin card creation ///////////////////////
   std::ostringstream oss;
 
@@ -856,7 +857,7 @@ std::string pyne::Material::mcnp(std::string frac_type) {
   }
 
   // Set up atom or mass frac map
-  std::map<int, double> fracs = get_density_frac(frac_type);
+  std::map<int, double> fracs = get_density_frac(frac_type, mult_den);
   std::string frac_sign = "";
 
   // write the frac map
@@ -867,7 +868,7 @@ std::string pyne::Material::mcnp(std::string frac_type) {
 
 
 ///---------------------------------------------------------------------------//
-std::string pyne::Material::phits(std::string frac_type) {
+std::string pyne::Material::phits(std::string frac_type, bool mult_den) {
   //////////////////// Begin card creation ///////////////////////
   std::ostringstream oss;
 
@@ -906,7 +907,7 @@ std::string pyne::Material::phits(std::string frac_type) {
   }
 
   // Set up atom or mass frac map
-  std::map<int, double> fracs = get_density_frac(frac_type);
+  std::map<int, double> fracs = get_density_frac(frac_type, mult_den);
   std::string frac_sign = "";
 
   // write the frac map
@@ -1674,11 +1675,11 @@ pyne::Material pyne::Material::collapse_elements(int** int_ptr_arry ) {
 
   // Set up atom or mass frac map
 
-std::map<int, double> pyne::Material::get_density_frac(std::string frac_type){
+std::map<int, double> pyne::Material::get_density_frac(std::string frac_type, bool mult_den){
   std::map<int, double> fracs;
 
   if ("atom" == frac_type) {
-    if (density != -1.0) {
+    if (density != -1.0 && mult_den) {
       fracs = to_atom_dens();
       for (comp_iter ci = fracs.begin(); ci != fracs.end(); ci++){
         ci->second *= pyne::cm2_per_barn; // unit requirememt is [10^24 atoms/cm3] = [atoms/b.cm]
@@ -1688,7 +1689,7 @@ std::map<int, double> pyne::Material::get_density_frac(std::string frac_type){
     }
   } else {
     fracs = comp;
-    if (density != -1.0) {
+    if (density != -1.0 && mult_den) {
       for (comp_iter ci = fracs.begin(); ci != fracs.end(); ci++){
         ci->second *= density;
       }

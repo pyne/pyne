@@ -671,8 +671,6 @@ def cell_materials(hdf5, **kwargs):
         Path to hdf5 material-laden geometry
     datapath: str, optional, default ='/materials',
         The path in the heirarchy to the material data table in the HDF5 file.
-    nucpath, str, optional, default='/nucid'
-        The path in the heirarchy to the nuclide array in the HDF5 file.
 
     Returns:
     --------
@@ -682,7 +680,6 @@ def cell_materials(hdf5, **kwargs):
     [1] http://svalinn.github.io/DAGMC/usersguide/uw2.html
     """
     datapath = kwargs.get('datapath', '/materials')
-    nucpath = kwargs.get('nucpath', '/nucid')
 
     # void material
     void_mat = Material({}, density = 0.0, metadata={'name': 'void',
@@ -691,7 +688,7 @@ def cell_materials(hdf5, **kwargs):
     void_names = ['vacuum', 'graveyard', 'void']
 
     ml = MaterialLibrary()
-    ml.from_hdf5(hdf5, datapath=datapath, nucpath=nucpath)
+    ml.from_hdf5(hdf5, datapath=datapath)
     mat_assigns = cell_material_assignments(hdf5)
     cell_mats = {}
     for cell_num, mat_name in mat_assigns.items():

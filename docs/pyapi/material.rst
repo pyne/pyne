@@ -59,14 +59,13 @@ material.
 
 `from_hdf5()` will detect the structure (old or new) of the file (when using
 `protocol1`).
-
-<<<<<<< HEAD
 The :ref:`pyne_material_library` class is available to efficiently manipulate
 collections of materials.
    
 The material class is presented below.  
 ========================================
 *For more information please refer to :ref:`usersguide_material`.*
+=======
 
 **************
 Material Class
