@@ -832,7 +832,7 @@ class Mesh(object):
                 if '/mat_name' in h5f:
                     mats_in_mesh_file = True
                     mat_path = '/mat_name'
-                elif '/materials' in h5f:
+                elif ('/materials' in h5f) or ('/material_library/materials' in h5f):
                     mats_in_mesh_file = True
                     mat_path = '/materials'
 
