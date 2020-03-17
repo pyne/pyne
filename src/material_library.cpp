@@ -25,22 +25,21 @@ void pyne::MaterialLibrary::from_hdf5(const std::string& filename,
   std::string nucpath;
   std::string full_datapath = datapath;
 
-  
   // Set file access properties so it closes cleanly
   hid_t fapl;
   fapl = H5Pcreate(H5P_FILE_ACCESS);
   H5Pset_fclose_degree(fapl, H5F_CLOSE_STRONG);
-  
+
   // Open the database
   hid_t db = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, fapl);
-  
+
   // Get datapath status in the hdf5 file
   herr_t status;
   status = H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
   hid_t matlib_group_id = db;
   H5O_info_t object_info;
   status = H5Oget_info_by_name(db, datapath.c_str(), &object_info, H5P_DEFAULT);
-  
+
   // if datapath exist and is a dataset -> old hdf5 mat_lib format
   // else if datapath does not exist -> new hdf5 mat lib format
   // else don't know what to do with it: fail !
@@ -73,8 +72,9 @@ void pyne::MaterialLibrary::merge(pyne::MaterialLibrary mat_lib) {
     (*this).add_material(*it, mat);
   }
 }
+
 void pyne::MaterialLibrary::merge(pyne::MaterialLibrary* mat_lib) {
-  merge(*mat_lib); 
+  merge(*mat_lib);
 }
 void pyne::MaterialLibrary::load_json(Json::Value json) {
   Json::Value::Members keys = json.getMemberNames();
@@ -252,8 +252,7 @@ void pyne::MaterialLibrary::write_hdf5(const std::string& filename,
   if (!pyne::file_exists(filename)) {
     // Create the file
     db = H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
-  }
-  else {
+  } else {
     db = H5Fopen(filename.c_str(), H5F_ACC_RDWR, fapl);
   }
   // Check if root_path exist and what type it is
@@ -261,9 +260,10 @@ void pyne::MaterialLibrary::write_hdf5(const std::string& filename,
   herr_t status;
   H5O_info_t object_info;
   status = H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
-  
+
   // Check if root_path exist and what type it is
-  status = H5Oget_info_by_name(db, root_path.c_str(), &object_info, H5P_DEFAULT);
+  status =
+      H5Oget_info_by_name(db, root_path.c_str(), &object_info, H5P_DEFAULT);
   if (status == 0) {
     // "/material_library" not a group: fail!
     if (object_info.type != H5O_TYPE_GROUP) {
@@ -274,13 +274,15 @@ void pyne::MaterialLibrary::write_hdf5(const std::string& filename,
       matlib_grp_id = H5Gopen2(db, root_path.c_str(), H5P_DEFAULT);
     }
   } else {  // "/material" do not exist -> create it !
-    matlib_grp_id = H5Gcreate2(db, root_path.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    matlib_grp_id = H5Gcreate2(db, root_path.c_str(), H5P_DEFAULT, H5P_DEFAULT,
+                               H5P_DEFAULT);
   }
-  
+
   // Group "/root_path/datapath" does not exist create it
   std::string full_path = root_path + datapath;
   if (!h5wrap::path_exists(db, full_path)) {
-    data_id = H5Gcreate2(db, full_path.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    data_id = H5Gcreate2(db, full_path.c_str(), H5P_DEFAULT, H5P_DEFAULT,
+                         H5P_DEFAULT);
   } else {
     data_id = H5Gopen2(db, full_path.c_str(), H5P_DEFAULT);
   }
@@ -292,7 +294,7 @@ void pyne::MaterialLibrary::write_hdf5(const std::string& filename,
     nuc_list.assign(nuclist.begin(), nuclist.end());
     mat.second->write_hdf5_datapath(data_id, compath, -0.0, 100, nuc_list);
   }
-  
+
   H5Fflush(db, H5F_SCOPE_GLOBAL);
   H5Gclose(data_id);
   H5Gclose(matlib_grp_id);
@@ -303,7 +305,7 @@ void pyne::MaterialLibrary::write_hdf5_nucpath(hid_t db, std::string nucpath) {
   //
   // Read in nuclist if available, write it out if not
   //
-//bool nucpath_exists = h5wrap::path_exists(db, nucpath);
+  // bool nucpath_exists = h5wrap::path_exists(db, nucpath);
   int nuc_size;
   nuc_size = nuclist.size();
   // Create the data if it doesn't exist
@@ -321,7 +323,7 @@ void pyne::MaterialLibrary::write_hdf5_nucpath(hid_t db, std::string nucpath) {
   hid_t nuc_set = H5Dcreate2(db, nucpath.c_str(), H5T_NATIVE_INT, nuc_space,
                              H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   H5Dwrite(nuc_set, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, nuc_data);
-  
+
   H5Fflush(db, H5F_SCOPE_GLOBAL);
   H5Sclose(nuc_space);
   H5Dclose(nuc_set);
