@@ -125,7 +125,7 @@ cdef class _MaterialLibrary:
         self._inst.from_hdf5(c_filename, c_datapath)
 
 
-    def write_hdf5(self, filename, datapath):
+    def write_hdf5(self, filename, datapath="/materials"):
         """Writes this material library to an HDF5 file.
         Parameters
         ----------
