@@ -159,11 +159,11 @@ def write_partisn_input(mesh, hdf5, ngroup, **kwargs):
     if 'names_dict' in kwargs:
         nuc_names = kwargs['names_dict']
         mat_lib, unique_names = _get_material_lib(
-            hdf5, data_hdf5path, nuc_hdf5path, nuc_names=nuc_names)
+            hdf5, data_hdf5path, nuc_names=nuc_names)
         mat_xs_names = _nucid_to_xs(mat_lib, nuc_names=nuc_names)
     else:
         mat_lib, unique_names = _get_material_lib(
-            hdf5, data_hdf5path, nuc_hdf5path)
+            hdf5, data_hdf5path)
         mat_xs_names = _nucid_to_xs(mat_lib)
 
     # Set input variables
@@ -206,7 +206,7 @@ def write_partisn_input(mesh, hdf5, ngroup, **kwargs):
                  block04, block05, cards, input_file)
 
 
-def _get_material_lib(hdf5, data_hdf5path, nuc_hdf5path, **kwargs):
+def _get_material_lib(hdf5, data_hdf5path, **kwargs):
     """Read material properties from the loaded dagmc geometry.
     """
 
@@ -220,7 +220,7 @@ def _get_material_lib(hdf5, data_hdf5path, nuc_hdf5path, **kwargs):
         collapse = False
 
     # collapse isotopes into elements (if required)
-    mats = MaterialLibrary(hdf5, datapath=data_hdf5path, nucpath=nuc_hdf5path)
+    mats = MaterialLibrary(hdf5, datapath=data_hdf5path)
 
     mats_collapsed = {}
     unique_names = {}
