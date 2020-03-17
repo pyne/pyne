@@ -63,6 +63,7 @@ void pyne::MaterialLibrary::from_hdf5(const std::string& filename,
     mat._load_comp_protocol1(db, full_datapath, nucpath, i);
     (*this).add_material(mat);
   }
+  H5Fclose(db);
 }
 
 void pyne::MaterialLibrary::merge(pyne::MaterialLibrary mat_lib) {
