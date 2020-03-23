@@ -23,7 +23,7 @@ typedef std::set<std::string> matname_set;
 typedef std::set<int> nuc_set;
 
 class MaterialLibrary {
- protected:
+ public:
   // The actual library
   mat_map material_library;  // material library
   matname_set keylist;

@@ -134,7 +134,6 @@ cdef class _MaterialLibrary:
         datapath : str, optional
             The path in the hierarchy to the data table in an HDF5 file.
         """
-
         cdef char * c_filename
         filename_bytes = filename.encode('UTF-8')
         c_filename = filename_bytes
@@ -305,8 +304,8 @@ cdef class _MaterialLibrary:
         return py_mat
 
     def __len__(self):
-        if hasattr(self, 'mat_library'):
-            return self.mat_library.size()
+        if hasattr(self, 'material_library'):
+            return self._inst.material_library.size()
         else:
             return 0
 

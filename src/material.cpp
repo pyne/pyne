@@ -46,6 +46,9 @@ void pyne::Material::norm_comp() {
 
 
 void pyne::Material::_load_comp_protocol0(hid_t db, std::string datapath, int row) {
+  // Clear current content
+  comp.clear();
+  
   hid_t matgroup = H5Gopen2(db, datapath.c_str(), H5P_DEFAULT);
   hid_t nucset;
   double nucvalue;
@@ -100,6 +103,9 @@ void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath,
 
 void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath,
                                           std::string nucpath, int row) {
+  // Clear current content
+  comp.clear();
+  
   if (!h5wrap::path_exists(db, nucpath))
     throw std::runtime_error("No path found at the location: " + nucpath);
 
@@ -207,15 +213,15 @@ void pyne::Material::from_hdf5(char * filename, char * datapath, int row, int pr
 
 int pyne::Material::detect_hdf5_layout(hid_t db, std::string path){
   // Check hdf5 material layout:
-  // return options are: 
+  // return options are:
   //     -"-1": path and "/material" do not exist
   //     - "0": path and/or "/material" exist but either as a group or a dataset
   //     - "1": path exists as a dataset -> old layout
   //     - "2": "/material" exists as a group-> new layout
-  
+
   // Initialize test variables
   herr_t status= H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
-  
+
   // Test if datapath exist as a non-dataset
   H5O_info_t path_info;
   status = H5Oget_info_by_name(db, path.c_str(), &path_info, H5P_DEFAULT);

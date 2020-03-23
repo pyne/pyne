@@ -11,6 +11,8 @@ pyne::MaterialLibrary::MaterialLibrary(){};
 // Default constructor
 pyne::MaterialLibrary::MaterialLibrary(const std::string& file,
                                        const std::string& datapath) {
+  
+
   // load materials
   from_hdf5(file, datapath);
 };
@@ -18,6 +20,7 @@ pyne::MaterialLibrary::MaterialLibrary(const std::string& file,
 // Append Material to the library from hdf5 file
 void pyne::MaterialLibrary::from_hdf5(const std::string& filename,
                                       const std::string& datapath) {
+  
   if (!pyne::file_exists(filename)) {
     throw std::runtime_error("File " + filename +
                              " not found or no read permission");
@@ -57,10 +60,12 @@ void pyne::MaterialLibrary::from_hdf5(const std::string& filename,
 
   int file_num_materials = get_length_of_table(filename, full_datapath);
   int library_length = material_library.size();
+  
   for (int i = 0; i < file_num_materials; i++) {
     pyne::Material mat = pyne::Material();
+    
     mat._load_comp_protocol1(db, full_datapath, nucpath, i);
-    (*this).add_material(mat);
+    add_material(mat);
   }
   H5Fclose(db);
 }
@@ -289,9 +294,9 @@ void pyne::MaterialLibrary::write_hdf5(const std::string& filename,
   std::string compath = "composition";
   std::string nucpath = "nuclidelist";
   write_hdf5_nucpath(data_id, nucpath);
+  std::vector<int> nuc_list;
+  nuc_list.assign(nuclist.begin(), nuclist.end());
   for (auto mat : material_library) {
-    std::vector<int> nuc_list;
-    nuc_list.assign(nuclist.begin(), nuclist.end());
     mat.second->write_hdf5_datapath(data_id, compath, -0.0, 100, nuc_list);
   }
 
@@ -374,7 +379,10 @@ int pyne::MaterialLibrary::get_length_of_table(const std::string& filename,
 
   // Initilize to dataspace, to find the indices we are looping over
   hid_t arr_space = H5Dget_space(ds);
-
+  // failure to read the dapaspace return 0 for the size
+  if (arr_space < 0)
+    return 0;
+  
   hsize_t arr_dims[1];
   int arr_ndim = H5Sget_simple_extent_dims(arr_space, arr_dims, NULL);
 
