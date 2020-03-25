@@ -14,7 +14,7 @@ PAPEROPT_letter = -D latex_paper_size=letter
 ALLSPHINXOPTS   = -d $(BUILDDIR)/doctrees $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) .
 
 DOCREPONAME = pyne.github.com
-DOCREPOURL  = https://github.com/pyne/pyne.github.com
+DOCREPOURL  = git@github.com:pyne/pyne.github.com
 
 .PHONY: help clean html dirhtml pickle json htmlhelp qthelp latex changes linkcheck doctest
 
