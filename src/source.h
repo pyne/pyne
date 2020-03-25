@@ -22,29 +22,54 @@
 
 namespace pyne
 {
-  // simplifying implementation...
-  using std::vector;
-  // default empty parameters for constructors
-  const vector<double> null_v_dbl;
-  const vector<int> null_v_int;
 
-  class Source 
+  class Source
   {
-  public:
-
+    public:
     /// Source Constructors
     Source (); /// empty constructor
 
 
     ~Source();  /// default destructor
- 
+
+
+    // mcnp tally
+    virtual std::string mcnp();
+
+    // fluka tally
+    virtual std::string fluka();
+  }
+
+
+  class SourcePoint: public Source
+  {
+  public:
+
+    /// Point Source Constructors
+    SourcePoint (double x=0, double y=0, double z=0, double u=0, double v=0, double w=0, double E=14, std::string p="n", double weight=1); /// default constructor
+
+
+    ~SourcePoint();  /// default destructor
+
 
     // mcnp tally
     std::string mcnp();
-    
-    // fluka tally
-    std::string fluka(std::string unit_number = "-21");
 
+    // fluka tally
+    std::string fluka();
+
+  private:
+    double x;
+    double y;
+    double z;
+
+    double u;
+    double v;
+    double w;
+
+    double E;
+    double weight;
+    std::string p;
   };
 
   /// Converts a Source to a string stream representation.
