@@ -35,14 +35,14 @@ class Source {
   virtual std::string fluka();
 }
 
-class SourcePoint : public Source {
+class PointSource : public Source {
  public:
   /// Point Source Constructors
-  SourcePoint(double x = 0, double y = 0, double z = 0, double u = 0,
-              double v = 0, double w = 0, double E = 14, std::string p = "n",
+  PointSoirce(double x = 0, double y = 0, double z = 0, double i = 0,
+              double j = 0, double k = 0, double E = 14, std::string p = "n",
               double weight = 1);  /// default constructor
 
-  ~SourcePoint();  /// default destructor
+  ~PointSource();  /// default destructor
 
   // mcnp tally
   std::string mcnp();
