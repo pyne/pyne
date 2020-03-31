@@ -16,6 +16,7 @@ set(PYNE_SRCS
   "material.cpp"
   "nucname.cpp"
   "particle.cpp"
+  "source.cpp"
   "rxname.cpp"
   "tally.cpp"
   "transmuters.cpp"

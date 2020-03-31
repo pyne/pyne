@@ -20,6 +20,7 @@ set(PYNE_CYTHON_MODULES
     particle
     pyne_config
     rxname
+    #source
     stlcontainers
     tally
     transmuters

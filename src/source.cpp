@@ -1,6 +1,5 @@
 // Source.cpp
 // Central Source Class
-// -- Andrew Davis
 
 #include <iomanip>
 #include <string>
@@ -36,10 +35,9 @@ std::ostream& operator<<(std::ostream& os, pyne::Source tal) {
 }
 
 pyne::PointSource::PointSource(double x, double y, double z, double u, double v,
-                               double w, double E, std::string p, double weight)
-    : x(x), y(y), z(z), i(i), j(j), w(w), E(E), p(p), weight(weight) {}
+                               double k, double E, std::string p, double weight)
+    : x(x), y(y), z(z), i(i), j(j), k(k), E(E), p(p), weight(weight) {}
 
-    
 // Destructor
 pyne::PointSource::~PointSource() {}
 
@@ -52,9 +50,10 @@ std::string pyne::PointSource::mcnp() {
   if (x != 0 && y != 0 && z != 0) {
     output << "POS=" << x << " " << y << " " << z << std::endl;
   }
-  
+
   if (i != 0 && j != 0 && k != 0) {
-    output << indent << "VEC=" << i << " " << j << " " << k << "DIR=1"<< std::endl;
+    output << indent << "VEC=" << i << " " << j << " " << k << "DIR=1"
+           << std::endl;
   }
 
   if (E != 14) {

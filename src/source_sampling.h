@@ -38,7 +38,6 @@
 #include "moab/Range.hpp"
 #include "moab/Core.hpp"
 #ifndef PYNE_IS_AMALGAMATED
-#include "Source.h"
 #include "measure.h"
 #endif
 #include "moab/CartVect.hpp"
@@ -102,6 +101,40 @@ namespace pyne {
     std::vector<int> alias; /// Alias probabilities.
   };
 
+  // class Source particle
+  class SourceParticle {
+    public:
+    SourceParticle();
+    /// Constructor for source particle
+    /// \param x The x coordinate of the source particle
+    /// \param y The y coordinate of the source particle
+    /// \param z The z coordinate of the source particle
+    /// \param e The energy of the source particle
+    /// \param w The weight of the source particle
+    /// \param c The cell number of the source particle
+    SourceParticle(double x,
+                   double y,
+                   double z,
+                   double e,
+                   double w,
+                   std::vector<int> cell_list);
+    ~SourceParticle();
+
+    double get_x() {return x;};
+    double get_y() {return y;};
+    double get_z() {return z;};
+    double get_e() {return e;};
+    double get_w() {return w;};
+    std::vector<int> get_cell_list() {return cell_list;};
+    private:
+    double x; // x coordinate
+    double y; // y coordinate
+    double z; // z coordinate
+    double e; // energy
+    double w; // weight
+    /// cell list. For sub-voxel mode, the size of cell_list is 1.
+    std::vector<int> cell_list;
+  };
 
   /// Problem modes
   enum BiasMode {USER, ANALOG, UNIFORM};

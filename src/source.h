@@ -33,12 +33,12 @@ class Source {
 
   // fluka tally
   virtual std::string fluka();
-}
+};
 
 class PointSource : public Source {
  public:
   /// Point Source Constructors
-  PointSoirce(double x = 0, double y = 0, double z = 0, double i = 0,
+  PointSource(double x = 0, double y = 0, double z = 0, double i = 0,
               double j = 0, double k = 0, double E = 14, std::string p = "n",
               double weight = 1);  /// default constructor
 
@@ -55,9 +55,9 @@ class PointSource : public Source {
   double y;
   double z;
 
-  double u;
-  double v;
-  double w;
+  double i;
+  double j;
+  double k;
 
   double E;
   double weight;
