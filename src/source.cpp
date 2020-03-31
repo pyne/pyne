@@ -34,7 +34,7 @@ std::ostream& operator<<(std::ostream& os, pyne::Source tal) {
   return os;
 }
 
-pyne::PointSource::PointSource(double x, double y, double z, double u, double v,
+pyne::PointSource::PointSource(double x, double y, double z, double i, double j,
                                double k, double E, std::string p, double weight)
     : x(x), y(y), z(z), i(i), j(j), k(k), E(E), p(p), weight(weight) {}
 
@@ -47,11 +47,11 @@ std::string pyne::PointSource::mcnp() {
 
   output << "SDEF ";
 
-  if (x != 0 && y != 0 && z != 0) {
+  if (x != 0 || y != 0 || z != 0) {
     output << "POS=" << x << " " << y << " " << z << std::endl;
   }
 
-  if (i != 0 && j != 0 && k != 0) {
+  if (i != 0 || j != 0 || k != 0) {
     output << indent << "VEC=" << i << " " << j << " " << k << "DIR=1"
            << std::endl;
   }
