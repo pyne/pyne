@@ -18,7 +18,17 @@ cdef extern from "source.h" namespace "pyne":
         PointSource(double, double, double, double, double, double, double, cstr, double) except +
 
         # attributes
+        double x
+        double y
+        double z
+        double i
+        double j
+        double k
+        double E
+        cstr particle
+        double weight
 
         # methods
         cstr mcnp() except +
+        cstr mcnp(int) except +
         pass

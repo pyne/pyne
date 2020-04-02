@@ -45,12 +45,13 @@ class PointSource : public Source {
   ~PointSource();  /// default destructor
 
   // mcnp tally
-  std::string mcnp();
+  std::string mcnp(int version=5);
 
   // fluka tally
   std::string fluka();
 
- private:
+
+
   double x;
   double y;
   double z;
@@ -61,7 +62,7 @@ class PointSource : public Source {
 
   double E;
   double weight;
-  std::string p;
+  std::string particle;
 };
 
 /// Converts a Source to a string stream representation.
