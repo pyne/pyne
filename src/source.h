@@ -38,9 +38,9 @@ class Source {
 class PointSource : public Source {
  public:
   /// Point Source Constructors
-  PointSource(double x = 0, double y = 0, double z = 0, double i = 0,
-              double j = 0, double k = 0, double E = 14, std::string p = "n",
-              double weight = 1);  /// default constructor
+  PointSource(double _x = 0, double _y = 0, double _z = 0, double _u = 0,
+              double _v = 0, double _w = 0, double _E = 14, std::string _particle = "Neutron",
+              double _weight = 1);  /// default constructor
 
   ~PointSource();  /// default destructor
 
@@ -56,9 +56,9 @@ class PointSource : public Source {
   double y;
   double z;
 
-  double i;
-  double j;
-  double k;
+  double u;
+  double v;
+  double w;
 
   double E;
   double weight;

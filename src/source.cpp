@@ -28,15 +28,9 @@ pyne::Source::Source() {}
 // Destructor
 pyne::Source::~Source() {}
 
-std::ostream& operator<<(std::ostream& os, pyne::Source tal) {
-  // print the Source to ostream
-  os << "\t---------\n";
-  return os;
-}
-
-pyne::PointSource::PointSource(double x, double y, double z, double i, double j,
-                               double k, double E, std::string p, double weight)
-    : x(x), y(y), z(z), i(i), j(j), k(k), E(E), particle(p), weight(weight) {}
+pyne::PointSource::PointSource(double _x, double _y, double _z, double _u, double _v,
+                               double _w, double _E, std::string _particle, double _weight)
+    : x(_x), y(_y), z(_z), u(_u), v(_v), w(_w), E(_E), particle(_particle), weight(_weight) {}
 
 // Destructor
 pyne::PointSource::~PointSource() {}
@@ -47,31 +41,31 @@ std::string pyne::PointSource::mcnp(int version) {
   std::stringstream newline;
   newline << std::endl << "     ";
   
-  
+  std::cout << __LINE__ << std::endl; 
   output << "SDEF ";
-  if (x != 0 || y != 0 || z != 0) {
-    output << "POS=" << x << " " << y << " " << z;
-  }
-  if (i != 0 || j != 0 || k != 0) {
+  std::cout << __LINE__ << std::endl; 
+  output << "POS=" << x << " " << y << " " << z;
+  std::cout << __LINE__ << std::endl; 
+  if (u != 0 || v != 0 || w != 0) {
     output << newline.str();
-    output << "VEC=" << i << " " << j << " " << k << " DIR=1";
+    output << "VEC=" << u << " " << v << " " << w << " DIR=1";
   }
-  if (E != 14) {
-    output << newline.str() << "ERG=" << E;
+  std::cout << __LINE__ << std::endl; 
+  output << newline.str() << "ERG=" << E;
+  std::cout << __LINE__ << std::endl; 
+  output << newline.str() << "WGT=" << weight;
+  std::cout << __LINE__ << std::endl; 
+  output << newline.str() << "PAR=";
+  std::cout << __LINE__ << std::endl; 
+  if (version == 5)
+    output << pyne::particle::mcnp(particle);
+  else if (version == 6)
+    output << pyne::particle::mcnp6(particle);
+  else {
+    throw std::runtime_error("MCNP version is not reconized!");
   }
-  if (weight != 1) {
-    output << newline.str() << "WGT=" << weight;
-  }
-  if (particle != "n") {
-    output << newline.str() << "PAR=";
-    if (version == 5)
-      output << pyne::particle::mcnp(particle);
-    else if (version == 6)
-      output << pyne::particle::mcnp6(particle);
-    else {
-      throw std::runtime_error("MCNP version is not reconized!");
-    }
-  }
+  std::cout << __LINE__ << std::endl; 
+  
 
   return output.str();
 }

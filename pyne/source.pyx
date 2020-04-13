@@ -29,9 +29,9 @@ cdef class PointSource:
     The class is found in the "pyne" namespace"""
 
     # constuctors
-    def __cinit__(self, x=0.0, y=0.0, z=0.0, i=0.0, j=0.0, k=0.0, E=14., p="n", weight=1):
+    def __cinit__(self, x=0.0, y=0.0, z=0.0, u=0.0, v=0.0, w=0.0, E=14., p="Neutron", weight=1):
         p_bytes = p.encode()
-        self._inst = new cpp_source.PointSource(x, y, z, i, j, k, E, std_string(<char *> p_bytes), weight)
+        self._inst = new cpp_source.PointSource(x, y, z, u, v, w, E, std_string(<char *> p_bytes), weight)
         self._free_inst = True
 
     def mcnp(self, version=5):
@@ -70,29 +70,29 @@ cdef class PointSource:
         def __set__(self, value):
             (<cpp_source.PointSource *> self._inst).z = <double> value
     
-    property i:
-        """no docstring for i, please file a bug report!"""
+    property u:
+        """no docstring for u, please file a bug report!"""
         def __get__(self):
-            return (<cpp_source.PointSource *> self._inst).i
+            return (<cpp_source.PointSource *> self._inst).u
 
         def __set__(self, value):
-            (<cpp_source.PointSource *> self._inst).i = <double> value
+            (<cpp_source.PointSource *> self._inst).u = <double> value
     
-    property j:
+    property v:
         """no docstring for j, please file a bug report!"""
         def __get__(self):
-            return (<cpp_source.PointSource *> self._inst).j
+            return (<cpp_source.PointSource *> self._inst).v
 
         def __set__(self, value):
-            (<cpp_source.PointSource *> self._inst).j = <double> value
+            (<cpp_source.PointSource *> self._inst).v = <double> value
     
-    property k:
-        """no docstring for k, please file a bug report!"""
+    property w:
+        """no docstring for w, please file a bug report!"""
         def __get__(self):
-            return (<cpp_source.PointSource *> self._inst).k
+            return (<cpp_source.PointSource *> self._inst).w
 
         def __set__(self, value):
-            (<cpp_source.PointSource *> self._inst).k = <double> value
+            (<cpp_source.PointSource *> self._inst).w = <double> value
     
     property E:
         """no docstring for E, please file a bug report!"""

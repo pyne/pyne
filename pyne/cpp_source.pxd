@@ -21,9 +21,9 @@ cdef extern from "source.h" namespace "pyne":
         double x
         double y
         double z
-        double i
-        double j
-        double k
+        double u
+        double v
+        double w
         double E
         cstr particle
         double weight

@@ -20,9 +20,10 @@ def test_point_source():
     assert_equal(pt_src.x, 1)
     assert_equal(pt_src.y, 2)
     assert_equal(pt_src.z, 3)
-    assert_equal(pt_src.i, 4)
-    assert_equal(pt_src.j, 5)
-    assert_equal(pt_src.k, 6)
+    assert_equal(pt_src.u, 4)
+    assert_equal(pt_src.v, 5)
+    assert_equal(pt_src.w, 6)
+    assert_equal(pt_src.E, 12)
     assert_equal(pt_src.particle, "p")
     assert_equal(pt_src.weight, 0.5)
 
@@ -30,25 +31,50 @@ def test_point_source():
 ################################################################################
 # test write particle for mcnp
 def test_point_source_mcnp():
+   # Beam Source specifying positon, energy, particle and weight
     pt_src = PointSource(1, 2, 3, 4, 5, 6, 12, "Proton", 0.5)
-    assert_equal(
-        "SDEF POS=1 2 3\n     VEC=4 5 6 DIR=1\n     ERG=12\n     WGT=0.5\n     PAR=h", pt_src.mcnp(6))
-    
-    pt_src = PointSource(1, 2, 3, 4, 5, 6, 12, "Proton")
-    assert_equal(
-        "SDEF POS=1 2 3\n     VEC=4 5 6 DIR=1\n     ERG=12\n     PAR=h", pt_src.mcnp(6))
+    exp_str = "SDEF POS=1 2 3\n" \
+              "     VEC=4 5 6 DIR=1\n" \
+              "     ERG=12\n" \
+              "     WGT=0.5\n" \
+              "     PAR=h"
+    assert_equal(exp_str, pt_src.mcnp(6))
 
+   # Beam Source specifying positon, energy and particle
+    pt_src = PointSource(1, 2, 3, 4, 5, 6, 12, "Proton")
+    exp_str = "SDEF POS=1 2 3\n" \
+              "     VEC=4 5 6 DIR=1\n" \
+              "     ERG=12\n" \
+              "     WGT=1\n" \
+              "     PAR=h"
+    assert_equal(exp_str, pt_src.mcnp(6))
+
+   # Beam Source specifying positon and energy
     pt_src = PointSource(1, 2, 3, 4, 5, 6, 12)
-    assert_equal(
-        "SDEF POS=1 2 3\n     VEC=4 5 6 DIR=1\n     ERG=12", pt_src.mcnp(6))
-    
+    exp_str = "SDEF POS=1 2 3\n" \
+              "     VEC=4 5 6 DIR=1\n" \
+              "     ERG=12\n" \
+              "     WGT=1\n" \
+              "     PAR=n"
+    assert_equal(exp_str, pt_src.mcnp(6))
+
+   # Beam Source specifying positon
     pt_src = PointSource(1, 2, 3, 4, 5, 6)
-    assert_equal(
-        "SDEF POS=1 2 3\n     VEC=4 5 6 DIR=1", pt_src.mcnp(6))
-    
+    exp_str = "SDEF POS=1 2 3\n" \
+              "     VEC=4 5 6 DIR=1\n" \
+              "     ERG=14\n" \
+              "     WGT=1\n" \
+              "     PAR=n"
+    assert_equal(exp_str, pt_src.mcnp(6))
+
+   # Isotropic Source only specifying positon
     pt_src = PointSource(1, 2, 3)
-    assert_equal(
-        "SDEF POS=1 2 3", pt_src.mcnp(6))
+    exp_str = "SDEF POS=1 2 3\n" \
+              "     ERG=14\n" \
+              "     WGT=1\n" \
+              "     PAR=n"
+    assert_equal(exp_str, pt_src.mcnp(6))
+
 
 # Run as script
 #
