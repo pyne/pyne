@@ -369,9 +369,9 @@ std::string pyne::particle::name(std::string s) {
   if(pyne::nucname::isnuclide(s))
     {
       if(pyne::particle::is_hydrogen(s))
-  return "Proton";
+        return "Proton";
       if( pyne::particle::is_heavy_ion(s) )
-  return s;
+        return s;
     }
   // check std name
   if(0 < names.count(s))
@@ -416,10 +416,7 @@ std::string pyne::particle::mcnp6(std::string s) {
   if(0 < part_to_mcnp6.count(pyne::particle::name(s)))
     return part_to_mcnp6[pyne::particle::name(s)];
   else
-    {
-      std::cout << "Not a valid MCNP6 particle" << std::endl;
       return "?";
-    }
 }
 
 // convert name to fluka id
