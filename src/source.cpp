@@ -41,22 +41,15 @@ std::string pyne::PointSource::mcnp(int version) {
   std::stringstream newline;
   newline << std::endl << "     ";
   
-  std::cout << __LINE__ << std::endl; 
   output << "SDEF ";
-  std::cout << __LINE__ << std::endl; 
   output << "POS=" << x << " " << y << " " << z;
-  std::cout << __LINE__ << std::endl; 
   if (u != 0 || v != 0 || w != 0) {
     output << newline.str();
     output << "VEC=" << u << " " << v << " " << w << " DIR=1";
   }
-  std::cout << __LINE__ << std::endl; 
   output << newline.str() << "ERG=" << E;
-  std::cout << __LINE__ << std::endl; 
   output << newline.str() << "WGT=" << weight;
-  std::cout << __LINE__ << std::endl; 
   output << newline.str() << "PAR=";
-  std::cout << __LINE__ << std::endl; 
   if (version == 5)
     output << pyne::particle::mcnp(particle);
   else if (version == 6)
@@ -64,8 +57,6 @@ std::string pyne::PointSource::mcnp(int version) {
   else {
     throw std::runtime_error("MCNP version is not reconized!");
   }
-  std::cout << __LINE__ << std::endl; 
-  
 
   return output.str();
 }
