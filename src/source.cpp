@@ -35,7 +35,7 @@ pyne::PointSource::PointSource(double _x, double _y, double _z, double _u, doubl
 // Destructor
 pyne::PointSource::~PointSource() {}
 
-std::string pyne::PointSource::mcnp(int version) {
+std::string pyne::PointSource::mcnp(int version) const {
   std::stringstream output;  // output stream
   
   std::stringstream newline;

@@ -45,7 +45,7 @@ class PointSource : public Source {
   ~PointSource();  /// default destructor
 
   // mcnp tally
-  std::string mcnp(int version=5) const;
+  virtual std::string mcnp(int version=5) const;
 
   // fluka tally
   std::string fluka();
