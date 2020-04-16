@@ -29,7 +29,7 @@ class Source {
   ~Source();  /// default destructor
 
   // mcnp tally
-  virtual std::string mcnp() {}
+  virtual std::string mcnp(int version=5) const {return "";}
 
   // fluka tally
   virtual std::string fluka() {}
@@ -45,7 +45,7 @@ class PointSource : public Source {
   ~PointSource();  /// default destructor
 
   // mcnp tally
-  std::string mcnp(int version=5);
+  std::string mcnp(int version=5) const;
 
   // fluka tally
   std::string fluka();
