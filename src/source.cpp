@@ -37,10 +37,10 @@ pyne::PointSource::~PointSource() {}
 
 std::string pyne::PointSource::mcnp(int version) const {
   std::stringstream output;  // output stream
-  
+
   std::stringstream newline;
   newline << std::endl << "     ";
-  
+
   output << "SDEF ";
   output << "POS=" << x << " " << y << " " << z;
   if (u != 0 || v != 0 || w != 0) {
