@@ -1,7 +1,7 @@
 **Added:** None
 
 **Changed:**
-- correct syntax issue, including, empty lines, indentations and trailing spaces
+- correct formating issues: including, empty lines, indentations and trailing spaces
 
 **Deprecated:** None
 
