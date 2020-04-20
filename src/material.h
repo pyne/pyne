@@ -22,6 +22,7 @@
 #endif
 
 #ifndef PYNE_IS_AMALGAMATED
+  #define PYNE_DECAY
 #include "json-forwards.h"
 #include "json.h"
 #include "h5wrap.h"
