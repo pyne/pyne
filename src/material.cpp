@@ -115,7 +115,7 @@ void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath,
     H5Sget_simple_extent_dims(data_space, data_dims, NULL);
     data_offset[0] += data_dims[0];
   }
-  
+
   // Grab the nuclides
   std::vector<int> nuclides =
       h5wrap::h5_array_to_cpp_vector_1d<int>(db, nucpath, H5T_NATIVE_INT);
@@ -1730,7 +1730,7 @@ pyne::Material pyne::Material::sub_mat(std::set<int> nucset) {
 
   pyne::comp_map cm;
   for (pyne::comp_iter i = comp.begin(); i != comp.end(); i++) {
-    if (0 < nucset.count(i->first)) 
+    if (0 < nucset.count(i->first))
       cm[i->first] = (i->second) * mass;
   }
   return pyne::Material(cm, -1, -1);
