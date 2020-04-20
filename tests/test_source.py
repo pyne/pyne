@@ -17,15 +17,18 @@ warnings.simplefilter("ignore", QAWarning)
 # tests the constructor
 def test_point_source():
     pt_src = PointSource(1, 2, 3, 4, 5, 6, 12, "p", 0.5)
-    assert_equal(pt_src.x, 1)
-    assert_equal(pt_src.y, 2)
-    assert_equal(pt_src.z, 3)
-    assert_equal(pt_src.u, 4)
-    assert_equal(pt_src.v, 5)
-    assert_equal(pt_src.w, 6)
-    assert_equal(pt_src.E, 12)
-    assert_equal(pt_src.particle, "p")
-    assert_equal(pt_src.weight, 0.5)
+    test_couples = [
+        (pt_src.x, 1), 
+        (pt_src.y, 2), 
+        (pt_src.z, 3), 
+        (pt_src.u, 4), 
+        (pt_src.v, 5), 
+        (pt_src.w, 6), 
+        (pt_src.E, 12), 
+        (pt_src.particle, "p"), 
+        (pt_src.weight, 0.5)]
+    for couple in test_couples:
+        assert_equal(couple[0], couple[1])
 
 
 ################################################################################
