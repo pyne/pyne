@@ -32,7 +32,6 @@ double pyne::Material::get_comp_sum() {
 }
 
 
-
 void pyne::Material::norm_comp() {
   double sum = get_comp_sum();
   if (sum != 1.0 && sum != 0.0) {
@@ -95,8 +94,8 @@ void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath,
     H5Dclose(data_set);
     throw std::runtime_error("Can't find location of the nuclide list: nucpath attribute not found!");
   }
-  
 }
+
 
 void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath,
                                           std::string nucpath, int row) {
@@ -116,6 +115,7 @@ void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath,
     H5Sget_simple_extent_dims(data_space, data_dims, NULL);
     data_offset[0] += data_dims[0];
   }
+
   // Grab the nuclides
   std::vector<int> nuclides =
       h5wrap::h5_array_to_cpp_vector_1d<int>(db, nucpath, H5T_NATIVE_INT);
@@ -206,22 +206,23 @@ void pyne::Material::from_hdf5(char * filename, char * datapath, int row, int pr
   from_hdf5(fname, dpath, row, protocol);
 }
 
+
 int pyne::Material::detect_hdf5_layout(hid_t db, std::string path){
   // Check hdf5 material layout:
-  // return options are: 
+  // return options are:
   //     -"-1": path and "/material" do not exist
   //     - "0": path and/or "/material" exist but either as a group or a dataset
   //     - "1": path exists as a dataset -> old layout
   //     - "2": "/material" exists as a group-> new layout
-  
+
   // Initialize test variables
   herr_t status= H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
-  
+
   // Test if datapath exist as a non-dataset
   H5O_info_t path_info;
   status = H5Oget_info_by_name(db, path.c_str(), &path_info, H5P_DEFAULT);
   bool path_exists = (status == 0);
-  
+
   // Reset status and test "/material" path exist as a non-dataset
   H5O_info_t matpath_info;
   status = H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
@@ -259,7 +260,6 @@ void pyne::Material::from_hdf5(std::string filename, std::string datapath, int r
   // Open the database
   hid_t db = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, fapl);
 
-
   // Clear current content
   comp.clear();
   // Load via various protocols
@@ -269,7 +269,7 @@ void pyne::Material::from_hdf5(std::string filename, std::string datapath, int r
       throw h5wrap::PathNotFound(filename, datapath);
     _load_comp_protocol0(db, datapath, row);
   } else if (protocol == 1) {
-    
+
     int prot1_hdf5_layout = detect_hdf5_layout(db, datapath);
     switch(prot1_hdf5_layout) {
       case prot1_layout::path_donotexists:
@@ -283,7 +283,7 @@ void pyne::Material::from_hdf5(std::string filename, std::string datapath, int r
       case old_layout:
         _load_comp_protocol1(db, datapath, row);
         break;
-      
+
       case prot1_layout::new_layout:
         std::string full_datapath = "/material" + datapath + "/composition";
         std::string nucpath = "/material" + datapath + "/nuclidelist";
@@ -310,7 +310,6 @@ void pyne::Material::deprecated_write_hdf5(char * filename, char * datapath, cha
 
 
 std::vector<int> pyne::Material::write_hdf5_nucpath(hid_t db, std::string nucpath) {
-
   //
   // Read in nuclist if available, write it out if not
   //
@@ -360,8 +359,9 @@ std::vector<int> pyne::Material::write_hdf5_nucpath(hid_t db, std::string nucpat
 }
 
 
-void pyne::Material::write_hdf5_datapath(hid_t db, std::string datapath, float row, int chunksize, std::vector<int> nuclides) {
-
+void pyne::Material::write_hdf5_datapath(hid_t db, std::string datapath,
+                                         float row, int chunksize,
+                                         std::vector<int> nuclides) {
   int row_num = (int)row;
 
   hsize_t nuc_dims[1];
@@ -520,7 +520,6 @@ void pyne::Material::write_hdf5_datapath(hid_t db, std::string datapath, float r
   H5Tclose(attrtype);
 
   delete[] mat_data;
-
 }
 
 
@@ -574,7 +573,7 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
           " is not a dataset and /material entity is neither a group nor a dataset.");
       break;
     }
-    
+
     // old layout
     case prot1_layout::old_layout: {
       std::string nucpath = "/nucid";
@@ -609,7 +608,6 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
       break;
     }
   }
-  
 
   //datapath is provided with a "/" so need to open with fullpath
   // Group "/material/datapath" does not exist create it
@@ -631,6 +629,7 @@ void pyne::Material::write_hdf5(std::string filename, std::string datapath,
   H5Gclose(material_grp_id);
   H5Fclose(db);
 }
+
 
 void pyne::Material::deprecated_write_hdf5(std::string filename, std::string datapath,
                                 std::string nucpath, float row, int chunksize) {
@@ -654,6 +653,7 @@ void pyne::Material::deprecated_write_hdf5(std::string filename, std::string dat
 
   H5Fclose(db);
 }
+
 
 void pyne::Material::deprecated_write_hdf5(hid_t db, std::string datapath,
                                 std::string nucpath, float row, int chunksize) {
@@ -802,6 +802,7 @@ std::string pyne::Material::openmc(std::string frac_type) {
   return oss.str();
 }
 
+
 ///---------------------------------------------------------------------------//
 std::string pyne::Material::get_uwuw_name() {
   // standard uwuw material name is : "mat:<Name of Material>/rho:<density>"
@@ -821,13 +822,14 @@ std::string pyne::Material::get_uwuw_name() {
   return uwuw_name.str();
 }
 
+
 ///---------------------------------------------------------------------------//
 std::string pyne::Material::mcnp(std::string frac_type, bool mult_den) {
   //////////////////// Begin card creation ///////////////////////
   std::ostringstream oss;
 
   std::string comment_prefix = "C ";
-  
+
   // 'name'
   if (metadata.isMember("name")) {
     oss << "C name: " << metadata["name"].asString() << std::endl;
@@ -874,7 +876,7 @@ std::string pyne::Material::phits(std::string frac_type, bool mult_den) {
   std::ostringstream oss;
 
   std::string comment_prefix = "C ";
-  
+
   // 'name'
   if (metadata.isMember("name")) {
     oss << "C name: " << metadata["name"].asString() << std::endl;
@@ -917,13 +919,13 @@ std::string pyne::Material::phits(std::string frac_type, bool mult_den) {
   return oss.str();
 }
 
-std::string pyne::Material::mcnp_frac(std::map<int, double> fracs, std::string frac_type){
 
+std::string pyne::Material::mcnp_frac(std::map<int, double> fracs, std::string frac_type){
   std::string frac_sign = "";
   if ("atom" != frac_type) {
     frac_sign = "-";
   }
-  
+
   // iterate through frac map
   // This is an awkward pre-C++11 way to put an int to a string
   std::ostringstream oss;
@@ -953,6 +955,7 @@ std::string pyne::Material::mcnp_frac(std::map<int, double> fracs, std::string f
   }
   return oss.str();
 }
+
 
 ///---------------------------------------------------------------------------//
 /// Create a set out of the static string array.
@@ -1197,6 +1200,7 @@ std::string pyne::Material::fluka_compound_str(int id, std::string frac_type) {
   return ss.str();
 }
 
+
 void pyne::Material::from_text(char * filename) {
   std::string fname (filename);
   from_text(fname);
@@ -1251,7 +1255,6 @@ void pyne::Material::from_text(std::string filename) {
    f.close();
    norm_comp();
 }
-
 
 
 void pyne::Material::write_text(char * filename) {
@@ -1326,6 +1329,7 @@ void pyne::Material::from_json(char * filename) {
   from_json(fname);
 }
 
+
 void pyne::Material::from_json(std::string filename) {
   if (!pyne::file_exists(filename))
     throw pyne::FileNotFound(filename);
@@ -1348,6 +1352,7 @@ void pyne::Material::write_json(char * filename) {
   write_json(fname);
 }
 
+
 void pyne::Material::write_json(std::string filename) {
   Json::Value json = dump_json();
   Json::StyledWriter writer;
@@ -1364,7 +1369,6 @@ void pyne::Material::write_json(std::string filename) {
 /************************/
 
 /*--- Constructors ---*/
-
 pyne::Material::Material() {
   // Empty Material constructor
   mass = -1.0;
@@ -1385,7 +1389,6 @@ pyne::Material::Material(pyne::comp_map cm, double m, double d, double apm,
   if (!comp.empty())
     norm_comp();
 }
-
 
 
 pyne::Material::Material(char * filename, double m, double d, double apm,
@@ -1434,10 +1437,7 @@ pyne::Material::~Material() {
 }
 
 
-
 /*--- Method definitions ---*/
-
-
 std::ostream& operator<<(std::ostream& os, pyne::Material mat) {
   //print the Mass Stream to stdout
   os << "\tMass: " << mat.mass << "\n";
@@ -1449,10 +1449,12 @@ std::ostream& operator<<(std::ostream& os, pyne::Material mat) {
   return os;
 }
 
+
 // Note this refines << for an inheritor of std::ostream.
 std::ostringstream& operator<<(std::ostringstream& os, pyne::Material mat) {
   return os;
 }
+
 
 void pyne::Material::normalize () {
   // normalizes the mass
@@ -1471,7 +1473,6 @@ pyne::comp_map pyne::Material::mult_by_mass() {
   }
   return cm;
 }
-
 
 
 pyne::comp_map pyne::Material::activity() {
@@ -1553,6 +1554,7 @@ double pyne::Material::molecular_mass(double apm) {
   return atsperm / inverseA;
 }
 
+
 pyne::Material pyne::Material::expand_elements(std::set<int> exception_ids) {
   // Expands the natural elements of a material and returns a new material note
   // that this implementation relies on the fact that maps of ints are stored in
@@ -1602,19 +1604,19 @@ pyne::Material pyne::Material::expand_elements(std::set<int> exception_ids) {
   return Material(newcomp, mass, density, atoms_per_molecule, metadata);
 }
 
+
 // Wrapped version for calling from python
-pyne::Material pyne::Material::expand_elements(int** int_ptr_arry ) {
-    std::set<int> nucvec;
-    // Set first pointer to first int pointed to by arg
-    if (int_ptr_arry != NULL) {
-      int *int_ptr = *int_ptr_arry;
-      while (int_ptr != NULL)
-  {
-    nucvec.insert(*int_ptr);
-    int_ptr++;
-  }
+pyne::Material pyne::Material::expand_elements(int** int_ptr_arry) {
+  std::set<int> nucvec;
+  // Set first pointer to first int pointed to by arg
+  if (int_ptr_arry != NULL) {
+    int* int_ptr = *int_ptr_arry;
+    while (int_ptr != NULL) {
+      nucvec.insert(*int_ptr);
+      int_ptr++;
     }
-    return expand_elements(nucvec);
+  }
+  return expand_elements(nucvec);
 }
 
 
@@ -1639,51 +1641,53 @@ pyne::Material pyne::Material::collapse_elements(std::set<int> exception_ids) {
   pyne::comp_map cm;
 
   for (pyne::comp_iter ptr = comp.begin(); ptr != comp.end(); ptr++) {
-      if (0 < ptr->second) {
-        // There is a nonzero amount of this nucid in the current material,
-        // check if znum and anum are in the exception list,
-        int cur_stripped_id = nucname::znum(ptr->first)*10000000
-                        + nucname::anum(ptr->first)*10000;
-        if (0 < exception_ids.count(cur_stripped_id)) {
+    if (0 < ptr->second) {
+      // There is a nonzero amount of this nucid in the current material,
+      // check if znum and anum are in the exception list,
+      int cur_stripped_id = nucname::znum(ptr->first) * 10000000 +
+                            nucname::anum(ptr->first) * 10000;
+      if (0 < exception_ids.count(cur_stripped_id)) {
         // The znum/anum combination identify the current material as a
         // fluka-named exception list => copy, don't collapse
-          cm[ptr->first] = (ptr->second) * mass;
-        } else {
-          // Not on exception list => add frac to id-component
-          int znum_id = nucname::id(nucname::znum(ptr->first));
-          cm[znum_id] += (ptr->second) * mass;
-        }
+        cm[ptr->first] = (ptr->second) * mass;
+      } else {
+        // Not on exception list => add frac to id-component
+        int znum_id = nucname::id(nucname::znum(ptr->first));
+        cm[znum_id] += (ptr->second) * mass;
       }
+    }
   }
   // Copy
-  pyne::Material collapsed = pyne::Material(cm, mass, density,
-                                            atoms_per_molecule, metadata);
+  pyne::Material collapsed =
+      pyne::Material(cm, mass, density, atoms_per_molecule, metadata);
   return collapsed;
 }
 
+
 // Wrapped version for calling from python
-pyne::Material pyne::Material::collapse_elements(int** int_ptr_arry ) {
-    std::set<int> nucvec;
-    // Set first pointer to first int pointed to by arg
-    int *int_ptr = *int_ptr_arry;
-    while (int_ptr != NULL)
-    {
-      nucvec.insert(*int_ptr);
-      int_ptr++;
-    }
-    return collapse_elements(nucvec);
+pyne::Material pyne::Material::collapse_elements(int** int_ptr_arry) {
+  std::set<int> nucvec;
+  // Set first pointer to first int pointed to by arg
+  int* int_ptr = *int_ptr_arry;
+  while (int_ptr != NULL) {
+    nucvec.insert(*int_ptr);
+    int_ptr++;
+  }
+  return collapse_elements(nucvec);
 }
 
-  // Set up atom or mass frac map
 
-std::map<int, double> pyne::Material::get_density_frac(std::string frac_type, bool mult_den){
+// Set up atom or mass frac map
+std::map<int, double> pyne::Material::get_density_frac(std::string frac_type,
+                                                       bool mult_den) {
   std::map<int, double> fracs;
 
   if ("atom" == frac_type) {
     if (density != -1.0 && mult_den) {
       fracs = to_atom_dens();
-      for (comp_iter ci = fracs.begin(); ci != fracs.end(); ci++){
-        ci->second *= pyne::cm2_per_barn; // unit requirememt is [10^24 atoms/cm3] = [atoms/b.cm]
+      for (comp_iter ci = fracs.begin(); ci != fracs.end(); ci++) {
+        ci->second *= pyne::cm2_per_barn;  // unit requirememt is [10^24
+                                           // atoms/cm3] = [atoms/b.cm]
       }
     } else {
       fracs = to_atom_frac();
@@ -1691,14 +1695,13 @@ std::map<int, double> pyne::Material::get_density_frac(std::string frac_type, bo
   } else {
     fracs = comp;
     if (density != -1.0 && mult_den) {
-      for (comp_iter ci = fracs.begin(); ci != fracs.end(); ci++){
+      for (comp_iter ci = fracs.begin(); ci != fracs.end(); ci++) {
         ci->second *= density;
       }
     }
   }
   return fracs;
 }
-
 
 
 double pyne::Material::mass_density(double num_dens, double apm) {
@@ -1720,20 +1723,18 @@ double pyne::Material::number_density(double mass_dens, double apm) {
 
 
 /*--- Stub-Stream Computation ---*/
-
 pyne::Material pyne::Material::sub_mat(std::set<int> nucset) {
   // Grabs a sub-material from this mat based on a set of integers.
-  // Integers can either be of id form -OR- they can be a z-numer (is 8 for O, 93 for Np, etc).
+  // Integers can either be of id form -OR- they can be a z-numer (is 8 for O,
+  // 93 for Np, etc).
 
   pyne::comp_map cm;
   for (pyne::comp_iter i = comp.begin(); i != comp.end(); i++) {
-    if ( 0 < nucset.count(i->first) )
+    if (0 < nucset.count(i->first))
       cm[i->first] = (i->second) * mass;
   }
-
   return pyne::Material(cm, -1, -1);
 }
-
 
 
 pyne::Material pyne::Material::sub_mat(std::set<std::string> nucset) {
@@ -1743,10 +1744,8 @@ pyne::Material pyne::Material::sub_mat(std::set<std::string> nucset) {
   for (std::set<std::string>::iterator i = nucset.begin(); i != nucset.end(); i++) {
     iset.insert(pyne::nucname::id(*i));
   }
-
   return sub_mat(iset);
 }
-
 
 
 pyne::Material pyne::Material::set_mat (std::set<int> nucset, double value) {
@@ -1770,7 +1769,6 @@ pyne::Material pyne::Material::set_mat (std::set<int> nucset, double value) {
 }
 
 
-
 pyne::Material pyne::Material::set_mat(std::set<std::string> nucset, double value) {
   // Sets a substream from this stream based on a set of strings.
   // Strings can be of any form.
@@ -1778,11 +1776,8 @@ pyne::Material pyne::Material::set_mat(std::set<std::string> nucset, double valu
   for (std::set<std::string>::iterator i = nucset.begin(); i != nucset.end(); i++) {
     iset.insert(pyne::nucname::id(*i));
   }
-
   return set_mat(iset, value);
 }
-
-
 
 
 pyne::Material pyne::Material::del_mat(std::set<int> nucset) {
@@ -1796,10 +1791,8 @@ pyne::Material pyne::Material::del_mat(std::set<int> nucset) {
     if ( 0 == nucset.count(i->first) )
       cm[i->first] = (i->second) * mass;
   }
-
   return pyne::Material(cm, -1, -1);
 }
-
 
 
 pyne::Material pyne::Material::del_mat (std::set<std::string> nucset) {
@@ -1809,13 +1802,8 @@ pyne::Material pyne::Material::del_mat (std::set<std::string> nucset) {
   for (std::set<std::string>::iterator i = nucset.begin(); i != nucset.end(); i++) {
     iset.insert(pyne::nucname::id(*i));
   }
-
   return del_mat(iset);
 }
-
-
-
-
 
 
 pyne::Material pyne::Material::sub_range(int lower, int upper) {
@@ -1832,10 +1820,8 @@ pyne::Material pyne::Material::sub_range(int lower, int upper) {
     if ((lower <= (i->first)) && ((i->first) < upper))
       cm[i->first] = (i->second) * mass;
   }
-
   return pyne::Material(cm, -1,-1);
 }
-
 
 
 pyne::Material pyne::Material::set_range(int lower, int upper, double value) {
@@ -1853,10 +1839,8 @@ pyne::Material pyne::Material::set_range(int lower, int upper, double value) {
     else
       cm[i->first] = (i->second) * mass;
   }
-
   return pyne::Material(cm, -1,-1);
 }
-
 
 
 pyne::Material pyne::Material::del_range(int lower, int upper) {
@@ -1872,17 +1856,8 @@ pyne::Material pyne::Material::del_range(int lower, int upper) {
     if ((upper <= (i->first)) || ((i->first) < lower))
       cm[i->first] = (i->second) * mass;
   }
-
   return pyne::Material(cm, -1, -1);
 }
-
-
-
-
-
-
-
-
 
 
 pyne::Material pyne::Material::sub_elem(int elem) {
@@ -1891,12 +1866,10 @@ pyne::Material pyne::Material::sub_elem(int elem) {
 }
 
 
-
 pyne::Material pyne::Material::sub_lan() {
   // Returns a material of Lanthanides that is a sub-material of this one.
   return sub_range(570000000, 720000000);
 }
-
 
 
 pyne::Material pyne::Material::sub_act() {
@@ -1911,12 +1884,10 @@ pyne::Material pyne::Material::sub_tru() {
 }
 
 
-
 pyne::Material pyne::Material::sub_ma() {
   // Returns a material of Minor Actinides that is a sub-material of this one.
   return sub_range(930000000, 1040000000).del_range(940000000, 950000000);
 }
-
 
 
 pyne::Material pyne::Material::sub_fp() {
@@ -1925,10 +1896,7 @@ pyne::Material pyne::Material::sub_fp() {
 }
 
 
-
-
 /*--- Atom Frac Functions ---*/
-
 std::map<int, double> pyne::Material::to_atom_frac() {
   // Returns an atom fraction map from this material's composition
   // the material's molecular mass
@@ -1956,7 +1924,6 @@ void pyne::Material::from_atom_frac(std::map<int, double> atom_fracs) {
     comp[afi->first] = (afi->second) * pyne::atomic_mass(afi->first);
     atoms_per_molecule += (afi->second);
   }
-
   norm_comp();
 }
 
@@ -1993,6 +1960,7 @@ std::vector<std::pair<double, double> > pyne::Material::gammas() {
   return result;
 }
 
+
 std::vector<std::pair<double, double> > pyne::Material::xrays() {
   std::vector<std::pair<double, double> > result;
   std::map<int, double> atom_fracs = this->to_atom_frac();
@@ -2012,6 +1980,7 @@ std::vector<std::pair<double, double> > pyne::Material::xrays() {
   return result;
 }
 
+
 std::vector<std::pair<double, double> > pyne::Material::photons(bool norm) {
   std::vector<std::pair<double, double> >  txray = this->xrays();
   std::vector<std::pair<double, double> >  tgammas = this->gammas();
@@ -2022,18 +1991,18 @@ std::vector<std::pair<double, double> > pyne::Material::photons(bool norm) {
   return tgammas;
 }
 
+
 std::vector<std::pair<double, double> > pyne::Material::normalize_radioactivity(
-std::vector<std::pair<double, double> > unnormed) {
+    std::vector<std::pair<double, double> > unnormed) {
   std::vector<std::pair<double, double> > normed;
   double sum = 0.0;
   for (int i = 0; i < unnormed.size(); ++i) {
-    if (!isnan(unnormed[i].second))
-      sum = sum + unnormed[i].second;
+    if (!isnan(unnormed[i].second)) sum = sum + unnormed[i].second;
   }
   for (int i = 0; i < unnormed.size(); ++i) {
     if (!isnan(unnormed[i].second)) {
-      normed.push_back(std::make_pair(unnormed[i].first,
-        (unnormed[i].second)/sum));
+      normed.push_back(
+          std::make_pair(unnormed[i].first, (unnormed[i].second) / sum));
     }
   }
   return normed;
@@ -2057,11 +2026,11 @@ pyne::Material pyne::Material::cram(std::vector<double> A,
   return rtn;
 }
 
+
 pyne::Material pyne::Material::operator+ (double y) {
   // Overloads x + y
   return pyne::Material(comp, mass + y, density);
 }
-
 
 
 pyne::Material pyne::Material::operator+ (Material y) {
@@ -2086,12 +2055,10 @@ pyne::Material pyne::Material::operator+ (Material y) {
 }
 
 
-
 pyne::Material pyne::Material::operator* (double y) {
   // Overloads x * y
   return pyne::Material(comp, mass * y, density);
 }
-
 
 
 pyne::Material pyne::Material::operator/ (double y) {
@@ -2099,13 +2066,14 @@ pyne::Material pyne::Material::operator/ (double y) {
   return pyne::Material(comp, mass / y, density );
 }
 
+
 bool pyne::detect_nuclidelist(hid_t data_set, std::string& nucpath){
   hid_t nuc_attr = H5Aopen(data_set, "nucpath", H5P_DEFAULT);
-  
+
   // can't find the "nucpath" Attribute
-  if(nuc_attr < 0) 
+  if(nuc_attr < 0)
     return false;
-  
+
   H5A_info_t nuc_info;
   H5Aget_info(nuc_attr, &nuc_info);
   hsize_t nuc_attr_len = nuc_info.data_size;
@@ -2119,3 +2087,4 @@ bool pyne::detect_nuclidelist(hid_t data_set, std::string& nucpath){
   H5Tclose(nuc_attr);
   return true;
 }
+
