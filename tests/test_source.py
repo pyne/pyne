@@ -30,7 +30,7 @@ def test_point_source():
 
 ################################################################################
 # test write particle for mcnp
-def test_point_source_mcnp():
+def test_point_source_mcnp_1():
    # Beam Source specifying positon, energy, particle and weight
     pt_src = PointSource(1, 2, 3, 4, 5, 6, 12, "Proton", 0.5)
     exp_str = "SDEF POS=1 2 3\n" \
@@ -40,6 +40,7 @@ def test_point_source_mcnp():
               "     PAR=h"
     assert_equal(exp_str, pt_src.mcnp(6))
 
+def test_point_source_mcnp_2():
    # Beam Source specifying positon, energy and particle
     pt_src = PointSource(1, 2, 3, 4, 5, 6, 12, "Proton")
     exp_str = "SDEF POS=1 2 3\n" \
@@ -49,6 +50,7 @@ def test_point_source_mcnp():
               "     PAR=h"
     assert_equal(exp_str, pt_src.mcnp(6))
 
+def test_point_source_mcnp_3():
    # Beam Source specifying positon and energy
     pt_src = PointSource(1, 2, 3, 4, 5, 6, 12)
     exp_str = "SDEF POS=1 2 3\n" \
@@ -58,6 +60,7 @@ def test_point_source_mcnp():
               "     PAR=n"
     assert_equal(exp_str, pt_src.mcnp(6))
 
+def test_point_source_mcnp_4():
    # Beam Source specifying positon
     pt_src = PointSource(1, 2, 3, 4, 5, 6)
     exp_str = "SDEF POS=1 2 3\n" \
@@ -67,6 +70,7 @@ def test_point_source_mcnp():
               "     PAR=n"
     assert_equal(exp_str, pt_src.mcnp(6))
 
+def test_point_source_mcnp_5():
    # Isotropic Source only specifying positon
     pt_src = PointSource(1, 2, 3)
     exp_str = "SDEF POS=1 2 3\n" \
