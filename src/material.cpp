@@ -90,7 +90,7 @@ void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath,
   hid_t data_set = H5Dopen2(db, datapath.c_str(), H5P_DEFAULT);
 
   // Grab the nucpath
-  If (detect_nuclidelist(data_set, nucpath)){
+  if (detect_nuclidelist(data_set, nucpath)){
     H5Dclose(data_set);
     _load_comp_protocol1(db, datapath, nucpath, row);
   } else {
@@ -2029,7 +2029,7 @@ pyne::comp_map pyne::Material::dose_per_g(std::string dose_type, int source) {
   return dose;
 }
 
-#endif
+#endif  PYNE_DECAY
 
 
 pyne::Material pyne::Material::operator+ (double y) {
@@ -2092,4 +2092,3 @@ bool pyne::detect_nuclidelist(hid_t data_set, std::string& nucpath){
   H5Tclose(nuc_attr);
   return true;
 }
-
