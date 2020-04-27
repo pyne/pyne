@@ -1475,6 +1475,63 @@ pyne::comp_map pyne::Material::mult_by_mass() {
 }
 
 
+pyne::comp_map pyne::Material::activity() {
+  pyne::comp_map act;
+  double masspermole = mass * pyne::N_A;
+  for (pyne::comp_iter i = comp.begin(); i != comp.end(); ++i) {
+    act[i->first] = masspermole * (i->second) * decay_const(i->first) / \
+                    atomic_mass(i->first);
+  }
+  return act;
+}
+
+
+pyne::comp_map pyne::Material::decay_heat() {
+  pyne::comp_map dh;
+  double masspermole = mass * pyne::N_A;
+  for (pyne::comp_iter i = comp.begin(); i != comp.end(); ++i) {
+    dh[i->first] = masspermole * (i->second) * \
+                   decay_const(metastable_id(i->first,nucname::snum(i->first))) * \
+                   q_val(i->first) / atomic_mass(i->first) / pyne::MeV_per_MJ;
+  }
+  return dh;
+}
+
+
+pyne::comp_map pyne::Material::dose_per_g(std::string dose_type, int source) {
+  pyne::comp_map dose;
+  const double pCi_per_Bq = 27.027027;
+  if (dose_type == "ext_air") {
+    for (pyne::comp_iter i = comp.begin(); i != comp.end(); ++i) {
+      dose[i->first] = Ci_per_Bq * pyne::N_A * (i->second) * \
+                       decay_const(i->first) * ext_air_dose(i->first, source) / \
+                       atomic_mass(i->first);
+    }
+  } else if (dose_type == "ext_soil") {
+    for (pyne::comp_iter i = comp.begin(); i != comp.end(); ++i) {
+      dose[i->first] = Ci_per_Bq * pyne::N_A * (i->second) * \
+                       decay_const(i->first) * ext_soil_dose(i->first, source) / \
+                       atomic_mass(i->first);
+    }
+  } else if (dose_type == "ingest") {
+    for (pyne::comp_iter i = comp.begin(); i != comp.end(); ++i) {
+      dose[i->first] = pCi_per_Bq * pyne::N_A * (i->second) * \
+                       decay_const(i->first) * ingest_dose(i->first, source) / \
+                       atomic_mass(i->first);
+    }
+  } else if (dose_type == "inhale") {
+    for (pyne::comp_iter i = comp.begin(); i != comp.end(); ++i) {
+      dose[i->first] = pCi_per_Bq * pyne::N_A * (i->second) * \
+                       decay_const(i->first) * inhale_dose(i->first, source) / \
+                       atomic_mass(i->first);
+    }
+  } else {
+    throw std::invalid_argument("Dose type must be one of: ext_air, ext_soil, ingest, inhale.");
+  }
+  return dose;
+}
+
+
 double pyne::Material::molecular_mass(double apm) {
   // Calculate the atomic weight of the Material
   double inverseA = 0.0;
@@ -1961,63 +2018,6 @@ pyne::Material pyne::Material::cram(std::vector<double> A,
 }
 
 
-pyne::comp_map pyne::Material::activity() {
-  pyne::comp_map act;
-  double masspermole = mass * pyne::N_A;
-  for (pyne::comp_iter i = comp.begin(); i != comp.end(); ++i) {
-    act[i->first] = masspermole * (i->second) * decay_const(i->first) / \
-                    atomic_mass(i->first);
-  }
-  return act;
-}
-
-
-pyne::comp_map pyne::Material::decay_heat() {
-  pyne::comp_map dh;
-  double masspermole = mass * pyne::N_A;
-  for (pyne::comp_iter i = comp.begin(); i != comp.end(); ++i) {
-    dh[i->first] = masspermole * (i->second) * \
-                   decay_const(metastable_id(i->first,nucname::snum(i->first))) * \
-                   q_val(i->first) / atomic_mass(i->first) / pyne::MeV_per_MJ;
-  }
-  return dh;
-}
-
-
-pyne::comp_map pyne::Material::dose_per_g(std::string dose_type, int source) {
-  pyne::comp_map dose;
-  const double pCi_per_Bq = 27.027027;
-  if (dose_type == "ext_air") {
-    for (pyne::comp_iter i = comp.begin(); i != comp.end(); ++i) {
-      dose[i->first] = Ci_per_Bq * pyne::N_A * (i->second) * \
-                       decay_const(i->first) * ext_air_dose(i->first, source) / \
-                       atomic_mass(i->first);
-    }
-  } else if (dose_type == "ext_soil") {
-    for (pyne::comp_iter i = comp.begin(); i != comp.end(); ++i) {
-      dose[i->first] = Ci_per_Bq * pyne::N_A * (i->second) * \
-                       decay_const(i->first) * ext_soil_dose(i->first, source) / \
-                       atomic_mass(i->first);
-    }
-  } else if (dose_type == "ingest") {
-    for (pyne::comp_iter i = comp.begin(); i != comp.end(); ++i) {
-      dose[i->first] = pCi_per_Bq * pyne::N_A * (i->second) * \
-                       decay_const(i->first) * ingest_dose(i->first, source) / \
-                       atomic_mass(i->first);
-    }
-  } else if (dose_type == "inhale") {
-    for (pyne::comp_iter i = comp.begin(); i != comp.end(); ++i) {
-      dose[i->first] = pCi_per_Bq * pyne::N_A * (i->second) * \
-                       decay_const(i->first) * inhale_dose(i->first, source) / \
-                       atomic_mass(i->first);
-    }
-  } else {
-    throw std::invalid_argument("Dose type must be one of: ext_air, ext_soil, ingest, inhale.");
-  }
-  return dose;
-}
-
-
 #ifdef PYNE_DECAY
 pyne::Material pyne::Material::decay(double t) {
   Material rtn;
@@ -2026,7 +2026,7 @@ pyne::Material pyne::Material::decay(double t) {
   rtn.mass = mass * rtn.molecular_mass() / molecular_mass();
   return rtn;
 }
-#endif // PYNE_DECAY
+#endif //  PYNE_DECAY
 
 
 pyne::Material pyne::Material::operator+ (double y) {
