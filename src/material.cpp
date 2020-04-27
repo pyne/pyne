@@ -2009,15 +2009,6 @@ std::vector<std::pair<double, double> > pyne::Material::normalize_radioactivity(
 }
 
 
-pyne::Material pyne::Material::cram(std::vector<double> A,
-                                    const int order) {
-  Material rtn;
-  rtn.from_atom_frac(pyne::transmuters::cram(A, to_atom_frac(), order));
-  rtn.mass = mass * rtn.molecular_mass() / molecular_mass();
-  return rtn;
-}
-
-
 #ifdef PYNE_DECAY
 pyne::Material pyne::Material::decay(double t) {
   Material rtn;
@@ -2027,6 +2018,15 @@ pyne::Material pyne::Material::decay(double t) {
   return rtn;
 }
 #endif //  PYNE_DECAY
+
+
+pyne::Material pyne::Material::cram(std::vector<double> A,
+                                    const int order) {
+  Material rtn;
+  rtn.from_atom_frac(pyne::transmuters::cram(A, to_atom_frac(), order));
+  rtn.mass = mass * rtn.molecular_mass() / molecular_mass();
+  return rtn;
+}
 
 
 pyne::Material pyne::Material::operator+ (double y) {
