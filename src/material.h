@@ -423,7 +423,7 @@ namespace pyne
     /// Returns a mapping of the nuclides in this material to their atom densities.
     /// This calculation is based off of the material's density.
     std::map<int, double> to_atom_dens();
-    
+ 
     // Radioactive Material functions
     /// Returns a list of gamma-rays energies in keV and intensities in
     /// decays/s/atom material unnormalized
