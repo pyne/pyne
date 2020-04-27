@@ -2089,3 +2089,4 @@ bool pyne::detect_nuclidelist(hid_t data_set, std::string& nucpath){
   H5Tclose(nuc_attr);
   return true;
 }
+
