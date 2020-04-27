@@ -441,7 +441,8 @@ namespace pyne
 #ifdef PYNE_DECAY
     /// Decays this material for a given amount of time in seconds
     Material decay(double t);
-#endif
+#endif // PYNE_DECAY
+    
     /// Transmutes the material via the CRAM method.
     /// \param A The transmutation matrix [unitless]
     /// \param order The CRAM approximation order (default 14).
