@@ -322,6 +322,9 @@ namespace pyne
     /// If \a apm and atoms_per_molecule on this instance are both negative, then the best
     /// guess value calculated from the normailized composition is used here.
     double molecular_mass(double apm=-1.0);
+    /// Calculates the activity of a material based on the composition and each
+    /// nuclide's mass, decay_const, and atmoic_mass.
+    comp_map activity();
     /// Calculates the decay heat of a material based on the composition and
     /// each nuclide's mass, q_val, decay_const, and atomic_mass. This assumes
     /// input mass of grams. Return values is in megawatts.
@@ -420,9 +423,6 @@ namespace pyne
     /// Returns a mapping of the nuclides in this material to their atom densities.
     /// This calculation is based off of the material's density.
     std::map<int, double> to_atom_dens();
-    /// Calculates the activity of a material based on the composition and each
-    /// nuclide's mass, decay_const, and atmoic_mass.
-    comp_map activity();
     // Radioactive Material functions
     /// Returns a list of gamma-rays energies in keV and intensities in
     /// decays/s/atom material unnormalized
