@@ -45,9 +45,6 @@ void pyne::Material::norm_comp() {
 
 
 void pyne::Material::_load_comp_protocol0(hid_t db, std::string datapath, int row) {
-  // Clear current content
-  comp.clear();
-  
   hid_t matgroup = H5Gopen2(db, datapath.c_str(), H5P_DEFAULT);
   hid_t nucset;
   double nucvalue;
@@ -102,9 +99,6 @@ void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath,
 
 void pyne::Material::_load_comp_protocol1(hid_t db, std::string datapath,
                                           std::string nucpath, int row) {
-  // Clear current content
-  comp.clear();
-  
   if (!h5wrap::path_exists(db, nucpath))
     throw std::runtime_error("No path found at the location: " + nucpath);
 
@@ -1889,7 +1883,7 @@ std::map<int, double> pyne::Material::to_atom_dens() {
   return atom_dens;
 }
 
-#ifdef PYNE_DECAY
+
 std::vector<std::pair<double, double> > pyne::Material::gammas() {
   std::vector<std::pair<double, double> > result;
   std::map<int, double> atom_fracs = this->to_atom_frac();
@@ -1956,13 +1950,7 @@ std::vector<std::pair<double, double> > pyne::Material::normalize_radioactivity(
   }
   return normed;
 }
-pyne::Material pyne::Material::decay(double t) {
-  Material rtn;
-  comp_map out = pyne::decayers::decay(to_atom_frac(), t);
-  rtn.from_atom_frac(out);
-  rtn.mass = mass * rtn.molecular_mass() / molecular_mass();
-  return rtn;
-}
+
 
 pyne::Material pyne::Material::cram(std::vector<double> A,
                                     const int order) {
@@ -2029,6 +2017,15 @@ pyne::comp_map pyne::Material::dose_per_g(std::string dose_type, int source) {
   return dose;
 }
 
+
+#ifdef PYNE_DECAY
+pyne::Material pyne::Material::decay(double t) {
+  Material rtn;
+  comp_map out = pyne::decayers::decay(to_atom_frac(), t);
+  rtn.from_atom_frac(out);
+  rtn.mass = mass * rtn.molecular_mass() / molecular_mass();
+  return rtn;
+}
 #endif
 
 

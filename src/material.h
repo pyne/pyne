@@ -406,7 +406,6 @@ namespace pyne
     /// Returns a mapping of the nuclides in this material to their atom densities.
     /// This calculation is based off of the material's density.
     std::map<int, double> to_atom_dens();
-#ifdef PYNE_DECAY
     /// Calculates the activity of a material based on the composition and each
     /// nuclide's mass, decay_const, and atmoic_mass.
     comp_map activity();
@@ -439,6 +438,7 @@ namespace pyne
     std::vector<std::pair<double, double> > normalize_radioactivity(
       std::vector<std::pair<double, double> > unnormed);
 
+#ifdef PYNE_DECAY
     /// Decays this material for a given amount of time in seconds
     Material decay(double t);
 #endif
