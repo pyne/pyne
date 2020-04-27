@@ -423,7 +423,7 @@ namespace pyne
     /// Returns a mapping of the nuclides in this material to their atom densities.
     /// This calculation is based off of the material's density.
     std::map<int, double> to_atom_dens();
- 
+
     // Radioactive Material functions
     /// Returns a list of gamma-rays energies in keV and intensities in
     /// decays/s/atom material unnormalized
@@ -443,7 +443,7 @@ namespace pyne
     /// Decays this material for a given amount of time in seconds
     Material decay(double t);
 #endif // PYNE_DECAY
-    
+
     /// Transmutes the material via the CRAM method.
     /// \param A The transmutation matrix [unitless]
     /// \param order The CRAM approximation order (default 14).
