@@ -2009,6 +2009,7 @@ std::vector<std::pair<double, double> > pyne::Material::normalize_radioactivity(
 }
 
 
+#ifdef PYNE_DECAY
 pyne::Material pyne::Material::decay(double t) {
   Material rtn;
   comp_map out = pyne::decayers::decay(to_atom_frac(), t);
@@ -2016,6 +2017,7 @@ pyne::Material pyne::Material::decay(double t) {
   rtn.mass = mass * rtn.molecular_mass() / molecular_mass();
   return rtn;
 }
+#endif //  PYNE_DECAY
 
 
 pyne::Material pyne::Material::cram(std::vector<double> A,
