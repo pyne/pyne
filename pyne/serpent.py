@@ -5,6 +5,8 @@ from pyne.utils import QAWarning
  
 import numpy as np
 
+import pdb
+
 if sys.version_info[0] > 2:
     basestring = str
     
@@ -176,6 +178,8 @@ def parse_res(resfile, write_py=False):
             new_filename = resfile.name.rpartition('.')[0] + '.py'
         with open(new_filename, 'w') as pyfile:
             pyfile.write(f)
+            
+    print(f)
 
     # Execute the adjusted file
     res = {}
@@ -282,13 +286,15 @@ def parse_dep(depfile, write_py=False, make_mats=True):
             new_filename = depfile.name.rpartition('.')[0] + '.py'
         with open(new_filename, 'w') as pyfile:
             pyfile.write(f)
-
+    
     # Execute the adjusted file
     dep = {}
-    exec(f, dep, dep)
-    if '__builtins__' in dep:
-        del dep['__builtins__']
-    return dep
+    #print(f)
+    #exec(f, dep, dep)
+    #if '__builtins__' in dep:
+        #del dep['__builtins__']
+    #return dep
+    return f
 
 
 def parse_det(detfile, write_py=False):
