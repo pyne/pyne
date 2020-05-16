@@ -265,7 +265,7 @@ def parse_dep(depfile, write_py=False, make_mats=True):
     # Add materials
     footer = ""
     if make_mats:
-        mat_gen_line = "{name}MATERIAL = [{name}VOLUME * Material(dict(zip(zai[:-2], {name}MDENS[:-2, col]))) for col in cols]\n"
+        mat_gen_line = "{name}MATERIAL = [{name}VOLUME[col] * Material(dict(zip(zai[:-2], {name}MDENS[:-2, col]))) for col in cols]\n"
         footer += ('\n\n# Construct materials\n'
                    'zai = list(map(int, ZAI))\n'
                    'cols = list(range(len(DAYS)))\n')
@@ -289,12 +289,10 @@ def parse_dep(depfile, write_py=False, make_mats=True):
     
     # Execute the adjusted file
     dep = {}
-    #print(f)
-    #exec(f, dep, dep)
-    #if '__builtins__' in dep:
-        #del dep['__builtins__']
-    #return dep
-    return f
+    exec(f, dep, dep)
+    if '__builtins__' in dep:
+        del dep['__builtins__']
+    return dep
 
 
 def parse_det(detfile, write_py=False):
