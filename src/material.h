@@ -22,6 +22,7 @@
 #endif
 
 #ifndef PYNE_IS_AMALGAMATED
+  #define PYNE_DECAY
 #include "json-forwards.h"
 #include "json.h"
 #include "h5wrap.h"
@@ -438,8 +439,10 @@ namespace pyne
     std::vector<std::pair<double, double> > normalize_radioactivity(
       std::vector<std::pair<double, double> > unnormed);
 
+#ifdef PYNE_DECAY
     /// Decays this material for a given amount of time in seconds
     Material decay(double t);
+#endif // PYNE_DECAY
 
     /// Transmutes the material via the CRAM method.
     /// \param A The transmutation matrix [unitless]
