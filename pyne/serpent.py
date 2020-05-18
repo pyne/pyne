@@ -100,7 +100,7 @@ def parse_res(resfile, write_py=False):
 
     """
     if isinstance(resfile, basestring):
-        with open(resfile, 'r') as mfile:
+        with open(resfgile, 'r') as mfile:
             f = mfile.read()
     else:
         f = resfile.read()
@@ -286,13 +286,13 @@ def parse_dep(depfile, write_py=False, make_mats=True):
             new_filename = depfile.name.rpartition('.')[0] + '.py'
         with open(new_filename, 'w') as pyfile:
             pyfile.write(f)
-    
+            
     # Execute the adjusted file
-    dep = {}
-    exec(f, dep, dep)
-    if '__builtins__' in dep:
-        del dep['__builtins__']
-    return dep
+    #dep = {}
+    #exec(f, dep, dep)
+    #if '__builtins__' in dep:
+        #del dep['__builtins__']
+    return f
 
 
 def parse_det(detfile, write_py=False):
