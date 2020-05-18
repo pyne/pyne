@@ -1,0 +1,114 @@
+% --- Pin-cell burnup calculation ----------------------------
+
+set title "Pin-cell burnup calculation"
+
+% --- Pin definition:
+
+pin 1
+fuel   0.412
+clad   0.475
+water
+
+% --- Geometry:
+
+surf 1  sqc 0.0 0.0 0.665
+
+cell 1  0  fill  1  -1
+cell 2  0  outside   1
+
+% --- Fuel (composition given in atomic densities):
+
+mat fuel  -10.045  burn 1
+92234.09c   6.15169E+18
+92235.09c   6.89220E+20
+92236.09c   3.16265E+18
+92238.09c   2.17103E+22
+ 6000.09c   9.13357E+18
+ 7014.09c   1.04072E+19
+ 8016.09c   4.48178E+22
+
+% --- Zircalloy cladding:
+
+mat clad   -6.560
+Zn-nat.06c  -0.9791
+50112.06c  -0.0159
+26056.06c  -0.0050
+
+% --- Water (composition given in atomic densities):
+
+mat water  -0.7569   moder lwtr 1001
+ 1001.06c   5.06153E+22
+ 8016.06c   2.53076E+22
+ 5010.06c   2.75612E+18
+ 5011.06c   1.11890E+19
+
+% --- Thermal scattering data for light water:
+
+therm lwtr lw06.32t
+
+% --- Cross section library file path:
+
+set acelib "/xs/sss_endfb7u.xsdata"
+
+% --- Periodic boundary condition:
+
+set bc 3
+
+% --- Neutron population and criticality cycles:
+
+set pop 100 60 20
+
+% --- Geometry and mesh plots:
+
+plot 3 500 500
+mesh 3 500 500
+
+% --- Decay and fission yield libraries:
+
+set acelib sss_jeff312.xsdata
+set declib sss_jeff33.dec
+set nfylib sss_jeff33.nfy
+
+% --- Depletion steps:
+
+% Power density 40 kW/kgU
+% Depletion steps given in units of total burnup
+
+set powdens 40.0E-3
+
+dep butot
+
+0.1
+
+% --- Isotope list for inventory calculation:
+
+set inventory
+922340
+922350
+922360
+922380
+932370
+942380
+942390
+942400
+942410
+942420
+952410
+952430
+420990
+430990
+441010
+451030
+471090
+551330
+621470
+621490
+621500
+621510
+621520
+601430
+601450
+631530
+641550
+
+% ------------------------------------------------------------
