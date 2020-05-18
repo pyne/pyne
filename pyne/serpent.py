@@ -66,7 +66,7 @@ def _replace_semicolons(s):
 
 
 def _replace_arrays(s):
-    """Replaces matlab arrays with numpy arrays in string s."""
+    """Replaces matlab arrays https://github.com/ZoeRichter/pyne/blob/bughunt/pyne/serpentpinburn.inp_dep.mwith numpy arrays in string s."""
 
     # Replace matlab arrays with python lists
     arrays = re.findall(_matlab_array_pattern, s)
@@ -288,11 +288,11 @@ def parse_dep(depfile, write_py=False, make_mats=True):
             pyfile.write(f)
             
     # Execute the adjusted file
-    #dep = {}
-    #exec(f, dep, dep)
-    #if '__builtins__' in dep:
-        #del dep['__builtins__']
-    return f
+    dep = {}
+    exec(f, dep, dep)
+    if '__builtins__' in dep:
+        del dep['__builtins__']
+    return dep
 
 
 def parse_det(detfile, write_py=False):
