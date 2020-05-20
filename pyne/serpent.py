@@ -2,14 +2,14 @@ import re
 import sys
 from warnings import warn
 from pyne.utils import QAWarning
- 
+
 import numpy as np
 
 import pdb
 
 if sys.version_info[0] > 2:
     basestring = str
-    
+
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
 _if_idx_str_serpent1 = (
@@ -100,7 +100,7 @@ def parse_res(resfile, write_py=False):
 
     """
     if isinstance(resfile, basestring):
-        with open(resfgile, 'r') as mfile:
+        with open(resfile, 'r') as mfile:
             f = mfile.read()
     else:
         f = resfile.read()
@@ -178,7 +178,7 @@ def parse_res(resfile, write_py=False):
             new_filename = resfile.name.rpartition('.')[0] + '.py'
         with open(new_filename, 'w') as pyfile:
             pyfile.write(f)
-            
+
     print(f)
 
     # Execute the adjusted file
@@ -219,13 +219,13 @@ def parse_dep(depfile, write_py=False, make_mats=True):
 
     # Remove imaterial information from the top of Serpent2 *_dep.m file
     f = _delete_imaterial(f)
-    
+
     # Keep comments around
     f = _replace_comments(f)
 
     # Replace matlab Arrays
     f = _replace_arrays(f)
-    
+
     # Now to find and convert arrays that have comments in them
     comment_arrays = re.findall("(" + _comment_array_pattern + ")", f)
     for ca in comment_arrays:
@@ -292,7 +292,7 @@ def parse_dep(depfile, write_py=False, make_mats=True):
             new_filename = depfile.name.rpartition('.')[0] + '.py'
         with open(new_filename, 'w') as pyfile:
             pyfile.write(f)
-            
+
     # Execute the adjusted file
     dep = {}
     exec(f, dep, dep)
