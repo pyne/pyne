@@ -265,7 +265,13 @@ def parse_dep(depfile, write_py=False, make_mats=True):
     # Add materials
     footer = ""
     if make_mats:
-        mat_gen_line = "{name}MATERIAL = [{name}VOLUME[col] * Material(dict(zip(zai[:-2], {name}MDENS[:-2, col]))) for col in cols]\n"
+        vol_name = re.search('.*_VOLUME = .*\]',f)
+        if type(vol_name) is type(None):
+            print('volume is not an array')
+            mat_gen_line = "{name}MATERIAL = [{name}VOLUME * Material(dict(zip(zai[:-2], {name}MDENS[:-2, col]))) for col in cols]\n"
+        else:
+            print('volume is an array')
+            mat_gen_line = "{name}MATERIAL = [{name}VOLUME[col] * Material(dict(zip(zai[:-2], {name}MDENS[:-2, col]))) for col in cols]\n"
         footer += ('\n\n# Construct materials\n'
                    'zai = list(map(int, ZAI))\n'
                    'cols = list(range(len(DAYS)))\n')
