@@ -73,9 +73,9 @@ def test_parse_dep2():
             assert_equal(dep[key].shape, shape)
 
     # Check values
-    assert_array_equal(dep['BU'], [ 0.00000E+00 1.00000E-01 1.00000E+00 ])
+    assert_array_equal(dep['BU'], [ 0.00000E+00, 1.00000E-01, 1.00000E+00 ])
     assert_equal(dep[i942420], 10)
-    assert_array_equal(dep['MAT_***_H'][3], [3.89361E-08 3.89337E-08 3.89111E-08])
+    assert_array_equal(dep['MAT_***_H'][3], [3.89361E-08, 3.89337E-08, 3.89111E-08])
 
 
 def test_parse_det1():
