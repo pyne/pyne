@@ -36,9 +36,9 @@ def test_parse_res2():
     assert_array_equal(res['MEAN_POP_SIZE'][0], [1.00140E+02, 0.00359])
 
 def test_parse_dep1():
-    dep = serpent.parse_dep('sample_dep.m')
+    dep = serpent.parse_dep('sample1_dep.m')
     nuc_set = set([nucname.id(int(nuc)) for nuc in dep['ZAI'][:-2]])
-    shape = (len(dep['ZAI']), len(dep['DAYS'])) 
+    shape = (len(dep['ZAI']), len(dep['DAYS']))
     for key in dep:
         if key.endswith('_VOLUME'):
             assert_true(isinstance(dep[key], float))
@@ -56,6 +56,27 @@ def test_parse_dep1():
     assert_equal(dep['i952421'], 123)
     assert_array_equal(dep['MAT_fuelp1r2_H'][3], [0.00000E+00, 5.56191E-11, 3.22483E-10])
 
+def test_parse_dep2():
+    dep = serpent.parse_dep('sample2_dep.m')
+    nuc_set = set([nucname.id(int(nuc)) for nuc in dep['ZAI'][:-2]])
+    shape = (len(dep['ZAI']), len(dep['DAYS']))
+    for key in dep:
+        if key.endswith('_VOLUME'):
+            assert_equal(dep[key].shape, (1, shape[1]))
+        elif key.endswith('_MATERIAL'):
+            assert_equal(len(dep[key]), shape[1])
+            for n in range(shape[1]):
+                assert_equal(nuc_set, set(dep[key][n].comp.keys()))
+        elif key.startswith('MAT_') and key.endswith('_BURNUP'):
+            assert_equal(dep[key].shape, (1, shape[1]))
+        elif key.startswith('MAT_') or key.startswith('TOT_'):
+            assert_equal(dep[key].shape, shape)
+
+    # Check values
+    assert_array_equal(dep['BU'], [ 0.00000E+00 1.00000E-01 1.00000E+00 ])
+    assert_equal(dep[i942420], 10)
+    assert_array_equal(dep['MAT_***_H'][3], [3.89361E-08 3.89337E-08 3.89111E-08])
+
 
 def test_parse_det1():
     det = serpent.parse_det('sample_det.m')
@@ -66,7 +87,7 @@ def test_parse_det1():
             assert_true(det[key].shape[1] in [3, 13])
 
     # Check values
-    assert_array_equal(det['DETphi'][6], 
+    assert_array_equal(det['DETphi'][6],
                        [7, 7, 1, 1, 1, 1, 1, 1, 1, 1, 2.92709E-02, 0.00857, 16768])
     assert_array_equal(det['DETphiE'][-3], [1.49182E+01, 1.69046E+01, 1.49182E+01])
 
@@ -79,6 +100,6 @@ def test_parse_det2():
             assert_true(det[key].shape[1] in [3, 13])
 
     # Check values
-    assert_array_equal(det['DET1'][4], 
+    assert_array_equal(det['DET1'][4],
         [5, 1, 5, 1, 1, 1, 1, 1, 1, 1, 1, 5.11865E+05, 0.00417])
     assert_array_equal(det['DET1E'][-3], [5.25306E-05, 3.80731E-03, 1.92992E-03])

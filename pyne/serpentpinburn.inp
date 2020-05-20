@@ -79,6 +79,7 @@ set powdens 40.0E-3
 dep butot
 
 0.1
+1.0
 
 % --- Isotope list for inventory calculation:
 
