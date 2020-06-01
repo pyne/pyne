@@ -306,7 +306,7 @@ def parse_dep(depfile, write_py=False, make_mats=True):
     
     if '__builtins__' in dep:
         del dep['__builtins__']
-    return f
+    return dep
 
 
 def parse_det(detfile, write_py=False):
@@ -408,12 +408,15 @@ def VOL_serp2_fix(quicksave_f, header):
 
     """
        
-    mat_gen_line = "{name}MATERIAL = [{name}VOLUME[col] * Material(dict(zip(zai[:-2], {name}MDENS[:-2, col]))) for col in cols]\n"
+    mat_gen_line = "{name}MATERIAL = [{name}vol[col] * Material(dict(zip(zai[:-2], {name}MDENS[:-2, col]))) for col in cols]\n"
     footer = ""
-    footer += ('\n\n# Construct materials\n'
-               'zai = list(map(int, ZAI))\n'
-               'cols = list(range(len(DAYS)))\n')
+    construct_string = ('\n\n# Construct materials\n'
+                        'zai = list(map(int, ZAI))\n'
+                        'cols = list(range(len(DAYS)))\n'
+                        '{name}vol = list(map(float, {name}VOLUME))\n')
     base_names = re.findall('(MAT_\w*_)MDENS = ', quicksave_f)
+    for base_name in base_names:
+        footer += construct_string.format(name=base_name)
     for base_name in base_names:
         footer += mat_gen_line.format(name=base_name)
     footer += "TOT_MATERIAL = [Material(dict(zip(zai[:-2], TOT_MASS[:-2, col]))) for col in cols]\n"
