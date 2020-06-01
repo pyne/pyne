@@ -73,7 +73,8 @@ def test_parse_dep2():
         elif key.startswith('MAT_') and key.endswith('_BURNUP'):
             assert_equal(len(dep[key]), shape[1])
         elif key.startswith('MAT_') or key.startswith('TOT_'):
-            assert_equal(dep[key].shape, shape)
+            assert_equal(len(dep[key]), shape[1])
+            assert_equal(len(dep[key][0]), shape[0])
 
     # Check values
     assert_array_equal(dep['BU'], [ 0.00000E+00, 1.00000E-01, 1.00000E+00 ])
