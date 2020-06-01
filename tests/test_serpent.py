@@ -79,7 +79,7 @@ def test_parse_dep2():
     # Check values
     assert_array_equal(dep['BU'], [ 0.00000E+00, 1.00000E-01, 1.00000E+00 ])
     assert_equal(dep['i621510'], 22)
-    assert_array_equal(dep['MAT_***_A'][6], [0.00000E+00, 1.73176E+05, 4.96485E+06])
+    assert_array_equal(dep['MAT_fuel_A'][6], [0.00000E+00, 1.73176E+05, 4.96485E+06])
 
 
 def test_parse_det1():
