@@ -71,7 +71,7 @@ def test_parse_dep2():
             for n in range(shape[1]):
                 assert_equal(nuc_set, set(dep[key][n].comp.keys()))
         elif key.startswith('MAT_') and key.endswith('_BURNUP'):
-            assert_equal(dep[key].shape, (1, shape[1]))
+            assert_equal(len(dep[key]), shape[1])
         elif key.startswith('MAT_') or key.startswith('TOT_'):
             assert_equal(dep[key].shape, shape)
 
