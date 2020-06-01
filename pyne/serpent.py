@@ -276,7 +276,7 @@ def parse_dep(depfile, write_py=False, make_mats=True):
         for base_name in base_names:
             footer += mat_gen_line.format(name=base_name)
         footer += "TOT_MATERIAL = [Material(dict(zip(zai[:-2], TOT_MASS[:-2, col]))) for col in cols]\n"
-        #footer += "del zai, cols\n"
+        footer += "del zai, cols\n"
 
     # Add header & footer to file
     f = header + f + footer
@@ -295,15 +295,15 @@ def parse_dep(depfile, write_py=False, make_mats=True):
     try:
         exec(f, dep, dep)
     except ValueError:
-        f = VOL_serp2_fix(quicksave_f, header)
-        
+        corrected_f = VOL_serp2_fix(quicksave_f, header)
+
         # Overwrite the file made before to reflect changes
         if write_py:
             with open(new_filename, 'w') as pyfile:
-                pyfile.write(f)
+                pyfile.write(corrected_f)
 
-        exec(f,dep,dep)
-    
+        exec(corrected_f,dep,dep)
+
     if '__builtins__' in dep:
         del dep['__builtins__']
     return dep
@@ -312,7 +312,7 @@ def parse_dep(depfile, write_py=False, make_mats=True):
 def parse_det(detfile, write_py=False):
     """Converts a serpent detector ``*_det.m`` output file to a dictionary (and
     optionally to a ``*_det.py`` file).
-    
+
     Parameters
     ----------
     detfile : str or file-like object
@@ -399,7 +399,7 @@ def VOL_serp2_fix(quicksave_f, header):
         is True, but before anything additional is appended to f
     header : str
         header is the variable of the same name in parse_dep
-     
+
     Returns
     -------
     corrected_f : str
@@ -407,7 +407,7 @@ def VOL_serp2_fix(quicksave_f, header):
         mat_gen_line variable, and all subsequent additions to f.
 
     """
-       
+
     mat_gen_line = "{name}MATERIAL = [{name}vol[col] * Material(dict(zip(zai[:-2], {name}MDENS[:-2, col]))) for col in cols]\n"
     footer = ""
     construct_string = ('\n\n# Construct materials\n'
@@ -420,9 +420,9 @@ def VOL_serp2_fix(quicksave_f, header):
     for base_name in base_names:
         footer += mat_gen_line.format(name=base_name)
     footer += "TOT_MATERIAL = [Material(dict(zip(zai[:-2], TOT_MASS[:-2, col]))) for col in cols]\n"
-    #footer += "del zai, cols\n"
+    footer += "del zai, cols\n"
 
     # Add header & footer to file
     corrected_f = header + quicksave_f + footer
 
-    return corrected_f 
+    return corrected_f
