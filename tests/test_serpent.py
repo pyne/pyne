@@ -62,20 +62,20 @@ def test_parse_dep2():
     shape = (len(dep['ZAI']), len(dep['DAYS']))
     for key in dep:
         if key.endswith('_VOLUME'):
-            assert_equal(dep[key].shape, (1, shape[1]))
+            assert_equal(len(dep[key]), shape[1])
         elif key.endswith('_MATERIAL'):
             assert_equal(len(dep[key]), shape[1])
             for n in range(shape[1]):
                 assert_equal(nuc_set, set(dep[key][n].comp.keys()))
-        elif key.endswith('_BURNUP'):
+        elif key.startswith('MAT_') and key.endswith('_BURNUP'):
             assert_equal(dep[key].shape, (1, shape[1]))
         elif key.startswith('MAT_') or key.startswith('TOT_'):
             assert_equal(dep[key].shape, shape)
 
     # Check values
-    assert_array_equal(dep['BU'], [ 0.00000E+00, 1.00000E-01, 1.00000E+00 ])
-    assert_equal(dep['i942420'], 10)
-    assert_array_equal(dep['MAT_***_H'][3], [3.89361E-08, 3.89337E-08, 3.89111E-08])
+    assert_array_equal(dep['BU'], [ 0.00000E+00 1.00000E-01 1.00000E+00 ])
+    assert_equal(dep['i621510'], 22)
+    assert_array_equal(dep['MAT_***_A'][6], [0.00000E+00 1.73176E+05 4.96485E+06])
 
 
 def test_parse_det1():
