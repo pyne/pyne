@@ -57,6 +57,7 @@ def test_parse_dep1():
     assert_array_equal(dep['MAT_fuelp1r2_H'][3], [0.00000E+00, 5.56191E-11, 3.22483E-10])
 
 def test_parse_dep2():
+    #sample2_dep.m made by running the serpent 2d pin burnup example with fewer dep steps
     dep = serpent.parse_dep('sample2_dep.m')
     nuc_set = set([nucname.id(int(nuc)) for nuc in dep['ZAI'][:-2]])
     shape = (len(dep['ZAI']), len(dep['DAYS']))
@@ -73,9 +74,9 @@ def test_parse_dep2():
             assert_equal(dep[key].shape, shape)
 
     # Check values
-    assert_array_equal(dep['BU'], [ 0.00000E+00 1.00000E-01 1.00000E+00 ])
+    assert_array_equal(dep['BU'], [ 0.00000E+00, 1.00000E-01, 1.00000E+00 ])
     assert_equal(dep['i621510'], 22)
-    assert_array_equal(dep['MAT_***_A'][6], [0.00000E+00 1.73176E+05 4.96485E+06])
+    assert_array_equal(dep['MAT_***_A'][6], [0.00000E+00, 1.73176E+05, 4.96485E+06])
 
 
 def test_parse_det1():
