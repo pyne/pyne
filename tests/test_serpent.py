@@ -64,6 +64,8 @@ def test_parse_dep2():
     for key in dep:
         if key.endswith('_VOLUME'):
             assert_equal(len(dep[key]), shape[1])
+        elif key.endswith('_vol'):
+            assert_equal(len(dep[key]), shape[1])
         elif key.endswith('_MATERIAL'):
             assert_equal(len(dep[key]), shape[1])
             for n in range(shape[1]):
