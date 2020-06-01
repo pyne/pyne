@@ -7,6 +7,8 @@ import numpy as np
 
 import pdb
 
+import copy
+
 if sys.version_info[0] > 2:
     basestring = str
 
@@ -66,7 +68,7 @@ def _replace_semicolons(s):
 
 
 def _replace_arrays(s):
-    """Replaces matlab arrays https://github.com/ZoeRichter/pyne/blob/bughunt/pyne/serpentpinburn.inp_dep.mwith numpy arrays in string s."""
+    """Replaces matlab arrays with numpy arrays in string s."""
 
     # Replace matlab arrays with python lists
     arrays = re.findall(_matlab_array_pattern, s)
@@ -265,11 +267,8 @@ def parse_dep(depfile, write_py=False, make_mats=True):
     # Add materials
     footer = ""
     if make_mats:
-        vol_name = re.search('.*_VOLUME = .*\]',f)
-        if type(vol_name) is type(None):
-            mat_gen_line = "{name}MATERIAL = [{name}VOLUME * Material(dict(zip(zai[:-2], {name}MDENS[:-2, col]))) for col in cols]\n"
-        else:
-            mat_gen_line = "{name}MATERIAL = [{name}VOLUME[col] * Material(dict(zip(zai[:-2], {name}MDENS[:-2, col]))) for col in cols]\n"
+        quicksave_f = copy.deepcopy(f)
+        mat_gen_line = "{name}MATERIAL = [{name}VOLUME * Material(dict(zip(zai[:-2], {name}MDENS[:-2, col]))) for col in cols]\n"
         footer += ('\n\n# Construct materials\n'
                    'zai = list(map(int, ZAI))\n'
                    'cols = list(range(len(DAYS)))\n')
@@ -277,7 +276,7 @@ def parse_dep(depfile, write_py=False, make_mats=True):
         for base_name in base_names:
             footer += mat_gen_line.format(name=base_name)
         footer += "TOT_MATERIAL = [Material(dict(zip(zai[:-2], TOT_MASS[:-2, col]))) for col in cols]\n"
-        footer += "del zai, cols\n"
+        #footer += "del zai, cols\n"
 
     # Add header & footer to file
     f = header + f + footer
@@ -293,16 +292,27 @@ def parse_dep(depfile, write_py=False, make_mats=True):
 
     # Execute the adjusted file
     dep = {}
-    exec(f, dep, dep)
+    try:
+        exec(f, dep, dep)
+    except ValueError:
+        f = VOL_serp2_fix(quicksave_f, header)
+        
+        # Overwrite the file made before to reflect changes
+        if write_py:
+            with open(new_filename, 'w') as pyfile:
+                pyfile.write(f)
+
+        exec(f,dep,dep)
+    
     if '__builtins__' in dep:
         del dep['__builtins__']
-    return dep
+    return f
 
 
 def parse_det(detfile, write_py=False):
     """Converts a serpent detector ``*_det.m`` output file to a dictionary (and
     optionally to a ``*_det.py`` file).
-
+    
     Parameters
     ----------
     detfile : str or file-like object
@@ -373,8 +383,43 @@ def parse_det(detfile, write_py=False):
             new_filename = detfile.name.rpartition('.')[0] + '.py'
         with open(new_filename, 'w') as pyfile:
             pyfile.write(f)
-    # Execute the adjusted file
+    # Execute the adjusted fileopen overwrite python w
     det = {}
     exec(f, {}, det)
 
     return det
+
+def VOL_serp2_fix(quicksave_f, header):
+    """Corrects for the _VOLUME arrays in a *_dep.m file being an array.
+
+    Parameters
+    ----------
+    quicksave_f : str
+        Deep copy of the f executable in parse_dep, made if make_mats
+        is True, but before anything additional is appended to f
+    header : str
+        header is the variable of the same name in parse_dep
+     
+    Returns
+    -------
+    corrected_f : str
+        The new version of the f executable that has the corrected
+        mat_gen_line variable, and all subsequent additions to f.
+
+    """
+       
+    mat_gen_line = "{name}MATERIAL = [{name}VOLUME[col] * Material(dict(zip(zai[:-2], {name}MDENS[:-2, col]))) for col in cols]\n"
+    footer = ""
+    footer += ('\n\n# Construct materials\n'
+               'zai = list(map(int, ZAI))\n'
+               'cols = list(range(len(DAYS)))\n')
+    base_names = re.findall('(MAT_\w*_)MDENS = ', quicksave_f)
+    for base_name in base_names:
+        footer += mat_gen_line.format(name=base_name)
+    footer += "TOT_MATERIAL = [Material(dict(zip(zai[:-2], TOT_MASS[:-2, col]))) for col in cols]\n"
+    #footer += "del zai, cols\n"
+
+    # Add header & footer to file
+    corrected_f = header + quicksave_f + footer
+
+    return corrected_f 
