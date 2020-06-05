@@ -9,6 +9,7 @@ src/atomic_data.cpp
 src/atomic_data.h
 src/*.tar.gz
 *.s
+.vscode
 
 # Ignore temp files
 *.pyc
