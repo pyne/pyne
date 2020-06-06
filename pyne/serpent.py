@@ -371,17 +371,7 @@ def parse_det(detfile, write_py=False):
     # Replace matlab Arrays
     f = _replace_arrays(f)
 
-    # Find detector variable namesmat_gen_line = "{name}MATERIAL =
-    # [{name}VOLUME * Material(dict(zip(zai[:-2], {name}MDENS[:-2, col]))) for
-    # col in cols]\n"
-     footer += ('\n\n# Construct materials\n'
-                 'zai = list(map(int, ZAI))\n'
-                 'cols = list(range(len(DAYS)))\n')
-      base_names = re.findall(r'(MAT_\w*_)MDENS = ', f)
-       for base_name in base_names:
-            footer += mat_gen_line.format(name=base_name)
-        footer += "TOT_MATERIAL = [Material(dict(zip(zai[:-2], TOT_MASS[:-2, col]))) for col in cols]\n"
-        footer += "del zai, cols\n"
+    # Find detector variable names
     det_names = re.findall(_detector_pattern, f)
     det_names = np.unique(det_names)
     all_det_names = re.findall(_detector_pattern_all, f)
