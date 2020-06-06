@@ -1,13 +1,9 @@
 import re
 import sys
+import numpy as np
+import pdb
 from warnings import warn
 from pyne.utils import QAWarning
-
-import numpy as np
-
-import pdb
-
-import copy
 
 if sys.version_info[0] > 2:
     basestring = str
@@ -20,7 +16,7 @@ _if_idx_str_serpent1 = (
     'else;\n'
     '  idx = 1;\n'
     'end;'
-    )
+)
 
 _if_idx_str_serpent2 = (
     "if (exist('idx', 'var'));\n"
@@ -28,7 +24,7 @@ _if_idx_str_serpent2 = (
     'else;\n'
     '  idx = 1;\n'
     'end;'
-    )
+)
 
 _num_pattern = "([0-9]+[.]?[0-9]*[Ee]?[+-]?[0-9]*)"
 
@@ -49,11 +45,56 @@ _detector_pattern_all = r"(DET\w+)\s*=\s*"
 
 _imaterial_line_pattern = r"(i[a-zA-Z]\w+)\s*=\s*\d*;"
 
+
 def _delete_imaterial(s):
     """"Remove imaterial information from the top of Serpent2 *_dep.m file started from 'i' with nothing."""
     s = re.sub(_imaterial_line_pattern,
                '', s)
     return s
+
+
+def form_footer(f, serp_2=False):
+    '''Creates the footer for use in the parse_dep
+    function.
+
+    Parameters
+    ----------
+    f : str
+        f from parse_dep
+    serp2 : bool
+    True if serp2 dep file, False if serp1.  Default false
+
+    Returns
+    -------
+    footer : str
+        The footer to be appended to f
+    '''
+
+    if serp2:
+        mat_gen_line = ('{name}MATERIAL = [{name}vol[col] *'
+                        'Material(dict(zip(zai[:-2], {name}MDENS[:-2, col])))'
+                        ' for col in cols]\n')
+    else:
+        mat_gen_line = ('{name}MATERIAL = [{name}VOLUME *'
+                        'Material(dict(zip(zai[:-2], {name}MDENS[:-2, col])))'
+                        ' for col in cols]\n')
+    footer = ""
+    construct_string = ('\n\n# Construct materials\n'
+                        'zai = list(map(int, ZAI))\n'
+                        'cols = list(range(len(DAYS)))\n')
+    if serp2:
+        construct_string += '{name}vol = list(map(float, {name}VOLUME))\n'
+    base_names = re.findall(r'(MAT_\w*_)MDENS = ', quicksave_f)
+    for base_name in base_names:
+        footer += construct_string.format(name=base_name)
+    for base_name in base_names:
+        footer += mat_gen_line.format(name=base_name)
+    footer += ('TOT_MATERIAL = [Material(dict(zip(zai[:-2], '
+               'TOT_MASS[:-2, col]))) for col in cols]\n')
+    footer += "del zai, cols\n"
+
+    return footer
+
 
 def _replace_comments(s):
     """Replaces matlab comments with python arrays in string s."""
@@ -153,8 +194,8 @@ def parse_res(resfile, write_py=False):
         else:
             dt = "int"
 
-        zero_line = "{0} = np.zeros([{1}, {2}], dtype={3})\n".format(vs[0],
-                     IDX, vs_shape, dt)
+        zero_line = "{0} = np.zeros([{1}, {2}], dtype={3})\n".format(
+            vs[0], IDX, vs_shape, dt)
         header = header + zero_line
 
     # Add IDx to file
@@ -165,7 +206,8 @@ def parse_res(resfile, write_py=False):
     f = header + f
 
     # Replace variable overrides
-    vars = np.array(list(set(re.findall("(" + _lhs_variable_pattern + ")", f))))
+    vars = np.array(
+        list(set(re.findall("(" + _lhs_variable_pattern + ")", f))))
     for v in vars:
         f = f.replace(v[0], "{0}[idx] ".format(v[1]))
 
@@ -180,8 +222,6 @@ def parse_res(resfile, write_py=False):
             new_filename = resfile.name.rpartition('.')[0] + '.py'
         with open(new_filename, 'w') as pyfile:
             pyfile.write(f)
-
-    print(f)
 
     # Execute the adjusted file
     res = {}
@@ -267,19 +307,10 @@ def parse_dep(depfile, write_py=False, make_mats=True):
     # Add materials
     footer = ""
     if make_mats:
-        quicksave_f = copy.deepcopy(f)
-        mat_gen_line = "{name}MATERIAL = [{name}VOLUME * Material(dict(zip(zai[:-2], {name}MDENS[:-2, col]))) for col in cols]\n"
-        footer += ('\n\n# Construct materials\n'
-                   'zai = list(map(int, ZAI))\n'
-                   'cols = list(range(len(DAYS)))\n')
-        base_names = re.findall('(MAT_\w*_)MDENS = ', f)
-        for base_name in base_names:
-            footer += mat_gen_line.format(name=base_name)
-        footer += "TOT_MATERIAL = [Material(dict(zip(zai[:-2], TOT_MASS[:-2, col]))) for col in cols]\n"
-        footer += "del zai, cols\n"
+        footer = form_footer(f)
 
     # Add header & footer to file
-    f = header + f + footer
+    full_f = header + f + footer
 
     # Write the file out
     if write_py:
@@ -288,21 +319,22 @@ def parse_dep(depfile, write_py=False, make_mats=True):
         else:
             new_filename = depfile.name.rpartition('.')[0] + '.py'
         with open(new_filename, 'w') as pyfile:
-            pyfile.write(f)
+            pyfile.write(full_f)
 
     # Execute the adjusted file
     dep = {}
     try:
-        exec(f, dep, dep)
+        exec(full_f, dep, dep)
     except ValueError:
-        corrected_f = VOL_serp2_fix(quicksave_f, header)
+        correct_footer = form_footer(f, serp2=True)
+        corrected_f = header + f + correct_footer
 
         # Overwrite the file made before to reflect changes
         if write_py:
             with open(new_filename, 'w') as pyfile:
                 pyfile.write(corrected_f)
 
-        exec(corrected_f,dep,dep)
+        exec(corrected_f, dep, dep)
 
     if '__builtins__' in dep:
         del dep['__builtins__']
@@ -339,7 +371,17 @@ def parse_det(detfile, write_py=False):
     # Replace matlab Arrays
     f = _replace_arrays(f)
 
-    # Find detector variable names
+    # Find detector variable namesmat_gen_line = "{name}MATERIAL =
+    # [{name}VOLUME * Material(dict(zip(zai[:-2], {name}MDENS[:-2, col]))) for
+    # col in cols]\n"
+     footer += ('\n\n# Construct materials\n'
+                 'zai = list(map(int, ZAI))\n'
+                 'cols = list(range(len(DAYS)))\n')
+      base_names = re.findall(r'(MAT_\w*_)MDENS = ', f)
+       for base_name in base_names:
+            footer += mat_gen_line.format(name=base_name)
+        footer += "TOT_MATERIAL = [Material(dict(zip(zai[:-2], TOT_MASS[:-2, col]))) for col in cols]\n"
+        footer += "del zai, cols\n"
     det_names = re.findall(_detector_pattern, f)
     det_names = np.unique(det_names)
     all_det_names = re.findall(_detector_pattern_all, f)
@@ -357,7 +399,7 @@ def parse_det(detfile, write_py=False):
                 f += '{name}.shape = ({name}_VALS, 13)\n'.format(name=dn)
             else:
                 f += '{name}.shape = ({name_min_E}_EBINS, 3)\n'.format(name=dn,
-                                                            name_min_E=dn[:-1])
+                                                                       name_min_E=dn[:-1])
         else:
             if (dn + 'T' in det_names):
                 f += '{name}.shape = (len({name})//13, 13)\n'.format(name=dn)
@@ -383,46 +425,8 @@ def parse_det(detfile, write_py=False):
             new_filename = detfile.name.rpartition('.')[0] + '.py'
         with open(new_filename, 'w') as pyfile:
             pyfile.write(f)
-    # Execute the adjusted fileopen overwrite python w
+    # Execute the adjusted file
     det = {}
     exec(f, {}, det)
 
     return det
-
-def VOL_serp2_fix(quicksave_f, header):
-    """Corrects for the _VOLUME arrays in a *_dep.m file being an array.
-
-    Parameters
-    ----------
-    quicksave_f : str
-        Deep copy of the f executable in parse_dep, made if make_mats
-        is True, but before anything additional is appended to f
-    header : str
-        header is the variable of the same name in parse_dep
-
-    Returns
-    -------
-    corrected_f : str
-        The new version of the f executable that has the corrected
-        mat_gen_line variable, and all subsequent additions to f.
-
-    """
-
-    mat_gen_line = "{name}MATERIAL = [{name}vol[col] * Material(dict(zip(zai[:-2], {name}MDENS[:-2, col]))) for col in cols]\n"
-    footer = ""
-    construct_string = ('\n\n# Construct materials\n'
-                        'zai = list(map(int, ZAI))\n'
-                        'cols = list(range(len(DAYS)))\n'
-                        '{name}vol = list(map(float, {name}VOLUME))\n')
-    base_names = re.findall('(MAT_\w*_)MDENS = ', quicksave_f)
-    for base_name in base_names:
-        footer += construct_string.format(name=base_name)
-    for base_name in base_names:
-        footer += mat_gen_line.format(name=base_name)
-    footer += "TOT_MATERIAL = [Material(dict(zip(zai[:-2], TOT_MASS[:-2, col]))) for col in cols]\n"
-    footer += "del zai, cols\n"
-
-    # Add header & footer to file
-    corrected_f = header + quicksave_f + footer
-
-    return corrected_f

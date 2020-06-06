@@ -36,6 +36,10 @@ def test_parse_res2():
     assert_array_equal(res['MEAN_POP_SIZE'][0], [1.00140E+02, 0.00359])
 
 def test_parse_dep1():
+    '''
+    Tests the parse_dep function with a serpent 1 _dep.m
+    file.  In this, the _VOLUME variable is a float.
+    '''
     dep = serpent.parse_dep('sample1_dep.m')
     nuc_set = set([nucname.id(int(nuc)) for nuc in dep['ZAI'][:-2]])
     shape = (len(dep['ZAI']), len(dep['DAYS']))
@@ -57,7 +61,13 @@ def test_parse_dep1():
     assert_array_equal(dep['MAT_fuelp1r2_H'][3], [0.00000E+00, 5.56191E-11, 3.22483E-10])
 
 def test_parse_dep2():
-    #sample2_dep.m made by running the serpent 2d pin burnup example with fewer dep steps
+    '''
+    Tests the parse_dep function with a simple _dep.m file,
+    sample2_dep.m, which was generated using the 2d pin burnup
+    example from the serpent wiki, changed to have fewer depsteps.
+    In this, the _VOLUME variable is a numpy array.
+    http://serpent.vtt.fi/mediawiki/index.php/2D_PWR_pin-cell_burnup_example
+    '''
     dep = serpent.parse_dep('sample2_dep.m')
     nuc_set = set([nucname.id(int(nuc)) for nuc in dep['ZAI'][:-2]])
     shape = (len(dep['ZAI']), len(dep['DAYS']))
