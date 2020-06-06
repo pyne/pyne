@@ -53,7 +53,7 @@ def _delete_imaterial(s):
     return s
 
 
-def form_footer(f, serp_2=False):
+def form_footer(f, serp2=False):
     '''Creates the footer for use in the parse_dep
     function.
 
@@ -70,7 +70,7 @@ def form_footer(f, serp_2=False):
         The footer to be appended to f
     '''
 
-    if serp2 == True:
+    if serp2:
         mat_gen_line = ('{name}MATERIAL = [{name}vol[col] *'
                         'Material(dict(zip(zai[:-2], {name}MDENS[:-2, col])))'
                         ' for col in cols]\n')
