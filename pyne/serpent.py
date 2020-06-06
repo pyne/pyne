@@ -84,7 +84,7 @@ def form_footer(f, serp2=False):
                         'cols = list(range(len(DAYS)))\n')
     if serp2:
         construct_string += '{name}vol = list(map(float, {name}VOLUME))\n'
-    base_names = re.findall(r'(MAT_\w*_)MDENS = ', quicksave_f)
+    base_names = re.findall(r'(MAT_\w*_)MDENS = ', f)
     for base_name in base_names:
         footer += construct_string.format(name=base_name)
     for base_name in base_names:
