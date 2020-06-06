@@ -70,7 +70,7 @@ def form_footer(f, serp_2=False):
         The footer to be appended to f
     '''
 
-    if serp2:
+    if serp2 == True:
         mat_gen_line = ('{name}MATERIAL = [{name}vol[col] *'
                         'Material(dict(zip(zai[:-2], {name}MDENS[:-2, col])))'
                         ' for col in cols]\n')
