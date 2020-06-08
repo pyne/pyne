@@ -70,14 +70,15 @@ def form_footer(f, serp2=False):
         The footer to be appended to f
     '''
 
+    vol_name = ""
     if serp2:
-        mat_gen_line = ('{name}MATERIAL = [{name}vol[col] *'
-                        'Material(dict(zip(zai[:-2], {name}MDENS[:-2, col])))'
-                        ' for col in cols]\n')
+        vol_name = "vol[col]"
     else:
-        mat_gen_line = ('{name}MATERIAL = [{name}VOLUME *'
-                        'Material(dict(zip(zai[:-2], {name}MDENS[:-2, col])))'
-                        ' for col in cols]\n')
+        vol_name = "VOLUME"
+    mat_gen_line = ('{name}MATERIAL = [{name}' + vol_name + ' *'
+                   'Material(dict(zip(zai[:-2], {name}MDENS[:-2, col])))'
+                   ' for col in cols]\n')
+
     footer = ""
     construct_string = ('\n\n# Construct materials\n'
                         'zai = list(map(int, ZAI))\n'
@@ -211,7 +212,14 @@ def parse_res(resfile, write_py=False):
     for v in vars:
         f = f.replace(v[0], "{0}[idx] ".format(v[1]))
 
-    # Remove semicolons
+    # Remove semicolons    if serp2:
+        mat_gen_line = ('{name}MATERIAL = [{name}vol[col] *'
+                        'Material(dict(zip(zai[:-2], {name}MDENS[:-2, col])))'
+                        ' for col in cols]\n')
+    else:
+        mat_gen_line = ('{name}MATERIAL = [{name}VOLUME *'
+                        'Material(dict(zip(zai[:-2], {name}MDENS[:-2, col])))'
+                        ' for col in cols]\n')
     f = _replace_semicolons(f)
 
     # Write the file out
@@ -326,15 +334,18 @@ def parse_dep(depfile, write_py=False, make_mats=True):
     try:
         exec(full_f, dep, dep)
     except ValueError:
+        #if the first attempt fails, it may be due to the VOLUME
+        #variable being an array.  Below changes mat_gen_line to
+        #work with an array
         correct_footer = form_footer(f, serp2=True)
-        corrected_f = header + f + correct_footer
+        full_f = header + f + correct_footer
 
         # Overwrite the file made before to reflect changes
         if write_py:
             with open(new_filename, 'w') as pyfile:
-                pyfile.write(corrected_f)
+                pyfile.write(full_f)
 
-        exec(corrected_f, dep, dep)
+        exec(full_f, dep, dep)
 
     if '__builtins__' in dep:
         del dep['__builtins__']
