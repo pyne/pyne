@@ -51,7 +51,7 @@ do its best to find relevant nuclear data elsewhere on your machine
 or from public sources on the internet.
 
 
-Most commun install flags:
+Most common install flags:
 **************************
 The list of the possible flags can be retrieve using:
 
