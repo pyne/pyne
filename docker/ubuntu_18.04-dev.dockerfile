@@ -26,7 +26,6 @@ RUN if [ "${py_version%.?}" -eq 3 ] ; \
             python${PY_SUFIX}-tables \
             python${PY_SUFIX}-scipy \
             python${PY_SUFIX}-jinja2 \
-            gfortran \
             git \
             cmake \
             gfortran \
