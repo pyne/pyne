@@ -122,7 +122,9 @@ RUN if [ "$build_dagmc" = "YES" ]; then \
         && cmake .. -DMOAB_DIR=$HOME/opt/moab \
                  -DCMAKE_INSTALL_PREFIX=$INSTALL_PATH \
         && make \
-        && make install ; \
+        && make install \
+        && cd ../.. \
+        && rm -rf DAGMC;
     fi
 
 ARG build_pyne=YES
