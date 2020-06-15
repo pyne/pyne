@@ -32,6 +32,7 @@ RUN if [ "${py_version%.?}" -eq 3 ] ; \
             vim emacs \
             libblas-dev \
             liblapack-dev \
+            libeigen3-dev \
             libhdf5-dev \
             libhdf5-serial-dev \
             autoconf \
@@ -85,6 +86,8 @@ RUN if [ "$build_moab" = "YES" ] || [ "$enable_pymoab" = "YES" ] ; then \
               -DCMAKE_INSTALL_PREFIX=$HOME/opt/moab \
               -DENABLE_HDF5=ON \
               -DBUILD_SHARED_LIBS=OFF \
+              -DENABLE_BLASLAPACK=OFF \
+              -DENABLE_FORTRAN=OFF \
         && make -j 3 \
         && make install \
       # build/install shared lib
@@ -93,6 +96,8 @@ RUN if [ "$build_moab" = "YES" ] || [ "$enable_pymoab" = "YES" ] ; then \
               -DCMAKE_INSTALL_PREFIX=$HOME/opt/moab \
               -DENABLE_HDF5=ON \
               -DBUILD_SHARED_LIBS=ON \
+              -DENABLE_BLASLAPACK=OFF \
+              -DENABLE_FORTRAN=OFF \
         && make -j 3 \
         && make install \
         && cd .. \
