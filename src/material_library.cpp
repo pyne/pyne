@@ -9,18 +9,28 @@
 pyne::MaterialLibrary::MaterialLibrary(){};
 
 // Default constructor when loading from HDF5 file
-pyne::MaterialLibrary::MaterialLibrary(const std::string& file,
+pyne::MaterialLibrary::MaterialLibrary(const std::string& filename,
                                        const std::string& datapath) {
-  
-
   // load materials
-  from_hdf5(file, datapath);
+
+  // Check that the file is there
+  if (!pyne::file_exists(filename)) throw pyne::FileNotFound(filename);
+
+  // Check to see if the file is in HDF5 format.
+  bool ish5 = H5Fis_hdf5(filename.c_str());
+  if (ish5)
+    from_hdf5(filename, datapath);
+  else if (datapath != "") {
+    std::string wrng =
+        filename + " is not an hdf5 file but a datapath was prodided!";
+    pyne::warning(wrng);
+  }
+  from_json(filename);
 };
 
 // Append Material to the library from hdf5 file
 void pyne::MaterialLibrary::from_hdf5(const std::string& filename,
                                       const std::string& datapath) {
-  
   if (!pyne::file_exists(filename)) {
     throw std::runtime_error("File " + filename +
                              " not found or no read permission");
@@ -58,10 +68,10 @@ void pyne::MaterialLibrary::from_hdf5(const std::string& filename,
 
   int file_num_materials = get_length_of_table(filename, full_datapath);
   int library_length = material_library.size();
-  
+
   for (int i = 0; i < file_num_materials; i++) {
     pyne::Material mat = pyne::Material();
-    
+
     mat._load_comp_protocol1(db, full_datapath, nucpath, i);
     add_material(mat);
   }
@@ -378,9 +388,8 @@ int pyne::MaterialLibrary::get_length_of_table(const std::string& filename,
   // Initilize to dataspace, to find the indices we are looping over
   hid_t arr_space = H5Dget_space(ds);
   // failure to read the dapaspace return 0 for the size
-  if (arr_space < 0)
-    return 0;
-  
+  if (arr_space < 0) return 0;
+
   hsize_t arr_dims[1];
   int arr_ndim = H5Sget_simple_extent_dims(arr_space, arr_dims, NULL);
 

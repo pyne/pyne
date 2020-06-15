@@ -3,9 +3,8 @@
 
 #include <stdlib.h>
 #include <iostream>
+#include <string>
 #include <unordered_map>
-#include <string>
-#include <string>
 #include <vector>
 
 #if !defined(JSON_IS_AMALGAMATION)
@@ -29,12 +28,11 @@ class MaterialLibrary {
   matname_set keylist;
   nuc_set nuclist;
 
-
  private:
   /**
    * \brief Add the nuclide form the material to the list of nuclides
    * \param material from which add the nuclide to the list
-  */
+   */
   void append_to_nuclist(pyne::Material mat);
   /**
    * \brief determines in that datapath exists in the hdf5 file
@@ -63,11 +61,10 @@ class MaterialLibrary {
    * \param filename path to file on disk, this file may be either in plaintext
    *                 or HDF5 format.
    * \param datapath Path to the materials in the file.
-  */
-  MaterialLibrary(const std::string& filename,
-                  const std::string& datapath);
+   */
+  MaterialLibrary(const std::string& fname, const std::string& datapath);
 
-  ~MaterialLibrary() {};  //< default destructor
+  ~MaterialLibrary(){};  //< default destructor
 
   /**
    * \brief loads the pyne materials in map of name vs Material
@@ -75,8 +72,7 @@ class MaterialLibrary {
     /// \param datapath Path to the materials in the file.
     /// \param protocol Flag for layout of material on disk.
   */
-  void from_hdf5(const std::string& filename,
-                 const std::string& datapath);
+  void from_hdf5(const std::string& filename, const std::string& datapath);
   /**
    * \brief loads the pyne materials in map of name vs Material
     /// \param filename Path on disk to the json file.
@@ -88,14 +84,14 @@ class MaterialLibrary {
   /**
    * Writes MaterialLibrary out to an HDF5 file.
    *  This happens according to protocol 1.
-   *  Writting in a file already containing 
-   *  This might cause issue to 
-   *  read material already present in the datapath, 
-   *  and for the new materials if written in the 
+   *  Writting in a file already containing
+   *  This might cause issue to
+   *  read material already present in the datapath,
+   *  and for the new materials if written in the
    *  same datapath.
    *  \param filename Path on disk to the HDF5 file.
    *  \param datapath Path to the the material in the file.
-  */
+   */
   void write_hdf5(const std::string& filename,
                   const std::string& datapath = "/materials");
   /// Writes this nucpath to an HDF5 file.
@@ -106,25 +102,25 @@ class MaterialLibrary {
   /**
    * \brief Merge a material library into the current one
    * \param mat_library pyne material library to merge
-  */
+   */
   void merge(pyne::MaterialLibrary mat_lib);
   void merge(pyne::MaterialLibrary* mat_lib);
 
   /**
    * \brief Add a material to the library
    * \param mat material to add
-  */
+   */
   void add_material(pyne::Material mat);
   /**
    * \brief Add a material to the library
-   * \param mat_name name of the material to add(will overwrite material name 
+   * \param mat_name name of the material to add(will overwrite material name
             if it already has one)
    * \param mat material to add
   */
   void add_material(const std::string& mat_name, pyne::Material mat);
   /**
    * \brief replace a material to the library
-   * \param mat_name name of the material to add(will overwrite material name 
+   * \param mat_name name of the material to add(will overwrite material name
             if it already has one)
    * \param mat material to add
   */
@@ -132,42 +128,42 @@ class MaterialLibrary {
   /**
    * \brief remove a material of the Library
    * \param mat material to remove
-  */
+   */
   void del_material(pyne::Material mat);
   /**
    * \brief remove a material of the Library by name
    * \param mat_name name of the material to remove
-  */
+   */
   void del_material(const std::string& mat_name);
   /**
    * \brief remove a material of the Library by name
    * \param mat_name name of the material to remove
-  */
+   */
   pyne::Material get_material(const std::string& mat_name) const;
   /**
    * \brief Get a material of the Library by name
    * \param mat_name name of the material to return
-  */
+   */
   pyne::Material* get_material_ptr(const std::string& mat_name);
   /**
    * \brief Get the material Library
    * \return std::map<std::string, pyne::MaterialLibrary>
-  */
+   */
   pyne::mat_map get_mat_library() const { return material_library; }
   /**
    * \brief Get the list of materials in the Library
    * \return std::set<std::string>
-  */
+   */
   pyne::matname_set get_keylist() const { return keylist; }
   /**
    * \brief Get the list of nuclides in the Library
    * \return std::set<int>
-  */
+   */
   pyne::nuc_set get_nuclist() const { return nuclist; }
 
   std::set<int> mat_number_set;
   std::vector<std::string> name_order;
 
 };  // end MaterialLibrary class header
-}  // end of pyne namespace
+}  // namespace pyne
 #endif  // PYNE_MATERIAL_LIBRARY
