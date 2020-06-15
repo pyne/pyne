@@ -8,7 +8,7 @@
 // Empty Constructor
 pyne::MaterialLibrary::MaterialLibrary(){};
 
-// Default constructor
+// Default constructor when loading from HDF5 file
 pyne::MaterialLibrary::MaterialLibrary(const std::string& file,
                                        const std::string& datapath) {
   
@@ -29,16 +29,14 @@ void pyne::MaterialLibrary::from_hdf5(const std::string& filename,
   std::string full_datapath = datapath;
 
   // Set file access properties so it closes cleanly
-  hid_t fapl;
-  fapl = H5Pcreate(H5P_FILE_ACCESS);
+  hid_t fapl = H5Pcreate(H5P_FILE_ACCESS);
   H5Pset_fclose_degree(fapl, H5F_CLOSE_STRONG);
 
   // Open the database
   hid_t db = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, fapl);
 
   // Get datapath status in the hdf5 file
-  herr_t status;
-  status = H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
+  herr_t status = H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
   hid_t matlib_group_id = db;
   H5O_info_t object_info;
   status = H5Oget_info_by_name(db, datapath.c_str(), &object_info, H5P_DEFAULT);
@@ -275,10 +273,10 @@ void pyne::MaterialLibrary::write_hdf5(const std::string& filename,
       throw std::runtime_error(
           "Non-group/non-dataset object /material_library already exists in "
           "the file. Can't write the Material");
-    } else {  // "/material" is a group get his hid
+    } else {  // "/material_library" is a group get its hid
       matlib_grp_id = H5Gopen2(db, root_path.c_str(), H5P_DEFAULT);
     }
-  } else {  // "/material" do not exist -> create it !
+  } else {  // "/material_library" does not exist -> create it !
     matlib_grp_id = H5Gcreate2(db, root_path.c_str(), H5P_DEFAULT, H5P_DEFAULT,
                                H5P_DEFAULT);
   }
