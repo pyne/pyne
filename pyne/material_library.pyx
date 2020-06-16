@@ -110,12 +110,8 @@ cdef class _MaterialLibrary:
             the HDF5 file.
 
         """
-        cdef char * c_filename
-        filename_bytes = filename.encode('UTF-8')
-        c_filename = filename_bytes
-        cdef char * c_datapath
-        datapath_bytes = datapath.encode('UTF-8')
-        c_datapath = datapath_bytes
+        c_filename = filename.encode('UTF-8')
+        c_datapath = datapath.encode('UTF-8')
         self._inst.from_hdf5(c_filename, c_datapath)
 
     def write_hdf5(self, filename, datapath="/materials"):
@@ -127,37 +123,9 @@ cdef class _MaterialLibrary:
         datapath : str, optional
             The path in the hierarchy to the data table in an HDF5 file.
         """
-        cdef char * c_filename
-        filename_bytes = filename.encode('UTF-8')
-        c_filename = filename_bytes
-        cdef char * c_datapath
-        datapath_bytes = datapath.encode('UTF-8')
-        c_datapath = datapath_bytes
+        c_filename = filename.encode('UTF-8')
+        c_datapath = datapath.encode('UTF-8')
         self._inst.write_hdf5(c_filename, c_datapath)
-
-    def add_material(self, key, mat):
-        """Add a Material to this material library.
-        Parameters
-        ----------
-        key : str or int (converted to str)
-            key to register the material, if material has no name attribute
-            will be added as the name metadata of the material
-        mat : Material
-            PyNE material object be added to this material library
-        """
-
-        cdef std_string c_matname
-        if isinstance(key, basestring):
-            key = key.encode('UTF-8')
-        elif isinstance(key, _INTEGRAL_TYPES):
-            key = str(key).encode('UTF-8')
-        if isinstance(mat, material.Material):
-            value_proxy = material.Material(
-                mat, free_mat=not isinstance(mat, material._Material))
-            self._inst.add_material(key, ( < material._Material > value_proxy).mat_pointer[0])
-        else:
-            raise TypeError("Material must be a PyNE Material or a string but is a "
-                            "{0}".format(type(mat)))
 
     def remove_material(self, mat):
         """Remove a Material from this material library.
@@ -166,34 +134,12 @@ cdef class _MaterialLibrary:
         mat : str Name of the material be removed from this material library
         """
 
-        cdef std_string c_matname
         if isinstance(mat, basestring):
-            c_matname = std_string(< char * > mat)
+            c_matname = mat.encode('UTF-8')
+            self._inst.del_material( < std_string > c_matname)
         else:
             raise TypeError("the argument must be a string (material name) but is a "
                             "{0}".format(type(mat)))
-        self._inst.del_material(c_matname)
-
-    def get_material(self, key):
-        """Get a Material from this material library.
-        Parameters
-        ----------
-        key : str or int (converted to str)
-            key of the material to return
-        """
-        # Get the correct cpp_material
-        cdef cpp_material.Material c_mat
-        cdef std_string c_matname
-        if isinstance(key, _INTEGRAL_TYPES):
-            c_matname = str(key).encode('UTF-8')
-        else:
-            c_matname = key
-        c_mat = self._inst.get_material(c_matname)
-
-        # build a PyNE Material object form the cpp_material
-        py_mat = material.Material(free_mat=False)
-        (< material._Material > py_mat).mat_pointer = new cpp_material.Material(c_mat.comp, c_mat.mass, c_mat.density, c_mat.atoms_per_molecule, c_mat.metadata)
-        return py_mat
 
     def merge(self, mat_library):
         """Merge a material library into this material library.
@@ -271,25 +217,23 @@ cdef class _MaterialLibrary:
         self._inst.write_json(filename)
 
     def __setitem__(self, key, value):
+        """Add a Material to this material library, if the material key already exist it will be overwritten.
+         Parameters
+         ----------
+         key : str or int (converted to str)
+             key to register the material, if material has no name attribute
+             will be added as the name metadata of the material
+         mat : Material
+             PyNE material object be added to this material library
+         """
         cdef cpp_pair[std_string, cpp_material.Material] item
-        if isinstance(key, _INTEGRAL_TYPES):
-            key = str(key).encode('UTF-8')
-        else:
-            key = key.encode('UTF-8')
         value_proxy = material.Material(
             value, free_mat=not isinstance(value, material._Material))
-        self._inst.add_material(key, deref((< material._Material > value_proxy).mat_pointer))
+        self._inst.add_material(ensure_material_key(key), deref((< material._Material > value_proxy).mat_pointer))
 
     def __getitem__(self, key):
         cdef cpp_material.Material * c_mat
-        cdef std_string c_matname
-        if isinstance(key, basestring):
-            key = key.encode('UTF-8')
-        elif isinstance(key, _INTEGRAL_TYPES):
-            key = str(key).encode('UTF-8')
-
-        c_matname = key
-        c_mat = self._inst.get_material_ptr( < std_string > c_matname)
+        c_mat = self._inst.get_material_ptr( < std_string > ensure_material_key(key))
 
         # build a PyNE Material object form the cpp_material
         py_mat = material.Material(free_mat=False)
@@ -297,17 +241,11 @@ cdef class _MaterialLibrary:
         return py_mat
 
     def __len__(self):
-        if hasattr(self, 'material_library'):
-            return self._inst.material_library.size()
-        else:
-            return 0
+        return self._inst.material_library.size()
+ 
 
     def __delitem__(self, key):
-        if isinstance(key, basestring):
-            key = key.encode('UTF-8')
-        elif isinstance(key, _INTEGRAL_TYPES):
-            key = str(key).encode('UTF-8')
-        self.del_material(key)
+        self.del_material(ensure_material_key(key))
 
     def __iter__(self):
         mat_lib_dict = map_to_dict_str_matp(self._inst.get_mat_library())
@@ -319,13 +257,18 @@ cdef class _MaterialLibrary:
 class MaterialLibrary(_MaterialLibrary, collections.MutableMapping):
     """The material library is a collection of unique keys mapped to
     Material objects.
-
     """
-
     def __repr__(self):
         libs = ["{0!r}={1!r}".format(k, m) for k, m in self.items()]
         libs = "{" + ", ".join(libs) + "}"
         return "pyne.material.MaterialLibrary({0})".format(libs)
+
+def ensure_material_key(key):
+    if isinstance(key, basestring):
+        key = key.encode('UTF-8')
+    elif isinstance(key, _INTEGRAL_TYPES):
+        key = str(key).encode('UTF-8')
+    return key
 
 
 # Python dict to u_map<string, Material *>
