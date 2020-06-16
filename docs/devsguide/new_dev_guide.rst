@@ -144,7 +144,7 @@ environments.html#sharing-an-environment>`__.
 ==========================
 Signing up for list hosts:
 ==========================
-Writing effective code isn’t easy. Thankfully, the PyNE developers can always be 
+Everyone faces challenges sometimes when writing effective code. Thankfully, the PyNE developers can always be 
 contacted on the list host at pyne-dev@groups.google.com. Another way to get 
 help is by going to https://groups.google.com/forum/#!forum/pyne-users and 
 joining the group to post. 
