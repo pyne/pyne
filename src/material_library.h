@@ -103,7 +103,7 @@ class MaterialLibrary {
    * \brief Merge a material library into the current one
    * \param mat_library pyne material library to merge
    */
-  void merge(pyne::MaterialLibrary mat_lib);
+  void merge(const pyne::MaterialLibrary& mat_lib);
   void merge(pyne::MaterialLibrary* mat_lib);
 
   /**

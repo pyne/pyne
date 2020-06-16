@@ -22,15 +22,18 @@ nucvec = {10010000:  1.0,
           }
 leu = {922380000: 0.96, 922350000: 0.04}
 
+
 def assert_mat_almost_equal(first, second, places=7):
     assert_almost_equal(first.mass, second.mass, places=places)
     assert_almost_equal(first.density, second.density, places=places)
-    assert_almost_equal(first.atoms_per_molecule, second.atoms_per_molecule, places=places)
+    assert_almost_equal(first.atoms_per_molecule,
+                        second.atoms_per_molecule, places=places)
     assert_equal(first.metadata["name"], second.metadata["name"])
     nucs = set(second.comp)
     assert_equal(set(first.comp), nucs)
     for nuc in nucs:
         assert_almost_equal(first.comp[nuc], second.comp[nuc], places=places)
+
 
 def assert_close(obs, exp, margin=1e-6):
     # default margin is because we only have 1e-6 of precision
@@ -39,16 +42,22 @@ def assert_close(obs, exp, margin=1e-6):
 
 def test_is_comp_matname_or_density():
     comp = ["H", 1001, 1000, 0.101327, 0.583640, 0.068228, None]
-    matname = ["1.  ", "A-150 Tissue-Equivalent Plastic (A150TEP)", None, None, None, None, None]
-    density = ["Density (g/cm3) =", None, 1.127000, None, "Total atoms/b-cm =", None, 1.169E-01]
+    matname = [
+        "1.  ", "A-150 Tissue-Equivalent Plastic (A150TEP)", None, None, None, None, None]
+    density = ["Density (g/cm3) =", None, 1.127000, None,
+               "Total atoms/b-cm =", None, 1.169E-01]
     badlines = [
-        ["Formula =", "-", None, None, "Molecular weight (g/mole) =", None, "-"],
-        ["The above density is estimated to be accurate to 4 significant digits.  Dealing with uncertainties is left to the user.", None, None, None, None, None, None],
-        ["The following data was calculated from the input weight fractions.", None, None, None, None, None, None],
+        ["Formula =", "-", None, None,
+            "Molecular weight (g/mole) =", None, "-"],
+        ["The above density is estimated to be accurate to 4 significant digits.  Dealing with uncertainties is left to the user.",
+            None, None, None, None, None, None],
+        ["The following data was calculated from the input weight fractions.",
+            None, None, None, None, None, None],
         [None, None, None, None, None, None, None],
         [None, None, None, "Weight", "Atom", "Atom", None],
-        ["Element", "Neutron ZA", "Photon ZA", "Fraction", "Fraction", "Density",  None],
-        ]
+        ["Element", "Neutron ZA", "Photon ZA",
+            "Fraction", "Fraction", "Density",  None],
+    ]
     assert_true(is_comp_matname_or_density(comp))
     assert_true(is_comp_matname_or_density(matname))
     assert_true(is_comp_matname_or_density(density))
@@ -71,7 +80,8 @@ def test_grab_materials_compendium():
 
     # this tests a material where we do do element expansion
     pubr = mats["Plutonium Bromide"]
-    bromium = sum((frac for nuc, frac in pubr.comp.items() if nucname.zzzaaa(nuc) // 1000 == 35))
+    bromium = sum((frac for nuc, frac in pubr.comp.items()
+                   if nucname.zzzaaa(nuc) // 1000 == 35))
     assert_close(bromium, 0.500617)
     assert_close(pubr[942380000], 0.000250)
 
@@ -79,13 +89,14 @@ def test_grab_materials_compendium():
 def test_against_nuc_data():
     nuc_data = pyne_conf.NUC_DATA_PATH
     if not os.path.isfile(nuc_data):
-        raise RuntimeError("Tests require nuc_data.h5. Please run nuc_data_make.")
+        raise RuntimeError(
+            "Tests require nuc_data.h5. Please run nuc_data_make.")
     obs_matslib = MaterialLibrary(nuc_data,
                                   datapath="/material_library/materials")
     gasoline = Material({
         "H": 0.157000,
         "C": 0.843000,
-        },
+    },
         density=0.721,
         metadata={"name": "Gasoline"}).expand_elements()
 
@@ -96,23 +107,24 @@ def test_against_nuc_data():
         "Pu-240": 0.029963,
         "Pu-241": 0.001998,
         "Pu-242": 0.000250
-        },
+    },
         density=6.75,
         metadata={"name": "Plutonium Bromide"}).expand_elements()
 
     obs_gasoline = obs_matslib["Gasoline"]
     # remove empty elements
-    assert_equal( { (x,val) for x,val in set(obs_gasoline.comp.items()) if val > 0 }, 
-            set(gasoline.comp.items()))
+    assert_equal({(x, val) for x, val in set(obs_gasoline.comp.items()) if val > 0},
+                 set(gasoline.comp.items()))
     assert_equal(obs_gasoline.density, gasoline.density)
     assert_equal(obs_gasoline.metadata["name"], gasoline.metadata["name"])
 
     obs_pubr3 = obs_matslib["Plutonium Bromide"]
     # remove empty elements
-    assert_equal( { (x,val) for x,val in set(obs_pubr3.comp.items()) if val > 0 }, 
-            set(pubr3.comp.items()))
+    assert_equal({(x, val) for x, val in set(obs_pubr3.comp.items()) if val > 0},
+                 set(pubr3.comp.items()))
     assert_equal(obs_pubr3.density, pubr3.density)
     assert_equal(obs_pubr3.metadata["name"], pubr3.metadata["name"])
+
 
 def test_matlib_json():
     filename = "matlib.json"
@@ -122,7 +134,7 @@ def test_matlib_json():
     lib = {"leu": Material(leu), "nucvec": nucvec, "aqua": water}
     wmatlib = MaterialLibrary(lib)
     wmatlib.write_json(filename)
-    
+
     rmatlib = MaterialLibrary()
     rmatlib.from_json(filename)
     assert_equal(set(wmatlib), set(rmatlib))
@@ -130,12 +142,16 @@ def test_matlib_json():
         assert_mat_almost_equal(wmatlib[key], rmatlib[key])
     os.remove(filename)
 
+
 def test_matlib_hdf5_nuc_data():
     matlib = MaterialLibrary()
     matlib.from_hdf5(nuc_data, datapath="/material_library/materials")
     matlib.write_hdf5("matlib_test.h5", "/materials")
     mat_lib_load_test = MaterialLibrary("matlib_test.h5", "/materials")
     os.remove("matlib_test.h5")
+    for key in matlib:
+        assert_mat_almost_equal(matlib[key], mat_lib_load_test[key])
+
 
 def test_matlib_hdf5():
     filename = "matlib.h5"
@@ -144,7 +160,7 @@ def test_matlib_hdf5():
     water = Material()
     water.from_atom_frac({10000000: 2.0, 80000000: 1.0})
     water.metadata["name"] = "Aqua sera."
-    lib = { "leu": Material(leu),"nucvec": nucvec,"aqua": water}
+    lib = {"leu": Material(leu), "nucvec": nucvec, "aqua": water}
     wmatlib = MaterialLibrary(lib)
     wmatlib.write_hdf5(filename, "/mats1")
     rmatlib = MaterialLibrary()
@@ -158,15 +174,16 @@ def test_matlib_hdf5():
         assert_mat_almost_equal(wmatlib[key], rmatlib[key])
     os.remove(filename)
 
+
 def test_matlib_query():
     water = Material()
     water.from_atom_frac({10000000: 2.0, 80000000: 1.0})
     water.metadata["name"] = "Aqua sera."
     mat_nucvec = Material(nucvec)
     mat_nucvec.metadata["name"] = "nucvec"
-    lib = { "nucvec": nucvec,"aqua": water}
+    lib = {"nucvec": nucvec, "aqua": water}
     matlib = MaterialLibrary(lib)
-    
+
     matlib_aqua = matlib["aqua"]
     assert_mat_almost_equal(water, matlib_aqua)
 

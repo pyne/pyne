@@ -77,7 +77,7 @@ void pyne::MaterialLibrary::from_hdf5(const std::string& filename,
   H5Fclose(db);
 }
 
-void pyne::MaterialLibrary::merge(pyne::MaterialLibrary mat_lib) {
+void pyne::MaterialLibrary::merge(const pyne::MaterialLibrary& mat_lib) {
   pyne::matname_set mats_to_add = mat_lib.get_keylist();
   for (auto it = mats_to_add.begin(); it != mats_to_add.end(); it++) {
     pyne::Material mat = Material(mat_lib.get_material(*it));
