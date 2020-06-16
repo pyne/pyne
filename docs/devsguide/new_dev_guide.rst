@@ -96,7 +96,7 @@ followed by "-v" (e.g. $ python -v). If you are just starting as a
 developer, likely, you will not have all of the necessary components.
 
 A particularly important detail to pay attention to is the version of
-each dependency. For example, Python is currently supported in conda
+each dependency. For example, PyNE is currently supported in conda
 install from 2.7.\* - 3.6.*, and attempting to install with a default
 version of 3.7.\* will result in errors. Setting your version to be
 compatible before you begin will help ensure you are successful.
