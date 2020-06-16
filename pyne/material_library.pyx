@@ -127,19 +127,18 @@ cdef class _MaterialLibrary:
         c_datapath = datapath.encode('UTF-8')
         self._inst.write_hdf5(c_filename, c_datapath)
 
-    def remove_material(self, mat):
+    def remove_material(self, mat_name):
         """Remove a Material from this material library.
         Parameters
         ----------
-        mat : str Name of the material be removed from this material library
+        mat_name : str Name of the material be removed from this material library
         """
-
-        if isinstance(mat, basestring):
-            c_matname = mat.encode('UTF-8')
+        if isinstance(mat_name, basestring):
+            c_matname = mat_name.encode('UTF-8')
             self._inst.del_material( < std_string > c_matname)
         else:
             raise TypeError("the argument must be a string (material name) but is a "
-                            "{0}".format(type(mat)))
+                            "{0}".format(type(mat_name)))
 
     def merge(self, mat_library):
         """Merge a material library into this material library.

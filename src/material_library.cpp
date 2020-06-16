@@ -244,9 +244,9 @@ void pyne::MaterialLibrary::write_hdf5(const std::string& filename,
   }
   // Check if root_path exist and what type it is
   std::string root_path = "/material_library";
-  herr_t status;
+
   H5O_info_t object_info;
-  status = H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
+  herr_t status = H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
   // Check if root_path exist and what type it is
   status =
@@ -279,7 +279,8 @@ void pyne::MaterialLibrary::write_hdf5(const std::string& filename,
   std::vector<int> nuc_list;
   nuc_list.assign(nuclist.begin(), nuclist.end());
   for (auto mat : material_library) {
-    mat.second->write_hdf5_datapath(data_id, compath, -0.0, 100, nuc_list);
+    mat.second->write_hdf5_datapath(data_id, compath, -0.0,
+                                    DEFAULT_MAT_CHUNKSIZE, nuc_list);
   }
 
   H5Fflush(db, H5F_SCOPE_GLOBAL);
@@ -328,7 +329,6 @@ void pyne::MaterialLibrary::append_to_nuclist(const pyne::Material& mat) {
 bool pyne::MaterialLibrary::hdf5_path_exists(
     const std::string& filename, const std::string& datapath) const {
   // Turn off annoying HDF5 errors
-  herr_t status;
   H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
   // Set file access properties so it closes cleanly
@@ -338,7 +338,7 @@ bool pyne::MaterialLibrary::hdf5_path_exists(
   hid_t db = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, fapl);
 
   bool datapath_exists = h5wrap::path_exists(db, datapath.c_str());
-  status = H5Eclear(H5E_DEFAULT);
+  herr_t status = H5Eclear(H5E_DEFAULT);
 
   // Close the database
   status = H5Fclose(db);
@@ -349,7 +349,6 @@ bool pyne::MaterialLibrary::hdf5_path_exists(
 int pyne::MaterialLibrary::get_length_of_table(
     const std::string& filename, const std::string& datapath) const {
   // Turn off annoying HDF5 errors
-  herr_t status;
   H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
   // Set file access properties so it closes cleanly
@@ -368,7 +367,7 @@ int pyne::MaterialLibrary::get_length_of_table(
   hsize_t arr_dims[1];
   int arr_ndim = H5Sget_simple_extent_dims(arr_space, arr_dims, NULL);
 
-  status = H5Eclear(H5E_DEFAULT);
+  herr_t status = H5Eclear(H5E_DEFAULT);
 
   // Close the database
   status = H5Fclose(db);
