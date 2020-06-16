@@ -129,7 +129,7 @@ create an environment for the conda install method.
 	
 	$ conda deactivate
 
-#. Before continuing with the PyNE `Conda Installation <http://pyne.io/install/
+5. Before continuing with the PyNE `Conda Installation <http://pyne.io/install/
 conda.html#conda>`__ ensure that the Python version is correct.
 
 
