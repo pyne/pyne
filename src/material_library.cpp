@@ -67,7 +67,6 @@ void pyne::MaterialLibrary::from_hdf5(const std::string& filename,
   }
 
   int file_num_materials = get_length_of_table(filename, full_datapath);
-  int library_length = material_library.size();
 
   for (int i = 0; i < file_num_materials; i++) {
     pyne::Material mat = pyne::Material();
@@ -89,6 +88,7 @@ void pyne::MaterialLibrary::merge(pyne::MaterialLibrary mat_lib) {
 void pyne::MaterialLibrary::merge(pyne::MaterialLibrary* mat_lib) {
   merge(*mat_lib);
 }
+
 void pyne::MaterialLibrary::load_json(Json::Value json) {
   Json::Value::Members keys = json.getMemberNames();
   Json::Value::Members::const_iterator ikey = keys.begin();
@@ -103,7 +103,7 @@ void pyne::MaterialLibrary::load_json(Json::Value json) {
 Json::Value pyne::MaterialLibrary::dump_json() {
   Json::Value json = Json::Value(Json::objectValue);
 
-  for (auto name : name_order) {
+  for (auto name : keylist) {
     json[name] = material_library[name]->dump_json();
   }
   return json;
@@ -128,51 +128,13 @@ void pyne::MaterialLibrary::write_json(const std::string& filename) {
   Json::Value json = dump_json();
   Json::StyledWriter writer;
   std::string s = writer.write(json);
-  std::ofstream f;
-  f.open(filename.c_str(), std::ios_base::trunc);
+  std::ofstream f(filename.c_str(), std::ios_base::trunc);
   f << s << "\n";
   f.close();
 }
 
-void pyne::MaterialLibrary::add_material(pyne::Material mat) {
-  // if exists, get the material name from metadata make one instead
-  std::string mat_name;
+int pyne::MaterialLibrary::ensure_material_number(pyne::Material& mat) const {
   int mat_number = -1;
-  std::set<int>::iterator mat_numb_it;
-  if (mat.metadata.isMember("mat_number")) {
-    if (Json::intValue <= mat.metadata["mat_number"].type() &&
-        mat.metadata["mat_number"].type() <= Json::realValue) {
-      mat_number = mat.metadata["mat_number"].asInt();
-    } else {
-      mat_number = std::stoi(mat.metadata["mat_number"].asString());
-    }
-  }
-  pyne::matname_set::iterator key_it;
-  if (mat.metadata.isMember("name")) {
-    if (Json::intValue <= mat.metadata["name"].type() &&
-        mat.metadata["name"].type() <= Json::realValue) {
-      mat_name = std::to_string(mat.metadata["name"].asInt());
-      mat.metadata["name"] = mat_name;
-    } else {
-      mat_name = mat.metadata["name"].asString();
-    }
-
-  } else {
-    if (mat_number == -1) {
-      mat_number = keylist.size();  // set a temp mat_number to form mat name
-    }
-    mat_name = "_" + std::to_string(mat_number);
-    mat.metadata["name"] = mat_name;
-  }
-
-  add_material(mat_name, mat);
-}
-
-void pyne::MaterialLibrary::add_material(const std::string& key,
-                                         pyne::Material mat) {
-  std::string mat_name;
-  int mat_number = -1;
-  std::set<int>::iterator mat_numb_it;
   if (mat.metadata.isMember("mat_number")) {
     if (Json::intValue <= mat.metadata["mat_number"].type() &&
         mat.metadata["mat_number"].type() <= Json::realValue) {
@@ -181,6 +143,7 @@ void pyne::MaterialLibrary::add_material(const std::string& key,
       mat_number = std::stoi(mat.metadata["mat_number"].asString());
       mat.metadata["mat_number"] = mat_number;
     }
+    std::set<int>::iterator mat_numb_it;
     mat_numb_it = mat_number_set.find(mat_number);
     if (mat_numb_it != mat_number_set.end()) {
       std::string msg = "Material number ";
@@ -189,21 +152,53 @@ void pyne::MaterialLibrary::add_material(const std::string& key,
       warning(msg);
     }
   }
+  return mat_number;
+}
+
+std::string pyne::MaterialLibrary::ensure_material_name(
+    pyne::Material& mat) const {
+  std::string mat_name = "";
+  int mat_number = ensure_material_number(mat);
+
+  if (mat.metadata.isMember("name")) {
+    if (Json::intValue <= mat.metadata["name"].type() &&
+        mat.metadata["name"].type() <= Json::realValue) {
+      mat_name = std::to_string(mat.metadata["name"].asInt());
+      mat.metadata["name"] = mat_name;
+    } else {
+      mat_name = mat.metadata["name"].asString();
+    }
+  } else {
+    if (mat_number == -1) {
+      mat_number = keylist.size();  // set a temp mat_number to form mat name
+    }
+    mat_name = "_" + std::to_string(mat_number);
+    mat.metadata["name"] = mat_name;
+  }
+  return mat_name;
+}
+
+void pyne::MaterialLibrary::add_material(pyne::Material mat) {
+  // if exists, get the material name from metadata make one instead
+
+  std::string mat_name = ensure_material_name(mat);
+  add_material(mat_name, mat);
+}
+
+void pyne::MaterialLibrary::add_material(const std::string& key,
+                                         pyne::Material mat) {
+  int mat_number = ensure_material_number(mat);
   if (!mat.metadata.isMember("name")) {
     mat.metadata["name"] = key;
   }
-
   append_to_nuclist(mat);
   if (mat_number > 0) mat_number_set.insert(mat_number);
   std::pair<std::set<std::string>::iterator, bool> key_insert;
   key_insert = keylist.insert(key);
-  // if the key was not present in the MaterialLibrary add it, otherwise
-  // overwrite the existing material
-  if (key_insert.second == true) name_order.push_back(key);
   material_library[key] = new Material(mat);
 }
 
-void pyne::MaterialLibrary::del_material(pyne::Material mat) {
+void pyne::MaterialLibrary::del_material(const pyne::Material& mat) {
   if (mat.metadata.isMember("name")) {
     std::string mat_name = mat.metadata["name"].asString();
     del_material(mat_name);
@@ -213,26 +208,15 @@ void pyne::MaterialLibrary::del_material(pyne::Material mat) {
 void pyne::MaterialLibrary::del_material(const std::string& key) {
   material_library.erase(key);
   keylist.erase(key);
-  for (auto name = name_order.begin(); name != name_order.end(); name++) {
-    if (*name == key) {
-      name_order.erase(name);
-      return;
-    }
-  }
 }
 
 pyne::Material pyne::MaterialLibrary::get_material(
     const std::string& mat_name) const {
-  auto it = material_library.find(mat_name);
-  if (it != material_library.end()) {
-    return *(it->second);
-  } else {
-    return pyne::Material();
-  }
+  return *(this->get_material_ptr(mat_name));
 }
 
 pyne::Material* pyne::MaterialLibrary::get_material_ptr(
-    const std::string& mat_name) {
+    const std::string& mat_name) const {
   auto it = material_library.find(mat_name);
   if (it != material_library.end()) {
     return it->second;
@@ -241,18 +225,8 @@ pyne::Material* pyne::MaterialLibrary::get_material_ptr(
   }
 }
 
-void pyne::MaterialLibrary::replace(int num, pyne::Material mat) {
-  if (!mat.metadata.isMember("name")) {
-    mat.metadata["name"] = name_order[num];
-  } else if (mat.metadata["name"] != name_order[num]) {
-    material_library.erase(name_order[num]);
-    name_order[num] = mat.metadata["name"].asString();
-  }
-  material_library[name_order[num]] = new pyne::Material(mat);
-}
-
 void pyne::MaterialLibrary::write_hdf5(const std::string& filename,
-                                       const std::string& datapath) {
+                                       const std::string& datapath) const {
   // Turn off annoying HDF5 errors
   H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
   // Set file access properties so it closes cleanly
@@ -314,7 +288,8 @@ void pyne::MaterialLibrary::write_hdf5(const std::string& filename,
   H5Fclose(db);
 }
 
-void pyne::MaterialLibrary::write_hdf5_nucpath(hid_t db, std::string nucpath) {
+void pyne::MaterialLibrary::write_hdf5_nucpath(hid_t db,
+                                               std::string nucpath) const {
   //
   // Read in nuclist if available, write it out if not
   //
@@ -342,7 +317,7 @@ void pyne::MaterialLibrary::write_hdf5_nucpath(hid_t db, std::string nucpath) {
   H5Dclose(nuc_set);
 }
 
-void pyne::MaterialLibrary::append_to_nuclist(pyne::Material mat) {
+void pyne::MaterialLibrary::append_to_nuclist(const pyne::Material& mat) {
   pyne::comp_map mat_comp = mat.comp;
   for (auto nuclide : mat_comp) {
     nuclist.insert(nuclide.first);
@@ -350,8 +325,8 @@ void pyne::MaterialLibrary::append_to_nuclist(pyne::Material mat) {
 }
 
 // see if path exists before we go on
-bool pyne::MaterialLibrary::hdf5_path_exists(const std::string& filename,
-                                             const std::string& datapath) {
+bool pyne::MaterialLibrary::hdf5_path_exists(
+    const std::string& filename, const std::string& datapath) const {
   // Turn off annoying HDF5 errors
   herr_t status;
   H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
@@ -371,8 +346,8 @@ bool pyne::MaterialLibrary::hdf5_path_exists(const std::string& filename,
   return datapath_exists;
 }
 
-int pyne::MaterialLibrary::get_length_of_table(const std::string& filename,
-                                               const std::string& datapath) {
+int pyne::MaterialLibrary::get_length_of_table(
+    const std::string& filename, const std::string& datapath) const {
   // Turn off annoying HDF5 errors
   herr_t status;
   H5Eset_auto2(H5E_DEFAULT, NULL, NULL);

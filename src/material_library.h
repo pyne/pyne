@@ -33,7 +33,7 @@ class MaterialLibrary {
    * \brief Add the nuclide form the material to the list of nuclides
    * \param material from which add the nuclide to the list
    */
-  void append_to_nuclist(pyne::Material mat);
+  void append_to_nuclist(const pyne::Material& mat);
   /**
    * \brief determines in that datapath exists in the hdf5 file
    * \param[in] filename of the h5m file
@@ -41,7 +41,7 @@ class MaterialLibrary {
    * \return true/false
    */
   bool hdf5_path_exists(const std::string& filename,
-                        const std::string& datapath);
+                        const std::string& datapath) const;
 
   /**
    * \brief determines the length of an hdf5 data table
@@ -50,7 +50,7 @@ class MaterialLibrary {
    * \return the number of elements to the array
    */
   int get_length_of_table(const std::string& filename,
-                          const std::string& datapath);
+                          const std::string& datapath) const;
 
  public:
   // materialLibrary constructor
@@ -93,12 +93,12 @@ class MaterialLibrary {
    *  \param datapath Path to the the material in the file.
    */
   void write_hdf5(const std::string& filename,
-                  const std::string& datapath = "/materials");
+                  const std::string& datapath = "/materials") const;
   /// Writes this nucpath to an HDF5 file.
   /// This happens according to protocol 1.
   /// \param db HDF5 id for the open HDF5 file.
   /// \param nucpath Path to the nuclides list in the file.
-  void write_hdf5_nucpath(hid_t db, std::string nucpath);
+  void write_hdf5_nucpath(hid_t db, std::string nucpath) const;
   /**
    * \brief Merge a material library into the current one
    * \param mat_library pyne material library to merge
@@ -124,12 +124,7 @@ class MaterialLibrary {
             if it already has one)
    * \param mat material to add
   */
-  void replace(int num, pyne::Material mat);
-  /**
-   * \brief remove a material of the Library
-   * \param mat material to remove
-   */
-  void del_material(pyne::Material mat);
+  void del_material(const pyne::Material& mat);
   /**
    * \brief remove a material of the Library by name
    * \param mat_name name of the material to remove
@@ -144,10 +139,19 @@ class MaterialLibrary {
    * \brief Get a material of the Library by name
    * \param mat_name name of the material to return
    */
-  pyne::Material* get_material_ptr(const std::string& mat_name);
+  pyne::Material* get_material_ptr(const std::string& mat_name) const;
+  std::string ensure_material_name(pyne::Material& mat) const;
   /**
-   * \brief Get the material Library
-   * \return std::map<std::string, pyne::MaterialLibrary>
+   * \brief Return a material material number, ensure it exist if it does not
+            exist build it using the material number, if material number is not
+            defined, define it accordingly to the material library
+   * \return std::string
+   */
+  int ensure_material_number(pyne::Material& mat) const;
+  /**
+   * \brief Return a material material number, ensure it exist as an int, if it
+            exist as a string convert it into int and update the material
+   * \return int
    */
   pyne::mat_map get_mat_library() const { return material_library; }
   /**
@@ -162,8 +166,6 @@ class MaterialLibrary {
   pyne::nuc_set get_nuclist() const { return nuclist; }
 
   std::set<int> mat_number_set;
-  std::vector<std::string> name_order;
-
 };  // end MaterialLibrary class header
 }  // namespace pyne
 #endif  // PYNE_MATERIAL_LIBRARY
