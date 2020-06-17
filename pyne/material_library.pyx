@@ -234,7 +234,7 @@ cdef class _MaterialLibrary:
         cdef cpp_material.Material * c_mat
         c_mat = self._inst.get_material_ptr( < std_string > ensure_material_key(key))
 
-        # build a PyNE Material object form the cpp_material
+        # build a PyNE Material object from the cpp_material
         py_mat = material.Material(free_mat=False)
         (< material._Material > py_mat).mat_pointer = c_mat
         return py_mat
