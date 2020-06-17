@@ -170,8 +170,7 @@ std::string pyne::MaterialLibrary::ensure_material_name_and_number(
     }
   } else {
     if (mat_number == -1) {
-      mat_number =
-          *max_element(mat_number_set.begin(), mat_number_set.end()) + 1;
+      mat_number = keylist.size();
     }
     mat_name = "_" + std::to_string(mat_number);
     mat.metadata["name"] = mat_name;
