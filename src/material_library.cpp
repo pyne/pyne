@@ -155,7 +155,7 @@ int pyne::MaterialLibrary::ensure_material_number(pyne::Material& mat) const {
   return mat_number;
 }
 
-std::string pyne::MaterialLibrary::ensure_material_name(
+std::string pyne::MaterialLibrary::ensure_material_name_and_number(
     pyne::Material& mat) const {
   std::string mat_name = "";
   int mat_number = ensure_material_number(mat);
@@ -180,29 +180,22 @@ std::string pyne::MaterialLibrary::ensure_material_name(
 
 void pyne::MaterialLibrary::add_material(pyne::Material mat) {
   // if exists, get the material name from metadata make one instead
-
-  std::string mat_name = ensure_material_name(mat);
+  std::string mat_name = ensure_material_name_and_number(mat);
   add_material(mat_name, mat);
 }
 
 void pyne::MaterialLibrary::add_material(const std::string& key,
-                                         pyne::Material mat) {
-  int mat_number = ensure_material_number(mat);
-  if (!mat.metadata.isMember("name")) {
-    mat.metadata["name"] = key;
-  }
-  append_to_nuclist(mat);
-  if (mat_number > 0) mat_number_set.insert(mat_number);
-  std::pair<std::set<std::string>::iterator, bool> key_insert;
-  key_insert = keylist.insert(key);
-  material_library[key] = std::make_shared<pyne::Material>(mat);
-}
+                                         const pyne::Material& mat) {
+  pyne::shr_mat_ptr new_mat = std::make_shared<pyne::Material>(mat);
 
-void pyne::MaterialLibrary::del_material(const pyne::Material& mat) {
-  if (mat.metadata.isMember("name")) {
-    std::string mat_name = mat.metadata["name"].asString();
-    del_material(mat_name);
+  int mat_number = ensure_material_number(*new_mat);
+  if (!new_mat->metadata.isMember("name")) {
+    new_mat->metadata["name"] = key;
   }
+  append_to_nuclist(*new_mat);
+  if (mat_number > 0) mat_number_set.insert(mat_number);
+  keylist.insert(key);
+  material_library[key] = new_mat;
 }
 
 void pyne::MaterialLibrary::del_material(const std::string& key) {
@@ -323,27 +316,6 @@ void pyne::MaterialLibrary::append_to_nuclist(const pyne::Material& mat) {
   for (auto nuclide : mat_comp) {
     nuclist.insert(nuclide.first);
   }
-}
-
-// see if path exists before we go on
-bool pyne::MaterialLibrary::hdf5_path_exists(
-    const std::string& filename, const std::string& datapath) const {
-  // Turn off annoying HDF5 errors
-  H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
-
-  // Set file access properties so it closes cleanly
-  hid_t fapl = H5Pcreate(H5P_FILE_ACCESS);
-  H5Pset_fclose_degree(fapl, H5F_CLOSE_STRONG);
-
-  hid_t db = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, fapl);
-
-  bool datapath_exists = h5wrap::path_exists(db, datapath.c_str());
-  herr_t status = H5Eclear(H5E_DEFAULT);
-
-  // Close the database
-  status = H5Fclose(db);
-
-  return datapath_exists;
 }
 
 int pyne::MaterialLibrary::get_length_of_table(
