@@ -68,7 +68,7 @@ cdef class _MaterialLibrary:
         ----------
         lib : dict-like, str, or None, optional
             The data to initialize the material library with.  If this is a
-            string, it is interpreted as a path to a file.
+            string, it is interpreted as a path to a file (hdf5 or json format supported).
         datapath : str, optional
             The path in the hierarchy to the data table in an HDF5 file.
             The path in the hierarchy to the nuclide array in an HDF5 file.
