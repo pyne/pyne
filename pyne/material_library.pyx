@@ -20,6 +20,8 @@ from libcpp.set cimport set as cpp_set
 from libcpp.string cimport string as std_string
 from libc.stdlib cimport malloc, free
 from libcpp.unordered_map cimport unordered_map as cpp_umap
+from libcpp.memory cimport shared_ptr
+
 from libcpp.vector cimport vector as cpp_vector
 from libcpp cimport bool as cpp_bool
 # from cython.operator cimport reference as ref
@@ -135,7 +137,7 @@ cdef class _MaterialLibrary:
         """
         if isinstance(mat_name, basestring):
             c_matname = mat_name.encode('UTF-8')
-            self._inst.del_material( < std_string > c_matname)
+            self._inst.del_material(< std_string > c_matname)
         else:
             raise TypeError("the argument must be a string (material name) but is a "
                             "{0}".format(type(mat_name)))
@@ -149,7 +151,7 @@ cdef class _MaterialLibrary:
         """
 
         if isinstance(mat_library, _MaterialLibrary):
-            self._inst.merge( < cpp_material_library.MaterialLibrary*>( < _MaterialLibrary > mat_library)._inst)
+            self._inst.merge(< cpp_material_library.MaterialLibrary*>( < _MaterialLibrary > mat_library)._inst)
         else:
             raise TypeError("the material library must be a MaterialLibrary but is a "
                             "{0}".format(type(mat_library)))
@@ -170,7 +172,7 @@ cdef class _MaterialLibrary:
             An object-type JSON value.
 
         """
-        self._inst.load_json(deref((< jsoncpp.Value > json)._inst))
+        self._inst.load_json(deref(( < jsoncpp.Value > json)._inst))
 
     def dump_json(self):
         """dump_json()
@@ -228,20 +230,19 @@ cdef class _MaterialLibrary:
         cdef cpp_pair[std_string, cpp_material.Material] item
         value_proxy = material.Material(
             value, free_mat=not isinstance(value, material._Material))
-        self._inst.add_material(ensure_material_key(key), deref((< material._Material > value_proxy).mat_pointer))
+        self._inst.add_material(ensure_material_key(key), deref(( < material._Material > value_proxy).mat_pointer))
 
     def __getitem__(self, key):
-        cdef cpp_material.Material * c_mat
-        c_mat = self._inst.get_material_ptr( < std_string > ensure_material_key(key))
+        cdef shared_ptr[cpp_material.Material] c_mat
+        c_mat = self._inst.get_material_ptr(< std_string > ensure_material_key(key))
 
         # build a PyNE Material object form the cpp_material
         py_mat = material.Material(free_mat=False)
-        (< material._Material > py_mat).mat_pointer = c_mat
+        ( < material._Material > py_mat).mat_pointer = c_mat.get()
         return py_mat
 
     def __len__(self):
         return self._inst.material_library.size()
- 
 
     def __delitem__(self, key):
         self.del_material(ensure_material_key(key))
@@ -257,10 +258,12 @@ class MaterialLibrary(_MaterialLibrary, collections.MutableMapping):
     """The material library is a collection of unique keys mapped to
     Material objects.
     """
+
     def __repr__(self):
         libs = ["{0!r}={1!r}".format(k, m) for k, m in self.items()]
         libs = "{" + ", ".join(libs) + "}"
         return "pyne.material.MaterialLibrary({0})".format(libs)
+
 
 def ensure_material_key(key):
     if isinstance(key, basestring):
@@ -271,30 +274,30 @@ def ensure_material_key(key):
 
 
 # Python dict to u_map<string, Material *>
-cdef cpp_umap[std_string, cpp_material.Material*] dict_to_map_str_matp(dict pydict):
-    cdef cpp_material.Material * cpp_matp
-    cdef cpp_umap[std_string, matp] cppmap = cpp_umap[std_string, matp]()
-    cdef cpp_pair[std_string, cpp_material.Material *] item
+cdef cpp_umap[std_string, shared_ptr[cpp_material.Material]] dict_to_map_str_matp(dict pydict):
+    cdef shared_ptr[cpp_material.Material] cpp_matp
+    cdef cpp_umap[std_string, shared_ptr[cpp_material.Material]] cppmap = cpp_umap[std_string, shared_ptr[cpp_material.Material]]()
+    cdef cpp_pair[std_string, shared_ptr[cpp_material.Material]] item
 
     for key, value in pydict.items():
         py_mat = material.Material(free_mat=False)
         py_mat = value
-        cpp_matp = (< material._Material > py_mat).mat_pointer
+        cpp_matp = shared_ptr[cpp_material.Material](( < material._Material > py_mat).mat_pointer)
         #cppmap[std_string(key)] = cpp_matp
-        item = cpp_pair[std_string, matp](std_string(< char * > key), cpp_matp)
+        item = cpp_pair[std_string, shared_ptr[cpp_material.Material]](std_string( < char * > key),         cpp_matp)
         cppmap.insert(item)
 
     return cppmap
 
 # u_map<string, Material *> to python dict
-cdef dict map_to_dict_str_matp(cpp_umap[std_string, cpp_material.Material*] cppmap):
+cdef dict map_to_dict_str_matp(cpp_umap[std_string, shared_ptr[cpp_material.Material]] cppmap):
     pydict = {}
-    cdef cpp_umap[std_string, cpp_material.Material*].iterator mapiter = cppmap.begin()
+    cdef cpp_umap[std_string, shared_ptr[cpp_material.Material]].iterator mapiter = cppmap.begin()
 
     while mapiter != cppmap.end():
         py_mat = material.Material(free_mat=False)
-        (< material._Material > py_mat).mat_pointer = deref(mapiter).second
-        pydict[< char * > deref(mapiter).first.c_str()] = py_mat
+        ( < material._Material > py_mat).mat_pointer = (deref(mapiter).second).get()
+        pydict[ < char * > deref(mapiter).first.c_str()] = py_mat
         inc(mapiter)
 
     return pydict

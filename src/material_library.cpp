@@ -195,7 +195,7 @@ void pyne::MaterialLibrary::add_material(const std::string& key,
   if (mat_number > 0) mat_number_set.insert(mat_number);
   std::pair<std::set<std::string>::iterator, bool> key_insert;
   key_insert = keylist.insert(key);
-  material_library[key] = new Material(mat);
+  material_library[key] = std::make_shared<pyne::Material>(mat);
 }
 
 void pyne::MaterialLibrary::del_material(const pyne::Material& mat) {
@@ -215,13 +215,13 @@ pyne::Material pyne::MaterialLibrary::get_material(
   return *(this->get_material_ptr(mat_name));
 }
 
-pyne::Material* pyne::MaterialLibrary::get_material_ptr(
+pyne::shr_mat_ptr pyne::MaterialLibrary::get_material_ptr(
     const std::string& mat_name) const {
   auto it = material_library.find(mat_name);
   if (it != material_library.end()) {
     return it->second;
   } else {
-    return new pyne::Material();
+    return std::make_shared<pyne::Material>(pyne::Material());
   }
 }
 

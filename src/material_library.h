@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <iostream>
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -17,7 +18,8 @@
 
 namespace pyne {
 
-typedef std::unordered_map<std::string, pyne::Material*> mat_map;
+typedef std::shared_ptr<pyne::Material> shr_mat_ptr;
+typedef std::unordered_map<std::string, shr_mat_ptr> mat_map;
 typedef std::set<std::string> matname_set;
 typedef std::set<int> nuc_set;
 
@@ -139,7 +141,7 @@ class MaterialLibrary {
    * \brief Get a material of the Library by name
    * \param mat_name name of the material to return
    */
-  pyne::Material* get_material_ptr(const std::string& mat_name) const;
+  pyne::shr_mat_ptr get_material_ptr(const std::string& mat_name) const;
   std::string ensure_material_name(pyne::Material& mat) const;
   /**
    * \brief Return a material material number, ensure it exist if it does not

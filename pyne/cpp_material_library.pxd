@@ -6,6 +6,7 @@ from libcpp.unordered_map cimport unordered_map
 from libcpp.vector cimport vector
 from libcpp.utility cimport pair
 from libcpp cimport bool
+from libcpp.memory cimport shared_ptr
 
 cimport cpp_jsoncpp
 
@@ -20,7 +21,7 @@ cdef extern from "material_library.h" namespace "pyne":
         MaterialLibrary(std_string, std_string) except +
 
         # Attributes
-        unordered_map[std_string, cpp_material.Material*] material_library
+        unordered_map[std_string, shared_ptr[cpp_material.Material]] material_library
         std_set[std_string] material_name
         std_set[int] nuclides
 
@@ -42,8 +43,8 @@ cdef extern from "material_library.h" namespace "pyne":
         void merge(MaterialLibrary*) except +
 
         cpp_material.Material get_material(std_string) except +
-        cpp_material.Material* get_material_ptr( std_string ) except +
+        shared_ptr[cpp_material.Material] get_material_ptr( std_string ) except +
         
-        unordered_map[std_string, cpp_material.Material*] get_mat_library() except + 
+        unordered_map[std_string, shared_ptr[cpp_material.Material]] get_mat_library() except + 
         std_set[std_string] get_keylist() except +
         std_set[int] get_nuclist() except +
