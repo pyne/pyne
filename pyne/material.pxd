@@ -4,7 +4,6 @@ from libcpp.string cimport string as std_string
 from libcpp.map cimport map as cpp_map
 from cython import pointer
 
-import collections
 
 # Local imports
 cimport cpp_material

@@ -1,4 +1,3 @@
-import collections
 from warnings import warn
 from pyne.utils import QAWarning
 
