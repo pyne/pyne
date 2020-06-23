@@ -2,7 +2,10 @@ from __future__ import division
 import re
 import sys
 import copy
-from collections import defaultdict
+try:
+    from collections.abc import defaultdict
+except ImportError:
+    from collections import defaultdict
 from warnings import warn
 from pyne.utils import QAWarning
 from pyne.utils import time_conv_dict

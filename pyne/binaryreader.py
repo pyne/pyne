@@ -5,7 +5,11 @@ Fortran formatted records.
 
 """
 import struct
-from collections import Iterable
+try:
+    from collections.abc import Iterable
+except ImportError:
+    from collections import Iterable
+
 from warnings import warn
 from pyne.utils import QAWarning
 

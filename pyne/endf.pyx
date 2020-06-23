@@ -15,7 +15,10 @@ from __future__ import print_function, division, unicode_literals
 
 import re
 import os
-from collections import OrderedDict, Iterable
+try:
+    from collections.abc import OrderedDict, Iterable
+except ImportError:
+    from collections import OrderedDict, Iterable
 from warnings import warn
 from pyne.utils import QAWarning
 

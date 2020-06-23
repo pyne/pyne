@@ -5,7 +5,10 @@ import os
 import io
 import sys
 from warnings import warn
-from collections import namedtuple
+try:
+    from collections.abc import namedtuple
+except ImportError:
+    from collections import namedtuple
 import numpy as np
 import tables as tb
 

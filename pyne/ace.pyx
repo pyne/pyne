@@ -21,7 +21,11 @@ import io
 import struct
 from warnings import warn
 from pyne.utils import QAWarning
-from collections import OrderedDict
+
+try:
+    from collections.abc import OrderedDict
+except ImportError:
+    from collections import OrderedDict
 
 cimport numpy as np
 import numpy as np
