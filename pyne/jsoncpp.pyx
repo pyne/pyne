@@ -11,6 +11,10 @@ from libcpp.vector cimport vector as std_vector
 
 # Python imports
 import collections
+try:
+    collectionsAbc = collections.abc
+except AttributeError:
+    collectionsAbc = collections
 
 try:
     import simplejson as json
@@ -35,7 +39,7 @@ cdef cpp_jsoncpp.Value * tocppval(object doc) except NULL:
     cdef cpp_jsoncpp.Value * cval = NULL
     if isinstance(doc, Value):
         cval = new cpp_jsoncpp.Value(<cpp_jsoncpp.Value &> (<Value> doc)._inst[0])
-    elif isinstance(doc, collections.Mapping):
+    elif isinstance(doc, collectionsAbc.Mapping):
         cval = new cpp_jsoncpp.Value(<cpp_jsoncpp.ValueType> cpp_jsoncpp.objectValue)
         for k, v in doc.items():
             if not isinstance(k, basestring):
@@ -49,7 +53,7 @@ cdef cpp_jsoncpp.Value * tocppval(object doc) except NULL:
     elif isinstance(doc, bytes):
         # bytes must come before other sequences
         cval = new cpp_jsoncpp.Value(<char *> doc)
-    elif isinstance(doc, collections.Sequence) or isinstance(doc, collections.Set):
+    elif isinstance(doc, collectionsAbc.Sequence) or isinstance(doc, collectionsAbc.Set):
         cval = new cpp_jsoncpp.Value(<cpp_jsoncpp.ValueType> cpp_jsoncpp.arrayValue)
         cval.resize(<int> len(doc))
         for i, d in enumerate(doc):

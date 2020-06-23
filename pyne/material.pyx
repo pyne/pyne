@@ -15,6 +15,10 @@ from libcpp cimport bool as cpp_bool
 
 # Python imports
 import collections
+try:
+    collectionsAbc = collections.abc
+except AttributeError:
+    collectionsAbc = collections
 cimport numpy as np
 import numpy as np
 from warnings import warn
@@ -1570,7 +1574,7 @@ cdef class _Material:
         return id(self)
 
 
-class Material(_Material, collections.MutableMapping):
+class Material(_Material, collectionsAbc.MutableMapping):
     """Material composed of nuclides.
 
     Parameters
@@ -2079,7 +2083,7 @@ cdef class _MapStrMaterial:
             del self._cache[key]
 
 
-class MapStrMaterial(_MapStrMaterial, collections.MutableMapping):
+class MapStrMaterial(_MapStrMaterial, collectionsAbc.MutableMapping):
     """Wrapper class for C++ standard library maps of type <string, Material
     \*>.  Provides dictionary like interface on the Python level.
 
@@ -2101,7 +2105,7 @@ class MapStrMaterial(_MapStrMaterial, collections.MutableMapping):
 
 
 
-class MultiMaterial(collections.MutableMapping):
+class MultiMaterial(collectionsAbc.MutableMapping):
     """ This class is serves as a way of storing a collection of materials.
     There sole argument of this function is a dictionary with material
     objects and keys and vol/mass fractions as values. There are two
@@ -2224,7 +2228,7 @@ cdef class _MaterialLibrary(object):
         cdef dict _lib = {}
         if lib is None:
             self._lib = _lib
-        elif isinstance(lib, collections.Mapping):
+        elif isinstance(lib, collectionsAbc.Mapping):
             for key, mat in lib.items():
                 _lib[key] = ensure_material(mat)
             self._lib = _lib
@@ -2235,7 +2239,7 @@ cdef class _MaterialLibrary(object):
             if lib.endswith('.h5') or lib.endswith('.hdf5') \
                                    or lib.endswith('.h5m'):
                 self.from_hdf5(lib, datapath=datapath, nucpath=nucpath)
-        elif isinstance(lib, collections.Sequence):
+        elif isinstance(lib, collectionsAbc.Sequence):
             for key, mat in lib:
                 _lib[key] = ensure_material(mat)
             self._lib = _lib
@@ -2392,7 +2396,7 @@ cdef class _MaterialLibrary(object):
                 mat.metadata["name"] = key
             mat.write_hdf5(filename, datapath=datapath, nucpath=nucpath)
 
-class MaterialLibrary(_MaterialLibrary, collections.MutableMapping):
+class MaterialLibrary(_MaterialLibrary, collectionsAbc.MutableMapping):
     """The material library is a collection of unique keys mapped to
     Material objects.  This is useful for organization and declaring
     prefernces between several sources (multiple libraries).
