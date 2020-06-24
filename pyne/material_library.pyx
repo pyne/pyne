@@ -93,9 +93,9 @@ cdef class _MaterialLibrary:
         else:
             self._inst = new cpp_material_library.MaterialLibrary()
 
-    def __dealloc__(self):
-        """MaterialLibrary C++ destructor."""
-        del self._inst
+#   def __dealloc__(self):
+#        """MaterialLibrary C++ destructor."""
+#        del self._inst
 
     def from_hdf5(self, filename, datapath):
         """Loads data from an HDF5 file into this material library.
