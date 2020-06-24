@@ -25,26 +25,6 @@ typedef std::set<int> nuc_set;
 
 class MaterialLibrary {
  public:
-  // The actual library
-  mat_map material_library;  // material library
-
- private:
-  /**
-   * \brief Add the nuclide form the material to the list of nuclides
-   * \param material from which add the nuclide to the list
-   */
-  void append_to_nuclist(const pyne::Material& mat);
-
-  /**
-   * \brief determines the length of an hdf5 data table
-   * \param filename of the h5m file
-   * \param datapath we would like to read
-   * \return the number of elements to the array
-   */
-  int get_length_of_table(const std::string& filename,
-                          const std::string& datapath) const;
-
- public:
   // materialLibrary constructor
   MaterialLibrary();  //< empty constryctor
 
@@ -153,10 +133,33 @@ class MaterialLibrary {
    * \return std::set<int>
    */
   pyne::nuc_set get_nuclist() const { return nuclist; }
+  /**
+   * \brief Get the szie of the Library
+   * \return int
+   */
+  int size() const { return material_library.size(); }
 
+ private:
+  /**
+   * \brief Add the nuclide form the material to the list of nuclides
+   * \param material from which add the nuclide to the list
+   */
+  void append_to_nuclist(const pyne::Material& mat);
+
+  /**
+   * \brief determines the length of an hdf5 data table
+   * \param filename of the h5m file
+   * \param datapath we would like to read
+   * \return the number of elements to the array
+   */
+  int get_length_of_table(const std::string& filename,
+                          const std::string& datapath) const;
   std::set<int> mat_number_set;
   matname_set keylist;
   nuc_set nuclist;
+  // The actual library
+  mat_map material_library;  // material library
+
 };  // end MaterialLibrary class header
 }  // namespace pyne
 #endif  // PYNE_MATERIAL_LIBRARY

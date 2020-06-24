@@ -242,7 +242,7 @@ cdef class _MaterialLibrary:
         return py_mat
 
     def __len__(self):
-        return self._inst.material_library.size()
+        return self._inst.size()
 
     def __delitem__(self, key):
         self.del_material(ensure_material_key(key))
