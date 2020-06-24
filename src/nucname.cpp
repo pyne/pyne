@@ -127,6 +127,10 @@ pyne::nucname::name_zz_t pyne::nucname::get_name_zz() {
   lzd["Cn"] = 112;
   lzd["Fl"] = 114;
   lzd["Lv"] = 116;
+  lzd["Nh"] = 113;
+  lzd["Mc"] = 115;
+  lzd["Ts"] = 117;
+  lzd["Og"] = 118;
 
   return lzd;
 }

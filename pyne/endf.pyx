@@ -2024,6 +2024,13 @@ class Evaluation(object):
         params, teff = self._get_tab1_record()
         inel['teff'] = teff
 
+        #Read teff curves for non-principal atoms with SCT approximation indicated:
+        for i in range(len(B)//6-1):
+            if B[6*(i+1)]==0.0:
+                params, teff = self._get_tab1_record()
+                inel['teff_%i'%(i+1)] = teff#Store as teff_1, teff_2, etc.
+
+
     def _read_independent_yield(self):
         self._print_info(8, 454)
         iyield = self.fission['yield_independent']
