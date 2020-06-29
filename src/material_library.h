@@ -29,9 +29,9 @@ class MaterialLibrary {
   MaterialLibrary();  //< empty constryctor
 
   /**
-   * Constructor from file
+   * \brief Constructor from file
    * \param filename path to file on disk, this file may be either in
-   * plaintext or HDF5 format.
+            plaintext or HDF5 format.
    * \param datapath Path to the materials in the
    * file.
    */
@@ -41,10 +41,10 @@ class MaterialLibrary {
 
   /**
    * \brief loads the pyne materials in map of name vs Material
-    /// \param filename Path on disk to the HDF5 file.
-    /// \param datapath Path to the materials in the file.
-    /// \param protocol Flag for layout of material on disk.
-  */
+   * \param filename Path on disk to the HDF5 file.
+   * \param datapath Path to the materials in the file.
+   * \param protocol Flag for layout of material on disk.
+   */
   void from_hdf5(const std::string& filename, const std::string& datapath);
   /**
    * \brief loads the pyne materials in map of name vs Material
@@ -55,30 +55,35 @@ class MaterialLibrary {
   Json::Value dump_json();
   void write_json(const std::string& filename);
   /**
-   * Writes MaterialLibrary out to an HDF5 file.
-   *  This happens according to protocol 1.
-   *  Writting in a file already containing
-   *  This might cause issue to
-   *  read material already present in the datapath,
-   *  and for the new materials if written in the
-   *  same datapath.
+   * \brief Writes MaterialLibrary out to an HDF5 file.
+            This happens according to protocol 1.
+            Writting in a file already containing
+            This might cause issue to
+            read material already present in the datapath,
+            and for the new materials if written in the
+            same datapath.
    *  \param filename Path on disk to the HDF5 file.
    *  \param datapath Path to the the material in the file.
    */
   void write_hdf5(const std::string& filename,
                   const std::string& datapath = "/materials") const;
-  /// Writes this nucpath to an HDF5 file.
-  /// This happens according to protocol 1.
-  /// \param db HDF5 id for the open HDF5 file.
-  /// \param nucpath Path to the nuclides list in the file.
+  /**
+   * \brief Writes this nucpath to an HDF5 file.
+   *  This happens according to protocol 1.
+   * \param db HDF5 id for the open HDF5 file.
+   * \param nucpath Path to the nuclides list in the file.
+   */
   void write_hdf5_nucpath(hid_t db, std::string nucpath) const;
   /**
    * \brief Merge a material library into the current one
    * \param mat_library pyne material library to merge
    */
   void merge(const pyne::MaterialLibrary& mat_lib);
+  /**
+   * \brief Merge a material library into the current one
+   * \param mat_library pointer to the pyne material library to merge
+   */
   void merge(pyne::MaterialLibrary* mat_lib);
-
   /**
    * \brief Add a material to the library
    * \param mat material to add
@@ -121,7 +126,10 @@ class MaterialLibrary {
  * \return int
  */
   int ensure_material_number(pyne::Material& mat) const;
-
+  /**
+   * \brief Get the material library itself
+   * \return std::map<std::string, pyne::Material>
+   */
   pyne::mat_map get_mat_library() const { return material_library; }
   /**
    * \brief Get the list of materials in the Library
@@ -145,18 +153,18 @@ class MaterialLibrary {
    * \param material from which add the nuclide to the list
    */
   void append_to_nuclist(const pyne::Material& mat);
-
   /**
    * \brief determines the length of an hdf5 data table
-   * \param filename of the h5m file
+   * \param db HDF5 id for the open HDF5 file.
    * \param datapath we would like to read
    * \return the number of elements to the array
    */
-  int get_length_of_table(const std::string& filename,
-                          const std::string& datapath) const;
-  std::set<int> mat_number_set;
-  matname_set keylist;
-  nuc_set nuclist;
+  int get_length_of_table(hid_t db, const std::string& datapath) const;
+
+  std::set<int>
+      mat_number_set;   // list of material number in the library (ordered)
+  matname_set keylist;  // list of masterial keys
+  nuc_set nuclist;      // list of nuclides in the library
   // The actual library
   mat_map material_library;  // material library
 

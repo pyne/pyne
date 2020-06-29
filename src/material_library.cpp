@@ -66,7 +66,7 @@ void pyne::MaterialLibrary::from_hdf5(const std::string& filename,
     throw std::runtime_error(datapath + " exist but is not a dataset.");
   }
 
-  int file_num_materials = get_length_of_table(filename, full_datapath);
+  int file_num_materials = get_length_of_table(db, full_datapath);
 
   for (int i = 0; i < file_num_materials; i++) {
     pyne::Material mat = pyne::Material();
@@ -171,7 +171,7 @@ std::string pyne::MaterialLibrary::ensure_material_name_and_number(
   } else {
     if (mat_number == -1) {
       if (!mat_number_set.empty())
-        mat_number = *mat_number_set.rbegin();
+        mat_number = *mat_number_set.rbegin() + 1;
       else {
         mat_number = 1;
       }
@@ -288,13 +288,8 @@ void pyne::MaterialLibrary::write_hdf5(const std::string& filename,
 
 void pyne::MaterialLibrary::write_hdf5_nucpath(hid_t db,
                                                std::string nucpath) const {
-  //
-  // Read in nuclist if available, write it out if not
-  //
-  // bool nucpath_exists = h5wrap::path_exists(db, nucpath);
   int nuc_size;
   nuc_size = nuclist.size();
-  // Create the data if it doesn't exist
   int nuc_data[nuc_size];
   {
     int n = 0;
@@ -323,15 +318,13 @@ void pyne::MaterialLibrary::append_to_nuclist(const pyne::Material& mat) {
 }
 
 int pyne::MaterialLibrary::get_length_of_table(
-    const std::string& filename, const std::string& datapath) const {
+    hid_t db, const std::string& datapath) const {
   // Turn off annoying HDF5 errors
   H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
   // Set file access properties so it closes cleanly
   hid_t fapl = H5Pcreate(H5P_FILE_ACCESS);
   H5Pset_fclose_degree(fapl, H5F_CLOSE_STRONG);
-
-  hid_t db = H5Fopen(filename.c_str(), H5F_ACC_RDONLY, fapl);
 
   hid_t ds = H5Dopen2(db, datapath.c_str(), H5P_DEFAULT);
 
@@ -344,9 +337,5 @@ int pyne::MaterialLibrary::get_length_of_table(
   int arr_ndim = H5Sget_simple_extent_dims(arr_space, arr_dims, NULL);
 
   herr_t status = H5Eclear(H5E_DEFAULT);
-
-  // Close the database
-  status = H5Fclose(db);
-
   return arr_dims[0];
 }
