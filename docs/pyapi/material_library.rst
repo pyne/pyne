@@ -16,7 +16,8 @@ Material Libraries provide a way of assembling a collection of :ref:`pyne_materi
 objects, including the reading and writing of those collections in various
 formats.  They behave in a dictionary-like way in which the key is a string
 that is generally a semantically meaningful name, and the value is a :ref:`pyne_material`
-object. MaterialLibrary contains mainly a dictionary like object referencing a list of :ref:`pyne_material` by the a string name key.
+object. MaterialLibrary contains mainly a dictionary like object referencing a list of
+:ref:`pyne_material` by the a string name key.
 
 The material_library class is presented below.  For more information please refer to :ref:`usersguide_material`.
 
@@ -29,7 +30,10 @@ When using the `write_hdf5` method to write a material in a group named
                      /------/nuclidelist
                      /------/composition_metadata
 
-Where, `/material_library` and `/material_library/my_lib` are HDF5 groups, (`my_lib` value shall be provided as the datapath by the user). If the `$datapath` or `/material_library` exist as a dataset in the file, then the old writing method will be used.
+Where, `/material_library` and `/material_library/my_lib` are HDF5 groups, (`my_lib` 
+value shall be provided as the datapath by the user). If the `$datapath` or 
+`/material_library` exist as a dataset in the file, then the old writing method will 
+be used.
 
 Old data structure looks like:
 .. verbatim::

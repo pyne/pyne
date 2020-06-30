@@ -39,7 +39,8 @@ Where, `/material` and `/material/my_mat` are HDF5 groups, (`my_mat` value shall
 be provided as the datapath by the user). If the `$datapath` or `/material`
 exist as a dataset in the file, then the old writing method will be used.
 
-Older data structure are deprecated but still available to written when providing a `nucpath` to the
+Older data structure are deprecated but still available to written when providing a
+ `nucpath` to the
 `write_hdf5()` method, or when writing a material in a file with the old
 data structure.
 Old data structure looks like:
