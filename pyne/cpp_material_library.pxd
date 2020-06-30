@@ -28,7 +28,7 @@ cdef extern from "material_library.h" namespace "pyne":
         void from_json(std_string) except +
         void write_json(std_string) except +
 
-        void write_hdf5(std_string, std_string) except +
+        void write_hdf5(std_string, std_string, bool) except +
         
         void add_material(cpp_material.Material) except +
         void add_material(std_string, cpp_material.Material) except +

@@ -223,7 +223,8 @@ pyne::shr_mat_ptr pyne::MaterialLibrary::get_material_ptr(
 }
 
 void pyne::MaterialLibrary::write_hdf5(const std::string& filename,
-                                       const std::string& datapath) const {
+                                       const std::string& datapath,
+                                       bool h5_overwrite) const {
   // Turn off annoying HDF5 errors
   H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
   // Set file access properties so it closes cleanly
@@ -262,14 +263,23 @@ void pyne::MaterialLibrary::write_hdf5(const std::string& filename,
                                H5P_DEFAULT);
   }
 
-  // Group "/root_path/datapath" does not exist create it
+  // Group "/root_path/datapath" does exist throw an error or remove it
   std::string full_path = root_path + datapath;
-  if (!h5wrap::path_exists(db, full_path)) {
-    data_id = H5Gcreate2(db, full_path.c_str(), H5P_DEFAULT, H5P_DEFAULT,
-                         H5P_DEFAULT);
-  } else {
-    data_id = H5Gopen2(db, full_path.c_str(), H5P_DEFAULT);
+  if (h5wrap::path_exists(db, full_path)) {
+    if (h5_overwrite) {
+      H5Ldelete(db, full_path.c_str(), H5P_DEFAULT);
+    } else {
+      throw std::runtime_error(
+          "datapath" + full_path +
+          "already exist, use \"h5_overwrite=true\" option to "
+          "overwrite existing datapath");
+    }
   }
+
+  // create "/root_path/datapath" Group
+  data_id =
+      H5Gcreate2(db, full_path.c_str(), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
   std::string compath = "composition";
   std::string nucpath = "nuclidelist";
   write_hdf5_nucpath(data_id, nucpath);

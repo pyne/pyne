@@ -1,14 +1,18 @@
 import os
-
-from nose.tools import assert_true, assert_false, assert_almost_equal, assert_equal
-from pyne import nuc_data
-from pyne.dbgen.materials_library import *
-from pyne.material import Material
-from pyne.material_library import MaterialLibrary
-from pyne.pyne_config import pyne_conf
-import pyne.nucname as nucname
-import tables as tb
 import numpy as np
+import tables as tb
+from nose.tools import \
+    assert_true, assert_false, \
+    assert_almost_equal, assert_equal, \
+    assert_raises
+
+
+import pyne.nucname as nucname
+from pyne.pyne_config import pyne_conf
+from pyne.material_library import MaterialLibrary
+from pyne.material import Material
+from pyne.dbgen.materials_library import *
+from pyne import nuc_data
 
 nucvec = {10010000:  1.0,
           80160000:  1.0,
@@ -172,6 +176,34 @@ def test_matlib_hdf5():
     assert_equal(set(wmatlib), set(rmatlib))
     for key in rmatlib:
         assert_mat_almost_equal(wmatlib[key], rmatlib[key])
+    os.remove(filename)
+
+
+def test_hdf5_overwrite():
+    filename = "matlib.h5"
+    if filename in os.listdir('.'):
+        os.remove(filename)
+    water = Material()
+    water.from_atom_frac({10000000: 2.0, 80000000: 1.0})
+    water.metadata["name"] = "Aqua sera."
+    lib = {"aqua": water}
+    wmatlib = MaterialLibrary(lib)
+    wmatlib.write_hdf5(filename, "/mats1")
+
+    lib = {"leu": Material(leu)}
+    umatlib = MaterialLibrary(lib)
+    # test error raise if path already exists
+    assert_raises(RuntimeError, umatlib.write_hdf5, filename, "/mats1", False)
+
+    # test overwriting
+    umatlib.write_hdf5(filename, "/mats1", h5_overwrite=True)
+    rmatlib = MaterialLibrary()
+    rmatlib.from_hdf5(filename, "/mats1")
+
+    # Round trip!
+    assert_equal(set(umatlib), set(rmatlib))
+    for key in rmatlib:
+        assert_mat_almost_equal(umatlib[key], rmatlib[key])
     os.remove(filename)
 
 

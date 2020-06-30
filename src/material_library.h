@@ -64,9 +64,11 @@ class MaterialLibrary {
             same datapath.
    *  \param filename Path on disk to the HDF5 file.
    *  \param datapath Path to the the material in the file.
+   *  \param h5_overwrite bool to decide if existing path should be overwritten
    */
   void write_hdf5(const std::string& filename,
-                  const std::string& datapath = "/materials") const;
+                  const std::string& datapath = "/materials",
+                  bool h5_overwrite = false) const;
   /**
    * \brief Writes this nucpath to an HDF5 file.
    *  This happens according to protocol 1.

@@ -116,7 +116,7 @@ cdef class _MaterialLibrary:
         c_datapath = datapath.encode('UTF-8')
         self._inst.from_hdf5(c_filename, c_datapath)
 
-    def write_hdf5(self, filename, datapath="/materials"):
+    def write_hdf5(self, filename, datapath="/materials", h5_overwrite=False):
         """Writes this material library to an HDF5 file.
         Parameters
         ----------
@@ -127,7 +127,7 @@ cdef class _MaterialLibrary:
         """
         c_filename = filename.encode('UTF-8')
         c_datapath = datapath.encode('UTF-8')
-        self._inst.write_hdf5(c_filename, c_datapath)
+        self._inst.write_hdf5(c_filename, c_datapath, h5_overwrite)
 
     def remove_material(self, mat_name):
         """Remove a Material from this material library.
