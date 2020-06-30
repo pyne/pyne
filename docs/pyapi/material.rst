@@ -36,8 +36,8 @@ When using the `write_hdf5` method to write a material in a group named
              /------/composition_metadata
 
 Where, `/material` and `/material/my_mat` are HDF5 groups, (`my_mat` value shall
-be provided as the datapath by the user). IF the `$datapath` or `/material`
-exist as a dataset in the file, then the old writing method will ne used.
+be provided as the datapath by the user). If the `$datapath` or `/material`
+exist as a dataset in the file, then the old writing method will be used.
 
 Older data structure are deprecated but still available to written when providing a `nucpath` to the
 `write_hdf5()` method, or when writing a material in a file with the old
@@ -52,7 +52,7 @@ Old data structure looks like:
 `my_mat` (the `datapath` -- default `material`) is a HDF5 dataset containing the
 material composition, `nucpath` is a attribute containing the path to the
 nuclide list (nested in the `datapath`).
-`my_mat_metadata` is a dataset containing the metatdata of the material.
+`my_mat_metadata` is a dataset containing the metadata of the material.
 `nuclidelist` is a dataset containing the list of nuclides composition the
 material.
 
