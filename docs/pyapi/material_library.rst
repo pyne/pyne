@@ -19,33 +19,40 @@ that is generally a semantically meaningful name, and the value is a :ref:`pyne_
 object. MaterialLibrary contains mainly a dictionary like object referencing a list of
 :ref:`pyne_material` by the a string name key.
 
-The material_library class is presented below.  For more information please refer to :ref:`usersguide_material`.
+The MaterialLibrary class is presented below.  For more information please refer to :ref:`usersguide_material`.
 
-When using the `write_hdf5` method to write a material in a group named
-`my_mat`, the default structure for the `HDF5` file is:
+HDF5 File Structure
+-------------------
+
+When using the `write_hdf5` method to write a material library in a group named
+`my_mat_lib` (the user shall provide the name for this group in argument `datapath`), 
+the default structure for the `HDF5` file is:
 .. verbatim::
     /material_library/
-    /----------------/my_lib/
-                     /------/composition
-                     /------/nuclidelist
-                     /------/composition_metadata
+    /----------------/my_mat_lib/
+                     /----------/composition
+                     /----------/nuclidelist
+                     /----------/composition_metadata
 
-Where, `/material_library` and `/material_library/my_lib` are HDF5 groups, (`my_lib` 
-value shall be provided as the datapath by the user). If the `$datapath` or 
-`/material_library` exist as a dataset in the file, then the old writing method will 
-be used.
+Where, `/material_library` and `/material_library/my_mat_lib` are HDF5 groups. 
+
+Previous HDF5 File Structure
+-----------------------------
+
+If the `$datapath` or `/material_library` exist as a dataset in the file, 
+then the old writing method will be used.
 
 Old data structure looks like:
 .. verbatim::
-    /my_lib/
-    /------/nucpath
-    /my_mat_metadata
+    /my_mat_lib/
+    /----------/nucpath
+    /my_mat_lib_metadata
     /nuclidelist
 
-`my_lib` (the `datapath` -- default `material`) is a HDF5 dataset containing the
+`my_mat_lib` (the `datapath` -- default `material`) is a HDF5 dataset containing the
 array of material composition, `nucpath` is a attribute containing the path to the
 nuclide list (nested in the `datapath`).
-`my_mat_metadata` is a dataset containing an array of metadata of the material.
+`my_mat_lib_metadata` is a dataset containing an array of metadata of the material.
 `nuclidelist` is a dataset containing the list of nuclides composition the
 material.
 
