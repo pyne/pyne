@@ -53,7 +53,7 @@ or from public sources on the internet.
 
 Most common install flags:
 **************************
-The list of the possible flags can be retrieve using:
+The list of the possible flags can be retrieved using:
 
 unzipped directory::
    python setup.py --help
