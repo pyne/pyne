@@ -26,7 +26,6 @@ def test_get_material_lib_with_names():
     THIS_DIR = os.path.dirname(os.path.realpath(__file__))
     hdf5 = THIS_DIR + '/files_test_partisn/partisn_test_geom.h5m'
     data_hdf5path = '/materials'
-    nuc_hdf5path = '/nucid'
 
     # nuc_names list
     names = {}
@@ -35,12 +34,13 @@ def test_get_material_lib_with_names():
     names[20040000] = 'he4'
 
     mat_lib, unique_names = partisn._get_material_lib(
-        hdf5, data_hdf5path, nuc_hdf5path, nuc_names=names)
+        hdf5, data_hdf5path, nuc_names=names)
     mat_lib_expected = {u'MERCURY1': {800000000: 4.066613534078662e-2},
                         u'HELIUMNA': {20040000: 2.4975599277878773e-05,
                                       20030000: 4.4414858514189387e-11}}
     expected_unique_names = {
         'mat:Helium, Natural': 'HELIUMNA', 'mat:Mercury': 'MERCURY1'}
+
     assert(unique_names == expected_unique_names)
     assert(mat_lib == mat_lib_expected)
 
@@ -53,19 +53,18 @@ def test_get_material_lib_no_names():
     THIS_DIR = os.path.dirname(os.path.realpath(__file__))
     hdf5 = THIS_DIR + '/files_test_partisn/partisn_test_geom.h5m'
     data_hdf5path = '/materials'
-    nuc_hdf5path = '/nucid'
 
     mat_lib, unique_names = partisn._get_material_lib(
-        hdf5, data_hdf5path, nuc_hdf5path)
-    mat_lib_expected = {'MERCURY1': {802020000: 1.2060451913893048e-02,
+        hdf5, data_hdf5path)
+    mat_lib_expected = {'HELIUMNA': {20040000: 2.4975599277878773e-05,
+                                     20030000: 4.4414858514189387e-11},
+                        'MERCURY1': {802020000: 1.2060451913893048e-02,
                                      802000000: 9.423512145483618e-03,
                                      802010000: 5.3498985962366465e-03,
                                      801960000: 6.24414427454006e-05,
                                      802040000: 2.7475463582858147e-03,
                                      801980000: 4.108325935058038e-03,
-                                     801990000: 6.916609590819954e-03},
-                        'HELIUMNA': {20040000: 2.4975599277878773e-05,
-                                     20030000: 4.4414858514189387e-11}}
+                                     801990000: 6.916609590819954e-03}}
     expected_unique_names = {
         'mat:Helium, Natural': 'HELIUMNA', 'mat:Mercury': 'MERCURY1'}
     assert(unique_names == expected_unique_names)
@@ -87,7 +86,6 @@ def test_nucid_to_xs_with_names():
     mat_xs_names_expected = {'mat:M1': {'cu63': 0.058, 'cu65': 0.026},
                              'mat:M2': {'h1': 0.067, 'o16': 0.033}}
     mat_xs_names = partisn._nucid_to_xs(mat_lib, nuc_names=nuc_names)
-    print(mat_xs_names)
     assert(mat_xs_names == mat_xs_names_expected)
 
 
@@ -199,7 +197,6 @@ def get_zones_no_void():
     THIS_DIR = os.path.dirname(os.path.realpath(__file__))
     hdf5 = THIS_DIR + '/files_test_partisn/partisn_test_geom.h5m'
     data_hdf5path = '/materials'
-    nuc_hdf5path = '/nucid'
 
     # Load dagmc geometry
     dagmc.load(hdf5)
@@ -265,7 +262,6 @@ def get_zones_iteration_order():
     THIS_DIR = os.path.dirname(os.path.realpath(__file__))
     hdf5 = THIS_DIR + '/files_test_partisn/fractal_box.h5m'
     data_hdf5path = '/materials'
-    nuc_hdf5path = '/nucid'
 
     # Load dagmc geometry
     dagmc.load(hdf5)
@@ -323,7 +319,6 @@ def get_zones_with_void():
     THIS_DIR = os.path.dirname(os.path.realpath(__file__))
     hdf5 = THIS_DIR + '/files_test_partisn/partisn_test_geom.h5m'
     data_hdf5path = '/materials'
-    nuc_hdf5path = '/nucid'
 
     dagmc.load(hdf5)
 
@@ -406,7 +401,6 @@ def write_partisn_input_1D():
     THIS_DIR = os.path.dirname(os.path.realpath(__file__))
     hdf5 = THIS_DIR + '/files_test_partisn/partisn_test_geom.h5m'
     data_hdf5path = '/materials'
-    nuc_hdf5path = '/nucid'
 
     # Create mesh
     xvals = [-5., 0., 10., 15.]
@@ -425,7 +419,7 @@ def write_partisn_input_1D():
     file_expected = THIS_DIR + '/files_test_partisn/partisn_1D_expected.inp'
 
     partisn.write_partisn_input(mesh, hdf5, ngroup,
-                                data_hdf5path=data_hdf5path, nuc_hdf5path=nuc_hdf5path,
+                                data_hdf5path=data_hdf5path,
                                 input_file=input_file, num_rays=100, grid=True)
 
     out = filecmp.cmp(input_file, file_expected)
@@ -457,7 +451,6 @@ def write_partisn_input_2D():
     THIS_DIR = os.path.dirname(os.path.realpath(__file__))
     hdf5 = THIS_DIR + '/files_test_partisn/partisn_test_geom.h5m'
     data_hdf5path = '/materials'
-    nuc_hdf5path = '/nucid'
 
     # Create mesh
     xvals = [-5., 0., 10., 15.]
@@ -476,7 +469,7 @@ def write_partisn_input_2D():
     file_expected = THIS_DIR + '/files_test_partisn/partisn_2D_expected.inp'
 
     partisn.write_partisn_input(mesh, hdf5, ngroup,
-                                data_hdf5path=data_hdf5path, nuc_hdf5path=nuc_hdf5path,
+                                data_hdf5path=data_hdf5path,
                                 input_file=input_file, num_rays=100, grid=True)
 
     out = filecmp.cmp(input_file, file_expected)
@@ -507,7 +500,6 @@ def write_partisn_input_3D():
     THIS_DIR = os.path.dirname(os.path.realpath(__file__))
     hdf5 = THIS_DIR + '/files_test_partisn/partisn_test_geom.h5m'
     data_hdf5path = '/materials'
-    nuc_hdf5path = '/nucid'
 
     # Create mesh
     xvals = [-5., 0., 10., 15.]
@@ -526,7 +518,7 @@ def write_partisn_input_3D():
     file_expected = THIS_DIR + '/files_test_partisn/partisn_3D_expected.inp'
 
     partisn.write_partisn_input(mesh, hdf5, ngroup,
-                                data_hdf5path=data_hdf5path, nuc_hdf5path=nuc_hdf5path,
+                                data_hdf5path=data_hdf5path,
                                 input_file=input_file, num_rays=100, grid=True)
 
     out = filecmp.cmp(input_file, file_expected)
@@ -557,7 +549,6 @@ def write_partisn_input_with_names_dict():
     THIS_DIR = os.path.dirname(os.path.realpath(__file__))
     hdf5 = THIS_DIR + '/files_test_partisn/partisn_test_geom.h5m'
     data_hdf5path = '/materials'
-    nuc_hdf5path = '/nucid'
 
     # Create mesh
     xvals = [-5., 0., 10., 15.]
@@ -582,7 +573,7 @@ def write_partisn_input_with_names_dict():
     file_expected = THIS_DIR + '/files_test_partisn/partisn_nucnames_expected.inp'
 
     partisn.write_partisn_input(mesh, hdf5, ngroup,
-                                data_hdf5path=data_hdf5path, nuc_hdf5path=nuc_hdf5path,
+                                data_hdf5path=data_hdf5path,
                                 input_file=input_file, num_rays=100, grid=True, names_dict=names)
 
     out = filecmp.cmp(input_file, file_expected)

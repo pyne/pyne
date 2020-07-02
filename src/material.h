@@ -32,6 +32,8 @@
 #include "decay.h"
 #endif
 
+#define DEFAULT_MAT_CHUNKSIZE 100
+
 namespace pyne
 {
   // Set Type Definitions
@@ -183,8 +185,8 @@ namespace pyne
     ///            appended to the end of the dataset.
     /// \param chunksize The chunksize for all material data on disk.
     /// New write_hdf5 which fallback on the old one when required
-    void write_hdf5(std::string filename, std::string datapath="/mat_name",
-        float row=-0.0, int chunksize= 100);
+    void write_hdf5(std::string filename, std::string datapath="/mat_name", 
+        float row=-0.0, int chunksize=DEFAULT_MAT_CHUNKSIZE);
 
     /// Writes this nucpath to an HDF5 file.
     /// This happens according to protocol 1.
@@ -221,7 +223,7 @@ namespace pyne
     ///            appended to the end of the dataset.
     /// \param chunksize The chunksize for all material data on disk.
     void deprecated_write_hdf5(char * filename, char * datapath, char * nucpath, float row=-0.0,
-                                                                    int chunksize=100);
+                                                                    int chunksize=DEFAULT_MAT_CHUNKSIZE);
     /// Writes this material out to an HDF5 file in the old data structure
     /// format.
     /// Now deprecated, as material data structure in HDF5 format has been
@@ -236,7 +238,7 @@ namespace pyne
     ///            appended to the end of the dataset.
     /// \param chunksize The chunksize for all material data on disk.
     void deprecated_write_hdf5(hid_t db, std::string datapath, std::string nucpath, float row=-0.0,
-                                                                    int chunksize=100);
+                                                                    int chunksize=DEFAULT_MAT_CHUNKSIZE);
     /// Writes this material out to an HDF5 file.
     /// This happens according to protocol 1.
     /// \param filename Path on disk to the HDF5 file.
@@ -247,7 +249,7 @@ namespace pyne
     ///            appended to the end of the dataset.
     /// \param chunksize The chunksize for all material data on disk.
     void deprecated_write_hdf5(std::string filename, std::string datapath,
-                    std::string nucpath, float row=-0.0, int chunksize=100);
+                    std::string nucpath, float row=-0.0, int chunksize=DEFAULT_MAT_CHUNKSIZE);
     /// Return an openmc xml material element as a string
     std::string openmc(std::string fact_type = "mass");
 
