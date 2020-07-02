@@ -948,11 +948,9 @@ std::string pyne::Material::mcnp_frac(std::map<int, double> fracs, std::string f
       // Spaces are important for tests
       table_item = metadata["table_ids"][nucmcnp].asString();
       if (!table_item.empty()) {
-
         oss << "     " << mcnp_id << "." << table_item << " ";
       } else {
         oss << "     " << mcnp_id << " ";
-
       }
       // The int needs a little formatting
       std::stringstream fs;
