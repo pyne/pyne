@@ -90,7 +90,7 @@ namespace pyne {
   std::string capitalize(std::string s);
 
   /// Forms and returns the wrapped lines with a lenght up to line_lenght.
-  std::ostringstream comment_line_wrapping(std::string line, std::string comment_prefix = "",
+  std::string comment_line_wrapping(std::string line, std::string comment_prefix = "",
                                            int line_length = 79);
 
   /// Finds and returns the first white-space delimited token of a line.

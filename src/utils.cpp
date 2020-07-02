@@ -164,7 +164,7 @@ std::string pyne::to_lower(std::string s) {
   return s;
 }
 
-std::ostringstream pyne::comment_line_wrapping(std::string line,
+std::string pyne::comment_line_wrapping(std::string line,
                                                std::string comment_prefix,
                                                int line_length) {
   std::ostringstream oss;
@@ -181,7 +181,7 @@ std::ostringstream pyne::comment_line_wrapping(std::string line,
     oss << comment_prefix << line << std::endl;
   }
 
-  return oss;
+  return oss.str();
 }
 
 std::string pyne::capitalize(std::string s) {
