@@ -23,9 +23,9 @@ namespace nucname
   typedef int zz_t;           ///< Z number type
 
   typedef std::map<name_t, zz_t> name_zz_t; ///< name and Z num map type
-	typedef name_zz_t::iterator name_zz_iter; ///< name and Z num iter type
-	name_zz_t get_name_zz();  ///< Creates standard name to Z number mapping.
-	extern name_zz_t name_zz; ///< name to Z num map
+  typedef name_zz_t::iterator name_zz_iter; ///< name and Z num iter type
+  name_zz_t get_name_zz();  ///< Creates standard name to Z number mapping.
+  extern name_zz_t name_zz; ///< name to Z num map
 
   typedef std::map<zz_t, name_t> zzname_t;  ///< Z num to name map type
   typedef zzname_t::iterator zzname_iter;   ///< Z num to name iter type
