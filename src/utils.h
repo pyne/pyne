@@ -16,6 +16,7 @@
 #include <cctype>
 #include <stdlib.h>
 #include <iostream>
+#include <iomanip>
 #include <cmath>
 #include <exception>
 #include <sys/stat.h>
@@ -88,6 +89,10 @@ namespace pyne {
   /// Returns a capitalized copy of the string.
   std::string capitalize(std::string s);
 
+  /// Forms and returns the wrapped lines with a lenght up to line_lenght.
+  std::ostringstream comment_line_wrapping(std::string line, std::string comment_prefix = "",
+                                           int line_length = 79);
+
   /// Finds and returns the first white-space delimited token of a line.
   /// \param line a character array to take the first token from.
   /// \param max_l an upper bound to the length of the token.  Must be 11 or less.
@@ -121,6 +126,13 @@ namespace pyne {
   /// That is to say that the return value uses only word characters.
   std::string natural_naming(std::string name);
 
+  // split a string into a vector of string using a delimiter
+  std::vector<std::string> split_string(std::string lists, std::string delimiter = " ");
+
+  // join the vector element into a string, each values will be delimited ny the delimiter
+  template<typename T>
+  std::string join_to_string(std::vector<T> vect, std::string delimiter = " ");
+
   /// Finds the slope of a line from the points (\a x1, \a y1) and (\a x2, \a y2).
   double slope (double x2, double y2, double x1, double y1);
 
@@ -135,6 +147,11 @@ namespace pyne {
   // File Helpers
   /// Returns true if the file can be found.
   bool file_exists(std::string strfilename);
+  
+  // turns the filename string into the full file path
+  std::string get_full_filepath(char* filename);
+  // turns the filename string into the full file path
+  std::string get_full_filepath(std::string filename);
 
   // Message Helpers
   extern bool USE_WARNINGS;
@@ -157,7 +174,7 @@ namespace pyne {
     ~FileNotFound () throw () {};
 
     /// constructor with the filename \a fname.
-    FileNotFound(std::string fname) 
+    FileNotFound(std::string fname)
     {
       FNF_message = "File not found";
       if (!fname.empty())

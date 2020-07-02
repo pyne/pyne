@@ -6,7 +6,7 @@ import numpy as np
 from pyne.mesh import Mesh
 from pyne.mcnp import Meshtal
 from pyne.alara import mesh_to_fluxin, record_to_geom, photon_source_to_hdf5, \
-    photon_source_hdf5_to_mesh
+    photon_source_hdf5_to_mesh, responses_output_zone
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 
@@ -75,7 +75,8 @@ def irradiation_setup(flux_mesh, cell_mats, cell_fracs, alara_params,
                       fluxin="alara_fluxin", reverse=False,
                       alara_inp="alara_inp", alara_matlib="alara_matlib",
                       output_mesh="r2s_step1.h5m", output_material=False,
-                      decay_times=None, sub_voxel=False):
+                      decay_times=None, sub_voxel=False, responses=None,
+                      wdr_file=None):
     """This function is used to setup the irradiation inputs after the first
     R2S transport step.
 
@@ -126,6 +127,10 @@ def irradiation_setup(flux_mesh, cell_mats, cell_fracs, alara_params,
         List of the decay times. If no decay times given, use '1 s'.
     sub_voxel : bool, optional
         If true, sub-voxel r2s work flow  will be used.
+    responses : list of str, optional
+        The list of requested responses.
+    wdr_file : str
+        Path to the wdr file.
     """
 
     m = resolve_mesh(flux_mesh, tally_num, flux_tag, output_material)
@@ -154,6 +159,10 @@ def irradiation_setup(flux_mesh, cell_mats, cell_fracs, alara_params,
 
     with open(alara_inp, 'a') as f:
         f.write("\n" + alara_params)
+
+    # append responses output zone
+    with open(alara_inp, 'a') as f:
+        f.write(responses_output_zone(responses, wdr_file, alara_params))
 
     m.write_hdf5(output_mesh)
 
@@ -214,7 +223,7 @@ def total_photon_source_intensity(m, tag_name, sub_voxel=False):
         # create a cell_fracs
         cell_fracs = np.ones(shape=(len(m), 1), dtype=float)
     max_num_cells = len(cell_fracs[0])
-    num_e_groups = len(sd_tag[list(m.iter_ve())[0]]) / max_num_cells
+    num_e_groups = len(sd_tag[list(m.iter_ve())[0]]) // max_num_cells
     for idx, _, ve in m:
         ve_data = sd_tag[ve]
         for svid in range(max_num_cells):

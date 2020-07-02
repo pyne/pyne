@@ -275,7 +275,7 @@ cdef class Sampler:
     def _sampler_sampler_0(self, filename, src_tag_name, e_bounds, bias_tag_name):
         """Sampler(self, filename, src_tag_name, e_bounds, bias_tag_name)
          This method was overloaded in the C-based source. To overcome
-        this we ill put the relevant docstring for each version below.
+        this we will put the relevant docstring for each version below.
         Each version will begin with a line of # characters.
         
         Constuctor for analog and uniform sampling
@@ -313,7 +313,7 @@ cdef class Sampler:
     def _sampler_sampler_1(self, filename, src_tag_name, e_bounds, uniform):
         """Sampler(self, filename, src_tag_name, e_bounds, uniform)
          This method was overloaded in the C-based source. To overcome
-        this we ill put the relevant docstring for each version below.
+        this we will put the relevant docstring for each version below.
         Each version will begin with a line of # characters.
         
         Constuctor for analog and uniform sampling
@@ -370,6 +370,8 @@ cdef class Sampler:
         cdef cpp_map[std_string, std_string] cpp_tag_names = \
                 cpp_map[std_string, std_string]()
         for key, value in tag_names.items():
+            key = key.encode('utf-8')
+            value = value.encode('utf-8')
             cpp_tag_names[key] = value
         # convert e_bounds
         cdef cpp_vector[double] e_bounds_proxy = convert_nparray_to_vector(e_bounds)
@@ -409,7 +411,7 @@ cdef class Sampler:
     def __init__(self, *args, **kwargs):
         """Sampler(self, filename, src_tag_name, e_bounds, uniform)
          This method was overloaded in the C-based source. To overcome
-        this we ill put the relevant docstring for each version below.
+        this we will put the relevant docstring for each version below.
         Each version will begin with a line of # characters.
         
         Constuctor for analog and uniform sampling
@@ -500,7 +502,7 @@ cdef class Sampler:
                 (<cpp_source_sampling.Sampler *> self._inst)\
                 .particle_birth(rands_proxy)
         return SourceParticle(c_src.get_x(), c_src.get_y(), c_src.get_z(), \
-                c_src.get_e(), c_src.get_w(), c_src.get_c())
+                c_src.get_e(), c_src.get_w(), c_src.get_cell_list())
 
 
 cdef class SourceParticle:
@@ -518,8 +520,8 @@ cdef class SourceParticle:
         The energy of the source particle
     w : double
         The weight of the source particle
-    c : int
-        The cell number of the source particle
+    cell_list : vector[int]
+        The cell list for available cells of the source particle
     
     Notes
     -----
@@ -528,12 +530,12 @@ cdef class SourceParticle:
     The class is found in the "pyne" namespace"""
 
     # constuctors
-    def __cinit__(self, double x, double y, double z, double e, double w, int c):
-        self.c_src = cpp_source_sampling.SourceParticle(x, y, z, e, w, c)
+    def __cinit__(self, double x, double y, double z, double e, double w, cpp_vector[int] cell_list):
+        self.c_src = cpp_source_sampling.SourceParticle(x, y, z, e, w, cell_list)
     
     @property
-    def c(self):
-        return self.c_src.get_c()
+    def cell_list(self):
+        return self.c_src.get_cell_list()
 
     @property
     def x(self):

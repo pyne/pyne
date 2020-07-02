@@ -30,7 +30,7 @@ import tables
 
 from pyne.material import Material
 from pyne.material import MultiMaterial
-from pyne.material import MaterialLibrary
+from pyne.material_library import MaterialLibrary
 
 from pyne import nucname
 from pyne.binaryreader import _BinaryReader, _FortranRecord
@@ -159,11 +159,11 @@ def write_partisn_input(mesh, hdf5, ngroup, **kwargs):
     if 'names_dict' in kwargs:
         nuc_names = kwargs['names_dict']
         mat_lib, unique_names = _get_material_lib(
-            hdf5, data_hdf5path, nuc_hdf5path, nuc_names=nuc_names)
+            hdf5, data_hdf5path, nuc_names=nuc_names)
         mat_xs_names = _nucid_to_xs(mat_lib, nuc_names=nuc_names)
     else:
         mat_lib, unique_names = _get_material_lib(
-            hdf5, data_hdf5path, nuc_hdf5path)
+            hdf5, data_hdf5path)
         mat_xs_names = _nucid_to_xs(mat_lib)
 
     # Set input variables
@@ -206,7 +206,7 @@ def write_partisn_input(mesh, hdf5, ngroup, **kwargs):
                  block04, block05, cards, input_file)
 
 
-def _get_material_lib(hdf5, data_hdf5path, nuc_hdf5path, **kwargs):
+def _get_material_lib(hdf5, data_hdf5path, **kwargs):
     """Read material properties from the loaded dagmc geometry.
     """
 
@@ -220,12 +220,19 @@ def _get_material_lib(hdf5, data_hdf5path, nuc_hdf5path, **kwargs):
         collapse = False
 
     # collapse isotopes into elements (if required)
-    mats = MaterialLibrary(hdf5, datapath=data_hdf5path, nucpath=nuc_hdf5path)
+    mats = MaterialLibrary(hdf5, datapath=data_hdf5path)
+
     mats_collapsed = {}
     unique_names = {}
+
     for mat_name in mats:
+        mat_name = mat_name.decode('utf-8')
         fluka_name = mats[mat_name].metadata['fluka_name']
-        unique_names[mat_name] = fluka_name
+        if sys.version_info[0] > 2:
+            unique_names[mat_name] = str(fluka_name.encode(), 'utf-8')
+        else:
+            unique_names[mat_name] = fluka_name.decode('utf-8')
+
         if collapse:
             mats_collapsed[fluka_name] = mats[mat_name].collapse_elements(
                 mat_except)
@@ -386,7 +393,7 @@ def _get_zones(mesh, hdf5, bounds, num_rays, grid, dg, mat_assigns, unique_names
                   ['mat:Graveyard'], ['mat:graveyard']]
     skip_list = ['mat:Vacuum', 'mat:vacuum', 'mat:Graveyard', 'mat:graveyard']
     zones_compressed = {}
-    for z, info in zones.iteritems():
+    for z, info in zones.items():
         # check first if the definition is 100% void, keep same if is
         if zones[z]['mat'] in skip_array and zones[z]['vol_frac'] == [1.0]:
             zones_compressed[z] = info
@@ -406,9 +413,9 @@ def _get_zones(mesh, hdf5, bounds, num_rays, grid, dg, mat_assigns, unique_names
     z = 0
     match = False
     first = True
-    for i, vals in zones_compressed.iteritems():
+    for i, vals in zones_compressed.items():
         # Find if the zone already exists
-        for zone, info in zones_mats.iteritems():
+        for zone, info in zones_mats.items():
             # Iterate through both sets to disregard order
             match_all = np.empty(len(vals['mat']), dtype=bool)
             match_all.fill(False)
@@ -529,7 +536,7 @@ def _write_input(title, block01, block02, block03, block04, block05, cards, file
 
     block1_cards = []
     if 'block1' in cards:
-        for card, value in cards['block1'].iteritems():
+        for card, value in sorted(cards['block1'].items()):
             partisn += "{}={}\n".format(card, value)
             block1_cards.append(card)
 
@@ -608,7 +615,7 @@ def _write_input(title, block01, block02, block03, block04, block05, cards, file
             partisn += "\n"
 
     if 'block2' in cards:
-        for card, value in cards['block2'].iteritems():
+        for card, value in sorted(cards['block2'].items()):
             partisn += "{}={}\n".format(card, value)
 
     partisn += "t"
@@ -624,7 +631,7 @@ def _write_input(title, block01, block02, block03, block04, block05, cards, file
     partisn += "/ meshed area are listed.\n"
     partisn += "names= "
     count = 0
-    for i, name in enumerate(block03['names']):
+    for i, name in enumerate(sorted(block03['names'])):
         count += 1
         partisn += "{0} ".format(name)
         if count == 10:
@@ -636,7 +643,7 @@ def _write_input(title, block01, block02, block03, block04, block05, cards, file
 
     block3_cards = []
     if 'block3' in cards:
-        for card, value in cards['block3'].iteritems():
+        for card, value in sorted(cards['block3'].items()):
             partisn += "{}={}\n".format(card, value)
             block3_cards.append(card)
 
@@ -656,11 +663,11 @@ def _write_input(title, block01, block02, block03, block04, block05, cards, file
     partisn += "\n/ \n"
 
     partisn += "matls= "
-    for i, mat in enumerate(block04['matls']):
+    for i, mat in enumerate(sorted(block04['matls'])):
         partisn += "{0} ".format(mat)
         count = 0
         j = 0
-        for iso, dens in block04['matls'][mat].iteritems():
+        for iso, dens in sorted(block04['matls'][mat].items()):
             count += 1
             j += 1
             if j != len(block04['matls'][mat]):
@@ -697,7 +704,7 @@ def _write_input(title, block01, block02, block03, block04, block05, cards, file
                         mat, block04['assign'][z]['vol_frac'][j])
 
     if 'block4' in cards:
-        for card, value in cards['block4'].iteritems():
+        for card, value in cards['block4'].items():
             partisn += "{}={}\n".format(card, value)
 
     partisn += "t"
@@ -719,7 +726,7 @@ def _write_input(title, block01, block02, block03, block04, block05, cards, file
         default_source = True
 
     if 'block5' in cards:
-        for card, value in cards['block5'].iteritems():
+        for card, value in cards['block5'].items():
             if card != 'source':
                 partisn += "{}={}\n".format(card, value)
     partisn += "t\n"

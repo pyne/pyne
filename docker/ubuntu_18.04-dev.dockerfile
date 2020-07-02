@@ -38,6 +38,7 @@ RUN if [ "${py_version%.?}" -eq 3 ] ; \
             autoconf \
             libtool \
             doxygen \
+            hdf5-tools \
     && apt-get clean -y; \
     if [ "${py_version%.?}" -eq 3 ] ; \
        then \ 
@@ -53,7 +54,8 @@ RUN if [ "${py_version%.?}" -eq 3 ] ; \
             nbconvert \
             numpy \
             nose \
-            cython
+            cython \
+            future
 
 
 # make starting directory
@@ -123,9 +125,9 @@ ARG build_pyne=YES
 # Build/Install PyNE
 RUN if [ "$build_pyne" = "YES" ]; then \
         cd $HOME/opt \
-        && git clone https://github.com/cnerg/pyne.git \
+        && git clone https://github.com/pyne/pyne.git \
         && cd pyne \
-        && git checkout pymoab_cleanup \
+        && git checkout develop \
         && python setup.py install --user \
                                     --moab $HOME/opt/moab --dagmc $HOME/opt/dagmc \
                                     --clean ; \
@@ -134,5 +136,13 @@ ENV PATH $HOME/.local/bin:$PATH
 RUN if [ "$build_pyne" = "YES" ]; then \
         cd $HOME \
         && nuc_data_make ; \
+    fi
+
+# build/install OpenMC Python API
+ARG install_openmc=NO
+RUN if [ "$install_openmc" = "YES" ]; then \
+    git clone https://github.com/openmc-dev/openmc.git $HOME/opt/openmc \
+    && cd  $HOME/opt/openmc \
+    && pip install . ; \
     fi
 

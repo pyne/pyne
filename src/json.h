@@ -6,28 +6,28 @@
 // //////////////////////////////////////////////////////////////////////
 
 /*
-The JsonCpp library's source code, including accompanying documentation, 
+The JsonCpp library's source code, including accompanying documentation,
 tests and demonstration applications, are licensed under the following
 conditions...
 
-The author (Baptiste Lepilleur) explicitly disclaims copyright in all 
-jurisdictions which recognize such a disclaimer. In such jurisdictions, 
+The author (Baptiste Lepilleur) explicitly disclaims copyright in all
+jurisdictions which recognize such a disclaimer. In such jurisdictions,
 this software is released into the Public Domain.
 
 In jurisdictions which do not recognize Public Domain property (e.g. Germany as of
 2010), this software is Copyright (c) 2007-2010 by Baptiste Lepilleur, and is
 released under the terms of the MIT License (see below).
 
-In jurisdictions which recognize Public Domain property, the user of this 
-software may choose to accept it either as 1) Public Domain, 2) under the 
-conditions of the MIT License (see below), or 3) under the terms of dual 
+In jurisdictions which recognize Public Domain property, the user of this
+software may choose to accept it either as 1) Public Domain, 2) under the
+conditions of the MIT License (see below), or 3) under the terms of dual
 Public Domain/MIT License conditions described here, as they choose.
 
 The MIT License is about as close to Public Domain as a license can get, and is
 described in clear, concise terms at:
 
    http://en.wikipedia.org/wiki/MIT_License
-   
+
 The full text of the MIT License follows:
 
 ========================================================================
@@ -419,22 +419,22 @@ namespace Json {
     * - an ordered list of Value
     * - collection of name/value pairs (javascript object)
     *
-    * The type of the held value is represented by a #ValueType and 
+    * The type of the held value is represented by a #ValueType and
     * can be obtained using type().
     *
-    * values of an #objectValue or #arrayValue can be accessed using operator[]() methods. 
-    * Non const methods will automatically create the a #nullValue element 
-    * if it does not exist. 
-    * The sequence of an #arrayValue will be automatically resize and initialized 
+    * values of an #objectValue or #arrayValue can be accessed using operator[]() methods.
+    * Non const methods will automatically create the a #nullValue element
+    * if it does not exist.
+    * The sequence of an #arrayValue will be automatically resize and initialized
     * with #nullValue. resize() can be used to enlarge or truncate an #arrayValue.
     *
     * The get() methods can be used to obtanis default value in the case the required element
     * does not exist.
     *
-    * It is possible to iterate over the list of a #objectValue values using 
+    * It is possible to iterate over the list of a #objectValue values using
     * the getMemberNames() method.
     */
-   class JSON_API Value 
+   class JSON_API Value
    {
       friend class ValueIteratorBase;
 # ifdef JSON_VALUE_USE_INTERNAL_MAP
@@ -480,10 +480,10 @@ namespace Json {
    private:
 #ifndef JSONCPP_DOC_EXCLUDE_IMPLEMENTATION
 # ifndef JSON_VALUE_USE_INTERNAL_MAP
-      class CZString 
+      class CZString
       {
       public:
-         enum DuplicationPolicy 
+         enum DuplicationPolicy
          {
             noDuplication = 0,
             duplicate,
@@ -620,7 +620,7 @@ namespace Json {
       /// \post type() is unchanged
       void clear();
 
-      /// Resize the array to size elements. 
+      /// Resize the array to size elements.
       /// New elements are initialized to null.
       /// May only be called on nullValue or arrayValue.
       /// \pre type() is arrayValue or nullValue
@@ -651,9 +651,9 @@ namespace Json {
       ///  this from the operator[] which takes a string.)
       const Value &operator[]( int index ) const;
 
-      /// If the array contains at least index+1 elements, returns the element value, 
+      /// If the array contains at least index+1 elements, returns the element value,
       /// otherwise returns defaultValue.
-      Value get( ArrayIndex index, 
+      Value get( ArrayIndex index,
                  const Value &defaultValue ) const;
       /// Return true if index < size().
       bool isValidIndex( ArrayIndex index ) const;
@@ -689,7 +689,7 @@ namespace Json {
       const Value &operator[]( const CppTL::ConstString &key ) const;
 # endif
       /// Return the member named key if it exist, defaultValue otherwise.
-      Value get( const char *key, 
+      Value get( const char *key,
                  const Value &defaultValue ) const;
       /// Return the member named key if it exist, defaultValue otherwise.
       Value get( const std::string &key,
@@ -699,7 +699,7 @@ namespace Json {
       Value get( const CppTL::ConstString &key,
                  const Value &defaultValue ) const;
 # endif
-      /// \brief Remove and return the named member.  
+      /// \brief Remove and return the named member.
       ///
       /// Do nothing if it did not exist.
       /// \return the removed Value, or null.
@@ -749,7 +749,7 @@ namespace Json {
       iterator end();
 
    private:
-      Value &resolveReference( const char *key, 
+      Value &resolveReference( const char *key,
                                bool isStatic );
 
 # ifdef JSON_VALUE_USE_INTERNAL_MAP
@@ -864,7 +864,7 @@ namespace Json {
             const PathArgument &a5 = PathArgument() );
 
       const Value &resolve( const Value &root ) const;
-      Value resolve( const Value &root, 
+      Value resolve( const Value &root,
                      const Value &defaultValue ) const;
       /// Creates the "path" to access the specified node and returns a reference on the node.
       Value &make( Value &root ) const;
@@ -875,11 +875,11 @@ namespace Json {
 
       void makePath( const std::string &path,
                      const InArgs &in );
-      void addPathInArg( const std::string &path, 
-                         const InArgs &in, 
-                         InArgs::const_iterator &itInArg, 
+      void addPathInArg( const std::string &path,
+                         const InArgs &in,
+                         InArgs::const_iterator &itInArg,
                          PathArgument::Kind kind );
-      void invalidPath( const std::string &path, 
+      void invalidPath( const std::string &path,
                         int location );
 
       Args args_;
@@ -931,7 +931,7 @@ namespace Json {
          }
       };
     * \endcode
-    */ 
+    */
    class JSON_API ValueMapAllocator
    {
    public:
@@ -952,7 +952,7 @@ namespace Json {
    {
    public:
       enum { itemPerLink = 6 };  // sizeof(ValueInternalLink) = 128 on 32 bits architecture.
-      enum InternalFlags { 
+      enum InternalFlags {
          flagAvailable = 0,
          flagUsed = 1
       };
@@ -973,7 +973,7 @@ namespace Json {
     * list in each bucket to handle collision. There is an addional twist in that
     * each node of the collision linked list is a page containing a fixed amount of
     * value. This provides a better compromise between memory usage and speed.
-    * 
+    *
     * Each bucket is made up of a chained list of ValueInternalLink. The last
     * link of a given bucket can be found in the 'previous_' field of the following bucket.
     * The last link of the last bucket is stored in tailLink_ as it has no following bucket.
@@ -991,11 +991,11 @@ namespace Json {
 # ifndef JSONCPP_DOC_EXCLUDE_IMPLEMENTATION
       struct IteratorState
       {
-         IteratorState() 
+         IteratorState()
             : map_(0)
             , link_(0)
             , itemIndex_(0)
-            , bucketIndex_(0) 
+            , bucketIndex_(0)
          {
          }
          ValueInternalMap *map_;
@@ -1024,24 +1024,24 @@ namespace Json {
 
       Value *find( const char *key );
 
-      Value &resolveReference( const char *key, 
+      Value &resolveReference( const char *key,
                                bool isStatic );
 
       void remove( const char *key );
 
-      void doActualRemove( ValueInternalLink *link, 
+      void doActualRemove( ValueInternalLink *link,
                            BucketIndex index,
                            BucketIndex bucketIndex );
 
       ValueInternalLink *&getLastLinkInBucket( BucketIndex bucketIndex );
 
-      Value &setNewItem( const char *key, 
-                         bool isStatic, 
-                         ValueInternalLink *link, 
+      Value &setNewItem( const char *key,
+                         bool isStatic,
+                         ValueInternalLink *link,
                          BucketIndex index );
 
-      Value &unsafeAdd( const char *key, 
-                        bool isStatic, 
+      Value &unsafeAdd( const char *key,
+                        bool isStatic,
                         HashKey hashedKey );
 
       HashKey hash( const char *key ) const;
@@ -1090,10 +1090,10 @@ namespace Json {
 # ifndef JSONCPP_DOC_EXCLUDE_IMPLEMENTATION
       struct IteratorState // Must be a POD
       {
-         IteratorState() 
+         IteratorState()
             : array_(0)
             , currentPageIndex_(0)
-            , currentItemIndex_(0) 
+            , currentItemIndex_(0)
          {
          }
          ValueInternalArray *array_;
@@ -1164,7 +1164,7 @@ public: // overridden from ValueArrayAllocator
       delete array;
    }
 
-   virtual void reallocateArrayPageIndex( Value **&indexes, 
+   virtual void reallocateArrayPageIndex( Value **&indexes,
                                           ValueInternalArray::PageIndex &indexCount,
                                           ValueInternalArray::PageIndex minNewIndexCount )
    {
@@ -1177,7 +1177,7 @@ public: // overridden from ValueArrayAllocator
       indexCount = newIndexCount;
       indexes = static_cast<Value **>( newIndexes );
    }
-   virtual void releaseArrayPageIndex( Value **indexes, 
+   virtual void releaseArrayPageIndex( Value **indexes,
                                        ValueInternalArray::PageIndex indexCount )
    {
       if ( indexes )
@@ -1196,7 +1196,7 @@ public: // overridden from ValueArrayAllocator
    }
 };
       \endcode
-    */ 
+    */
    class JSON_API ValueArrayAllocator
    {
    public:
@@ -1207,18 +1207,18 @@ public: // overridden from ValueArrayAllocator
       /** \brief Reallocate array page index.
        * Reallocates an array of pointer on each page.
        * \param indexes [input] pointer on the current index. May be \c NULL.
-       *                [output] pointer on the new index of at least 
-       *                         \a minNewIndexCount pages. 
+       *                [output] pointer on the new index of at least
+       *                         \a minNewIndexCount pages.
        * \param indexCount [input] current number of pages in the index.
        *                   [output] number of page the reallocated index can handle.
        *                            \b MUST be >= \a minNewIndexCount.
        * \param minNewIndexCount Minimum number of page the new index must be able to
        *                         handle.
        */
-      virtual void reallocateArrayPageIndex( Value **&indexes, 
+      virtual void reallocateArrayPageIndex( Value **&indexes,
                                              ValueInternalArray::PageIndex &indexCount,
                                              ValueInternalArray::PageIndex minNewIndexCount ) = 0;
-      virtual void releaseArrayPageIndex( Value **indexes, 
+      virtual void releaseArrayPageIndex( Value **indexes,
                                           ValueInternalArray::PageIndex indexCount ) = 0;
       virtual Value *allocateArrayPage() = 0;
       virtual void releaseArrayPage( Value *value ) = 0;
@@ -1482,13 +1482,13 @@ namespace Json {
        *                        is \c false.
        * \return \c true if the document was successfully parsed, \c false if an error occurred.
        */
-      bool parse( const std::string &document, 
+      bool parse( const std::string &document,
                   Value &root,
                   bool collectComments = true );
 
       /** \brief Read a Value from a <a HREF="http://www.json.org">JSON</a> document.
        * \param beginDoc Pointer on the beginning of the UTF-8 encoded string of the document to read.
-       * \param endDoc Pointer on the end of the UTF-8 encoded string of the document to read. 
+       * \param endDoc Pointer on the end of the UTF-8 encoded string of the document to read.
        \               Must be >= beginDoc.
        * \param root [out] Contains the root value of the document if it was
        *             successfully parsed.
@@ -1498,7 +1498,7 @@ namespace Json {
        *                        is \c false.
        * \return \c true if the document was successfully parsed, \c false if an error occurred.
        */
-      bool parse( const char *beginDoc, const char *endDoc, 
+      bool parse( const char *beginDoc, const char *endDoc,
                   Value &root,
                   bool collectComments = true );
 
@@ -1509,16 +1509,16 @@ namespace Json {
                   bool collectComments = true );
 
       /** \brief Returns a user friendly string that list errors in the parsed document.
-       * \return Formatted error message with the list of errors with their location in 
+       * \return Formatted error message with the list of errors with their location in
        *         the parsed document. An empty string is returned if no error occurred
        *         during parsing.
        * \deprecated Use getFormattedErrorMessages() instead (typo fix).
        */
-      JSONCPP_DEPRECATED("Use getFormattedErrorMessages instead") 
+      JSONCPP_DEPRECATED("Use getFormattedErrorMessages instead")
       std::string getFormatedErrorMessages() const;
 
       /** \brief Returns a user friendly string that list errors in the parsed document.
-       * \return Formatted error message with the list of errors with their location in 
+       * \return Formatted error message with the list of errors with their location in
        *         the parsed document. An empty string is returned if no error occurred
        *         during parsing.
        */
@@ -1564,7 +1564,7 @@ namespace Json {
       bool expectToken( TokenType type, Token &token, const char *message );
       bool readToken( Token &token );
       void skipSpaces();
-      bool match( Location pattern, 
+      bool match( Location pattern,
                   int patternLength );
       bool readComment();
       bool readCStyleComment();
@@ -1578,19 +1578,19 @@ namespace Json {
       bool decodeString( Token &token );
       bool decodeString( Token &token, std::string &decoded );
       bool decodeDouble( Token &token );
-      bool decodeUnicodeCodePoint( Token &token, 
-                                   Location &current, 
-                                   Location end, 
+      bool decodeUnicodeCodePoint( Token &token,
+                                   Location &current,
+                                   Location end,
                                    unsigned int &unicode );
-      bool decodeUnicodeEscapeSequence( Token &token, 
-                                        Location &current, 
-                                        Location end, 
+      bool decodeUnicodeEscapeSequence( Token &token,
+                                        Location &current,
+                                        Location end,
                                         unsigned int &unicode );
-      bool addError( const std::string &message, 
+      bool addError( const std::string &message,
                      Token &token,
                      Location extra = 0 );
       bool recoverFromError( TokenType skipUntilToken );
-      bool addErrorAndRecover( const std::string &message, 
+      bool addErrorAndRecover( const std::string &message,
                                Token &token,
                                TokenType skipUntilToken );
       void skipUntilSpace();
@@ -1600,11 +1600,11 @@ namespace Json {
                                      int &line,
                                      int &column ) const;
       std::string getLocationLineAndColumn( Location location ) const;
-      void addComment( Location begin, 
-                       Location end, 
+      void addComment( Location begin,
+                       Location end,
                        CommentPlacement placement );
       void skipCommentTokens( Token &token );
-   
+
       typedef std::stack<Value *> Nodes;
       Nodes nodes_;
       Errors errors_;

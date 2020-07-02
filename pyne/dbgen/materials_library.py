@@ -18,7 +18,8 @@ import tables as tb
 
 from pyne import nucname
 from pyne.data import natural_abund, natural_abund_map
-from pyne.material import Material, MaterialLibrary
+from pyne.material import Material
+from pyne.material_library import MaterialLibrary
 
 warn(__name__ + " is not yet QA compliant.", QAWarning)
 

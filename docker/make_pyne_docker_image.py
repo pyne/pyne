@@ -14,9 +14,9 @@ def consistancy_check(args):
     args : list of arguments 
 
     """
-    args.moab = args.moab or args.dagmc or args.pymoab or args.all
-    args.pymoab = args.pymoab or args.all
-    args.dagmc = args.dagmc or args.all
+    args.moab = args.moab or args.dagmc or args.pymoab or args.openmc or args.all
+    args.pymoab = args.pymoab or args.openmc or args.all
+    args.dagmc = args.dagmc or args.openmc or args.all
 
     return args
 
@@ -42,6 +42,8 @@ def build_name(args):
             name += '_dagmc'
         if args.pymoab:
             name += '_pymoab'
+        if args.openmc:
+            name += '_openmc'
 
     if args.deps:
         name += '_pyne-deps'
@@ -68,11 +70,15 @@ def build_docker(args):
         docker_args += ["--build-arg", "build_dagmc=YES"]
     if args.pymoab:
         docker_args += ["--build-arg", "enable_pymoab=YES"]
+    if args.openmc:
+        docker_args += ["--build-arg", "install_openmc=YES"]
     if args.deps:
         docker_args += ["--build-arg", "build_pyne=NO"]
     if args.py_version:
         if args.py_version == 2:
             docker_args += ["--build-arg", "py_version=2.7"]
+            if args.openmc:
+                raise ValueError("OpenMC Python API does not support python2!")
         elif args.py_version == 3:
             docker_args += ["--build-arg", "py_version=3.6"]
         else:
@@ -106,6 +112,10 @@ def main():
 
     pymoab = 'Enable pymoab'
     parser.add_argument('--pymoab', help=pymoab,
+                        action='store_true', default=False)
+
+    openmc = 'Install OpenMC python API'
+    parser.add_argument('--openmc', help=openmc,
                         action='store_true', default=False)
 
     all_deps = 'Add all dependencies'

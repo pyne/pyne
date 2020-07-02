@@ -6,7 +6,7 @@ Conda Package Manager
 The first step is to make sure that you have 
 the conda package manager installed. 
 You can download and install either anaconda or miniconda from 
-`the Continuum downloads page <http://continuum.io/downloads>`_.
+`the downloads page <https://www.anaconda.com/distribution/#download-section>`_.
 Make sure that you follow the full instructions and that the 
 conda command line utility is on your PATH.  This is the default 
 option when installing conda.

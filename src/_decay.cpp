@@ -56,7 +56,7 @@ std::map<int, double> decay(std::map<int, double> comp, double t) {
   int i = 0;
   double out [4] = {};  // init to zero
   map<int, double> outcomp;
-  
+
   // body
   map<int, double>::const_iterator it = comp.begin();
   for (; it != comp.end(); ++it) {
@@ -72,7 +72,7 @@ std::map<int, double> decay(std::map<int, double> comp, double t) {
         break;
     }
   }
-  
+
   // cleanup
   for (i = 0; i < 4; ++i)
     if (out[i] > 0.0)

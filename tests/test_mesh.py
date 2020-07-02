@@ -4,6 +4,21 @@ import time
 import shutil
 import warnings
 import itertools
+
+# The buildin zip in python3 behaves as itertools.izip as python2.
+# For python2, we need to import izip as zip.
+# For python3, do nothing with zip.
+try:
+    from itertools import izip as zip
+except ImportError:
+    pass
+
+# izip_longest in python3 was renamed to zip_longest in python3
+try:
+    from itertools import izip_longest as zip_longest
+except ImportError:
+    from itertools import zip_longest
+
 from operator import itemgetter
 from nose.tools import assert_true, assert_equal, assert_raises, with_setup, \
     assert_is, assert_is_instance, assert_in, assert_not_in, assert_almost_equal, \
@@ -18,10 +33,12 @@ from pyne.utils import QAWarning
 from pyne.mesh import HAVE_PYMOAB
 if not HAVE_PYMOAB:
     raise SkipTest
-from pyne.mesh import NativeMeshTag, ComputedTag, MetadataTag
+from pyne.mesh import NativeMeshTag, ComputedTag, MetadataTag, MeshTally, \
+        _check_meshtally_tag_names
 from pymoab.types import _eh_py_type
 from pymoab import core as mb_core, hcoord, scd, types
-from pyne.mesh import Mesh, StatMesh, MeshError, meshset_iterate, mesh_iterate
+from pyne.mesh import Mesh, StatMesh, MeshError, meshset_iterate, \
+        mesh_iterate, _cell_fracs_sort_vol_frac_reverse
 
 warnings.simplefilter("ignore", QAWarning)
 
@@ -175,7 +192,7 @@ def test_structured_hex_volume():
 
     ijk_all = itertools.product(*([[0, 1]]*3))
 
-    for V, ijk in itertools.izip_longest(sm.structured_iterate_hex_volumes(),
+    for V, ijk in zip_longest(sm.structured_iterate_hex_volumes(),
                                          ijk_all):
         assert_equal(V, sm.structured_hex_volume(*ijk))
 
@@ -396,27 +413,26 @@ def test_bad_iterates():
 
 
 def test_iterate_3d():
-    # use izip_longest in the lockstep iterations below; this will catch any
+    # use zip_longest in the lockstep iterations below; this will catch any
     # situations where one iterator turns out to be longer than expected.
     sm = Mesh(structured=True,
               structured_coords=[range(10, 15), range(21, 25), range(31, 34)])
     I = range(0, 4)
     J = range(0, 3)
     K = range(0, 2)
-    izip = itertools.izip_longest
 
     it = meshset_iterate(sm.mesh, sm.structured_set, types.MBHEX)
 
     # Test the zyx order, which is default; it should be equivalent
     # to the standard pyne.mesh iterator
-    for it_x, sm_x in izip(it, sm.structured_iterate_hex()):
+    for it_x, sm_x in zip_longest(it, sm.structured_iterate_hex()):
         assert_equal(it_x, sm_x)
 
     # testing xyz
 
     all_indices_zyx = itertools.product(I, J, K)
     # Test the xyz order, the default from original mmGridGen
-    for ijk_index, sm_x in izip(all_indices_zyx,
+    for ijk_index, sm_x in zip_longest(all_indices_zyx,
                                 sm.structured_iterate_hex("xyz")):
         assert_equal(sm.structured_get_hex(*ijk_index), sm_x)
 
@@ -432,7 +448,7 @@ def test_iterate_3d():
 
     def test_order(order, *args,  **kw):
         all_indices = itertools.product(*args)
-        for ijk_index, sm_x in izip(_tuple_sort(all_indices, order),
+        for ijk_index, sm_x in zip_longest(_tuple_sort(all_indices, order),
                                     sm.structured_iterate_hex(order, **kw)):
             assert_equal(sm.structured_get_hex(*ijk_index), sm_x)
 
@@ -454,7 +470,7 @@ def test_iterate_2d():
               structured_coords=[range(10, 15), range(21, 25), range(31, 34)])
 
     def test_order(iter1, iter2):
-        for i1, i2 in itertools.izip_longest(iter1, iter2):
+        for i1, i2 in zip_longest(iter1, iter2):
             assert_equal(i1, i2)
 
     test_order(sm.structured_iterate_hex("yx"),
@@ -475,7 +491,7 @@ def test_iterate_1d():
               structured_coords=[range(10, 15), range(21, 25), range(31, 34)])
 
     def test_equal(ijk_list, miter):
-        for ijk, i in itertools.izip_longest(ijk_list, miter):
+        for ijk, i in zip_longest(ijk_list, miter):
             assert_equal(sm.structured_get_hex(*ijk), i)
 
     test_equal([[0, 0, 0], [0, 0, 1]],
@@ -492,31 +508,30 @@ def test_iterate_1d():
 
 def test_vtx_iterator():
     # use vanilla izip as we"ll test using non-equal-length iterators
-    izip = itertools.izip
 
     sm = Mesh(structured=True,
               structured_coords=[range(10, 15), range(21, 25), range(31, 34)])
     it = meshset_iterate(sm.mesh, sm.structured_set, types.MBVERTEX)
 
     # test the default order
-    for (it_x, sm_x) in itertools.izip_longest(it,
+    for (it_x, sm_x) in zip(it,
                                                sm.structured_iterate_vertex("zyx")):
         assert_equal(it_x, sm_x)
 
     # Do the same again, but use an arbitrary kwarg to structured_iterate_vertex
     # to prevent optimization from kicking in
     it.reset()
-    for (it_x, sm_x) in itertools.izip_longest(it,
+    for (it_x, sm_x) in zip(it,
                                                sm.structured_iterate_vertex("zyx", no_opt=True)):
         assert_equal(it_x, sm_x)
 
     it.reset()
-    for (it_x, sm_x) in izip(it,
+    for (it_x, sm_x) in zip(it,
                              sm.structured_iterate_vertex("yx", z=sm.dims[2])):
         assert_equal(it_x, sm_x)
 
     it.reset()
-    for (it_x, sm_x) in izip(it, sm.structured_iterate_vertex("x")):
+    for (it_x, sm_x) in zip(it, sm.structured_iterate_vertex("x")):
         assert_equal(it_x, sm_x)
 
 
@@ -539,14 +554,14 @@ def test_large_iterator():
 @with_setup(None, try_rm_file('test_matlib2.h5m'))
 def test_matlib():
     mats = {
-        0: Material({'H1': 1.0, 'K39': 1.0}, density=1.1),
-        1: Material({'H1': 0.1, 'O16': 1.0}, density=2.2),
-        2: Material({'He4': 42.0}, density=3.3),
-        3: Material({'Tm171': 171.0}, density=4.4),
+        0: Material({'H1': 1.0, 'K39': 1.0}, density=1.1, metadata={'mat_number':1}),
+        1: Material({'H1': 0.1, 'O16': 1.0}, density=2.2, metadata={'mat_number':2}),
+        2: Material({'He4': 42.0}, density=3.3, metadata={'mat_number':3}),
+        3: Material({'Tm171': 171.0}, density=4.4, metadata={'mat_number':4}),
     }
     m = gen_mesh(mats=mats)
     for i, ve in enumerate(mesh_iterate(m.mesh)):
-        assert_is(m.mats[i], mats[i])
+        assert_equal(m.mats[i], mats[i])
         assert_equal(m.mesh.tag_get_data(
             m.mesh.tag_get_handle('idx'), ve, flat=True)[0], i)
 
@@ -555,7 +570,7 @@ def test_matlib():
     m2 = Mesh(mesh='test_matlib2.h5m')  # MOAB fails to flush
     for i, mat, ve in m2:
         assert_equal(len(mat.comp), len(mats[i].comp))
-        for key in mats[i].iterkeys():
+        for key in mats[i]:
             assert_equal(mat.comp[key], mats[i].comp[key])
         assert_equal(mat.density, mats[i].density)
         assert_equal(m2.idx[i], i)
@@ -860,17 +875,17 @@ def test_issue360():
 
 def test_iter():
     mats = {
-        0: Material({'H1': 1.0, 'K39': 1.0}, density=42.0),
-        1: Material({'H1': 0.1, 'O16': 1.0}, density=43.0),
-        2: Material({'He4': 42.0}, density=44.0),
-        3: Material({'Tm171': 171.0}, density=45.0),
+        0: Material({'H1': 1.0, 'K39': 1.0}, density=42.0, metadata={'mat_number':1}),
+        1: Material({'H1': 0.1, 'O16': 1.0}, density=43.0, metadata={'mat_number':2}),
+        2: Material({'He4': 42.0}, density=44.0, metadata={'mat_number':3}),
+        3: Material({'Tm171': 171.0}, density=45.0, metadata={'mat_number':4}),
     }
     m = gen_mesh(mats=mats)
     j = 0
     idx_tag = m.mesh.tag_get_handle('idx')
     for i, mat, ve in m:
         assert_equal(j, i)
-        assert_is(mats[i], mat)
+        assert_equal(mats[i], mat)
         assert_equal(j, m.mesh.tag_get_data(idx_tag, ve, flat=True)[0])
         j += 1
 
@@ -919,6 +934,36 @@ def test_cell_fracs_to_mats():
         assert_equal(mat.comp, exp_comps[i])
         assert_equal(mat.density, 1.0)
 
+def test_cell_fracs_sort_vol_frac_reverse():
+    cell_fracs = np.zeros(8, dtype=[('idx', np.int64),
+                                    ('cell', np.int64),
+                                    ('vol_frac', np.float64),
+                                    ('rel_error', np.float64)])
+
+    exp_cell_fracs = np.zeros(8, dtype=[('idx', np.int64),
+                                    ('cell', np.int64),
+                                    ('vol_frac', np.float64),
+                                    ('rel_error', np.float64)])
+    cell_fracs[:] = [(0, 11, 0.55, 0.0),
+                     (0, 12, 0.45, 0.0),
+                     (1, 11, 0.2, 0.0),
+                     (1, 12, 0.3, 0.0),
+                     (1, 13, 0.5, 0.0),
+                     (2, 11, 0.5, 0.0),
+                     (2, 12, 0.5, 0.0),
+                     (3, 11, 0.5, 0.0)]
+    exp_cell_fracs[:] = [(0, 11, 0.55, 0.0),
+                     (0, 12, 0.45, 0.0),
+                     (1, 13, 0.5, 0.0),
+                     (1, 12, 0.3, 0.0),
+                     (1, 11, 0.2, 0.0),
+                     (2, 11, 0.5, 0.0),
+                     (2, 12, 0.5, 0.0),
+                     (3, 12, 1.0, 0.0)]
+    cell_fracs = _cell_fracs_sort_vol_frac_reverse(cell_fracs)
+    for i in range(4):
+        assert_array_equal(cell_fracs[i], exp_cell_fracs[i])
+
 
 def test_tag_cell_fracs():
     m = gen_mesh()
@@ -927,17 +972,25 @@ def test_tag_cell_fracs():
                                     ('vol_frac', np.float64),
                                     ('rel_error', np.float64)])
 
-    cell_fracs[:] = [(0, 11, 0.55, 0.0), (0, 12, 0.45, 0.0), (1, 11, 0.2, 0.0),
-                     (1, 12, 0.3, 0.0), (1, 13, 0.5, 0.0), (2, 11, 1.0, 0.0),
+    cell_fracs[:] = [(0, 11, 0.55, 0.0),
+                     (0, 12, 0.45, 0.0),
+                     (1, 11, 0.2, 0.0),
+                     (1, 12, 0.3, 0.0),
+                     (1, 13, 0.5, 0.0),
+                     (2, 11, 1.0, 0.0),
                      (3, 12, 1.0, 0.0)]
 
     m.tag_cell_fracs(cell_fracs)
 
     #  Expected tags:
-    exp_cell_number = [[11, 12, -1], [11, 12, 13], [11, -1, -1],
+    exp_cell_number = [[11, 12, -1],
+                       [13, 12, 11],
+                       [11, -1, -1],
                        [12, -1, -1]]
-    exp_cell_fracs = [[0.55, 0.45, 0.0], [0.2, 0.3, 0.5],
-                      [1.0, 0.0, 0.0], [1.0, 0.0, 0.0]]
+    exp_cell_fracs = [[0.55, 0.45, 0.0],
+                      [0.5, 0.3, 0.2],
+                      [1.0, 0.0, 0.0],
+                      [1.0, 0.0, 0.0]]
     exp_cell_largest_frac_number = [11, 13, 11, 12]
     exp_cell_largest_frac = [0.55, 0.5, 1.0, 1.0]
 
@@ -985,3 +1038,21 @@ def test_no_mats():
     assert_true(mesh.mats is None)
     i, mat, ve = next(iter(mesh))
     assert_true(mat is None)
+
+def test_check_meshtally_tag_names():
+    # correct case
+    tag_names = ("n_result", "n_result_rel_error", "n_result_total",
+            "n_result_total_rel_error")
+    assert(_check_meshtally_tag_names(tag_names))
+    # not iterable
+    tag_names = "a"
+    assert_raises(ValueError, _check_meshtally_tag_names, tag_names)
+    # wrong length
+    tag_names = ("a", "b", "c")
+    assert_raises(ValueError, _check_meshtally_tag_names, tag_names)
+    # wrong content
+    tag_names = (1, 2, 3, 4)
+    assert_raises(ValueError, _check_meshtally_tag_names, tag_names)
+    # a string of length 4
+    tag_names = "abcd"
+    assert_raises(ValueError, _check_meshtally_tag_names, tag_names)

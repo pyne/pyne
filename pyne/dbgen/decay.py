@@ -110,12 +110,12 @@ def grab_ensdf_decay(build_dir=""):
         pass
 
     # Grab ENSDF files and unzip them.
-    iaea_base_url = 'http://www.nndc.bnl.gov/ensarchivals/distributions/dist17/'
+    iaea_base_url = 'http://www.nndc.bnl.gov/ensarchivals/distributions/dist19/'
 
     cf_base_url = 'http://data.pyne.io/'
-    ensdf_zip = ['ensdf_170501.099.zip',
-                 'ensdf_170501_199.zip',
-                 'ensdf_170501_299.zip', ]
+    ensdf_zip = ['ensdf_191004_099.zip',
+                 'ensdf_191004_199.zip',
+                 'ensdf_191004_300.zip', ]
 
     for f in ensdf_zip:
         fpath = os.path.join(build_dir, f)
