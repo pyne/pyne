@@ -50,11 +50,11 @@ Old data structure looks like:
     /nuclidelist
 
 `my_mat_lib` (the `datapath` -- default `material`) is a HDF5 dataset containing the
-array of material composition, `nucpath` is a attribute containing the path to the
-nuclide list (nested in the `datapath`).
-`my_mat_lib_metadata` is a dataset containing an array of metadata of the material.
+array of material compositions, `nucpath` is a attribute containing the path to the
+nuclide list (attached to the `datapath`).
+`my_mat_lib_metadata` is a dataset containing an array of metadata of the materials.
 `nuclidelist` is a dataset containing the list of nuclides composition the
-material.
+materials.
 
 `from_hdf5()` will detect the structure (old or new) of the file.
 
@@ -103,7 +103,6 @@ Functions are provided to ensure robust behavior when working with changes to
 ---------
 
 .. autofunction:: merge
-
 
 
 
