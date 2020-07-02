@@ -1418,7 +1418,7 @@ def test_mcnp():
                 '     92235.15c 1.9575e-03\n'
                 '     92238.25c 4.6386e-02\n')
     assert_equal(atom, atom_exp)
-    
+
     atom_frac = leu.mcnp(frac_type='atom', mult_den=False)
     atom_frac_exp = ('C name: leu\n'
                      'C density = 19.10000\n'
