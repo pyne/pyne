@@ -39,7 +39,7 @@ Where, `/material_library` and `/material_library/my_mat_lib` are HDF5 groups.
 Previous HDF5 File Structure
 -----------------------------
 
-If the `$datapath` or `/material_library` exist as a dataset in the file, 
+If the `datapath` or `/material_library` exist as a dataset in the file, 
 then the old writing method will be used.
 
 Old data structure looks like:
@@ -103,7 +103,6 @@ Functions are provided to ensure robust behavior when working with changes to
 ---------
 
 .. autofunction:: merge
-
 
 
 
