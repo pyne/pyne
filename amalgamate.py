@@ -42,6 +42,8 @@ DEFAULT_FILES = [
     'src/jsoncustomwriter.cpp',
     'src/material.h',
     'src/material.cpp',
+    'src/material_library.h',
+    'src/material_library.cpp',
     'src/enrichment_cascade.h',
     'src/enrichment_cascade.cpp',
     'src/enrichment.h',
