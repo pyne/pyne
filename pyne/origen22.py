@@ -7,7 +7,10 @@ import os
 import re
 import sys
 from io import StringIO
-from collections import Mapping
+try:
+    from collections.abc import Mapping
+except ImportError:
+    from collections import Mapping
 from copy import deepcopy
 from itertools import chain
 from warnings import warn

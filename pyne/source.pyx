@@ -4,7 +4,6 @@ from libcpp.string cimport string as std_string
 import numpy as np
 cimport numpy as np
 
-import collections
 from pyne import stlcontainers
 
 from warnings import warn

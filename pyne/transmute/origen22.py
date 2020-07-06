@@ -5,7 +5,10 @@ from __future__ import print_function, division
 import os
 import subprocess
 import tempfile
-from collections import Mapping
+try:
+    from collections.abc import Mapping
+except ImportError:
+    from collections import Mapping
 from warnings import warn
 from pyne.utils import QAWarning
 

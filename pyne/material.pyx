@@ -15,6 +15,10 @@ from libcpp cimport bool as cpp_bool
 
 # Python imports
 import collections
+try:
+    collectionsAbc = collections.abc
+except AttributeError:
+    collectionsAbc = collections
 cimport numpy as np
 import numpy as np
 from warnings import warn
@@ -1570,7 +1574,7 @@ cdef class _Material:
         return id(self)
 
 
-class Material(_Material, collections.MutableMapping):
+class Material(_Material, collectionsAbc.MutableMapping):
     """Material composed of nuclides.
 
     Parameters
@@ -2051,7 +2055,7 @@ cdef class _MapStrMaterial:
             del self._cache[key]
 
 
-class MapStrMaterial(_MapStrMaterial, collections.MutableMapping):
+class MapStrMaterial(_MapStrMaterial, collectionsAbc.MutableMapping):
     """Wrapper class for C++ standard library maps of type <string, Material
     \*>.  Provides dictionary like interface on the Python level.
 
@@ -2073,7 +2077,7 @@ class MapStrMaterial(_MapStrMaterial, collections.MutableMapping):
 
 
 
-class MultiMaterial(collections.MutableMapping):
+class MultiMaterial(collectionsAbc.MutableMapping):
     """ This class is serves as a way of storing a collection of materials.
     There sole argument of this function is a dictionary with material
     objects and keys and vol/mass fractions as values. There are two

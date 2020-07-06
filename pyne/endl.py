@@ -18,7 +18,10 @@ from __future__ import print_function, division, unicode_literals
 import re
 import sys
 from warnings import warn
-from collections import namedtuple, defaultdict
+try:
+    from collections.abc import namedtuple, defaultdict
+except ImportError:
+    from collections import namedtuple, defaultdict
 
 import numpy as np
 

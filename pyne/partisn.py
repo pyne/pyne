@@ -13,7 +13,6 @@ If PyMOAB not installed then this module will not work.
 from __future__ import print_function, division
 from pyne.mesh import HAVE_PYMOAB
 import sys
-import collections
 import string
 import struct
 import math

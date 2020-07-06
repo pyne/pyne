@@ -9,9 +9,6 @@ from cython.operator cimport preincrement as inc
 #from cython cimport pointer
 from libcpp.string cimport string as std_string
 
-# Python imports
-#from collections import Iterable
-
 # local imports
 cimport pyne.cpp_utils
 cimport pyne.pyne_config

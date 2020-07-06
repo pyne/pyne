@@ -5,7 +5,10 @@ import inspect
 from warnings import warn
 
 from itertools import product
-from collections import MutableMapping
+try:
+    from collections.abc import MutableMapping
+except ImportError:
+    from collections import MutableMapping
 
 import numpy as np
 import tables as tb

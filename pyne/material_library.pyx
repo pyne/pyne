@@ -30,6 +30,10 @@ from cython.operator cimport preincrement as inc
 
 # Python imports
 import collections
+try:
+    collectionsAbc = collections.abc
+except AttributeError:
+    collectionsAbc = collections
 cimport numpy as np
 if sys.version_info[0] >= 3:
     # Python2 basestring is now Python3 string
@@ -77,12 +81,12 @@ cdef class _MaterialLibrary:
             if sys.version_info[0] >= 3 and isinstance(lib, bytes):
                 lib = lib.decode()
             if (isinstance(lib, basestring) or isinstance(lib, unicode)) \
-                    and not isinstance(lib, collections.Mapping):
+                    and not isinstance(lib, collectionsAbc.Mapping):
                 # Python2: basestring = (std + unicode)
                 c_filename = lib.encode('UTF-8')
                 c_datapath = datapath.encode('UTF-8')
                 self._inst = new cpp_material_library.MaterialLibrary(c_filename, c_datapath)
-            elif isinstance(lib, collections.Mapping) or isinstance(lib, collections.Sequence):
+            elif isinstance(lib, collectionsAbc.Mapping) or isinstance(lib, collectionsAbc.Sequence):
                 self._inst = new cpp_material_library.MaterialLibrary()
                 for key in sorted(lib.keys()):
                     mat = lib[key]
@@ -254,7 +258,7 @@ cdef class _MaterialLibrary:
         return mat_lib_iter
 
 
-class MaterialLibrary(_MaterialLibrary, collections.MutableMapping):
+class MaterialLibrary(_MaterialLibrary, collectionsAbc.MutableMapping):
     """The material library is a collection of unique keys mapped to
     Material objects.
     """

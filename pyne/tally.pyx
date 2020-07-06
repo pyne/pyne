@@ -16,7 +16,6 @@ from libcpp.vector cimport vector
 import numpy as np
 cimport numpy as np
 
-import collections
 from pyne import stlcontainers
 
 from warnings import warn

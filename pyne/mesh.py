@@ -5,7 +5,10 @@ from pyne.material_library import MaterialLibrary
 import sys
 import copy
 import itertools
-from collections import Iterable, Sequence
+try:
+    from collections.abc import Iterable, Sequence
+except ImportError:
+    from collections import Iterable, Sequence
 from warnings import warn
 from pyne.utils import QAWarning, check_iterable
 
