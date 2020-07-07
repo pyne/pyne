@@ -209,5 +209,20 @@ text (Vim, TextEdit, Nano, etc.) and doesn’t invisibly add characters to the
 file (like Word). The only important part is to write the file in a manner that’s 
 considered reStructuredText (check out http://sphinx-doc.org/rest.html). Then, 
 Sphinx will do everything else under the hood as described `here 
-<http://pyne.io/devsguide/website.html>`__. Finally, commit these changes to 
-your forked version and submit a pull request.
+<http://pyne.io/devsguide/website.html>`__. Before you make the pull request, 
+make sure that you include a news file named after the purpose of your pr 
+following the template located in the news folder. Finally, commit these changes to 
+your forked version and submit a pull request. 
+
+---------------------
+Making a Pull Request
+---------------------
+The pull request should contain a description of the the pull request, any labels 
+(such as bug, docs, test), projects (such as Transition to PyMOAB), and a reference
+to the issue that led to the pr (which you can do by inserting '@issue_number' to 
+the description.
+
+The more specific your description, the better you employ the labels, and 
+project selections the easier it will be for other contributers to review your work.
+Adding a reference to the issue the pull request will allow people to see the issue 
+inspired it, and any conversation about the issue.
