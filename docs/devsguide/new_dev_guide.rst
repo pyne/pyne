@@ -1,4 +1,4 @@
-.. _devsguide_new_devs_guide:
+.. _devsguide_new_dev_guide:
 
 *********************
 New Developer's Guide
