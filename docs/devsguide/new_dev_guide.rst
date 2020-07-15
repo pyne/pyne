@@ -1,3 +1,5 @@
+.. _devsguide_new_devs_guide:
+
 *********************
 New Developer's Guide
 *********************
@@ -30,6 +32,17 @@ may not already be on your device.
 
 To Install Homebrew
 ```````````````````
+This method uses Ruby, but there are other methods you can use `here <https://docs.brew.sh/Installation>`_ .
+
+``To Install Ruby:``
+
+`Installing Ruby <https://www.ruby-lang.org/en/documentation/installation/>`_
+
+``Resources:``
+
+#. `Learning Ruby <http://rubylearning.com/satishtalim/tutorial.html>`_
+#. `Official FAQ <https://www.ruby-lang.org/en/documentation/faq/>`_
+
 Run the commands ::
 
 	$ ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
@@ -101,7 +114,7 @@ install from 2.7.\* - 3.6.*, and attempting to install with a default
 version of 3.7.\* will result in errors. Setting your version to be
 compatible before you begin will help ensure you are successful.
 For a comprehensive list of all the dependencies of PyNE, examine
-:ref:`Dependencies`.
+:ref:`Dependencies` .
 
 
 -----------------------
@@ -131,16 +144,14 @@ create an environment for the conda install method.
 	
 	$ conda deactivate
 
-5. Before continuing with the PyNE `Conda Installation <http://pyne.io/install/
-conda.html#conda>`__ ensure that the Python version is correct.
+5. Before continuing with the PyNE installation ensure that the Python version is correct.
 
 
 
 For additional support with creating and managing environments,
 documentation can be found
-`here
-<https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-
-environments.html#sharing-an-environment>`__.
+`here <https://docs.conda.io/projects/conda/en/latest/user-guide/
+tasks/manage-environments.html>`__.
 
 
 ==========================
@@ -150,6 +161,7 @@ Everyone faces challenges sometimes when writing effective code. Thankfully, the
 contacted on the list host at pyne-dev@groups.google.com. Another way to get 
 help is by going to https://groups.google.com/forum/#!forum/pyne-users and 
 joining the group to post. 
+
 
 ========================
 Preparing to Contribute:
@@ -186,6 +198,7 @@ The PyNE files are now ready for your contributions. You can easily contribute
 by editing the contents of the folders, submitting these changes to your 
 repository, and making a pull request to PyNE through Github’s website. 
 
+
 =============
 Contributing:
 =============
@@ -203,6 +216,21 @@ the “low hanging pinoli” label to display more issues with the same tag.
 Pinoli is the Italian word for the Pine Nut, and this marker is the 
 first place New Developers should look to contribute.
 
+---------------------
+Making a Pull Request
+---------------------
+The pull request (PR) should contain a description of the the pull request, any labels 
+(such as bug, docs, test), projects (such as Transition to PyMOAB), and a reference
+to the issue that led to the PR, which you can do by inserting '#issue_number' to 
+the description.
+
+The more specific your description, the better you employ the labels, and 
+project selections the easier it will be for other contributors to review your work.
+Adding a reference to the issue the pull request will allow people to see the issue 
+inspired it, and any conversation about the issue. Before you make the pull request (PR), 
+make sure that you include a news file named after the purpose of your PR 
+following the template located in the news folder.
+
 ---------------------------------
 Adding and Updating Documentation 
 ---------------------------------
@@ -211,23 +239,13 @@ text (Vim, TextEdit, Nano, etc.) and doesn’t invisibly add characters to the
 file (like Word). The only important part is to write the file in a manner that’s 
 considered reStructuredText (check out http://sphinx-doc.org/rest.html). Then, 
 Sphinx will do everything else under the hood as described `here 
-<http://pyne.io/devsguide/website.html>`__. Before you make the pull request (PR), 
-make sure that you include a news file named after the purpose of your PR 
-following the template located in the news folder. Finally, commit these changes to 
-your forked version and submit a pull request. 
+<http://pyne.io/devsguide/website.html>`__.  
 
----------------------
-Making a Pull Request
----------------------
-The pull request (PR) should contain a description of the the pull request, any labels 
-(such as bug, docs, test), projects (such as Transition to PyMOAB), and a reference
-to the issue that led to the PR (which you can do by inserting '#issue_number' to 
-the description.
-
-The more specific your description, the better you employ the labels, and 
-project selections the easier it will be for other contributers to review your work.
-Adding a reference to the issue the pull request will allow people to see the issue 
-inspired it, and any conversation about the issue.
+Your contributions will be more robust 
+if they follow the formatting of other documents in the PyNE repository. As such, 
+before you create or update a file, it is a good idea to skim through other PyNE 
+documentation to see how they are formatted. Finally, commit these changes to your 
+forked version and submit a pull request. 
 
 .. _Dependencies:
 
@@ -237,110 +255,7 @@ PyNE Dependencies:
 
 Something to note before you begin the installation process is the version of Python 
 that you are using. PyNE is currently supported from Python 2 through Python 3.6 
-(NOT 3.7, which is coming in future updates). A comprehensive Python package is Anaconda 
-which provides a free installation for MacOS, Windows, and Linux. Follow the instructions 
-for your specific platform `here <https://docs.anaconda.com/anaconda/install/>`_ . Installing 
-through Anaconda will result in many of the packages and dependencies being satisfied.
-
--------
-Website
--------
-
-**Sphinx:** 
-
-A python based documentation generator that allows files to be written into HTML, LaTeX, 
-ePub, Texinfo, pages, and plain text. Sphinx uses reStructuredText, which is a very 
-straight-forward markup language.
-
-``To Install:``
-
-For the latest version, in the command line enter ::
-
-	$ pip install sphinx
-
-``Resources:``
-
-#. `Sphinx <https://www.sphinx-doc.org/en/master/>`_
-#. `Tutorial <http://matplotlib.sourceforge.net/sampledoc/>`_
-#. `reStructuredText Cheat Sheet <https://docutils.sourceforge.io/docs/user/rst/cheatsheet.txt>`_
-
-
-**Sphinxcontrib-bibtex:**
-
-An extension allowing Sphinx to interact with BibTeX.
-
-``To Install:``
-
-For the latest version, in the command line enter ::
-
-	$ pip install sphinxcontrib-bibtex
-
-``Resources:``
-
-#. `Documentation <https://sphinxcontrib-bibtex.readthedocs.io/en/latest/>`_ 
-#. `Known Issues and Workarounds <https://sphinxcontrib-bibtex.readthedocs.io/en/latest/usage.html#known-issues-and-workarounds>`_
-#. `Example <https://sphinxcontrib-bibtex.readthedocs.io/en/latest/quickstart.html#minimal-example>`_
-
-
-**PrettyTable:**
-
-PrettyTable is a python library that adds a lot of versatility to table creation.
-
-``To Install:``
-
-For the latest version, in the command line enter ::
-
-	$ pip install prettytable
-
-``Resources:``
-
-#. `Tutorial <https://code.google.com/archive/p/prettytable/wikis/Tutorial.wiki>`_
-
-
-**Cloud Sphinx:**
-
-Cloud is a Sphinx theme that PyNE uses to generate its 
-HTML documentation (like this site).
-
-``To Install:``
-
-For the latest version, in the command line enter ::
-
-	$ pip install cloud_sptheme
-
-``Resources:``
-
-#. `Documentation <https://cloud-sptheme.readthedocs.io/en/latest/>`_
-#. `Source <https://foss.heptapod.net/doc-utils/cloud_sptheme>`_
-
-
-**Jupyter:**
-
-If you have downloaded Python through Anaconda Jupyter requirements should 
-be satasfied, but it never hurts to make sure. 
-
-You can check there version by entering ::
-
-	$jupyter —-version
-
-``To Install:``
-
-If you are going to use Python 2:
-
-For the latest version, in the command line enter ::
-
-	$ pip install jupyter
-
-If you are going to use Python 3:
-
-For the latest version, in the command line enter ::
-
-	$ pip3 install jupyter
-
-``Resources:``
-
-#. `Additional Installation Information <https://jupyter.readthedocs.io/en/latest/install.html>`_
-#. `Project Documentation <https://jupyter.readthedocs.io/en/latest/projects/doc-proj-categories.html#deployment>`_
+(NOT 3.7, which is coming in future updates).
 
 
 ------------
@@ -358,15 +273,17 @@ data science, and visualization.
 
 ``To Install:``
 
-A comprehensive Python package can be found in Anaconda, which provides a 
-free installation for MacOS, Windows, and Linux. Follow the instructions for your 
-specific platform `here <https://docs.anaconda.com/anaconda/install/>`_ . 
-Installing through Anaconda will result in many of the packages and dependencies 
-for PyNE being satisfied.
+A comprehensive Python package is Anaconda 
+which provides a free installation for MacOS, Windows, and Linux. Follow the instructions 
+for your specific platform `here <https://docs.anaconda.com/anaconda/install/>`_ if you would 
+like to use Anaconda. Installing through Anaconda will result in many of the packages and 
+dependencies being satisfied.
 
 If you want to download Python without the rest of Anaconda, use 
 the links in the resources below. Keep in-mind that PyNE is currently 
-not supported on Python 3.7 or later.
+not supported on Python 3.7 or later, but you can 
+:ref:`create an environment<Creating an Environment>` following the instructions above
+for Anaconda users.
 
 ``Resources:``
 
@@ -582,3 +499,104 @@ For the latest version, in the command line enter ::
 
 #. `PyPi Project Homepage <https://pypi.org/project/numexpr/>`_
 #. `Github Repository <https://github.com/pydata/numexpr>`_
+
+
+-------
+Website
+-------
+
+**Sphinx:** 
+
+A python based documentation generator that allows files to be written into HTML, LaTeX, 
+ePub, Texinfo, pages, and plain text. Sphinx uses reStructuredText, which is a very 
+straight-forward markup language.
+
+``To Install:``
+
+For the latest version, in the command line enter ::
+
+	$ pip install sphinx
+
+``Resources:``
+
+#. `Sphinx <https://www.sphinx-doc.org/en/master/>`_
+#. `Tutorial <http://matplotlib.sourceforge.net/sampledoc/>`_
+#. `reStructuredText Cheat Sheet <https://docutils.sourceforge.io/docs/user/rst/cheatsheet.txt>`_
+
+
+**Sphinxcontrib-bibtex:**
+
+An extension allowing Sphinx to interact with BibTeX.
+
+``To Install:``
+
+For the latest version, in the command line enter ::
+
+	$ pip install sphinxcontrib-bibtex
+
+``Resources:``
+
+#. `Documentation <https://sphinxcontrib-bibtex.readthedocs.io/en/latest/>`_ 
+#. `Known Issues and Workarounds <https://sphinxcontrib-bibtex.readthedocs.io/en/latest/usage.html#known-issues-and-workarounds>`_
+#. `Example <https://sphinxcontrib-bibtex.readthedocs.io/en/latest/quickstart.html#minimal-example>`_
+
+
+**PrettyTable:**
+
+PrettyTable is a python library that adds a lot of versatility to table creation.
+
+``To Install:``
+
+For the latest version, in the command line enter ::
+
+	$ pip install prettytable
+
+``Resources:``
+
+#. `Tutorial <https://code.google.com/archive/p/prettytable/wikis/Tutorial.wiki>`_
+
+
+**Cloud Sphinx:**
+
+Cloud is a Sphinx theme that PyNE uses to generate its 
+HTML documentation (like this site).
+
+``To Install:``
+
+For the latest version, in the command line enter ::
+
+	$ pip install cloud_sptheme
+
+``Resources:``
+
+#. `Documentation <https://cloud-sptheme.readthedocs.io/en/latest/>`_
+#. `Source <https://foss.heptapod.net/doc-utils/cloud_sptheme>`_
+
+
+**Jupyter:**
+
+If you have downloaded Python through Anaconda Jupyter requirements should 
+be satasfied, but it never hurts to make sure. 
+
+You can check there version by entering ::
+
+	$jupyter —-version
+
+``To Install:``
+
+If you are going to use Python 2:
+
+For the latest version, in the command line enter ::
+
+	$ pip install jupyter
+
+If you are going to use Python 3:
+
+For the latest version, in the command line enter ::
+
+	$ pip3 install jupyter
+
+``Resources:``
+
+#. `Additional Installation Information <https://jupyter.readthedocs.io/en/latest/install.html>`_
+#. `Project Documentation <https://jupyter.readthedocs.io/en/latest/projects/doc-proj-categories.html#deployment>`_
