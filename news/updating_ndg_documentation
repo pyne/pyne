@@ -1,0 +1,15 @@
+**Added:** This PR adds a section for all the dependencies found on the PyNE website, along with 
+information of how to install them, and some relavent resources for that dependency. It also adds 
+a section on how to make a pull request and updating documentation with the notable inclusion of 
+how to include a notes file for the PR. It also adds an anchor to the section for dependencies 
+(.. _Dependencies:), which might help with including or linking this section to other pages.
+
+**Changed:** New Developer's Guide file
+
+**Deprecated:** None
+
+**Removed:** None
+
+**Fixed:** None
+
+**Security:** None
