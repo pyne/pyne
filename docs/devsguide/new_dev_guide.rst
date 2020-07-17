@@ -113,7 +113,7 @@ each dependency. For example, PyNE is currently supported in conda
 install from 2.7.\* - 3.6.*, and attempting to install with a default
 version of 3.7.\* will result in errors. Setting your version to be
 compatible before you begin will help ensure you are successful.
-For a comprehensive list of all the dependencies of PyNE, examine
+For a comprehensive list of all the software that PyNE depends on, examine
 :ref:`Dependencies` .
 
 
@@ -144,7 +144,7 @@ create an environment for the conda install method.
 	
 	$ conda deactivate
 
-5. Before continuing with the PyNE installation ensure that the Python version is correct.
+5. Before continuing with the PyNE installation, ensure that the Python version is correct.
 
 
 
@@ -219,17 +219,17 @@ first place New Developers should look to contribute.
 ---------------------
 Making a Pull Request
 ---------------------
-The pull request (PR) should contain a description of the the pull request, any labels 
+The pull request (PR) should contain a description of the the changes, appropriate labels 
 (such as bug, docs, test), projects (such as Transition to PyMOAB), and a reference
 to the issue that led to the PR, which you can do by inserting '#issue_number' to 
 the description.
 
-The more specific your description, the better you employ the labels, and 
-project selections the easier it will be for other contributors to review your work.
+A specific description, accurate labels, and appropriate
+project selections will help other contributors to discover and review your work more easily.
 Adding a reference to the issue the pull request will allow people to see the issue 
-inspired it, and any conversation about the issue. Before you make the pull request (PR), 
+inspired it alongside any conversation about the issue. Before you make the pull request (PR), 
 make sure that you include a news file named after the purpose of your PR 
-following the template located in the news folder.
+following the template located in the `news` directory.
 
 ---------------------------------
 Adding and Updating Documentation 
