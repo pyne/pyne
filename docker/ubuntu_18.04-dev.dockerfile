@@ -143,7 +143,7 @@ RUN if [ "$build_dagmc" = "YES" ]; then \
                  -DBUILD_MAKE_WATERTIGHT=OFF \
                  -DBUILD_OVERLAP_CHECK=OFF \
                  -DBUILD_TESTS=OFF \
-        && make \
+        && make -j 3\
         && make install \
         && cd ../.. \
         && rm -rf DAGMC; \
@@ -162,7 +162,7 @@ RUN if [ "$build_pyne" = "YES" ]; then \
         && python setup.py install --user \
                                     --moab $HOME/opt/moab --dagmc $HOME/opt/dagmc \
                                     $PYNE_HDF5_ARGS \
-                                    --clean ; \
+                                    --clean -j 3; \
     fi
 ENV PATH $HOME/.local/bin:$PATH
 RUN if [ "$build_pyne" = "YES" ]; then \
