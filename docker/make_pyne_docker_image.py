@@ -35,6 +35,8 @@ def build_name(args):
 
     name = 'pyne/ubuntu_18.04'
     name += '_py'+str(args.py_version)
+    if args.hdf5_version is not '':
+        name += "_" + args.hdf5_version
     if args.moab and not args.dagmc and not args.pymoab:
         name += "_moab"
     else:
@@ -64,6 +66,8 @@ def build_docker(args):
     tag = build_name(args)
     tag_flag = ['-t', tag]
     docker_args = []
+    if args.hdf5_version is not '':
+        docker_args += ["--build-arg", "build_hdf5=" + args.hdf5_version]
     if args.moab:
         docker_args += ["--build-arg", "build_moab=YES"]
     if args.dagmc:
@@ -100,7 +104,13 @@ def main():
     parser = ap.ArgumentParser(description=description)
 
     py_version = 'Require a specific python version'
-    parser.add_argument('--py_version', type=int, help=py_version)
+    parser.add_argument('--py_version', type=int, help=py_version,
+                        default=3)
+
+    custom_hdf5 = 'Build and install custom HDF5 Version. ' \
+        + 'Argument HDF5_VERSION must be a valid git tag or branch at https://github.com/HDFGroup/hdf5'
+    parser.add_argument('--hdf5_version', help=custom_hdf5,
+                        default='')
 
     moab = 'Build and install MOAB'
     parser.add_argument('--moab', help=moab,
@@ -122,7 +132,7 @@ def main():
     parser.add_argument('--all', '-a', '-all', help=all_deps,
                         action='store_true', default=False)
 
-    deps = 'Depdendencies only'
+    deps = 'Dependencies only'
     parser.add_argument('--deps', help=deps,
                         action='store_true', default=False)
 
