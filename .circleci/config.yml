@@ -346,7 +346,7 @@ workflows:
       - py3_dagmc_pymoab_hdf5_12_build:
           requires:
             - py3_dagmc_pymoab_build
-      - py3_dagmc_pymoab_test:
+      - py3_dagmc_pymoab_hdf5_12_test:
           requires:
             - py3_dagmc_pymoab_hdf5_12_build
 
