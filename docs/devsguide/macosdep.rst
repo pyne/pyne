@@ -76,9 +76,9 @@ CMake is designed to build, test, and compile packages programs across platforms
 
 To download CMake, you can visit `Downloads <https://cmake.org/download/>`_.
 
-If you have homebrew installed on your device, you can install GCC by entering ::
+If you have homebrew installed on your device, you can install CMake by entering ::
 
-	$ brew install gcc
+	$ brew install cmake
 
 ``Resources:``
 
