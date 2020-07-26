@@ -21,7 +21,7 @@ and it is designed to assist in Nuclear Engineering projects.
 Python
 ''''''
 
-Python is a popular computer language for building applications, 
+Python is a popular programming language for building applications, 
 data science, and visualization. 
 
 ``To Install:``
@@ -36,6 +36,15 @@ If you want to download Python without the rest of Anaconda, use
 the links in the resources below. Keep in-mind that PyNE is currently 
 not supported on Python 3.7 or later, but you can follow the instructions
 for Anaconda users in the New Developer's Guide.
+
+To install a specific version of Python from the command line, enter ::
+
+    $ sudo apt-get install pythonx
+    
+    * Where the x refers to a specific version of Python. For example, to install
+    Python 3.6 you would enter ::
+        
+        $ sudo apt-get install python3.6
 
 ``Resources:``
 
@@ -56,6 +65,10 @@ PyNE to work as a Python library, even though it is built with several languages
 
 To download GCC, visit `Installing GCC <https://gcc.gnu.org/install/index.html>`_
 
+Install with sudo apt ::
+
+    $ sudo apt install gcc
+
 ``Resources:``
 
 #. `Documentation <https://gcc.gnu.org/onlinedocs/gfortran/#toc-Compiler-Characteristics-1>`_
@@ -70,7 +83,11 @@ CMake is designed to build, test, and compile packages programs across platforms
 
 ``To Install:``
 
-To download CMake, visit `Downloads <https://cmake.org/download/>`_.
+To download CMake, visit `Downloads <https://cmake.org/download/>`_ .
+
+Install with sudo apt-get ::
+
+    $ sudo apt-get install cmake
 
 ``Resources:``
 
@@ -86,13 +103,17 @@ as well as mathematical functions acting on those arrays.
 
 ``To Install:``
 
-#. Update the packages index ::
-	
-	$ sudo apt update
+If you are going to use Python 2:
 
-#. Install with sudo apt ::
+For the latest version, in the command line enter ::
 
-    $ sudo apt-get install python-numpy
+	$ sudo apt-get install python-numpy
+
+If you are going to use Python 3:
+
+For the latest version, in the command line enter ::
+
+	$ sudo apt-get install python3-numpy
 
 For more details, go `here <https://phoenixnap.com/kb/install-numpy>`_
 
@@ -114,9 +135,17 @@ integration, and other scientific or engineering tasks.
 
 ``To Install:``
 
-Install using sudo apt-get ::
+If you are going to use Python 2:
 
-    $ sudo apt-get install python-scipy
+For the latest version, in the command line enter ::
+
+	$ sudo apt-get install python-scipy
+
+If you are going to use Python 3:
+
+For the latest version, in the command line enter ::
+
+	$ sudo apt-get install python3-scipy
 
 For more details, go `here <https://www.scipy.org/install.html>`_
 
@@ -134,9 +163,17 @@ Cython is a compiler that helps in making C or C++ extensions for python.
 
 ``To Install:``
 
-Install using sudo apt-get ::
+If you are going to use Python 2:
 
-    $ sudo apt-get install -y cython
+For the latest version, in the command line enter ::
+
+	$ sudo apt-get install cython
+
+If you are going to use Python 3:
+
+For the latest version, in the command line enter ::
+
+	$ sudo apt-get install cython3
 
 For more details, go `here <https://cython.readthedocs.io/en/latest/src/quickstart/install.html>`_ .
 
@@ -183,10 +220,17 @@ PyTables is a package for managing large hierarchical datasets.
 For a variety of installation instructions, 
 follow the instructions `here <http://www.pytables.org/usersguide/installation.html>`_ .
 
-Alternatively, based off of instructions found `here <https://medium.com/@jupyterdata/installing-hdf5-pytables-on-ubuntu-f4808f515f2e>`_ 
-, enter ::
+If you are going to use Python 2:
+
+For the latest version, in the command line enter ::
 
     $ sudo apt-get install python-tables
+
+If you are going to use Python 3:
+
+For the latest version, in the command line enter ::
+
+	$ sudo apt-get install python3-tables
 
 ``Resources:``
 
@@ -202,7 +246,9 @@ BLAS (Basic Linear Algebra Subroutines) coordinates operations on vectors and ma
 
 ``To Install:``
 
-Follow the instructions `here <https://ahmadzareei.github.io/azareei/linux/2016/04/08/configuring-blas-lapack.html>`_
+To install BLAS from the command line, enter ::
+
+    $ sudo apt-get install libblas-dev
 
 Installation methods can be found `here <http://www.netlib.org/blas/#_software>`_
 
@@ -218,22 +264,11 @@ LAPACK (Liner Algebra Package) is a software library for numerical liner algebra
 
 ``To Install:``
 
-Follow the instructions `here <https://ahmadzareei.github.io/azareei/linux/2016/04/08/configuring-blas-lapack.html>`_
+To install LAPACK from the command line, enter ::
+
+    $ sudo apt-get install liblapack-dev
 
 Installation methods can be found `here <http://www.netlib.org/lapack/#_software>`_
-
-Alternatively, based off of instructions found `here <https://coral.ise.lehigh.edu/jild13/2016/07/27/install-lapack-and-blas-on-linux-based-systems/>`_ ,
-do the following:
-
-#. Download `LAPack <http://www.netlib.org/lapack/>`_
-
-#. Go to the LAPACK directory and enter ::
-
-    $ make
-
-#. Now you have created a library called “lapack_MACOS.a”, enter ::
-
-    $ sudo cp liblapack.a /usr/local/lib/
 
 ``Resources:``
 
@@ -249,10 +284,17 @@ expressions operating on arrays are faster and take up less memory.
 
 ``To Install:``
 
-Based off of instructions found `here <https://howtoinstall.co/en/ubuntu/trusty/python-numexpr>`_
-, enter ::
+If you are going to use Python 2:
+
+For the latest version, in the command line enter ::
 
     $ sudo apt-get install python-numexpr
+
+If you are going to use Python 3:
+
+For the latest version, in the command line enter ::
+
+	$ sudo apt-get install python3-numexpr
 
 ``Resources:``
 
@@ -273,10 +315,17 @@ straight-forward markup language.
 
 ``To Install:``
 
-Based off of the instructions found `here <https://www.sphinx-doc.org/en/1.6/install.html#debian-ubuntu-install-sphinx-using-packaging-system>`_
-, enter ::
+If you are going to use Python 2:
 
-    $ apt-get install python-sphinx
+For the latest version, in the command line enter ::
+
+    $ sudo apt-get install python-sphinx
+
+If you are going to use Python 3:
+
+For the latest version, in the command line enter ::
+
+	$ sudo apt-get install python3-sphinx
 
 ``Resources:``
 
@@ -292,9 +341,17 @@ An extension allowing Sphinx to interact with BibTeX.
 
 ``To Install:``
 
-Open your command line and enter ::
+If you are going to use Python 2:
 
-    $ sudo apt-get install -y python3-sphinxcontrib.bibtex
+For the latest version, in the command line enter ::
+
+    $ sudo apt-get install python-sphinxcontrib.bibtex
+
+If you are going to use Python 3:
+
+For the latest version, in the command line enter ::
+
+	$ sudo apt-get install python3-sphinxcontrib.bibtex
 
 ``Resources:``
 
@@ -310,9 +367,17 @@ PrettyTable is a python library that adds a lot of versatility to table creation
 
 ``To Install:``
 
-Open your command line and enter ::
+If you are going to use Python 2:
 
-    $ sudo apt-get install -y python-prettytable
+For the latest version, in the command line enter ::
+
+    $ sudo apt-get install python-prettytable
+
+If you are going to use Python 3:
+
+For the latest version, in the command line enter ::
+
+	$ sudo apt-get install python3-prettytable
 
 ``Resources:``
 
@@ -335,7 +400,7 @@ HTML documentation (like this site).
 
     $ python setup.py install
 
-For more details about installing on windows with a setup.py file, go 
+For more details about installing on linux with a setup.py file, go 
 `here <https://docs.python.org/2/install/#standard-build-and-install>`_ .
 
 ``Resources:``
