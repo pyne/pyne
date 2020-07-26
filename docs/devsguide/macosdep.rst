@@ -21,7 +21,7 @@ and it is designed to assist in Nuclear Engineering projects.
 Python
 ''''''
 
-Python is a popular computer language for building applications, 
+Python is a popular programming language for building applications, 
 data science, and visualization. 
 
 ``To Install:``
@@ -76,6 +76,18 @@ CMake is designed to build, test, and compile packages programs across platforms
 
 To download CMake, you can visit `Downloads <https://cmake.org/download/>`_.
 
+If you are going to use Python 2:
+
+For the latest version, in the command line enter ::
+
+	$ pip install cmake
+
+If you are going to use Python 3:
+
+For the latest version, in the command line enter ::
+
+	$ pip3 install cmake
+
 If you have homebrew installed on your device, you can install CMake by entering ::
 
 	$ brew install cmake
@@ -94,9 +106,17 @@ as well as mathematical functions acting on those arrays.
 
 ``To Install:``
 
-For the latest version using pip, in the command line enter ::
+If you are going to use Python 2:
+
+For the latest version, in the command line enter ::
 
 	$ pip install numpy
+
+If you are going to use Python 3:
+
+For the latest version, in the command line enter ::
+
+	$ pip3 install numpy
 
 For the latest version using Conda, in the command line enter ::
 
@@ -119,6 +139,22 @@ integration, and other scientific or engineering tasks.
 
 `Installation <https://www.scipy.org/install.html>`_
 
+If you are going to use Python 2:
+
+For the latest version, in the command line enter ::
+
+	$ pip install scipy
+
+If you are going to use Python 3:
+
+For the latest version, in the command line enter ::
+
+	$ pip3 install scipy
+
+If you have homebrew installed on your device, you can install SciPy by entering ::
+
+	$ brew install scipy
+
 ``Resources:``
 
 #. `Getting Started <https://www.scipy.org/getting-started.html>`_
@@ -133,9 +169,17 @@ Cython is a compiler that helps in making C or C++ extensions for python.
 
 ``To Install:``
 
+If you are going to use Python 2:
+
 For the latest version, in the command line enter ::
 
 	$ pip install cython
+
+If you are going to use Python 3:
+
+For the latest version, in the command line enter ::
+
+	$ pip3 install cython
 
 If you have homebrew installed on your device, you can install Cython by entering ::
 
@@ -236,9 +280,17 @@ expressions operating on arrays are faster and take up less memory.
 
 ``To Install:``
 
+If you are going to use Python 2:
+
 For the latest version, in the command line enter ::
 
 	$ pip install numexpr
+
+If you are going to use Python 3:
+
+For the latest version, in the command line enter ::
+
+	$ pip3 install numexpr
 
 ``Resources:``
 
@@ -259,9 +311,17 @@ straight-forward markup language.
 
 ``To Install:``
 
+If you are going to use Python 2:
+
 For the latest version, in the command line enter ::
 
 	$ pip install sphinx
+
+If you are going to use Python 3:
+
+For the latest version, in the command line enter ::
+
+	$ pip3 install sphinx
 
 ``Resources:``
 
@@ -277,9 +337,17 @@ An extension allowing Sphinx to interact with BibTeX.
 
 ``To Install:``
 
+If you are going to use Python 2:
+
 For the latest version, in the command line enter ::
 
 	$ pip install sphinxcontrib-bibtex
+
+If you are going to use Python 3:
+
+For the latest version, in the command line enter ::
+
+	$ pip3 install sphinxcontrib-bibtex
 
 ``Resources:``
 
@@ -295,9 +363,17 @@ PrettyTable is a python library that adds a lot of versatility to table creation
 
 ``To Install:``
 
+If you are going to use Python 2:
+
 For the latest version, in the command line enter ::
 
 	$ pip install prettytable
+
+If you are going to use Python 3:
+
+For the latest version, in the command line enter ::
+
+	$ pip3 install prettytable
 
 ``Resources:``
 
@@ -312,9 +388,17 @@ HTML documentation (like this site).
 
 ``To Install:``
 
+If you are going to use Python 2:
+
 For the latest version, in the command line enter ::
 
 	$ pip install cloud_sptheme
+
+If you are going to use Python 3:
+
+For the latest version, in the command line enter ::
+
+	$ pip3 install cloud_sptheme
 
 ``Resources:``
 
