@@ -7,6 +7,10 @@ pyne Change Log
 Next Version
 ====================
 
+
+v0.7.0 RC2
+====================
+
 **New Capabilities**
 
 * Subvoxel R2S allows activation and photon source sampling by 
