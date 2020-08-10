@@ -179,7 +179,7 @@ v0.7.0 RC2
     instead of "C++ & Fortran API Documentation"
     
 * Improvements in building and testing
-  * require contributor to provide news file
+  * require contributor to change CHANGELOG 
   * Expand testing matrix to include:
      * python 2 vs 2
      * with vs without PyMOAB

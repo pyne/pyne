@@ -147,7 +147,7 @@ jobs:
       - checkout
       - run:
           name: Checking News Update
-          command: news/news_test.sh news
+          command: circleci/changelog_test.sh
  
 # Python 3 jobs
   py3_build:
