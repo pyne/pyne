@@ -138,15 +138,15 @@ commands:
 # Define the different job that will be ran this separate building form
 # testing for each configuration allowing to get more information out of the CI
 jobs:
-# news file checker
-  news_update:
+# CHANGELOG file checker
+  changelog_update:
     executor: 
       name: py3
     working_directory: ~/repo
     steps:
       - checkout
       - run:
-          name: Checking News Update
+          name: Checking CHANGELOG Update
           command: circleci/changelog_test.sh
  
 # Python 3 jobs
@@ -317,7 +317,7 @@ workflows:
   version: 2
   build_and_test:
     jobs:
-      - news_update:
+      - changelog_update:
           filters:
             branches:
               ignore: develop
