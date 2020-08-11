@@ -13,7 +13,7 @@ v0.7.0 RC2
 
 **New Capabilities**
 
-* Subvoxel R2S allows activation and photon source sampling by 
+* Subvoxel R2S allows activation and photon source sampling by
   material within a mesh voxel
   * SubMode parameter in source_sampling
   * Add code for submode: SUBVOXEL
@@ -28,7 +28,7 @@ v0.7.0 RC2
   * Add options to install OpenMC Python API
   * Functions to read OpenMC state point file to get meshtally data
 
-* File scripts/activation_responses.py to get activation responses data for 
+* File scripts/activation_responses.py to get activation responses data for
   ALARA output file for better visualization. Responses include:
    * decay heat
    * specific activity
@@ -45,30 +45,30 @@ v0.7.0 RC2
    * first step for the GT-CADIS workflow, further steps to follow
 
 
-**Enhancements to Previous Capabilities** 
+**Enhancements to Previous Capabilities**
 
 * Enhancements of Material and MaterialLibrary capabilities
    * A C++ API for the MaterialLibrary class has been created for direct
      use in compiled software tools
    * Change the MaterialLibrary Python API to bind to the new c++ one.
-   * Overhaul of HDF5 format of Material and MaterialLibrary 
+   * Overhaul of HDF5 format of Material and MaterialLibrary
       * Capability to read nuclides from a specific path when loading material
         from an hdf5 file (not necessarily relying on autodetect the nucpath).
       * change the structure of material when written in a hdf5 file:
         .. verbatim::
-          /material/ 
-          /material/my_mat/ 
+          /material/
+          /material/my_mat/
           /material/my_mat/composition
-          /material/my_mat/nuclidelist 
+          /material/my_mat/nuclidelist
           /material/my_mat/composition_metadata
         where, `/material` and `/material/my_mat` are now HDF% groups
    * Material I/O formats
-      * pyne::Material: capability to form PHITS input material card 
+      * pyne::Material: capability to form PHITS input material card
       * capability to form a uwuw material name
-      * A new argument `mult_den` (bool) that makes *Material* class's 
-        **get_density_frac** method (hence also **mcnp** and **phits** methods) 
+      * A new argument `mult_den` (bool) that makes *Material* class's
+        **get_density_frac** method (hence also **mcnp** and **phits** methods)
         write atom/mass density if true, otherwise write atom/mass fraction.
-      * increased precision of the material density reported in the comment card 
+      * increased precision of the material density reported in the comment card
         for an MCNP material to 5 decimal places
     * Adds tests to tests/test:materials.py:test_decay_heat(self) to check more isotopes
 
@@ -93,7 +93,7 @@ v0.7.0 RC2
    * Sort cell_fracs according to the order of 'idx' and 'vol_frac'. For faster source sampling.
    * Pass cell_list back to Fortran, to speed up source sampling.
    * function to write total photon intensities for subvoxel r2s
-   * Removed variables ```icl_tmp``` and ```find_cell``` which are not longer needed. 
+   * Removed variables ```icl_tmp``` and ```find_cell``` which are not longer needed.
    * MCNP6 version of source.F90
    * Changed source.F90 to use "implicit none" instead of "implicit real"
    * Addition & updates of unit tests for above improvements
@@ -162,7 +162,7 @@ v0.7.0 RC2
         * mesh.destroyTag(self, boolean) -> mesh.delete_tag(self)
         * ... (see PyTAPS and PyMOAB respective documentation)
      * those changes have been propagated in mcnp.py, alara.py, ccc.py, dagmc.pyx,
-       r2s.py, variancereduction.py, expand_tags.py, and their respective tests... 
+       r2s.py, variancereduction.py, expand_tags.py, and their respective tests...
 
 **Maintenance**
 
@@ -170,16 +170,17 @@ v0.7.0 RC2
   * Credit Rochman for allowing redistribute TENDL file
   * Fix various typos
   * automatic deployment of a updated version of the website on tags
-  * automatic creation of a new version of the website (not deployed) for 
+  * automatic creation of a new version of the website (not deployed) for
      verification purposes in `pyne.github.com/website_preview`
   * New developers guide: The update adds information about creating an environment,
-    updates formatting for more consistency, details considerations and methods to 
+    updates formatting for more consistency, details considerations and methods to
     check the version of dependencies, and adds additional links to coding resources.
   * In website index, change C++ API link to "C++ API Documentation"
     instead of "C++ & Fortran API Documentation"
-    
+  * Added publications to bibliography (PR #1256)
+
 * Improvements in building and testing
-  * require contributor to change CHANGELOG 
+  * require contributor to change CHANGELOG
   * Expand testing matrix to include:
      * python 2 vs 2
      * with vs without PyMOAB
@@ -196,7 +197,7 @@ v0.7.0 RC2
   * test_fluka:
      * added test to check the data tag name of the different tally part and
        error.
-  * revert internal nuc_data_path to origin value after internal data test 
+  * revert internal nuc_data_path to origin value after internal data test
   * added DEFINE variable to allow material.cpp amalgamation without decay.cpp
   * now skips endf test when website is not reachable to allow completeness of
     the other tests.
@@ -207,7 +208,7 @@ v0.7.0 RC2
 * Code cleanup
    * Formatting improvements
    * Compatibility with language updates
-     * update the way that `collections` is imported in preparation 
+     * update the way that `collections` is imported in preparation
        for deprecated changes in future python versions
      * removed some imports of `collections` that were not necessary
      * change return type of method to avoid compiler compatibility issue
@@ -320,6 +321,3 @@ v0.5.5
 
 v0.5.4
 ====================
-
-
-
