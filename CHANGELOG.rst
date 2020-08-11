@@ -164,61 +164,61 @@ v0.7.0 RC2
 **Maintenance**
 
 * Documentation Changes
-  * Credit Rochman for allowing redistribute TENDL file
-  * Fix various typos
-  * automatic deployment of a updated version of the website on tags
-  * automatic creation of a new version of the website (not deployed) for
-     verification purposes in `pyne.github.com/website_preview`
-  * New developers guide: The update adds information about creating an environment,
-    updates formatting for more consistency, details considerations and methods to
-    check the version of dependencies, and adds additional links to coding resources.
-  * In website index, change C++ API link to "C++ API Documentation"
-    instead of "C++ & Fortran API Documentation"
-  * Added publications to bibliography (PR #1256)
-  * Adding contributing guide and code of conduct (#1258)
-  * Changed Doc and Tutorial mentions of iPython notebooks to Jupyter notebooks (PR #1262)
+   * Credit Rochman for allowing redistribute TENDL file
+   * Fix various typos
+   * automatic deployment of a updated version of the website on tags
+   * automatic creation of a new version of the website (not deployed) for
+     verification purposes in ``pyne.github.com/website_preview``
+   * New developers guide: The update adds information about creating an environment,
+     updates formatting for more consistency, details considerations and methods to
+     check the version of dependencies, and adds additional links to coding resources.
+   * In website index, change C++ API link to "C++ API Documentation"
+     instead of "C++ & Fortran API Documentation"
+   * Added publications to bibliography (PR #1256)
+   * Adding contributing guide and code of conduct (#1258)
+   * Changed Doc and Tutorial mentions of iPython notebooks to Jupyter notebooks (PR #1262)
     
 * Improvements in building and testing
-  * require contributor to change CHANGELOG
-  * Expand testing matrix to include:
-     * python 2 vs 2
-     * with vs without PyMOAB
-     * with vs without DAGMC
-  * Added FindDAGMC.cmake file
-  * turn off BLAS/LAPACK & FORTRAN in MOAB build
-  * Dockerfile to build many variations of PyNE docker image, with python script CLI
-  * Add hdf5-tools as dependency for docker images used in CircleCI, for better nose test comparing h5 files
-  * Add future as dependency for docker images used in CircleCI, for python2 and python3 compatibility
-  * "--dagmc" flag added to `setup.py` in order to build PyNE against DAGMC
-  * new check won't now be triggered after a merge only on PRs
-  * utils.py: updated the download timeout time to 120sec (from 30sec)
-  * updated CI to use CircleCI 2.1 workflows: now build separately from tests with state saved between runs
-  * test_fluka:
-     * added test to check the data tag name of the different tally part and
-       error.
-  * revert internal nuc_data_path to origin value after internal data test
-  * added DEFINE variable to allow material.cpp amalgamation without decay.cpp
-  * now skips endf test when website is not reachable to allow completeness of
-    the other tests.
-   * test file for ENDF was wrong
-  * Add functions to do file, file block, line, and string almost the same
-    compare functions in pyne/utils.py
-  * make data available as replacement for data.pyne.io (#1261)
+   * require contributor to change CHANGELOG
+   * Expand testing matrix to include:
+      * python 2 vs 3
+      * with vs without PyMOAB
+      * with vs without DAGMC
+   * Added FindDAGMC.cmake file
+   * turn off BLAS/LAPACK & FORTRAN in MOAB build
+   * Dockerfile to build many variations of PyNE docker image, with python script CLI
+   * Add hdf5-tools as dependency for docker images used in CircleCI, for better nose test comparing h5 files
+   * Add future as dependency for docker images used in CircleCI, for python2 and python3 compatibility
+   * "--dagmc" flag added to ``setup.py`` in order to build PyNE against DAGMC
+   * new check won't now be triggered after a merge only on PRs
+   * utils.py: updated the download timeout time to 120sec (from 30sec)
+   * updated CI to use CircleCI 2.1 workflows: now build separately from tests with state saved between runs
+   * test_fluka:
+      * added test to check the data tag name of the different tally part and
+        error.
+   * revert internal nuc_data_path to origin value after internal data test
+   * added DEFINE variable to allow material.cpp amalgamation without decay.cpp
+   * now skips endf test when website is not reachable to allow completeness of
+     the other tests.
+      * test file for ENDF was wrong
+   * Add functions to do file, file block, line, and string almost the same
+     compare functions in pyne/utils.py
+   * make data available as replacement for data.pyne.io (#1261)
 
 * Code cleanup
    * Formatting improvements
    * Compatibility with language updates
-     * update the way that `collections` is imported in preparation
-       for deprecated changes in future python versions
-     * removed some imports of `collections` that were not necessary
-     * change return type of method to avoid compiler compatibility issue
-     * Convert some code and tests to enable python2/3 compatibility
+      * update the way that ``collections`` is imported in preparation
+        for deprecated changes in future python versions
+      * removed some imports of ``collections`` that were not necessary
+      * change return type of method to avoid compiler compatibility issue
+      * Convert some code and tests to enable python2/3 compatibility
    * Clean up some hard coded strings in test_source_sampling.py
    * ``rxname.child()`` and ``rxname.parent()`` now accept ``str`` for the
-    ``z`` argument in Python 3.
+     ``z`` argument in Python 3.
    * dagmc_bridge: added a static DagMC instance
-   * cleanup throws return from ``return (const char *)`` to simple ``return`` (it was suggested that those complicated return might cause seg fault, on some system -- OsX+conda)
-
+   * cleanup throws return from ``return (const char *)`` to simple ``return`` 
+     (it was suggested that those complicated return might cause seg fault, on some system -- OsX+conda)
 
 
 v0.5.11
@@ -235,7 +235,6 @@ v0.5.11
 * Test function for subvoxel with (N, 1) condition in test_mesh.py
 * Reshape the array when max_num_cells == 1
 
-
 **Changed:**
 
 * shape of IMeshTag when input value is a (N, 1) array
@@ -251,11 +250,9 @@ v0.5.11
 * Some code clean up
 * Some clean up of white space
 
-
 **Removed:**
 
 * Code in mesh.py to reshpe a (N,1) to (N, ) array is no longer needed if PR #971 merged
-
 
 **Fixed:**
 
@@ -267,16 +264,12 @@ v0.5.11
   supplied.
 
 
-
-
 v0.5.10
 ====================
 
 **Fixed:**
 
 * Made SSL context creation Python 2 & 3 Compatible.
-
-
 
 
 v0.5.9
@@ -287,16 +280,12 @@ v0.5.9
 * Downloading files now uses null SSL context.
 
 
-
-
 v0.5.8
 ====================
 
 **Changed:**
 
 * Downloading data now uses HTTP, rather than HTTPS.
-
-
 
 
 v0.5.7
@@ -307,16 +296,12 @@ v0.5.7
 * Occassional bug with downloading URL fix.
 
 
-
-
 v0.5.6
 ====================
 
 
-
 v0.5.5
 ====================
-
 
 
 v0.5.4
