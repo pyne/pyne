@@ -21,13 +21,13 @@ Expected results:
 ------------------
 
 * A review of the current 'data_source.py' interface with small experimental datasets in mind.
-* An IPython notebook, for the example documentation gallery, demonstrating how 
+* A Jupyter notebook, for the example documentation gallery, demonstrating how 
   an experimentalist can import their experimental nuclear data into a PyNE 
   analysis (using the data_source API).
 * Development of methods that generate relevant statistical comparisons of any 
   data in the small experimental dataset against available data in other PyNE 
   source.
-* An Ipython notebook, for the example documentation gallery, demonstrating how 
+* A Jupyter notebook, for the example documentation gallery, demonstrating how 
   an experimentalist would use these functions to compare their data to known 
   sources. 
 
