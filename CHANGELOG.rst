@@ -206,6 +206,7 @@ v0.7.0 RC2
    * test file for ENDF was wrong
   * Add functions to do file, file block, line, and string almost the same
     compare functions in pyne/utils.py
+  * make data available as replacement for data.pyne.io ()
 
 * Code cleanup
    * Formatting improvements
