@@ -112,7 +112,7 @@ def grab_ensdf_decay(build_dir=""):
     # Grab ENSDF files and unzip them.
     iaea_base_url = 'http://www.nndc.bnl.gov/ensarchivals/distributions/dist19/'
 
-    cf_base_url = 'http://data.pyne.io/'
+    cf_base_url = 'https://github.com/pyne/data/raw/master/'
     ensdf_zip = ['ensdf_191004_099.zip',
                  'ensdf_191004_199.zip',
                  'ensdf_191004_300.zip', ]
