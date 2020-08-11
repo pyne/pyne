@@ -9,9 +9,9 @@ Creating a Pull Request
 -----------------------
 1. Fork this repository from `develop` and create a branch for new code.
 2. Add or update any applicable tests for the new code.
-3. If applicable, update the `README documentation <README.rst>`_ or `website documentation <docs>`_).
+3. If applicable, update the `README documentation <readme.rst>`_ or `website documentation <docs>`_).
 4. Issue a pull request using the pull request template. All pull requests must include a meaningful change
-   to the `CHANGELOG <README.rst>`_.  You can either add a new entry
+   to the `CHANGELOG <CHANGELOG.rst>`_.  You can either add a new entry
    to the CHANGELOG, or just add a reference to this pull request number if the change is already included
    in a prior entry.
 
