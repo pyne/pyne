@@ -181,7 +181,8 @@ v0.7.0 RC2
    * Added publications to bibliography (PR #1256)
    * Adding contributing guide and code of conduct (#1258)
    * Changed Doc and Tutorial mentions of iPython notebooks to Jupyter notebooks (PR #1262)
-
+   * Improvements in documentation for release (#1254)
+    
 * Improvements in building and testing
    * require contributor to change CHANGELOG
    * Expand testing matrix to include:
