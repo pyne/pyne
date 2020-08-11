@@ -112,11 +112,11 @@ v0.7.0 RC2
    * In R2S step2, add option to write only 'total' to h5 file, reduce the CPU time
    * Error in voxel R2S.
    * Changes in processing of ALARA input/output
-     * Change some default names of alara_inp.
-     * Decay times in the alara_params.txt.
-     * Add input units check to the function utils.py/to_sec
-     * Use function utils.py/to_sec to replace alara.py/_TO_SEC
-     * Simplify the method to get the list of decay/cooling times
+      * Change some default names of alara_inp.
+      * Decay times in the alara_params.txt.
+      * Add input units check to the function utils.py/to_sec
+      * Use function utils.py/to_sec to replace alara.py/_TO_SEC
+      * Simplify the method to get the list of decay/cooling times
 
 * Nuclear Data Handling and Reporting
    * Fixed issue where some gamma x-rays where throwing ``NotANuclide`` errors
@@ -126,9 +126,9 @@ v0.7.0 RC2
    * decay_heat() in material.cpp now calls metastable_id to convert zas_id to state_id
    * Fix ENDF parsing of TSL files with short collision time approximation for non-principal atoms.
    * endf.Library._read_headers() and regular expressions in endf.pyx
-       Removed regexps: CONTENTS_R, SPACE66_R, NUMERICAL_DATA_R
-       Added regexps:   SPACEINT11_R
-       Added methods:   _isContentLine(parts)
+        * Removed regexps: CONTENTS_R, SPACE66_R, NUMERICAL_DATA_R
+        * Added regexps:   SPACEINT11_R
+        * Added methods:   _isContentLine(parts)
    * ENSDF database link to 2019 Oct 4th database
    * Update the C012-n.ace file link.
    * Missing elements name_to_zz dictionary
