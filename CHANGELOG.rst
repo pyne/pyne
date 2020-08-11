@@ -178,7 +178,8 @@ v0.7.0 RC2
   * In website index, change C++ API link to "C++ API Documentation"
     instead of "C++ & Fortran API Documentation"
   * Added publications to bibliography (PR #1256)
-
+  * Adding contributing guide and code of conduct (#1258)
+    
 * Improvements in building and testing
   * require contributor to change CHANGELOG
   * Expand testing matrix to include:
