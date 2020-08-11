@@ -349,7 +349,7 @@ namespace rxname
       return INFEstr_rtn;
     }
 
-   private:
+  private:
     std::string rxwas;  ///< previous reaction state
     std::string rxnow;  ///< current reaction state
   };
