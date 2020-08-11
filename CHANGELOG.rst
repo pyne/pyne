@@ -53,12 +53,14 @@ v0.7.0 RC2
       * Capability to read nuclides from a specific path when loading material
         from an hdf5 file (not necessarily relying on autodetect the nucpath).
       * change the structure of material when written in a hdf5 file:
+        ::
 
-            /material/
-            /material/my_mat/
-            /material/my_mat/composition
-            /material/my_mat/nuclidelist
-            /material/my_mat/composition_metadata 
+          /material/
+          /material/my_mat/
+          /material/my_mat/composition
+          /material/my_mat/nuclidelist
+          /material/my_mat/composition_metadata
+        
         where, ``/material`` and ``/material/my_mat`` are now HDF5 groups
    * Material I/O formats
       * pyne::Material: capability to form PHITS input material card
@@ -68,7 +70,7 @@ v0.7.0 RC2
         write atom/mass density if true, otherwise write atom/mass fraction.
       * increased precision of the material density reported in the comment card
         for an MCNP material to 5 decimal places
-    * Adds tests to tests/test:materials.py:test_decay_heat(self) to check more isotopes
+      * Adds tests to tests/test:materials.py:test_decay_heat(self) to check more isotopes
 
 * Bug fixes in serpent support
    * in serpent.py, function VOL_serp2_fix() to correct for
