@@ -134,7 +134,7 @@ v0.7.0 RC2
    * ENSDF database link to 2019 Oct 4th database
    * Update the C012-n.ace file link.
    * Missing elements name_to_zz dictionary
-   * Updated half_life in data.pyx to return nan if isotope not found
+   * Updated half_life in data.pyx to return nan if isotope not found (#1257)
 
 * Improvements in Mesh capabilities
    * added mesh tally definitions to tallies
