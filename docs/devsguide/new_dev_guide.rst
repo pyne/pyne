@@ -115,8 +115,11 @@ first place New Developers should look to contribute.
 ---------------------
 Making a Pull Request
 ---------------------
-Before you make the pull request (PR), make sure that you include a news file named
-after the purpose of your PR following the template located in the news directory.
+Before you make the pull request (PR), make sure that you include a change to the 
+CHANGELOG.rst file under the appropriate heading. Your contribution can be as simply as
+a line of text, but it should include the PR's number in parenthesis. If there is a line
+already in the changelog that describes a similar action (e.g., adding a publication) to 
+your own, you can simply add the number of your PR after the existing line.
 
 The PR should contain a description of the changes, appropriate labels, projects,
 and a reference to the issue that led to it, which you can do by inserting
