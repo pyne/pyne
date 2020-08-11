@@ -179,6 +179,7 @@ v0.7.0 RC2
    * Changed Doc and Tutorial mentions of iPython notebooks to Jupyter notebooks (PR #1262)
     
 * Improvements in building and testing
+<<<<<<< HEAD
    * require contributor to change CHANGELOG
    * Expand testing matrix to include:
       * python 2 vs 3
@@ -202,7 +203,7 @@ v0.7.0 RC2
       * test file for ENDF was wrong
    * Add functions to do file, file block, line, and string almost the same
      compare functions in pyne/utils.py
-   * make data available as replacement for data.pyne.io (#1261)
+   * make data available as replacement for data.pyne.io (#1261, #1265)
 
 * Code cleanup
    * Formatting improvements
