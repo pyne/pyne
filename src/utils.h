@@ -215,7 +215,7 @@ namespace pyne {
       if (!message.empty())
         msgstr += message;
 
-      return (const char *) msgstr.c_str();
+      return msgstr.c_str();
     };
 
   private:

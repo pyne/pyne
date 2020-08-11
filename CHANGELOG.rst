@@ -178,6 +178,7 @@ v0.7.0 RC2
     check the version of dependencies, and adds additional links to coding resources.
   * In website index, change C++ API link to "C++ API Documentation"
     instead of "C++ & Fortran API Documentation"
+  * Added publications to bibliography (PR #1256)
 
 * Improvements in building and testing
   * require contributor to change CHANGELOG
@@ -217,6 +218,7 @@ v0.7.0 RC2
    * ``rxname.child()`` and ``rxname.parent()`` now accept ``str`` for the
     ``z`` argument in Python 3.
    * dagmc_bridge: added a static DagMC instance
+   * cleanup throws return from ``return (const char *)`` to simple ``return`` (it was suggested that those complicated return might cause seg fault, on some system -- OsX+conda)
 
 
 

@@ -60,7 +60,7 @@ namespace h5wrap
       if (!filename.empty())
         FNH5str += filename;
 
-      return (const char *) FNH5str.c_str();
+      return FNH5str.c_str();
     };
 
   private:
@@ -92,7 +92,7 @@ namespace h5wrap
       msg += groupname;
       msg += " not found in the file ";
       msg += filename;
-      return (const char *) msg.c_str();
+      return msg.c_str();
     };
 
   private:
@@ -125,7 +125,7 @@ namespace h5wrap
       msg += path;
       msg += " was not found in the HDF5 file ";
       msg += filename;
-      return (const char *) msg.c_str();
+      return msg.c_str();
     };
 
   private:
