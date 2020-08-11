@@ -9,9 +9,9 @@ Creating a Pull Request
 -----------------------
 1. Fork this repository from `develop` and create a branch for new code.
 2. Add or update any applicable tests for the new code.
-3. If applicable, update the [README documentation](https://github.com/pyne/pyne/blob/develop/README.rst) or [website documentation](https://github.com/pyne/pyne/tree/develop/docs).
+3. If applicable, update the `README documentation <README.rst>`_ or `website documentation <docs>`_).
 4. Issue a pull request using the pull request template. All pull requests must include a meaningful change
-   to the [CHANGELOG](https://github.com/pyne/pyne/blob/develop/README.rst).  You can either add a new entry
+   to the `CHANGELOG <README.rst>`_.  You can either add a new entry
    to the CHANGELOG, or just add a reference to this pull request number if the change is already included
    in a prior entry.
 
@@ -23,15 +23,16 @@ Reporting an Issue
 
 Important Resources
 -------------------
-* [Pull Request Template](https://github.com/pyne/pyne/blob/develop/PULL_REQUEST_TEMPLATE.md)
-* [Bug Report Template](https://github.com/pyne/pyne/blob/develop/.github/ISSUE_TEMPLATE/bug-report.md)
-* [Feature Request Template](https://github.com/pyne/pyne/blob/develop/.github/ISSUE_TEMPLATE/feature-request.md)
+* `Pull Request Template <PULL_REQUEST_TEMPLATE.md>`_
+* `Bug Report Template <.github/ISSUE_TEMPLATE/bug-report.md>`_
+* `Feature Request Template <.github/ISSUE_TEMPLATE/feature-request.md>`_
 
 License
 -------
 By contributing, you agree that your contributions will be licensed under the
-[Simplified BSD License](https://github.com/pyne/pyne/blob/develop/license.txt).
+`Simplified BSD License <license.txt>`_
 
 References
 ----------
-These guidelines were adapted from [here](https://gist.github.com/briandk/3d2e8b3ec8daf5a27a62) and [here](https://github.com/drush-ops/drush/blob/master/CONTRIBUTING.md).
+These guidelines were adapted from `here <https://gist.github.com/briandk/3d2e8b3ec8daf5a27a62>`_ 
+and `here <https://github.com/drush-ops/drush/blob/master/CONTRIBUTING.md>`_
