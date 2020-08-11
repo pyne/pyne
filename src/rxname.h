@@ -279,7 +279,7 @@ namespace rxname
         narxstr += " --> ";
         narxstr += rxnow;
       }
-      return (const char *) narxstr.c_str();
+      return narxstr.c_str();
     };
 
   private:
@@ -344,7 +344,7 @@ namespace rxname
         INFEstr += " --> ";
         INFEstr += rxnow;
       }
-      return (const char *) INFEstr.c_str();
+      return INFEstr.c_str();
     }
 
   private:
