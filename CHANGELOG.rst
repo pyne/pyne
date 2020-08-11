@@ -179,6 +179,7 @@ v0.7.0 RC2
     instead of "C++ & Fortran API Documentation"
   * Added publications to bibliography (PR #1256)
   * Adding contributing guide and code of conduct (#1258)
+  * Changed Doc and Tutorial mentions of iPython notebooks to Jupyter notebooks (PR #1262)
     
 * Improvements in building and testing
   * require contributor to change CHANGELOG
