@@ -861,14 +861,14 @@ def half_life(nuc, use_metastable=True):
 
     Notes
     -----
-    If the nuclide is not found, the nuclide is assumed to be stable.
+    If the nuclide is not found, returns nan.
     """
     if use_metastable is True:
         nuc = pyne.nucname.id(nuc)
         ms = nuc % 10000
         nuc = metastable_id(nuc, ms)
         if nuc is None:
-            return float('inf')  # nuclide doesn't exist, assume stable
+            return float('nan')  # nuclide doesn't exist
     if isinstance(nuc, int):
         hl = cpp_data.half_life(<int> nuc)
     elif isinstance(nuc, basestring):
