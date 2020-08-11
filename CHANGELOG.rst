@@ -15,18 +15,18 @@ v0.7.0 RC2
 
 * Subvoxel R2S allows activation and photon source sampling by
   material within a mesh voxel
-  * SubMode parameter in source_sampling
-  * Add code for submode: SUBVOXEL
-  * Test functions to test SUBVOXEL codes in test_source_sampling.py
-  * Add subvoxel r2s workflow support in pyne/scripts/r2s.py
-  * Use new sampler for both voxel and sub-voxel R2S.
-  * Define cell_mats for subvoxel equals False
-  * Function Sampler::mesh_tag_data to be compatible for both DEFAULT and SUBVOXEL mode
+   * SubMode parameter in source_sampling
+   * Add code for submode: SUBVOXEL
+   * Test functions to test SUBVOXEL codes in test_source_sampling.py
+   * Add subvoxel r2s workflow support in pyne/scripts/r2s.py
+   * Use new sampler for both voxel and sub-voxel R2S.
+   * Define cell_mats for subvoxel equals False
+   * Function Sampler::mesh_tag_data to be compatible for both DEFAULT and SUBVOXEL mode
 
 * OpenMC support
-  * Add CI test for OpenMC as an optional dependency
-  * Add options to install OpenMC Python API
-  * Functions to read OpenMC state point file to get meshtally data
+   * Add CI test for OpenMC as an optional dependency
+   * Add options to install OpenMC Python API
+   * Functions to read OpenMC state point file to get meshtally data
 
 * File scripts/activation_responses.py to get activation responses data for
   ALARA output file for better visualization. Responses include:
@@ -39,11 +39,9 @@ v0.7.0 RC2
    * photon_source
    * multiple response in one output.txt file
 
-
 * first introduction of GT-CADIS workflows
    * added gtcadis.py script
    * first step for the GT-CADIS workflow, further steps to follow
-
 
 **Enhancements to Previous Capabilities**
 
@@ -55,17 +53,17 @@ v0.7.0 RC2
       * Capability to read nuclides from a specific path when loading material
         from an hdf5 file (not necessarily relying on autodetect the nucpath).
       * change the structure of material when written in a hdf5 file:
-        .. verbatim::
-          /material/
-          /material/my_mat/
-          /material/my_mat/composition
-          /material/my_mat/nuclidelist
-          /material/my_mat/composition_metadata
-        where, `/material` and `/material/my_mat` are now HDF% groups
+
+            /material/
+            /material/my_mat/
+            /material/my_mat/composition
+            /material/my_mat/nuclidelist
+            /material/my_mat/composition_metadata 
+        where, ``/material`` and ``/material/my_mat`` are now HDF5 groups
    * Material I/O formats
       * pyne::Material: capability to form PHITS input material card
       * capability to form a uwuw material name
-      * A new argument `mult_den` (bool) that makes *Material* class's
+      * A new argument ``mult_den`` (bool) that makes *Material* class's
         **get_density_frac** method (hence also **mcnp** and **phits** methods)
         write atom/mass density if true, otherwise write atom/mass fraction.
       * increased precision of the material density reported in the comment card
@@ -77,9 +75,8 @@ v0.7.0 RC2
      _VOL variable being an array. as seen in serpent 2
    * fix error in serpent parse_dep
    * serpent.py function parse_dep.  Catches ValueError that
-     occurs when parse_dep attempts to make_mats with a serpent 2 *_dep.m file
-     due to the *_VOL variable not being a float
-
+     occurs when parse_dep attempts to make_mats with a serpent 2 \*_dep.m file
+     due to the \*_VOL variable not being a float
 
 * Changes in source sampling for mesh-based Monte Carlo sources
    * Add statistics summary output of find_cell failure in source sampling.
@@ -119,7 +116,6 @@ v0.7.0 RC2
      * Use function utils.py/to_sec to replace alara.py/_TO_SEC
      * Simplify the method to get the list of decay/cooling times
 
-
 * Nuclear Data Handling and Reporting
    * Fixed issue where some gamma x-rays where throwing ``NotANuclide`` errors
      because the underlying nuclides were being read & recorded with negative ids.
@@ -147,23 +143,23 @@ v0.7.0 RC2
    * Move class MeshTally from mcnp.py to mesh.py
    * Change the method of creating meshtally from mcnp meshtal
    * pyne.mesh now takes advantage of PyMOAB instead of PyTAPS:
-     * IMeshTag changed to NativeMeshTag, with according tagetype name change:
-       from 'imesh' to 'nat_mesh'
-     * write_hdf5(self, filename) -> write_hdf5(self, filename, write_mats)
-     * new save(self, filename, write_mats) (alias for write hdf5)
-     * new class MeshSetIterator()
-     * new get_tag(self, tag_name) and delete_tag(self, tag_name) methods
-     * when tagging the root set of a mesh, a new syntax is available:
-           * `mymesh.mytag[mesh.mesh.getRootSet()] = val`  can now be written as `mymesh.mytag[mymesh] = val`
-     * direct call to the mesh entities change accordingly for example:
-        * getEntSets() -> get_entities_by_type( , )
-        * getTagHandle('XXX') -> tag_get_handle(types.XXXXX)
-        * iterate() -> mesh_iterate()
-        * getAllTags(xx) -> tag_get_tags_on_entity(xx)
-        * mesh.destroyTag(self, boolean) -> mesh.delete_tag(self)
-        * ... (see PyTAPS and PyMOAB respective documentation)
-     * those changes have been propagated in mcnp.py, alara.py, ccc.py, dagmc.pyx,
-       r2s.py, variancereduction.py, expand_tags.py, and their respective tests...
+      * IMeshTag changed to NativeMeshTag, with according tagetype name change:
+        from 'imesh' to 'nat_mesh'
+      * write_hdf5(self, filename) -> write_hdf5(self, filename, write_mats)
+      * new save(self, filename, write_mats) (alias for write hdf5)
+      * new class MeshSetIterator()
+      * new get_tag(self, tag_name) and delete_tag(self, tag_name) methods
+      * when tagging the root set of a mesh, a new syntax is available:
+         * `mymesh.mytag[mesh.mesh.getRootSet()] = val`  can now be written as `mymesh.mytag[mymesh] = val`
+      * direct call to the mesh entities change accordingly for example:
+         * getEntSets() -> get_entities_by_type( , )
+         * getTagHandle('XXX') -> tag_get_handle(types.XXXXX)
+         * iterate() -> mesh_iterate()
+         * getAllTags(xx) -> tag_get_tags_on_entity(xx)
+         * mesh.destroyTag(self, boolean) -> mesh.delete_tag(self)
+         * ... (see PyTAPS and PyMOAB respective documentation)
+      * those changes have been propagated in mcnp.py, alara.py, ccc.py, dagmc.pyx,
+        r2s.py, variancereduction.py, expand_tags.py, and their respective tests...
 
 **Maintenance**
 
