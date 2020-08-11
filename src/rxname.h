@@ -279,7 +279,8 @@ namespace rxname
         narxstr += " --> ";
         narxstr += rxnow;
       }
-      return narxstr.c_str();
+      const char* narxstr_rtn = narxstr.c_str();
+      return narxstr_rtn;
     };
 
   private:
@@ -344,10 +345,11 @@ namespace rxname
         INFEstr += " --> ";
         INFEstr += rxnow;
       }
-      return INFEstr.c_str();
+      const char* INFEstr_rtn = INFEstr.c_str();
+      return INFEstr_rtn;
     }
 
-  private:
+   private:
     std::string rxwas;  ///< previous reaction state
     std::string rxnow;  ///< current reaction state
   };

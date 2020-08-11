@@ -214,8 +214,8 @@ namespace pyne {
       std::string msgstr ("ValueError: ");
       if (!message.empty())
         msgstr += message;
-
-      return msgstr.c_str();
+      const char* msgstr_rtn = msgstr.c_str();
+      return msgstr_rtn;
     };
 
   private:

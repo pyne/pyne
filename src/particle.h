@@ -186,7 +186,8 @@ namespace particle
       std::string pname ("Not a valid particle name ");
       if(!part_name.empty())
         pname += part_name;
-      return pname.c_str();
+      const char *pname_rtn = pname.c_str();
+      return pname_rtn;
     }
 
     private:
