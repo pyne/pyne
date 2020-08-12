@@ -34,4 +34,6 @@ C the comments continue
 C here are more
 c even more
 m2 1000.05c 2 8000 1 $ Testing single line capability
+m3 1000 2 8000 1 $ Default library reading capability
+   nlib=60c
 
