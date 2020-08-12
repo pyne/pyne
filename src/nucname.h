@@ -138,7 +138,8 @@ namespace nucname
         NaNEstr += " --> ";
         NaNEstr += nucnow;
       }
-      return (const char *) NaNEstr.c_str();
+      const char* NaNEstr_rtn = NaNEstr.c_str();
+      return NaNEstr_rtn;
     };
 
   private:
@@ -206,7 +207,8 @@ namespace nucname
         INFEstr += " --> ";
         INFEstr += nucnow;
       }
-      return (const char *) INFEstr.c_str();
+      const char* INFEstr_rtn = INFEstr.c_str();
+      return INFEstr_rtn;
     }
 
   private:
