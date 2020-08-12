@@ -4,6 +4,14 @@
 master_repo="https://github.com/pyne/pyne.git"
 default_branch="develop"
 
+
+PR_NUMBER=$(echo "$CIRCLE_PULL_REQUEST" | sed "s/.*\/pull\///")
+API_GITHUB="https://api.github.com/repos/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME"
+PR_REQUEST_URL="$API_GITHUB/pulls/$PR_NUMBER"
+PR_RESPONSE=$(curl "$PR_REQUEST_URL")
+PR_BASE_BRANCH=$(echo $PR_RESPONSE | jq -e '.base.ref' | tr -d '"')
+
+
 echo "*********"
 echo "*********"
 echo "*********"
