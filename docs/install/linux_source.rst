@@ -20,10 +20,14 @@ PyNE has the following dependencies:
    #. `Python 2.7 <http://www.python.org/>`_
    #. `LAPACK <http://www.netlib.org/lapack/>`_
    #. `BLAS <http://www.netlib.org/blas/>`_
+   #. `Jinja2 <http://jinja.pocoo.org/>`_
 
 Optional Depenendencies:
    #. `MOAB <https://press3.mcs.anl.gov/sigma/moab-library>`_
    #. `PyTAPS <https://pythonhosted.org/PyTAPS/index.html>`_
+
+To run tutorial and examples:
+   #. `jupyter <http://jupyter.org/>`_
 
 Most of the dependencies are readily available through package managers.  Once
 all the dependencies are installed, PyNE can be installed. Download and unzip
