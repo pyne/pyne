@@ -6,8 +6,7 @@ API_GITHUB="https://api.github.com/repos/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJEC
 PR_REQUEST_URL="$API_GITHUB/pulls/$PR_NUMBER"
 PR_RESPONSE=$(curl "$PR_REQUEST_URL")
 PR_BASE_BRANCH=$(echo $PR_RESPONSE | tr '\r\n' ' ' | jq -e '.base.ref' | tr -d '"')
-echo $PR_RESPONSE
-echo $PR_BASE_BRANCH
+echo "Testing changelog against $PR_BASE_BRANCH branch"
 
 master_repo="https://github.com/pyne/pyne.git"
 default_branch=$PR_BASE_BRANCH
