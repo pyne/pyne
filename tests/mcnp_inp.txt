@@ -3,7 +3,7 @@ C  cells
   1  1  -19.1  -2323   $ These are just random surface numbers
   2  2  -0.9  -1222 1002 -4002                  
   3  2   1.005E-01 $ atom density of water (not molecule density)                           
-  4  2   -1.1 -1 -2 3 4
+  4  3   -1.1 -1 -2 3 4
 C 4  2  -2.7 $ Testing comment out capability
 c
 c Check to make sure surface cards with transformations are not
