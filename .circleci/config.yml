@@ -340,13 +340,13 @@ workflows:
                 - develop
 
 
-      # only done on tags
-      - build_push_website_deploy:
-          requires:
-            - py2_dagmc_pymoab_test
-            - py3_dagmc_pymoab_test
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /.*/
+      # # only done on tags
+      # - build_push_website_deploy:
+      #     requires:
+      #       - py2_dagmc_pymoab_test
+      #       - py3_dagmc_pymoab_test
+      #     filters:
+      #       branches:
+      #         ignore: /.*/
+      #       tags:
+      #         only: /.*/
