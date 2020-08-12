@@ -28,6 +28,9 @@ v0.7.0 RC2
   * Add options to install OpenMC Python API
   * Functions to read OpenMC state point file to get meshtally data
 
+* MCNP Support
+  * Default library reading capability from material card, such as nlib, plib and etc.
+
 * File scripts/activation_responses.py to get activation responses data for
   ALARA output file for better visualization. Responses include:
    * decay heat
