@@ -113,7 +113,6 @@ def assert_ubuntu_version():
 def assert_dep_versions():
     assert_np_version()
     assert_ubuntu_version()
-    assert_ipython_version()
 
 
 def ssl_context():
