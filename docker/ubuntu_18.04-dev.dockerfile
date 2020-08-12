@@ -15,8 +15,6 @@ RUN if [ "${py_version%.?}" -eq 3 ] ; \
             software-properties-common \
             wget \
             g++ \
-            curl \
-            jq \
             build-essential \
             python${PY_SUFIX}-setuptools \
             python${PY_SUFIX}-pip \
@@ -52,11 +50,10 @@ RUN if [ "${py_version%.?}" -eq 3 ] ; \
             numpy \
             nose \
             cython \
-            future \
-            matplotlib \
-            tables \
-            scipy \
-            jinja2
+            future
+# Required for CHANGELOG test
+RUN apt-get install -y curl jq
+
 
 
 
