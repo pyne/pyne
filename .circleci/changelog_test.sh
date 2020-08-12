@@ -20,7 +20,7 @@ echo "*********"
 echo "MY WAR"
 echo "*********"
 echo "*********"
-echo $GITHUB_PR_BASE_BRANCH
+echo $PR_BASE_BRANCH
 echo "*********"
 echo "*********"
 echo "*********"
