@@ -17,7 +17,6 @@ if sys.version_info[0] == 2:
 else:
     from html.parser import HTMLParser
 
-from pyne.utils import QAWarning
 from pyne.mesh import MeshTally, HAVE_PYMOAB
 if HAVE_PYMOAB:
     from pyne.mesh import NativeMeshTag
@@ -26,9 +25,9 @@ else:
          "Some aspects of the openmc module may be incomplete.",
          QAWarning)
 from pyne import nucname
-from pyne.utils import QAWarning
+from pyne.utils import QA_warn
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+QA_warn(__name__)
 
 try:
     import openmc
