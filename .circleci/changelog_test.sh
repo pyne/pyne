@@ -4,7 +4,7 @@
 master_repo="https://github.com/pyne/pyne.git"
 default_branch="develop"
 
-
+apt-get install curl jq
 PR_NUMBER=$(echo "$CIRCLE_PULL_REQUEST" | sed "s/.*\/pull\///")
 API_GITHUB="https://api.github.com/repos/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME"
 PR_REQUEST_URL="$API_GITHUB/pulls/$PR_NUMBER"
