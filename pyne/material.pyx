@@ -1233,6 +1233,51 @@ cdef class _Material:
 
         self.mat_pointer.from_atom_frac(af)
 
+    def from_activity(self, activities):
+        """from_activity(activities)
+        Loads the material composition based on a mapping of radionuclide
+        activities.
+
+        Parameters
+        ----------
+        activities : dict
+            Dictionary that maps radionuclides to activities for the material.
+            The keys may be intergers or strings. The values must be castable
+            to floats.
+
+        Examples
+        --------
+        To get a material of natural uranium, based on activities::
+
+            natu = {'U234': 12223.2, 'U235': 568.648, 'U238': 12347.1}
+            mat = Material()
+            mat.from_activity(natu)
+
+        """
+        cdef int key_zz
+        cdef double val
+        cdef cpp_map[int, double] key_act
+        cdef cpp_map[int, double].iterator keyiter, keyend
+        cdef cpp_map[int, double] act = cpp_map[int, double]()
+
+        # Convert atom_fracs to something usable in C++
+        for key, value in activities.items():
+            val = <double> value
+            if isinstance(key, int):
+                key_zz = <int> nucname.id(key)
+                if 0 == act.count(key_zz):
+                    act[key_zz] = 0.0
+                act[key_zz] = act[key_zz] + val
+            elif isinstance(key, basestring):
+                key_zz = nucname.id(key)
+                if 0 == act.count(key_zz):
+                    act[key_zz] = 0.0
+                act[key_zz] = act[key_zz] + val
+            else:
+                raise TypeError("Activity keys must be integers, "
+                        "or strings.")
+
+        self.mat_pointer.from_activity(act)
 
     def to_atom_dens(self):
         """Converts the material to a map of nuclides to atom densities.
@@ -1801,6 +1846,66 @@ def from_atom_frac(atom_fracs, double mass=-1.0, double density=-1.0,
     """
     mat = Material(metadata=metadata)
     mat.from_atom_frac(atom_fracs)
+
+    if 0.0 <= mass:
+        mat.mass = mass
+
+    if 0.0 <= density:
+        mat.density = density
+
+    if 0.0 <= atoms_per_molecule:
+        mat.atoms_per_molecule = atoms_per_molecule
+
+    return mat
+    
+
+
+def from_activity(activities, double mass=-1.0, double density=-1.0,
+                   double atoms_per_molecule=-1.0, metadata=None):
+    """from_activity(activities, double mass=-1.0, double atoms_per_molecule=-1.0)
+    Create a Material from a mapping of radionuclide activities.
+
+    Parameters
+    ----------
+    activities : dict
+        Dictionary that maps radionuclides to activities for the material. The
+        keys may be intergers or strings. The values must be castable to
+        floats.
+    mass : float, optional
+        This is the mass of the new stream. If the mass provided is negative
+        (default -1.0) then the mass of the new stream is calculated from the
+        sum of compdict's components before normalization.  If the mass here is
+        positive or zero, then this mass overrides the calculated one.
+    density : float, optional
+        This is the density of the material.
+    atoms_per_molecule : float, optional
+        Number of atoms per molecule of material.  Needed to obtain proper
+        scaling of molecular mass.  For example, this value for water is
+        3.0.
+    metadata : JSON-convertable Python object, optional
+        Initial attributes to build the material with.  At the top-level this is
+        usually a dictionary with string keys.  This container is used to store
+        arbitrary metadata about the material.
+
+    Returns
+    -------
+    mat : Material
+        A material generated from radionuclide activities.
+
+    Examples
+    --------
+    To get a material of natural uranium, based on activities::
+
+            natu = {'U234': 12223.2, 'U235': 568.648, 'U238': 12347.1}
+            mat = from_activity(natu)
+
+    See Also
+    --------
+    Material.from_activity : Underlying method class method.
+
+    """
+    mat = Material(metadata=metadata)
+    mat.from_activity(activities)
 
     if 0.0 <= mass:
         mat.mass = mass

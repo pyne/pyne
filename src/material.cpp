@@ -2013,6 +2013,20 @@ std::vector<std::pair<double, double> > pyne::Material::normalize_radioactivity(
   return normed;
 }
 
+void pyne::Material::from_activity(std::map<int, double> activities) {
+  // activities must be of the form {nuc: act}, eg, tritium
+  //  10030: 1.0
+
+  // clear existing components
+  comp.clear();
+
+  for (std::map<int, double>::iterator acti = activities.begin(); acti != activities.end(); acti++) {
+    comp[acti->first] = (acti->second) * pyne::atomic_mass(acti->first) / \
+                        pyne::N_A / pyne::decay_const(acti->first);
+  }
+  norm_comp();
+}
+
 
 #ifdef PYNE_DECAY
 pyne::Material pyne::Material::decay(double t) {

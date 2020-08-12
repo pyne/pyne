@@ -12,8 +12,8 @@ from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
 from pyne.utils import QAWarning
 warnings.simplefilter("ignore", QAWarning)
 from pyne import nuc_data
-from pyne.material import Material, from_atom_frac, from_hdf5, from_text, \
-    MapStrMaterial, MultiMaterial
+from pyne.material import Material, from_atom_frac, from_activity, from_hdf5, \
+    from_text, MapStrMaterial, MultiMaterial
 from pyne import jsoncpp
 from pyne import data
 from pyne import nucname
@@ -297,6 +297,17 @@ class TestMaterialMethods(TestCase):
         exp = {922350000: 59953.15151320379, 922380000: 177216.65219208886}
         assert_equal(set(obs), set(exp))
         assert_equal(set(obs.values()), set(exp.values()))
+
+
+    def test_from_activity(self):
+        mat = Material()
+        mat.from_activity({922350000: 59953.15101810882,
+                           922380000: 177216.65112976026})
+        assert_equal(mat.atoms_per_molecule, -1.0)
+        assert_equal(mat.comp[922350000], 0.05)
+        assert_equal(mat.comp[922380000], 0.95)
+        assert_equal(mat.mass, 15.0)
+        assert_equal(mat.molecular_mass(), 237.8986195419686)
 
 
     def test_decay_heat_stable(self):
@@ -1060,6 +1071,17 @@ def test_from_atom_frac_func():
     assert_almost_equal(mat.comp[922350000], 0.4376375781743612, 15)
     assert_almost_equal(mat.comp[922380000], 0.4432361674078869, 15)
     assert_almost_equal(mat.molecular_mass()/268.53718683220006, 1.0, 15)
+
+
+
+def test_from_activity_func():
+    leu = {922350000: 59953.15101810882, 922380000: 177216.65112976026}
+    mat = from_activity(leu)
+    assert_equal(mat.atoms_per_molecule, -1.0)
+    assert_equal(mat.comp[922350000], 0.05)
+    assert_equal(mat.comp[922380000], 0.95)
+    assert_equal(mat.mass, 15.0)
+    assert_equal(mat.molecular_mass(), 237.8986195419686)
 
 
 
@@ -2090,7 +2112,7 @@ def test_decay_u235_h3():
         # with spontaneous fission
         assert_mat_almost_equal(exp_sf, obs)
     else:
-        assert_true(False, "Observed material does not have corrent length")
+        assert_true(False, "Observed material does not have correct length")
 
 
 def test_cram_h3():
