@@ -4,6 +4,19 @@
 master_repo="https://github.com/pyne/pyne.git"
 default_branch="develop"
 
+echo "*********"
+echo "*********"
+echo "*********"
+echo "*********"
+echo "MY WAR"
+echo "*********"
+echo "*********"
+echo $GITHUB_PR_BASE_BRANCH
+echo "*********"
+echo "*********"
+echo "*********"
+echo "*********"
+
 
 # setup temp remote 
 git_remote_name=ci_changelog_`git log --pretty=format:'%h' -n 1`
