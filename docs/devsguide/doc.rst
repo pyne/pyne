@@ -92,7 +92,7 @@ else. Simply write rst files and add them to the ``index.rst``.
 
 Gallery
 -------
-The gallery is a collection of IPython notebooks which provide simple examples of 
+The gallery is a collection of Jupyter notebooks which provide simple examples of 
 how to perform tasks with pyne.
 
 Theory Manual
