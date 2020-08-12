@@ -35,7 +35,7 @@ The examples directory should also be kept up-to-date as much as possible.
 PyNE examples are either in Python files or `Jupyter notebooks
 <https://jupyter.org/>`_. This means that to test the examples requires a
 recent version of Jupyter.  Furthermore, the examples themseleves may have many
-other optional dependencies.  Don't be alarmed if testing the examples fails do
+other optional dependencies.  Don't be alarmed if testing the examples fails due
 to a lack of having a dependency installed.  For this reason, testing the
 examples is not as important as unit tests, but still should be done
 occassionally.
@@ -72,4 +72,3 @@ you can chain the following BASH commands together::
       ../execer.py || cd ..
 
 Happy testing!
-
