@@ -203,6 +203,8 @@ v0.7.0 RC2
    * test file for ENDF was wrong
   * Add functions to do file, file block, line, and string almost the same
     compare functions in pyne/utils.py
+  * Install Python dependencies with Pip instead of APT in Dockerfile
+  * Remove if block in travis-run-tests.sh (just run nosetests)
 
 * Code cleanup
    * Formatting improvements
