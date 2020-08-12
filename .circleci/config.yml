@@ -323,7 +323,7 @@ workflows:
 
       - py2_dagmc_pymoab_build:
           requires:
-            - py2_pymoab_build
+            - py3_dagmc_pymoab_build
       - py2_dagmc_pymoab_test:
           requires:
             - py2_dagmc_pymoab_build
