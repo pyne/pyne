@@ -207,6 +207,7 @@ v0.7.0 RC2
    * Install Python dependencies with Pip instead of APT in Dockerfile
    * Remove if block in travis-run-tests.sh (just run nosetests)
    * Deprecating most of the python 2 tests. Only testing python2 with pyMOAB and DAGMC deps.
+   * updates tutorials and examples to python3 syntax to avoid failures (#1271)
 
 * Code cleanup
    * Formatting improvements
