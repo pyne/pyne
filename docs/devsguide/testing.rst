@@ -32,8 +32,8 @@ passing.
 Example Testing
 ---------------
 The examples directory should also be kept up-to-date as much as possible.
-PyNE examples are either in Python files or IPython notebooks. This means that
-to test the examples requires a recent version of IPython.  Furthermore, the 
+PyNE examples are either in Python files or Jupyter notebooks. This means that
+to test the examples requires a recent version of Jupyter.  Furthermore, the 
 examples themseleves may have many other optional dependencies.  Don't be alarmed
 if testing the examples fails do to a lack of having a dependency installed.
 For this reason, testing the examples is not as important as unit tests, but still
@@ -51,7 +51,7 @@ To run the examples automatically, go to the examples directory and run the
 Tutorial Testing
 ----------------
 Tutorial testing is very similar to example testing except that all of the 
-tutorials are IPython notebooks.
+tutorials are Jupyter notebooks.
 
 To run the tutorials automatically, go to the tutorial directory and run the 
 ``execer.py`` file from the root pyne dir.
