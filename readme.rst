@@ -33,7 +33,7 @@ PyNE has the following dependencies:
    #. `Cython <http://cython.org/>`_ (>= 0.19.1)
    #. `HDF5 <http://www.hdfgroup.org/HDF5/>`_
    #. `PyTables <http://www.pytables.org/>`_
-   #. `Python 2.7 <http://www.python.org/>`_
+   #. `Python <http://www.python.org/>`_
    #. `LAPACK <http://www.netlib.org/lapack/>`_
    #. `BLAS <http://www.netlib.org/blas/>`_
    #. `Jinja2 <http://jinja.pocoo.org/>`_
