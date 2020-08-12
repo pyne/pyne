@@ -13,8 +13,7 @@ v0.7.0 RC2
 
 **New Capabilities**
 
-* Subvoxel R2S allows activation and photon source sampling by
-  material within a mesh voxel
+* Subvoxel R2S allows activation and photon source sampling by material within a mesh voxel
    * SubMode parameter in source_sampling
    * Add code for submode: SUBVOXEL
    * Test functions to test SUBVOXEL codes in test_source_sampling.py
@@ -28,8 +27,7 @@ v0.7.0 RC2
    * Add options to install OpenMC Python API
    * Functions to read OpenMC state point file to get meshtally data
 
-* File scripts/activation_responses.py to get activation responses data for
-  ALARA output file for better visualization. Responses include:
+* File scripts/activation_responses.py to get activation responses data for ALARA output file for better visualization. Responses include:
    * decay heat
    * specific activity
    * alpha heat
@@ -200,8 +198,7 @@ v0.7.0 RC2
         error.
    * revert internal nuc_data_path to origin value after internal data test
    * added DEFINE variable to allow material.cpp amalgamation without decay.cpp
-   * now skips endf test when website is not reachable to allow completeness of
-     the other tests.
+   * now skips endf test when website is not reachable to allow completeness of the other tests.
       * test file for ENDF was wrong
    * Add functions to do file, file block, line, and string almost the same
      compare functions in pyne/utils.py
