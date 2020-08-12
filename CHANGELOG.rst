@@ -203,6 +203,7 @@ v0.7.0 RC2
    * Add functions to do file, file block, line, and string almost the same
      compare functions in pyne/utils.py
    * make data available as replacement for data.pyne.io (#1261, #1265)
+   * Removed iPython check from ``setup.py`` and added Jupyter to be an optional dependency in documentation (#1273)
 
 * Code cleanup
    * Formatting improvements
