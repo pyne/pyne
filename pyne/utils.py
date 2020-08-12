@@ -15,7 +15,8 @@ class QAWarning(UserWarning):
     pass
 
 def QA_warn(module_name):
-    warn(module_name + " is not yet fully QA compliant.", QAWarning)
+    if ('PYNE_QA_WARN' in os.environ):
+        warn(module_name + " is not yet fully QA compliant.", QAWarning)
 
 
 time_conv_dict = {'as': 1e-18,
