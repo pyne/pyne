@@ -1399,13 +1399,25 @@ def mat_from_inp_line(filename, mat_line, densities='None'):
     # collect all material card data on one string
     line_index = 1
     line = linecache.getline(filename, mat_line + line_index)
+    lib_id = {}
     # people sometimes put comments in materials and then this loop breaks                                                                                       # so we need to keep reading if we encounter comments
     while len(line.split()) > 0 and (line[0:5] == '     ' or line[0].lower() == 'c'):
+        
+        # For deafult cross-section library. Requires a seperate line(s) of library indicator
+        # in material card 
+        lib_name = ['nlib', 'plib', 'hlib', 'pnlib', 'elib']
+        if line.split()[0][0:4] in lib_name:
+            for item in line.split():
+                lib_id[item.split('=')[0]] = item.split('=')[1]
+
         # make sure element/isotope is not commented out
-        if line.split()[0][0] != 'c' and line.split()[0][0] != 'C':
+        if line.split()[0][0] != 'c' and line.split()[0][0] != 'C' \
+                                     and (line.split()[0][0:4] not in lib_name):
+
             data_string += line.split('$')[0]
             line_index += 1
             line = linecache.getline(filename, mat_line + line_index)
+            
         # otherwise this not a line we care about, move on and
         # skip lines that start with c or C
         else:
@@ -1428,6 +1440,8 @@ def mat_from_inp_line(filename, mat_line, densities='None'):
 
             if len(data_string.split()[i].split('.')) > 1:
                 table_ids[str(zzzaaam)] = data_string.split()[i].split('.')[1]
+            else:
+                table_ids[str(zzzaaam)] = lib_id
 
     # Check to see it material is definted my mass or atom fracs.
     # Do this by comparing the first non-zero fraction to the rest
