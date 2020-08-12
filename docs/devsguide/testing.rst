@@ -32,12 +32,13 @@ passing.
 Example Testing
 ---------------
 The examples directory should also be kept up-to-date as much as possible.
-PyNE examples are either in Python files or Jupyter notebooks. This means that
-to test the examples requires a recent version of Jupyter.  Furthermore, the 
-examples themseleves may have many other optional dependencies.  Don't be alarmed
-if testing the examples fails do to a lack of having a dependency installed.
-For this reason, testing the examples is not as important as unit tests, but still
-should be done occassionally.
+PyNE examples are either in Python files or `Jupyter notebooks
+<https://jupyter.org/>`_. This means that to test the examples requires a
+recent version of Jupyter.  Furthermore, the examples themseleves may have many
+other optional dependencies.  Don't be alarmed if testing the examples fails do
+to a lack of having a dependency installed.  For this reason, testing the
+examples is not as important as unit tests, but still should be done
+occassionally.
 
 To run the examples automatically, go to the examples directory and run the 
 ``execer.py`` file from the root pyne dir.
@@ -51,7 +52,7 @@ To run the examples automatically, go to the examples directory and run the
 Tutorial Testing
 ----------------
 Tutorial testing is very similar to example testing except that all of the 
-tutorials are Jupyter notebooks.
+tutorials are `Jupyter notebooks <https://jupyter.org/>`_.
 
 To run the tutorials automatically, go to the tutorial directory and run the 
 ``execer.py`` file from the root pyne dir.
