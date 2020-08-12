@@ -1406,9 +1406,10 @@ def mat_from_inp_line(filename, mat_line, densities='None'):
         # For deafult cross-section library. Requires a seperate line(s) of library indicator
         # in material card 
         lib_name = ['nlib', 'plib', 'hlib', 'pnlib', 'elib']
-        if line.split()[0][0:4] in lib_name:
-            for item in line.split():
-                lib_id[item.split('=')[0]] = item.split('=')[1]
+        for token in line.split():
+            if '=' in token:
+                if token.split('=')[0] in lib_name:
+                    lib_id[token.split('=')[0]] = item.split('=')[1]
 
         # make sure element/isotope is not commented out
         if line.split()[0][0] != 'c' and line.split()[0][0] != 'C' \
