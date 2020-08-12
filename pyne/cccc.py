@@ -673,7 +673,7 @@ class Rtflux(object):
         else:
             warn("The PyMOAB optional dependency could not be imported. "
                  "All aspects of the partisn module are not imported.",
-                 QAWarning)
+                 ImportWarning)
 
         if not m.structured:
             raise ValueError("Only structured mesh is supported.")

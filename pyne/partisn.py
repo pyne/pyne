@@ -43,7 +43,7 @@ if HAVE_PYMOAB:
 else:
     warn("The PyMOAB optional dependency could not be imported. "
          "All aspects of the partisn module are not imported.",
-         QAWarning)
+         ImportWarning)
 
 try:
     from pyne import dagmc

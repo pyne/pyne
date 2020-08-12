@@ -27,7 +27,7 @@ try:
 except ImportError:
     HAVE_PYMOAB = False
     warn("The PyMOAB optional dependency could not be imported. "
-         "Some aspects of the mesh module may be incomplete.", QAWarning)
+         "Some aspects of the mesh module may be incomplete.", ImportWarning)
 
 
 _BOX_DIMS_TAG_NAME = "BOX_DIMS"

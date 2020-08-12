@@ -30,7 +30,7 @@ if HAVE_PYMOAB:
     from pyne.mesh import mesh_iterate
 else:
     warn("The PyMOAB optional dependency could not be imported. "
-         "Some aspects of the mesh module may be incomplete.", QAWarning)
+         "Some aspects of the mesh module may be incomplete.", ImportWarning)
 
 response_strings = {'decay_heat': 'Total Decay Heat',
                     'specific_activity': 'Specific Activity',

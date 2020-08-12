@@ -23,7 +23,7 @@ if HAVE_PYMOAB:
 else:
     warn("The PyMOAB optional dependency could not be imported. "
          "Some aspects of the openmc module may be incomplete.",
-         QAWarning)
+         ImportWarning)
 from pyne import nucname
 from pyne.utils import QA_warn
 

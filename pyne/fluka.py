@@ -26,7 +26,7 @@ if HAVE_PYMOAB:
 else:
     warn("The PyMOAB optional dependency could not be imported. "
          "Some aspects of the fluka module may be incomplete.",
-         QAWarning)
+         ImportWarning)
 
 
 class Usrbin(object):

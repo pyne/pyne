@@ -39,7 +39,7 @@ if HAVE_PYMOAB:
 else:
     warn("The PyMOAB optional dependency could not be imported. "
          "Some aspects of the mcnp module may be incomplete.",
-         QAWarning)
+         ImportWarning)
 
 if sys.version_info[0] > 2:
     def cmp(a, b):

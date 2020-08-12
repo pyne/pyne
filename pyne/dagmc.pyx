@@ -29,7 +29,7 @@ from pymoab import core as mb_core, types
 if not HAVE_PYMOAB:
     warn("The PyMOAB optional dependency could not be imported. "
          "Some aspects of dagmc module may be incomplete",
-         QAWarning)
+         ImportWarning)
 
 # Globals
 VOL_FRAC_TOLERANCE = 1E-10 # The maximum volume fraction to be considered valid
