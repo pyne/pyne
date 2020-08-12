@@ -15,6 +15,8 @@ RUN if [ "${py_version%.?}" -eq 3 ] ; \
             software-properties-common \
             wget \
             g++ \
+            curl \
+            jq \
             build-essential \
             python${PY_SUFIX}-setuptools \
             python${PY_SUFIX}-pip \
