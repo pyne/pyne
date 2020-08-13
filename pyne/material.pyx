@@ -1268,17 +1268,20 @@ cdef class _Material:
             val = <double> value
             if isinstance(key, int):
                 key_zz = <int> nucname.id(key)
-                if 0 == act.count(key_zz):
-                    act[key_zz] = 0.0
-                act[key_zz] = act[key_zz] + val
             elif isinstance(key, basestring):
                 key_zz = nucname.id(key)
-                if 0 == act.count(key_zz):
-                    act[key_zz] = 0.0
-                act[key_zz] = act[key_zz] + val
             else:
                 raise TypeError("Activity keys must be integers, "
                         "or strings.")
+
+            dc = data.decay_const(key_zz)
+            if dc == 0.0 and val == 0.0:
+                continue
+            elif dc == 0.0:
+                raise ValueError("Activity keys must be radionuclides.")
+            elif 0 == act.count(key_zz):
+                act[key_zz] = 0.0
+            act[key_zz] = act[key_zz] + val
 
         self.mat_pointer.from_activity(act)
 
