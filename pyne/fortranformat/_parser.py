@@ -79,7 +79,7 @@ def _parse_tokens(tokens, reversion=False, version=None):
         elif ed_type == 'ED10':
             ed = _read_ed10(token_set)
         else:
-            raise InvalidFormat('Could not identify edit descriptor in sequence $s' % str(token_set))
+            raise InvalidFormat('Could not identify edit descriptor in sequence %s' % str(token_set))
         # If there is a repeat number cached, then apply
         if repeat is not None:
             ed.repeat = repeat
