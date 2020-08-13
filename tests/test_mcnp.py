@@ -551,7 +551,7 @@ def test_read_mcnp():
              "source": " internet",
              "table_ids": {'10000': "05c", "80000":{}}}): 1})
 
-    read_materials = mats_from_inp('bcc_unit_cell_den')
+    read_materials = mats_from_inp('mcnp_inp.txt')
     assert_almost_equal(expected_material, read_materials[1])
     assert_equal(expected_material_default_lib, read_materials[3])
     assert_equal(
