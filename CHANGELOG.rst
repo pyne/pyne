@@ -58,7 +58,7 @@ v0.7.0 RC2
           /material/my_mat/composition
           /material/my_mat/nuclidelist
           /material/my_mat/composition_metadata
-        
+
         where, ``/material`` and ``/material/my_mat`` are now HDF5 groups
    * Material I/O formats
       * pyne::Material: capability to form PHITS input material card
@@ -77,6 +77,9 @@ v0.7.0 RC2
    * serpent.py function parse_dep.  Catches ValueError that
      occurs when parse_dep attempts to make_mats with a serpent 2 \*_dep.m file
      due to the \*_VOL variable not being a float
+
+*Bug fixes in examples and tutorials
+  * in half_life example, changed nuc_data call in anum to give int data type
 
 * Changes in source sampling for mesh-based Monte Carlo sources
    * Add statistics summary output of find_cell failure in source sampling.
@@ -177,7 +180,7 @@ v0.7.0 RC2
    * Added publications to bibliography (PR #1256)
    * Adding contributing guide and code of conduct (#1258)
    * Changed Doc and Tutorial mentions of iPython notebooks to Jupyter notebooks (PR #1262)
-    
+
 * Improvements in building and testing
    * require contributor to change CHANGELOG
    * Expand testing matrix to include:
@@ -221,7 +224,7 @@ v0.7.0 RC2
    * ``rxname.child()`` and ``rxname.parent()`` now accept ``str`` for the
      ``z`` argument in Python 3.
    * dagmc_bridge: added a static DagMC instance
-   * cleanup throws return from ``return (const char *)`` to simple ``return`` 
+   * cleanup throws return from ``return (const char *)`` to simple ``return``
      (it was suggested that those complicated return might cause seg fault, on some system -- OsX+conda)
    * Fixes string formatting typo in ``pyne/fortranformat/_parser.py``. Entire file is now ``str.format()`` (#1275)
 
