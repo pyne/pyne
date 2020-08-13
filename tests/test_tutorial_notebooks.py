@@ -22,12 +22,20 @@ def test_notebooks():
     # list all notebook files
     notebooks = glob.glob('../tutorial/*ipynb')
     for notebook in notebooks:
-        with open(notebook, 'r', encoding='utf-8') as myfile:
-            try:
-                # try to parse the JSON
-                data = json.load(myfile)
-            except:
-                failed.append(notebook)
+        try:
+            with open(notebook, 'r', encoding='utf-8') as myfile:
+                try:
+                    # try to parse the JSON
+                    data = json.load(myfile)
+                except:
+                    failed.append(notebook)
+        except TypeError:
+            with open(notebook, 'r') as myfile:
+                try:
+                    # try to parse the JSON
+                    data = json.load(myfile)
+                except:
+                    failed.append(notebook)
 
     assert_equal(len(failed), 0, "Not all notebooks contained valid JSON. [%s] failed." % ', '.join(failed))
 
