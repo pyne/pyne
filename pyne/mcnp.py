@@ -1400,16 +1400,22 @@ def mat_from_inp_line(filename, mat_line, densities='None'):
     line_index = 1
     line = linecache.getline(filename, mat_line + line_index)
     lib_id = {}
+    lib_name = ['nlib', 'plib', 'hlib', 'pnlib', 'elib']
     # people sometimes put comments in materials and then this loop breaks                                                                                       # so we need to keep reading if we encounter comments
     while len(line.split()) > 0 and (line[0:5] == '     ' or line[0].lower() == 'c'):
         
         # For deafult cross-section library. Requires a seperate line(s) of library indicator
         # in material card 
-        lib_name = ['nlib', 'plib', 'hlib', 'pnlib', 'elib']
+        
+        #if line.split()[0][0:4] in lib_name:
+        #    for item in line.split():
+        #        lib_id[item.split('=')[0]] = item.split('=')[1]
+        
+        # This is a new sloution to any case
         for token in line.split():
             if '=' in token:
                 if token.split('=')[0] in lib_name:
-                    lib_id[token.split('=')[0]] = item.split('=')[1]
+                    lib_id[token.split('=')[0]] = token.split('=')[1]
 
         # make sure element/isotope is not commented out
         if line.split()[0][0] != 'c' and line.split()[0][0] != 'C' \
@@ -1430,6 +1436,11 @@ def mat_from_inp_line(filename, mat_line, densities='None'):
     table_ids = {}
     for i in range(1, len(data_string.split())):
         if i & 1 == 1:
+
+            # Eliminates default library indicators
+            if data_string.split()[i].split('=')[0] in lib_name:
+                continue
+                
             zzzaaam = str(nucname.zzaaam(
                 nucname.mcnp_to_id(data_string.split()[i].split('.')[0])))
 
@@ -1438,6 +1449,7 @@ def mat_from_inp_line(filename, mat_line, densities='None'):
                 nucvec[zzzaaam] += float(data_string.split()[i+1])
             else:
                 nucvec[zzzaaam] = float(data_string.split()[i+1])
+            
 
             if len(data_string.split()[i].split('.')) > 1:
                 table_ids[str(zzzaaam)] = data_string.split()[i].split('.')[1]
@@ -1537,7 +1549,6 @@ def mat_from_inp_line(filename, mat_line, densities='None'):
         finished_mat = mat
 
     return finished_mat
-
 
 class Wwinp(Mesh):
     """A Wwinp object stores all of the information from a single MCNP WWINP
