@@ -78,7 +78,7 @@ v0.7.0 RC2
      occurs when parse_dep attempts to make_mats with a serpent 2 \*_dep.m file
      due to the \*_VOL variable not being a float
 
-*Bug fixes in examples and tutorials
+* Fixes in examples and tutorials
   * in half_life example, changed nuc_data call in anum to give int data type
 
 * Changes in source sampling for mesh-based Monte Carlo sources
