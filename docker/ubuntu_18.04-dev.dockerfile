@@ -21,11 +21,6 @@ RUN if [ "${py_version%.?}" -eq 3 ] ; \
             python${PY_SUFIX}-setuptools \
             python${PY_SUFIX}-dev \
             libpython${PY_SUFIX}-dev \
-            python${PY_SUFIX}-nose \
-            python${PY_SUFIX}-matplotlib \
-            python${PY_SUFIX}-tables \
-            python${PY_SUFIX}-scipy \
-            python${PY_SUFIX}-jinja2 \
             git \
             cmake \
             gfortran \
@@ -55,7 +50,11 @@ RUN if [ "${py_version%.?}" -eq 3 ] ; \
             numpy \
             nose \
             cython \
-            future
+            future \
+            matplotlib \
+            tables \
+            scipy \
+            jinja2
 
 
 
