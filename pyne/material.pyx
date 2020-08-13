@@ -638,7 +638,9 @@ cdef class _Material:
 
 
     def activity(self):
-        """This provides the activity of the comp of the material.
+        """This provides the activity of the comp of the material. It assumes
+        that the mass of the material is given in units of [grams] and returns
+        activities in units of [Bq].
 
         Returns
     -------
@@ -1236,7 +1238,8 @@ cdef class _Material:
     def from_activity(self, activities):
         """from_activity(activities)
         Loads the material composition based on a mapping of radionuclide
-        activities.
+        activities. It assumes that activities are supplied in units of [Bq]
+        and sets the material mass to units of [grams].
 
         Parameters
         ----------
@@ -1863,7 +1866,10 @@ def from_atom_frac(atom_fracs, double mass=-1.0, double density=-1.0,
 def from_activity(activities, double mass=-1.0, double density=-1.0,
                    double atoms_per_molecule=-1.0, metadata=None):
     """from_activity(activities, double mass=-1.0, double atoms_per_molecule=-1.0)
-    Create a Material from a mapping of radionuclide activities.
+    Create a Material from a mapping of radionuclide activities. If mass < 0.0,
+    it assumes the activities are supplied in units of [Bq] and sets the
+    material mass to units of [grams]. Otherewise when mass >= 0.0, it
+    treats the supplied activities as relative activities.
 
     Parameters
     ----------

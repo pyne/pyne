@@ -70,6 +70,8 @@ v0.7.0 RC2
       * increased precision of the material density reported in the comment card
         for an MCNP material to 5 decimal places
       * Adds tests to tests/test:materials.py:test_decay_heat(self) to check more isotopes
+      * Adds from_activity() to create or redefine materials using radionuclide
+        activities
 
 * Bug fixes in serpent support
    * in serpent.py, function VOL_serp2_fix() to correct for
