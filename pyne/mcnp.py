@@ -1404,14 +1404,7 @@ def mat_from_inp_line(filename, mat_line, densities='None'):
     # people sometimes put comments in materials and then this loop breaks                                                                                       # so we need to keep reading if we encounter comments
     while len(line.split()) > 0 and (line[0:5] == '     ' or line[0].lower() == 'c'):
         
-        # For deafult cross-section library. Requires a seperate line(s) of library indicator
-        # in material card 
-        
-        #if line.split()[0][0:4] in lib_name:
-        #    for item in line.split():
-        #        lib_id[item.split('=')[0]] = item.split('=')[1]
-        
-        # This is a new sloution to any case
+        # This line reads deafult cross-section library from material card 
         for token in line.split():
             if '=' in token:
                 if token.split('=')[0] in lib_name:
