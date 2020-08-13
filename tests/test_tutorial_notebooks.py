@@ -29,7 +29,7 @@ def test_notebooks():
             except:
                 failed.append(notebook)
 
-    assert_equal(len(failed), 0, "Not all notbooks contained valid JSON. [%s] failed." % ', '.join(failed))
+    assert_equal(len(failed), 0, "Not all notebooks contained valid JSON. [%s] failed." % ', '.join(failed))
 
 if __name__ == "__main__":
     nose.runmodule()
