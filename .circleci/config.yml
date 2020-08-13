@@ -1,4 +1,5 @@
 version: 2.1
+
 # Executors:
 # Alias the environment on which run the different jobs
 # i.e. in this case, docker image in which the jobs will be run
@@ -138,6 +139,18 @@ commands:
 # Define the different job that will be ran this separate building form
 # testing for each configuration allowing to get more information out of the CI
 jobs:
+  skip_draft:
+    docker:
+      - image: alpine:3.7
+    working_directory: ~/repo
+    steps:
+      - run: apk add --no-cache bash curl jq git openssh
+      - checkout
+      - run:
+          name: Skipping some test for Draft PR ?!
+          command: circleci/skip_draft.sh
+ 
+
 # CHANGELOG file checker
   changelog_update:
     docker:
@@ -280,16 +293,24 @@ jobs:
 # with limited amount of dependencies.
 workflows:
   version: 2
-  build_and_test:
+  draft_build:
     jobs:
+      - py3_dagmc_pymoab_openmc_build
+      - py3_dagmc_pymoab_openmc_test:
+          requires:
+            - py3_dagmc_pymoab_openmc_build
       - changelog_update:
           filters:
             branches:
               ignore: develop
             tags:
-              ignore: /.*/   
-      
-      - py3_build
+              ignore: /.*/ 
+  build_and_test:
+    jobs:
+      - skip_draft
+      - py3_build:
+          requires:
+            - skip_draft
       - py3_test:
           requires:
             - py3_build
@@ -314,13 +335,6 @@ workflows:
       - py3_dagmc_pymoab_hdf5_12_test:
           requires:
             - py3_dagmc_pymoab_hdf5_12_build
-
-      - py3_dagmc_pymoab_openmc_build:
-          requires:
-            - py3_dagmc_pymoab_build
-      - py3_dagmc_pymoab_openmc_test:
-          requires:
-            - py3_dagmc_pymoab_openmc_build
 
       - py2_dagmc_pymoab_build:
           requires:
