@@ -82,7 +82,9 @@ v0.7.0 RC2
      due to the \*_VOL variable not being a float
 
 * Fixes in examples and tutorials
-  * in half_life example, changed nuc_data call in anum to give int data type
+   * in half_life example, changed nuc_data call in anum to give int data type
+   * in Data Sources, rerun example to update output
+   * in Chainsolve Transmutation, rerun example to update output
 
 * Changes in source sampling for mesh-based Monte Carlo sources
    * Add statistics summary output of find_cell failure in source sampling.
