@@ -21,8 +21,7 @@ except AttributeError:
     collectionsAbc = collections
 cimport numpy as np
 import numpy as np
-from warnings import warn
-from pyne.utils import QAWarning
+from pyne.utils import QA_warn
 import os
 import sys
 if sys.version_info[0] >= 3:
@@ -47,7 +46,7 @@ cimport pyne.data as data
 import pyne.data as data
 
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+QA_warn(__name__)
 
 # Maximum 32-bit signed int
 DEF INT_MAX = 2147483647

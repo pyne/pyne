@@ -4,6 +4,8 @@ import os
 import glob
 import shutil
 from zipfile import ZipFile
+from pyne.utils import QA_warn
+
 try:
     import urllib.request as urllib
 except ImportError:
@@ -15,6 +17,8 @@ import tables as tb
 
 from pyne import ensdf
 from pyne.dbgen.api import BASIC_FILTERS
+
+QA_warn(__name__)
 
 
 def _readpoint(line, dstart, dlen):

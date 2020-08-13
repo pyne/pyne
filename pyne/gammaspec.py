@@ -3,14 +3,13 @@ GammaSpectrum class, reads a .spe file Will in the future have functions
 for activity calculations.
 """
 
-from warnings import warn
-from pyne.utils import QAWarning
+from pyne.utils import QA_warn
 
 import numpy as np
 
 from pyne import spectanalysis
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+QA_warn(__name__)
 
 
 class GammaSpectrum(spectanalysis.PhSpectrum):

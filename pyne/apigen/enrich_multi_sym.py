@@ -9,8 +9,7 @@ import os
 import logging
 import multiprocessing
 import time
-from warnings import warn
-from pyne.utils import QAWarning
+from pyne.utils import QA_warn
 
 from sympy import Symbol, pprint, latex, diff, count_ops, simplify, cse, Eq, Q, \
     log, logcombine, Abs, exp, sqrt, series, separate, powsimp, collect, expand, Abs
@@ -19,7 +18,7 @@ from sympy.utilities.iterables import numbered_symbols
 
 from utils import cse_to_c
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+QA_warn(__name__)
 
 NPROCS = 10
 

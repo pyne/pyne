@@ -14,7 +14,9 @@ available to use.
 """
 
 from warnings import warn
-from pyne.utils import QAWarning
+from pyne.utils import QA_warn
+
+QA_warn(__name__)
 
 # Mesh specific imports
 from pyne.mesh import Mesh, StatMesh, MeshError, HAVE_PYMOAB
@@ -24,7 +26,7 @@ if HAVE_PYMOAB:
 else:
     warn("The PyMOAB optional dependency could not be imported. "
          "Some aspects of the fluka module may be incomplete.",
-         QAWarning)
+         ImportWarning)
 
 
 class Usrbin(object):

@@ -16,7 +16,7 @@ from libc.stdlib cimport free
 from libcpp.string cimport string as std_string
 
 from warnings import warn
-from pyne.utils import QAWarning
+from pyne.utils import QA_warn
 
 from pyne cimport nucname
 from pyne import nucname
@@ -27,7 +27,7 @@ import pyne.material
 from pyne cimport cpp_enrichment
 
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+QA_warn(__name__)
 
 
 #####################

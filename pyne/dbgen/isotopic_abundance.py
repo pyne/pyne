@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 from __future__ import print_function
 import pkgutil
-from warnings import warn
-from pyne.utils import QAWarning
+from pyne.utils import QA_warn
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+QA_warn(__name__)
 
 
 def get_isotopic_abundances():

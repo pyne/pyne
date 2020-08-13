@@ -86,12 +86,11 @@ import os as _os
 import re as _re
 import sys as _sys
 import textwrap as _textwrap
-from warnings import warn
-from pyne.utils import QAWarning
+from pyne.utils import QA_warn
 
 from gettext import gettext as _
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+QA_warn(__name__)
 
 try:
     set
