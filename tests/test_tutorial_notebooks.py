@@ -22,7 +22,7 @@ def test_notebooks():
     # list all notebook files
     notebooks = glob.glob('../tutorial/*ipynb')
     for notebook in notebooks:
-        with open(notebook, 'r') as myfile:
+        with open(notebook, 'r', encoding='utf-8') as myfile:
             try:
                 # try to parse the JSON
                 data = json.load(myfile)
