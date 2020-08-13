@@ -3,7 +3,8 @@ C  cells
   1  1  -19.1  -2323   $ These are just random surface numbers
   2  2  -0.9  -1222 1002 -4002                  
   3  2   1.005E-01 $ atom density of water (not molecule density)                           
-  4  3   -1.1 -1 -2 3 4
+  4  2   -1.1 -1 -2 3 4
+  5  3   -1.1 -1 -2 3 4
 C 4  2  -2.7 $ Testing comment out capability
 c
 c Check to make sure surface cards with transformations are not
@@ -34,6 +35,6 @@ C the comments continue
 C here are more
 c even more
 m2 1000.05c 2 8000 1 $ Testing single line capability
-m3 1000 2 8000 1 $ Default library reading capability
-   nlib=60c
-
+m3 1000 2 8000 1 
+     6000 3 hlib=42h $ Default library reading capability
+     nlib=60c plib=01p 
