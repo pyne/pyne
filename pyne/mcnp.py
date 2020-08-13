@@ -1411,8 +1411,7 @@ def mat_from_inp_line(filename, mat_line, densities='None'):
                     lib_id[token.split('=')[0]] = token.split('=')[1]
 
         # make sure element/isotope is not commented out
-        if line.split()[0][0] != 'c' and line.split()[0][0] != 'C' \
-                                     and (line.split()[0][0:4] not in lib_name):
+        if line.split()[0][0] != 'c' and line.split()[0][0] != 'C':
 
             data_string += line.split('$')[0]
             line_index += 1
