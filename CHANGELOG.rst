@@ -206,6 +206,7 @@ v0.7.0 RC2
    * Removed iPython check from ``setup.py`` and added Jupyter to be an optional dependency in documentation (#1273)
    * Install Python dependencies with Pip instead of APT in Dockerfile
    * Remove if block in travis-run-tests.sh (just run nosetests)
+   * Deprecating most of the python 2 tests. Only testing python2 with pyMOAB and DAGMC deps.
 
 * Code cleanup
    * Formatting improvements
