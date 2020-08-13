@@ -10,3 +10,6 @@ then consider one of the options below:
 #. Source installs - recommended for developers:
   #. :ref:`linux_source`
   #. :ref:`osx_source` 
+
+Following installation, you can find information on how to test your build in the
+Developer's Guide under `How to Test <http://pyne.io/devsguide/testing.html>`_.
