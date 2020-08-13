@@ -43,6 +43,7 @@ HEADER = ENV.from_string("""
 #{{ dummy_ifdef }} PYNE_DECAY_IS_DUMMY
 #ifndef PYNE_GEUP5PGEJBFGNHGI36TRBB4WGM
 #define PYNE_GEUP5PGEJBFGNHGI36TRBB4WGM
+#define PYNE_DECAY
 
 {{ autogenwarn }}
 

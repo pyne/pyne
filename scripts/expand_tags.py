@@ -24,7 +24,7 @@ def main():
         from pymoab import types
     except ImportError:
         warn("The PyMOAB optional dependency could not be imported. "
-             "Some aspects of the mesh module may be incomplete.", QAWarning)
+             "Some aspects of the mesh module may be incomplete.", ImportWarning)
 
     try:
         m = Mesh(structured=True, mesh=args.mesh_file)

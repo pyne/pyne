@@ -6,6 +6,7 @@ from hashlib import md5
 
 import nose
 from nose.tools import assert_equal
+from nose import SkipTest
 
 import numpy as np
 from numpy.testing import assert_array_equal, assert_allclose, \
@@ -21,6 +22,13 @@ from pyne.xs.data_source import ENDFDataSource
 from pyne import nucname
 
 from utils import download_file
+
+def try_download(url, target, sha):
+    try :
+        download_file(url, target, sha)
+    except:
+        raise SkipTest(url + " not available")
+
 
 def ignore_future_warnings(func):
     """This is a decorator which can be used to ignore FutureWarnings
@@ -52,6 +60,7 @@ def array_from_ENDF(fh):
 
 
 def test_endftod():
+    
     from pyne._utils import endftod
     obs = [endftod(" 3.28559+12"),
            endftod(" 2.328559+4"),
@@ -78,10 +87,12 @@ def test_endftod():
     assert_allclose(obs, exp, rtol = 1e-8)
 
 def test_loadtape():
-    download_file("http://www.nndc.bnl.gov/endf/b6.8/tapes/tape.100",
-                  "endftape.100", "b56dd0aee38bd006c58181e473232776")
+    try_download("http://www.nndc.bnl.gov/endf/b6.8/tapes/tape.100",
+             "endftape.100", "b56dd0aee38bd006c58181e473232776")
+
     testlib = Library("endftape.100")
-    exp_nuclides = set([10010000, 30060000, 40090000, 50110000, 30070000, 60000000, 50100000])
+    exp_nuclides = set([10010000, 30060000, 40090000,
+                        50110000, 30070000, 60000000, 50100000])
     obs_nuclides = set(map(int, testlib.structure.keys()))
     assert_equal(exp_nuclides, obs_nuclides)
 
@@ -483,9 +494,9 @@ def test_isomeric():
     assert (nuc61148m in library.structure)
 
 def test_u235():
-    download_file("http://t2.lanl.gov/nis/data/data/ENDFB-VII.1-neutron/U/235",
+    try_download("http://t2.lanl.gov/nis/data/data/ENDFB-VII.1-neutron/U/235",
                   "U235.txt", "1b71da3769d8b1e675c3c579ba5cb2d3")
-
+    
     u235 = Library('U235.txt')
     nuc = 922350000
     u235._read_res(nuc)
@@ -639,9 +650,8 @@ def test_discretize():
     except ImportError:
         import urllib
 
-    if not isfile("Ni59.txt"):
-        urllib.urlretrieve("http://t2.lanl.gov/nis/data/data/ENDFB-VII.1-neutron/Ni/59",
-                    "Ni59.txt")
+    try_download("http://t2.lanl.gov/nis/data/data/ENDFB-VII.1-neutron/Ni/59",
+                        "Ni59.txt", "")
 
     endfds = ENDFDataSource("Ni59.txt")
     nonelastic_rx = endfds.reaction("Ni59", "nonelastic")
@@ -659,11 +669,11 @@ def test_discretize():
            74.217617672501689, 162.26091389706099, 218.90153743636509,
            312.62178192130619, 590.40136068709603, 724.64216445611373]
     assert_array_almost_equal(nonelastic_c, exp)
-
+    os.remove(Ni59.txt)
 
 def test_photoatomic():
-    download_file("https://www-nds.iaea.org/fendl30/data/atom/endf/ph_3000_30-Zn.txt",
-                  "Zn.txt", 'e6bda2fe6125ad9a8d51a6405ae9cc2a')
+    try_download("https://www-nds.iaea.org/fendl30/data/atom/endf/ph_3000_30-Zn.txt",
+                      "Zn.txt", 'e6bda2fe6125ad9a8d51a6405ae9cc2a')
     photondata = Library('Zn.txt')
     xs_data = photondata.get_xs(300000000, 501)[0]
     Eints, sigmas = xs_data['e_int'], xs_data['xs']
@@ -682,8 +692,8 @@ def test_photoatomic():
 
 
 def test_evaluation_neutron():
-    download_file('http://t2.lanl.gov/nis/data/data/ENDFB-VII.1-neutron/U/235',
-                  'U235.txt', "1b71da3769d8b1e675c3c579ba5cb2d3")
+    try_download('http://t2.lanl.gov/nis/data/data/ENDFB-VII.1-neutron/U/235',
+                      'U235.txt', "1b71da3769d8b1e675c3c579ba5cb2d3")
     u235 = Evaluation('U235.txt', verbose=False)
     u235.read()
 
@@ -743,8 +753,8 @@ def test_evaluation_neutron():
 
 
 def test_evaluation_decay():
-    download_file('http://t2.lanl.gov/nis/data/endf/decayVII.1/092_U_233',
-                  'U233.txt', '3db23dc650bae28eabb92942dd7d0de5')
+    try_download('http://t2.lanl.gov/nis/data/endf/decayVII.1/092_U_233',
+                      'U233.txt', '3db23dc650bae28eabb92942dd7d0de5')
     u233 = Evaluation('U233.txt', verbose=False)
     u233.read()
 
@@ -775,7 +785,7 @@ def test_evaluation_decay():
 
 
 def test_evaluation_photoatomic():
-    download_file('https://www-nds.iaea.org/fendl30/data/atom/endf/ph_3000_30-Zn.txt',
+    try_download('https://www-nds.iaea.org/fendl30/data/atom/endf/ph_3000_30-Zn.txt',
                   'Zn.txt', 'e6bda2fe6125ad9a8d51a6405ae9cc2a')
     zn = Evaluation('Zn.txt', verbose=False)
     zn.read()
@@ -810,8 +820,12 @@ def test_evaluation_photoatomic():
 
 
 def test_evaluation_electroatomic():
-    download_file('http://t2.lanl.gov/nis/data/data/ENDFB-VII-electroatomic/Mo/nat',
-                  'Mo.txt', '2139a23258c517ae3bfa5f2cc346da4c')
+    try:
+        try_download('http://t2.lanl.gov/nis/data/data/ENDFB-VII-electroatomic/Mo/nat',
+                      'Mo.txt', '2139a23258c517ae3bfa5f2cc346da4c')
+    except:
+        raise SkipTest("http://t2.lanl.gov/nis/data/data/ENDFB-VII.1-neutron not available")
+    
     mo = Evaluation('Mo.txt', verbose=False)
     mo.read()
 
@@ -843,7 +857,7 @@ def test_evaluation_electroatomic():
 
 
 def test_evaluation_relaxation():
-    download_file('http://t2.lanl.gov/nis/data/endf/relaxation/Xe-relax',
+    try_download('http://t2.lanl.gov/nis/data/endf/relaxation/Xe-relax',
                   'Xe.txt', '40ecb69da6a45f992918a98da4d98ba0')
     xe = Evaluation('Xe.txt', verbose=False)
     xe.read()
@@ -865,6 +879,47 @@ def test_evaluation_relaxation():
     assert data['N2']['transitions'][12] == (u'N5', u'O3', 81.95, 0.00224012)
     assert data['O3']['transitions'] == []
 
+def test_contents_regexp():
+    testInput = """A line like this will never happen in any ENDF-6 formatted file!!!
+This line looks like a (MF,MT)=(1,451) line but NOT!              012  1451 1 34
+This line should be recognized as a valid (MF,MT)=(1,451) doc line 123 1451  456
+It is now checked whether an integer number starts with '0' or not0123 1451  457
+    (perhaps not a valid FORTRAN77 INTEGER!)                       123 1451  458
+The following two lines are valid CONT Records in ENDF-6 format    123 1451  459
+but are NOT recognized as CONTENTS lines in (MF,MT)=(1,451).       123 1451  460
+12345689901 2345678901  345678901   45678901    5678901     6789012345 1451  461
+          1          2          3          4          5          62345 1451  462
+The following two lines should be recognized as the CONTENTS lines.
+   (Neither the ranges of the numbers (MF:1-99, MT:1-999)
+    nor the position of the CONTENTS lines are checked)
+                        345678901   45678901    5678901     6789012345 1451  463
+                                3          4          5          62345 1451  464
+The following three lines are DATA lines but now it is not searched for.
+ 9.87654+32-6.54321098  345678901   45678901    5678901     6789012345 1451  465
+-1.234567+1+1.23456-22          3          4          5          62345 1451  466
+ 2.34567890-3.456789+1          3          4          5          62345 1451  467
+LRP can be NEGATIVE!
+ 2.34567890-3.456789+1         -3          4          5          62345 1451  468
+How about the following three???
+2.34567890 -3.456789+1          3          4          5          62345 1451  469
+ 2.34567890-3.456789+1         3          4          5          6 2345 1451  470
+ 2.34567890-3.456789+1         3          4          5          6 2345 1451 471 
+"""
+    from pyne.endf import FILE1_R, SPACEINT11_R
+    for line in testInput.splitlines():
+        #print("'{}'".format(line))
+        if FILE1_R.match(line):
+            parts = [line[i:i+11] for i in range(0, 66, 11)]
+            # CONTENTS line
+            if parts[0]+parts[1]==' '*22 and \
+               SPACEINT11_R.match(parts[2]) and SPACEINT11_R.match(parts[3]) and \
+               SPACEINT11_R.match(parts[4]) and SPACEINT11_R.match(parts[5]):
+                print("1451CONT: '{}'".format(line))
+            # DOCUMENTS line
+            else:
+                print("1451DOCS: '{}'".format(line))
+        else:
+            print("OTHER   : '{}'".format(line))
 
 if __name__ == "__main__":
     nose.runmodule()

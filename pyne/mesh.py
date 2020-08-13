@@ -1,17 +1,21 @@
 from __future__ import print_function, division
-from pyne.material import Material, MaterialLibrary, MultiMaterial
+from future.utils import implements_iterator
+from pyne.material import Material, MultiMaterial
+from pyne.material_library import MaterialLibrary
 import sys
 import copy
 import itertools
-from collections import Iterable, Sequence
+try:
+    from collections.abc import Iterable, Sequence
+except ImportError:
+    from collections import Iterable, Sequence
 from warnings import warn
-from pyne.utils import QAWarning
+from pyne.utils import QA_warn, check_iterable
 
 import numpy as np
 import tables as tb
 
-
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+QA_warn(__name__)
 
 try:
     from pymoab import core as mb_core, hcoord, scd, types
@@ -23,7 +27,7 @@ try:
 except ImportError:
     HAVE_PYMOAB = False
     warn("The PyMOAB optional dependency could not be imported. "
-         "Some aspects of the mesh module may be incomplete.", QAWarning)
+         "Some aspects of the mesh module may be incomplete.", ImportWarning)
 
 
 _BOX_DIMS_TAG_NAME = "BOX_DIMS"
@@ -67,8 +71,8 @@ class Tag(object):
             The name of the tag.
         doc : str, optional
             Documentation string for the tag.
-
         """
+
         if mesh is None or name is None:
             self._lazy_args = {'mesh': mesh, 'name': name, 'doc': doc}
             return
@@ -129,7 +133,7 @@ class MaterialPropertyTag(Tag):
             RuntimeError("Mesh.mats is None, please add a MaterialLibrary.")
         size = len(self.mesh)
         if isinstance(key, _INTEGRAL_TYPES):
-            return getattr(mats[key], name)
+            return getattr(mats[int(key)], name)
         elif isinstance(key, slice):
             return np.array([getattr(mats[i], name)
                              for i in range(*key.indices(size))])
@@ -364,8 +368,8 @@ class NativeMeshTag(Tag):
             The name of the tag.
         doc : str, optional
             Documentation string for the tag.
-
         """
+
         super(NativeMeshTag, self).__init__(mesh=mesh, name=name, doc=doc)
 
         if mesh is None or name is None:
@@ -547,6 +551,7 @@ class NativeMeshTag(Tag):
 
         are created and the data is tagged accordingly.
         """
+
         if self.size < 2:
             raise TypeError("Cannot expand a tag that is already a scalar.")
         for j in range(self.size):
@@ -582,7 +587,6 @@ class ComputedTag(Tag):
     The results of computed tags are not stored and the function object itself
     is also not persisted.  Therefore, you must manually re-tag the mesh with
     the desired functions each session.
-
     '''
 
     def __init__(self, f, mesh=None, name=None, doc=None):
@@ -596,8 +600,8 @@ class ComputedTag(Tag):
             The name of the tag.
         doc : str, optional
             Documentation string for the tag.
-
         """
+
         doc = doc or f.__doc__
         super(ComputedTag, self).__init__(mesh=mesh, name=name, doc=doc)
         if mesh is None or name is None:
@@ -702,8 +706,19 @@ class Mesh(object):
             where each value is a volume element index number. Typically volume
             elements should be indexed from 0. The "BOX_DIMS" information is
             stored in self.dims.
-
         """
+
+        # if Mesh is made and no parameters passed, raise MeshError
+        if (mesh is None) and (not structured) and (structured_coords is None) \
+            and (structured_set is None) and (structured_ordering == 'xyz') \
+            and (mats == ()):
+            raise MeshError("Trivial mesh instantiation detected. "
+                            "For structured mesh instantiation, "
+                                "supply exactly one of the following:\n"
+                                "A. PyMOAB instance\n"
+                                "B. Mesh file\n"
+                                "C. Mesh coordinates\n"
+                                "D. Structured entity set AND PyMOAB instance")
         if mesh is None:
             self.mesh = mb_core.Core()
         elif isinstance(mesh, basestring):
@@ -726,7 +741,7 @@ class Mesh(object):
                 # check for the structured box tag on the instance
                 try:
                     box_tag = self.mesh.tag_get_handle(_BOX_DIMS_TAG_NAME)
-                except types.MB_TAG_NOT_FOUND as e:
+                except RuntimeError as e:
                     print("BOX_DIMS not found on MOAB mesh instance")
                     raise e
 
@@ -816,10 +831,15 @@ class Mesh(object):
         mats_in_mesh_file = False
         if isinstance(mesh, basestring) and len(mats) == 0:
             with tb.open_file(mesh) as h5f:
-                if '/materials' in h5f:
+                if '/mat_name' in h5f:
                     mats_in_mesh_file = True
+                    mat_path = '/mat_name'
+                elif ('/materials' in h5f) or ('/material_library/materials' in h5f):
+                    mats_in_mesh_file = True
+                    mat_path = '/materials'
+
             if mats_in_mesh_file:
-                mats = MaterialLibrary(mesh)
+                mats = MaterialLibrary(mesh, datapath=mat_path)
 
         if mats is None:
             pass
@@ -904,6 +924,7 @@ class Mesh(object):
         """Iterates through the mesh and at each step yield the volume element
         index i, the material mat, and the volume element itself ve.
         """
+
         mats = self.mats
         if mats is None:
             for i, ve in enumerate(self.iter_ve()):
@@ -913,8 +934,7 @@ class Mesh(object):
                 yield i, mats[i], ve
 
     def iter_ve(self):
-        """Returns an iterator that yields on the volume elements.
-        """
+        """Returns an iterator that yields on the volume elements."""
         if self.structured:
             return self.structured_iterate_hex(self.structured_ordering)
         else:
@@ -954,8 +974,8 @@ class Mesh(object):
         dtype : numpy dtype, optional
             The data type of the tag. This only applies to NativeMeshTags. See PyMOAB
             for more details.
-
         """
+
         if name in self.tags:
             raise KeyError('{0} tag already exists on the mesh'.format(name))
         if tagtype is None:
@@ -1021,32 +1041,32 @@ class Mesh(object):
             delattr(self, tag_name)
 
     def __iadd__(self, other):
-        """Adds the common tags of other to the mesh object.
-        """
+        """Adds the common tags of other to the mesh object."""
         tags = self.common_ve_tags(other)
         return self._do_op(other, tags, "+")
 
     def __isub__(self, other):
-        """Substracts the common tags of other to the mesh object.
-        """
+        """Substracts the common tags of other to the mesh object."""
         tags = self.common_ve_tags(other)
         return self._do_op(other, tags, "-")
 
     def __imul__(self, other):
-        """Multiplies the common tags of other to the mesh object.
-        """
+        """Multiplies the common tags of other to the mesh object."""
         tags = self.common_ve_tags(other)
         return self._do_op(other, tags, "*")
 
     def __idiv__(self, other):
-        """Divides the common tags of other to the mesh object.
-        """
+        """Divides the common tags of other to the mesh object."""
+        tags = self.common_ve_tags(other)
+        return self._do_op(other, tags, "/")
+
+    def __itruediv__(self, other):
+        """Divides the common tags of other to the mesh object."""
         tags = self.common_ve_tags(other)
         return self._do_op(other, tags, "/")
 
     def _do_op(self, other, tags, op, in_place=True):
-        """Private function to do mesh +, -, *, /.
-        """
+        """Private function to do mesh +, -, *, /."""
         # Exclude error tags in a case a StatMesh is mistakenly initialized as
         # a Mesh object.
         tags = set(tag for tag in tags if not tag.endswith('_error'))
@@ -1070,18 +1090,17 @@ class Mesh(object):
         return mesh_1
 
     def common_ve_tags(self, other):
-        """Returns the volume element tags in common between self and other.
-        """
+        """Returns the volume element tags in common between self and other."""
         self_it = MeshSetIterator(self.mesh,
                                   self.structured_set,
                                   types.MBMAXTYPE,
                                   dim=3)
-        self_tags = self.mesh.tag_get_tags_on_entity(self_it.next())
+        self_tags = self.mesh.tag_get_tags_on_entity(next(self_it))
         other_it = MeshSetIterator(other.mesh,
                                    other.structured_set,
                                    types.MBMAXTYPE,
                                    dim=3)
-        other_tags = other.mesh.tag_get_tags_on_entity(other_it.next())
+        other_tags = other.mesh.tag_get_tags_on_entity(next(other_it))
         self_tags = set(x.get_name() for x in self_tags)
         other_tags = set(x.get_name() for x in other_tags)
         intersect = self_tags & other_tags
@@ -1113,6 +1132,7 @@ class Mesh(object):
         .. : float
             Element's volume. Returns None if volume is not a hex or tet.
         """
+
         coord = self.mesh.get_coords(
             self.mesh.get_connectivity(ve)).reshape(-1, 3)
         num_coords = coord.shape[0]
@@ -1140,6 +1160,7 @@ class Mesh(object):
         center : tuple
            The (x, y, z) coordinates of the center of the mesh volume element.
         """
+
         ve_handle = _eh_py_type(ve)
         coords = self.mesh.get_coords(
             self.mesh.get_connectivity(ve_handle)).reshape(-1, 3)
@@ -1215,6 +1236,7 @@ class Mesh(object):
                                         values change fastest, j-values least
                                         fast.
         """
+
         self._structured_check()
 
         # special case: zyx order is the standard pytaps iteration order,
@@ -1239,6 +1261,7 @@ class Mesh(object):
         See structured_iterate_hex() for an explanation of the order argument
         and the available keyword arguments.
         """
+
         self._structured_check()
         # special case: zyx order without kw is equivalent to an iterator
         if order == "zyx" and not kw:
@@ -1258,6 +1281,7 @@ class Mesh(object):
         See structured_iterate_hex() for an explanation of the order argument
         and the available keyword arguments.
         """
+
         self._structured_check()
         indices, _ = _structured_iter_setup(self.dims, order, **kw)
         # Use an inefficient but simple approach: call structured_hex_volume()
@@ -1283,6 +1307,7 @@ class Mesh(object):
         order : str, optional
             The requested iteration order (e.g. 'zyx').
         """
+
         self._structured_check()
         if not order:
             order = self.structured_ordering
@@ -1298,8 +1323,10 @@ class Mesh(object):
         Given a dimension "x", "y", or "z", return a list of the mesh vertices
         along that dimension.
         """
+
         self._structured_check()
 
+        ## sometimes the dim is the ascii of the 'x', 'y', 'z'
         if len(dim) == 1 and dim in "xyz":
             idx = "xyz".find(dim)
             return [self.mesh.get_coords(v)[idx] for v in self.structured_iterate_vertex(dim)]
@@ -1343,8 +1370,8 @@ class Mesh(object):
         cell_mats : dict
             Maps geometry cell numbers to Material objects that represent what
             material each cell is made of.
-
         """
+
         for i in range(len(self)):
             mat_col = {}  # Collection of materials in the ith ve.
             for row in cell_fracs[cell_fracs['idx'] == i]:
@@ -1374,10 +1401,11 @@ class Mesh(object):
 
             The array must be sorted with respect to both idx and cell, with
             cell changing fastest.
-
         """
 
         num_vol_elements = len(self)
+        # sort cell_fracs
+        cell_fracs = _cell_fracs_sort_vol_frac_reverse(cell_fracs)
         # Find the maximum cell number in a voxel
         max_num_cells = -1
         for i in range(num_vol_elements):
@@ -1450,6 +1478,7 @@ class StatMesh(Mesh):
         """Private function to do mesh +, -, *, /. Called by operater
         overloading functions.
         """
+
         # Exclude error tags because result and error tags are treated
         # simultaneously so there is not need to include both in the tag
         # list to iterate through.
@@ -1490,6 +1519,121 @@ class StatMesh(Mesh):
 
         return mesh_1
 
+
+class MeshTally(StatMesh):
+    """This class stores all information from a single mesh tally that
+    exists within some meshtal or state point file. Header information is
+    stored as attributes and the "mesh" attribute is a PyNE mesh object tagged
+    with all result and relative error data. This class inherits from StatMesh,
+    exposing all statistical mesh manipulation methods.
+
+    Attributes
+    ----------
+    tally_number : int
+        The tally number.
+        For mesh tally from MCNP, it must end with 4 (e.g. 4, 14, 214).
+        For mesh tally from OpenMC, it could be any int.
+    particle : string
+        Either "neutron" for a neutron mesh tally or "photon" for a photon mesh
+        tally.
+    dose_response : bool
+        True if the tally is modified by a dose response function.
+    x_bounds : tuple of floats
+        The locations of mesh vertices in the x direction.
+    y_bounds : tuple of floats
+        The locations of mesh vertices in the y direction.
+    z_bounds : tuple of floats
+        The locations of mesh vertices in the z direction.
+    dims : list
+        Dimensions of the mesh.
+    num_ves : int
+        Number of volume elements.
+    e_bounds : tuple of floats
+        The minimum and maximum bounds for energy bins.
+    num_e_groups: int
+        Number of energy groups.
+    mesh :
+        An PyMOAB core instance tagged with all results and
+        relative errors.
+    tag_names : iterable
+        Four strs that specify the tag names for the results, relative errors,
+        total results, and total relative error.
+
+    Notes
+    -----
+    All Mesh/StatMesh attributes are also present via a super() call to
+    StatMesh.__init__().
+    """
+
+    def __init__(self):
+        """Create an empty MeshTally object and set default values."""
+        if not HAVE_PYMOAB:
+            raise NotImplementedError("PyMOAB is not available, "
+                               "unable to create Meshtally Mesh.")
+
+        self.tally_number = None
+        self.particle = 'neutron'
+        self.set_default_tag_names()
+
+    @property
+    def tag_names(self):
+        return self._tag_names
+
+    @tag_names.setter
+    def tag_names(self, tag_names):
+        _check_meshtally_tag_names(tag_names)
+        self._tag_names = tag_names
+
+    def set_default_tag_names(self):
+        """Set default tag_names according to particle type."""
+        self.tag_names = ("{0}_result".format(self.particle),
+                          "{0}_result_rel_error".format(self.particle),
+                          "{0}_result_total".format(self.particle),
+                          "{0}_result_total_rel_error".format(self.particle))
+
+    def tag_flux_error_from_tally_results(self, result, rel_err, res_tot,
+                                          rel_err_tot):
+        """
+        This function uses the output tally result, rel_err, res_tot and the
+        rel_err_tot to set the flux and error tags.
+
+        Parameters
+        ----------
+        result : numpy array
+            This numpy array contains the flux data read from MCNP meshtal or
+            OpenMC state point file.
+            The shape of this numpy array is (ves, num_e_groups).
+        rel_err : numpy array
+            This numpy array contains the relative error data read from MCNP
+            meshtal or OpenMC state point file. The shape of this numpy array
+            is (num_ves, num_e_groups).
+        res_tot : list
+            The total results.
+        rel_err_tot : list
+            Relative error of total results.
+        """
+
+        num_ves = len(self)
+        self.tag(name=self.tag_names[0], value=result,
+                 doc='{0} flux'.format(self.particle),
+                 tagtype=NativeMeshTag, size=self.num_e_groups, dtype=float)
+        # set result_rel_error tag
+        self.tag(name=self.tag_names[1],
+                 value=rel_err,
+                 doc='{0} flux relative error'.format(self.particle),
+                 tagtype=NativeMeshTag, size=self.num_e_groups, dtype=float)
+        # set result_total tag
+        self.tag(name=self.tag_names[2],
+                 value=res_tot,
+                 doc='total {0} flux'.format(self.particle),
+                 tagtype=NativeMeshTag, size=1, dtype=float)
+        # set result_total_rel_error tag
+        self.tag(name=self.tag_names[3],
+                 value=rel_err_tot,
+                 doc='total {0} flux relative error'.format(self.particle),
+                 tagtype=NativeMeshTag, size=1, dtype=float)
+
+
 ######################################################
 # private helper functions for structured mesh methods
 ######################################################
@@ -1500,6 +1644,7 @@ def _structured_find_idx(dims, ijk):
 
     For tuple (i,j,k), return the number N in the appropriate iterator.
     """
+
     dim0 = [0] * 3
     for i in range(0, 3):
         if (dims[i] > ijk[i] or dims[i + 3] <= ijk[i]):
@@ -1517,8 +1662,9 @@ def _structured_step_iter(it, n):
 
     Return the nth item in the iterator.
     """
+
     it.step(n)
-    r = it.next()
+    r = next(it)
     it.reset()
     return r
 
@@ -1531,6 +1677,7 @@ def _structured_iter_setup(dims, order, **kw):
     with fastest-changing coordinate in the last column), and the
     ordmap used by _structured_iter to reorder each coodinate to (i,j,k).
     """
+
     # a valid order has the letters "x", "y", and "z"
     # in any order without duplicates
     if not (len(order) <= 3 and
@@ -1570,6 +1717,7 @@ def _structured_iter(indices, ordmap, dims, it):
     """Iterate over the indices lists, yielding _structured_step_iter(it) for
     each.
     """
+
     d = [0, 0, 1]
     d[1] = (dims[3] - dims[0])
     d[0] = (dims[4] - dims[1]) * d[1]
@@ -1619,15 +1767,18 @@ class MeshSetIterator(object):
         self.entities = ents
 
     def __iter__(self):
-        for i in range(0, self.size):
-            yield self.entities[i]
+        return self
 
-    def next(self):
+    def __next__(self):
         if self.pos >= self.size:
             raise StopIteration
         else:
-            return self.entities[self.pos]
-            self.pos += 1
+            self.pos, value = self.pos + 1, self.entities[self.pos]
+            return value
+
+    # for Python2 compatability
+    def next(self):
+        return self.__next__()
 
     def step(self, num_steps):
         self.pos += int(num_steps)  # protecting from Python 3 auto-promotion
@@ -1636,3 +1787,62 @@ class MeshSetIterator(object):
             self.pos = self.size - 1
             at_end = True
         return at_end
+
+def _cell_fracs_sort_vol_frac_reverse(cell_fracs):
+    """
+    Sort cell_fracs according to the order of increasing idx and decreasing
+    with vol_frac.
+
+    Parameters
+    ----------
+    cell_fracs : structured array
+            The output from dagmc.discretize_geom(). A sorted, one dimensional
+            array, each entry containing the following fields:
+
+                :idx: int
+                    The volume element index.
+                :cell: int
+                    The geometry cell number.
+                :vol_frac: float
+                    The volume fraction of the cell withing the mesh ve.
+                :rel_error: float
+                    The relative error associated with the volume fraction.
+
+            The array must be sorted with respect to both idx and cell, with
+            cell changing fastest.
+
+    Returns
+    -------
+    cell_fracs : structured array
+        Sorted cell_fracs.
+    """
+
+    # sort ascending along idx and vol_frac
+    # ndarray.sort can't sort using desending sequence.
+    # Multiply the vol_frac to -1.0 to sort the vol_frac in reverse order.
+    cell_fracs['vol_frac'] *= -1.0
+    cell_fracs.sort(order=['idx', 'vol_frac'])
+    cell_fracs['vol_frac'] *= -1.0
+    return cell_fracs
+
+def _check_meshtally_tag_names(tag_names):
+    """Make sure tag_names is an iterable of 4 strings."""
+    # check iterable
+    if not check_iterable(tag_names):
+        raise ValueError("The given tag_names is not an Iterable.")
+
+    # check length of 4
+    if len(tag_names) != 4:
+        raise ValueError("The length of tag_names is not 4.")
+
+    # check content strings
+    for item in tag_names:
+        if not isinstance(item, str):
+            raise ValueError("The content of tag_names "
+                            "should be strings")
+
+    # tag_names should be a string with length of 4
+    if isinstance(tag_names, str):
+        raise ValueError("The tag_names should not be a single string")
+
+    return True

@@ -17,3 +17,5 @@ the VirtualBox follow these steps:
      /home/pyne-user/pyne.
   #. Email any questions to pyne-users@googlegroups.com.
 
+The default password for the user "pyne-user" is "pyne".
+

@@ -6,8 +6,6 @@ from cython.operator cimport dereference as deref
 from cython.operator cimport preincrement as inc
 from libcpp.string cimport string as std_string
 
-# Python imports
-#from collections import Iterable
 
 # local imports
 cimport extra_types

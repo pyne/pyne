@@ -1,8 +1,12 @@
 import collections
+try:
+    collectionsAbc = collections.abc
+except AttributeError:
+    collectionsAbc = collections
 from warnings import warn
-from pyne.utils import QAWarning
+from pyne.utils import QA_warn
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+QA_warn(__name__)
 
 
 class RxLib(object):
@@ -17,7 +21,7 @@ class RxLib(object):
         pass
 
 
-class DoubleSpinDict(collections.MutableMapping):
+class DoubleSpinDict(collectionsAbc.MutableMapping):
     """Sanitizes input, avoiding errors arising from half-integer values of spin.
 
     Parameters

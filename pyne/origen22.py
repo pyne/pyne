@@ -7,11 +7,13 @@ import os
 import re
 import sys
 from io import StringIO
-from collections import Mapping
+try:
+    from collections.abc import Mapping
+except ImportError:
+    from collections import Mapping
 from copy import deepcopy
 from itertools import chain
-from warnings import warn
-from pyne.utils import QAWarning
+from pyne.utils import QA_warn
 
 import numpy as np
 
@@ -25,7 +27,7 @@ if sys.version_info[0] > 2:
     basestring = str
     unicode = str
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+QA_warn(__name__)
 
 BASE_TAPE9 = os.path.join(os.path.dirname(__file__), 'base_tape9.inp')
 

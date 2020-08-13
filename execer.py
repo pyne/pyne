@@ -1,5 +1,5 @@
 #! /usr/bin/env python
-"""A simple script to run all of the IPython notebooks in this directory.
+"""A simple script to run all of the Jupyter notebooks in this directory.
 """
 import io
 import os
@@ -30,7 +30,7 @@ def execipynb(filename, glb=None, loc=None):
     env = os.environ.copy()
     env['TERM'] = 'dumb'
     env['PYTHONIOENCODING'] = 'utf-8'
-    rtn = subprocess.check_call(['ipython', 'nbconvert', '--to=python', '--stdout', 
+    rtn = subprocess.check_call(['jupyter', 'nbconvert', '--to=python', '--stdout', 
                                  filename], stdout=out, stderr=err, env=env)
     out.seek(0)
     src = out.read()
@@ -57,7 +57,7 @@ def main():
             cat = 'cat ' + f
         elif ext == '.ipynb':
             execer = execipynb
-            cat = 'ipython nbconvert --to=python --stdout ' + f
+            cat = 'jupyter nbconvert --to=python --stdout ' + f
         else:
             continue
         count += 1

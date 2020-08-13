@@ -4,6 +4,8 @@ import os
 import glob
 import shutil
 from zipfile import ZipFile
+from pyne.utils import QA_warn
+
 try:
     import urllib.request as urllib
 except ImportError:
@@ -15,6 +17,8 @@ import tables as tb
 
 from pyne import ensdf
 from pyne.dbgen.api import BASIC_FILTERS
+
+QA_warn(__name__)
 
 
 def _readpoint(line, dstart, dlen):
@@ -110,12 +114,12 @@ def grab_ensdf_decay(build_dir=""):
         pass
 
     # Grab ENSDF files and unzip them.
-    iaea_base_url = 'http://www.nndc.bnl.gov/ensarchivals/distributions/dist17/'
+    iaea_base_url = 'http://www.nndc.bnl.gov/ensarchivals/distributions/dist19/'
 
-    cf_base_url = 'http://data.pyne.io/'
-    ensdf_zip = ['ensdf_170501.099.zip',
-                 'ensdf_170501_199.zip',
-                 'ensdf_170501_299.zip', ]
+    cf_base_url = 'https://github.com/pyne/data/raw/master/'
+    ensdf_zip = ['ensdf_191004_099.zip',
+                 'ensdf_191004_199.zip',
+                 'ensdf_191004_300.zip', ]
 
     for f in ensdf_zip:
         fpath = os.path.join(build_dir, f)

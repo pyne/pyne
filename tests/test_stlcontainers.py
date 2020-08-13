@@ -14,7 +14,10 @@ from numpy.testing import assert_array_equal, assert_array_almost_equal
 
 import os
 import numpy  as np
-from collections import Container, Mapping
+try:
+    from collections.abc import Container, Mapping
+except ImportError:
+    from collections import Container, Mapping
 
 from pyne import stlcontainers
 

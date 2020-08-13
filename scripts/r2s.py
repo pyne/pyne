@@ -83,7 +83,7 @@ flux  my_flux     alara_fluxin  1e10     0      default
 
 # Specify the irradiation schedule below.
 # Syntax is found in the ALARA user manual
-# This example is for a single 3.5 h pulse
+# This example is for a single 3.5 d pulse
 schedule    my_schedule
     3.5 d my_flux my_pulse_history 0  s
 end
@@ -96,7 +96,6 @@ truncation 1e-12
 impurity 5e-6 1e-3
 dump_file dump.file
 """
-
 
 def setup():
     with open(config_filename, 'w') as f:
@@ -175,18 +174,18 @@ def step2():
         cell_mats = None
     h5_file = 'phtn_src.h5'
     if not isfile(h5_file):
-        photon_source_to_hdf5('phtn_src')
+        photon_source_to_hdf5(filename='phtn_src', nucs='total')
     intensities = "Total photon source intensities (p/s)\n"
-    for i, dc in enumerate(decay_times):
-        print('Writing source for decay time: {0}'.format(dc))
+    for i, dt in enumerate(decay_times):
+        print('Writing source for decay time: {0} to mesh'.format(dt))
         mesh = Mesh(structured=structured, mesh='blank_mesh.h5m')
-        tags = {('TOTAL', dc): tag_name}
+        tags = {('TOTAL', dt): tag_name}
         photon_source_hdf5_to_mesh(mesh, h5_file, tags, sub_voxel=sub_voxel,
                                    cell_mats=cell_mats)
         mesh.write_hdf5('{0}_{1}.h5m'.format(output, i+1))
         intensity = total_photon_source_intensity(mesh, tag_name,
                                                   sub_voxel=sub_voxel)
-        intensities += "{0}: {1}\n".format(dc, intensity)
+        intensities += "{0}: {1}\n".format(dt, intensity)
 
     with open(tot_phtn_src_intensities, 'w') as f:
         f.write(intensities)

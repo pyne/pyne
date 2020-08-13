@@ -14,9 +14,9 @@ def consistancy_check(args):
     args : list of arguments 
 
     """
-    args.moab = args.moab or args.dagmc or args.pymoab or args.all
-    args.pymoab = args.pymoab or args.all
-    args.dagmc = args.dagmc or args.all
+    args.moab = args.moab or args.dagmc or args.pymoab or args.openmc or args.all
+    args.pymoab = args.pymoab or args.openmc or args.all
+    args.dagmc = args.dagmc or args.openmc or args.all
 
     return args
 
@@ -35,6 +35,8 @@ def build_name(args):
 
     name = 'pyne/ubuntu_18.04'
     name += '_py'+str(args.py_version)
+    if args.hdf5_version is not '':
+        name += "_" + args.hdf5_version
     if args.moab and not args.dagmc and not args.pymoab:
         name += "_moab"
     else:
@@ -42,6 +44,8 @@ def build_name(args):
             name += '_dagmc'
         if args.pymoab:
             name += '_pymoab'
+        if args.openmc:
+            name += '_openmc'
 
     if args.deps:
         name += '_pyne-deps'
@@ -62,17 +66,23 @@ def build_docker(args):
     tag = build_name(args)
     tag_flag = ['-t', tag]
     docker_args = []
+    if args.hdf5_version is not '':
+        docker_args += ["--build-arg", "build_hdf5=" + args.hdf5_version]
     if args.moab:
         docker_args += ["--build-arg", "build_moab=YES"]
     if args.dagmc:
         docker_args += ["--build-arg", "build_dagmc=YES"]
     if args.pymoab:
         docker_args += ["--build-arg", "enable_pymoab=YES"]
+    if args.openmc:
+        docker_args += ["--build-arg", "install_openmc=YES"]
     if args.deps:
         docker_args += ["--build-arg", "build_pyne=NO"]
     if args.py_version:
         if args.py_version == 2:
             docker_args += ["--build-arg", "py_version=2.7"]
+            if args.openmc:
+                raise ValueError("OpenMC Python API does not support python2!")
         elif args.py_version == 3:
             docker_args += ["--build-arg", "py_version=3.6"]
         else:
@@ -94,7 +104,13 @@ def main():
     parser = ap.ArgumentParser(description=description)
 
     py_version = 'Require a specific python version'
-    parser.add_argument('--py_version', type=int, help=py_version)
+    parser.add_argument('--py_version', type=int, help=py_version,
+                        default=3)
+
+    custom_hdf5 = 'Build and install custom HDF5 Version. ' \
+        + 'Argument HDF5_VERSION must be a valid git tag or branch at https://github.com/HDFGroup/hdf5'
+    parser.add_argument('--hdf5_version', help=custom_hdf5,
+                        default='')
 
     moab = 'Build and install MOAB'
     parser.add_argument('--moab', help=moab,
@@ -108,11 +124,15 @@ def main():
     parser.add_argument('--pymoab', help=pymoab,
                         action='store_true', default=False)
 
+    openmc = 'Install OpenMC python API'
+    parser.add_argument('--openmc', help=openmc,
+                        action='store_true', default=False)
+
     all_deps = 'Add all dependencies'
     parser.add_argument('--all', '-a', '-all', help=all_deps,
                         action='store_true', default=False)
 
-    deps = 'Depdendencies only'
+    deps = 'Dependencies only'
     parser.add_argument('--deps', help=deps,
                         action='store_true', default=False)
 

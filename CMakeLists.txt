@@ -80,7 +80,15 @@ set(LIBS ${LIBS} ${HDF5_C_LIBRARIES})
 MESSAGE("--    HDF5 Include directory: ${HDF5_INCLUDE_DIRS}")
 MESSAGE("--    HDF5 Library directories: ${HDF5_LIBRARY_DIRS}")
 MESSAGE("--    HDF5 Libraries: ${HDF5_C_LIBRARIES}")
+MESSAGE("--    HDF5 library version: ${HDF5_VERSION}")
 
+# Version 1.12 of HDF5 deprecates the H5Oget_info_by_idx(), 
+# H5O_info_t() and H5Oget_info_by_name() interfaces.
+# Thus, we give these flags to allow usage of the old interface in newer
+# versions of HDF5.
+if(NOT (${HDF5_VERSION} VERSION_LESS 1.12.0))
+   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DH5Oget_info_by_idx_vers=1 -DH5O_info_t_vers=1 -DH5Oget_info_by_name_vers=1")
+endif()
 
 # Look for MOAB if requested
 if(WITH_MOAB)
@@ -95,7 +103,7 @@ if(WITH_MOAB)
     include_directories(${MOAB_INCLUDE_DIRS})
     get_filename_component(MOAB_LIBRARY_DIRS ${MOAB_LIBRARY} PATH)
     if(APPLE)
-      link_directories(${MOAB_LIBRARY_DIRS}/lib)
+      link_directories(${MOAB_LIBRARY_DIRS})
     else(APPLE)
       link_directories(${MOAB_LIBRARY_DIRS})
     endif(APPLE)

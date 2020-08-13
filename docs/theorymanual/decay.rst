@@ -376,7 +376,7 @@ For further discussion, please see:
 
 * `the mailing list post <https://groups.google.com/d/topic/pyne-dev/CXmRfBSThDE/discussion>`_,
 * `the pull request, #614 <https://github.com/pyne/pyne/pull/614>`_, and
-* `the benchmark study <http://nbviewer.ipython.org/github/pyne/sandbox/blob/master/origen-cmp.ipynb>`_.
+* `the benchmark study <https://nbviewer.jupyter.org/github/pyne/sandbox/blob/master/origen-cmp.ipynb>`_.
 
 Note that the benchmark study shows quite high agreement between this method
 and ORIGEN v2.2.

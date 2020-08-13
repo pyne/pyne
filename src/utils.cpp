@@ -2,6 +2,7 @@
 #ifndef PYNE_IS_AMALGAMATED
 extern "C" double endftod_(char *str, int len);
 #endif
+#include <iomanip>
 
 #ifndef PYNE_IS_AMALGAMATED
 #include "utils.h"
@@ -163,6 +164,25 @@ std::string pyne::to_lower(std::string s) {
   return s;
 }
 
+std::string pyne::comment_line_wrapping(std::string line,
+                                               std::string comment_prefix,
+                                               int line_length) {
+  std::ostringstream oss;
+
+  line_length -= comment_prefix.length();
+    
+  // Include as is if short enough
+  while (line.length() > line_length) {
+    oss << comment_prefix << line.substr(0, line_length) << std::endl;
+    line.erase(0, line_length);
+  }
+
+  if (line.length() > 0) {
+    oss << comment_prefix << line << std::endl;
+  }
+
+  return oss.str();
+}
 
 std::string pyne::capitalize(std::string s) {
   unsigned int slen = s.length();
@@ -282,6 +302,43 @@ std::string pyne::natural_naming(std::string name) {
 }
 
 
+std::vector<std::string> pyne::split_string(std::string particles_list, std::string delimiter) {
+  std::vector<std::string> output_vector;
+  size_t prev_pos = 0; //item start position
+  size_t pos = 0; //item end position
+ 
+  while( (pos = particles_list.find(delimiter, prev_pos)) != std::string::npos){
+    output_vector.push_back(particles_list.substr(prev_pos, pos));
+    prev_pos = pos + delimiter.length();
+  }
+  // catch list with a single particle
+  if (pos == std::string::npos && prev_pos == 0 && particles_list.length() >0)
+    output_vector.push_back(particles_list);
+
+  return output_vector;
+}
+
+
+
+template<typename T>
+std::string pyne::join_to_string(std::vector<T> vect, std::string delimiter){
+  std::stringstream out;
+  out << std::setiosflags(std::ios::fixed) << std::setprecision(6);
+  
+  // ensure there is at least 1 element in the vector
+  if (vect.size() == 0)
+    return out.str();
+  // no delimiter needed before the first element
+  out << vect[0];
+  for( int i = 1; i < vect.size(); i++)
+    out << delimiter << vect[i];
+  return out.str();
+}
+template std::string pyne::join_to_string(std::vector<int> vect, std::string delimiter);
+template std::string pyne::join_to_string(std::vector<double> vect,
+                                 std::string delimiter);
+template std::string pyne::join_to_string(std::vector<std::string> vect, std::string delimiter);
+
 //
 // Math Helpers
 //
@@ -335,6 +392,21 @@ bool pyne::file_exists(std::string strfilename) {
   }
 
   return(blnReturn);
+}
+
+// convert convert a filename into path+filename (for pyne)
+std::string pyne::get_full_filepath(char* filename) {
+  std::string file(filename);
+  return pyne::get_full_filepath(file);
+}
+
+// convert convert a filename into path+filename (for pyne)
+std::string pyne::get_full_filepath(std::string filename) {
+  // remove all extra whitespace
+  filename = pyne::remove_characters(" " , filename);
+  // use stdlib call
+  const char* full_filepath = realpath(filename.c_str(), NULL);
+  return std::string(full_filepath);
 }
 
 // Message Helpers
