@@ -103,6 +103,32 @@ Contributing:
 Follow the `Developer's Guide <https://pyne.io/devsguide/index.html>`__
 for contributions to this site, and PyNE itself.
 
+*Imposter syndrome disclaimer*: We want your help. No really, we do.
+
+There might be a little voice inside that tells you you're not ready; 
+that you need to do one more tutorial, or learn another framework, or 
+write a few more of your own projects before you can contribute here.
+
+We want to assure you, that's not the case.
+
+This project has some clear Contribution Guidelines and expectations 
+that you can read about in the Developer's Guide and below.
+
+Below, you will find an outline of the process that you'll need to 
+follow to get a pull request merged. By making expectations and process 
+explicit, we hope it will make it easier for you to contribute.
+
+And you don't just have to write code. You can help out by writing 
+documentation, tests, or even by giving feedback about this work. 
+(And yes, that includes giving feedback about the contribution guidelines.)
+
+Thank you for contributing!
+
+This disclaimer was originally written by `Adrienne Lowe 
+<https://github.com/adriennefriend/imposter-syndrome-disclaimer/blob/master/README.md>`_ 
+for a `PyCon talk <https://www.youtube.com/watch?v=6Uj746j9Heo>`_, and was adapted for
+PyNE's Guide for New Developers.
+
 ----------------
 Getting Practice
 ----------------
