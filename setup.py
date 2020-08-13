@@ -101,19 +101,6 @@ def assert_np_version():
         raise ValueError(msg)
 
 
-def assert_ipython_version():
-    try:
-        import IPython
-    except ImportError:
-        return
-    low = (1, 2, 1)
-    v = IPython.__version__.split('-')[0]
-    cur = tuple(map(int, v.split('.')))
-    if cur < low:
-        msg = "ipython version is too low! {0} (have) < 2.0.0 (min)".format(v)
-        raise ValueError(msg)
-
-
 def assert_ubuntu_version():
     v = platform.uname()
     for itm in v:
@@ -126,7 +113,6 @@ def assert_ubuntu_version():
 def assert_dep_versions():
     assert_np_version()
     assert_ubuntu_version()
-    assert_ipython_version()
 
 
 def ssl_context():

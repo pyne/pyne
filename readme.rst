@@ -25,7 +25,6 @@ Installation
 Dependencies
 ------------
 PyNE has the following dependencies:
-
    #. `Fortran compiler <https://gcc.gnu.org/wiki/GFortran>`_
    #. `C++ compiler <https://gcc.gnu.org/>`_
    #. `CMake <http://www.cmake.org/>`_ (>= 2.8.5)
@@ -34,7 +33,7 @@ PyNE has the following dependencies:
    #. `Cython <http://cython.org/>`_ (>= 0.19.1)
    #. `HDF5 <http://www.hdfgroup.org/HDF5/>`_
    #. `PyTables <http://www.pytables.org/>`_
-   #. `Python 2.7 <http://www.python.org/>`_
+   #. `Python <http://www.python.org/>`_
    #. `LAPACK <http://www.netlib.org/lapack/>`_
    #. `BLAS <http://www.netlib.org/blas/>`_
    #. `Jinja2 <http://jinja.pocoo.org/>`_
@@ -43,8 +42,10 @@ Optional Depenendencies:
    #. `MOAB <https://press3.mcs.anl.gov/sigma/moab-library>`_
    #. `PyTAPS <https://pythonhosted.org/PyTAPS/index.html>`_
 
-Additionally, building the documentation requires the following:
+To run tutorial and examples:
+   #. `jupyter <http://jupyter.org/>`_
 
+Additionally, building the documentation requires the following:
    #. `Sphinx <http://sphinx-doc.org/>`_
    #. `sphinxcontrib-bibtex <https://pypi.python.org/pypi/sphinxcontrib-bibtex/>`_
    #. `PrettyTable <https://code.google.com/p/prettytable/>`_
