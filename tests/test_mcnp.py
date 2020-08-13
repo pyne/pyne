@@ -508,8 +508,15 @@ def test_read_mcnp():
         "mat_number": "1",
         "name": " leu",
         "source": " Some http://URL.com",
-        "table_ids": {'922350': "15c"}})
+        "table_ids": {'922350': "15c", "922380":{}}})
     expected_material.mass = -1.0  # to avoid reassignment to +1.0
+    expected_material_default_lib = Material({10000000: 0.037298334378601375, 
+                60000000: 0.6666767493132514, 80000000: 0.29602491630814726}, 
+                54.047494122635584, 1.1, 6.0, 
+                {"mat_number":"3","table_ids":{
+                "10000":{"hlib":"42h","nlib":"60c","plib":"01p"},
+                "60000":{"hlib":"42h","nlib":"60c","plib":"01p"},
+                "80000":{"hlib":"42h","nlib":"60c","plib":"01p"}}})
 
     expected_multimaterial = MultiMaterial({
         Material(
@@ -521,7 +528,7 @@ def test_read_mcnp():
              "mat_number": "2",
              "name": " water",
              "source": " internet",
-             "table_ids": {'10000': "05c"}}): 1,
+             "table_ids": {'10000': "05c", "80000":{}}}): 1,
         Material(
             {10000000: 0.11189838783149784, 80000000: 0.8881016121685023},
             -1.0,
@@ -532,7 +539,7 @@ def test_read_mcnp():
              "mat_number": "2",
              "name": " water",
              "source": " internet",
-             "table_ids": {'10000': "05c"}}): 1,
+             "table_ids": {'10000': "05c", "80000":{}}}): 1,
         Material(
             {10000000: 0.11189838783149784, 80000000: 0.8881016121685023},
             -1.0, 1.1, 3,
@@ -542,10 +549,11 @@ def test_read_mcnp():
              "mat_number": "2",
              "name": " water",
              "source": " internet",
-             "table_ids": {'10000': "05c"}}): 1})
+             "table_ids": {'10000': "05c", "80000":{}}}): 1})
 
-    read_materials = mats_from_inp('mcnp_inp.txt')
+    read_materials = mats_from_inp('bcc_unit_cell_den')
     assert_almost_equal(expected_material, read_materials[1])
+    assert_equal(expected_material_default_lib, read_materials[3])
     assert_equal(
         list(expected_multimaterial._mats.keys())[0].comp.keys(),
         list(read_materials[2]._mats.keys())[0].comp.keys())
