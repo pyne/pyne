@@ -2013,6 +2013,24 @@ std::vector<std::pair<double, double> > pyne::Material::normalize_radioactivity(
   return normed;
 }
 
+void pyne::Material::from_activity(std::map<int, double> activities) {
+  // activities must be of the form {nuc: act}, eg, tritium
+  //  10030: 1.0
+
+  // clear existing components
+  comp.clear();
+
+  for (std::map<int, double>::iterator acti = activities.begin();
+       acti != activities.end(); acti++) {
+    double dc = pyne::decay_const(acti->first);
+    if (dc == 0.0 && (acti->second) == 0.0) continue;
+    else if (dc == 0.0) throw std::invalid_argument("Activity keys must be radionuclides.");
+    comp[acti->first] = (acti->second) * pyne::atomic_mass(acti->first) / \
+                        pyne::N_A / dc;
+  }
+  norm_comp();
+}
+
 
 #ifdef PYNE_DECAY
 pyne::Material pyne::Material::decay(double t) {
