@@ -1537,6 +1537,7 @@ def mat_from_inp_line(filename, mat_line, densities='None'):
 
     return finished_mat
 
+
 class Wwinp(Mesh):
     """A Wwinp object stores all of the information from a single MCNP WWINP
     file. Weight window lower bounds are stored on a structured mesh. Only
