@@ -186,6 +186,8 @@ v0.7.0 RC2
 
 * Improvements in building and testing
    * require contributor to change CHANGELOG
+   * now get the base branch name from github and check change against it
+      (inspired by https://github.com/NarrativeScience/circleci-orb-ghpr/blob/master/src/commands/get-pr-info.yml)
    * Expand testing matrix to include:
       * python 2 vs 3
       * with vs without PyMOAB

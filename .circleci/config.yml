@@ -140,10 +140,11 @@ commands:
 jobs:
 # CHANGELOG file checker
   changelog_update:
-    executor: 
-      name: py3
+    docker:
+      - image: alpine:3.7
     working_directory: ~/repo
     steps:
+      - run: apk add --no-cache bash curl jq git openssh
       - checkout
       - run:
           name: Checking CHANGELOG Update
