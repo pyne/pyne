@@ -147,7 +147,7 @@ endmacro()
 # determine if spatial solver module should be built
 macro(pyne_set_build_spatial_solver)
   SET(BUILD_SPATIAL_SOLVER false)
-  MESSAGE("-- Checking whether to build spatial solvers)
+  MESSAGE("-- Checking whether to build spatial solvers")
   IF(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     MESSAGE("-- -- Using GNU Compiler")
     IF(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.6" AND
