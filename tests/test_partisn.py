@@ -42,7 +42,9 @@ def test_get_material_lib_with_names():
         'mat:Helium, Natural': 'HELIUMNA', 'mat:Mercury': 'MERCURY1'}
 
     assert(unique_names == expected_unique_names)
-    assert(mat_lib == mat_lib_expected)
+    for matname, mat in mat_lib_expected.items():
+        for nuc, frac in mat.items():
+            assert_almost_equal(mat_lib[matname][nuc], frac)
 
 
 def test_get_material_lib_no_names():
@@ -68,7 +70,9 @@ def test_get_material_lib_no_names():
     expected_unique_names = {
         'mat:Helium, Natural': 'HELIUMNA', 'mat:Mercury': 'MERCURY1'}
     assert(unique_names == expected_unique_names)
-    assert(mat_lib == mat_lib_expected)
+    for matname, mat in mat_lib_expected.items():
+        for nuc, frac in mat.items():
+            assert_almost_equal(mat_lib[matname][nuc], frac)
 
 
 def test_nucid_to_xs_with_names():

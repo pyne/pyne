@@ -133,7 +133,7 @@ def test_tm171_decay():
     exp = np.exp(-1*lamb*t_sim)
     inp = Material({'TM171': 1.0}, mass=1.0)
     obs = tm.transmute(inp, t=t_sim, phi=0.0, tol=1e-7)
-    assert_equal(exp, obs['TM171'])
+    assert_almost_equal(exp, obs['TM171'],12)
 
 #
 # Run as script
