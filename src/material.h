@@ -440,6 +440,9 @@ namespace pyne
     /// so the sum of the intensities is one
     std::vector<std::pair<double, double> > normalize_radioactivity(
       std::vector<std::pair<double, double> > unnormed);
+    /// Sets the composition, mass, and atoms_per_molecule of this material to those
+    /// calculated from \a activities, a mapping of radionuclides to activities.
+    void from_activity(std::map<int, double> activities);
 
 #ifdef PYNE_DECAY
     /// Decays this material for a given amount of time in seconds

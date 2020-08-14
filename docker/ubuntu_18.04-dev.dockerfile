@@ -56,9 +56,6 @@ RUN if [ "${py_version%.?}" -eq 3 ] ; \
             scipy \
             jinja2
 
-
-
-
 # make starting directory
 RUN mkdir -p $HOME/opt
 RUN echo "export PATH=$HOME/.local/bin:\$PATH" >> ~/.bashrc
