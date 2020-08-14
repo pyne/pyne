@@ -78,6 +78,8 @@ def build_docker(args):
         docker_args += ["--build-arg", "install_openmc=YES"]
     if args.deps:
         docker_args += ["--build-arg", "build_pyne=NO"]
+    if args.bootable:
+        docker_args += ["--build-arg", "bootable=YES"]
     if args.py_version:
         if args.py_version == 2:
             docker_args += ["--build-arg", "py_version=2.7"]
@@ -141,6 +143,10 @@ def main():
 
     push = 'Push docker image on dockerhub'
     parser.add_argument('--push', '-p', '-push', help=push,
+                        action='store_true', default=False)
+
+    bootable = 'Make the docker image bootable'
+    parser.add_argument('--bootable', '-b', help=bootable,
                         action='store_true', default=False)
 
     args = parser.parse_args()
