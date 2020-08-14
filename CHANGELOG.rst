@@ -90,6 +90,7 @@ v0.7.0 RC2
    * Removed QA warnings
    * in ACE Module example, change urllib for requests
    * adds broken yt warning to examples notebooks, updates deprecated urlretrieve to requests (#1295)
+   * remove Origen 2.2: H1 Cross Section for PyNE repo not supporting necessary inputs to reproduce the example.
 
 * Changes in source sampling for mesh-based Monte Carlo sources
    * Add statistics summary output of find_cell failure in source sampling.
