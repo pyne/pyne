@@ -79,7 +79,7 @@ class Library(rxdata.RxLib):
         """Read all the table headers from an ENDL file."""
         opened_here = False
         if isinstance(self.fh, basestring):
-            fh = open(self.fh, 'rU')
+            fh = open(self.fh, 'r')
             opened_here = True
         else:
             fh = self.fh
