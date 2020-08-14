@@ -1,7 +1,7 @@
 .. _tutorial-11:
 
-Spatial Solver
-==============
+ENSDF Processing
+================
 
 Download the :download:`full notebook <../../tutorial/11-ensdf-processing.ipynb>`.
 
