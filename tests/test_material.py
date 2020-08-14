@@ -299,20 +299,20 @@ class TestMaterialMethods(TestCase):
         assert_equal(set(obs.values()), set(exp.values()))
 
 
-    def test_from_activity(self):
+    def test_from_activity_meth(self):
         mat = Material()
-        mat.from_activity({922350000: 59953.15101810882,
-                           922380000: 177216.65112976026})
+        mat.from_activity({922350000: 59953.15151320379,
+                           922380000: 177216.65219208886})
         assert_equal(mat.atoms_per_molecule, -1.0)
         assert_equal(mat.comp[922350000], 0.05)
         assert_equal(mat.comp[922380000], 0.95)
         assert_equal(mat.mass, 15.0)
-        assert_equal(mat.molecular_mass(), 237.8986195419686)
+        assert_equal(mat.molecular_mass(), 237.8986180886295)
 
         mat = Material()
         mat.from_activity({'H': 0.0, 'H3': 1.0, 'O16': 0.0})
         assert_equal(mat.comp, {10030000: 1.0})
-        assert_equal(mat.mass, 2.8091613926886366e-15)
+        assert_equal(mat.mass, 2.809161396488766e-15)
 
         mat = Material()
         hto = {'H': 1.0, 'H3': 1.0, 'O16': 1.0}
@@ -1084,22 +1084,22 @@ def test_from_atom_frac_func():
 
 
 def test_from_activity_func():
-    leu = {922350000: 59953.15101810882, 922380000: 177216.65112976026}
+    leu = {922350000: 59953.15151320379, 922380000: 177216.65219208886}
     mat = from_activity(leu)
     assert_equal(mat.atoms_per_molecule, -1.0)
     assert_equal(mat.comp[922350000], 0.05)
     assert_equal(mat.comp[922380000], 0.95)
     assert_equal(mat.mass, 15.0)
-    assert_equal(mat.molecular_mass(), 237.8986195419686)
+    assert_equal(mat.molecular_mass(), 237.8986180886295)
 
     hto = {'H': 0.0, 'H3': 1.0, 'O16': 0.0}
     mat = from_activity(hto)
     assert_equal(mat.comp, {10030000: 1.0})
-    assert_equal(mat.mass, 2.8091613926886366e-15)
+    assert_equal(mat.mass, 2.809161396488766e-15)
 
     hto = {'H': 1.0, 'H3': 1.0, 'O16': 1.0}
     assert_raises(ValueError, from_activity, hto)
-    
+
 
 
 def test_from_hdf5_func_protocol_0():
