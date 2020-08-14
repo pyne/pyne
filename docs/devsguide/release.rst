@@ -7,7 +7,7 @@ Release Candidates & Branches
 =============================
 All releases should have a release candidate ('-rc1') that comes out 2 - 5 days
 prior to the scheduled release.  During this time, no changes should occur to 
-a special release branch ('vX.X.X-release').  
+a special release branch (e.g. 'vX.X.X-release').  
 
 The release branch is there so that development can continue on the 
 develop branch while the release candidates (rc) are out and under review.  
@@ -45,9 +45,9 @@ When releasing pyne, make sure to do the following items in order:
 2. Ensure that all issues in this release's milestone have been closed.  Moving issues
    to the next release's milestone is a perfectly valid strategy for completing this
    milestone. 
-3. Perform maintainence tasks for this project, see below.
+3. Perform maintenance tasks for this project, see below.
 4. Write and commit the release notes.
-5. Review the current state of documentation and make approriate updates.
+5. Review the current state of documentation and make appropriate updates.
 6. Bump the version (in code, documentation, etc.) and commit the change.
 7. If this is a release candidate, tag the release branch with a name that matches 
    that of the release: 
@@ -60,10 +60,11 @@ When releasing pyne, make sure to do the following items in order:
 8. If this is the full and final release (and not a release candidate), 
    merge the release branch into the master branch.  Next, tag the master branch 
    with the name 'X.X.X'.  Finally, delete the release branch.
-9. Push the tags upstream
-10. Update release information on the website.
+10. Push the tags upstream
+11. Update release information on the website.
+12. Perform post-release tasks for the project, see below.
 
-Maintainence Tasks
+Maintenance Tasks
 ==================
 PyNE may have associated maintenance tasks which may need to be performed at 
 least as often as every minor release.  These are as follows (all commands are run 
@@ -81,3 +82,13 @@ from the root dir):
 .. code-block:: bash
 
     $ echo '#include "enrichment_symbolic40.cpp"' > cpp/enrichment_symbolic.cpp
+
+Post Release Tasks
+==================
+
+1. Update the conda-forge recipe for the new release, either as a full release
+   or a release candidate
+2. Publish new docker images with updated version, appropriately tagged
+3. Publish new VM images with updated version, appropriately tagged
+4. Update website with new documentation, including links to distributions
+   in each deployment channel

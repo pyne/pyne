@@ -13,7 +13,7 @@ Browse and borrow code from the PyNE examples!
 
 |ace| |chainsolve_transmutation| |discretized_teapot| |half_life| |data_source| 
 |mstar_vs_flowrate| |fng_model| |materials| |material_library| |mesh_tags| 
-|open_origen_data| |origen22_h1_xs| |reaction_names| |endf_reader|
+|open_origen_data| |reaction_names| |endf_reader|
 
 .. |ace| image:: ace_thumb.png
     :target: ace.html
@@ -50,9 +50,6 @@ Browse and borrow code from the PyNE examples!
 
 .. |open_origen_data| image:: open_origen_data_thumb.png
     :target: open_origen_data.html
-
-.. |origen22_h1_xs| image:: origen22_h1_xs_thumb.png
-    :target: origen22_h1_xs.html
 
 .. |reaction_names| image:: reaction_names_thumb.png
     :target: reaction_names.html

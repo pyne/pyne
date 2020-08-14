@@ -13,23 +13,6 @@ v0.7.0 RC2
 
 **New Capabilities**
 
-<<<<<<< HEAD
-* Subvoxel R2S allows activation and photon source sampling by material within a mesh voxel
-   * SubMode parameter in source_sampling
-   * Add code for submode: SUBVOXEL
-   * Test functions to test SUBVOXEL codes in test_source_sampling.py
-   * Add subvoxel r2s workflow support in pyne/scripts/r2s.py
-   * Use new sampler for both voxel and sub-voxel R2S.
-   * Define cell_mats for subvoxel equals False
-   * Function Sampler::mesh_tag_data to be compatible for both DEFAULT and SUBVOXEL mode
-
-* OpenMC support
-   * Add CI test for OpenMC as an optional dependency
-   * Add options to install OpenMC Python API
-   * Functions to read OpenMC state point file to get meshtally data
-
-* File scripts/activation_responses.py to get activation responses data for ALARA output file for better visualization. Responses include:
-=======
 * Subvoxel R2S allows activation and photon source sampling by 
   material within a mesh voxel
   * SubMode parameter in source_sampling
@@ -47,7 +30,6 @@ v0.7.0 RC2
 
 * File scripts/activation_responses.py to get activation responses data for 
   ALARA output file for better visualization. Responses include:
->>>>>>> 6063f52c... Add #1238 to the change log
    * decay heat
    * specific activity
    * alpha heat
@@ -62,7 +44,6 @@ v0.7.0 RC2
    * added gtcadis.py script
    * first step for the GT-CADIS workflow, further steps to follow
 
-<<<<<<< HEAD
 **Enhancements to Previous Capabilities**
 
 * Turn off QA warnings by default and enable with env variable 'PYNE_QA_WARN' (#1268)
@@ -70,32 +51,6 @@ v0.7.0 RC2
    * A C++ API for the MaterialLibrary class has been created for direct
      use in compiled software tools
    * Change the MaterialLibrary Python API to bind to the new c++ one.
-<<<<<<< HEAD
-   * Overhaul of HDF5 format of Material and MaterialLibrary
-      * Capability to read nuclides from a specific path when loading material
-        from an hdf5 file (not necessarily relying on autodetect the nucpath).
-      * change the structure of material when written in a hdf5 file:
-        ::
-
-          /material/
-          /material/my_mat/
-          /material/my_mat/composition
-          /material/my_mat/nuclidelist
-          /material/my_mat/composition_metadata
-
-        where, ``/material`` and ``/material/my_mat`` are now HDF5 groups
-   * Material I/O formats
-      * pyne::Material: capability to form PHITS input material card
-      * capability to form a uwuw material name
-      * A new argument ``mult_den`` (bool) that makes *Material* class's
-        **get_density_frac** method (hence also **mcnp** and **phits** methods)
-        write atom/mass density if true, otherwise write atom/mass fraction.
-      * increased precision of the material density reported in the comment card
-        for an MCNP material to 5 decimal places
-      * Adds tests to tests/test:materials.py:test_decay_heat(self) to check more isotopes
-      * Adds from_activity() to create or redefine materials using radionuclide
-        activities
-=======
    * Overhaul of HDF5 format of Material and MaterialLibrary 
       * Capability to read nuclides from a specific path when loading material
         from an hdf5 file (not necessarily relying on autodetect the nucpath).
@@ -116,24 +71,26 @@ v0.7.0 RC2
       * increased precision of the material density reported in the comment card 
         for an MCNP material to 5 decimal places
     * Adds tests to tests/test:materials.py:test_decay_heat(self) to check more isotopes
->>>>>>> 6063f52c... Add #1238 to the change log
 
 * Bug fixes in serpent support
    * in serpent.py, function VOL_serp2_fix() to correct for
      _VOL variable being an array. as seen in serpent 2
    * fix error in serpent parse_dep
    * serpent.py function parse_dep.  Catches ValueError that
-<<<<<<< HEAD
-     occurs when parse_dep attempts to make_mats with a serpent 2 \*_dep.m file
-     due to the \*_VOL variable not being a float
-
-* Fixes in examples and tutorials
-  * in half_life example, changed nuc_data call in anum to give int data type
-=======
      occurs when parse_dep attempts to make_mats with a serpent 2 *_dep.m file
      due to the *_VOL variable not being a float
 
->>>>>>> 6063f52c... Add #1238 to the change log
+* Fixes in examples and tutorials
+   * in half_life example, changed nuc_data call in anum to give int data type
+   * in Data Sources, rerun example to update output
+   * in Chainsolve Transmutation, rerun example to update output
+   * pytaps to pymoab update in intro tutorial (#1282)
+   * in material_library example, updated import and class usage to reflect MaterialLibrary changes (#1280)
+   * Removed QA warnings
+   * in ACE Module example, change urllib for requests
+   * adds broken yt warning to examples notebooks, updates deprecated urlretrieve to requests (#1295)
+   * remove Origen 2.2: H1 Cross Section for PyNE repo not supporting necessary inputs to reproduce the example.
+   * in mesh basic tutorial, add broken yt warning
 
 * Changes in source sampling for mesh-based Monte Carlo sources
    * Add statistics summary output of find_cell failure in source sampling.
@@ -147,11 +104,7 @@ v0.7.0 RC2
    * Sort cell_fracs according to the order of 'idx' and 'vol_frac'. For faster source sampling.
    * Pass cell_list back to Fortran, to speed up source sampling.
    * function to write total photon intensities for subvoxel r2s
-<<<<<<< HEAD
-   * Removed variables ```icl_tmp``` and ```find_cell``` which are not longer needed.
-=======
    * Removed variables ```icl_tmp``` and ```find_cell``` which are not longer needed. 
->>>>>>> 6063f52c... Add #1238 to the change log
    * MCNP6 version of source.F90
    * Changed source.F90 to use "implicit none" instead of "implicit real"
    * Addition & updates of unit tests for above improvements
@@ -237,6 +190,7 @@ v0.7.0 RC2
    * Added publications to bibliography (PR #1256)
    * Adding contributing guide and code of conduct (#1258)
    * Changed Doc and Tutorial mentions of iPython notebooks to Jupyter notebooks (PR #1262)
+   * Improvements in documentation for release (#1290 #1285 #1299)
 
 * Improvements in building and testing
    * require contributor to change CHANGELOG
@@ -270,6 +224,7 @@ v0.7.0 RC2
    * Remove if block in travis-run-tests.sh (just run nosetests)
    * Deprecating most of the python 2 tests. Only testing python2 with pyMOAB and DAGMC deps.
    * updates tutorials and examples to python3 syntax to avoid failures (#1271)
+   * added a welcome bot for first PR, Issue, and merge (#1287)
 
 * Code cleanup
    * Formatting improvements
