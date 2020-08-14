@@ -1399,7 +1399,6 @@ def mat_from_inp_line(filename, mat_line, densities='None'):
     # collect all material card data on one string
     line_index = 1
     line = linecache.getline(filename, mat_line + line_index)
-    lib_name = ['nlib', 'plib', 'hlib', 'pnlib', 'elib']
     # people sometimes put comments in materials and then this loop breaks                                                                                       # so we need to keep reading if we encounter comments
     while len(line.split()) > 0 and (line[0:5] == '     ' or line[0].lower() == 'c'):
         # make sure element/isotope is not commented out
@@ -1417,13 +1416,14 @@ def mat_from_inp_line(filename, mat_line, densities='None'):
     # create dictionaries nucvec and table_ids
     nucvec = {}
     table_ids = {}
-    table_ids['default'] = {}
+    lib_name = ['nlib', 'plib', 'hlib', 'pnlib', 'elib']
     for i in range(1, len(data_string.split())):
+        # Reads default library indicators
+        token = data_string.split()[i].split('=')[0]
+        if token in lib_name:
+           table_ids[token] = data_string.split()[i].split('=')[1]             
+           continue
         if i & 1 == 1:
-            # Eliminates default library indicators
-            token = data_string.split()[i]
-            if token.split('=')[0] in lib_name:
-                table_ids['default'][.split('=')[0]] = token.split('=')[1]
             zzzaaam = str(nucname.zzaaam(
                 nucname.mcnp_to_id(token.split('.')[0])))
 
@@ -1434,7 +1434,6 @@ def mat_from_inp_line(filename, mat_line, densities='None'):
                 nucvec[zzzaaam] = float(data_string.split()[i+1])
             if len(token.split('.')) > 1:
                 table_ids[str(zzzaaam)] = token.split('.')[1]
-
 
     # Check to see it material is definted my mass or atom fracs.
     # Do this by comparing the first non-zero fraction to the rest
