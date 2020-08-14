@@ -55,12 +55,6 @@ RUN if [ "${py_version%.?}" -eq 3 ] ; \
             tables \
             scipy \
             jinja2
-# Required for CHANGELOG test
-RUN apt-get install -y curl jq
-
-
-
-
 
 # make starting directory
 RUN mkdir -p $HOME/opt

@@ -183,7 +183,7 @@ v0.7.0 RC2
    * Changed Doc and Tutorial mentions of iPython notebooks to Jupyter notebooks (PR #1262)
 
 * Improvements in building and testing
-   * require contributor to change 
+   * require contributor to change CHANGELOG
    * now get the base branch name from github and check change against it
       (inspired by https://github.com/NarrativeScience/circleci-orb-ghpr/blob/master/src/commands/get-pr-info.yml)
    * Expand testing matrix to include:
