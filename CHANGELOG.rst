@@ -221,6 +221,7 @@ v0.7.0 RC2
    * Remove if block in travis-run-tests.sh (just run nosetests)
    * Deprecating most of the python 2 tests. Only testing python2 with pyMOAB and DAGMC deps.
    * updates tutorials and examples to python3 syntax to avoid failures (#1271)
+   * added a welcome bot for first PR, Issue, and merge (#1287)
 
 * Code cleanup
    * Formatting improvements
