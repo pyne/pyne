@@ -11,5 +11,5 @@ on Python 3.6, 3.7, and 3.8:
  * Ubuntu 18.04 - x86_64
 
 
-Installation is supported on Ubuntu and MacOS.
+Installation and use is supported on Ubuntu and MacOS.
  
