@@ -1274,12 +1274,7 @@ cdef class _Material:
                 raise TypeError("Activity keys must be integers, "
                         "or strings.")
 
-            dc = data.decay_const(key_zz)
-            if dc == 0.0 and val == 0.0:
-                continue
-            elif dc == 0.0:
-                raise ValueError("Activity keys must be radionuclides.")
-            elif 0 == act.count(key_zz):
+            if 0 == act.count(key_zz):
                 act[key_zz] = 0.0
             act[key_zz] = act[key_zz] + val
 

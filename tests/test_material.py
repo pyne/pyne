@@ -309,6 +309,15 @@ class TestMaterialMethods(TestCase):
         assert_equal(mat.mass, 15.0)
         assert_equal(mat.molecular_mass(), 237.8986195419686)
 
+        mat = Material()
+        mat.from_activity({'H': 0.0, 'H3': 1.0, 'O16': 0.0})
+        assert_equal(mat.comp, {10030000: 1.0})
+        assert_equal(mat.mass, 2.8091613926886366e-15)
+
+        mat = Material()
+        hto = {'H': 1.0, 'H3': 1.0, 'O16': 1.0}
+        assert_raises(ValueError, mat.from_activity, hto)
+
 
     def test_decay_heat_stable(self):
         mat = Material({922350000: 0.05, 922380000: 0.95}, 15)
@@ -1083,6 +1092,14 @@ def test_from_activity_func():
     assert_equal(mat.mass, 15.0)
     assert_equal(mat.molecular_mass(), 237.8986195419686)
 
+    hto = {'H': 0.0, 'H3': 1.0, 'O16': 0.0}
+    mat = from_activity(hto)
+    assert_equal(mat.comp, {10030000: 1.0})
+    assert_equal(mat.mass, 2.8091613926886366e-15)
+
+    hto = {'H': 1.0, 'H3': 1.0, 'O16': 1.0}
+    assert_raises(ValueError, from_activity, hto)
+    
 
 
 def test_from_hdf5_func_protocol_0():
