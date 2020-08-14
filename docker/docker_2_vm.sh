@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # based on solution in https://gist.github.com/gunnarx/527fbc385a2e76f89609d837b6447f85
+# and from https://iximiuz.com/en/posts/from-docker-container-to-bootable-linux-disk-image/
 # with additions from https://github.com/iximiuz/docker-to-linux
 
 set -e
