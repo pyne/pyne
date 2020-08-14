@@ -30,8 +30,7 @@ v0.7.0 RC2
 * MCNP Support
   * Default library reading capability from material card, such as nlib, plib and etc.
 
-* File scripts/activation_responses.py to get activation responses data for
-  ALARA output file for better visualization. Responses include:
+* File scripts/activation_responses.py to get activation responses data for ALARA output file for better visualization. Responses include:
    * decay heat
    * specific activity
    * alpha heat
