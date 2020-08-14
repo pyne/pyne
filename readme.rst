@@ -1,14 +1,14 @@
 PyNE: The Nuclear Engineering Toolkit
 =====================================
-The PyNE project aims to provide a common set of tools for nuclear 
+The PyNE project aims to provide a common set of tools for nuclear
 science and engineering needs.
 
 If you are interested in the package itself, or would like to help
-and contribute, please let us know either on the mailing list 
-(https://groups.google.com/forum/#!forum/pyne-dev, 
+and contribute, please let us know either on the mailing list
+(https://groups.google.com/forum/#!forum/pyne-dev,
 pyne-dev@googlegroups.com) or `github`_.
 
-Examples, documentation, and more can be found at 
+Examples, documentation, and more can be found at
 http://pyne.io/, the official PyNE project site.
 
 .. _github: https://github.com/pyne/pyne
@@ -61,8 +61,8 @@ running on your device.
 ============
 Contributing
 ============
-We highly encourage contributions to PyNE! If you would like to contribute, 
-it is as easy as forking the repository on GitHub, making your changes, and 
-issuing a pull request. If you have any questions about this process don't 
-hesitate to ask the mailing list (https://groups.google.com/forum/#!forum/pyne-dev, 
+We highly encourage contributions to PyNE! If you would like to contribute,
+it is as easy as forking the repository on GitHub, making your changes, and
+issuing a pull request. If you have any questions about this process don't
+hesitate to ask the mailing list (https://groups.google.com/forum/#!forum/pyne-dev,
 pyne-dev@googlegroups.com).

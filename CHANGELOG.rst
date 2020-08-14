@@ -82,7 +82,15 @@ v0.7.0 RC2
      due to the \*_VOL variable not being a float
 
 * Fixes in examples and tutorials
-  * in half_life example, changed nuc_data call in anum to give int data type
+   * in half_life example, changed nuc_data call in anum to give int data type
+   * in Data Sources, rerun example to update output
+   * in Chainsolve Transmutation, rerun example to update output
+   * pytaps to pymoab update in intro tutorial (#1282)
+   * in material_library example, updated import and class usage to reflect MaterialLibrary changes (#1280)
+   * Removed QA warnings
+   * in ACE Module example, change urllib for requests
+   * adds broken yt warning to examples notebooks, updates deprecated urlretrieve to requests (#1295)
+   * remove Origen 2.2: H1 Cross Section for PyNE repo not supporting necessary inputs to reproduce the example.
 
 * Changes in source sampling for mesh-based Monte Carlo sources
    * Add statistics summary output of find_cell failure in source sampling.
@@ -183,6 +191,7 @@ v0.7.0 RC2
    * Added publications to bibliography (PR #1256)
    * Adding contributing guide and code of conduct (#1258)
    * Changed Doc and Tutorial mentions of iPython notebooks to Jupyter notebooks (PR #1262)
+   * Improvements in documentation for release (#1290 #1285)
 
 * Improvements in building and testing
    * require contributor to change CHANGELOG
@@ -216,6 +225,7 @@ v0.7.0 RC2
    * Remove if block in travis-run-tests.sh (just run nosetests)
    * Deprecating most of the python 2 tests. Only testing python2 with pyMOAB and DAGMC deps.
    * updates tutorials and examples to python3 syntax to avoid failures (#1271)
+   * added a welcome bot for first PR, Issue, and merge (#1287)
 
 * Code cleanup
    * Formatting improvements
