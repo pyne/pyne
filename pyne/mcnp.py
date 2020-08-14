@@ -1431,7 +1431,6 @@ def mat_from_inp_line(filename, mat_line, densities='None'):
                 nucvec[zzzaaam] += float(data_string.split()[i+1])
             else:
                 nucvec[zzzaaam] = float(data_string.split()[i+1])
-            
             if len(data_string.split()[i].split('.')) > 1:
                 table_ids[str(zzzaaam)] = data_string.split()[i].split('.')[1]
 
