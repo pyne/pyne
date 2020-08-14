@@ -1425,15 +1425,14 @@ def mat_from_inp_line(filename, mat_line, densities='None'):
            continue
         if i & 1 == 1:
             zzzaaam = str(nucname.zzaaam(
-                nucname.mcnp_to_id(token.split('.')[0])))
-
+                nucname.mcnp_to_id(data_string.split()[i].split('.')[0])))
             # this allows us to read nuclides that are repeated
             if zzzaaam in nucvec.keys():
                 nucvec[zzzaaam] += float(data_string.split()[i+1])
             else:
-                nucvec[zzzaaam] = float(data_string.split()[i+1])
-            if len(token.split('.')) > 1:
-                table_ids[str(zzzaaam)] = token.split('.')[1]
+                nucvec[zzzaaam] = float(data_string.split()[i+1])        
+            if len(data_string.split()[i].split('.')) > 1:
+                table_ids[str(zzzaaam)] = data_string.split()[i].split('.')[1]
 
     # Check to see it material is definted my mass or atom fracs.
     # Do this by comparing the first non-zero fraction to the rest
