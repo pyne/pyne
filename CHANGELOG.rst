@@ -83,6 +83,8 @@ v0.7.0 RC2
 
 * Fixes in examples and tutorials
    * in half_life example, changed nuc_data call in anum to give int data type
+   * in Data Sources, rerun example to update output
+   * in Chainsolve Transmutation, rerun example to update output
    * pytaps to pymoab update in intro tutorial (#1282)
 
 * Changes in source sampling for mesh-based Monte Carlo sources
