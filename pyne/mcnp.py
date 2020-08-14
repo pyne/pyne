@@ -1423,7 +1423,6 @@ def mat_from_inp_line(filename, mat_line, densities='None'):
             # Eliminates default library indicators
             if data_string.split()[i].split('=')[0] in lib_name:
                 continue
-                
             zzzaaam = str(nucname.zzaaam(
                 nucname.mcnp_to_id(data_string.split()[i].split('.')[0])))
 
