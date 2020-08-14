@@ -53,7 +53,7 @@ RUN if [ "${py_version%.?}" -eq 3 ] ; \
             future  \
             matplotlib \
             tables \
-            scipy \		
+            scipy \
             jinja2
 # Required for CHANGELOG test
 RUN apt-get install -y curl jq
