@@ -250,6 +250,7 @@ v0.7.0 RC2
    * cleanup throws return from ``return (const char *)`` to simple ``return``
      (it was suggested that those complicated return might cause seg fault, on some system -- OsX+conda)
    * Fixes string formatting typo in ``pyne/fortranformat/_parser.py``. Entire file is now ``str.format()`` (#1275)
+   * Remove deprecated file open mode 'U' (#1298)
 
 **Fixed:**
 
