@@ -52,4 +52,4 @@ branch of PyNE ("-dev") for each.
 Example for building a docker image of the latest stable branch of PyNE based on
 Ubuntu 16.04::
 
-    docker build -f ubuntu_16.04-stable.dockerfile -t pyne-16.04-stable .
+    docker build -f ubuntu_16.04-stable.dockerfile -t pyne-ubuntu-16.04-stable .
