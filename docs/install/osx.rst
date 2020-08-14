@@ -42,8 +42,8 @@ These are only necessary if you intend to contribute to the PyNE website.
 Optional Dependencies
 ---------------------
 #. `MOAB <https://press3.mcs.anl.gov/sigma/moab-library>`__
-#. `PyTAPS <https://pythonhosted.org/PyTAPS/index.html>`__
-
+#. `DAGMC <https://svalinn.github.io/DAGMC/install/index.html>`__
+#. `OpenMC <https://docs.openmc.org/en/stable/quickinstall.html>`_
 
 =============
 Installation:

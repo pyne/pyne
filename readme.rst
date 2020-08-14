@@ -40,8 +40,9 @@ PyNE has the following dependencies:
 
 Optional Depenendencies:
    #. `MOAB <https://press3.mcs.anl.gov/sigma/moab-library>`_
-   #. `PyTAPS <https://pythonhosted.org/PyTAPS/index.html>`_
-
+   #. `DAGMC <https://svalinn.github.io/DAGMC/install/index.html>`__
+   #. `OpenMC <https://docs.openmc.org/en/stable/quickinstall.html>`_
+   
 To run tutorial and examples:
    #. `jupyter <http://jupyter.org/>`_
 
