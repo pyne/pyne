@@ -26,7 +26,7 @@ to the user's operating system and version.
 
 The intention of these
 scripts is that PyNE can be ready to use on a clean install of any of
-the supported operating systems. Furthermore, the user should choose either
+the :ref:`supported operating systems <supported_platforms>`. Furthermore, the user should choose either
 to build a stable version of PyNE or the current develop
 branch of PyNE by supplying a secondary argument. Choosing between dev and stable is
 a matter of preference, if you intend to contribute to PyNE it is recommended that
