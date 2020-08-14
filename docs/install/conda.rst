@@ -24,25 +24,3 @@ where VERSION should be replaced with the version number to be installed.
 A windows 32-bit binary is also available on conda via the same command but
 it is highly experimental and likely broken. Conda binaries do not have 
 moab/pymoab/mesh support (yet).
-
-----------------------------------
-Create a Package (For Developer)
-----------------------------------
-In a new shell, run the following::
-
-    conda install conda-build jinja2 nose setuptools pytables hdf5 scipy
-
-on linux you may also need to run::
-
-    conda install patchelf
-
-Then dowload the latest conda-recipes `here 
-<https://github.com/conda/conda-recipes/archive/master.zip>`_
-
-cd to the conda-recipes directory and run::
-
-    conda build pyne
-    conda install $(conda build --output pyne)
-    nuc_data_make
-
-You should now be able to update the conda package that lives on binstar.
