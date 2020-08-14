@@ -50,7 +50,7 @@ RUN if [ "${py_version%.?}" -eq 3 ] ; \
             numpy \
             nose \
             cython \
-            future  \
+            future \
             matplotlib \
             tables \
             scipy \
