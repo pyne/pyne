@@ -2,8 +2,8 @@
 
 # Comment to be posted to on first time issues
 newIssueWelcomeComment: >
-  Hi, and welcome to PyNE!  Thanks for opening your first issue.  We recommend that you 
-  include information such as the version of Pyne you're working with, the platform you
+  Hi, and welcome to PyNE!  :wave: Thanks for opening your first issue.  We recommend that you 
+  include information such as the version of PyNE you're working with (eg, develop branch or a specific version), the platform you
   are operating on, the expected behavior, and the actual behavior you are bringing our 
   attention to. The more deatil you provide, the better others in this community will 
   be able to help you.
