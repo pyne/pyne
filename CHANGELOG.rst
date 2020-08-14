@@ -88,6 +88,8 @@ v0.7.0 RC2
    * pytaps to pymoab update in intro tutorial (#1282)
    * in material_library example, updated import and class usage to reflect MaterialLibrary changes (#1280)
    * Removed QA warnings
+   * in ACE Module example, change urllib for requests
+>>>>>>> changelog
 
 * Changes in source sampling for mesh-based Monte Carlo sources
    * Add statistics summary output of find_cell failure in source sampling.
