@@ -15,7 +15,7 @@ Many, if not all of these dependencies can be installed using a package manager
 ----
 PyNE
 ----
-#. `Python <https://www.python.org/>`__
+#. `Python <https://www.python.org/>`__ (>= 3.5.2)
 #. `GCC <https://gcc.gnu.org/>`__
 #. `CMake <http://www.cmake.org/>`_ (>= 2.8.5)
 #. `NumPy <http://www.numpy.org/>`_ (>= 1.8.0)
