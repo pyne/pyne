@@ -87,6 +87,7 @@ v0.7.0 RC2
    * in Chainsolve Transmutation, rerun example to update output
    * pytaps to pymoab update in intro tutorial (#1282)
    * in material_library example, updated import and class usage to reflect MaterialLibrary changes (#1280)
+   * Removed QA warnings
 
 * Changes in source sampling for mesh-based Monte Carlo sources
    * Add statistics summary output of find_cell failure in source sampling.
