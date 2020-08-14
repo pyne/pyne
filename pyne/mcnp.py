@@ -1403,12 +1403,6 @@ def mat_from_inp_line(filename, mat_line, densities='None'):
     lib_name = ['nlib', 'plib', 'hlib', 'pnlib', 'elib']
     # people sometimes put comments in materials and then this loop breaks                                                                                       # so we need to keep reading if we encounter comments
     while len(line.split()) > 0 and (line[0:5] == '     ' or line[0].lower() == 'c'):
-        # This line reads deafult cross-section library from material card 
-        for token in line.split():
-            if '=' in token:
-                if token.split('=')[0] in lib_name:
-                    lib_id[token.split('=')[0]] = token.split('=')[1]
-
         # make sure element/isotope is not commented out
         if line.split()[0][0] != 'c' and line.split()[0][0] != 'C':
             data_string += line.split('$')[0]
@@ -1439,11 +1433,15 @@ def mat_from_inp_line(filename, mat_line, densities='None'):
             else:
                 nucvec[zzzaaam] = float(data_string.split()[i+1])
             
-
             if len(data_string.split()[i].split('.')) > 1:
                 table_ids[str(zzzaaam)] = data_string.split()[i].split('.')[1]
-            else:
-                table_ids[str(zzzaaam)] = lib_id
+
+    # This lines read default library indicators from material card.            
+    for token in data_string.split():
+        if '=' in token:
+            if token.split('=')[0] in lib_name:
+                lib_id[token.split('=')[0]] = token.split('=')[1]
+                table_ids["default"] = lib_id    
 
     # Check to see it material is definted my mass or atom fracs.
     # Do this by comparing the first non-zero fraction to the rest
