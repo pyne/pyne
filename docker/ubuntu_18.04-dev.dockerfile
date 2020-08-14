@@ -50,7 +50,11 @@ RUN if [ "${py_version%.?}" -eq 3 ] ; \
             numpy \
             nose \
             cython \
-            future
+            future  \
+            matplotlib \
+            tables \
+            scipy \		
+            jinja2
 # Required for CHANGELOG test
 RUN apt-get install -y curl jq
 
