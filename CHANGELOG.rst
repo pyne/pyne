@@ -85,11 +85,11 @@ v0.7.0 RC2
    * in half_life example, changed nuc_data call in anum to give int data type
    * in Data Sources, rerun example to update output
    * in Chainsolve Transmutation, rerun example to update output
-   * pytaps to pymoab update in intro tutorial (#1282)
+   * pytaps to pymoab update in intro/diffusion tutorials (#1282, #1304)
    * in material_library example, updated import and class usage to reflect MaterialLibrary changes (#1280)
    * Removed QA warnings
    * in ACE Module example, change urllib for requests
-   * adds broken yt warning to examples notebooks, updates deprecated urlretrieve to requests (#1295)
+   * adds broken yt warning to examples notebooks, updates deprecated urlretrieve to requests (#1295, #1304)
    * remove Origen 2.2: H1 Cross Section for PyNE repo not supporting necessary inputs to reproduce the example.
    * in mesh basic tutorial, add broken yt warning
 
