@@ -180,3 +180,9 @@ RUN if [ "$install_openmc" = "YES" ]; then \
         && pip install . ; \
     fi
 
+ARG bootable="NO"
+RUN if [ "$bootable" != "NO" ]; then \
+       apt-get -y install --no-install-recommends linux-image-virtual systemd-sysv; \
+       fi;
+RUN echo "root:root" | chpasswd
+
