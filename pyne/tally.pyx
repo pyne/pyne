@@ -18,10 +18,9 @@ cimport numpy as np
 
 from pyne import stlcontainers
 
-from warnings import warn
-from pyne.utils import QAWarning
+from pyne.utils import QA_warn
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+QA_warn(__name__)
 
 cdef vector[int] to_vector_int(value):
     cdef vector[int] value_proxy

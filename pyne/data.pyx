@@ -13,8 +13,7 @@ from libcpp.utility cimport pair as cpp_pair
 #from cython cimport pointer
 
 #Standard lib import
-from warnings import warn
-from pyne.utils import QAWarning
+from pyne.utils import QA_warn
 
 cimport numpy as np
 import numpy as np
@@ -34,7 +33,7 @@ cimport cpp_data
 cimport pyne.stlcontainers as conv
 import pyne.stlcontainers as conv
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+QA_warn(__name__)
 
 # Mathematical constants
 pi = cpp_data.pi

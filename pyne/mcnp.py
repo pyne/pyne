@@ -24,13 +24,13 @@ from warnings import warn
 import numpy as np
 import tables
 
-from pyne.utils import QAWarning
+from pyne.utils import QA_warn
 from pyne.material import Material
 from pyne.material import MultiMaterial
 from pyne import nucname
 from pyne.binaryreader import _BinaryReader, _FortranRecord
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+QA_warn(__name__)
 
 # Mesh specific imports
 
@@ -39,7 +39,7 @@ if HAVE_PYMOAB:
 else:
     warn("The PyMOAB optional dependency could not be imported. "
          "Some aspects of the mcnp module may be incomplete.",
-         QAWarning)
+         ImportWarning)
 
 if sys.version_info[0] > 2:
     def cmp(a, b):

@@ -10,8 +10,7 @@ from pyne cimport cpp_material
 import tables as tb
 import sys
 import os
-from pyne.utils import QAWarning
-from warnings import warn
+from pyne.utils import QA_warn
 import numpy as np
 
 # Cython imports
@@ -53,7 +52,7 @@ cimport pyne.data as data
 cimport pyne.material as material
 
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+QA_warn(__name__)
 
 _INTEGRAL_TYPES = (int, np.integer, np.bool_)
 

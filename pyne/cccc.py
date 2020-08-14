@@ -32,10 +32,10 @@ from __future__ import division
 from warnings import warn
 import numpy as np
 
-from pyne.utils import QAWarning
+from pyne.utils import QA_warn
 from pyne.binaryreader import _BinaryReader, _FortranRecord
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+QA_warn(__name__)
 
 
 class Isotxs(_BinaryReader):
@@ -673,7 +673,7 @@ class Rtflux(object):
         else:
             warn("The PyMOAB optional dependency could not be imported. "
                  "All aspects of the partisn module are not imported.",
-                 QAWarning)
+                 ImportWarning)
 
         if not m.structured:
             raise ValueError("Only structured mesh is supported.")

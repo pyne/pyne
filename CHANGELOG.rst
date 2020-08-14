@@ -46,6 +46,7 @@ v0.7.0 RC2
 
 **Enhancements to Previous Capabilities**
 
+* Turn off QA warnings by default and enable with env variable 'PYNE_QA_WARN' (#1268)
 * Enhancements of Material and MaterialLibrary capabilities
    * A C++ API for the MaterialLibrary class has been created for direct
      use in compiled software tools
@@ -61,7 +62,7 @@ v0.7.0 RC2
           /material/my_mat/composition
           /material/my_mat/nuclidelist
           /material/my_mat/composition_metadata
-        
+
         where, ``/material`` and ``/material/my_mat`` are now HDF5 groups
    * Material I/O formats
       * pyne::Material: capability to form PHITS input material card
@@ -72,6 +73,8 @@ v0.7.0 RC2
       * increased precision of the material density reported in the comment card
         for an MCNP material to 5 decimal places
       * Adds tests to tests/test:materials.py:test_decay_heat(self) to check more isotopes
+      * Adds from_activity() to create or redefine materials using radionuclide
+        activities
 
 * Bug fixes in serpent support
    * in serpent.py, function VOL_serp2_fix() to correct for
@@ -80,6 +83,18 @@ v0.7.0 RC2
    * serpent.py function parse_dep.  Catches ValueError that
      occurs when parse_dep attempts to make_mats with a serpent 2 \*_dep.m file
      due to the \*_VOL variable not being a float
+
+* Fixes in examples and tutorials
+   * in half_life example, changed nuc_data call in anum to give int data type
+   * in Data Sources, rerun example to update output
+   * in Chainsolve Transmutation, rerun example to update output
+   * pytaps to pymoab update in intro/diffusion tutorials (#1282, #1304)
+   * in material_library example, updated import and class usage to reflect MaterialLibrary changes (#1280)
+   * Removed QA warnings
+   * in ACE Module example, change urllib for requests
+   * adds broken yt warning to examples notebooks, updates deprecated urlretrieve to requests (#1295, #1304)
+   * remove Origen 2.2: H1 Cross Section for PyNE repo not supporting necessary inputs to reproduce the example.
+   * in mesh basic tutorial, add broken yt warning
 
 * Changes in source sampling for mesh-based Monte Carlo sources
    * Add statistics summary output of find_cell failure in source sampling.
@@ -180,9 +195,12 @@ v0.7.0 RC2
    * Added publications to bibliography (PR #1256)
    * Adding contributing guide and code of conduct (#1258)
    * Changed Doc and Tutorial mentions of iPython notebooks to Jupyter notebooks (PR #1262)
-    
+   * Improvements in documentation for release (#1290 #1285 #1299)
+
 * Improvements in building and testing
    * require contributor to change CHANGELOG
+   * now get the base branch name from github and check change against it
+      (inspired by https://github.com/NarrativeScience/circleci-orb-ghpr/blob/master/src/commands/get-pr-info.yml)
    * Expand testing matrix to include:
       * python 2 vs 3
       * with vs without PyMOAB
@@ -210,6 +228,8 @@ v0.7.0 RC2
    * Install Python dependencies with Pip instead of APT in Dockerfile
    * Remove if block in travis-run-tests.sh (just run nosetests)
    * Deprecating most of the python 2 tests. Only testing python2 with pyMOAB and DAGMC deps.
+   * updates tutorials and examples to python3 syntax to avoid failures (#1271)
+   * added a welcome bot for first PR, Issue, and merge (#1287)
 
 * Code cleanup
    * Formatting improvements
@@ -223,7 +243,7 @@ v0.7.0 RC2
    * ``rxname.child()`` and ``rxname.parent()`` now accept ``str`` for the
      ``z`` argument in Python 3.
    * dagmc_bridge: added a static DagMC instance
-   * cleanup throws return from ``return (const char *)`` to simple ``return`` 
+   * cleanup throws return from ``return (const char *)`` to simple ``return``
      (it was suggested that those complicated return might cause seg fault, on some system -- OsX+conda)
    * Fixes string formatting typo in ``pyne/fortranformat/_parser.py``. Entire file is now ``str.format()`` (#1275)
 
