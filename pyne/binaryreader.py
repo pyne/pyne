@@ -5,11 +5,15 @@ Fortran formatted records.
 
 """
 import struct
-from collections import Iterable
-from warnings import warn
-from pyne.utils import QAWarning
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+try:
+    from collections.abc import Iterable
+except ImportError:
+    from collections import Iterable
+
+from pyne.utils import QA_warn
+
+QA_warn(__name__)
 
 class _FortranRecord(object):
     """A single Fortran formatted record.

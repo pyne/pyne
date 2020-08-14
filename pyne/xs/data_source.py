@@ -5,8 +5,7 @@ from __future__ import division
 import os
 import io
 import sys
-from warnings import warn
-from pyne.utils import QAWarning
+from pyne.utils import QA_warn
 
 try:
     from StringIO import StringIO
@@ -31,7 +30,7 @@ from pyne import ace
 from pyne.data import MeV_per_K
 from pyne.xs.models import partial_energy_matrix, group_collapse, same_arr_or_none
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+QA_warn(__name__)
 
 IO_TYPES = (io.IOBase, StringIO)
 

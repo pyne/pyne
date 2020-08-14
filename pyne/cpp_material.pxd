@@ -109,6 +109,7 @@ cdef extern from "material.h" namespace "pyne":
         vector[pair[double, double]] gammas() except +
         vector[pair[double, double]] xrays() except +
         vector[pair[double, double]] photons(bool) except +
+        void from_activity(map[int, double]) except +
 
         Material decay(double) except +
         Material cram(vector[double]) except +

@@ -8,8 +8,7 @@ q_value, and the percent of q coming from gammas. This data is from
 from __future__ import print_function
 import csv
 import os
-from warnings import warn
-from pyne.utils import QAWarning
+from pyne.utils import QA_warn
 
 import numpy as np
 import tables as tb
@@ -18,7 +17,7 @@ from pyne import nucname
 from pyne.api import nuc_data
 from pyne.dbgen.api import BASIC_FILTERS
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+QA_warn(__name__)
 
 # Parses data from .csv
 def grab_q_values(fname):

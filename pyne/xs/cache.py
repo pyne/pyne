@@ -2,10 +2,12 @@
 cross-sections from provided nuclear data sets."""
 import sys
 import inspect
-from warnings import warn
 
 from itertools import product
-from collections import MutableMapping
+try:
+    from collections.abc import MutableMapping
+except ImportError:
+    from collections import MutableMapping
 
 import numpy as np
 import tables as tb
@@ -14,9 +16,9 @@ from pyne import nucname
 from pyne.pyne_config import pyne_conf
 from pyne.xs.models import partial_energy_matrix, phi_g, same_arr_or_none
 from pyne.xs import data_source
-from pyne.utils import QAWarning
+from pyne.utils import QA_warn
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+QA_warn(__name__)
 
 if sys.version_info[0] > 2:
   basestring = str

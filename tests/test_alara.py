@@ -449,10 +449,10 @@ def test_mesh_to_geom():
     mesh_to_geom(m, geom, matlib)
 
     with open(expected_geom) as f:
-        written = f.readlines()
+        expected = f.readlines()
 
     with open(geom) as f:
-        expected = f.readlines()
+        written = f.readlines()
 
     assert_equal(written, expected)
 
@@ -460,11 +460,10 @@ def test_mesh_to_geom():
         os.remove(geom)
 
     with open(expected_matlib) as f:
-        written = f.readlines()
-
-    with open(matlib) as f:
         expected = f.readlines()
 
+    with open(matlib) as f:
+        written = f.readlines()
     assert_equal(written, expected)
 
     if os.path.isfile(matlib):

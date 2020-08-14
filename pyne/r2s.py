@@ -1,6 +1,5 @@
 from os.path import isfile
-from warnings import warn
-from pyne.utils import QAWarning
+from pyne.utils import QA_warn
 import numpy as np
 
 from pyne.mesh import Mesh
@@ -8,7 +7,7 @@ from pyne.mcnp import Meshtal
 from pyne.alara import mesh_to_fluxin, record_to_geom, photon_source_to_hdf5, \
     photon_source_hdf5_to_mesh, responses_output_zone
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+QA_warn(__name__)
 
 
 def resolve_mesh(mesh_reference, tally_num=None, flux_tag="n_flux",

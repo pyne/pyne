@@ -4,7 +4,6 @@ from libcpp.string cimport string as std_string
 from libcpp.map cimport map as cpp_map
 from cython import pointer
 
-import collections
 
 # Local imports
 cimport cpp_material
@@ -21,9 +20,6 @@ cdef class _Material:
 #
 ctypedef cpp_material.Material * matp
 
-# Dictionary - Map Converters
-cdef cpp_map[std_string, matp] dict_to_map_str_matp(dict)
-cdef dict map_to_dict_str_matp(cpp_map[std_string, matp])
 
 # (Str, Material)
 cdef class MapIterStrMaterial(object):
@@ -36,5 +32,3 @@ cdef class _MapStrMaterial:
     cdef public bint _free_map
     cdef dict _cache
 
-cdef class _MaterialLibrary(object):
-    cdef dict _lib

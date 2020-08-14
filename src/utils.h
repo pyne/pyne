@@ -90,7 +90,7 @@ namespace pyne {
   std::string capitalize(std::string s);
 
   /// Forms and returns the wrapped lines with a lenght up to line_lenght.
-  std::ostringstream comment_line_wrapping(std::string line, std::string comment_prefix = "",
+  std::string comment_line_wrapping(std::string line, std::string comment_prefix = "",
                                            int line_length = 79);
 
   /// Finds and returns the first white-space delimited token of a line.
@@ -147,6 +147,11 @@ namespace pyne {
   // File Helpers
   /// Returns true if the file can be found.
   bool file_exists(std::string strfilename);
+  
+  // turns the filename string into the full file path
+  std::string get_full_filepath(char* filename);
+  // turns the filename string into the full file path
+  std::string get_full_filepath(std::string filename);
 
   // Message Helpers
   extern bool USE_WARNINGS;
@@ -210,7 +215,7 @@ namespace pyne {
       if (!message.empty())
         msgstr += message;
 
-      return (const char *) msgstr.c_str();
+      return msgstr.c_str();
     };
 
   private:

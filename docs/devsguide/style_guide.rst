@@ -97,7 +97,7 @@ Expectations
 * The *only* exceptions to not having tests and documentation are when merging in and
   slowly integrating legacy code or code not originally originally written for pyne.
 * Without both tests and documentation, the code must be marked as experimental.
-  It should issue a ``pyne.utils.QAWarning``.
+  It should invoke ``pyne.utils.QA_warn()``.
 * Have *extreme* empathy for your users.
 * Be selfish. Since you will be writing tests you will be your first user.
 * Nothing says "I <3 PyNE" quite like an ASCII art dragon.

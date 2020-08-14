@@ -4,7 +4,7 @@ from __future__ import print_function, division, unicode_literals
 import sys
 from contextlib import contextmanager
 from warnings import warn
-from pyne.utils import QAWarning
+from pyne.utils import QA_warn
 
 cimport numpy as np
 import numpy as np
@@ -12,10 +12,12 @@ import numpy as np
 from pyne cimport cpp_dagmc_bridge
 from pyne.mesh import Mesh
 from numpy.linalg import norm
-from pyne.material import Material, MaterialLibrary
+from pyne.material import Material
+from pyne.material_library import MaterialLibrary
+
 np.import_array()
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+QA_warn(__name__)
 
 if sys.version_info[0] >= 3:
     unichr = chr
@@ -27,7 +29,7 @@ from pymoab import core as mb_core, types
 if not HAVE_PYMOAB:
     warn("The PyMOAB optional dependency could not be imported. "
          "Some aspects of dagmc module may be incomplete",
-         QAWarning)
+         ImportWarning)
 
 # Globals
 VOL_FRAC_TOLERANCE = 1E-10 # The maximum volume fraction to be considered valid
@@ -669,8 +671,6 @@ def cell_materials(hdf5, **kwargs):
         Path to hdf5 material-laden geometry
     datapath: str, optional, default ='/materials',
         The path in the heirarchy to the material data table in the HDF5 file.
-    nucpath, str, optional, default='/nucid'
-        The path in the heirarchy to the nuclide array in the HDF5 file.
 
     Returns:
     --------
@@ -680,7 +680,6 @@ def cell_materials(hdf5, **kwargs):
     [1] http://svalinn.github.io/DAGMC/usersguide/uw2.html
     """
     datapath = kwargs.get('datapath', '/materials')
-    nucpath = kwargs.get('nucpath', '/nucid')
 
     # void material
     void_mat = Material({}, density = 0.0, metadata={'name': 'void',
@@ -689,7 +688,7 @@ def cell_materials(hdf5, **kwargs):
     void_names = ['vacuum', 'graveyard', 'void']
 
     ml = MaterialLibrary()
-    ml.from_hdf5(hdf5, datapath=datapath, nucpath=nucpath)
+    ml.from_hdf5(hdf5, datapath=datapath)
     mat_assigns = cell_material_assignments(hdf5)
     cell_mats = {}
     for cell_num, mat_name in mat_assigns.items():

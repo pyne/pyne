@@ -27,6 +27,9 @@ executors:
     py3_dagmc_pymoab:
         docker:
             - image: pyne/ubuntu_18.04_py3_dagmc_pymoab_pyne-deps:latest
+    py3_dagmc_pymoab_hdf5_12:
+        docker:
+            - image: pyne/ubuntu_18.04_py3_hdf5-1_12_0_dagmc_pymoab_pyne-deps:latest
     py3_dagmc_pymoab_openmc:
         docker:
             - image: pyne/ubuntu_18.04_py3_dagmc_pymoab_openmc_pyne-deps:latest
@@ -135,16 +138,17 @@ commands:
 # Define the different job that will be ran this separate building form
 # testing for each configuration allowing to get more information out of the CI
 jobs:
-# news file checker
-  news_update:
-    executor: 
-      name: py3
+# CHANGELOG file checker
+  changelog_update:
+    docker:
+      - image: alpine:3.7
     working_directory: ~/repo
     steps:
+      - run: apk add --no-cache bash curl jq git openssh
       - checkout
       - run:
-          name: Checking News Update
-          command: news/news_test.sh news
+          name: Checking CHANGELOG Update
+          command: circleci/changelog_test.sh
  
 # Python 3 jobs
   py3_build:
@@ -198,6 +202,23 @@ jobs:
           flags: "python3"
           build: "python3_dagmc_pymoab"
 
+  py3_dagmc_pymoab_hdf5_12_build:
+    executor:
+      name: py3_dagmc_pymoab_hdf5_12
+    working_directory: ~/repo
+    steps:
+      - checkout_build:
+          flags: "--moab $HOME/opt/moab --dagmc $HOME/opt/dagmc --hdf5 $HOME/opt/hdf5/hdf5-1_12_0"
+          build: "python3_dagmc_pymoab_hdf5_12"
+  py3_dagmc_pymoab_hdf5_12_test:
+    executor:
+      name: py3_dagmc_pymoab_hdf5_12
+    working_directory: ~/repo
+    steps:
+      - run_test:
+          flags: "python3"
+          build: "python3_dagmc_pymoab_hdf5_12"
+        
   py3_dagmc_pymoab_openmc_build:
       executor:
         name: py3_dagmc_pymoab_openmc
@@ -216,42 +237,6 @@ jobs:
             build: "python3_dagmc_pymoab_openmc"
 
 # Python 2 jobs
-# without optional depedencies
-  py2_build:
-    executor:
-      name: py2
-    working_directory: ~/repo
-    steps:
-      - checkout_build:
-          flags: ""
-          build: "python2"
-  py2_test:
-    executor:
-      name: py2
-    working_directory: ~/repo
-    steps:
-      - run_test:
-          flags: "python2"
-          build: "python2"
-
-# With PyMOAB
-  py2_pymoab_build:
-    executor:
-      name: py2_pymoab
-    working_directory: ~/repo
-    steps:
-      - checkout_build:
-          flags: "--moab $HOME/opt/moab"
-          build: "python2_pymoab"
-  py2_pymoab_test:
-    executor:
-      name: py2_pymoab
-    working_directory: ~/repo
-    steps:
-      - run_test:
-          flags: "python2"
-          build: "python2_pymoab"
-
 # With PyMOAB & DAGMC
   py2_dagmc_pymoab_build:
     executor:
@@ -272,21 +257,21 @@ jobs:
 
 # Website
 # Build and push the website
-  build_push_website_test:
-    executor:
-      name: py2_dagmc_pymoab
-    working_directory: ~/repo
-    steps:
-      - website_build_push:
-          push_option: "test"
+  # build_push_website_test:
+  #   executor:
+  #     name: py2_dagmc_pymoab
+  #   working_directory: ~/repo
+  #   steps:
+  #     - website_build_push:
+  #         push_option: "test"
 
-  build_push_website_deploy:
-    executor:
-      name: py2_dagmc_pymoab
-    working_directory: ~/repo
-    steps:
-      - website_build_push:
-          push_option: "root"
+  # build_push_website_deploy:
+  #   executor:
+  #     name: py2_dagmc_pymoab
+  #   working_directory: ~/repo
+  #   steps:
+  #     - website_build_push:
+  #         push_option: "root"
 
 
 # Workflow part:
@@ -297,7 +282,7 @@ workflows:
   version: 2
   build_and_test:
     jobs:
-      - news_update:
+      - changelog_update:
           filters:
             branches:
               ignore: develop
@@ -323,6 +308,13 @@ workflows:
           requires:
             - py3_dagmc_pymoab_build
 
+      - py3_dagmc_pymoab_hdf5_12_build:
+          requires:
+            - py3_dagmc_pymoab_build
+      - py3_dagmc_pymoab_hdf5_12_test:
+          requires:
+            - py3_dagmc_pymoab_hdf5_12_build
+
       - py3_dagmc_pymoab_openmc_build:
           requires:
             - py3_dagmc_pymoab_build
@@ -330,44 +322,32 @@ workflows:
           requires:
             - py3_dagmc_pymoab_openmc_build
 
-      - py2_build
-      - py2_test:
-          requires:
-            - py2_build
-
-      - py2_pymoab_build:
-          requires:
-            - py2_build
-      - py2_pymoab_test:
-          requires:
-            - py2_pymoab_build
-
       - py2_dagmc_pymoab_build:
           requires:
-            - py2_pymoab_build
+            - py3_dagmc_pymoab_build
       - py2_dagmc_pymoab_test:
           requires:
             - py2_dagmc_pymoab_build
 
 
-     # Build/Push test website
-      - build_push_website_test:
-          requires:
-            - py2_dagmc_pymoab_test
-            - py3_dagmc_pymoab_test
-          filters:
-            branches:
-              only:
-                - develop
+    #  # Build/Push test website
+    #   - build_push_website_test:
+    #       requires:
+    #         - py2_dagmc_pymoab_test
+    #         - py3_dagmc_pymoab_test
+    #       filters:
+    #         branches:
+    #           only:
+    #             - develop
 
 
-      # only done on tags
-      - build_push_website_deploy:
-          requires:
-            - py2_dagmc_pymoab_test
-            - py3_dagmc_pymoab_test
-          filters:
-            branches:
-              ignore: /.*/
-            tags:
-              only: /.*/
+      # # only done on tags
+      # - build_push_website_deploy:
+      #     requires:
+      #       - py2_dagmc_pymoab_test
+      #       - py3_dagmc_pymoab_test
+      #     filters:
+      #       branches:
+      #         ignore: /.*/
+      #       tags:
+      #         only: /.*/

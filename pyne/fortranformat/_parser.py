@@ -79,7 +79,7 @@ def _parse_tokens(tokens, reversion=False, version=None):
         elif ed_type == 'ED10':
             ed = _read_ed10(token_set)
         else:
-            raise InvalidFormat('Could not identify edit descriptor in sequence $s' % str(token_set))
+            raise InvalidFormat('Could not identify edit descriptor in sequence {0:s}'.format(str(token_set)))
         # If there is a repeat number cached, then apply
         if repeat is not None:
             ed.repeat = repeat
@@ -232,7 +232,7 @@ def _read_quoted_string(tokens):
     # Of form X only
     type_string = ",".join([t.type for t in tokens])
     if type_string != "QUOTED_STRING":
-        raise InvalidFormat('Token %s has invalid neighbouring token' % tokens[0])
+        raise InvalidFormat('Token {0:s} has invalid neighbouring token'.format(tokens[0]))
     ed = QuotedString()  
     ed.char_string = tokens[0].value
     return ed
@@ -241,7 +241,7 @@ def _read_ed1(tokens):
     # Of form X only
     type_string = ",".join([t.type for t in tokens])
     if type_string != "ED1":
-        raise InvalidFormat('Token %s has invalid neighbouring token' % tokens[0])
+        raise InvalidFormat('Token {0:s} has invalid neighbouring token'.format(tokens[0]))
     ed = get_edit_descriptor_obj(tokens[0].value)   
     return ed
 
@@ -249,7 +249,7 @@ def _read_ed2(tokens):
     # Of form nX only
     type_string = ",".join([t.type for t in tokens])
     if type_string != "NZUINT,ED2":
-        raise InvalidFormat('Token %s has invalid neighbouring token' % tokens[0])
+        raise InvalidFormat('Token {0:s} has invalid neighbouring token'.format(tokens[0]))
     ed = get_edit_descriptor_obj(tokens[1].value)
     ed.num_chars = tokens[0].value
     return ed
@@ -258,7 +258,7 @@ def _read_ed3(tokens):
     # Of form Xn only
     type_string = ",".join([t.type for t in tokens])
     if type_string != "ED3,NZUINT":
-        raise InvalidFormat('Token %s has invalid neighbouring token' % tokens[0])
+        raise InvalidFormat('Token {0:s} has invalid neighbouring token'.format(tokens[0]))
     ed = get_edit_descriptor_obj(tokens[0].value)
     # L edit descriptor has a width rather than num_chars
     if hasattr(ed, 'width'):
@@ -276,7 +276,7 @@ def _read_ed4(tokens):
         if len(tokens) > 1:
             ed.width = tokens[1].value
     else:
-        raise InvalidFormat('Token %s has invalid neighbouring token' % tokens[0])
+        raise InvalidFormat('Token {0:s} has invalid neighbouring token'.format(tokens[0]))
     return ed
 
 def _read_ed5(tokens):
@@ -289,7 +289,7 @@ def _read_ed5(tokens):
         ed.width = tokens[1].value
         ed.decimal_places = tokens[3].value
     else:
-        raise InvalidFormat('%s has invalid neighbouring token' % tokens[0])
+        raise InvalidFormat('{0:s} has invalid neighbouring token'.format(tokens[0]))
     return ed
 
 def _read_ed6(tokens):
@@ -307,7 +307,7 @@ def _read_ed6(tokens):
         ed.width = tokens[1].value
         ed.min_digits = tokens[3].value
     else:
-        raise InvalidFormat('%s has invalid neighbouring token' % tokens[0])
+        raise InvalidFormat('{0:s} has invalid neighbouring token'.format(tokens[0]))
     return ed
 
 def _read_ed7(tokens):
@@ -338,7 +338,7 @@ def _read_ed7(tokens):
         ed.decimal_places = tokens[3].value
         ed.exponent = tokens[5].value
     else:
-        raise InvalidFormat('%s has invalid neighbouring token' % tokens[0])
+        raise InvalidFormat('{0:s} has invalid neighbouring token'.format(tokens[0]))
     return ed
 
 def _read_ed8(tokens):
@@ -349,7 +349,7 @@ def _read_ed8(tokens):
         ed = get_edit_descriptor_obj(tokens[1].value)
         ed.scale = tokens[0].value
     else:
-        raise InvalidFormat('%s has invalid neighbouring token' % tokens[0])
+        raise InvalidFormat('{0:s} has invalid neighbouring token'.format(tokens[0]))
     return ed
 
 def _read_ed9(tokens):
@@ -358,7 +358,7 @@ def _read_ed9(tokens):
     if type_string == "ED9":
         ed = get_edit_descriptor_obj(tokens[0].value)
     else:
-        raise InvalidFormat('%s has invalid neighbouring token' % tokens[0])
+        raise InvalidFormat('{0:s} has invalid neighbouring token'.format(tokens[0]))
     return ed
 
 def _read_ed10(tokens):
@@ -367,7 +367,7 @@ def _read_ed10(tokens):
     if type_string == "ED10":
         ed = get_edit_descriptor_obj(tokens[0].value)
     else:
-        raise InvalidFormat('%s has invalid neighbouring token' % tokens[0])
+        raise InvalidFormat('{0:s} has invalid neighbouring token'.format(tokens[0]))
     return ed
 
 

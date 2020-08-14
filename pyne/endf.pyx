@@ -15,9 +15,12 @@ from __future__ import print_function, division, unicode_literals
 
 import re
 import os
-from collections import OrderedDict, Iterable
+try:
+    from collections.abc import OrderedDict, Iterable
+except ImportError:
+    from collections import OrderedDict, Iterable
 from warnings import warn
-from pyne.utils import QAWarning
+from pyne.utils import QA_warn
 
 cimport numpy as np
 import numpy as np
@@ -34,7 +37,7 @@ from pyne.utils import fromendf_tok, endftod
 
 np.import_array()
 
-warn(__name__ + ' is not yet QA compliant.', QAWarning)
+QA_warn(__name__)
 
 libraries = {0: 'ENDF/B', 1: 'ENDF/A', 2: 'JEFF', 3: 'EFF',
              4: 'ENDF/B High Energy', 5: 'CENDL', 6: 'JENDL',

@@ -4,13 +4,11 @@ from libcpp.string cimport string as std_string
 import numpy as np
 cimport numpy as np
 
-import collections
 from pyne import stlcontainers
 
-from warnings import warn
-from pyne.utils import QAWarning
+from pyne.utils import QA_warn
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+QA_warn(__name__)
 
 cdef class PointSource:
     """

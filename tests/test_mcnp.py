@@ -513,7 +513,7 @@ def test_read_mcnp():
 
     expected_multimaterial = MultiMaterial({
         Material(
-            {10000000: 0.11189838783149784, 80000000: 0.8881016121685023},
+            {10000000: 0.1118983878322976, 80000000: 0.8881016121677024},
             -1.0, 0.9, 3,
             {"comments":
              (" Here are comments the comments "
@@ -523,9 +523,9 @@ def test_read_mcnp():
              "source": " internet",
              "table_ids": {'10000': "05c"}}): 1,
         Material(
-            {10000000: 0.11189838783149784, 80000000: 0.8881016121685023},
+            {10000000: 0.1118983878322976, 80000000: 0.8881016121677024},
             -1.0,
-            1.0021552889223864, 3,
+            1.0021552889251644, 3,
             {"comments":
              (" Here are comments the comments "
               "continue here are more even more"),
@@ -534,7 +534,7 @@ def test_read_mcnp():
              "source": " internet",
              "table_ids": {'10000': "05c"}}): 1,
         Material(
-            {10000000: 0.11189838783149784, 80000000: 0.8881016121685023},
+            {10000000: 0.1118983878322976, 80000000: 0.8881016121677024},
             -1.0, 1.1, 3,
             {"comments":
              (" Here are comments the comments "
@@ -1236,23 +1236,29 @@ def test_mesh_to_geom():
         "8 pz 0.0\n"
         "9 pz 1.0\n"
         "\n"
+        "C name: 0\n"
         "C density = 42.00000\n"
         "m1\n"
         "     1001 -2.1000e+01\n"
         "     19039 -2.1000e+01\n"
+        "C name: 1\n"
         "C density = 43.00000\n"
         "m2\n"
         "     1001 -3.9091e+00\n"
         "     8016 -3.9091e+01\n"
+        "C name: 2\n"
         "C density = 44.00000\n"
         "m3\n"
         "     2004 -4.4000e+01\n"
+        "C name: 3\n"
         "C density = 45.00000\n"
         "m4\n"
         "     69171 -4.5000e+01\n"
+        "C name: 4\n"
         "C density = 47.00000\n"
         "m5\n"
         "     6012 -4.7000e+01\n"
+        "C name: 5\n"
         "C density = 5.00000\n"
         "m6\n"
         "     1002 -5.0000e+00\n")

@@ -1,18 +1,21 @@
 from __future__ import print_function, division
 from future.utils import implements_iterator
-from pyne.material import Material, MaterialLibrary, MultiMaterial
+from pyne.material import Material, MultiMaterial
+from pyne.material_library import MaterialLibrary
 import sys
 import copy
 import itertools
-from collections import Iterable, Sequence
+try:
+    from collections.abc import Iterable, Sequence
+except ImportError:
+    from collections import Iterable, Sequence
 from warnings import warn
-from pyne.utils import QAWarning, check_iterable
+from pyne.utils import QA_warn, check_iterable
 
 import numpy as np
 import tables as tb
 
-
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+QA_warn(__name__)
 
 try:
     from pymoab import core as mb_core, hcoord, scd, types
@@ -24,7 +27,7 @@ try:
 except ImportError:
     HAVE_PYMOAB = False
     warn("The PyMOAB optional dependency could not be imported. "
-         "Some aspects of the mesh module may be incomplete.", QAWarning)
+         "Some aspects of the mesh module may be incomplete.", ImportWarning)
 
 
 _BOX_DIMS_TAG_NAME = "BOX_DIMS"
@@ -130,7 +133,7 @@ class MaterialPropertyTag(Tag):
             RuntimeError("Mesh.mats is None, please add a MaterialLibrary.")
         size = len(self.mesh)
         if isinstance(key, _INTEGRAL_TYPES):
-            return getattr(mats[key], name)
+            return getattr(mats[int(key)], name)
         elif isinstance(key, slice):
             return np.array([getattr(mats[i], name)
                              for i in range(*key.indices(size))])
@@ -831,7 +834,7 @@ class Mesh(object):
                 if '/mat_name' in h5f:
                     mats_in_mesh_file = True
                     mat_path = '/mat_name'
-                elif '/materials' in h5f:
+                elif ('/materials' in h5f) or ('/material_library/materials' in h5f):
                     mats_in_mesh_file = True
                     mat_path = '/materials'
 

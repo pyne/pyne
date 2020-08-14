@@ -18,6 +18,10 @@ from cpython.version cimport PY_MAJOR_VERSION
 
 # Python Imports
 import collections
+try:
+    collectionsAbc = collections.abc
+except AttributeError:
+    collectionsAbc = collections
 
 cimport numpy as np
 import numpy as np
@@ -152,7 +156,7 @@ cdef class _SetStr:
         return
 
 
-class SetStr(_SetStr, collections.Set):
+class SetStr(_SetStr, collectionsAbc.Set):
     """Wrapper class for C++ standard library sets of type <string>.
     Provides set like interface on the Python level.
 
@@ -280,7 +284,7 @@ cdef class _SetInt:
         return
 
 
-class SetInt(_SetInt, collections.Set):
+class SetInt(_SetInt, collectionsAbc.Set):
     """Wrapper class for C++ standard library sets of type <integer>.
     Provides set like interface on the Python level.
 
@@ -432,7 +436,7 @@ cdef class _MapStrStr:
             self.map_ptr.erase(k)
 
 
-class MapStrStr(_MapStrStr, collections.MutableMapping):
+class MapStrStr(_MapStrStr, collectionsAbc.MutableMapping):
     """Wrapper class for C++ standard library maps of type <string, string>.
     Provides dictionary like interface on the Python level.
 
@@ -583,7 +587,7 @@ cdef class _MapStrInt:
             self.map_ptr.erase(k)
 
 
-class MapStrInt(_MapStrInt, collections.MutableMapping):
+class MapStrInt(_MapStrInt, collectionsAbc.MutableMapping):
     """Wrapper class for C++ standard library maps of type <string, integer>.
     Provides dictionary like interface on the Python level.
 
@@ -734,7 +738,7 @@ cdef class _MapIntStr:
             self.map_ptr.erase(k)
 
 
-class MapIntStr(_MapIntStr, collections.MutableMapping):
+class MapIntStr(_MapIntStr, collectionsAbc.MutableMapping):
     """Wrapper class for C++ standard library maps of type <integer, string>.
     Provides dictionary like interface on the Python level.
 
@@ -885,7 +889,7 @@ cdef class _MapStrUInt:
             self.map_ptr.erase(k)
 
 
-class MapStrUInt(_MapStrUInt, collections.MutableMapping):
+class MapStrUInt(_MapStrUInt, collectionsAbc.MutableMapping):
     """Wrapper class for C++ standard library maps of type <string, unsigned integer>.
     Provides dictionary like interface on the Python level.
 
@@ -1036,7 +1040,7 @@ cdef class _MapUIntStr:
             self.map_ptr.erase(k)
 
 
-class MapUIntStr(_MapUIntStr, collections.MutableMapping):
+class MapUIntStr(_MapUIntStr, collectionsAbc.MutableMapping):
     """Wrapper class for C++ standard library maps of type <unsigned integer, string>.
     Provides dictionary like interface on the Python level.
 
@@ -1187,7 +1191,7 @@ cdef class _MapStrDouble:
             self.map_ptr.erase(k)
 
 
-class MapStrDouble(_MapStrDouble, collections.MutableMapping):
+class MapStrDouble(_MapStrDouble, collectionsAbc.MutableMapping):
     """Wrapper class for C++ standard library maps of type <string, double>.
     Provides dictionary like interface on the Python level.
 
@@ -1338,7 +1342,7 @@ cdef class _MapUIntUInt:
             self.map_ptr.erase(k)
 
 
-class MapUIntUInt(_MapUIntUInt, collections.MutableMapping):
+class MapUIntUInt(_MapUIntUInt, collectionsAbc.MutableMapping):
     """Wrapper class for C++ standard library maps of type <unsigned integer, unsigned integer>.
     Provides dictionary like interface on the Python level.
 
@@ -1489,7 +1493,7 @@ cdef class _MapIntInt:
             self.map_ptr.erase(k)
 
 
-class MapIntInt(_MapIntInt, collections.MutableMapping):
+class MapIntInt(_MapIntInt, collectionsAbc.MutableMapping):
     """Wrapper class for C++ standard library maps of type <integer, integer>.
     Provides dictionary like interface on the Python level.
 
@@ -1640,7 +1644,7 @@ cdef class _MapIntDouble:
             self.map_ptr.erase(k)
 
 
-class MapIntDouble(_MapIntDouble, collections.MutableMapping):
+class MapIntDouble(_MapIntDouble, collectionsAbc.MutableMapping):
     """Wrapper class for C++ standard library maps of type <integer, double>.
     Provides dictionary like interface on the Python level.
 
@@ -1791,7 +1795,7 @@ cdef class _MapIntComplex:
             self.map_ptr.erase(k)
 
 
-class MapIntComplex(_MapIntComplex, collections.MutableMapping):
+class MapIntComplex(_MapIntComplex, collectionsAbc.MutableMapping):
     """Wrapper class for C++ standard library maps of type <integer, complex>.
     Provides dictionary like interface on the Python level.
 
@@ -1942,7 +1946,7 @@ cdef class _MapUIntDouble:
             self.map_ptr.erase(k)
 
 
-class MapUIntDouble(_MapUIntDouble, collections.MutableMapping):
+class MapUIntDouble(_MapUIntDouble, collectionsAbc.MutableMapping):
     """Wrapper class for C++ standard library maps of type <unsigned integer, double>.
     Provides dictionary like interface on the Python level.
 
@@ -2131,7 +2135,7 @@ cdef class _MapStrVectorDouble:
             self.map_ptr.erase(k)
 
 
-class MapStrVectorDouble(_MapStrVectorDouble, collections.MutableMapping):
+class MapStrVectorDouble(_MapStrVectorDouble, collectionsAbc.MutableMapping):
     """Wrapper class for C++ standard library maps of type <string, vector [ndarray] of double>.
     Provides dictionary like interface on the Python level.
 
@@ -2320,7 +2324,7 @@ cdef class _MapIntVectorDouble:
             self.map_ptr.erase(k)
 
 
-class MapIntVectorDouble(_MapIntVectorDouble, collections.MutableMapping):
+class MapIntVectorDouble(_MapIntVectorDouble, collectionsAbc.MutableMapping):
     """Wrapper class for C++ standard library maps of type <integer, vector [ndarray] of double>.
     Provides dictionary like interface on the Python level.
 

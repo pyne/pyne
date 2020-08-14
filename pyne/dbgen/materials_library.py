@@ -11,16 +11,16 @@ import os
 import csv
 import sys
 from itertools import takewhile, groupby
-from warnings import warn
-from pyne.utils import QAWarning
+from pyne.utils import QA_warn
 
 import tables as tb
 
 from pyne import nucname
 from pyne.data import natural_abund, natural_abund_map
-from pyne.material import Material, MaterialLibrary
+from pyne.material import Material
+from pyne.material_library import MaterialLibrary
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+QA_warn(__name__)
 
 
 def make_elements():

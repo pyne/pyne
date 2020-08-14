@@ -9,25 +9,28 @@ from pyne.material import Material, from_atom_frac
 from pyne.mesh import Mesh, MeshError, HAVE_PYMOAB
 import os
 import collections
+try:
+    collectionsAbc = collections.abc
+except AttributeError:
+    collectionsAbc = collections
 from warnings import warn
-from pyne.utils import QAWarning, to_sec, str_to_unicode
+from pyne.utils import QA_warn, to_sec, str_to_unicode
 import numpy as np
 import tables as tb
 from io import open
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+QA_warn(__name__)
 
 try:
     basestring
 except NameError:
     basestring = str
 
-
 if HAVE_PYMOAB:
     from pyne.mesh import mesh_iterate
 else:
     warn("The PyMOAB optional dependency could not be imported. "
-         "Some aspects of the mesh module may be incomplete.", QAWarning)
+         "Some aspects of the mesh module may be incomplete.", ImportWarning)
 
 response_strings = {'decay_heat': 'Total Decay Heat',
                     'specific_activity': 'Specific Activity',
@@ -672,7 +675,7 @@ def num_density_to_mesh(lines, time, m):
     if isinstance(lines, basestring):
         with open(lines) as f:
             lines = f.readlines()
-    elif not isinstance(lines, collections.Sequence):
+    elif not isinstance(lines, collectionsAbc.Sequence):
         raise TypeError("Lines argument not a file or sequence.")
     # Advance file to number density portion.
     header = u'Number Density [atoms/cm3]'
@@ -773,7 +776,7 @@ def irradiation_blocks(material_lib, element_lib, data_library, cooling,
 
     # Cooling times
     s += u"cooling\n"
-    if isinstance(cooling, collections.Iterable) and not isinstance(cooling, basestring):
+    if isinstance(cooling, collectionsAbc.Iterable) and not isinstance(cooling, basestring):
         for c in cooling:
             s += u"    {0}\n".format(c)
     else:
@@ -792,7 +795,7 @@ def irradiation_blocks(material_lib, element_lib, data_library, cooling,
 
     # Output block
     s += u"output zone\n    units Ci cm3\n"
-    if isinstance(output, collections.Iterable) and not isinstance(output, basestring):
+    if isinstance(output, collectionsAbc.Iterable) and not isinstance(output, basestring):
         for out in output:
             s += u"    {0}\n".format(out)
     else:

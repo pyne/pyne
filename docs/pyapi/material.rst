@@ -26,8 +26,12 @@ The :ref:`pyne_material_library` class is available to efficiently manipulate
 collections of materials.  The material class is presented below.  For more
 information please refer to :ref:`usersguide_material`.
 
+HDF5 File Structure
+--------------------
+
 When using the `write_hdf5` method to write a material in a group named
-`my_mat`, the default structure for the `HDF5` file is:
+`my_mat` (the user shall provide the name for this group in argument `datapath`), 
+the default structure for the `HDF5` file is:
 .. verbatim::
     /material/
     /--------/my_mat/
@@ -35,11 +39,21 @@ When using the `write_hdf5` method to write a material in a group named
              /------/nuclidelist
              /------/composition_metadata
 
-Where, `/material` and `/material/my_mat` are HDF5 groups, (`my_mat` value shall
-be provided as the datapath by the user). IF the `$datapath` or `/material`
-exist as a dataset in the file, then the old writing method will ne used.
+Where, `/material` and `/material/my_mat` are HDF5 groups, and 
+`composition`, `nuclidelist` and `composition_metadata` are HDF5 datasets. 
 
-Older data structure are deprecated but still available to written when providing a `nucpath` to the
+The :ref:`pyne_material_library` class is available to efficiently manipulate
+collections of materials.
+
+
+Previous HDF5 File Structure
+----------------------------
+
+In files created with previous versions, it's possible that 
+the `datapath` or `/material` already exist as a dataset in the file.
+In such cases, the old writing method will be used.
+Older data structure are deprecated but still available to written when providing a
+ `nucpath` to the
 `write_hdf5()` method, or when writing a material in a file with the old
 data structure.
 Old data structure looks like:
@@ -51,14 +65,18 @@ Old data structure looks like:
 
 `my_mat` (the `datapath` -- default `material`) is a HDF5 dataset containing the
 material composition, `nucpath` is a attribute containing the path to the
-nuclide list (nested in the `datapath`).
-`my_mat_metadata` is a dataset containing the metatdata of the material.
+nuclide list. The attribute is attached to the `datapath`.
+`my_mat_metadata` is a dataset containing the metadata of the material.
 `nuclidelist` is a dataset containing the list of nuclides composition the
 material.
 
-
 `from_hdf5()` will detect the structure (old or new) of the file (when using
 `protocol1`).
+   
+The material class is presented below.  
+========================================
+*For more information please refer to :ref:`usersguide_material`.*
+=======
 
 **************
 Material Class

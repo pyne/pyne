@@ -14,9 +14,11 @@ try:
 except ImportError:
     pass
 from warnings import warn
-from pyne.utils import QAWarning
+from pyne.utils import QA_warn
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+import numpy as np
+
+QA_warn(__name__)
 
 
 if HAVE_PYMOAB:
@@ -24,7 +26,7 @@ if HAVE_PYMOAB:
 else:
     warn("The PyMOAB optional dependency could not be imported. "
          "Some aspects of the variance reduction module may be incomplete.",
-         QAWarning)
+         ImportWarning)
 
 
 def cadis(adj_flux_mesh, adj_flux_tag, q_mesh, q_tag,

@@ -15,10 +15,13 @@ from libcpp cimport bool as cpp_bool
 
 # Python imports
 import collections
+try:
+    collectionsAbc = collections.abc
+except AttributeError:
+    collectionsAbc = collections
 cimport numpy as np
 import numpy as np
-from warnings import warn
-from pyne.utils import QAWarning
+from pyne.utils import QA_warn
 import os
 import sys
 if sys.version_info[0] >= 3:
@@ -43,7 +46,7 @@ cimport pyne.data as data
 import pyne.data as data
 
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+QA_warn(__name__)
 
 # Maximum 32-bit signed int
 DEF INT_MAX = 2147483647
@@ -635,7 +638,9 @@ cdef class _Material:
 
 
     def activity(self):
-        """This provides the activity of the comp of the material.
+        """This provides the activity of the comp of the material. It assumes
+        that the mass of the material is given in units of [grams] and returns
+        activities in units of [Bq].
 
         Returns
     -------
@@ -1230,6 +1235,50 @@ cdef class _Material:
 
         self.mat_pointer.from_atom_frac(af)
 
+    def from_activity(self, activities):
+        """from_activity(activities)
+        Loads the material composition based on a mapping of radionuclide
+        activities. It assumes that activities are supplied in units of [Bq]
+        and sets the material mass to units of [grams].
+
+        Parameters
+        ----------
+        activities : dict
+            Dictionary that maps radionuclides to activities for the material.
+            The keys may be intergers or strings. The values must be castable
+            to floats.
+
+        Examples
+        --------
+        To get a material of natural uranium, based on activities::
+
+            natu = {'U234': 12223.2, 'U235': 568.648, 'U238': 12347.1}
+            mat = Material()
+            mat.from_activity(natu)
+
+        """
+        cdef int key_zz
+        cdef double val
+        cdef cpp_map[int, double] key_act
+        cdef cpp_map[int, double].iterator keyiter, keyend
+        cdef cpp_map[int, double] act = cpp_map[int, double]()
+
+        # Convert atom_fracs to something usable in C++
+        for key, value in activities.items():
+            val = <double> value
+            if isinstance(key, int):
+                key_zz = <int> nucname.id(key)
+            elif isinstance(key, basestring):
+                key_zz = nucname.id(key)
+            else:
+                raise TypeError("Activity keys must be integers, "
+                        "or strings.")
+
+            if 0 == act.count(key_zz):
+                act[key_zz] = 0.0
+            act[key_zz] = act[key_zz] + val
+
+        self.mat_pointer.from_activity(act)
 
     def to_atom_dens(self):
         """Converts the material to a map of nuclides to atom densities.
@@ -1570,7 +1619,7 @@ cdef class _Material:
         return id(self)
 
 
-class Material(_Material, collections.MutableMapping):
+class Material(_Material, collectionsAbc.MutableMapping):
     """Material composed of nuclides.
 
     Parameters
@@ -1733,6 +1782,8 @@ class Material(_Material, collections.MutableMapping):
         """
         with open(filename, 'a') as f:
             f.write(self.alara())
+         
+
 
 #####################################
 ### Material generation functions ###
@@ -1796,6 +1847,69 @@ def from_atom_frac(atom_fracs, double mass=-1.0, double density=-1.0,
     """
     mat = Material(metadata=metadata)
     mat.from_atom_frac(atom_fracs)
+
+    if 0.0 <= mass:
+        mat.mass = mass
+
+    if 0.0 <= density:
+        mat.density = density
+
+    if 0.0 <= atoms_per_molecule:
+        mat.atoms_per_molecule = atoms_per_molecule
+
+    return mat
+    
+
+
+def from_activity(activities, double mass=-1.0, double density=-1.0,
+                   double atoms_per_molecule=-1.0, metadata=None):
+    """from_activity(activities, double mass=-1.0, double atoms_per_molecule=-1.0)
+    Create a Material from a mapping of radionuclide activities. If mass < 0.0,
+    it assumes the activities are supplied in units of [Bq] and sets the
+    material mass to units of [grams]. Otherewise when mass >= 0.0, it
+    treats the supplied activities as relative activities.
+
+    Parameters
+    ----------
+    activities : dict
+        Dictionary that maps radionuclides to activities for the material. The
+        keys may be intergers or strings. The values must be castable to
+        floats.
+    mass : float, optional
+        This is the mass of the new stream. If the mass provided is negative
+        (default -1.0) then the mass of the new stream is calculated from the
+        sum of compdict's components before normalization.  If the mass here is
+        positive or zero, then this mass overrides the calculated one.
+    density : float, optional
+        This is the density of the material.
+    atoms_per_molecule : float, optional
+        Number of atoms per molecule of material.  Needed to obtain proper
+        scaling of molecular mass.  For example, this value for water is
+        3.0.
+    metadata : JSON-convertable Python object, optional
+        Initial attributes to build the material with.  At the top-level this is
+        usually a dictionary with string keys.  This container is used to store
+        arbitrary metadata about the material.
+
+    Returns
+    -------
+    mat : Material
+        A material generated from radionuclide activities.
+
+    Examples
+    --------
+    To get a material of natural uranium, based on activities::
+
+            natu = {'U234': 12223.2, 'U235': 568.648, 'U238': 12347.1}
+            mat = from_activity(natu)
+
+    See Also
+    --------
+    Material.from_activity : Underlying method class method.
+
+    """
+    mat = Material(metadata=metadata)
+    mat.from_activity(activities)
 
     if 0.0 <= mass:
         mat.mass = mass
@@ -1914,36 +2028,6 @@ def from_text(filename, double mass=-1.0, double atoms_per_molecule=-1.0, metada
 ### Material Converters ###
 ###########################
 
-# <string, Material *>
-
-cdef cpp_map[std_string, matp] dict_to_map_str_matp(dict pydict):
-    cdef _Material pymat
-    cdef cpp_material.Material * cpp_matp
-    cdef cpp_map[std_string, matp] cppmap = cpp_map[std_string, matp]()
-    cdef cpp_pair[std_string, matp] item
-
-    for key, value in pydict.items():
-        pymat = value
-        cpp_matp = pymat.mat_pointer
-        #cppmap[std_string(key)] = cpp_matp
-        item = cpp_pair[std_string, matp](std_string(<char *> key), cpp_matp)
-        cppmap.insert(item)
-
-    return cppmap
-
-
-cdef dict map_to_dict_str_matp(cpp_map[std_string, matp] cppmap):
-    pydict = {}
-    cdef _Material pymat
-    cdef cpp_map[std_string, matp].iterator mapiter = cppmap.begin()
-
-    while mapiter != cppmap.end():
-        pymat = Material()
-        pymat.mat_pointer[0] = deref(deref(mapiter).second)
-        pydict[<char *> deref(mapiter).first.c_str()] = pymat
-        inc(mapiter)
-
-    return pydict
 
 
 
@@ -2079,7 +2163,7 @@ cdef class _MapStrMaterial:
             del self._cache[key]
 
 
-class MapStrMaterial(_MapStrMaterial, collections.MutableMapping):
+class MapStrMaterial(_MapStrMaterial, collectionsAbc.MutableMapping):
     """Wrapper class for C++ standard library maps of type <string, Material
     \*>.  Provides dictionary like interface on the Python level.
 
@@ -2101,7 +2185,7 @@ class MapStrMaterial(_MapStrMaterial, collections.MutableMapping):
 
 
 
-class MultiMaterial(collections.MutableMapping):
+class MultiMaterial(collectionsAbc.MutableMapping):
     """ This class is serves as a way of storing a collection of materials.
     There sole argument of this function is a dictionary with material
     objects and keys and vol/mass fractions as values. There are two
@@ -2201,205 +2285,5 @@ def mats_latex_table(mats, labels=None, align=None, format=".5g"):
     return tab
 
 
-#
-#  Material Library
-#
-
-cdef class _MaterialLibrary(object):
-
-    def __init__(self, lib=None, datapath="/mat_name", nucpath="/nucid"):
-        """Parameters
-        ----------
-        lib : dict-like, str, or None, optional
-            The data to intialize the material library with.  If this is a
-            string, it is interpreted as a path to a file.
-        datapath : str, optional
-            The path in the heirarchy to the data table in an HDF5 file.
-        nucpath : str, optional
-            The path in the heirarchy to the nuclide array in an HDF5 file.
-
-        """
-        if sys.version_info[0] >=3 and isinstance(lib, bytes):
-            lib = lib.decode()
-        cdef dict _lib = {}
-        if lib is None:
-            self._lib = _lib
-        elif isinstance(lib, collections.Mapping):
-            for key, mat in lib.items():
-                _lib[key] = ensure_material(mat)
-            self._lib = _lib
-        elif isinstance(lib, basestring):
-            self._lib = _lib
-            if lib.endswith('.json') or lib.endswith('.js'):
-                self.from_json(lib)
-            if lib.endswith('.h5') or lib.endswith('.hdf5') \
-                                   or lib.endswith('.h5m'):
-                self.from_hdf5(lib, datapath=datapath, nucpath=nucpath)
-        elif isinstance(lib, collections.Sequence):
-            for key, mat in lib:
-                _lib[key] = ensure_material(mat)
-            self._lib = _lib
-        else:
-            msg = "Could not initialize library with lib type {0!r}"
-            raise TypeError(msg.format(type(lib)))
-
-    def __contains__(self, key):
-        return key in self._lib
-
-    def __len__(self):
-        return len(self._lib)
-
-    def __iter__(self):
-        return iter(self._lib)
-
-    def __getitem__(self, key):
-        return self._lib[key]
-
-    def __setitem__(self, key, value):
-        self._lib[key] = ensure_material(value)
-
-    def __delitem__(self, key):
-        del self._lib[key]
-
-    def from_json(self, file):
-        """Loads data from a JSON file into this material library.
-
-        Parameters
-        ----------
-        file : str
-            A path to a JSON file.
-
-        """
-        cdef std_string s
-        cdef bint opened_here = False
-        cdef cpp_jsoncpp.Value jsonlib
-        cdef cpp_jsoncpp.Reader reader = cpp_jsoncpp.Reader()
-        cdef int i
-        cdef std_string key
-        cdef cpp_vector[std_string] keys
-        cdef _Material mat
-        cdef dict _lib = (<_MaterialLibrary> self)._lib
-        if isinstance(file, basestring):
-            file = open(file, 'r')
-            opened_here = True
-        fstr = file.read()
-        if isinstance(fstr, str):
-            fstr = fstr.encode()
-        s = std_string(<char *> fstr)
-        if opened_here:
-            file.close()
-        reader.parse(s, jsonlib)
-        keys = jsonlib.getMemberNames()
-        for i in range(len(keys)):
-            mat = Material()
-            key = keys[i]
-            (<_Material> mat).mat_pointer.load_json(jsonlib[key])
-            _lib[bytes(key.c_str()).decode()] = mat
-
-    def write_json(self, file):
-        """Writes this material library to a JSON file.
-
-        Parameters
-        ----------
-        file : str
-            A path to a JSON file.
-
-        """
-        cdef std_string s
-        cdef std_string skey
-        cdef bint opened_here = False
-        cdef cpp_jsoncpp.Value jsonlib = cpp_jsoncpp.Value(cpp_jsoncpp.objectValue)
-        cdef cpp_jsoncpp.StyledWriter writer = cpp_jsoncpp.StyledWriter()
-        for key, mat in self._lib.items():
-            key = key.encode()
-            skey = std_string(<char *> key)
-            jsonlib[skey] = (<_Material> mat).mat_pointer.dump_json()
-        s = writer.write(jsonlib)
-        if isinstance(file, basestring):
-            file = open(file, 'w')
-            opened_here = True
-        file.write(bytes(s).decode())
-        if opened_here:
-            file.close()
-
-    def from_hdf5(self, file, datapath="/mat_name", nucpath="/nucid"):
-        """Loads data from an HDF5 file into this material library.
-
-        Parameters
-        ----------
-        file : str
-            A path to an HDF5 file.
-        datapath : str, optional
-            The path in the heirarchy to the data table in an HDF5 file.
-        nucpath : str, optional
-            The path in the heirarchy to the nuclide array in an HDF5 file.
-
-        """
-        cdef std_string s
-        cdef cpp_jsoncpp.Reader reader = cpp_jsoncpp.Reader()
-        cdef cpp_jsoncpp.Value attribs
-        cdef int i
-        cdef _Material mat
-        cdef dict _lib = (<_MaterialLibrary> self)._lib
-        cdef np.ndarray mattable
-        with tb.open_file(file, 'r') as f:
-            matstable = f.get_node(datapath)[:]
-            nucs = f.get_node(nucpath)[:]
-            matsmetadata = f.get_node(datapath + '_metadata').read()
-        for i in range(len(matstable)):
-            row = matstable[i]
-            if len(nucs) == 0:
-                row = (row[0], row[1], row[2], [])
-            comp = dict((<int> k, v) for k, v in zip(nucs, row[3]) if v != 0.0)
-            mat = Material(comp, mass=row[0], density=row[1],
-                                    atoms_per_molecule=row[2])
-            strmetadata = "".join(map(chr, matsmetadata[i]))
-            strmetadata = strmetadata.encode()
-            s = std_string(<char *> strmetadata)
-            attribs = cpp_jsoncpp.Value()
-            reader.parse(s, attribs)
-            (<_Material> mat).mat_pointer.metadata = attribs
-            if "name" in mat.metadata:
-                name = mat.metadata["name"]
-            else:
-                name = "_" + str(i)
-            _lib[name] = mat
-
-    def write_hdf5(self, filename, datapath="/mat_name", nucpath="/nucid"):
-        """Writes this material library to an HDF5 file.
-
-        Parameters
-        ----------
-        filename : str
-            A path to an HDF5 file.
-        datapath : str, optional
-            The path in the heirarchy to the data table in an HDF5 file.
-        nucpath : str, optional
-            The path in the heirarchy to the nuclide array in an HDF5 file.
-
-        """
-        cdef _Material mat
-        cdef dict _lib = (<_MaterialLibrary> self)._lib
-        cdef set nucids = set()
-        for mat in _lib.values():
-            nucids.update(mat.comp.keys())
-        with tb.open_file(filename, 'a') as f:
-            nucgrp, nucdsname = os.path.split(nucpath)
-            f.create_array(nucgrp, nucdsname, np.array(sorted(nucids)),
-                          createparents=True)
-        for key, mat in _lib.items():
-            if "name" not in mat.metadata:
-                mat.metadata["name"] = key
-            mat.write_hdf5(filename, datapath=datapath, nucpath=nucpath)
-
-class MaterialLibrary(_MaterialLibrary, collections.MutableMapping):
-    """The material library is a collection of unique keys mapped to
-    Material objects.  This is useful for organization and declaring
-    prefernces between several sources (multiple libraries).
-    """
-    def __repr__(self):
-        libs = ["{0!r}={1!r}".format(k, m) for k, m in self.items()]
-        libs = "{" + ", ".join(libs) + "}"
-        return "pyne.material.MaterialLibrary({0})".format(libs)
-
 ensure_material = lambda m: m if isinstance(m, Material) else Material(m)
+

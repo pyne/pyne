@@ -24,7 +24,8 @@ warnings.simplefilter("ignore", QAWarning)
 from pyne import nucname
 from pyne import data
 from pyne import origen22
-from pyne.material import Material, MaterialLibrary
+from pyne.material import Material
+from pyne.material_library import MaterialLibrary
 
 # import decay gen
 srcdir = os.path.join(os.path.dirname(__file__), '..', 'src')
@@ -93,6 +94,11 @@ def pivot_mat_keys():
     """
     nuc_keys = {}
     for key in MATS.keys():
+        if (sys.version_info[0] >= 3):
+            key = str(key, encoding='UTF-8')
+        else:
+            key = str(key).encode('UTF-8')
+
         _, nuc, t = key.split('_')
         nuc = int(nuc)
         if nuc in METASTABLE_BLACKLIST:

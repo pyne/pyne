@@ -164,7 +164,7 @@ std::string pyne::to_lower(std::string s) {
   return s;
 }
 
-std::ostringstream pyne::comment_line_wrapping(std::string line,
+std::string pyne::comment_line_wrapping(std::string line,
                                                std::string comment_prefix,
                                                int line_length) {
   std::ostringstream oss;
@@ -181,7 +181,7 @@ std::ostringstream pyne::comment_line_wrapping(std::string line,
     oss << comment_prefix << line << std::endl;
   }
 
-  return oss;
+  return oss.str();
 }
 
 std::string pyne::capitalize(std::string s) {
@@ -392,6 +392,21 @@ bool pyne::file_exists(std::string strfilename) {
   }
 
   return(blnReturn);
+}
+
+// convert convert a filename into path+filename (for pyne)
+std::string pyne::get_full_filepath(char* filename) {
+  std::string file(filename);
+  return pyne::get_full_filepath(file);
+}
+
+// convert convert a filename into path+filename (for pyne)
+std::string pyne::get_full_filepath(std::string filename) {
+  // remove all extra whitespace
+  filename = pyne::remove_characters(" " , filename);
+  // use stdlib call
+  const char* full_filepath = realpath(filename.c_str(), NULL);
+  return std::string(full_filepath);
 }
 
 // Message Helpers
