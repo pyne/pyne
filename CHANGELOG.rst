@@ -228,6 +228,7 @@ v0.7.0 RC2
    * Deprecating most of the python 2 tests. Only testing python2 with pyMOAB and DAGMC deps.
    * updates tutorials and examples to python3 syntax to avoid failures (#1271)
    * added a welcome bot for first PR, Issue, and merge (#1287)
+   * allow spatial solvers to be built in conda environments (#1305)
 
 * Code cleanup
    * Formatting improvements
