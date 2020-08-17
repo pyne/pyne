@@ -93,6 +93,7 @@ v0.7.0 RC2
    * remove Origen 2.2: H1 Cross Section for PyNE repo not supporting necessary inputs to reproduce the example.
    * in mesh basic tutorial, add broken yt warning
    * in endf reader example, cross-section plots from ENDF/B-VII.1 and updated module for deprecated urlretrieve to requests (#1297, #1226)
+   * change to integer division in example in nuclide naming tutorial, fix typo (#1310)
 
 * Changes in source sampling for mesh-based Monte Carlo sources
    * Add statistics summary output of find_cell failure in source sampling.
