@@ -903,7 +903,7 @@ std::string pyne::Material::phits(std::string frac_type, bool mult_den) {
   oss << " ]" << std::endl;
 
   // check for metadata
-  std::string keyworkds[6] = {"GAS", "ESTEP", "NLIB", "PLIB", "ELIB", "HLIB"};
+  std::string keyworkds[6] = {"GAS", "ESTEP", "NLIB", "PLIB", "PNLIB", "ELIB", "HLIB"};
   for (auto keyword : keyworkds){
     if (metadata.isMember(keyword)){
       oss << "     "<< keyword << "=" << metadata[keyword].asInt() << std::endl;
