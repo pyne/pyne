@@ -250,10 +250,14 @@ IMPORTANT: Python 2 is no longer supported as of this release.  Some packages ma
    * added a welcome bot for first PR, Issue, and merge (#1287)
    * allow spatial solvers to be built in conda environments (#1305)
 <<<<<<< HEAD
+<<<<<<< HEAD
    * ensure that ENSDF fortran tools are linked correctly. (#1306)
    * allow spatial solvers to be turned on/off at time of setup (#1308)
 =======
    * Update moab version (#1312)
+>>>>>>> update changelog.rst
+=======
+   * Update moab version 5.1.0 >> 5.2.0 (#1312)
 >>>>>>> update changelog.rst
 
 * Code cleanup
