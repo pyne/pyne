@@ -1415,7 +1415,7 @@ def mat_from_inp_line(filename, mat_line, densities='None'):
 
     # create dictionaries nucvec and table_ids
     nucvec = {}
-    table_ids = {'default': dict() }
+    table_ids = {'default': dict()}
     lib_names = ['nlib', 'plib', 'hlib', 'pnlib', 'elib']
 
     # skip the first token that is the material card identifier
@@ -1429,13 +1429,13 @@ def mat_from_inp_line(filename, mat_line, densities='None'):
                 table_ids['default'][lib_name] = lib_num
         else:
             nuc_info = token.split('.')
-            zzzaaam =str(nucname.zzaaam(nucname.mcnp_to_id(nuc_info[0])))
+            zzzaaam = str(nucname.zzaaam(nucname.mcnp_to_id(nuc_info[0])))
             # this allows us to read nuclides that are repeated
             nuc_frac = token_list.pop(0)
             if zzzaaam in nucvec.keys():
                 nucvec[zzzaaam] += float(nuc_frac)
             else:
-                nucvec[zzzaaam] = float(nuc_frac)        
+                nucvec[zzzaaam] = float(nuc_frac)
             if len(nuc_info) > 1:
                 table_ids[str(zzzaaam)] = nuc_info[1]
 
