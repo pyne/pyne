@@ -293,7 +293,7 @@ jobs:
 # with limited amount of dependencies.
 workflows:
   version: 2
-  draft_build:
+  lite_build_and_test:
     jobs:
       - py3_dagmc_pymoab_openmc_build
       - py3_dagmc_pymoab_openmc_test:
@@ -305,6 +305,7 @@ workflows:
               ignore: develop
             tags:
               ignore: /.*/ 
+  
   build_and_test:
     jobs:
       - skip_draft
