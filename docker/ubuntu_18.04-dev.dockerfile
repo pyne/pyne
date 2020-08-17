@@ -22,6 +22,7 @@ RUN if [ "${py_version%.?}" -eq 3 ] ; \
             python${PY_SUFIX}-dev \
             libpython${PY_SUFIX}-dev \
             git \
+            cmake \
             gfortran \
             vim emacs \
             libblas-dev \
@@ -40,7 +41,6 @@ RUN if [ "${py_version%.?}" -eq 3 ] ; \
             update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 10; \
     fi;\
     pip install --force-reinstall \
-            cmake \
             sphinx \
             cloud_sptheme \
             prettytable \
