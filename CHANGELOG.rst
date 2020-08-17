@@ -195,6 +195,7 @@ v0.7.0 RC2
    * Adding contributing guide and code of conduct (#1258)
    * Changed Doc and Tutorial mentions of iPython notebooks to Jupyter notebooks (PR #1262)
    * Improvements in documentation for release (#1290 #1285 #1299)
+   * Fix broken links (#1311)
 
 * Improvements in building and testing
    * require contributor to change CHANGELOG
