@@ -22,7 +22,6 @@ RUN if [ "${py_version%.?}" -eq 3 ] ; \
             python${PY_SUFIX}-dev \
             libpython${PY_SUFIX}-dev \
             git \
-            cmake \
             gfortran \
             vim emacs \
             libblas-dev \
@@ -41,6 +40,7 @@ RUN if [ "${py_version%.?}" -eq 3 ] ; \
             update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 10; \
     fi;\
     pip install --force-reinstall \
+            cmake \
             sphinx \
             cloud_sptheme \
             prettytable \
@@ -98,7 +98,7 @@ RUN if [ "$build_moab" = "YES" ] || [ "$enable_pymoab" = "YES" ] ; then \
         && cd $HOME/opt \
         && mkdir moab \
         && cd moab \
-        && git clone --single-branch -b Version5.1.0 https://bitbucket.org/fathomteam/moab \
+        && git clone --single-branch -b Version5.2.0 https://bitbucket.org/fathomteam/moab \
         && cd moab \
         && mkdir build \
         && cd build \
@@ -145,6 +145,10 @@ RUN if [ "$build_dagmc" = "YES" ]; then \
         && rm -rf DAGMC; \
     fi
 
+# DAGMC path variable
+ENV LD_LIBRARY_PATH $HOME/opt/dagmc/lib:$LD_LIBRARY_PATH
+ENV LIBRARY_PATH $HOME/opt/dagmc/lib:$LIBRARY_PATH
+
 ARG build_pyne=YES
 # Build/Install PyNE
 RUN if [ "$build_pyne" = "YES" ]; then \
@@ -162,8 +166,8 @@ RUN if [ "$build_pyne" = "YES" ]; then \
     fi
 ENV PATH $HOME/.local/bin:$PATH
 RUN if [ "$build_pyne" = "YES" ]; then \
-        cd $HOME \
-        && nuc_data_make ; \
+        cd $HOME/opt/pyne \
+        && ./scripts/nuc_data_make ; \
     fi
 
 # build/install OpenMC Python API
