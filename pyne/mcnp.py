@@ -1416,23 +1416,29 @@ def mat_from_inp_line(filename, mat_line, densities='None'):
     # create dictionaries nucvec and table_ids
     nucvec = {}
     table_ids = {}
-    lib_name = ['nlib', 'plib', 'hlib', 'pnlib', 'elib']
-    for i in range(1, len(data_string.split())):
-        # Reads default library indicators
-        token = data_string.split()[i].split('=')[0]
-        if token in lib_name:
-           table_ids[token] = data_string.split()[i].split('=')[1]             
-           continue
-        if i & 1 == 1:
-            zzzaaam = str(nucname.zzaaam(
-                nucname.mcnp_to_id(data_string.split()[i].split('.')[0])))
+    lib_names = ['NLIB', 'PLIB', 'HLIB', 'PNLIB', 'ELIB']
+    default_libs = {}
+
+    # skip the first token that is the material card identifier
+    token_list = data_string.split()[1:]
+    while len(token_list) > 0:
+        token = token_list.pop(0)
+
+        if '=' in token:
+            lib_name, lib_num = token.split('=')
+            if lib_name.upper() in lib_names:
+                default_libs[lib_name.upper()] = lib_num
+        else:
+            nuc_info = token.split('.')
+            zzzaaam = str(nucname.zzaaam(nucname.mcnp_to_id(nuc_info[0])))
             # this allows us to read nuclides that are repeated
+            nuc_frac = token_list.pop(0)
             if zzzaaam in nucvec.keys():
-                nucvec[zzzaaam] += float(data_string.split()[i+1])
+                nucvec[zzzaaam] += float(nuc_frac)
             else:
-                nucvec[zzzaaam] = float(data_string.split()[i+1])        
-            if len(data_string.split()[i].split('.')) > 1:
-                table_ids[str(zzzaaam)] = data_string.split()[i].split('.')[1]
+                nucvec[zzzaaam] = float(nuc_frac)
+            if len(nuc_info) > 1:
+                table_ids[str(zzzaaam)] = nuc_info[1]
 
     # Check to see it material is definted my mass or atom fracs.
     # Do this by comparing the first non-zero fraction to the rest
@@ -1458,6 +1464,8 @@ def mat_from_inp_line(filename, mat_line, densities='None'):
         mat = Material(nucvec=nucvec)
 
     mat.metadata['table_ids'] = table_ids
+    for lib_name, lib_num in default_libs.items():
+        mat.metadata[lib_name] = lib_num
     mat.metadata['mat_number'] = data_string.split()[0][1:]
 
     # collect metadata, if present
