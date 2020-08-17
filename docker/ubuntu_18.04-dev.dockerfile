@@ -166,8 +166,8 @@ RUN if [ "$build_pyne" = "YES" ]; then \
     fi
 ENV PATH $HOME/.local/bin:$PATH
 RUN if [ "$build_pyne" = "YES" ]; then \
-        cd $HOME/opt/pyne \
-        && ./scripts/nuc_data_make ; \
+        cd $HOME \
+        && nuc_data_make ; \
     fi
 
 # build/install OpenMC Python API
