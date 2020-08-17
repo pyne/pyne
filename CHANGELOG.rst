@@ -249,6 +249,10 @@ v0.7.0 RC2
      (it was suggested that those complicated return might cause seg fault, on some system -- OsX+conda)
    * Fixes string formatting typo in ``pyne/fortranformat/_parser.py``. Entire file is now ``str.format()`` (#1275)
 
+**Fixed:**
+
+* Bug fix in xsdir class for parsing correct ZAID XS (#1314)
+
 
 v0.5.11
 ====================
