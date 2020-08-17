@@ -229,6 +229,7 @@ v0.7.0 RC2
    * updates tutorials and examples to python3 syntax to avoid failures (#1271)
    * added a welcome bot for first PR, Issue, and merge (#1287)
    * allow spatial solvers to be built in conda environments (#1305)
+   * allow spatial solvers to be turned on/off at time of setup (#1308)
 
 * Code cleanup
    * Formatting improvements
