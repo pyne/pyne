@@ -90,7 +90,7 @@ license you like.
 // Copyright 2007-2010 Baptiste Lepilleur
 // Distributed under MIT license, or public domain if desired and
 // recognized in your jurisdiction.
-// See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
+// See file LICENSE for detail or copy at https://github.com/open-source-parsers/jsoncpp/blob/master/LICENSE
 
 #ifndef JSON_CONFIG_H_INCLUDED
 # define JSON_CONFIG_H_INCLUDED
@@ -200,7 +200,7 @@ namespace Json {
 // Copyright 2007-2010 Baptiste Lepilleur
 // Distributed under MIT license, or public domain if desired and
 // recognized in your jurisdiction.
-// See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
+// See file LICENSE for detail or copy at https://github.com/open-source-parsers/jsoncpp/blob/master/LICENSE
 
 #ifndef JSON_FORWARDS_H_INCLUDED
 # define JSON_FORWARDS_H_INCLUDED
