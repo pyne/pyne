@@ -1,8 +1,8 @@
-.. _linux_source:
+.. _source:
 
-========================
-Source Install - Linux
-========================
+==============
+Source Install 
+==============
 
 ------------
 Dependencies
@@ -29,6 +29,52 @@ Optional Depenendencies:
    
 To run tutorial and examples:
    #. `jupyter <http://jupyter.org/>`_
+
+Many, if not all of these dependencies can be installed using a package manager
+(i.e. `apt-get` on Linux, `MacPorts <https://www.macports.org/>`__ or `Homebrew
+<https://brew.sh/>`__ on MacOS, or `Anaconda
+ 13 <https://www.anaconda.com/>`__ on both, etc.)
+
+
+Most common install flags:
+**************************
+The list of the possible flags can be retrieved using:
+
+unzipped directory::
+  python setup.py --help
+
+
+#. optional arguments:
+  -h, --help            show this help message and exit
+  --clean [CLEAN]       removes the build directory before continuing.
+  --user [USER]         Installs into ~/.local
+
+#. cmake:  CMake arguments.
+
+   -D VAR                Set environment variable.
+  --build-type BT       Set build type via CMAKE_BUILD_TYPE, e.g. Release
+                          or Debug.
+  --deps-root DEPS_ROOT The path to the directory containing all
+                          dependencies
+  --fast  (default)                Will try to compile from assembly, if possible.
+                          This is faster than compiling from source.
+  --slow                Will NOT try to compile from assembly, if possible.
+                          This is slower as it must compile from source.
+
+#. make:  Make arguments.
+
+   -j J                  Degree of parallelism for build.
+
+#. other/dependencies:
+
+   --hdf5 HDF5           Path to HDF5 root directory.
+  --moab [MOAB]         Path to MOAB root directory.
+  --dagmc [DAGMC]       Path to DAGMC root directory.
+  --prefix PREFIX       Prefix for install location.
+  --build-dir BLD_DIR   where to place the build directory
+  --bootstrap           Bootstraps the PyNE installation, including
+                               nuc_data_make and possibly decaygen.
+
 
 Most of the dependencies are readily available through package managers.  Once
 all the dependencies are installed, PyNE can be installed. Download and unzip
