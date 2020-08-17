@@ -85,12 +85,15 @@ v0.7.0 RC2
    * in half_life example, changed nuc_data call in anum to give int data type
    * in Data Sources, rerun example to update output
    * in Chainsolve Transmutation, rerun example to update output
-   * pytaps to pymoab update in intro tutorial (#1282)
+   * pytaps to pymoab update in intro/diffusion tutorials (#1282, #1304)
    * in material_library example, updated import and class usage to reflect MaterialLibrary changes (#1280)
    * Removed QA warnings
    * in ACE Module example, change urllib for requests
-   * adds broken yt warning to examples notebooks, updates deprecated urlretrieve to requests (#1295)
+   * adds broken yt warning to examples notebooks, updates deprecated urlretrieve to requests (#1295, #1304)
    * remove Origen 2.2: H1 Cross Section for PyNE repo not supporting necessary inputs to reproduce the example.
+   * in mesh basic tutorial, add broken yt warning
+   * in endf reader example, cross-section plots from ENDF/B-VII.1 and updated module for deprecated urlretrieve to requests (#1297, #1226)
+   * change to integer division in example in nuclide naming tutorial, fix typo (#1310)
 
 * Changes in source sampling for mesh-based Monte Carlo sources
    * Add statistics summary output of find_cell failure in source sampling.
@@ -191,7 +194,8 @@ v0.7.0 RC2
    * Added publications to bibliography (PR #1256)
    * Adding contributing guide and code of conduct (#1258)
    * Changed Doc and Tutorial mentions of iPython notebooks to Jupyter notebooks (PR #1262)
-   * Improvements in documentation for release (#1290 #1285)
+   * Improvements in documentation for release (#1290 #1285 #1299)
+   * Fix broken links (#1311)
 
 * Improvements in building and testing
    * require contributor to change CHANGELOG
@@ -227,6 +231,8 @@ v0.7.0 RC2
    * updates tutorials and examples to python3 syntax to avoid failures (#1271)
    * added a welcome bot for first PR, Issue, and merge (#1287)
    * now skips part of the tests when PR set as a Draft or includes a [wip] tag in the title
+   * allow spatial solvers to be built in conda environments (#1305)
+   * allow spatial solvers to be turned on/off at time of setup (#1308)
 
 * Code cleanup
    * Formatting improvements

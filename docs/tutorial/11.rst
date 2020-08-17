@@ -1,0 +1,8 @@
+.. _tutorial-11:
+
+ENSDF Processing
+================
+
+Download the :download:`full notebook <../../tutorial/11-ensdf-processing.ipynb>`.
+
+.. notebook:: ../../tutorial/11-ensdf-processing.ipynb

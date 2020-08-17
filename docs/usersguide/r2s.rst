@@ -76,7 +76,7 @@ file is alara_params.txt. This file will be appended to the ALARA geometry
 information automatically created by PyNE R2S to form a complete ALARA input
 file. The alara_params.txt file will need to be modified to specify the irradiation schedule,
 decay times of interest, and any other parameters. More information can be found in the
-`ALARA Users' Guide <http://alara.engr.wisc.edu/users.guide.html/>`_. Once both
+`ALARA Users' Guide <http://svalinn.github.io/ALARA/usersguide/index.html>`_. Once both
 of these files are filled out, run the command:
 
 .. code-block:: bash

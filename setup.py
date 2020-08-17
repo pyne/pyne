@@ -273,6 +273,9 @@ def update_cmake_args(ns):
     if ns.fast is not None:
         fast = 'TRUE' if ns.fast else 'FALSE'
         ns.cmake_args.append('-DPYNE_FAST_COMPILE=' + fast)
+    if ns.spatial_solvers is not None:
+        spatial_solvers = 'ON' if ns.spatial_solvers else 'OFF'
+        ns.cmake_args.append('-DENABLE_SPATIAL_SOLVERS=' + spatial_solvers)
 
 
 def update_make_args(ns):
@@ -338,6 +341,12 @@ def parse_args():
     other.add_argument('--bootstrap', default=False, action='store_true',
                        help='Bootstraps the PyNE installation, including '
                             'nuc_data_make and possibly decaygen.')
+    other.add_argument('--spatial_solvers', default=True, 
+                       action='store_true',
+                       help='Build spatial solvers (Default)')
+    other.add_argument('--no_spatial_solvers', action='store_false', 
+                       dest='spatial_solvers',
+                       help='Do NOT build spatial solvers')
 
     ns = parser.parse_args(argv)
     update_setup_args(ns)
