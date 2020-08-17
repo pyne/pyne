@@ -1415,7 +1415,7 @@ def mat_from_inp_line(filename, mat_line, densities='None'):
 
     # create dictionaries nucvec and table_ids
     nucvec = {}
-    table_ids = {'default': None}
+    table_ids = {'default': dict() }
     lib_names = ['nlib', 'plib', 'hlib', 'pnlib', 'elib']
 
     # skip the first token that is the material card identifier
