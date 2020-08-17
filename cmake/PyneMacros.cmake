@@ -152,7 +152,7 @@ macro(pyne_set_build_spatial_solver)
     MESSAGE("-- -- Checking CMAKE_CXX_COMPILER_ID: ${CMAKE_CXX_COMPILER_ID}")
     IF(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
       MESSAGE("-- -- -- Checking CMAKE_CXX_COMPILER_VERSION: ${CMAKE_CXX_COMPILER_VERSION}")
-      MESSAGE("-- -- -- Checking if APPLE: ${APPLE}}")
+      MESSAGE("-- -- -- Checking if APPLE: ${APPLE}")
       IF(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.6" AND
         NOT APPLE )
         SET(BUILD_SPATIAL_SOLVER true)
