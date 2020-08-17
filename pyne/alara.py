@@ -734,7 +734,7 @@ def irradiation_blocks(material_lib, element_lib, data_library, cooling,
     single pulse of time <irr_time>. The notation in this function is consistent
     with the ALARA users' guide, found at:
 
-    http://alara.engr.wisc.edu/users.guide.html/
+    http://svalinn.github.io/ALARA/usersguide/index.html
 
     Parameters
     ----------
