@@ -513,7 +513,7 @@ def test_read_mcnp():
     expected_material_default_lib = Material({10000000: 0.037298334378601375, 
             60000000: 0.6666767493132514, 80000000: 0.29602491630814726}, 
             54.047494122635584, 1.1, 6.0, {"mat_number":"3",
-            "hlib":"42h","nlib":"60c","plib":"01p",
+            "HLIB":"42h","NLIB":"60c","PLIB":"01p",
             "table_ids":{}})
     expected_multimaterial = MultiMaterial({
         Material(
