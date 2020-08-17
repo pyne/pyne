@@ -35,7 +35,7 @@ if [[ "${mergeable_state}" == "\"draft\"" ]]; then
     printf "PR is a draft, skipping CI!\n"
     cancel_running_jobs=1
 fi
-# Check for Tittle SKIP Token
+# Check for Title SKIP Token
 for skip_token in '[skip ci]' '[ci skip]' '[wip]' '[WIP]'; do
     if [[ ${title} == *"${skip_token}"* ]]; then
     printf "Found \"${skip_token}\" in PR title, skipping CI!\n"
@@ -43,7 +43,7 @@ for skip_token in '[skip ci]' '[ci skip]' '[wip]' '[WIP]'; do
     fi
 done
 
-# Cancel the JOb if needed
+# Cancel the Job if needed
 if [[ "${cancel_running_jobs}" == 1 ]]; then
     printf "Attempting to cancel any running jobs"
     FORMAT_PARAM="-H \"Content-Type: application/json\""

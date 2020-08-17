@@ -147,7 +147,7 @@ jobs:
       - run: apk add --no-cache bash curl jq git openssh
       - checkout
       - run:
-          name: Skipping some test for Draft PR ?!
+          name: Skipping some tests for Draft PRs
           command: circleci/skip_draft.sh
  
 
