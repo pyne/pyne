@@ -1416,7 +1416,7 @@ def mat_from_inp_line(filename, mat_line, densities='None'):
     # create dictionaries nucvec and table_ids
     nucvec = {}
     table_ids = {}
-    lib_names = ['nlib', 'plib', 'hlib', 'pnlib', 'elib']
+    lib_names = ['NLIB', 'PLIB', 'HLIB', 'PNLIB', 'ELIB']
     default_libs = {}
 
     # skip the first token that is the material card identifier
@@ -1426,7 +1426,7 @@ def mat_from_inp_line(filename, mat_line, densities='None'):
 
         if '=' in token:
             lib_name, lib_num = token.split('=')
-            if lib_name in lib_names:
+            if lib_name.upper() in lib_names:
                 default_libs[lib_name.upper()] = lib_num
         else:
             nuc_info = token.split('.')
