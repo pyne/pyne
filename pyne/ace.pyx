@@ -10,7 +10,7 @@ ENDF data has been reconstructed and Doppler-broadened, the ACER module
 generates ACE-format cross sections.
 
 .. _MCNP: https://laws.lanl.gov/vhosts/mcnp.lanl.gov/
-.. _NJOY: http://t2.lanl.gov/codes.shtml
+.. _NJOY: http://t2.lanl.gov/nis/codes.shtml
 .. _ENDF: http://www.nndc.bnl.gov/endf
 
 .. moduleauthor:: Paul Romano <paul.k.romano@gmail.com>, Anthony Scopatz <scopatz@gmail.com>

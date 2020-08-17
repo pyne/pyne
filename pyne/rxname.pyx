@@ -126,7 +126,7 @@ Repeat this procedure as necessary.
 
 .. [NNDC] http://www.nndc.bnl.gov/endfdocs/ENDF-102-2001.pdf
 .. [NEA] http://www.oecd-nea.org/dbdata/data/manual-endf/endf102_MT.pdf
-.. [T2] http://t2.lanl.gov/endf/mts.html
+.. [T2] http://t2.lanl.gov/nis/endf/mts.html
 .. [JAEA] http://wwwndc.jaea.go.jp/form/ENDF6/mt.html
 
 --------------------------
