@@ -35,7 +35,7 @@ developers, it is recommended that you install PyNE from the source.
 
 Make sure that your device has all of the dependencies downloaded. You 
 can check this by typing the name of the program into your command line 
-followed by "--version" (e.g., $ python --version). If you are starting as a
+followed by :code:`--version` (e.g., :code:`$ python --version`). If you are starting as a
 developer, likely, you will not have all of the necessary components.
 
 
