@@ -33,7 +33,7 @@ To run tutorial and examples:
 Many, if not all of these dependencies can be installed using a package manager
 (i.e. `apt-get` on Linux, `MacPorts <https://www.macports.org/>`__ or `Homebrew
 <https://brew.sh/>`__ on MacOS, or `Anaconda
- 13 <https://www.anaconda.com/>`__ on both, etc.)
+ <https://www.anaconda.com/>`__ on both, etc.)
 
 
 Most common install flags:
