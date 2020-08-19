@@ -557,7 +557,7 @@ def test_read_mcnp():
 
     read_materials = mats_from_inp('mcnp_inp.txt')
     assert_almost_equal(expected_material, read_materials[1])
-    assert_equal(expected_material_default_lib, read_materials[3])
+    assert_almost_equal(expected_material_default_lib, read_materials[3])
     assert_equal(
         list(expected_multimaterial._mats.keys())[0].comp.keys(),
         list(read_materials[2]._mats.keys())[0].comp.keys())
