@@ -92,7 +92,7 @@ v0.7.0 RC2
    * adds broken yt warning to examples notebooks, updates deprecated urlretrieve to requests (#1295, #1304)
    * remove Origen 2.2: H1 Cross Section for PyNE repo not supporting necessary inputs to reproduce the example.
    * in mesh basic tutorial, add broken yt warning
-   * in endf reader example, cross-section plots from ENDF/B-VII.1 and updated module for deprecated urlretrieve to requests (#1297, #1226)
+   * in endf reader example, cross-section plots from ENDF/B-VII.1 and updated module for deprecated urlretrieve to requests (#1297, #1317)
    * change to integer division in example in nuclide naming tutorial, fix typo (#1310)
 
 * Changes in source sampling for mesh-based Monte Carlo sources
@@ -250,6 +250,10 @@ v0.7.0 RC2
    * cleanup throws return from ``return (const char *)`` to simple ``return``
      (it was suggested that those complicated return might cause seg fault, on some system -- OsX+conda)
    * Fixes string formatting typo in ``pyne/fortranformat/_parser.py``. Entire file is now ``str.format()`` (#1275)
+
+**Fixed:**
+
+* Bug fix in xsdir class for parsing correct ZAID XS (#1314)
 
 
 v0.5.11
