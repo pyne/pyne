@@ -8,7 +8,7 @@ New Developer's Guide
 Setting up Github:
 ==================
 
-Before you start using GitHub, you have to make Git available on your computer.
+Before you start using GitHub, you have to install Git on your computer.
 Even if it is on your device, it is a good idea to update to the latest version.
 You can either install it as a package, via another installer or download the
 source code and compile it yourself.
@@ -19,7 +19,7 @@ Download Git `here
 ------------------------
 Connecting GitHub to Git
 ------------------------
-To connect Git on your device to GitHub `here
+To connect Git on your device to GitHub, follow the instructions `here
 <https://docs.github.com/en/github/getting-started-with-github/set-up-git#setting-up-git>`__.
 
 Learn how to keep your email address hidden `here
