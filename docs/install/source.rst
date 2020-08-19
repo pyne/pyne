@@ -39,8 +39,6 @@ Most common install flags:
 **************************
 The list of the possible flags can be retrieved using:
 
-unzipped directory::
-
   python setup.py --help
 
 
