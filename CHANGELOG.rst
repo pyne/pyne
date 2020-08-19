@@ -27,9 +27,6 @@ v0.7.0 RC2
    * Add options to install OpenMC Python API
    * Functions to read OpenMC state point file to get meshtally data
 
-* MCNP Support
-  * Default library reading capability from material card, such as nlib, plib and etc. (#1269)
-
 * File scripts/activation_responses.py to get activation responses data for ALARA output file for better visualization. Responses include:
    * decay heat
    * specific activity
@@ -45,6 +42,9 @@ v0.7.0 RC2
    * first step for the GT-CADIS workflow, further steps to follow
 
 **Enhancements to Previous Capabilities**
+
+* MCNP Support
+  * Default library reading capability from material card, such as nlib, plib and etc. (#1316)
 
 * Turn off QA warnings by default and enable with env variable 'PYNE_QA_WARN' (#1268)
 * Enhancements of Material and MaterialLibrary capabilities
