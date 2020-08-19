@@ -67,7 +67,7 @@ unzipped directory::
 
 #. other/dependencies:
 
-   --hdf5 HDF5           Path to HDF5 root directory.
+  --hdf5 HDF5           Path to HDF5 root directory.
   --moab [MOAB]         Path to MOAB root directory.
   --dagmc [DAGMC]       Path to DAGMC root directory.
   --prefix PREFIX       Prefix for install location.
