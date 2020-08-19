@@ -157,11 +157,7 @@ it alongside any conversation about the issue.
 ----------------------
 Changing Documentation
 ----------------------
-To contribute, you can edit the text file in any program that allows you to edit
-text (Vim, TextEdit, Nano, etc.) and does not invisibly add characters to the file
-(like Word).
-
-Your contributions will be more robust if they follow the formatting of other
+To contribute, you can edit the text file following the formatting of the other
 documents in the PyNE repository. As such, before you create or update a file, it
 is a good idea to skim through other PyNE documentation to see how they are
 formatted. Finally, commit these changes to your forked version and submit a pull

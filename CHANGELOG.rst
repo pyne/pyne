@@ -196,7 +196,7 @@ v0.7.0 RC2
    * Changed Doc and Tutorial mentions of iPython notebooks to Jupyter notebooks (PR #1262)
    * Improvements in documentation for release (#1290 #1285 #1299)
    * Fix broken links (#1311)
-   * Update install instructions (#1238 & #)
+   * Update install instructions (#1238 & #1315)
    * Update New Developers Guide
 
 * Improvements in building and testing
