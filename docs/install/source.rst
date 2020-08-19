@@ -32,8 +32,7 @@ To run tutorial and examples:
 
 Many, if not all of these dependencies can be installed using a package manager
 (i.e. `apt-get` on Linux, `MacPorts <https://www.macports.org/>`__ or `Homebrew
-<https://brew.sh/>`__ on MacOS, or `Anaconda
- <https://www.anaconda.com/>`__ on both, etc.)
+<https://brew.sh/>`__ on MacOS, or `Anaconda <https://www.anaconda.com/>`__ on both, etc.)
 
 
 Most common install flags:
@@ -41,6 +40,7 @@ Most common install flags:
 The list of the possible flags can be retrieved using:
 
 unzipped directory::
+
   python setup.py --help
 
 
