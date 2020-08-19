@@ -41,15 +41,20 @@ The list of the possible flags can be retrieved using:
 
   python setup.py --help
 
-
 #. optional arguments:
+.. hlist::
+    :columns: 1
   -h, --help            show this help message and exit
   --clean [CLEAN]       removes the build directory before continuing.
   --user [USER]         Installs into ~/.local
 
+
 #. cmake:  CMake arguments.
 
-   -D VAR                Set environment variable.
+.. hlist::
+    :columns: 1
+
+  -D VAR                Set environment variable.
   --build-type BT       Set build type via CMAKE_BUILD_TYPE, e.g. Release
                           or Debug.
   --deps-root DEPS_ROOT The path to the directory containing all
@@ -59,11 +64,19 @@ The list of the possible flags can be retrieved using:
   --slow                Will NOT try to compile from assembly, if possible.
                           This is slower as it must compile from source.
 
+
 #. make:  Make arguments.
+
+.. hlist::
+    :columns: 1
 
    -j J                  Degree of parallelism for build.
 
+
 #. other/dependencies:
+
+.. hlist::
+    :columns: 1
 
   --hdf5 HDF5           Path to HDF5 root directory.
   --moab [MOAB]         Path to MOAB root directory.
