@@ -60,9 +60,9 @@ When releasing pyne, make sure to do the following items in order:
 8. If this is the full and final release (and not a release candidate), 
    merge the release branch into the master branch.  Next, tag the master branch 
    with the name 'X.X.X'.  Finally, delete the release branch.
-10. Push the tags upstream
-11. Update release information on the website.
-12. Perform post-release tasks for the project, see below.
+9. Push the tags upstream
+10. Update release information on the website.
+11. Perform post-release tasks for the project, see below.
 
 Maintenance Tasks
 ==================
