@@ -42,49 +42,43 @@ The list of the possible flags can be retrieved using:
   python setup.py --help
 
 #. optional arguments:
-.. hlist::
-    :columns: 1
-  -h, --help            show this help message and exit
-  --clean [CLEAN]       removes the build directory before continuing.
-  --user [USER]         Installs into ~/.local
 
+  :code:`-h`, :code:`--help`: show this help message and exit
+
+  :code:`--clean`: removes the build directory before continuing.
+
+  :code:`--user`: Installs into :code:`~/.local`
 
 #. cmake:  CMake arguments.
 
-.. hlist::
-    :columns: 1
+  :code:`-D VAR`: Set environment variable.
 
-  -D VAR                Set environment variable.
-  --build-type BT       Set build type via CMAKE_BUILD_TYPE, e.g. Release
-                          or Debug.
-  --deps-root DEPS_ROOT The path to the directory containing all
-                          dependencies
-  --fast  (default)                Will try to compile from assembly, if possible.
-                          This is faster than compiling from source.
-  --slow                Will NOT try to compile from assembly, if possible.
-                          This is slower as it must compile from source.
+  :code:`--build-type BT`: Set build type via :code:`CMAKE_BUILD_TYPE`, e.g. "release"  or "debug".
 
+  :code:`--deps-root DEPS_ROOT`: The path to the directory containing all dependencies
+
+  :code:`--fast`: (default) Will try to compile from assembly, if possible. This is faster than compiling from source.
+
+  :code:`--slow`: Will NOT try to compile from assembly, if possible. This is slower as it must compile from source.
 
 #. make:  Make arguments.
 
-.. hlist::
-    :columns: 1
-
-   -j J                  Degree of parallelism for build.
-
+  :code:`-j J`: Degree of parallelism for build.
 
 #. other/dependencies:
 
-.. hlist::
-    :columns: 1
+  :code:`--hdf5 HDF5_PATH`: Path to HDF5 root direcitory.
 
-  --hdf5 HDF5           Path to HDF5 root directory.
-  --moab [MOAB]         Path to MOAB root directory.
-  --dagmc [DAGMC]       Path to DAGMC root directory.
-  --prefix PREFIX       Prefix for install location.
-  --build-dir BLD_DIR   where to place the build directory
-  --bootstrap           Bootstraps the PyNE installation, including
-                               nuc_data_make and possibly decaygen.
+  :code:`--moab MOAB_PATH`: Path to MOAB root directory.
+
+  :code:`--dagmc DAGMC_PATH`: Path to DAGMC root directory.
+
+  :code:`--prefix INSTALL_PATH`: Prefix for install location.
+
+  :code:`--build-dir BUILD_DIR`: where to place the build directory
+
+  :code:`--bootstrap`: Bootstraps the PyNE installation, including :code:`nuc_data_make` and possibly decaygen.
+
 
 
 Most of the dependencies are readily available through package managers.  Once
