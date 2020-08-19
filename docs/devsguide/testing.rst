@@ -15,7 +15,7 @@ http://nose.readthedocs.org/en/latest/
 To perform all unit tests::
 
     $ cd tests/
-    $ nosetests
+    $ ./travis-run-tests.sh 
 
 This will recursively look through the currently directory, open up every file
 named test_* and run every function (or method) named test_*.
