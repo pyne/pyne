@@ -204,6 +204,7 @@ IMPORTANT: Python 2 is no longer supported as of this release.  Some packages ma
    * Fix broken links (#1311)
    * Update install instructions (#1238 & #1315)
    * Update New Developers Guide
+   * Update conda install instruction
 
 * Improvements in building and testing
    * require contributor to change CHANGELOG
