@@ -20,7 +20,7 @@ To list all of the versions of PyNE available on `conda-forge
 
     conda search -c conda-forge pyne
 
-Binary distributions of the latest release for mac and linux (64-bit) 
+Binary distributions of the latest release for linux (64-bit) 
 using the conda package manager can be installed by running the command::
 
     conda install -c conda-forge pyne
@@ -28,9 +28,9 @@ using the conda package manager can be installed by running the command::
 If you want to install PyNE with the correct package specification, try
 ``pkg_name=version=build_string``.
 
-For example, if you want to install ``pyne version=0.7.0`` with build option ``moab_openmc_py36he21c9c4_1``, you would enter::
+For example, if you want to install ``pyne version=0.7.0`` with build option ``moab_openmc``, you would enter::
 
-    conda install -c conda-forge pyne=0.7.0=moab_openmc_py36h094fa6c_0
+    conda install -c conda-forge pyne=0.7.0=moab_openmc*
 
 where version should be replaced with the version number to be installed.
 
