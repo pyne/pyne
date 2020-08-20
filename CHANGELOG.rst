@@ -7,6 +7,10 @@ pyne Change Log
 Next Version
 ====================
 
+**Maintenance**
+
+* Documentation Changes
+   * Update conda install instruction. (#1324)
 
 v0.7.0
 ====================
@@ -204,7 +208,6 @@ IMPORTANT: Python 2 is no longer supported as of this release.  Some packages ma
    * Fix broken links (#1311)
    * Update install instructions (#1238 & #1315)
    * Update New Developers Guide
-   * Update conda install instruction
 
 * Improvements in building and testing
    * require contributor to change CHANGELOG
