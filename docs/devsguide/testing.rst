@@ -15,7 +15,7 @@ http://nose.readthedocs.org/en/latest/
 To perform all unit tests::
 
     $ cd tests/
-    $ nosetests
+    $ ./travis-run-tests.sh 
 
 This will recursively look through the currently directory, open up every file
 named test_* and run every function (or method) named test_*.
@@ -68,7 +68,7 @@ Putting It All Together
 If you'd like to run all of the tests automatically from the root pyne dir, 
 you can chain the following BASH commands together::
 
-    $ cd tests && nosetests && cd ../examples && ../execer.py || cd ../tutorial && \
+    $ cd tests && ./travis-run-tests.sh && cd ../examples && ../execer.py || cd ../tutorial && \
       ../execer.py || cd ..
 
 Happy testing!

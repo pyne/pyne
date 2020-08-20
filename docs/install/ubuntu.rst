@@ -5,7 +5,7 @@ Ubuntu build script
 =================================
 
 Scripts for installing PyNE and all its dependencies from scratch on Ubuntu
-16.04 & 18.04 are found `here
+18.04 and 20.04 are found `here
 <https://github.com/pyne/install_scripts/>`_.
 
 In this repository, you will find both bash scripts and dockerfiles for Ubuntu.
