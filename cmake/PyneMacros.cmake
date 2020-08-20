@@ -101,9 +101,9 @@ macro(pyne_setup_fortran)
   if(Fortran_COMPILER_NAME MATCHES "gfortran.*")
     # gfortran
     set(CMAKE_Fortran_FLAGS_RELEASE
-        "-funroll-all-loops -c -fpic -fdefault-real-8 -fdefault-double-8")
+        "-funroll-all-loops -fpic -fdefault-real-8 -fdefault-double-8")
     set(CMAKE_Fortran_FLAGS_DEBUG
-        "-c -fpic -fdefault-real-8 -fdefault-double-8")
+        "-fpic -fdefault-real-8 -fdefault-double-8")
   elseif(Fortran_COMPILER_NAME MATCHES "ifort.*")
     # ifort (untested)
     set(CMAKE_Fortran_FLAGS_RELEASE "-f77rtl -O2 -r8")
