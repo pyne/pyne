@@ -7,6 +7,10 @@ pyne Change Log
 Next Version
 ====================
 
+**Maintenance**
+
+* Documentation Changes
+   * Update conda install instruction. (#1324)
 
 v0.7.0
 ====================
