@@ -101,19 +101,6 @@ def assert_np_version():
         raise ValueError(msg)
 
 
-def assert_ipython_version():
-    try:
-        import IPython
-    except ImportError:
-        return
-    low = (1, 2, 1)
-    v = IPython.__version__.split('-')[0]
-    cur = tuple(map(int, v.split('.')))
-    if cur < low:
-        msg = "ipython version is too low! {0} (have) < 2.0.0 (min)".format(v)
-        raise ValueError(msg)
-
-
 def assert_ubuntu_version():
     v = platform.uname()
     for itm in v:
@@ -126,7 +113,6 @@ def assert_ubuntu_version():
 def assert_dep_versions():
     assert_np_version()
     assert_ubuntu_version()
-    assert_ipython_version()
 
 
 def ssl_context():
@@ -287,6 +273,9 @@ def update_cmake_args(ns):
     if ns.fast is not None:
         fast = 'TRUE' if ns.fast else 'FALSE'
         ns.cmake_args.append('-DPYNE_FAST_COMPILE=' + fast)
+    if ns.spatial_solvers is not None:
+        spatial_solvers = 'ON' if ns.spatial_solvers else 'OFF'
+        ns.cmake_args.append('-DENABLE_SPATIAL_SOLVERS=' + spatial_solvers)
 
 
 def update_make_args(ns):
@@ -352,6 +341,12 @@ def parse_args():
     other.add_argument('--bootstrap', default=False, action='store_true',
                        help='Bootstraps the PyNE installation, including '
                             'nuc_data_make and possibly decaygen.')
+    other.add_argument('--spatial_solvers', default=True, 
+                       action='store_true',
+                       help='Build spatial solvers (Default)')
+    other.add_argument('--no_spatial_solvers', action='store_false', 
+                       dest='spatial_solvers',
+                       help='Do NOT build spatial solvers')
 
     ns = parser.parse_args(argv)
     update_setup_args(ns)

@@ -13,8 +13,7 @@ from libcpp.utility cimport pair as cpp_pair
 #from cython cimport pointer
 
 #Standard lib import
-from warnings import warn
-from pyne.utils import QAWarning
+from pyne.utils import QA_warn
 
 cimport numpy as np
 import numpy as np
@@ -34,7 +33,7 @@ cimport cpp_data
 cimport pyne.stlcontainers as conv
 import pyne.stlcontainers as conv
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+QA_warn(__name__)
 
 # Mathematical constants
 pi = cpp_data.pi
@@ -861,14 +860,14 @@ def half_life(nuc, use_metastable=True):
 
     Notes
     -----
-    If the nuclide is not found, the nuclide is assumed to be stable.
+    If the nuclide is not found, returns nan.
     """
     if use_metastable is True:
         nuc = pyne.nucname.id(nuc)
         ms = nuc % 10000
         nuc = metastable_id(nuc, ms)
         if nuc is None:
-            return float('inf')  # nuclide doesn't exist, assume stable
+            return float('nan')  # nuclide doesn't exist
     if isinstance(nuc, int):
         hl = cpp_data.half_life(<int> nuc)
     elif isinstance(nuc, basestring):

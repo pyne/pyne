@@ -1,4 +1,4 @@
-/// Json-cpp amalgated source (http://jsoncpp.sourceforge.net/).
+/// Json-cpp amalgated source (https://github.com/open-source-parsers/jsoncpp/).
 /// It is intented to be used with #include <json.h>
 
 // //////////////////////////////////////////////////////////////////////
@@ -88,7 +88,7 @@ license you like.
 // Copyright 2007-2010 Baptiste Lepilleur
 // Distributed under MIT license, or public domain if desired and
 // recognized in your jurisdiction.
-// See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
+// See file LICENSE for detail or copy at https://github.com/open-source-parsers/jsoncpp/blob/master/LICENSE
 
 #ifndef LIB_JSONCPP_JSON_TOOL_H_INCLUDED
 # define LIB_JSONCPP_JSON_TOOL_H_INCLUDED
@@ -184,7 +184,7 @@ uintToString( LargestUInt value,
 // Copyright 2007-2010 Baptiste Lepilleur
 // Distributed under MIT license, or public domain if desired and
 // recognized in your jurisdiction.
-// See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
+// See file LICENSE for detail or copy at https://github.com/open-source-parsers/jsoncpp/blob/master/LICENSE
 
 #if !defined(JSON_IS_AMALGAMATION)
 # include <json/reader.h>
@@ -988,7 +988,7 @@ std::istream& operator>>( std::istream &sin, Value &root ) {
 // Copyright 2007-2010 Baptiste Lepilleur
 // Distributed under MIT license, or public domain if desired and
 // recognized in your jurisdiction.
-// See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
+// See file LICENSE for detail or copy at https://github.com/open-source-parsers/jsoncpp/blob/master/LICENSE
 
 #ifndef JSONCPP_BATCHALLOCATOR_H_INCLUDED
 # define JSONCPP_BATCHALLOCATOR_H_INCLUDED
@@ -1121,7 +1121,7 @@ private:
 // Copyright 2007-2010 Baptiste Lepilleur
 // Distributed under MIT license, or public domain if desired and
 // recognized in your jurisdiction.
-// See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
+// See file LICENSE for detail or copy at https://github.com/open-source-parsers/jsoncpp/blob/master/LICENSE
 
 // included by json_value.cpp
 
@@ -1404,7 +1404,7 @@ ValueIterator::operator =( const SelfType &other ) {
 // Copyright 2007-2010 Baptiste Lepilleur
 // Distributed under MIT license, or public domain if desired and
 // recognized in your jurisdiction.
-// See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
+// See file LICENSE for detail or copy at https://github.com/open-source-parsers/jsoncpp/blob/master/LICENSE
 
 #if !defined(JSON_IS_AMALGAMATION)
 # include <json/value.h>
@@ -3089,7 +3089,7 @@ Path::make( Value &root ) const {
 // Copyright 2007-2010 Baptiste Lepilleur
 // Distributed under MIT license, or public domain if desired and
 // recognized in your jurisdiction.
-// See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
+// See file LICENSE for detail or copy at https://github.com/open-source-parsers/jsoncpp/blob/master/LICENSE
 
 #if !defined(JSON_IS_AMALGAMATION)
 # include <json/writer.h>

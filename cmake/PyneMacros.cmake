@@ -101,9 +101,9 @@ macro(pyne_setup_fortran)
   if(Fortran_COMPILER_NAME MATCHES "gfortran.*")
     # gfortran
     set(CMAKE_Fortran_FLAGS_RELEASE
-        "-funroll-all-loops -c -fpic -fdefault-real-8 -fdefault-double-8")
+        "-funroll-all-loops -fpic -fdefault-real-8 -fdefault-double-8")
     set(CMAKE_Fortran_FLAGS_DEBUG
-        "-c -fpic -fdefault-real-8 -fdefault-double-8")
+        "-fpic -fdefault-real-8 -fdefault-double-8")
   elseif(Fortran_COMPILER_NAME MATCHES "ifort.*")
     # ifort (untested)
     set(CMAKE_Fortran_FLAGS_RELEASE "-f77rtl -O2 -r8")
@@ -146,14 +146,22 @@ endmacro()
 
 # determine if spatial solver module should be built
 macro(pyne_set_build_spatial_solver)
-  IF(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    IF(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.6" AND
-       NOT APPLE AND NOT "$ENV{CONDA_BUILD}")
-      SET(BUILD_SPATIAL_SOLVER true)
-    ELSE()
-      SET(BUILD_SPATIAL_SOLVER false)
+  SET(BUILD_SPATIAL_SOLVER false)
+  IF ( ENABLE_SPATIAL_SOLVERS )
+    MESSAGE("-- Checking whether to build spatial solvers")
+    MESSAGE("-- -- Checking CMAKE_CXX_COMPILER_ID: ${CMAKE_CXX_COMPILER_ID}")
+    IF(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+      MESSAGE("-- -- -- Checking CMAKE_CXX_COMPILER_VERSION: ${CMAKE_CXX_COMPILER_VERSION}")
+      MESSAGE("-- -- -- Checking if APPLE: ${APPLE}")
+      IF(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.6" AND
+        NOT APPLE )
+        SET(BUILD_SPATIAL_SOLVER true)
+      ELSE()
+        SET(BUILD_SPATIAL_SOLVER false)
+      ENDIF()
     ENDIF()
-  ENDIF()
+  ENDIF( ENABLE_SPATIAL_SOLVERS)
+  MESSAGE("-- Build spatial solvers: ${BUILD_SPATIAL_SOLVER}")
 endmacro()
 
 

@@ -10,7 +10,7 @@ ENDF data has been reconstructed and Doppler-broadened, the ACER module
 generates ACE-format cross sections.
 
 .. _MCNP: https://laws.lanl.gov/vhosts/mcnp.lanl.gov/
-.. _NJOY: http://t2.lanl.gov/codes.shtml
+.. _NJOY: http://t2.lanl.gov/nis/codes.shtml
 .. _ENDF: http://www.nndc.bnl.gov/endf
 
 .. moduleauthor:: Paul Romano <paul.k.romano@gmail.com>, Anthony Scopatz <scopatz@gmail.com>
@@ -20,7 +20,7 @@ from __future__ import division, unicode_literals
 import io
 import struct
 from warnings import warn
-from pyne.utils import QAWarning
+from pyne.utils import QA_warn
 
 try:
     from collections.abc import OrderedDict
@@ -39,7 +39,7 @@ from pyne.rxname import label
 from pyne._utils import fromstring_split, fromstring_token
 cdef bint NP_LE_V15 = int(np.__version__.split('.')[1]) <= 5 and np.__version__.startswith('1')
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+QA_warn(__name__)
 
 def ascii_to_binary(ascii_file, binary_file):
     """Convert an ACE file in ASCII format (type 1) to binary format (type 2).

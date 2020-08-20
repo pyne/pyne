@@ -4,7 +4,7 @@ from __future__ import print_function, division, unicode_literals
 import sys
 from contextlib import contextmanager
 from warnings import warn
-from pyne.utils import QAWarning
+from pyne.utils import QA_warn
 
 cimport numpy as np
 import numpy as np
@@ -17,7 +17,7 @@ from pyne.material_library import MaterialLibrary
 
 np.import_array()
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+QA_warn(__name__)
 
 if sys.version_info[0] >= 3:
     unichr = chr
@@ -29,7 +29,7 @@ from pymoab import core as mb_core, types
 if not HAVE_PYMOAB:
     warn("The PyMOAB optional dependency could not be imported. "
          "Some aspects of dagmc module may be incomplete",
-         QAWarning)
+         ImportWarning)
 
 # Globals
 VOL_FRAC_TOLERANCE = 1E-10 # The maximum volume fraction to be considered valid

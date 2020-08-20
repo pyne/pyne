@@ -1,6 +1,6 @@
 """Exposes a bibtex file to sphinx using bibtex-js under the covers.
-This is largely based on the IPython notebook sphinx extension, that
-you can find at https://github.com/ipython/nbconvert
+This is largely based on the Jupyter notebook sphinx extension, that
+you can find at https://github.com/jupyter/nbconvert
 
 :Author: Anthony Scopatz <scopatz@gmail.com>
 """

@@ -2,13 +2,12 @@ import re
 import sys
 import numpy as np
 import pdb
-from warnings import warn
-from pyne.utils import QAWarning
+from pyne.utils import QA_warn
 
 if sys.version_info[0] > 2:
     basestring = str
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+QA_warn(__name__)
 
 _if_idx_str_serpent1 = (
     'if (exist("idx", "var"));\n'

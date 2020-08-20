@@ -11,8 +11,7 @@ try:
     collectionsAbc = collections.abc
 except AttributeError:
     collectionsAbc = collections
-from warnings import warn
-from pyne.utils import QAWarning
+from pyne.utils import QA_warn
 
 import numpy as np
 import scipy.integrate
@@ -27,7 +26,7 @@ from . import models
 from . import cache
 from .models import group_collapse
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+QA_warn(__name__)
 
 if sys.version_info[0] > 2:
   basestring = str

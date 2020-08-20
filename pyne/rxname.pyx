@@ -126,7 +126,7 @@ Repeat this procedure as necessary.
 
 .. [NNDC] http://www.nndc.bnl.gov/endfdocs/ENDF-102-2001.pdf
 .. [NEA] http://www.oecd-nea.org/dbdata/data/manual-endf/endf102_MT.pdf
-.. [T2] http://t2.lanl.gov/endf/mts.html
+.. [T2] http://t2.lanl.gov/nis/endf/mts.html
 .. [JAEA] http://wwwndc.jaea.go.jp/form/ENDF6/mt.html
 
 --------------------------
@@ -142,8 +142,7 @@ from cython.operator cimport dereference as deref
 from cython.operator cimport preincrement as inc
 from libcpp.string cimport string as std_string
 
-from warnings import warn
-from pyne.utils import QAWarning
+from pyne.utils import QA_warn
 
 # local imports
 cimport extra_types
@@ -157,7 +156,7 @@ import pyne.stlcontainers as conv
 
 
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+QA_warn(__name__)
 
 # names
 cdef conv._SetStr names_proxy = conv.SetStr(False)
