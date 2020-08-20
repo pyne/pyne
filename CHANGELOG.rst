@@ -8,8 +8,11 @@ Next Version
 ====================
 
 
-v0.7.0 RC2
+v0.7.0
 ====================
+
+IMPORTANT: Python 2 is no longer supported as of this release.  Some packages may continue to work,
+           but there is no longer testing of Python 2 during development.
 
 **New Capabilities**
 
