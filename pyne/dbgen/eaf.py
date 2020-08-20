@@ -5,8 +5,7 @@ the IAEA.
 from __future__ import print_function
 import re
 import os
-from warnings import warn
-from pyne.utils import QAWarning
+from pyne.utils import QA_warn
 
 try:
     import urllib.request as urllib
@@ -20,7 +19,7 @@ import tables as tb
 from .. import nucname
 from .api import BASIC_FILTERS
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+QA_warn(__name__)
 
 def grab_eaf_data(build_dir=""):
     """Grabs the EAF activation data files
@@ -42,7 +41,7 @@ def grab_eaf_data(build_dir=""):
     # Grab ENSDF files and unzip them.
     # This link was taken from 'http://www-nds.iaea.org/fendl/fen-activation.htm'
     iaea_url = 'http://www-nds.iaea.org/fendl2/activation/processed/vitj_e/libout/fendlg-2.0_175-gz'
-    cf_base_url = 'http://data.pyne.io/'
+    cf_base_url = 'https://github.com/pyne/data/raw/master/'
     eaf_gzip = 'fendlg-2.0_175-gz'
 
     fpath = os.path.join(build_dir, eaf_gzip)

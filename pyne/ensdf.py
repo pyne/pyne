@@ -7,8 +7,7 @@ try:
 except ImportError:
     from collections import defaultdict
 from warnings import warn
-from pyne.utils import QAWarning
-from pyne.utils import time_conv_dict
+from pyne.utils import QA_warn, time_conv_dict
 
 import numpy as np
 
@@ -17,7 +16,7 @@ from pyne import nucname, rxname, data
 if sys.version_info[0] > 2:
     basestring = str
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+QA_warn(__name__)
 
 _valexp = re.compile('([0-9.]*)([Ee][+-]?\d*)')
 _val = re.compile('(\d*)[.](\d*)')

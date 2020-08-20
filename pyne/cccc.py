@@ -16,13 +16,13 @@ A description of several CCCC formats are available online for ISOTXS_, MATXS_,
 RTFLUX_, and RZFLUX_. Other format specifications can be found in Los Alamos
 Report LA-5324-MS_.
 
-.. _ISOTXS: http://t2.lanl.gov/codes/transx-hyper/isotxs.html
+.. _ISOTXS: http://t2.lanl.gov/nis/codes/transx-hyper/isotxs.html
 
-.. _MATXS: http://t2.lanl.gov/codes/transx-hyper/matxs.html
+.. _MATXS: http://t2.lanl.gov/nis/codes/transx-hyper/matxs.html
 
-.. _RTFLUX: http://t2.lanl.gov/codes/transx-hyper/rtflux.html
+.. _RTFLUX: http://t2.lanl.gov/nis/codes/transx-hyper/rtflux.html
 
-.. _RZFLUX: http://t2.lanl.gov/codes/transx-hyper/rzflux.html
+.. _RZFLUX: http://t2.lanl.gov/nis/codes/transx-hyper/rzflux.html
 
 .. _LA-5324-MS: http://www.osti.gov/bridge/servlets/purl/5369298-uIcX6p/
 
@@ -32,10 +32,10 @@ from __future__ import division
 from warnings import warn
 import numpy as np
 
-from pyne.utils import QAWarning
+from pyne.utils import QA_warn
 from pyne.binaryreader import _BinaryReader, _FortranRecord
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+QA_warn(__name__)
 
 
 class Isotxs(_BinaryReader):
@@ -673,7 +673,7 @@ class Rtflux(object):
         else:
             warn("The PyMOAB optional dependency could not be imported. "
                  "All aspects of the partisn module are not imported.",
-                 QAWarning)
+                 ImportWarning)
 
         if not m.structured:
             raise ValueError("Only structured mesh is supported.")

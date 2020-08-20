@@ -9,8 +9,8 @@ Executors
 ---------
 The `executors` define aliases to the environment to run the different jobs. In our case these are
 different docker images containing different combinations of the optional
-dependencies of PyNE (`MOAB`, `pyMOAB`, `DAGMC`) in one of the two supported
-Python versions (Python 2.7 or Python 3.6).
+dependencies of PyNE (`MOAB`, `pyMOAB`, `DAGMC`) in the supported
+Python version (Python 3.6).
 
 
 Commands
@@ -52,8 +52,8 @@ nosetests using the provided `flag`.
         - `flags` (string): flags to be use when running the PyNE nosetests
 
 
-`website_build_push`: pull the Python 2.7 build with all the PyNE optional
-depedencies `python2_dagmc_pymoab` saved image (using `pull_container` command),
+`website_build_push`: pull the Python 3.6 build with all the PyNE optional
+depedencies `python3_dagmc_pymoab` saved image (using `pull_container` command),
 build the website, and push it to the `pyne.github.com` repo.
     
     - `arguments`:

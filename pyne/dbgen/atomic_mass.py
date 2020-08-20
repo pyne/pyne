@@ -3,8 +3,7 @@ from __future__ import print_function
 import os
 import re
 import pkgutil
-from warnings import warn
-from pyne.utils import QAWarning
+from pyne.utils import QA_warn
 
 import numpy as np
 import tables as tb
@@ -13,12 +12,12 @@ from pyne import nucname
 from pyne.dbgen.api import BASIC_FILTERS
 from pyne.dbgen.isotopic_abundance import get_isotopic_abundances
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+QA_warn(__name__)
 
 # Note that since ground state and meta-stable isotopes are of the same atomic mass,
 # the meta-stables have been discluded from the following data sets.
 
-MASS_FILE = 'mass.mas12'
+MASS_FILE = 'mass.mas16'
 
 
 def copy_atomic_mass_adjustment(build_dir=""):
@@ -144,7 +143,7 @@ def make_atomic_mass(args):
                 return
 
     # Then grab mass data
-    print("Copying AME 2012 atomic mass data.")
+    print("Copying AME 2016 atomic mass data.")
     copy_atomic_mass_adjustment(build_dir)
 
     # Make atomic mass table once we have the array

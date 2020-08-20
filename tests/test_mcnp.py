@@ -457,7 +457,10 @@ def test_xsdir():
     assert_equal(xsdir.tables[0].entries, 0)
     assert_equal(xsdir.tables[0].temperature, 5.5555E+05)
     assert_false(xsdir.tables[0].ptable)
+    assert_equal(xsdir.tables[1].filename, 'such_data/1001.777nc')
     assert_true(xsdir.tables[1].ptable)
+    assert_equal(xsdir.tables[2].filename, 'more_data/1001.999nc')
+    assert_true(xsdir.tables[2].ptable)
 
 
 def test_xsdir_find_table():
@@ -465,6 +468,7 @@ def test_xsdir_find_table():
     table = xsdir.find_table('1001')
     assert_equal(table[0].name, '1001.44c')
     assert_equal(table[1].name, '1001.66c')
+    assert_equal(table[2].name, '1001.70c')
 
 
 def test_xsdir_to_serpent():
@@ -478,7 +482,9 @@ def test_xsdir_to_serpent():
     exp = [("1001.44c 1001.44c 1 1001 0 1.111111 6.44688328094e+15 0"
             " many_xs/1001.555nc\n"),
            ("1001.66c 1001.66c 1 1001 0 1.111111 6.44688328094e+15 0"
-            " such_data/1001.777nc\n")]
+            " such_data/1001.777nc\n"),
+           ("1001.70c 1001.70c 1 1001 0 1.111111 6.44688328094e+15 0"
+            " more_data/1001.999nc\n")]
 
     assert_equal(lines, exp)
     os.remove(output)
@@ -510,10 +516,15 @@ def test_read_mcnp():
         "source": " Some http://URL.com",
         "table_ids": {'922350': "15c"}})
     expected_material.mass = -1.0  # to avoid reassignment to +1.0
-
+    expected_material_default_lib = Material({10000000: 0.037298334378933776, 
+            60000000: 0.6666767493126631, 80000000: 0.29602491630840305}, 
+            54.04749412269001, 1.1, 6.0,
+            {"mat_number": "3",
+             "HLIB": "42h", "NLIB": "60c", "PLIB": "01p",
+             "table_ids": {}})
     expected_multimaterial = MultiMaterial({
         Material(
-            {10000000: 0.11189838783149784, 80000000: 0.8881016121685023},
+            {10000000: 0.1118983878322976, 80000000: 0.8881016121677024},
             -1.0, 0.9, 3,
             {"comments":
              (" Here are comments the comments "
@@ -523,9 +534,9 @@ def test_read_mcnp():
              "source": " internet",
              "table_ids": {'10000': "05c"}}): 1,
         Material(
-            {10000000: 0.11189838783149784, 80000000: 0.8881016121685023},
+            {10000000: 0.1118983878322976, 80000000: 0.8881016121677024},
             -1.0,
-            1.0021552889223864, 3,
+            1.0021552889251644, 3,
             {"comments":
              (" Here are comments the comments "
               "continue here are more even more"),
@@ -534,7 +545,7 @@ def test_read_mcnp():
              "source": " internet",
              "table_ids": {'10000': "05c"}}): 1,
         Material(
-            {10000000: 0.11189838783149784, 80000000: 0.8881016121685023},
+            {10000000: 0.1118983878322976, 80000000: 0.8881016121677024},
             -1.0, 1.1, 3,
             {"comments":
              (" Here are comments the comments "
@@ -546,6 +557,7 @@ def test_read_mcnp():
 
     read_materials = mats_from_inp('mcnp_inp.txt')
     assert_almost_equal(expected_material, read_materials[1])
+    assert_equal(expected_material_default_lib, read_materials[3])
     assert_equal(
         list(expected_multimaterial._mats.keys())[0].comp.keys(),
         list(read_materials[2]._mats.keys())[0].comp.keys())
@@ -1264,4 +1276,3 @@ def test_mesh_to_geom():
         "     1002 -5.0000e+00\n")
 
     assert_equal(geom, exp_geom)
-

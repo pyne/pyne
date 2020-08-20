@@ -2,7 +2,7 @@
 
 import sys, os, shutil, subprocess, tarfile
 from warnings import warn
-from pyne.utils import QAWarning
+from pyne.utils import QA_warn
 
 try:
     import urllib.request as urllib
@@ -12,7 +12,7 @@ except ImportError:
 if sys.version_info[0] > 2:
     basestring = str
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+QA_warn(__name__)
 
 class SetupIncompleteError(Exception):
     def __init__(self, value):

@@ -4,9 +4,9 @@ try:
 except AttributeError:
     collectionsAbc = collections
 from warnings import warn
-from pyne.utils import QAWarning
+from pyne.utils import QA_warn
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+QA_warn(__name__)
 
 
 class RxLib(object):

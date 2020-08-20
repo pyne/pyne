@@ -6,8 +6,7 @@ from __future__ import print_function
 import os
 import re
 import shutil
-from warnings import warn
-from pyne.utils import QAWarning
+from pyne.utils import QA_warn
 
 try:
     import urllib.request as urllib2
@@ -20,7 +19,7 @@ import tables as tb
 from .. import nucname
 from .api import BASIC_FILTERS
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+QA_warn(__name__)
 
 def grab_scattering_lengths(build_dir="", file_out='scattering_lengths.html'):
     """Grabs the scattering cross-section lengths for neutrons from the NIST website

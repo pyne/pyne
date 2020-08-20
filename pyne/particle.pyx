@@ -69,8 +69,7 @@ from cython.operator cimport dereference as deref
 from cython.operator cimport preincrement as inc
 from libcpp.string cimport string as std_string
 
-from warnings import warn
-from pyne.utils import QAWarning
+from pyne.utils import QA_warn
 
 # local imports 
 cimport extra_types
@@ -83,7 +82,7 @@ cimport pyne.stlcontainers as conv
 import pyne.stlcontainers as conv
 
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+QA_warn(__name__)
 
 # names
 cdef conv._SetStr names_proxy = conv.SetStr(False)

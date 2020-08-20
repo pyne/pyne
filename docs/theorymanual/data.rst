@@ -28,9 +28,9 @@ Additional Information
 **********************
 For further information, please see:
 
-* `The ENSDF manual <http://www.nndc.bnl.gov/nndcscr/documents/ensdf/ensdf-manual.pdf>`_, 
+* `The ENSDF manual <https://www-nds.iaea.org/public/documents/ensdf/ensdf-manual.pdf>`_, 
 * `IAEA nuclear data section <https://www-nds.iaea.org/>`_, 
-* `ORIGEN-S data <http://web.ornl.gov/~webworks/cppr/y2001/rpt/97914.pdf>`_,
+* `ORIGEN-S data <https://info.ornl.gov/sites/publications/Files/Pub57380.pdf>`_,
 * `Isotopic abundance data <http://atom.kaeri.re.kr/>`_
 * `Scattering lengths <http://www.ncnr.nist.gov/resources/n-lengths/list.html>`_
 * `ENSDF data <http://www.nndc.bnl.gov/ensdf/>`_

@@ -2,8 +2,7 @@ from __future__ import print_function
 import os
 import re
 import sys
-from warnings import warn
-from pyne.utils import QAWarning
+from pyne.utils import QA_warn
 
 try:
     import urllib.request as urllib2
@@ -14,7 +13,7 @@ except ImportError:
 
 from pyne import nucname
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+QA_warn(__name__)
 
 if sys.version_info[0] > 2:
   basestring = str
