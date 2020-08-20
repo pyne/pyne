@@ -516,7 +516,12 @@ def test_read_mcnp():
         "source": " Some http://URL.com",
         "table_ids": {'922350': "15c"}})
     expected_material.mass = -1.0  # to avoid reassignment to +1.0
-
+    expected_material_default_lib = Material({10000000: 0.037298334378933776, 
+            60000000: 0.6666767493126631, 80000000: 0.29602491630840305}, 
+            54.04749412269001, 1.1, 6.0,
+            {"mat_number": "3",
+             "HLIB": "42h", "NLIB": "60c", "PLIB": "01p",
+             "table_ids": {}})
     expected_multimaterial = MultiMaterial({
         Material(
             {10000000: 0.1118983878322976, 80000000: 0.8881016121677024},
@@ -552,6 +557,7 @@ def test_read_mcnp():
 
     read_materials = mats_from_inp('mcnp_inp.txt')
     assert_almost_equal(expected_material, read_materials[1])
+    assert_equal(expected_material_default_lib, read_materials[3])
     assert_equal(
         list(expected_multimaterial._mats.keys())[0].comp.keys(),
         list(read_materials[2]._mats.keys())[0].comp.keys())

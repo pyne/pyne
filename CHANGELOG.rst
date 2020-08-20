@@ -43,6 +43,9 @@ v0.7.0 RC2
 
 **Enhancements to Previous Capabilities**
 
+* MCNP Support
+  * Default library reading capability from material card, such as nlib, plib and etc. (#1316)
+
 * Turn off QA warnings by default and enable with env variable 'PYNE_QA_WARN' (#1268)
 * Enhancements of Material and MaterialLibrary capabilities
    * A C++ API for the MaterialLibrary class has been created for direct
