@@ -82,7 +82,7 @@ class Library(rxdata.RxLib):
     def _set_line_length(self):
         opened_here = False
         if isinstance(self.fh, str):
-            fh = open(self.fh, 'rU')
+            fh = open(self.fh, 'r')
             opened_here = True
         else:
             fh = self.fh
@@ -115,7 +115,7 @@ class Library(rxdata.RxLib):
         """
         opened_here = False
         if isinstance(self.fh, basestring):
-            fh = open(self.fh, 'rU')
+            fh = open(self.fh, 'r')
             opened_here = True
         else:
             fh = self.fh
@@ -130,7 +130,7 @@ class Library(rxdata.RxLib):
         if self.chars_til_now == 0:
             opened_here = False
             if isinstance(self.fh, basestring):
-                fh = open(self.fh, 'rU')
+                fh = open(self.fh, 'r')
                 opened_here = True
             else:
                 fh = self.fh
@@ -157,7 +157,7 @@ class Library(rxdata.RxLib):
         cdef double nucd
         opened_here = False
         if isinstance(self.fh, basestring):
-            fh = open(self.fh, 'rU')
+            fh = open(self.fh, 'r')
             opened_here = True
         else:
             fh = self.fh
@@ -1065,7 +1065,7 @@ class Library(rxdata.RxLib):
         """
         opened_here = False
         if isinstance(self.fh, basestring):
-            fh = open(self.fh, 'rU')
+            fh = open(self.fh, 'r')
             opened_here = True
         else:
             fh = self.fh
@@ -1242,7 +1242,7 @@ class Evaluation(object):
         if hasattr(filename_or_handle, 'read'):
             self._fh = filename_or_handle
         else:
-            self._fh = open(filename_or_handle, 'rU')
+            self._fh = open(filename_or_handle, 'r')
         self._verbose = verbose
         self._veryverbose = False
 
