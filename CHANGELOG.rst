@@ -14,7 +14,7 @@ Next Version
 * move join_string declaration in utils header to allow amalgamate PyNE to be compiled with clang
 
 * Bug fixes
-   * Update version numbering for release v0.7.0 (#)
+   * Update version numbering for release v0.7.0 (#1326)
 
 v0.7.0
 ====================
