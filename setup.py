@@ -60,7 +60,7 @@ if '.' not in sys.path:
 def absexpanduser(x): return os.path.abspath(os.path.expanduser(x))
 
 
-VERSION = '0.5.11'
+VERSION = '0.7.0'
 IS_NT = os.name == 'nt'
 LOCALDIR = absexpanduser('~/.local')
 CMAKE_BUILD_TYPES = {
