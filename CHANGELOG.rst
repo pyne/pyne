@@ -11,6 +11,7 @@ Next Version
 
 * Documentation Changes
    * Update conda install instruction. (#1324)
+* move join_string declaration in utils header to allow amalgamate PyNE to be compiled with clang
 
 v0.7.0
 ====================
