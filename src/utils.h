@@ -147,7 +147,7 @@ namespace pyne {
   template std::string join_to_string(std::vector<int> vect,
                                       std::string delimiter);
   template std::string join_to_string(std::vector<double> vect,
-                                  std::string delimiter);
+                                      std::string delimiter);
   template std::string join_to_string(std::vector<std::string> vect, std::string delimiter);
 
   /// Finds the slope of a line from the points (\a x1, \a y1) and (\a x2, \a y2).
