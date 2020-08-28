@@ -319,26 +319,6 @@ std::vector<std::string> pyne::split_string(std::string particles_list, std::str
 }
 
 
-
-template<typename T>
-std::string pyne::join_to_string(std::vector<T> vect, std::string delimiter){
-  std::stringstream out;
-  out << std::setiosflags(std::ios::fixed) << std::setprecision(6);
-  
-  // ensure there is at least 1 element in the vector
-  if (vect.size() == 0)
-    return out.str();
-  // no delimiter needed before the first element
-  out << vect[0];
-  for( int i = 1; i < vect.size(); i++)
-    out << delimiter << vect[i];
-  return out.str();
-}
-template std::string pyne::join_to_string(std::vector<int> vect, std::string delimiter);
-template std::string pyne::join_to_string(std::vector<double> vect,
-                                 std::string delimiter);
-template std::string pyne::join_to_string(std::vector<std::string> vect, std::string delimiter);
-
 //
 // Math Helpers
 //

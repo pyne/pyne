@@ -131,7 +131,24 @@ namespace pyne {
 
   // join the vector element into a string, each values will be delimited ny the delimiter
   template<typename T>
-  std::string join_to_string(std::vector<T> vect, std::string delimiter = " ");
+  std::string join_to_string(std::vector<T> vect, std::string delimiter = " "){
+    std::stringstream out;
+    out << std::setiosflags(std::ios::fixed) << std::setprecision(6);
+    
+    // ensure there is at least 1 element in the vector
+    if (vect.size() == 0)
+      return out.str();
+    // no delimiter needed before the first element
+    out << vect[0];
+    for( int i = 1; i < vect.size(); i++)
+      out << delimiter << vect[i];
+    return out.str();
+  };
+  template std::string join_to_string(std::vector<int> vect,
+                                      std::string delimiter);
+  template std::string join_to_string(std::vector<double> vect,
+                                  std::string delimiter);
+  template std::string join_to_string(std::vector<std::string> vect, std::string delimiter);
 
   /// Finds the slope of a line from the points (\a x1, \a y1) and (\a x2, \a y2).
   double slope (double x2, double y2, double x1, double y1);
