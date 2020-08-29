@@ -231,18 +231,21 @@ def _activation_responses_test_step2(activation_responses_run_dir):
     os.chdir(activation_responses_run_dir)
     os.system('python activation_responses.py step2')
 
+    response = 'decay_heat'
     # output files of activation_responses step2
-    h5_filename = os.path.join(activation_responses_run_dir, "decay_heat.h5")
-    exp_h5_filename = os.path.join(activation_responses_run_dir, "exp_decay_heat.h5")
-    h5m_filename = os.path.join(activation_responses_run_dir, "decay_heat_1.h5m")
-    exp_h5m_filename = os.path.join(activation_responses_run_dir, "exp_decay_heat_1.h5m")
+    h5_filename = os.path.join(activation_responses_run_dir, ''.join([response, '.h5']))
+    exp_h5_filename = os.path.join(activation_responses_run_dir, ''.join(['exp_', response, '.h5']))
+    h5m_filename = os.path.join(activation_responses_run_dir, ''.join([response, '_1.h5m']))
+    exp_h5m_filename = os.path.join(activation_responses_run_dir, ''.join(['exp_', response, '_1.h5m']))
 
     # compare the results
     # compare two h5 files
     command = ''.join(['h5diff ', h5_filename, ' ', exp_h5_filename])
     diff_flag4 = os.system(command)
     # compare two h5m files
-    command = ''.join(['h5diff ', h5m_filename, ' ', exp_h5m_filename, ' /tstt/tags /tstt/tags'])
+    command = ''.join(['h5diff ', h5m_filename, ' ', exp_h5m_filename,
+        ''.join([' tstt/tags/', response, ' /tstt/tags/', response])])
+
     diff_flag5 = os.system(command)
 
     # remove test generated files
