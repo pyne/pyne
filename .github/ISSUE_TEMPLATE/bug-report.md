@@ -24,7 +24,7 @@ Note, please do not include screenshots or snippets of code that is export contr
 
 **Please complete the following information regarding your system:**<br/>
  - OS: [e.g. ubuntu Linux]
- - PyNE Version: [e.g. 0.7.0]
+ - PyNE Version: [e.g. 0.7.1]
  - Versions of dependencies installed with: [e.g. HDF5 1.10]
 
 **Additional Context**<br/>

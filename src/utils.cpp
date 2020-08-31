@@ -13,7 +13,7 @@ extern "C" double endftod_(char *str, int len);
 
 std::string pyne::PYNE_DATA = "";
 std::string pyne::NUC_DATA_PATH = "";
-std::string pyne::VERSION = "0.7.0";
+std::string pyne::VERSION = "0.7.1";
 
 void pyne::pyne_start() {
 #if defined __WIN_MSVC__
