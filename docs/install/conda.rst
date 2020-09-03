@@ -28,9 +28,9 @@ using the conda package manager can be installed by running the command::
 If you want to install PyNE with the correct package specification, try
 ``pkg_name=version=build_string``.
 
-For example, if you want to install ``pyne version=0.7.0`` with build option ``moab_openmc``, you would enter::
+For example, if you want to install ``pyne version=0.7.1`` with build option ``moab_openmc``, you would enter::
 
-    conda install -c conda-forge pyne=0.7.0=moab_openmc*
+    conda install -c conda-forge pyne=0.7.1=moab_openmc*
 
 where version should be replaced with the version number to be installed.
 
