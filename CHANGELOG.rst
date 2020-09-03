@@ -12,6 +12,7 @@ Next Version
 * Documentation Changes
    * Update conda install instruction. (#1324)
 * move join_string declaration in utils header to allow amalgamate PyNE to be compiled with clang
+* Fix the incompatibility between MOAB 5.2.0 and test_activation_responses (#1328)
 
 * Bug fixes
    * Update version numbering for release v0.7.1 (#1326)
