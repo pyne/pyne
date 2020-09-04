@@ -253,12 +253,16 @@ IMPORTANT: Python 2 is no longer supported as of this release.  Some packages ma
 <<<<<<< HEAD
    * ensure that ENSDF fortran tools are linked correctly. (#1306)
    * allow spatial solvers to be turned on/off at time of setup (#1308)
+<<<<<<< HEAD
 =======
    * Update moab version (#1312)
 >>>>>>> update changelog.rst
 =======
    * Update moab version 5.1.0 >> 5.2.0 (#1312)
 >>>>>>> update changelog.rst
+=======
+   * Update moab version 5.1.0 >> 5.2.1 (#1312)
+>>>>>>> Update CHANGELOG.rst
 
 * Code cleanup
    * Formatting improvements
