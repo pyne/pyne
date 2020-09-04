@@ -23,4 +23,4 @@ cdef class _MaterialLibrary:
     cdef cpp_set[int] get_nuclist(self)
 
 cdef cpp_umap[std_string, shared_ptr[cpp_material.Material]] dict_to_map_str_matp(dict)
-cdef dict map_to_dict_str_matp(cpp_umap[std_string, shared_ptr[cpp_material.Material]])
+cdef dict matlib_to_dict_str_matp(cpp_material_library.MaterialLibrary)

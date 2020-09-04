@@ -2,7 +2,7 @@
 from libcpp.set cimport set
 from libcpp.string cimport string as std_string
 from libcpp.set cimport set as std_set
-from libcpp.unordered_map cimport unordered_map
+from libcpp.unordered_map cimport unordered_map as cpp_umap
 from libcpp.vector cimport vector
 from libcpp.utility cimport pair
 from libcpp cimport bool
@@ -40,7 +40,10 @@ cdef extern from "material_library.h" namespace "pyne":
         cpp_material.Material get_material(std_string) except +
         shared_ptr[cpp_material.Material] get_material_ptr( std_string ) except +
         
-        unordered_map[std_string, shared_ptr[cpp_material.Material]] get_mat_library() except + 
+        cpp_umap[std_string, shared_ptr[cpp_material.Material]] get_mat_library() except + 
         std_set[std_string] get_keylist() except +
         std_set[int] get_nuclist() except +
         int size() except +
+        cpp_umap[std_string, shared_ptr[cpp_material.Material]].iterator begin() except +
+        cpp_umap[std_string, shared_ptr[cpp_material.Material]].iterator end() except +
+
