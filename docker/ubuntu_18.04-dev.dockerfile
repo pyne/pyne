@@ -145,10 +145,6 @@ RUN if [ "$build_dagmc" = "YES" ]; then \
         && rm -rf DAGMC; \
     fi
 
-# DAGMC path variable
-ENV LD_LIBRARY_PATH $HOME/opt/dagmc/lib:$LD_LIBRARY_PATH
-ENV LIBRARY_PATH $HOME/opt/dagmc/lib:$LIBRARY_PATH
-
 ARG build_pyne=YES
 # Build/Install PyNE
 RUN if [ "$build_pyne" = "YES" ]; then \
