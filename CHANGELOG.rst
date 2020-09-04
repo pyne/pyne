@@ -17,6 +17,9 @@ Next Version
 * Bug fixes
    * Update version numbering for release v0.7.1 (#1326)
 
+* Improvements in building and testing
+   * Update moab version 5.1.0 >> 5.2.1 (#1312)
+
 v0.7.0
 ====================
 
