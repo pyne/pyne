@@ -7,6 +7,9 @@ pyne Change Log
 Next Version
 ====================
 
+**New Capabilities**
+   * Adding unordered_map like API to MaterialLibrary pointing directly to the nested unordered_map
+
 **Maintenance**
 
 * Documentation Changes

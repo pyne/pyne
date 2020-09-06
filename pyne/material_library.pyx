@@ -251,7 +251,7 @@ cdef class _MaterialLibrary:
         self.del_material(ensure_material_key(key))
 
     def __iter__(self):
-        mat_lib_dict = map_to_dict_str_matp(self._inst.get_mat_library())
+        mat_lib_dict = matlib_to_dict_str_matp(deref(self._inst))
         self._iter_mat_lib = mat_lib_dict
         mat_lib_iter = iter(mat_lib_dict)
         return mat_lib_iter
@@ -292,12 +292,12 @@ cdef cpp_umap[std_string, shared_ptr[cpp_material.Material]] dict_to_map_str_mat
 
     return cppmap
 
-# u_map<string, Material *> to python dict
-cdef dict map_to_dict_str_matp(cpp_umap[std_string, shared_ptr[cpp_material.Material]] cppmap):
+# MaterialLibrary to python dict
+cdef dict matlib_to_dict_str_matp(cpp_material_library.MaterialLibrary cpp_mat_lib):
     pydict = {}
-    cdef cpp_umap[std_string, shared_ptr[cpp_material.Material]].iterator mapiter = cppmap.begin()
+    cdef cpp_umap[std_string, shared_ptr[cpp_material.Material]].iterator mapiter = cpp_mat_lib.begin()
 
-    while mapiter != cppmap.end():
+    while mapiter != cpp_mat_lib.end():
         py_mat = material.Material(free_mat=False)
         ( < material._Material > py_mat).mat_pointer = (deref(mapiter).second).get()
         pydict[ < char * > deref(mapiter).first.c_str()] = py_mat

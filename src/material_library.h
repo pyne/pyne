@@ -143,11 +143,28 @@ class MaterialLibrary {
    * \return std::set<int>
    */
   pyne::nuc_set get_nuclist() const { return nuclist; }
-  /**
-   * \brief Get the szie of the Library
-   * \return int
-   */
-  int size() const { return material_library.size(); }
+
+  /** Set of method allowing MaterialLibrary to behave like a undordered_map,
+   * pointing directly to the nested material_library
+   **/
+  typedef mat_map::iterator iterator;
+  typedef mat_map::const_iterator const_iterator;
+  iterator begin() { return material_library.begin(); }
+  iterator end() { return material_library.end(); }
+
+  const_iterator cbegin() const { return material_library.cbegin(); }
+  const_iterator cend() const { return material_library.cend(); }
+  std::size_t size() const { return material_library.size(); }
+  bool emtpy() const { return material_library.empty(); }
+  std::size_t count(std::string mat_name) const {
+    return material_library.count(mat_name);
+  }
+  std::shared_ptr<Material>& operator[](const std::string& k) {
+    return material_library[k];
+  }
+  std::shared_ptr<Material>& operator[](std::string&& k) {
+    return material_library[k];
+  }
 
  private:
   /**
