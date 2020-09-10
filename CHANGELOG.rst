@@ -19,6 +19,10 @@ Next Version
    * removing old circle-ci related stuff (#1405)
    * adds a manual trigger for docker build workflow (#1406)
    * clarify the tag name for docker images generated in CI (#1407)
+   * Fixes for nuc_data_make (#1333)
+      * new download location for KAERI data archive
+      * do not try to download missing (super heavy) data from KAERI
+      * update material_library writing interface
 
 v0.7.5
 ======
@@ -105,7 +109,7 @@ v0.7.1
 ======
 
 **New Capabilities**
-   * Adding unordered_map like API to MaterialLibrary pointing directly to the nested unordered_map
+   * Adding unordered_map like API to MaterialLibrary pointing directly to the nested unordered_map (#1330)
 
 **Maintenance**
 
