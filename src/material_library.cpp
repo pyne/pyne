@@ -152,6 +152,14 @@ int pyne::MaterialLibrary::ensure_material_number(pyne::Material& mat) const {
       warning(msg);
     }
   }
+  if (mat_number == -1) {
+    if (!mat_number_set.empty())
+      mat_number = *mat_number_set.rbegin() + 1;
+    else {
+      mat_number = 1;
+    }
+    mat.metadata["mat_number"] = mat_number;
+  }
   return mat_number;
 }
 
@@ -169,13 +177,6 @@ std::string pyne::MaterialLibrary::ensure_material_name_and_number(
       mat_name = mat.metadata["name"].asString();
     }
   } else {
-    if (mat_number == -1) {
-      if (!mat_number_set.empty())
-        mat_number = *mat_number_set.rbegin() + 1;
-      else {
-        mat_number = 1;
-      }
-    }
     mat_name = "_" + std::to_string(mat_number);
     mat.metadata["name"] = mat_name;
   }
