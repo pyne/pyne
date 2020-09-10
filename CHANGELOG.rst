@@ -69,6 +69,10 @@ v0.7.6
    * add ifbar to cleanup the code about progress bar (#1409)
    * use ifbar to print progress of mesh_to_fluxin (#1401)
    * pep8 formatting applied to all py files (#1436)
+   * * Fixes for nuc_data_make (#1333)
+      * new download location for KAERI data archive
+      * do not try to download missing (super heavy) data from KAERI
+      * update material_library writing interface
 
 v0.7.5
 ======
@@ -157,7 +161,7 @@ v0.7.1
 ======
 
 **New Capabilities**
-   * Adding unordered_map like API to MaterialLibrary pointing directly to the nested unordered_map
+   * Adding unordered_map like API to MaterialLibrary pointing directly to the nested unordered_map (#1330)
 
 **Maintenance**
 
