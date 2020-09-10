@@ -29,19 +29,19 @@ def grab_kaeri_simple_xs(build_dir=""):
     build_dir : str
         Major directory to place html files in. 'KAERI/' will be appended.
     """
-    zip_path = os.path.join(build_dir, "kaeri.zip")
-    zip_url = "http://data.pyne.io/kaeri.zip"
+    zip_path = os.path.join(build_dir, 'kaeri.zip')
+    zip_url = 'http://raw.githubusercontent.com/pyne/data/master/kaeri.zip'
     if not os.path.exists(zip_path):
         print("  grabbing {0} and placing it in {1}".format(zip_url, zip_path))
         urllib.urlretrieve(zip_url, zip_path)
-        try:
-            zf = ZipFile(zip_path)
-            for name in zf.namelist():
-                if not os.path.exists(os.path.join(build_dir, name)):
-                    print("    extracting {0} from {1}".format(name, zip_path))
-                    zf.extract(name, build_dir)
-        finally:
-            zf.close()
+    try:
+        zf = ZipFile(zip_path)
+        for name in zf.namelist():
+            if not os.path.exists(os.path.join(build_dir, name)):
+                print("    extracting {0} from {1}".format(name, zip_path))
+                zf.extract(name, build_dir)
+    finally:
+        zf.close()
 
     # Add kaeri to build_dir
     build_dir = os.path.join(build_dir, "KAERI")
@@ -56,10 +56,10 @@ def grab_kaeri_simple_xs(build_dir=""):
     for element in nucname.name_zz.keys():
         htmlfile = element.upper() + ".html"
         if htmlfile not in already_grabbed:
-            grab_kaeri_nuclide(element.upper(), build_dir)
-        all_nuclides = all_nuclides | parse_for_all_isotopes(
-            os.path.join(build_dir, htmlfile)
-        )
+            pass
+        else:
+            all_nuclides = all_nuclides | parse_for_all_isotopes(os.path.join(build_dir, 
+                                                                          htmlfile))
 
     # Grab nuclide XS summary files
     for nuc in sorted(all_nuclides):
@@ -165,10 +165,11 @@ def parse_simple_xs(build_dir=""):
     # Grab and parse elemental summary files.
     all_nuclides = set()
     for element in nucname.name_zz.keys():
-        htmlfile = element.upper() + ".html"
-        all_nuclides = all_nuclides | parse_for_all_isotopes(
-            os.path.join(build_dir, htmlfile)
-        )
+        htmlfile = element.upper() + '.html'
+        # missing data for newer super-heavy elements
+        if os.path.exists(os.path.join(build_dir,htmlfile)):
+            all_nuclides = all_nuclides | parse_for_all_isotopes(os.path.join(build_dir, 
+                                                                          htmlfile))
     all_nuclides = sorted([nucname.id(nuc) for nuc in all_nuclides])
     energy_tables = dict(
         [
