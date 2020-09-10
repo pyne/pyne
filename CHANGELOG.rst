@@ -7,7 +7,8 @@ pyne Change Log
 Next Version
 ====================
 
-
+**Change**
+   * Now attribute a number to material when adding them into a material library (#1334)
 
 v0.7.1
 ====================
