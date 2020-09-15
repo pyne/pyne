@@ -1204,8 +1204,13 @@ class PtracReader(object):
         variable_ids = dict()
 
         if self.eightbytes:
-            variable_info = self.read_next(
-                "qqqqqqqqqqqiiiiiiiii", 124, raw_format=True)
+            mcnp_version=self.mcnp_version_info.split()[1]
+            if mcnp_version in ["6","6.mpi"]:
+                variable_info = self.read_next(
+                    "iqqqqqqqqqqiiiiiiiii", 120, raw_format=True)
+            else: # Not sure about MCNPX 
+                variable_info = self.read_next(
+                    "qqqqqqqqqqqiiiiiiiii", 124, raw_format=True)
         else:
             variable_info = self.read_next('i', 20)
 
