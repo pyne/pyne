@@ -1050,7 +1050,7 @@ class PtracReader(object):
             24: "vvv",  # cos(y-direction)
             25: "www",  # cos(z-direction)
             26: "erg",  # energy
-            27: "wgt",  # mass
+            27: "wgt",  # weight
             28: "tme"
         }
 
@@ -1081,7 +1081,7 @@ class PtracReader(object):
         else:
             self.endianness = '>'
 
-        # discard the next 8 bytes (the value -1 und another 4)
+        # discard the next 8 bytes (the value -1 and another 4)
         self.f.read(8)
 
     def read_next(self, format, number=1, auto=False, raw_format=False):
@@ -1177,12 +1177,12 @@ class PtracReader(object):
             tmp = struct.pack(self.endianness + "f"*20, *line)
             line = list(struct.unpack(self.endianness + "d"*10, tmp))
 
-        # the first item is always 13. afterwards, there is 13 times the
-        # following scheme:
-        # N x_0 ... x_N,
-        # where N is the number of values for the current input variable and
-        # the x_i are its N values.
-        num_variables = int(line[0])  # should always be 13.
+        # the first item is 13 in MCNP5, 14 in MCNP6. afterwards, there is
+        # that times the following scheme:
+        # n x_0 ... x_n,
+        # where n is the number of values for the current input variable and
+        # the x_i are its n values.
+        num_variables = int(line[0])  # should always be 13 or 14.
         current_pos = 1
         current_variable = 1
 
