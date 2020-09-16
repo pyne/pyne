@@ -95,7 +95,7 @@ def test_against_nuc_data():
     if not os.path.isfile(nuc_data):
         raise RuntimeError(
             "Tests require nuc_data.h5. Please run nuc_data_make.")
-    obs_matslib = MaterialLibrary(nuc_data)
+    obs_matslib = MaterialLibrary(nuc_data, "/materials")
     gasoline = Material({
         "H": 0.157000,
         "C": 0.843000,
@@ -148,7 +148,7 @@ def test_matlib_json():
 
 def test_matlib_hdf5_nuc_data():
     matlib = MaterialLibrary()
-    matlib.from_hdf5(nuc_data)
+    matlib.from_hdf5(nuc_data, "/materials")
     matlib.write_hdf5("matlib_test.h5", "/materials")
     mat_lib_load_test = MaterialLibrary("matlib_test.h5", "/materials")
     os.remove("matlib_test.h5")
