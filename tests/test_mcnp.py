@@ -674,7 +674,8 @@ def test_read_events():
 
 def test_write_to_hdf5():
     test_files = ["mcnp_ptrac_i4_little.ptrac",
-                  "mcnp_ptrac_i8_little.ptrac"]
+                  "mcnp_ptrac_i8_little.ptrac",
+                  "mcnp6_ptrac_i8_little.ptrac"]
 
     for test_file in test_files:
         p = mcnp.PtracReader(test_file)
