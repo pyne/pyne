@@ -1268,11 +1268,9 @@ class PtracReader(object):
 
         self.next_event = evt_line[0]
 
-        for i in range(1, len(self.variable_ids[e])):
-            if self.variable_ids[e][i] in self.variable_mappings:
-                ptrac_event[self.variable_mappings[
-                    self.variable_ids[e][i]]] = \
-                    evt_line[i]
+        for i,j in enumerate(self.variable_ids[e][:1]):
+            if j in self.variable_mappings:
+                ptrac_event[self.variable_mappings[j]]=evt_line[i+1]
         ptrac_event["event_type"] = event_type
 
     def write_to_hdf5_table(self, hdf5_table, print_progress=0):
