@@ -149,8 +149,8 @@ def test_matlib_json():
 def test_matlib_hdf5_nuc_data():
     matlib = MaterialLibrary()
     matlib.from_hdf5(nuc_data, "/materials")
-    matlib.write_hdf5("matlib_test.h5", "/materials")
-    mat_lib_load_test = MaterialLibrary("matlib_test.h5", "/materials")
+    matlib.write_hdf5("matlib_test.h5")
+    mat_lib_load_test = MaterialLibrary("matlib_test.h5")
     os.remove("matlib_test.h5")
     for key in matlib:
         assert_mat_almost_equal(matlib[key], mat_lib_load_test[key])
