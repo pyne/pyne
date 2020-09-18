@@ -128,8 +128,7 @@ def parse_materials(mats, lines):
 # Writes to file
 def make_materials_compendium(nuc_data, matslib):
     """Adds materials compendium to nuc_data.h5."""
-    matslib.write_hdf5(nuc_data, datapath="/material_library/materials",
-                       nucpath="/material_library/nucid")
+    matslib.write_hdf5(nuc_data)
 
 
 def make_matslib(fname):

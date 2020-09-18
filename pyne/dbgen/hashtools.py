@@ -12,7 +12,7 @@ from .. import data
 QA_warn(__name__)
 
 # list of nodes from distinct data sets
-nodelist = ['/atomic_mass', '/material_library',
+nodelist = ['/atomic_mass', '/material_library/materials',
             '/neutron/eaf_xs', '/neutron/scattering_lengths',
             '/neutron/simple_xs', '/decay', '/dose_factors']
 
