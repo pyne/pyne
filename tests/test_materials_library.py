@@ -95,7 +95,7 @@ def test_against_nuc_data():
     if not os.path.isfile(nuc_data):
         raise RuntimeError(
             "Tests require nuc_data.h5. Please run nuc_data_make.")
-    obs_matslib = MaterialLibrary(nuc_data, "/materials")
+    obs_matslib = MaterialLibrary(nuc_data)
     gasoline = Material({
         "H": 0.157000,
         "C": 0.843000,
