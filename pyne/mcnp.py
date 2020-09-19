@@ -1070,7 +1070,7 @@ class PtracReader(object):
     def determine_endianness(self):
         """Determine the number format (endianness) used in the Ptrac file.
         For this, the file's first entry is used. It is always minus one
-        and has a length of 4 bytes.
+        and has a length of 4 bytes, unless compiled with 8-byte ints.
         """
 
         # read and unpack first 4 bytes
@@ -1082,7 +1082,9 @@ class PtracReader(object):
             self.endianness = '>'
 
         # discard the next 8 bytes (the value -1 and another 4)
-        self.f.read(8)
+        c = self.f.read(8)
+        assert (c[4:8] == b) , "8 byte integers compilation flag "\
+                               "not supported for MCNP6"
 
     def read_next(self, format, number=1, auto=False, raw_format=False):
         """Helper method for reading records from the Ptrac file.
@@ -1204,11 +1206,11 @@ class PtracReader(object):
         variable_ids = dict()
 
         if self.eightbytes:
-            mcnp_version=self.mcnp_version_info[8:13]
-            if mcnp_version in ["6","6.mpi"]:
+            mcnp_version = self.mcnp_version_info[8:13]
+            if mcnp_version in ["6", "6.mpi"]:
                 variable_info = self.read_next(
                     "iqqqqqqqqqqiiiiiiiii", 120, raw_format=True)
-            else: # Not sure about MCNPX 
+            else:  # Not sure about MCNPX
                 variable_info = self.read_next(
                     "qqqqqqqqqqqiiiiiiiii", 124, raw_format=True)
         else:
@@ -1268,9 +1270,9 @@ class PtracReader(object):
 
         self.next_event = evt_line[0]
 
-        for i,j in enumerate(self.variable_ids[e][1:]):
+        for i, j in enumerate(self.variable_ids[e][1:]):
             if j in self.variable_mappings:
-                ptrac_event[self.variable_mappings[j]]=evt_line[i+1]
+                ptrac_event[self.variable_mappings[j]] = evt_line[i+1]
         ptrac_event["event_type"] = event_type
 
     def write_to_hdf5_table(self, hdf5_table, print_progress=0):
