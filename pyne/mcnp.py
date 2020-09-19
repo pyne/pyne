@@ -1268,7 +1268,7 @@ class PtracReader(object):
 
         self.next_event = evt_line[0]
 
-        for i,j in enumerate(self.variable_ids[e][:1]):
+        for i,j in enumerate(self.variable_ids[e][1:]):
             if j in self.variable_mappings:
                 ptrac_event[self.variable_mappings[j]]=evt_line[i+1]
         ptrac_event["event_type"] = event_type
