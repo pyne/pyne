@@ -351,7 +351,7 @@ class NativeMeshTag(Tag):
     """
 
     def __init__(self, size=1, dtype='f8', default=0.0, mesh=None, name=None,
-                 doc=None):
+                 doc=None, storage_type=None):
         """Parameters
         ----------
         size : int, optional
@@ -368,6 +368,25 @@ class NativeMeshTag(Tag):
             The name of the tag.
         doc : str, optional
             Documentation string for the tag.
+        storage_type: str, optional
+            MOAB tag storage type (MB_TAG_DENSE, MB_TAG_SPARSE, etc.)
+            in advanced use of the database, this flag controls how this tag's
+            data is stored in memory. The most common storage types are:
+            MB_TYPE_SPARSE -  sparse tags are stored as a list of (entity
+                handle, tag value) tuples, one list per sparse tag, sorted by
+                entity handle
+            MB_TYPE_DENSE - Dense tag values are stored in arrays which match
+                arrays of contiguous entity handles. Dense tags are more
+                efficient in both storage and memory if large numbers of
+                entities are assigned the same tag. Storage for a given dense
+                tag is not allocated until a tag value is set on an entity;
+                memory for a given dense tag is allocated for all entities in a
+                given sequence at the same time.  Sparse: Sparse tags are stored
+                as a list of (entity handle, tag value) tuples, one list per
+                sparse tag, sorted by entity handle.
+            MB_TYPE_BIT - Bit tags are stored similarly to dense tags, but with
+                special handling to allow allocation in bit-size amounts per
+                entity.
         """
 
         super(NativeMeshTag, self).__init__(mesh=mesh, name=name, doc=doc)
@@ -381,6 +400,8 @@ class NativeMeshTag(Tag):
         self.dtype = dtype
         self.pymbtype = types.pymoab_data_type(self.dtype)
         self.default = default
+        if storage_type is None:
+            self.storage_type = types.MB_TAG_DENSE
         # if the tag already exists, pick up its properties
         try:
             self.tag = self.mesh.mesh.tag_get_handle(self.name)
@@ -392,7 +413,7 @@ class NativeMeshTag(Tag):
             self.tag = self.mesh.mesh.tag_get_handle(self.name,
                                                      self.size,
                                                      self.pymbtype,
-                                                     types.MB_TAG_DENSE,
+                                                     self.storage_type,
                                                      create_if_missing=True,
                                                      default_value=default)
             if default is not None:
@@ -554,6 +575,8 @@ class NativeMeshTag(Tag):
 
         if self.size < 2:
             raise TypeError("Cannot expand a tag that is already a scalar.")
+        if self.storage_type == types.MB_TAG_SPARSE:
+            raise TypeError("Expand of a sparse tag is not implemented.")
         for j in range(self.size):
             data = [x[j] for x in self[:]]
             tag = self.mesh.mesh.tag_get_handle("{0}_{1:03d}".format(self.name, j),
