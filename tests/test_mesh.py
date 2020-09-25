@@ -1002,7 +1002,7 @@ def test_tag_cell_fracs():
         assert_equal(m.cell_largest_frac[i],
                      exp_cell_largest_frac[i])
 
-def test_tag_cell_fracs():
+def test_tag_e_bins():
     m = gen_mesh()
     e_bins = np.array([0.0, 0.1, 20])
 
