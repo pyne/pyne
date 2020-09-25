@@ -371,7 +371,7 @@ class NativeMeshTag(Tag):
         storage_type: str, optional
             MOAB tag storage type (MB_TAG_DENSE, MB_TAG_SPARSE, etc.)
             in advanced use of the database, this flag controls how this tag's
-            data is stored in memory. The most common storage types are:
+            data is stored in memory. The supported storage types are:
             MB_TYPE_SPARSE -  sparse tags are stored as a list of (entity
                 handle, tag value) tuples, one list per sparse tag, sorted by
                 entity handle
@@ -384,9 +384,6 @@ class NativeMeshTag(Tag):
                 given sequence at the same time.  Sparse: Sparse tags are stored
                 as a list of (entity handle, tag value) tuples, one list per
                 sparse tag, sorted by entity handle.
-            MB_TYPE_BIT - Bit tags are stored similarly to dense tags, but with
-                special handling to allow allocation in bit-size amounts per
-                entity.
         """
 
         super(NativeMeshTag, self).__init__(mesh=mesh, name=name, doc=doc)
@@ -402,6 +399,8 @@ class NativeMeshTag(Tag):
         self.default = default
         if storage_type is None:
             self.storage_type = types.MB_TAG_DENSE
+        else:
+            self.storage_type = storage_type
         # if the tag already exists, pick up its properties
         try:
             self.tag = self.mesh.mesh.tag_get_handle(self.name)
@@ -976,7 +975,7 @@ class Mesh(object):
         super(Mesh, self).__setattr__(name, value)
 
     def tag(self, name, value=None, tagtype=None, doc=None, size=None,
-            dtype=None):
+            dtype=None, storage_type=None):
         """Adds a new tag to the mesh, guessing the approriate place to store
         the data.
 
@@ -997,6 +996,22 @@ class Mesh(object):
         dtype : numpy dtype, optional
             The data type of the tag. This only applies to NativeMeshTags. See PyMOAB
             for more details.
+        storage_type: str, optional
+            MOAB tag storage type (MB_TAG_DENSE, MB_TAG_SPARSE, etc.)
+            in advanced use of the database, this flag controls how this tag's
+            data is stored in memory. The supported storage types are:
+            MB_TYPE_SPARSE - sparse tags are stored as a list of (entity
+                handle, tag value) tuples, one list per sparse tag, sorted by
+                entity handle
+            MB_TYPE_DENSE - Dense tag values are stored in arrays which match
+                arrays of contiguous entity handles. Dense tags are more
+                efficient in both storage and memory if large numbers of
+                entities are assigned the same tag. Storage for a given dense
+                tag is not allocated until a tag value is set on an entity;
+                memory for a given dense tag is allocated for all entities in a
+                given sequence at the same time.  Sparse: Sparse tags are stored
+                as a list of (entity handle, tag value) tuples, one list per
+                sparse tag, sorted by entity handle.
         """
 
         if name in self.tags:
@@ -1031,9 +1046,19 @@ class Mesh(object):
                                  'or dtype'.format(name))
             else:
                 tagtype = MetadataTag
+
         if tagtype is NativeMeshTag or tagtype.lower() == 'nat_mesh':
+            # storage_type works for only NativeMeshTag
+            if storage_type is None or storage_type.lower() == 'dense':
+                storage_type = types.MB_TAG_DENSE
+            elif storage_type == types.MB_TAG_SPARSE or \
+                storage_type.lower() == 'sparse':
+                storage_type = types.MB_TAG_SPARSE
+            else:
+                raise ValueError('storage_type {0} not valid'.format(storage_type))
             t = NativeMeshTag(size=size, dtype=dtype,
-                              mesh=self, name=name, doc=doc)
+                              mesh=self, name=name, doc=doc,
+                              storage_type=storage_type)
         elif tagtype is MetadataTag or tagtype.lower() == 'metadata':
             t = MetadataTag(mesh=self, name=name, doc=doc)
         elif tagtype is ComputedTag or tagtype.lower() == 'computed':
@@ -1042,6 +1067,7 @@ class Mesh(object):
             raise ValueError('tagtype {0} not valid'.format(tagtype))
         if value is not None and tagtype is not ComputedTag:
             t[:] = value
+
         setattr(self, name, t)
 
     def get_tag(self, tag_name):
@@ -1473,6 +1499,22 @@ class Mesh(object):
                  tagtype=NativeMeshTag, doc='cell fraction of the cell with '
                                             'largest cell volume fraction',
                  size=1, dtype=float)
+
+
+    def tag_e_bins(self, e_bins):
+        """This function tags the energy boundaries to the PyMOAB mesh
+        instance as a sparse tag for the purpose of photon source sampling.
+
+        Parameters
+        ----------
+        e_bins : numpy array or list
+            The energy boundaries of a photon source.
+        """
+
+        self.tag(name='e_bins', value=e_bins,
+                 doc='energy boundaries of the photon source',
+                 tagtype=NativeMeshTag, size=len(e_bins), dtype=float,
+                 storage_type='sparse')
 
 
 class StatMesh(Mesh):
