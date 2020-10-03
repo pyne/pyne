@@ -1050,7 +1050,7 @@ class PtracReader(object):
             24: "vvv",  # cos(y-direction)
             25: "www",  # cos(z-direction)
             26: "erg",  # energy
-            27: "wgt",  # mass
+            27: "wgt",  # weight
             28: "tme"
         }
 
@@ -1070,7 +1070,7 @@ class PtracReader(object):
     def determine_endianness(self):
         """Determine the number format (endianness) used in the Ptrac file.
         For this, the file's first entry is used. It is always minus one
-        and has a length of 4 bytes.
+        and has a length of 4 bytes, unless compiled with 8-byte ints.
         """
 
         # read and unpack first 4 bytes
@@ -1081,8 +1081,10 @@ class PtracReader(object):
         else:
             self.endianness = '>'
 
-        # discard the next 8 bytes (the value -1 und another 4)
-        self.f.read(8)
+        # discard the next 8 bytes (the value -1 and another 4)
+        c = self.f.read(8)
+        assert (c[4:8] == b) , "8 byte integers compilation flag "\
+                               "not supported for MCNP6"
 
     def read_next(self, format, number=1, auto=False, raw_format=False):
         """Helper method for reading records from the Ptrac file.
@@ -1177,12 +1179,12 @@ class PtracReader(object):
             tmp = struct.pack(self.endianness + "f"*20, *line)
             line = list(struct.unpack(self.endianness + "d"*10, tmp))
 
-        # the first item is always 13. afterwards, there is 13 times the
-        # following scheme:
-        # N x_0 ... x_N,
-        # where N is the number of values for the current input variable and
-        # the x_i are its N values.
-        num_variables = int(line[0])  # should always be 13.
+        # the first item is 13 in MCNP5, 14 in MCNP6. afterwards, there is
+        # that times the following scheme:
+        # n x_0 ... x_n,
+        # where n is the number of values for the current input variable and
+        # the x_i are its n values.
+        num_variables = int(line[0])  # should always be 13 or 14.
         current_pos = 1
         current_variable = 1
 
@@ -1204,8 +1206,13 @@ class PtracReader(object):
         variable_ids = dict()
 
         if self.eightbytes:
-            variable_info = self.read_next(
-                "qqqqqqqqqqqiiiiiiiii", 124, raw_format=True)
+            mcnp_version = self.mcnp_version_info[8:13]
+            if mcnp_version in ["6", "6.mpi"]:
+                variable_info = self.read_next(
+                    "iqqqqqqqqqqiiiiiiiii", 120, raw_format=True)
+            else:  # Not sure about MCNPX
+                variable_info = self.read_next(
+                    "qqqqqqqqqqqiiiiiiiii", 124, raw_format=True)
         else:
             variable_info = self.read_next('i', 20)
 
@@ -1263,11 +1270,9 @@ class PtracReader(object):
 
         self.next_event = evt_line[0]
 
-        for i in range(1, len(self.variable_ids[e])):
-            if self.variable_ids[e][i] in self.variable_mappings:
-                ptrac_event[self.variable_mappings[
-                    self.variable_ids[e][i]]] = \
-                    evt_line[i]
+        for i, j in enumerate(self.variable_ids[e][1:]):
+            if j in self.variable_mappings:
+                ptrac_event[self.variable_mappings[j]] = evt_line[i+1]
         ptrac_event["event_type"] = event_type
 
     def write_to_hdf5_table(self, hdf5_table, print_progress=0):

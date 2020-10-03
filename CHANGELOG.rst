@@ -3,6 +3,7 @@ pyne Change Log
 ===============
 
 .. current developments
+   * Compatibility fix with MCNP6 ptracs. (#1336)
 
 Next Version
 ====================
