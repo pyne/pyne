@@ -18,7 +18,7 @@ Next Version
    * clean the remaining calls to the old material_library write_hdf5 API
 
 **Maintenance**
-   * Add dockerhub authorization for pulling images
+   * Add dockerhub authentication for pulling images
 
 v0.7.1
 ====================
