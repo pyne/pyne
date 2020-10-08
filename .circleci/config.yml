@@ -6,21 +6,39 @@ executors:
     py3:
         docker:
             - image: pyne/ubuntu_18.04_py3_pyne-deps:latest
+              auth:
+                username: $DOCKERHUB_USER
+                password: $DOCKERHUB_PASS
     py3_dagmc:
         docker:
             - image: pyne/ubuntu_18.04_py3_dagmc_pyne-deps:latest
+              auth:
+                username: $DOCKERHUB_USER
+                password: $DOCKERHUB_PASS
     py3_pymoab:
         docker:
             - image: pyne/ubuntu_18.04_py3_pymoab_pyne-deps:latest
+              auth:
+                username: $DOCKERHUB_USER
+                password: $DOCKERHUB_PASS
     py3_dagmc_pymoab:
         docker:
             - image: pyne/ubuntu_18.04_py3_dagmc_pymoab_pyne-deps:latest
+              auth:
+                username: $DOCKERHUB_USER
+                password: $DOCKERHUB_PASS
     py3_dagmc_pymoab_hdf5_12:
         docker:
             - image: pyne/ubuntu_18.04_py3_hdf5-1_12_0_dagmc_pymoab_pyne-deps:latest
+              auth:
+                username: $DOCKERHUB_USER
+                password: $DOCKERHUB_PASS
     py3_dagmc_pymoab_openmc:
         docker:
             - image: pyne/ubuntu_18.04_py3_dagmc_pymoab_openmc_pyne-deps:latest
+              auth:
+                username: $DOCKERHUB_USER
+                password: $DOCKERHUB_PASS
 
 
 # Commands:
@@ -252,6 +270,7 @@ workflows:
   build_and_test:
     jobs:
       - changelog_update:
+          context: Dockerhub
           filters:
             branches:
               ignore: develop
@@ -259,35 +278,45 @@ workflows:
               ignore: /.*/   
       
       - py3_build
+          context: Dockerhub
       - py3_test:
+          context: Dockerhub
           requires:
             - py3_build
 
       - py3_pymoab_build:
+          context: Dockerhub
           requires:
             - py3_build
       - py3_pymoab_test:
+          context: Dockerhub
           requires:
             - py3_pymoab_build
 
       - py3_dagmc_pymoab_build:
+          context: Dockerhub
           requires:
             - py3_pymoab_build
       - py3_dagmc_pymoab_test:
+          context: Dockerhub
           requires:
             - py3_dagmc_pymoab_build
 
       - py3_dagmc_pymoab_hdf5_12_build:
+          context: Dockerhub
           requires:
             - py3_dagmc_pymoab_build
       - py3_dagmc_pymoab_hdf5_12_test:
+          context: Dockerhub
           requires:
             - py3_dagmc_pymoab_hdf5_12_build
 
       - py3_dagmc_pymoab_openmc_build:
+          context: Dockerhub
           requires:
             - py3_dagmc_pymoab_build
       - py3_dagmc_pymoab_openmc_test:
+          context: Dockerhub
           requires:
             - py3_dagmc_pymoab_openmc_build
 
