@@ -17,6 +17,9 @@ Next Version
    * change the ref address of the materials group in the nuc_data.h5 material_library (to match new format) (#1337)
    * clean the remaining calls to the old material_library write_hdf5 API
 
+**Maintenance**
+   * Add dockerhub authorization for pulling images
+
 v0.7.1
 ====================
 
