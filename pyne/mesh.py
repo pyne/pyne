@@ -999,11 +999,11 @@ class Mesh(object):
         storage_type: str, optional
             MOAB tag storage type (MB_TAG_DENSE, MB_TAG_SPARSE, etc.)
             in advanced use of the database, this flag controls how this tag's
-            data is stored in memory. The supported storage types are:
-            MB_TYPE_SPARSE - sparse tags are stored as a list of (entity
+            data is stored in memory, the supported storage types are:
+            sparse - MB_TAG_SPARSE tag, values are stored as a list of (entity
                 handle, tag value) tuples, one list per sparse tag, sorted by
                 entity handle
-            MB_TYPE_DENSE - Dense tag values are stored in arrays which match
+            dense - MB_TAG_DENSE tag, values are stored in arrays which match
                 arrays of contiguous entity handles. Dense tags are more
                 efficient in both storage and memory if large numbers of
                 entities are assigned the same tag. Storage for a given dense
@@ -1051,8 +1051,7 @@ class Mesh(object):
             # storage_type works for only NativeMeshTag
             if storage_type is None or storage_type.lower() == 'dense':
                 storage_type = types.MB_TAG_DENSE
-            elif storage_type == types.MB_TAG_SPARSE or \
-                storage_type.lower() == 'sparse':
+            elif storage_type.lower() == 'sparse':
                 storage_type = types.MB_TAG_SPARSE
             else:
                 raise ValueError('storage_type {0} not valid'.format(storage_type))
