@@ -2,7 +2,7 @@ from os.path import isfile
 from pyne.utils import QA_warn
 import numpy as np
 
-from pyne.mesh import Mesh
+from pyne.mesh import Mesh, NativeMeshTag
 from pyne.mcnp import Meshtal
 from pyne.alara import mesh_to_fluxin, record_to_geom, photon_source_to_hdf5, \
     photon_source_hdf5_to_mesh, responses_output_zone
@@ -230,3 +230,31 @@ def total_photon_source_intensity(m, tag_name, sub_voxel=False):
             sv_data = ve_data[num_e_groups*svid:num_e_groups*(svid+1)]
             intensity += vol * np.sum(sv_data)
     return intensity
+ 
+def tag_e_bins(m, e_bins, tag_name='e_bins'):
+    """This function tags the energy boundaries to the PyMOAB mesh
+    instance as a sparse tag for the purpose of photon source sampling.
+
+    Parameters
+    ----------
+    m : PyNE Mesh
+       The mesh-based photon emission density distribution in p/cm3/s.
+    e_bins : numpy array or list
+        The energy boundaries of a photon source.
+    tag_name : str, optional
+       The name of the tag on the mesh with the energy boundaries
+       information.
+
+    Returns
+    -------
+    m : PyNE Mesh
+       The mesh with energy boundaries tag.
+    """
+
+    m.tag(name=tag_name, value=e_bins,
+          doc='energy boundaries of the photon source',
+          tagtype=NativeMeshTag, size=len(e_bins), dtype=float,
+          storage_type='sparse')
+    return m
+
+

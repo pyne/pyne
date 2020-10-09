@@ -1500,22 +1500,6 @@ class Mesh(object):
                  size=1, dtype=float)
 
 
-    def tag_e_bins(self, e_bins):
-        """This function tags the energy boundaries to the PyMOAB mesh
-        instance as a sparse tag for the purpose of photon source sampling.
-
-        Parameters
-        ----------
-        e_bins : numpy array or list
-            The energy boundaries of a photon source.
-        """
-
-        self.tag(name='e_bins', value=e_bins,
-                 doc='energy boundaries of the photon source',
-                 tagtype=NativeMeshTag, size=len(e_bins), dtype=float,
-                 storage_type='sparse')
-
-
 class StatMesh(Mesh):
     """This class extends the basic Mesh class by modifying the standard
     mathematical operations that are performed on multiple meshes.

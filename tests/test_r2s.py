@@ -11,7 +11,8 @@ from shutil import copyfile
 
 from pyne.mcnp import Meshtal
 from pyne.material import Material
-from pyne.r2s import irradiation_setup, photon_sampling_setup, total_photon_source_intensity
+from pyne.r2s import irradiation_setup, photon_sampling_setup, \
+                     total_photon_source_intensity, tag_e_bins
 from pyne.utils import QAWarning, file_almost_same, file_block_almost_same
 from pyne.mesh import Mesh, NativeMeshTag, HAVE_PYMOAB
 if not HAVE_PYMOAB:
@@ -369,6 +370,13 @@ def test_irradiation_setup_unstructured_nondef_tag():
     f2 = results[1]
     f3 = results[2]
 
+
+def test_tag_e_bins():
+    m = Mesh(structured=True, structured_coords=[[0, 1, 2], [0, 1, 3], [0, 1]])
+    e_bins = np.array([0.0, 0.1, 20])
+    m = tag_e_bins(m, e_bins)
+    assert_array_equal(m.e_bins[:], e_bins)
+ 
 
 def _r2s_test_step1(r2s_run_dir, remove_step1_out=True):
     os.chdir(thisdir)

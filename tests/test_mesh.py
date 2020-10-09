@@ -1002,13 +1002,6 @@ def test_tag_cell_fracs():
         assert_equal(m.cell_largest_frac[i],
                      exp_cell_largest_frac[i])
 
-def test_tag_e_bins():
-    m = gen_mesh()
-    e_bins = np.array([0.0, 0.1, 20])
-
-    m.tag_e_bins(e_bins)
-    assert_array_equal(m.e_bins[:], e_bins)
-    
 
 def test_tag_cell_fracs_subvoxel_equal_voxel():
     m = Mesh(structured=True,
