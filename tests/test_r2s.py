@@ -3,6 +3,7 @@ import warnings
 from nose.tools import assert_equal, assert_almost_equal
 from nose.plugins.skip import SkipTest
 import numpy as np
+import tables as tb
 from numpy.testing import assert_array_equal
 import multiprocessing
 import filecmp
@@ -13,7 +14,8 @@ from pyne.mcnp import Meshtal
 from pyne.material import Material
 from pyne.r2s import irradiation_setup, photon_sampling_setup, \
                      total_photon_source_intensity, tag_e_bounds,\
-                     tag_source_intensity, tag_decay_time, tag_version
+                     tag_source_intensity, tag_decay_time, tag_version,\
+                     photon_source_add_filetype
 from pyne.utils import QAWarning, file_almost_same, file_block_almost_same
 from pyne.mesh import Mesh, NativeMeshTag, HAVE_PYMOAB
 if not HAVE_PYMOAB:
@@ -389,6 +391,17 @@ def test_tag_decay_time():
     decay_time = 1.0
     m = tag_decay_time(m, decay_time)
     assert_array_equal(m.decay_time[m], decay_time)
+
+def test_photon_soruce_add_filetype():
+    filename = os.path.join("files_test_r2s", "source.h5m")
+    filename_add_type = os.path.join("files_test_r2s", "source_filetype.h5m")
+    copyfile(filename, filename_add_type)
+    photon_source_add_filetype(filename_add_type)
+    with tb.open_file(filename_add_type) as h5f:
+        retval = h5f.root._f_getattr('filetype')
+        assert_equal(retval, b'pyne_r2s_source')
+    os.remove(filename_add_type)
+
 
 def _r2s_test_step1(r2s_run_dir, remove_step1_out=True):
     os.chdir(thisdir)
