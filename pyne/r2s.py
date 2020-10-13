@@ -250,7 +250,7 @@ def tag_e_bins(m, e_bins, tag_name='e_bins'):
     m : PyNE Mesh
        The mesh with energy boundaries tag.
     """
-
+    # do not provide value when init a sparse tag
     m.tag(name=tag_name, doc='energy boundaries of the photon source',
           tagtype=NativeMeshTag, size=len(e_bins), dtype=float,
           storage_type='sparse')
