@@ -231,7 +231,7 @@ def total_photon_source_intensity(m, tag_name, sub_voxel=False):
             intensity += vol * np.sum(sv_data)
     return intensity
  
-def tag_e_bins(m, e_bins, tag_name='e_bins'):
+def tag_e_bounds(m, e_bounds, tag_name='e_bounds'):
     """This function tags the energy boundaries to the PyMOAB mesh
     instance as a sparse tag for the purpose of photon source sampling.
 
@@ -239,7 +239,7 @@ def tag_e_bins(m, e_bins, tag_name='e_bins'):
     ----------
     m : PyNE Mesh
        The mesh-based photon emission density distribution in p/cm3/s.
-    e_bins : numpy array or list
+    e_bounds : numpy array or list
         The energy boundaries of a photon source.
     tag_name : str, optional
        The name of the tag on the mesh with the energy boundaries
@@ -252,9 +252,9 @@ def tag_e_bins(m, e_bins, tag_name='e_bins'):
     """
     # do not provide value when init a sparse tag
     m.tag(name=tag_name, doc='energy boundaries of the photon source',
-          tagtype=NativeMeshTag, size=len(e_bins), dtype=float,
+          tagtype=NativeMeshTag, size=len(e_bounds), dtype=float,
           storage_type='sparse')
-    m.get_tag(tag_name)[m] = e_bins
+    m.get_tag(tag_name)[m] = e_bounds
     return m
 
 

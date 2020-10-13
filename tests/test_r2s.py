@@ -12,7 +12,7 @@ from shutil import copyfile
 from pyne.mcnp import Meshtal
 from pyne.material import Material
 from pyne.r2s import irradiation_setup, photon_sampling_setup, \
-                     total_photon_source_intensity, tag_e_bins
+                     total_photon_source_intensity, tag_e_bounds
 from pyne.utils import QAWarning, file_almost_same, file_block_almost_same
 from pyne.mesh import Mesh, NativeMeshTag, HAVE_PYMOAB
 if not HAVE_PYMOAB:
@@ -371,11 +371,11 @@ def test_irradiation_setup_unstructured_nondef_tag():
     f3 = results[2]
 
 
-def test_tag_e_bins():
+def test_tag_e_bounds():
     m = Mesh(structured=True, structured_coords=[[0, 1, 2], [0, 1, 3], [0, 1]])
-    e_bins = np.array([0.0, 0.1, 20])
-    m = tag_e_bins(m, e_bins)
-    assert_array_equal(m.e_bins[m], e_bins)
+    e_bounds = np.array([0.0, 0.1, 20])
+    m = tag_e_bounds(m, e_bounds)
+    assert_array_equal(m.e_bounds[m], e_bounds)
  
 
 def _r2s_test_step1(r2s_run_dir, remove_step1_out=True):
@@ -463,8 +463,8 @@ def _r2s_test_step2(r2s_run_dir, remove_step1_out=True):
     if is_h5diff == 0:
         # compare e_bounds
         command = ''.join(['h5diff --relative=1e-6 ', src_c1, ' ', exp_src_c1,
-            ' /tstt/elements/', ele_type, '/tags/e_bins',
-            ' /tstt/elements/', ele_type, '/tags/e_bins'])
+            ' /tstt/elements/', ele_type, '/tags/e_bounds',
+            ' /tstt/elements/', ele_type, '/tags/e_bounds'])
         diff_flag = os.system(command)
         f4 = True if diff_flag == 0 else False
         # compare two h5 files

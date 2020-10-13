@@ -10,7 +10,7 @@ from os.path import isfile
 from pyne.mesh import Mesh, NativeMeshTag
 from pyne.dagmc import cell_materials, load, discretize_geom
 from pyne.r2s import resolve_mesh, irradiation_setup, photon_sampling_setup,\
-    total_photon_source_intensity, tag_e_bins
+    total_photon_source_intensity, tag_e_bounds
 from pyne.alara import photon_source_to_hdf5, photon_source_hdf5_to_mesh,\
     phtn_src_energy_bounds
 from pyne.mcnp import Meshtal
@@ -183,7 +183,7 @@ def step2():
         tags = {('TOTAL', dt): tag_name}
         photon_source_hdf5_to_mesh(mesh, h5_file, tags, sub_voxel=sub_voxel,
                                    cell_mats=cell_mats)
-        mesh = tag_e_bins(mesh, e_bounds)
+        mesh = tag_e_bounds(mesh, e_bounds)
         mesh.write_hdf5('{0}_{1}.h5m'.format(output, i+1))
         intensity = total_photon_source_intensity(mesh, tag_name,
                                                   sub_voxel=sub_voxel)
