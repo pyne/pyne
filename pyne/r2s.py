@@ -251,10 +251,10 @@ def tag_e_bins(m, e_bins, tag_name='e_bins'):
        The mesh with energy boundaries tag.
     """
 
-    m.tag(name=tag_name, value=e_bins,
-          doc='energy boundaries of the photon source',
+    m.tag(name=tag_name, doc='energy boundaries of the photon source',
           tagtype=NativeMeshTag, size=len(e_bins), dtype=float,
           storage_type='sparse')
+    m.get_tag(tag_name)[m] = e_bins
     return m
 
 

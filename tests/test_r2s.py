@@ -375,7 +375,7 @@ def test_tag_e_bins():
     m = Mesh(structured=True, structured_coords=[[0, 1, 2], [0, 1, 3], [0, 1]])
     e_bins = np.array([0.0, 0.1, 20])
     m = tag_e_bins(m, e_bins)
-    assert_array_equal(m.e_bins[:], e_bins)
+    assert_array_equal(m.e_bins[m], e_bins)
  
 
 def _r2s_test_step1(r2s_run_dir, remove_step1_out=True):
