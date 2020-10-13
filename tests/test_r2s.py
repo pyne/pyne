@@ -440,20 +440,25 @@ def _r2s_test_step2(r2s_run_dir, remove_step1_out=True):
     # run r2s step2
     os.chdir(r2s_run_dir)
     os.system('python r2s.py step2')
+    os.remove(blank_mesh)
+    os.remove(alara_inp)
+    os.remove(dst)
 
     # output files of r2s step2
     p_src = os.path.join(r2s_run_dir, "phtn_src.h5")
-    t_p_src = os.path.join(r2s_run_dir, "total_photon_source_intensities.txt")
-    src_c1 = os.path.join(r2s_run_dir, "source_1.h5m")
+    os.remove(p_src)
 
+    # compare the total photon source intensities
+    t_p_src = os.path.join(r2s_run_dir, "total_photon_source_intensities.txt")
     exp_t_p_src = os.path.join(
         r2s_run_dir, "exp_total_photon_source_intensities.txt")
-    exp_src_c1 = os.path.join(r2s_run_dir, "exp_source_1.h5m")
+    f5 = file_almost_same(t_p_src, exp_t_p_src)
+    assert_equal(f5, True)
+    os.remove(t_p_src)
 
     # compare the results
-    f4 = True # compare e_bounds
-    f5 = file_almost_same(t_p_src, exp_t_p_src)
-    f6 = True # compre source_density
+    src_c1 = os.path.join(r2s_run_dir, "source_1.h5m")
+    exp_src_c1 = os.path.join(r2s_run_dir, "exp_source_1.h5m")
     # skip test if h5diff not exist
     if 'unstructured' in r2s_run_dir:
         ele_type = 'Tet4'
@@ -461,32 +466,25 @@ def _r2s_test_step2(r2s_run_dir, remove_step1_out=True):
         ele_type = 'Hex8'
     is_h5diff = os.system('which h5diff')
     if is_h5diff == 0:
-        # compare e_bounds
-        command = ''.join(['h5diff --relative=1e-6 ', src_c1, ' ', exp_src_c1,
-            ' /tstt/elements/', ele_type, '/tags/e_bounds',
-            ' /tstt/elements/', ele_type, '/tags/e_bounds'])
-        diff_flag = os.system(command)
-        f4 = True if diff_flag == 0 else False
         # compare two h5 files
+        f6 = True # compre source_density
         command = ''.join(['h5diff --relative=1e-6 ', src_c1, ' ', exp_src_c1,
             ' /tstt/elements/', ele_type, '/tags/source_density',
             ' /tstt/elements/', ele_type, '/tags/source_density'])
         diff_flag = os.system(command)
         # return value 0 if no difference, 1 if differences found, 2 if error
         f6 = True if diff_flag == 0 else False
+        assert_equal(f6, True)
 
-    # remove test generated files
-    os.remove(blank_mesh)
-    os.remove(alara_inp)
-    os.remove(p_src)
-    os.remove(t_p_src)
+        # compare e_bounds
+        f4 = True # compare e_bounds
+        command = ''.join(['h5diff --relative=1e-6 ', src_c1, ' ', exp_src_c1,
+            ' /tstt/tags/e_bounds',
+            ' /tstt/tags/e_bounds'])
+        diff_flag = os.system(command)
+        f4 = True if diff_flag == 0 else False
+        assert_equal(f4, True)
     os.remove(src_c1)
-    os.remove(dst)
-
-    assert_equal(f4, True)
-    assert_equal(f5, True)
-    assert_equal(f6, True)
-
 
 
 def test_r2s_script_step_by_step():
