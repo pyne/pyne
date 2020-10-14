@@ -204,6 +204,7 @@ namespace pyne {
     std::string cell_number_tag_name; ///< Cell number tag
     std::string cell_fracs_tag_name; ///< Cell volume fraction tag
     std::map<std::string, std::string> tag_names; /// < tag names
+    std::string e_bounds_tag_name; ///< Energy boundaries tag name
     std::vector<double> e_bounds;  ///< Energy boundaries
     int num_e_groups; ///< Number of groups in tag \a _src_tag_name
     int num_bias_groups; ///< Number of groups tag \a _bias_tag_name

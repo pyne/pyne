@@ -11,7 +11,6 @@ const int SUBVOXEL_START = 3;
 void pyne::sampling_setup_(int* mode, int* cell_list_size) {
   if (sampler == NULL) {
     std::string filename ("source.h5m");
-    std::string src_tag_name ("source_density");
     std::string e_bounds_file ("e_bounds");
     std::vector<double> e_bounds = read_e_bounds(e_bounds_file);
     std::map<std::string, std::string> tag_names;
@@ -23,6 +22,8 @@ void pyne::sampling_setup_(int* mode, int* cell_list_size) {
           "cell_number"));
     tag_names.insert(std::pair<std::string, std::string> ("cell_fracs_tag_name",
           "cell_fracs"));
+    tag_names.insert(std::pair<std::string, std::string> ("e_bounds_tag_name",
+          "e_bounds"));
     sampler = new pyne::Sampler(filename, tag_names, e_bounds, *mode);
     *cell_list_size = sampler->get_cell_list_size();
   }
@@ -56,7 +57,8 @@ std::vector<double> pyne::read_e_bounds(std::string e_bounds_file){
       e_bounds.push_back(value);
   }
   else {
-    throw std::runtime_error("File " + e_bounds_file + " not found or no read permission");
+    //throw std::runtime_error("File " + e_bounds_file + " not found or no read permission");
+    std::cout<<"warning: e_bounds file is not provided, it will be read from photon source file"<<std::endl;
   }
   return e_bounds;
 }
@@ -123,6 +125,17 @@ pyne::Sampler::Sampler(std::string filename,
     } else {
       // found bias_tag_name
       bias_tag_name = tag_names["bias_tag_name"];
+    }
+  }
+  if (tag_names.find("e_bounds_tag_name") == tag_names.end()) {
+    // e_bounds not provided by h5m
+    if (e_bounds.size() == 0) {
+      throw std::invalid_argument("e_bounds_tag_name not found");
+    }
+  } else { // e_bounds provided in h5m file
+    if (e_bounds.size() > 0) {
+      // there is also an user defined e_bounds
+      std::cout<<"warning: e_bounds in 'source.h5m' will be used."<<std::endl;
     }
   }
   setup();
@@ -268,6 +281,8 @@ void pyne::Sampler::mesh_tag_data(moab::Range ves,
   moab::Tag src_tag;
   moab::Tag cell_number_tag;
   moab::Tag cell_fracs_tag;
+
+  // get src tag data
   rval = mesh->tag_get_handle(src_tag_name.c_str(),
                               moab::MB_TAG_VARLEN,
                               moab::MB_TYPE_DOUBLE,
@@ -308,7 +323,20 @@ void pyne::Sampler::mesh_tag_data(moab::Range ves,
           rval = mesh->tag_get_data(cell_number_tag, ves, &cell_number[0]);
       }
   }
-  std::cout<<" comment. max_num_cells="<<max_num_cells<<std::endl;
+
+  // get e_bounds tag data
+  moab::Tag e_bounds_tag;
+  rval = mesh->tag_get_handle(e_bounds_tag_name.c_str(),
+                              num_e_groups + 1,
+                              moab::MB_TYPE_DOUBLE,
+                              e_bounds_tag,
+                              moab::MB_TAG_SPARSE|moab::MB_TAG_EXCL);
+  if (rval == moab::MB_SUCCESS) {
+    // use e_bounds in 'source.h5m'
+    e_bounds.resize(num_e_groups + 1);
+    rval = mesh->tag_get_data(e_bounds_tag, ves, &e_bounds[0]);
+  }
+
   std::vector<double> pdf(num_ves*num_e_groups*p_src_num_cells);
   rval = mesh->tag_get_data(src_tag, ves, &pdf[0]);
   if (rval != moab::MB_SUCCESS)
