@@ -66,12 +66,19 @@ def test_single_hex_tag_names_map():
     filename = "sampling_mesh.h5m"
     m.write_hdf5(filename)
 
-    # right condition
+    # right condition with e_bounds in 'source.h5m'
+    tag_names = {"src_tag_name": "src",
+                 "cell_number_tag_name": "cell_number",
+                 "cell_fracs_tag_name": "cell_fracs",
+                 "e_bounds_tag_name": "e_bounds"}
+    sampler = Sampler(filename, tag_names, DEFAULT_ANALOG)
+    # right condition with e_bounds provided by both 'e_bounds' and 'source.h5m'
     tag_names = {"src_tag_name": "src",
                  "cell_number_tag_name": "cell_number",
                  "cell_fracs_tag_name": "cell_fracs",
                  "e_bounds_tag_name": "e_bounds"}
     sampler = Sampler(filename, tag_names, e_bounds, DEFAULT_ANALOG)
+
 
     # src_tag_name not given
     tag_names = {"cell_number_tag_name": "cell_number",
@@ -1758,7 +1765,7 @@ def _source_sampling_test_template(mode, cell_fracs_list, src_tag,
     m.write_hdf5(filename)
 
     # construct Sampler
-    sampler = Sampler(filename, tag_names, e_bounds, mode)
+    sampler = Sampler(filename, tag_names, mode)
     # remove the temporary file
     os.remove(filename)
 

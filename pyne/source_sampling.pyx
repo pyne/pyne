@@ -227,6 +227,7 @@ cdef class Sampler:
     bias_tag_name (std::string) : Biased source density
         distribution.
     e_bounds (std::vector< double >) : Energy boundaries.
+    e_bounds_tag_name (std::string) : Energy boundaries tag name.
     num_e_groups (int) : Number of groups in tag
     num_bias_groups (int) : Number of groups tag
     mode (Mode) : Problem mode: analog, uniform, user.
@@ -382,6 +383,38 @@ cdef class Sampler:
                 <cpp_vector[double]> e_bounds_proxy,
                 <int> mode)
 
+    def _sampler_sampler_3(self, filename, tag_names, mode):
+        """Sampler(self, filename, tag_names, mode)
+        
+        Constuctor for overall Sampler
+        
+        Parameters
+        ----------
+        filename : std::string
+        
+        tag_names : std::map<std::string, std::string>
+        
+        Returns
+        -------
+        None
+        """
+        # convert filename
+        cdef char * filename_proxy
+        filename_bytes = filename.encode()
+        # Convert tag_names
+        cdef cpp_map[std_string, std_string] cpp_tag_names = \
+                cpp_map[std_string, std_string]()
+        for key, value in tag_names.items():
+            key = key.encode('utf-8')
+            value = value.encode('utf-8')
+            cpp_tag_names[key] = value
+        # construct sampler
+        self._inst = new cpp_source_sampling.Sampler(
+                std_string(<char *> filename_bytes),
+                <cpp_map[std_string, std_string]> cpp_tag_names,
+                <int> mode)
+
+
     
     _sampler_sampler_0_argtypes = frozenset(((0, str),
                                              (1, str),
@@ -407,9 +440,15 @@ cdef class Sampler:
                                              ("tag_names", dict),
                                              ("e_bounds",  np.ndarray),
                                              ("mode", int)))
+    _sampler_sampler_3_argtypes = frozenset(((0, str),
+                                            (1, dict),
+                                            (2, int),
+                                            ("filename", str),
+                                            ("tag_names", dict),
+                                            ("mode", int)))
     
     def __init__(self, *args, **kwargs):
-        """Sampler(self, filename, src_tag_name, e_bounds, uniform)
+        """
          This method was overloaded in the C-based source. To overcome
         this we will put the relevant docstring for each version below.
         Each version will begin with a line of # characters.
@@ -425,6 +464,8 @@ cdef class Sampler:
         bias_tag_name : std::string
         
         filename : std::string
+
+        tag_names : std::map<std::string, std::string>
         
         Returns
         -------
@@ -438,6 +479,9 @@ cdef class Sampler:
             return
         elif types <= self._sampler_sampler_1_argtypes:
             self._sampler_sampler_1(*args, **kwargs)
+            return
+        elif types <= self._sampler_sampler_3_argtypes:
+            self._sampler_sampler_3(*args, **kwargs)
             return
         elif types <= self._sampler_sampler_2_argtypes:
             self._sampler_sampler_2(*args, **kwargs)
@@ -455,6 +499,11 @@ cdef class Sampler:
             pass
         try:
             self._sampler_sampler_2(*args, **kwargs)
+            return
+        except (RuntimeError, TypeError, NameError):
+            pass
+        try:
+            self._sampler_sampler_3(*args, **kwargs)
             return
         except (RuntimeError, TypeError, NameError):
             pass
