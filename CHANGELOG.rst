@@ -13,7 +13,8 @@ Next Version
    * Now attribute a number to material when adding them into a material library (#1334)
    * Update OVA link in the docs (#1348)
    * Bump license date to 2020 (#1348)
-   * Add the energy boundaries to photon source file.(#1341)
+   * Add the energy boundaries to photon source file (#1341)
+   * Add a new source sampling sampler without e_bounds (#1341)
 
 **Fix**
 
