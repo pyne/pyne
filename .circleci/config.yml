@@ -277,7 +277,7 @@ workflows:
             tags:
               ignore: /.*/   
       
-      - py3_build
+      - py3_build:
           context: Dockerhub
       - py3_test:
           context: Dockerhub
