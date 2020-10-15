@@ -60,16 +60,17 @@ An object of the Sampler class is first instantiated using a constructor:
 :constructor:
     Sampler(std::string filename,
             std::map<std::string, std::string> tag_names,
-            std::vector<double> e_bounds,
             int mode)
 
 The "filename" is a MOAB mesh file (.h5m). The "tag_names" is a map that stores
-all the tag names need in the problem, such as the "src_tag_name" (required for
-all modes), "bias_tag_name" (required in mode 2 and 5), "cell_number_tag_name"
-(required for mode 3, 4, 5), "cell_fracs_tag_name" (required for mode 3, 4, 5).
+all the tag names need in the problem, such as the "src_tag_name" and
+"e_bounds_tag_name" (required for all modes), "bias_tag_name"
+(required in mode 2 and 5), "cell_number_tag_name" (required for mode 3, 4, 5),
+"cell_fracs_tag_name" (required for mode 3, 4, 5).
+
 The source density can be specified for an arbitrary number of energy groups,
-stored as a MOAB vector tag. The "e_bounds" parameter describes the upper and
-lower bounds of these energy groups. For example if the src_tag_name tag is a
+stored as a MOAB vector tag. The energy boundaries tag describes the lower and
+upper bounds of these energy groups. For example if the src_tag_name tag is a
 vector of length 24 (for 24 energy groups), e_bounds should be of length 25.
 The final parameter determins the source sampling mode.
 
@@ -79,7 +80,8 @@ This method takes a single argument: a vector of 6 pseudorandom number between
 position, y position, z position, energy, weight and cell number respectively.
 
 An example C++ program is supplied below. This program requires a mesh file
-named "source.h5m" with a tag named "source_density" of length 1.
+named "source.h5m" with a tag named "source_density" of length 1 and a tag
+named "e_bounds" with data of [0.0, 1.0].
 
 .. code-block:: cpp
 
@@ -93,11 +95,10 @@ named "source.h5m" with a tag named "source_density" of length 1.
     std::map<std::string, std::string> tag_names;
     tag_names.insert(std::pair<std::string, std::string>  ("src_tag_name",
     "source_density"));
-    std::vector<double> e_bounds;
-    e_bounds.push_back(0); // 1 energy group, lower bound of 0 upper bound of 1
-    e_bounds.push_back(1);
+    tag_names.insert(std::pair<std::string, std::string> ("e_bounds_tag_name",
+    "e_bounds"));
   
-    pyne::Sampler sampler(filename, tag_names, e_bounds, 0);
+    pyne::Sampler sampler(filename, tag_names, 0);
   
     std::vector<double> rands;
     int i;
@@ -135,8 +136,8 @@ with python.nose. It can be used in the same manner as the C++ class:
  from random import uniform
  from pyne.source_sampling import Sampler, SourceParticle
  
- tag_names = {"src_tag_name": "source_density"}
- sampler = Sampler("source.h5m", tag_names, np.array([0, 1]), 0)
+ tag_names = {"src_tag_name": "source_density", "e_bounds_tag": "e_bounds"}
+ sampler = Sampler("source.h5m", tag_names, 0)
  s = sampler.particle_birth([uniform(0, 1) for x in range(6)])
  
  print("x: {0}\ny: {1}\nz: {2}\ne: {3}\nw: {4}\nc: {5}".format(
@@ -154,9 +155,7 @@ a single argument: an integer representing the problem mode (0: DEFAULT_USER, 1:
 DEFAULT_UNIFORM, 2: DEFAULT_USER, 3: SUBVOXEL_ANALOG, 4: SUBVOXEL_UNIFORM,
 5: SUBVOXEL_USER). This function assumes the mesh file is "source.h5m" and
 that the tag names are "source_density", "biased_source_density",
-"cell_number_tag_name" and "cell_fracs_tag_name". In addition, this function
-assumes that a file "e_bounds" is present which is a plain text file containing
-the energy boundaries.
+"cell_number_tag_name", "cell_fracs_tag_name" and "e_bounds_tag_name".
 
 An example program using the Fortran interface is shown below:
 
