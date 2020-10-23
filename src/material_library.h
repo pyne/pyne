@@ -151,9 +151,11 @@ class MaterialLibrary {
   typedef mat_map::const_iterator const_iterator;
   iterator begin() { return material_library.begin(); }
   iterator end() { return material_library.end(); }
-
+  const_iterator begin() const { return material_library.begin(); }
+  const_iterator end() const { return material_library.end(); }
   const_iterator cbegin() const { return material_library.cbegin(); }
   const_iterator cend() const { return material_library.cend(); }
+
   std::size_t size() const { return material_library.size(); }
   bool emtpy() const { return material_library.empty(); }
   std::size_t count(std::string mat_name) const {
