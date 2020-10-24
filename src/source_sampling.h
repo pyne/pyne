@@ -180,6 +180,7 @@ namespace pyne {
             std::map<std::string, std::string> tag_names,
             std::vector<double> e_bounds,
             int mode);
+
     /// Constuctor for simplified overall sampler
     /// \param filename The filename of the h5m file
     /// \param tag_names The map of src_tag_name and bias_tag_name
