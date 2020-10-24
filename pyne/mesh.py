@@ -1048,7 +1048,6 @@ class Mesh(object):
                 tagtype = MetadataTag
 
         if tagtype is NativeMeshTag or tagtype.lower() == 'nat_mesh':
-            # storage_type works for only NativeMeshTag
             if storage_type is None or storage_type.lower() == 'dense':
                 storage_type = types.MB_TAG_DENSE
                 default_value = 0.0
@@ -1060,6 +1059,8 @@ class Mesh(object):
             t = NativeMeshTag(size=size, dtype=dtype,
                               mesh=self, name=name, doc=doc,
                               storage_type=storage_type, default=default_value)
+        elif storage_type is not None:
+            raise ValueError("storage_type works for only NativeMeshTag")
         elif tagtype is MetadataTag or tagtype.lower() == 'metadata':
             t = MetadataTag(mesh=self, name=name, doc=doc)
         elif tagtype is ComputedTag or tagtype.lower() == 'computed':
