@@ -374,16 +374,14 @@ class NativeMeshTag(Tag):
             data is stored in memory. The supported storage types are:
             MB_TYPE_SPARSE -  sparse tags are stored as a list of (entity
                 handle, tag value) tuples, one list per sparse tag, sorted by
-                entity handle
-            MB_TYPE_DENSE - Dense tag values are stored in arrays which match
+                entity handle.
+            dense - MB_TAG_DENSE tag, values are stored in arrays which match
                 arrays of contiguous entity handles. Dense tags are more
                 efficient in both storage and memory if large numbers of
                 entities are assigned the same tag. Storage for a given dense
-                tag is not allocated until a tag value is set on an entity;
-                memory for a given dense tag is allocated for all entities in a
-                given sequence at the same time.  Sparse: Sparse tags are stored
-                as a list of (entity handle, tag value) tuples, one list per
-                sparse tag, sorted by entity handle.
+                tag is not allocated until a tag value is set on an entity, at
+                which point memory allocation for the dense tag occurs for all
+                entities.
         """
 
         super(NativeMeshTag, self).__init__(mesh=mesh, name=name, doc=doc)
@@ -1002,13 +1000,14 @@ class Mesh(object):
             data is stored in memory, the supported storage types are:
             sparse - MB_TAG_SPARSE tag, values are stored as a list of (entity
                 handle, tag value) tuples, one list per sparse tag, sorted by
-                entity handle
+                entity handle.
             dense - MB_TAG_DENSE tag, values are stored in arrays which match
                 arrays of contiguous entity handles. Dense tags are more
                 efficient in both storage and memory if large numbers of
                 entities are assigned the same tag. Storage for a given dense
-                tag is not allocated until a tag value is set on an entity, at which point
-                memory allocation for the dense tag occurs for all entities.
+                tag is not allocated until a tag value is set on an entity, at
+                which point memory allocation for the dense tag occurs for all
+                entities.
         """
 
         if name in self.tags:
