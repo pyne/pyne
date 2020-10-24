@@ -283,13 +283,13 @@ cdef class Sampler:
         
         Parameters
         ----------
+        filename : std::string
+
+        src_tag_name : std::string
+
         e_bounds : std::vector< double >
         
-        src_tag_name : std::string
-        
         bias_tag_name : std::string
-        
-        filename : std::string
         
         Returns
         -------
@@ -321,13 +321,13 @@ cdef class Sampler:
         
         Parameters
         ----------
+        filename : std::string
+
+        src_tag_name : std::string
+
         e_bounds : std::vector< double >
         
-        src_tag_name : std::string
-        
-        bias_tag_name : std::string
-        
-        filename : std::string
+        uniform : bool
         
         Returns
         -------
@@ -351,15 +351,17 @@ cdef class Sampler:
         """Sampler(self, filename, tag_names, e_bounds, mode)
         
         Constuctor for overall Sampler
-        
+
         Parameters
         ----------
         filename : std::string
-        
+
         tag_names : std::map<std::string, std::string>
-        
+
         e_bounds : std::vector< double >
-        
+
+        mode : int
+
         Returns
         -------
         None
@@ -391,9 +393,11 @@ cdef class Sampler:
         Parameters
         ----------
         filename : std::string
-        
+
         tag_names : std::map<std::string, std::string>
-        
+
+        mode : int
+
         Returns
         -------
         None
@@ -458,15 +462,19 @@ cdef class Sampler:
         Parameters
         ----------
         e_bounds : std::vector< double >
-        
+
         src_tag_name : std::string
-        
+
         bias_tag_name : std::string
-        
+
         filename : std::string
 
         tag_names : std::map<std::string, std::string>
-        
+
+        mode : int
+
+        uniform : bool
+
         Returns
         -------
         None
