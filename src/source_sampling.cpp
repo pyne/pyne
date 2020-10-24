@@ -289,7 +289,7 @@ void pyne::Sampler::mesh_e_bounds_data() {
     // use e_bounds in 'source.h5m'
     e_bounds.resize(num_e_groups + 1);
     moab::EntityHandle root_set = mesh->get_root_set();
-    rval = mesh->tag_get_data(e_bounds_tag, &root_set, 1, &e_bounds[0]);
+    rval = mesh->tag_get_data(e_bounds_tag, &root_set, 1, e_bounds.data());
   } else {
     if (e_bounds.size() == 0) {
       throw std::runtime_error("e_bounds not found");
