@@ -575,7 +575,7 @@ class NativeMeshTag(Tag):
         if self.size < 2:
             raise TypeError("Cannot expand a tag that is already a scalar.")
         if self.storage_type == types.MB_TAG_SPARSE:
-            raise TypeError("Expand of a sparse tag is not implemented.")
+            raise TypeError("Expansion of sparse tags is not implemented.")
         for j in range(self.size):
             data = [x[j] for x in self[:]]
             tag = self.mesh.mesh.tag_get_handle("{0}_{1:03d}".format(self.name, j),
