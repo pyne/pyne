@@ -1007,11 +1007,8 @@ class Mesh(object):
                 arrays of contiguous entity handles. Dense tags are more
                 efficient in both storage and memory if large numbers of
                 entities are assigned the same tag. Storage for a given dense
-                tag is not allocated until a tag value is set on an entity;
-                memory for a given dense tag is allocated for all entities in a
-                given sequence at the same time.  Sparse: Sparse tags are stored
-                as a list of (entity handle, tag value) tuples, one list per
-                sparse tag, sorted by entity handle.
+                tag is not allocated until a tag value is set on an entity, at which point
+                memory allocation for the dense tag occurs for all entities.
         """
 
         if name in self.tags:
