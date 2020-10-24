@@ -57,7 +57,6 @@ std::vector<double> pyne::read_e_bounds(std::string e_bounds_file){
       e_bounds.push_back(value);
   }
   else {
-    //throw std::runtime_error("File " + e_bounds_file + " not found or no read permission");
     std::cout<<"warning: e_bounds file is not provided, it will be read from photon source file"<<std::endl;
   }
   return e_bounds;
@@ -66,18 +65,18 @@ std::vector<double> pyne::read_e_bounds(std::string e_bounds_file){
 
 // C++ API
 pyne::Sampler::Sampler(std::string filename,
-                 std::string src_tag_name,
-                 std::vector<double> e_bounds,
-                 bool uniform)
+                       std::string src_tag_name,
+                       std::vector<double> e_bounds,
+                       bool uniform)
   : filename(filename), src_tag_name(src_tag_name), e_bounds(e_bounds) {
   bias_mode = (uniform) ? UNIFORM : ANALOG;
   setup();
 }
 
 pyne::Sampler::Sampler(std::string filename,
-                 std::string src_tag_name,
-                 std::vector<double> e_bounds,
-                 std::string bias_tag_name)
+                       std::string src_tag_name,
+                       std::vector<double> e_bounds,
+                       std::string bias_tag_name)
   : filename(filename),
     src_tag_name(src_tag_name),
     e_bounds(e_bounds),
@@ -87,9 +86,9 @@ pyne::Sampler::Sampler(std::string filename,
 }
 
 pyne::Sampler::Sampler(std::string filename,
-                 std::map<std::string, std::string> tag_names,
-                 std::vector<double> e_bounds,
-                 int mode)
+                       std::map<std::string, std::string> tag_names,
+                       std::vector<double> e_bounds,
+                       int mode)
   : filename(filename),
     tag_names(tag_names),
     e_bounds(e_bounds),
@@ -142,8 +141,8 @@ pyne::Sampler::Sampler(std::string filename,
 }
 
 pyne::Sampler::Sampler(std::string filename,
-                 std::map<std::string, std::string> tag_names,
-                 int mode)
+                       std::map<std::string, std::string> tag_names,
+                       int mode)
   : filename(filename),
     tag_names(tag_names),
     mode(mode) {
