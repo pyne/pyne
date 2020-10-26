@@ -157,7 +157,7 @@ class MaterialLibrary {
   const_iterator cend() const { return material_library.cend(); }
 
   std::size_t size() const { return material_library.size(); }
-  bool emtpy() const { return material_library.empty(); }
+  bool empty() const { return material_library.empty(); }
   std::size_t count(std::string mat_name) const {
     return material_library.count(mat_name);
   }
