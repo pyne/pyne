@@ -10,7 +10,7 @@ Next Version
 
 **Change**
 
-   * Now attribute a number to material when adding them into a material library (#1334)
+   * Now attribute a number to material when adding them into a material library (#1334 & #1350)
    * Update OVA link in the docs (#1348)
    * Bump license date to 2020 (#1348)
 
