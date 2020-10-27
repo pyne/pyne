@@ -351,7 +351,7 @@ class NativeMeshTag(Tag):
     """
 
     def __init__(self, size=1, dtype='f8', default=0.0, mesh=None, name=None,
-                 doc=None):
+                 doc=None, storage_type=None):
         """Parameters
         ----------
         size : int, optional
@@ -368,6 +368,20 @@ class NativeMeshTag(Tag):
             The name of the tag.
         doc : str, optional
             Documentation string for the tag.
+        storage_type: str, optional
+            MOAB tag storage type (MB_TAG_DENSE, MB_TAG_SPARSE, etc.)
+            in advanced use of the database, this flag controls how this tag's
+            data is stored in memory. The supported storage types are:
+            MB_TYPE_SPARSE -  sparse tags are stored as a list of (entity
+                handle, tag value) tuples, one list per sparse tag, sorted by
+                entity handle.
+            dense - MB_TAG_DENSE tag, values are stored in arrays which match
+                arrays of contiguous entity handles. Dense tags are more
+                efficient in both storage and memory if large numbers of
+                entities are assigned the same tag. Storage for a given dense
+                tag is not allocated until a tag value is set on an entity, at
+                which point memory allocation for the dense tag occurs for all
+                entities.
         """
 
         super(NativeMeshTag, self).__init__(mesh=mesh, name=name, doc=doc)
@@ -381,6 +395,10 @@ class NativeMeshTag(Tag):
         self.dtype = dtype
         self.pymbtype = types.pymoab_data_type(self.dtype)
         self.default = default
+        if storage_type is None:
+            self.storage_type = types.MB_TAG_DENSE
+        else:
+            self.storage_type = storage_type
         # if the tag already exists, pick up its properties
         try:
             self.tag = self.mesh.mesh.tag_get_handle(self.name)
@@ -392,7 +410,7 @@ class NativeMeshTag(Tag):
             self.tag = self.mesh.mesh.tag_get_handle(self.name,
                                                      self.size,
                                                      self.pymbtype,
-                                                     types.MB_TAG_DENSE,
+                                                     self.storage_type,
                                                      create_if_missing=True,
                                                      default_value=default)
             if default is not None:
@@ -554,6 +572,8 @@ class NativeMeshTag(Tag):
 
         if self.size < 2:
             raise TypeError("Cannot expand a tag that is already a scalar.")
+        if self.storage_type == types.MB_TAG_SPARSE:
+            raise TypeError("Expansion of sparse tags is not implemented.")
         for j in range(self.size):
             data = [x[j] for x in self[:]]
             tag = self.mesh.mesh.tag_get_handle("{0}_{1:03d}".format(self.name, j),
@@ -953,7 +973,7 @@ class Mesh(object):
         super(Mesh, self).__setattr__(name, value)
 
     def tag(self, name, value=None, tagtype=None, doc=None, size=None,
-            dtype=None):
+            dtype=None, storage_type=None):
         """Adds a new tag to the mesh, guessing the approriate place to store
         the data.
 
@@ -974,6 +994,20 @@ class Mesh(object):
         dtype : numpy dtype, optional
             The data type of the tag. This only applies to NativeMeshTags. See PyMOAB
             for more details.
+        storage_type: str, optional
+            MOAB tag storage type (MB_TAG_DENSE, MB_TAG_SPARSE, etc.)
+            in advanced use of the database, this flag controls how this tag's
+            data is stored in memory, the supported storage types are:
+            sparse - MB_TAG_SPARSE tag, values are stored as a list of (entity
+                handle, tag value) tuples, one list per sparse tag, sorted by
+                entity handle.
+            dense - MB_TAG_DENSE tag, values are stored in arrays which match
+                arrays of contiguous entity handles. Dense tags are more
+                efficient in both storage and memory if large numbers of
+                entities are assigned the same tag. Storage for a given dense
+                tag is not allocated until a tag value is set on an entity, at
+                which point memory allocation for the dense tag occurs for all
+                entities.
         """
 
         if name in self.tags:
@@ -1008,9 +1042,21 @@ class Mesh(object):
                                  'or dtype'.format(name))
             else:
                 tagtype = MetadataTag
+
         if tagtype is NativeMeshTag or tagtype.lower() == 'nat_mesh':
+            if storage_type is None or storage_type.lower() == 'dense':
+                storage_type = types.MB_TAG_DENSE
+                default_value = 0.0
+            elif storage_type.lower() == 'sparse':
+                storage_type = types.MB_TAG_SPARSE
+                default_value = None
+            else:
+                raise ValueError('storage_type {0} not valid'.format(storage_type))
             t = NativeMeshTag(size=size, dtype=dtype,
-                              mesh=self, name=name, doc=doc)
+                              mesh=self, name=name, doc=doc,
+                              storage_type=storage_type, default=default_value)
+        elif storage_type is not None:
+            raise ValueError("storage_type works for only NativeMeshTag")
         elif tagtype is MetadataTag or tagtype.lower() == 'metadata':
             t = MetadataTag(mesh=self, name=name, doc=doc)
         elif tagtype is ComputedTag or tagtype.lower() == 'computed':
@@ -1019,6 +1065,7 @@ class Mesh(object):
             raise ValueError('tagtype {0} not valid'.format(tagtype))
         if value is not None and tagtype is not ComputedTag:
             t[:] = value
+
         setattr(self, name, t)
 
     def get_tag(self, tag_name):

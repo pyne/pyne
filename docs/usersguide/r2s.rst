@@ -105,9 +105,8 @@ decay time. These files will be named like:
 
 source_1.h5m, source_2.h5m ... source_N.h5m
 
-An "e_bounds" file containing the photon lower and upper energy bounds will also be generated. 
-These source files, combined with the "e_bounds" file can now be used as sources
-for photon transport within MCNP. Information on compiling/using a version of MCNP5
+These source files with tag named "e_bounds" can now be used as sources for
+photon transport within MCNP. Information on compiling/using a version of MCNP5
 that can utilize these mesh-based sources is found in the PyNE user's guide entry on 
 `mesh-based source sampling <http://pyne.io/usersguide/source_sampling.html#source-sampling-in-mcnp5>`_.
 Note that each of these source files must be renamed to "source.h5m" for this purpose.
@@ -182,7 +181,7 @@ Perform R2S step1. ALARA input file and neutron flux file will be generated in t
 
    $ r2s.py step1
 
-Perform R2S step2. Several photon source file and a e_bounds file will be generated in this step.
+Perform R2S step2. Several photon source files will be generated in this step.
 
 .. code-block:: bash
 
@@ -197,8 +196,6 @@ Perform Photon transport calculation. Example input file can be seen in r2s_exam
    $ ln -sf ../geom.h5m .
 
    $ ln -sf ../r2s_run/source_1.h5m source.h5m
-
-   $ ln -sf ../r2s_run/e_bounds .
 
    $ mcnp5.mpi i=input g=geom.h5m
 

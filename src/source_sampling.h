@@ -181,6 +181,15 @@ namespace pyne {
             std::vector<double> e_bounds,
             int mode);
 
+    /// Constuctor for simplified overall sampler
+    /// \param filename The filename of the h5m file
+    /// \param tag_names The map of src_tag_name and bias_tag_name
+    /// \param mode The mode number, 0, 1, 2, 3, 4 or 5
+    Sampler(std::string filename,
+            std::map<std::string, std::string> tag_names,
+            int mode);
+
+
     /// Samples particle birth parameters
     /// \param rands Six pseudo-random numbers in range [0, 1].
     /// \return A SourceParticle object containing the x position, y, position,
@@ -204,6 +213,7 @@ namespace pyne {
     std::string cell_number_tag_name; ///< Cell number tag
     std::string cell_fracs_tag_name; ///< Cell volume fraction tag
     std::map<std::string, std::string> tag_names; /// < tag names
+    std::string e_bounds_tag_name; ///< Energy boundaries tag name
     std::vector<double> e_bounds;  ///< Energy boundaries
     int num_e_groups; ///< Number of groups in tag \a _src_tag_name
     int num_bias_groups; ///< Number of groups tag \a _bias_tag_name
@@ -237,6 +247,7 @@ namespace pyne {
     void setup();
     void mesh_geom_data(moab::Range ves, std::vector<double> &volumes);
     void mesh_tag_data(moab::Range ves, const std::vector<double> volumes);
+    void mesh_e_bounds_data();
     // select birth parameters
     moab::CartVect sample_xyz(int ve_idx, std::vector<double> rands);
     double sample_e(int e_idx, double rand);

@@ -10,7 +10,7 @@ from os.path import isfile
 from pyne.mesh import Mesh, NativeMeshTag
 from pyne.dagmc import cell_materials, load, discretize_geom
 from pyne.r2s import resolve_mesh, irradiation_setup, photon_sampling_setup,\
-    total_photon_source_intensity
+    total_photon_source_intensity, tag_e_bounds
 from pyne.alara import photon_source_to_hdf5, photon_source_hdf5_to_mesh,\
     phtn_src_energy_bounds
 from pyne.mcnp import Meshtal
@@ -176,12 +176,14 @@ def step2():
     if not isfile(h5_file):
         photon_source_to_hdf5(filename='phtn_src', nucs='total')
     intensities = "Total photon source intensities (p/s)\n"
+    e_bounds = phtn_src_energy_bounds("alara_inp")
     for i, dt in enumerate(decay_times):
         print('Writing source for decay time: {0} to mesh'.format(dt))
         mesh = Mesh(structured=structured, mesh='blank_mesh.h5m')
         tags = {('TOTAL', dt): tag_name}
         photon_source_hdf5_to_mesh(mesh, h5_file, tags, sub_voxel=sub_voxel,
                                    cell_mats=cell_mats)
+        mesh = tag_e_bounds(mesh, e_bounds)
         mesh.write_hdf5('{0}_{1}.h5m'.format(output, i+1))
         intensity = total_photon_source_intensity(mesh, tag_name,
                                                   sub_voxel=sub_voxel)
@@ -189,14 +191,6 @@ def step2():
 
     with open(tot_phtn_src_intensities, 'w') as f:
         f.write(intensities)
-
-    e_bounds = phtn_src_energy_bounds("alara_inp")
-    e_bounds_str = ""
-    for e in e_bounds:
-        e = e/1e6  # convert unit to MeV
-        e_bounds_str += "{0}\n".format(e)
-    with open("e_bounds", 'w') as f:
-        f.write(e_bounds_str)
 
     print('R2S step2 complete.')
 
