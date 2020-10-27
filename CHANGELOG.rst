@@ -2,27 +2,45 @@
 pyne Change Log
 ===============
 
-.. current developments
-   * Compatibility fix with MCNP6 ptracs. (#1336)
-
 Next Version
-====================
+============
+
+**New Capabilities**
 
 **Change**
 
-   * Now attribute a number to material when adding them into a material library (#1334 & #1350)
+**Fix**
+
+**Maintenance**
+
+v0.7.3 
+======
+
+**Change**
+
    * Update OVA link in the docs (#1348)
    * Bump license date to 2020 (#1348)
    * Add the energy boundaries to photon source file (#1341)
    * Add a new source sampling sampler without e_bounds (#1341)
+   
+**Fix**
+   * Compatibility fix with MCNP6 ptracs. (#1336)
+   * Add some missing pieces in MaterialLibrary API to match std::unordered_map one (#1350)
 
+v0.7.2
+======
+
+**Change**
+
+   * Now attribute a number to material when adding them into a material library (#1334)
+ 
 **Fix**
 
    * change the ref address of the materials group in the nuc_data.h5 material_library (to match new format) (#1337)
    * clean the remaining calls to the old material_library write_hdf5 API
 
 v0.7.1
-====================
+======
 
 **New Capabilities**
    * Adding unordered_map like API to MaterialLibrary pointing directly to the nested unordered_map
@@ -41,7 +59,7 @@ v0.7.1
    * Update moab version 5.1.0 >> 5.2.1 (#1331)
 
 v0.7.0
-====================
+======
 
 IMPORTANT: Python 2 is no longer supported as of this release.  Some packages may continue to work,
            but there is no longer testing of Python 2 during development.
@@ -341,7 +359,7 @@ v0.5.11
 
 
 v0.5.10
-====================
+=======
 
 **Fixed:**
 
@@ -349,7 +367,7 @@ v0.5.10
 
 
 v0.5.9
-====================
+======
 
 **Changed:**
 
