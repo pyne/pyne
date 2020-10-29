@@ -54,7 +54,7 @@ def test_single_hex_tag_names_map():
     m.src = NativeMeshTag(2, float)
     m.src[:] = [[2.0, 1.0], [9.0, 3.0]]
     e_bounds = np.array([0, 0.5, 1.0])
-    m = tag_phtn_src_info(m, e_bounds)
+    m = tag_phtn_src_info(m, e_bounds, 'e_bounds')
     m.bias = NativeMeshTag(2, float)
     cell_fracs = np.zeros(2, dtype=[('idx', np.int64),
                                     ('cell', np.int64),
@@ -176,7 +176,7 @@ def test_analog_single_hex():
     cell_fracs[:] = [(0, 11, 1.0, 0.0)]
     m.tag_cell_fracs(cell_fracs)
     e_bounds = np.array([0, 1.0])
-    m = tag_phtn_src_info(m, e_bounds)
+    m = tag_phtn_src_info(m, e_bounds, 'e_bounds')
 
     filename = "sampling_mesh.h5m"
     m.write_hdf5(filename)
@@ -231,7 +231,7 @@ def test_analog_multiple_hex():
     m.tag_cell_fracs(cell_fracs)
     filename = "sampling_mesh.h5m"
     e_bounds = np.array([0, 0.5, 1])
-    m = tag_phtn_src_info(m, e_bounds)
+    m = tag_phtn_src_info(m, e_bounds, 'e_bounds')
     m.write_hdf5(filename)
     tag_names = {"src_tag_name": "src",
                  "cell_number_tag_name": "cell_number",
@@ -274,7 +274,7 @@ def test_analog_single_tet():
     m.src[:] = np.array([1])
     filename = "tet.h5m"
     e_bounds = np.array([0., 1.])
-    m = tag_phtn_src_info(m, e_bounds)
+    m = tag_phtn_src_info(m, e_bounds, 'e_bounds')
     m.write_hdf5(filename)
     center = m.ve_center(list(m.iter_ve())[0])
 
@@ -323,7 +323,7 @@ def test_uniform():
     cell_fracs[:] = [(0, 11, 1.0, 0.0),
                      (1, 11, 1.0, 0.0)]
     m.tag_cell_fracs(cell_fracs)
-    m = tag_phtn_src_info(m, e_bounds)
+    m = tag_phtn_src_info(m, e_bounds, 'e_bounds')
     m.write_hdf5(filename)
     tag_names = {"src_tag_name": "src",
                  "cell_number_tag_name": "cell_number",
@@ -389,7 +389,7 @@ def test_single_hex_single_subvoxel_analog():
     m.tag_cell_fracs(cell_fracs)
     filename = "sampling_mesh.h5m"
     e_bounds = np.array([0., 1.])
-    m = tag_phtn_src_info(m, e_bounds)
+    m = tag_phtn_src_info(m, e_bounds, 'e_bounds')
     m.write_hdf5(filename)
     tag_names = {"src_tag_name": "src",
                  "cell_number_tag_name": "cell_number",
@@ -438,7 +438,7 @@ def test_single_hex_multiple_subvoxel_analog():
     m.tag_cell_fracs(cell_fracs) # cell_fracs will be sorted
     filename = "sampling_mesh.h5m"
     e_bounds = np.array([0, 1])
-    m = tag_phtn_src_info(m, e_bounds)
+    m = tag_phtn_src_info(m, e_bounds, 'e_bounds')
     m.write_hdf5(filename)
     tag_names = {"src_tag_name": "src",
                  "cell_number_tag_name": "cell_number",
@@ -486,7 +486,7 @@ def test_multiple_hex_multiple_subvoxel_analog():
     m.tag_cell_fracs(cell_fracs)
     filename = "sampling_mesh.h5m"
     e_bounds = np.array([0, 0.5, 1])
-    m = tag_phtn_src_info(m, e_bounds)
+    m = tag_phtn_src_info(m, e_bounds, 'e_bounds')
     m.write_hdf5(filename)
     tag_names = {"src_tag_name": "src",
                  "cell_number_tag_name": "cell_number",
@@ -532,7 +532,7 @@ def test_single_hex_subvoxel_uniform():
     m.tag_cell_fracs(cell_fracs)
     filename = "sampling_mesh.h5m"
     e_bounds = np.array([0., 1.])
-    m = tag_phtn_src_info(m, e_bounds)
+    m = tag_phtn_src_info(m, e_bounds, 'e_bounds')
     m.write_hdf5(filename)
     tag_names = {"src_tag_name": "src",
                  "cell_number_tag_name": "cell_number",
@@ -581,7 +581,7 @@ def test_single_hex_multiple_subvoxel_uniform():
     m.tag_cell_fracs(cell_fracs)
     filename = "sampling_mesh.h5m"
     e_bounds = np.array([0., 1.])
-    m = tag_phtn_src_info(m, e_bounds)
+    m = tag_phtn_src_info(m, e_bounds, 'e_bounds')
     m.write_hdf5(filename)
     tag_names = {"src_tag_name": "src",
                  "cell_number_tag_name": "cell_number",
@@ -634,7 +634,7 @@ def test_multiple_hex_multiple_subvoxel_uniform():
     m.tag_cell_fracs(cell_fracs)
     filename = "sampling_mesh.h5m"
     e_bounds = np.array([0, 0.5, 1])
-    m = tag_phtn_src_info(m, e_bounds)
+    m = tag_phtn_src_info(m, e_bounds, 'e_bounds')
     m.write_hdf5(filename)
     tag_names = {"src_tag_name": "src",
                  "cell_number_tag_name": "cell_number",
@@ -694,7 +694,7 @@ def test_bias():
                  "bias_tag_name": "bias",
                  "e_bounds_tag_name": "e_bounds"}
     filename = "sampling_mesh.h5m"
-    m = tag_phtn_src_info(m, e_bounds)
+    m = tag_phtn_src_info(m, e_bounds, 'e_bounds')
     m.write_hdf5(filename)
     sampler = Sampler(filename, tag_names, e_bounds, DEFAULT_USER)
 
@@ -756,7 +756,7 @@ def test_bias_spatial():
                  "bias_tag_name": "bias",
                  "e_bounds_tag_name": "e_bounds"}
 
-    m = tag_phtn_src_info(m, e_bounds)
+    m = tag_phtn_src_info(m, e_bounds, 'e_bounds')
     m.write_hdf5(filename)
     sampler = Sampler(filename, tag_names, e_bounds, DEFAULT_USER)
 
@@ -828,7 +828,7 @@ def test_subvoxel_multiple_hex_bias_1():
     m.bias[:] = [[0.4], [0.6]]
 
     filename = "sampling_mesh.h5m"
-    m = tag_phtn_src_info(m, e_bounds)
+    m = tag_phtn_src_info(m, e_bounds, 'e_bounds')
     m.write_hdf5(filename)
     tag_names = {"src_tag_name": "src",
                  "cell_number_tag_name": "cell_number",
@@ -906,7 +906,7 @@ def test_subvoxel_multiple_hex_bias_max_num_cells_num_e_groups():
     m.bias[:] = [[0.125, 0.125, 0.1, 0.15], [0.1, 0.1, 0.15, 0.15]]
 
     filename = "sampling_mesh.h5m"
-    m = tag_phtn_src_info(m, e_bounds)
+    m = tag_phtn_src_info(m, e_bounds, 'e_bounds')
     m.write_hdf5(filename)
     tag_names = {"src_tag_name": "src",
                  "cell_number_tag_name": "cell_number",
@@ -981,7 +981,7 @@ def test_subvoxel_multiple_hex_bias_e_groups():
     m.bias[:] = [[0.1, 0.3], [0.2, 0.4]]
 
     filename = "sampling_mesh.h5m"
-    m = tag_phtn_src_info(m, e_bounds)
+    m = tag_phtn_src_info(m, e_bounds, 'e_bounds')
     m.write_hdf5(filename)
     tag_names = {"src_tag_name": "src",
                  "cell_number_tag_name": "cell_number",
@@ -1761,7 +1761,7 @@ def _source_sampling_test_template(mode, cell_fracs_list, src_tag,
         tag_names["bias_tag_name"] = "bias"
     # save the mesh into h5m file
     filename = "sampling_mesh.h5m"
-    m = tag_phtn_src_info(m, e_bounds)
+    m = tag_phtn_src_info(m, e_bounds, 'e_bounds')
     m.write_hdf5(filename)
 
     # construct Sampler
