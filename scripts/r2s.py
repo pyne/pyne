@@ -15,7 +15,6 @@ from pyne.alara import photon_source_to_hdf5, photon_source_hdf5_to_mesh,\
     phtn_src_energy_bounds
 from pyne.mcnp import Meshtal
 from pyne.utils import to_sec
-from pyne.__init__ import __version__
 
 config_filename = 'config.ini'
 alara_params_filename = 'alara_params.txt'
@@ -195,9 +194,8 @@ def step2():
         # get and tag decay time
         decay_time = to_sec(float(dt.split()[0]), dt.split()[1])
         mesh = tag_phtn_src_info(mesh, value=decay_time, tag_name='decay_time')
-        # get and tag pyne version
-        version = list(map(int, __version__.split('.')))
-        mesh = tag_phtn_src_info(mesh, value=version, tag_name='version',
+        # set version manually when changing the information of source.h5m
+        mesh = tag_phtn_src_info(mesh, value=[0, 7, 3], tag_name='version',
                                  dtype=int)
         mesh.write_hdf5('{0}_{1}.h5m'.format(output, i+1))
         intensities += "{0}: {1}\n".format(dt, intensity)
