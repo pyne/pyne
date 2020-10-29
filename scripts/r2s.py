@@ -188,15 +188,12 @@ def step2():
                                    cell_mats=cell_mats)
         intensity = total_photon_source_intensity(mesh, tag_name,
                                                   sub_voxel=sub_voxel)
-        mesh = tag_phtn_src_info(mesh, value=e_bounds, tag_name='e_bounds',
-                                 size=len(e_bounds))
+        mesh = tag_phtn_src_info(mesh, value=e_bounds, tag_name='e_bounds')
         mesh = tag_phtn_src_info(mesh, value=intensity,
-                                 tag_name='total_photon_source_intensity',
-                                 size=1)
+                                 tag_name='total_photon_source_intensity')
         # get and tag decay time
         decay_time = to_sec(float(dt.split()[0]), dt.split()[1])
-        mesh = tag_phtn_src_info(mesh, value=decay_time, tag_name='decay_time',
-                                 size=1)
+        mesh = tag_phtn_src_info(mesh, value=decay_time, tag_name='decay_time')
         mesh.write_hdf5('{0}_{1}.h5m'.format(output, i+1))
         intensities += "{0}: {1}\n".format(dt, intensity)
 

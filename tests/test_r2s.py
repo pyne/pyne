@@ -374,13 +374,13 @@ def test_irradiation_setup_unstructured_nondef_tag():
 def test_tag_phtn_src_info():
     m = Mesh(structured=True, structured_coords=[[0, 1, 2], [0, 1, 3], [0, 1]])
     e_bounds = np.array([0.0, 0.1, 20])
-    m = tag_phtn_src_info(m, e_bounds, 'e_bounds', len(e_bounds))
+    m = tag_phtn_src_info(m, e_bounds, 'e_bounds')
     assert_array_equal(m.e_bounds[m], e_bounds)
     # test tag decay_time
-    m = tag_phtn_src_info(m, 1.0, 'decay_time', 1)
+    m = tag_phtn_src_info(m, 1.0, 'decay_time')
     assert_array_equal(m.decay_time[m], [1.0])
     # test tag total_photon_source_intensity
-    m = tag_phtn_src_info(m, 1.0, 'total_photon_source_intensity', 1)
+    m = tag_phtn_src_info(m, 1.0, 'total_photon_source_intensity')
     assert_array_equal(m.total_photon_source_intensity[m], [1.0])
  
 
