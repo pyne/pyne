@@ -10,7 +10,7 @@ Next Version
 **Change**
 
    * Change the e_bounds tag unit from eV to MeV (#1353)
-   * Tag the decay_time and total_photon_source_intensity to source.h5m (#1352)
+   * Add functions to tag the decay_time, source_intensity and version to source.h5m (#1352)
 
 **Fix**
 
