@@ -42,6 +42,7 @@
 #endif
 #include "moab/CartVect.hpp"
 
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -264,8 +265,23 @@ namespace pyne {
   };
 } //end namespace pyne
 
+/// OpenMC custom source
+#ifdef OPENMC_SOURCE_H
+/// for OpenMC custom source
+#include <cmath> // for M_PI
+#include <memory> // for unique_ptr
+#include "openmc/random_lcg.h"
+#include "openmc/source.h"
+#include "openmc/particle.h"
+class PyneSource : public openmc::CustomSource
+{
+  openmc::Particle::Bank sample(uint64_t* seed);
+};
+#endif // OPENMC_SOURCE_H
+
 #ifdef __cplusplus
 } // extern "C"
 #endif
+
 
 #endif // PYNE_6OR6BJURKJHHTOFWXO2VMQM5EY

@@ -710,3 +710,45 @@ pyne::SourceParticle::SourceParticle(double _x, double _y, double _z,
       e(_e), w(_w), cell_list(_cell_list) {}
 
 pyne::SourceParticle::~SourceParticle() {};
+
+/// OpenMC custom source
+#ifdef OPENMC_SOURCE_H
+/// for OpenMC custom source
+openmc::Particle::Bank PyneSource::sample(uint64_t* seed)
+{
+  // init pyne sampler
+  std::map<std::string, std::string> tag_names;
+  tag_names.insert(std::pair<std::string, std::string> ("src_tag_name",
+        "source_density"));
+  tag_names.insert(std::pair<std::string, std::string> ("bias_tag_name",
+        "biased_source_density"));
+  tag_names.insert(std::pair<std::string, std::string> ("cell_number_tag_name",
+        "cell_number"));
+  tag_names.insert(std::pair<std::string, std::string> ("cell_fracs_tag_name",
+        "cell_fracs"));
+  tag_names.insert(std::pair<std::string, std::string> ("e_bounds_tag_name",
+        "e_bounds"));
+  int mode = 0;
+  sampler = new pyne::Sampler('source.h5m', tag_names, *mode);
+  // fake rands for test
+  std::vector<double> rands;
+  for (int i=0; i<6; i++) {
+      rands.push_back(0.5);
+  }
+  pyne::SourceParticle pyne_src = sampler.particle_birth(rands)
+  // convert pyne source particle to openmc particle
+  openmc::Particle::Bank particle;
+  // particle type
+  particle.particle = openmc::Particle::Type::photon;
+  // wgt
+  particle.wgt = pyne_src.get_w();
+  // position
+  particle.r = Position(pyne_src.get_x(), pyne_src.get_y(), pyne_src.get_z());
+  // angle
+  Isotropic angle;
+  particle.u = angle.sample();
+  particle.E = pyne_src.get_e();
+  particle.delayed_group = 0;
+  return particle;
+}
+#endif // OPENMC_SOURCE_H
