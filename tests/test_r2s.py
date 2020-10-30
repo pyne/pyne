@@ -12,7 +12,8 @@ from shutil import copyfile
 from pyne.mcnp import Meshtal
 from pyne.material import Material
 from pyne.r2s import irradiation_setup, photon_sampling_setup, \
-                     total_photon_source_intensity, tag_phtn_src_info
+                     total_photon_source_intensity, tag_e_bounds,\
+                     tag_source_intensity, tag_decay_time, tag_version
 from pyne.utils import QAWarning, file_almost_same, file_block_almost_same
 from pyne.mesh import Mesh, NativeMeshTag, HAVE_PYMOAB
 if not HAVE_PYMOAB:
@@ -371,18 +372,23 @@ def test_irradiation_setup_unstructured_nondef_tag():
     f3 = results[2]
 
 
-def test_tag_phtn_src_info():
+def test_tag_e_bounds():
     m = Mesh(structured=True, structured_coords=[[0, 1, 2], [0, 1, 3], [0, 1]])
     e_bounds = np.array([0.0, 0.1, 20])
-    m = tag_phtn_src_info(m, e_bounds, 'e_bounds')
+    m = tag_e_bounds(m, e_bounds)
     assert_array_equal(m.e_bounds[m], e_bounds)
-    # test tag decay_time
-    m = tag_phtn_src_info(m, 1.0, 'decay_time')
-    assert_array_equal(m.decay_time[m], [1.0])
-    # test tag total_photon_source_intensity
-    m = tag_phtn_src_info(m, 1.0, 'total_photon_source_intensity')
-    assert_array_equal(m.total_photon_source_intensity[m], [1.0])
+
+def test_tag_source_intensity():
+    m = Mesh(structured=True, structured_coords=[[0, 1, 2], [0, 1, 3], [0, 1]])
+    source_intensity = 1.0
+    m = tag_source_intensity(m, source_intensity)
+    assert_array_equal(m.source_intensity[m], source_intensity)
  
+def test_tag_decay_time():
+    m = Mesh(structured=True, structured_coords=[[0, 1, 2], [0, 1, 3], [0, 1]])
+    decay_time = 1.0
+    m = tag_decay_time(m, decay_time)
+    assert_array_equal(m.decay_time[m], decay_time)
 
 def _r2s_test_step1(r2s_run_dir, remove_step1_out=True):
     os.chdir(thisdir)
@@ -501,8 +507,8 @@ def _r2s_test_step2(r2s_run_dir, remove_step1_out=True):
         # compare total_photon_source_intensity
         f8 = True
         command = ''.join(['h5diff --relative=1e-6 ', src_c1, ' ', exp_src_c1,
-            ' /tstt/tags/total_photon_source_intensity',
-            ' /tstt/tags/total_photon_source_intensity'])
+            ' /tstt/tags/source_intensity',
+            ' /tstt/tags/source_intensity'])
         diff_flag = os.system(command)
         f8 = True if diff_flag == 0 else False
         assert_equal(f8, True)

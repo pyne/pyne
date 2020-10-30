@@ -10,7 +10,8 @@ from os.path import isfile
 from pyne.mesh import Mesh, NativeMeshTag
 from pyne.dagmc import cell_materials, load, discretize_geom
 from pyne.r2s import resolve_mesh, irradiation_setup, photon_sampling_setup,\
-    total_photon_source_intensity, tag_phtn_src_info
+    total_photon_source_intensity, tag_e_bounds, tag_source_intensity,\
+    tag_decay_time, tag_version
 from pyne.alara import photon_source_to_hdf5, photon_source_hdf5_to_mesh,\
     phtn_src_energy_bounds
 from pyne.mcnp import Meshtal
@@ -188,15 +189,13 @@ def step2():
                                    cell_mats=cell_mats)
         intensity = total_photon_source_intensity(mesh, tag_name,
                                                   sub_voxel=sub_voxel)
-        mesh = tag_phtn_src_info(mesh, value=e_bounds, tag_name='e_bounds')
-        mesh = tag_phtn_src_info(mesh, value=intensity,
-                                 tag_name='total_photon_source_intensity')
+        mesh = tag_e_bounds(mesh, e_bounds)
+        mesh = tag_source_intensity(mesh, intensity)
         # get and tag decay time
         decay_time = to_sec(float(dt.split()[0]), dt.split()[1])
-        mesh = tag_phtn_src_info(mesh, value=decay_time, tag_name='decay_time')
+        mesh = tag_decay_time(mesh, decay_time)
         # set version manually when changing the information of source.h5m
-        mesh = tag_phtn_src_info(mesh, value=[0, 7, 3], tag_name='version',
-                                 dtype=int)
+        mesh = tag_version(mesh, [0, 7, 3])
         mesh.write_hdf5('{0}_{1}.h5m'.format(output, i+1))
         intensities += "{0}: {1}\n".format(dt, intensity)
 
