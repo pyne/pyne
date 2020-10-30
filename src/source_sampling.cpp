@@ -291,10 +291,6 @@ void pyne::Sampler::mesh_e_bounds_data() {
     e_bounds.resize(num_e_groups + 1);
     moab::EntityHandle root_set = mesh->get_root_set();
     rval = mesh->tag_get_data(e_bounds_tag, &root_set, 1, e_bounds.data());
-    // convert unit from eV to MeV
-    for (int i=0; i<e_bounds.size(); i++){
-      e_bounds[i] /= 1.0e6;
-    }
   } else {
     if (e_bounds.size() == 0) {
       throw std::runtime_error("e_bounds not found");

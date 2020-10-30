@@ -240,7 +240,7 @@ def tag_e_bounds(m, e_bounds, tag_name='e_bounds'):
     m : PyNE Mesh
        The mesh-based photon emission density distribution in p/cm3/s.
     e_bounds : numpy array or list
-        The energy boundaries of a photon source.
+        The energy boundaries of a photon source, MeV.
     tag_name : str, optional
        The name of the tag on the mesh with the energy boundaries
        information.
