@@ -195,7 +195,7 @@ def step2():
         decay_time = to_sec(float(dt.split()[0]), dt.split()[1])
         mesh = tag_decay_time(mesh, decay_time)
         # set version manually when changing the information of source.h5m
-        mesh = tag_version(mesh, [0, 7, 3])
+        mesh = tag_version(mesh)
         mesh.write_hdf5('{0}_{1}.h5m'.format(output, i+1))
         intensities += "{0}: {1}\n".format(dt, intensity)
 

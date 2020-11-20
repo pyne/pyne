@@ -9,6 +9,7 @@ from pyne.alara import mesh_to_fluxin, record_to_geom, photon_source_to_hdf5, \
 
 QA_warn(__name__)
 
+_SOURCE_FILE_VERSION = [0, 7, 3]
 
 def resolve_mesh(mesh_reference, tally_num=None, flux_tag="n_flux",
                  output_material=False):
@@ -313,7 +314,7 @@ def tag_decay_time(m, decay_time, tag_name='decay_time'):
     return m
 
 
-def tag_version(m, version, tag_name='version'):
+def tag_version(m):
     """This function tags the version of photon source to the PyMOAB
     mesh instance as a sparse tag for the purpose of photon source sampling.
 
@@ -321,11 +322,6 @@ def tag_version(m, version, tag_name='version'):
     ----------
     m : PyNE Mesh
         The object containing the mesh instance to be tagged.
-    version: iterable of int
-        The PyNE version that changes the information or organization of the
-        'source.h5m'.
-    tag_name : str, optional
-       The name of version tag.
 
     Returns
     -------
@@ -334,8 +330,9 @@ def tag_version(m, version, tag_name='version'):
     """
 
     # do not provide value when init a sparse tag
-    m.tag(name=tag_name, doc=tag_name + ' of the photon source',
-          tagtype=NativeMeshTag, size=len(version), dtype=int,
+    tag_name = 'source_file_version'
+    m.tag(name=tag_name, doc='version of the photon source file',
+          tagtype=NativeMeshTag, size=len(_SOURCE_FILE_VERSION), dtype=int,
           storage_type='sparse')
-    m.get_tag(tag_name)[m] = version
+    m.get_tag(tag_name)[m] = _SOURCE_FILE_VERSION
     return m
