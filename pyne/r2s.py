@@ -233,7 +233,7 @@ def total_photon_source_intensity(m, tag_name, sub_voxel=False):
 
 
 def tag_e_bounds(m, e_bounds, tag_name='e_bounds'):
-    """This function tags the energy boundaries of photon source to the PyMOAB
+    """This function tags the energy boundaries of photon source to the PyNE
     mesh instance as a sparse tag for the purpose of photon source sampling.
 
     Parameters
