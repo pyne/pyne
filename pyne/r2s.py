@@ -201,7 +201,7 @@ def total_photon_source_intensity(m, tag_name, sub_voxel=False):
     Parameters
     ----------
     m : PyNE Mesh
-        The object containing the mesh instance to be tagged.
+        The mesh instance to be tagged.
     tag_name : str
         The name of the tag on the mesh with the photon emission density
         information.
