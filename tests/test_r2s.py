@@ -512,6 +512,15 @@ def _r2s_test_step2(r2s_run_dir, remove_step1_out=True):
         diff_flag = os.system(command)
         f8 = True if diff_flag == 0 else False
         assert_equal(f8, True)
+        # compare soruce file version
+        f9 = True
+        command = ''.join(['h5diff ', src_c1, ' ', exp_src_c1,
+            ' /tstt/tags/source_file_version',
+            ' /tstt/tags/source_file_version'])
+        diff_flag = os.system(command)
+        f9 = True if diff_flag == 0 else False
+        assert_equal(f9, True)
+
     os.remove(src_c1)
 
 
