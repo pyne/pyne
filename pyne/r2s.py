@@ -278,7 +278,7 @@ def tag_source_intensity(m, source_intensity, tag_name='source_intensity'):
         The mesh with energy boundaries tag.
     """
 
-    # do not provide value when init a sparse tag
+    # do not provide value when initializing a sparse tag
     m.tag(name=tag_name, doc=tag_name + ' of the photon source',
           tagtype=NativeMeshTag, size=1, dtype=float,
           storage_type='sparse')
