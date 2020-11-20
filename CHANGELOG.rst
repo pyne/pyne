@@ -9,7 +9,11 @@ Next Version
 
 **Change**
 
+   * Change the e_bounds tag unit from eV to MeV (#1353)
+
 **Fix**
+
+   * An e_bounds reading problem when old sampler is used without e_bounds text file (#1353)
 
 **Maintenance**
 

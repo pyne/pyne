@@ -126,6 +126,7 @@ pyne::Sampler::Sampler(std::string filename,
       throw std::invalid_argument("e_bounds_tag_name not found");
     }
   } else { // e_bounds provided in h5m file
+    e_bounds_tag_name = tag_names["e_bounds_tag_name"];
     if (e_bounds.size() > 0) {
       // there is also an user defined e_bounds
       std::cout<<"warning: e_bounds in 'source.h5m' will be used."<<std::endl;

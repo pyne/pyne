@@ -177,6 +177,8 @@ def step2():
         photon_source_to_hdf5(filename='phtn_src', nucs='total')
     intensities = "Total photon source intensities (p/s)\n"
     e_bounds = phtn_src_energy_bounds("alara_inp")
+    for i in range(len(e_bounds)):
+        e_bounds[i] /= 1.0e6 # convert unit from eV to MeV
     for i, dt in enumerate(decay_times):
         print('Writing source for decay time: {0} to mesh'.format(dt))
         mesh = Mesh(structured=structured, mesh='blank_mesh.h5m')
