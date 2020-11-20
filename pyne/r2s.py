@@ -239,7 +239,7 @@ def tag_e_bounds(m, e_bounds, tag_name='e_bounds'):
     Parameters
     ----------
     m : PyNE Mesh
-        The object containing the mesh instance to be tagged.
+        The mesh instance to be tagged.
     e_bounds: iterable of float
         The energy boundaries of a photon source, eV.
     tag_name : str, optional
