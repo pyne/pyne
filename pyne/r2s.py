@@ -10,7 +10,7 @@ from pyne.alara import mesh_to_fluxin, record_to_geom, photon_source_to_hdf5, \
 QA_warn(__name__)
 
 # source file version is composed of pyne version and one more int number
-_SOURCE_FILE_VERSION = [0, 7, 3, 0]
+_SOURCE_FILE_VERSION = [0, 7, 3, 1]
 _SOURCE_TAG_NAME = 'source_file_version'
 
 def resolve_mesh(mesh_reference, tally_num=None, flux_tag="n_flux",
