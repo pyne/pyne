@@ -11,7 +11,7 @@ QA_warn(__name__)
 
 # source file version is composed of pyne version and one more int number
 _SOURCE_FILE_VERSION = [0, 7, 3, 1]
-_SOURCE_TAG_NAME = 'r2s_source_file_version'
+_SOURCE_VERSION_TAG_NAME = 'r2s_source_file_version'
 
 def resolve_mesh(mesh_reference, tally_num=None, flux_tag="n_flux",
                  output_material=False):
@@ -332,8 +332,8 @@ def tag_version(m):
     """
 
     # do not provide value when init a sparse tag
-    m.tag(name=_SOURCE_TAG_NAME, doc='version of the photon source file',
+    m.tag(name=_SOURCE_VERSION_TAG_NAME, doc='version of the photon source file',
           tagtype=NativeMeshTag, size=len(_SOURCE_FILE_VERSION), dtype=int,
           storage_type='sparse')
-    m.get_tag(_SOURCE_TAG_NAME)[m] = _SOURCE_FILE_VERSION
+    m.get_tag(_SOURCE_VERSION_TAG_NAME)[m] = _SOURCE_FILE_VERSION
     return m
