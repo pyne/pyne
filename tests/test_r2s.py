@@ -12,7 +12,8 @@ from shutil import copyfile
 from pyne.mcnp import Meshtal
 from pyne.material import Material
 from pyne.r2s import irradiation_setup, photon_sampling_setup, \
-                     total_photon_source_intensity, tag_e_bounds
+                     total_photon_source_intensity, tag_e_bounds,\
+                     tag_source_intensity, tag_decay_time, tag_version
 from pyne.utils import QAWarning, file_almost_same, file_block_almost_same
 from pyne.mesh import Mesh, NativeMeshTag, HAVE_PYMOAB
 if not HAVE_PYMOAB:
@@ -376,7 +377,18 @@ def test_tag_e_bounds():
     e_bounds = np.array([0.0, 0.1, 20])
     m = tag_e_bounds(m, e_bounds)
     assert_array_equal(m.e_bounds[m], e_bounds)
+
+def test_tag_source_intensity():
+    m = Mesh(structured=True, structured_coords=[[0, 1, 2], [0, 1, 3], [0, 1]])
+    source_intensity = 1.0
+    m = tag_source_intensity(m, source_intensity)
+    assert_array_equal(m.source_intensity[m], source_intensity)
  
+def test_tag_decay_time():
+    m = Mesh(structured=True, structured_coords=[[0, 1, 2], [0, 1, 3], [0, 1]])
+    decay_time = 1.0
+    m = tag_decay_time(m, decay_time)
+    assert_array_equal(m.decay_time[m], decay_time)
 
 def _r2s_test_step1(r2s_run_dir, remove_step1_out=True):
     os.chdir(thisdir)
@@ -477,13 +489,38 @@ def _r2s_test_step2(r2s_run_dir, remove_step1_out=True):
         assert_equal(f6, True)
 
         # compare e_bounds
-        f4 = True # compare e_bounds
+        f4 = True
         command = ''.join(['h5diff --relative=1e-6 ', src_c1, ' ', exp_src_c1,
             ' /tstt/tags/e_bounds',
             ' /tstt/tags/e_bounds'])
         diff_flag = os.system(command)
         f4 = True if diff_flag == 0 else False
         assert_equal(f4, True)
+        # compare decay_time
+        f7 = True
+        command = ''.join(['h5diff --relative=1e-6 ', src_c1, ' ', exp_src_c1,
+            ' /tstt/tags/decay_time',
+            ' /tstt/tags/decay_time'])
+        diff_flag = os.system(command)
+        f7 = True if diff_flag == 0 else False
+        assert_equal(f7, True)
+        # compare total_photon_source_intensity
+        f8 = True
+        command = ''.join(['h5diff --relative=1e-6 ', src_c1, ' ', exp_src_c1,
+            ' /tstt/tags/source_intensity',
+            ' /tstt/tags/source_intensity'])
+        diff_flag = os.system(command)
+        f8 = True if diff_flag == 0 else False
+        assert_equal(f8, True)
+        # compare r2s soruce file version
+        f9 = True
+        command = ''.join(['h5diff ', src_c1, ' ', exp_src_c1,
+            ' /tstt/tags/r2s_source_file_version',
+            ' /tstt/tags/r2s_source_file_version'])
+        diff_flag = os.system(command)
+        f9 = True if diff_flag == 0 else False
+        assert_equal(f9, True)
+
     os.remove(src_c1)
 
 

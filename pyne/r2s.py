@@ -9,6 +9,9 @@ from pyne.alara import mesh_to_fluxin, record_to_geom, photon_source_to_hdf5, \
 
 QA_warn(__name__)
 
+# source file version is composed of pyne version and one more int number
+_SOURCE_FILE_VERSION = [0, 7, 3, 1]
+_SOURCE_VERSION_TAG_NAME = 'r2s_source_file_version'
 
 def resolve_mesh(mesh_reference, tally_num=None, flux_tag="n_flux",
                  output_material=False):
@@ -174,7 +177,7 @@ def photon_sampling_setup(mesh, phtn_src, tags):
     Parameters
     ----------
     mesh : PyNE Mesh
-       The object containing the mesh instance to be tagged.
+        The object containing the mesh instance to be tagged.
     phtn_src : str
         The path of the ALARA phtn_file.
     tags: dict
@@ -201,10 +204,10 @@ def total_photon_source_intensity(m, tag_name, sub_voxel=False):
     Parameters
     ----------
     m : PyNE Mesh
-       The mesh-based photon emission density distribution in p/cm3/s.
+        The mesh instance to be tagged.
     tag_name : str
-       The name of the tag on the mesh with the photon emission density
-       information.
+        The name of the tag on the mesh with the photon emission density
+        information.
     sub_voxel: bool, optional
         If true, sub-voxel r2s work flow will be used.
 
@@ -230,31 +233,107 @@ def total_photon_source_intensity(m, tag_name, sub_voxel=False):
             sv_data = ve_data[num_e_groups*svid:num_e_groups*(svid+1)]
             intensity += vol * np.sum(sv_data)
     return intensity
- 
+
+
 def tag_e_bounds(m, e_bounds, tag_name='e_bounds'):
-    """This function tags the energy boundaries to the PyMOAB mesh
-    instance as a sparse tag for the purpose of photon source sampling.
+    """This function tags the energy boundaries of photon source to the PyNE
+    mesh instance as a sparse tag for the purpose of photon source sampling.
 
     Parameters
     ----------
     m : PyNE Mesh
-       The mesh-based photon emission density distribution in p/cm3/s.
-    e_bounds : numpy array or list
-        The energy boundaries of a photon source, MeV.
+        The mesh instance to be tagged.
+    e_bounds: iterable of float
+        The energy boundaries of a photon source, eV.
     tag_name : str, optional
-       The name of the tag on the mesh with the energy boundaries
-       information.
+       The name of the energy boundaries tag.
 
     Returns
     -------
     m : PyNE Mesh
        The mesh with energy boundaries tag.
     """
+
     # do not provide value when init a sparse tag
-    m.tag(name=tag_name, doc='energy boundaries of the photon source',
+    m.tag(name=tag_name, doc=tag_name + ' of the photon source',
           tagtype=NativeMeshTag, size=len(e_bounds), dtype=float,
           storage_type='sparse')
     m.get_tag(tag_name)[m] = e_bounds
     return m
 
 
+def tag_source_intensity(m, source_intensity, tag_name='source_intensity'):
+    """This function tags the source intensity of photon source to the PyMOAB
+    mesh instance as a sparse tag for the purpose of photon source sampling.
+
+    Parameters
+    ----------
+    m : PyNE Mesh
+        The object containing the mesh instance to be tagged.
+    source_intensity : float
+        The source intensity of a photon source, p/s.
+    tag_name : str, optional
+        The name of the energy boundaries tag.
+
+    Returns
+    -------
+    m : PyNE Mesh
+        The mesh with energy boundaries tag.
+    """
+
+    # do not provide value when initializing a sparse tag
+    m.tag(name=tag_name, doc=tag_name + ' of the photon source',
+          tagtype=NativeMeshTag, size=1, dtype=float,
+          storage_type='sparse')
+    m.get_tag(tag_name)[m] = source_intensity
+    return m
+
+
+def tag_decay_time(m, decay_time, tag_name='decay_time'):
+    """This function tags the decay time of photon source to the PyMOAB
+    mesh instance as a sparse tag for the purpose of photon source sampling.
+
+    Parameters
+    ----------
+    m : PyNE Mesh
+        The object containing the mesh instance to be tagged.
+    decay_time : float
+        The decay time of a photon source, s.
+    tag_name : str, optional
+        The name of the decay time tag.
+
+    Returns
+    -------
+    m : PyNE Mesh
+        The mesh with decay time tag.
+    """
+
+    # do not provide value when init a sparse tag
+    m.tag(name=tag_name, doc=tag_name + ' of the photon source',
+          tagtype=NativeMeshTag, size=1, dtype=float,
+          storage_type='sparse')
+    m.get_tag(tag_name)[m] = decay_time
+    return m
+
+
+def tag_version(m):
+    """This function tags the version of photon source to the PyMOAB
+    mesh instance as a sparse tag for the purpose of photon source sampling.
+
+    Parameters
+    ----------
+    m : PyNE Mesh
+        The object containing the mesh instance to be tagged.
+
+    Returns
+    -------
+    m : PyNE Mesh
+       The mesh with version tag.
+    """
+
+    # do not provide value when init a sparse tag
+    m.tag(name=_SOURCE_VERSION_TAG_NAME, doc='version of the photon source file',
+          tagtype=NativeMeshTag, size=len(_SOURCE_FILE_VERSION), dtype=int,
+          storage_type='sparse')
+    m.get_tag(_SOURCE_VERSION_TAG_NAME)[m] = _SOURCE_FILE_VERSION
+    return m
