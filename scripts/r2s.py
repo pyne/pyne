@@ -193,7 +193,6 @@ def step2():
         tags = {('TOTAL', dt): tag_name}
         photon_source_hdf5_to_mesh(mesh, h5_file, tags, sub_voxel=sub_voxel,
                                    cell_mats=cell_mats)
-        mesh = tag_e_bounds(mesh, e_bounds)
         p_src_filename = '{0}_{1}.h5m'.format(output, i+1)
         mesh.write_hdf5(p_src_filename)
         if transport_code.lower() == 'openmc':
