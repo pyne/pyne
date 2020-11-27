@@ -13,6 +13,7 @@ Next Version
    * Setting CMP0074 in CMakeLists.txt to allow `*_ROOT` variables in the CMake command.
    * Change the e_bounds tag unit from eV to MeV (#1353)
    * Add functions to tag the decay_time, source_intensity and version to source.h5m (#1352)
+   * Add the workflow to support PyNE R2S with DAG-OpenMC (#1355)
 
 **Fix**
 
