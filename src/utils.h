@@ -134,7 +134,7 @@ namespace pyne {
   std::string join_to_string(std::vector<T> vect, std::string delimiter = " "){
     std::stringstream out;
     out << std::setiosflags(std::ios::fixed) << std::setprecision(6);
-    
+
     // ensure there is at least 1 element in the vector
     if (vect.size() == 0)
       return out.str();
@@ -164,7 +164,7 @@ namespace pyne {
   // File Helpers
   /// Returns true if the file can be found.
   bool file_exists(std::string strfilename);
-  
+
   // turns the filename string into the full file path
   std::string get_full_filepath(char* filename);
   // turns the filename string into the full file path
@@ -222,20 +222,17 @@ namespace pyne {
     /// constructor with the filename \a fname.
     ValueError(std::string msg)
     {
-      message = msg;
+      message = "ValueError: " + msg;
     };
 
     /// Creates a helpful error message.
     virtual const char* what() const throw()
     {
-      std::string msgstr ("ValueError: ");
-      if (!message.empty())
-        msgstr += message;
-      const char* msgstr_rtn = msgstr.c_str();
+      const char* msgstr_rtn = message.c_str();
       return msgstr_rtn;
     };
 
-  private:
+  protected:
     std::string message; ///< extra message for the user.
   };
 
