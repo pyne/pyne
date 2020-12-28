@@ -165,10 +165,7 @@ def step2():
     config.read(config_filename)
     structured = config.getboolean('general', 'structured')
     sub_voxel = config.getboolean('general', 'sub_voxel')
-    try:
-        transport_code = config.get('general', 'transport_code')
-    except:
-        transport_code = 'MCNP'
+    transport_code = config.get('general', 'transport_code', fallback='MCNP')
     decay_times = config.get('step2', 'decay_times').split(',')
     output = config.get('step2', 'output')
     tot_phtn_src_intensities = config.get('step2', 'tot_phtn_src_intensities')
