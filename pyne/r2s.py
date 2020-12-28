@@ -351,17 +351,3 @@ def tag_version(m):
     m.get_tag(_SOURCE_VERSION_TAG_NAME)[m] = _SOURCE_FILE_VERSION
     return m
 
-
-def photon_source_add_filetype(filename):
-    """
-    This function is used to add 'filetype' attribute for PyNE R2S photon
-    source file 'source_x.h5m'. For OpenMC source sampling.
-    Parameters
-    ----------
-    filename : string
-        Filename of the 'source_x.h5m'.
-    """
-    with tb.open_file(filename, 'r+') as h5f:
-        h5f.root._f_setattr('filetype',
-                'pyne_r2s_source'.encode(encoding='ascii'))
-    return
