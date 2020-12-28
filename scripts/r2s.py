@@ -26,8 +26,6 @@ config = \
 structured: True
 # Specify whether this problem uses sub-voxel r2s
 sub_voxel: False
-# transport code, MCNP or OpenMC
-transport_code: MCNP
 
 [step1]
 # Path to MCNP MESHTAL file containing neutron fluxes or a DAG-MCNP5
@@ -165,7 +163,6 @@ def step2():
     config.read(config_filename)
     structured = config.getboolean('general', 'structured')
     sub_voxel = config.getboolean('general', 'sub_voxel')
-    transport_code = config.get('general', 'transport_code', fallback='MCNP')
     decay_times = config.get('step2', 'decay_times').split(',')
     output = config.get('step2', 'output')
     tot_phtn_src_intensities = config.get('step2', 'tot_phtn_src_intensities')
