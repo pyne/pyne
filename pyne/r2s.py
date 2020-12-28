@@ -46,7 +46,7 @@ def resolve_mesh(mesh_reference, tally_num=None, flux_tag="n_flux",
     # mesh_reference is Mesh object
     if isinstance(mesh_reference, Mesh):
         m = mesh_reference
-    # mesh_reference is a file
+    # mesh_reference is a file path
     elif isinstance(mesh_reference, str) and not isfile(mesh_reference):
         raise ValueError("File {0} not found!".format(mesh_reference))
     #  mesh_reference is unstructured mesh file
