@@ -30,7 +30,7 @@ calculated using two separate transport steps, using the procedure below:
 PyNE R2S implements a Cartesian- and tetrahedral- mesh-based R2S method that
 operates entirely on CAD geometry. This is accomplished using the Direct
 Accelerated Geometry Monte Carlo (DAGMC) version of MCNP5, known as DAG-MCNP5
-[2]_ and the ALARA activation code [3]_. PyNE R2S is now support DAG-OpenMC [5]_.
+[2]_ and the ALARA activation code [3]_.
 For Cartesian mesh, the CAD geometry must be discretized onto the mesh in order
 to obtain material compositions in each mesh volume element for activation.
 This is done using a ray-tracing technique. For both Cartesian and tetrahedral
@@ -39,6 +39,8 @@ custom source subroutine which utilizes the functionality of the
 pyne.source_sampling module. PyNE R2S has been validated
 using the Frascati Neutron Generator ITER benchmark problem, with close
 agreement to experimental results [4]_.
+
+PyNE R2S is now support DAG-OpenMC [5]_.
 
 ***************
 Using PyNE R2S
