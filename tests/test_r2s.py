@@ -595,7 +595,7 @@ def test_r2s_script():
     # test openmc r2s
     try:
         import openmc
-    except:
+    except ImportError:
         raise SkipTest
     r2s_run_dir = os.path.join(
             thisdir, "files_test_r2s", "r2s_examples", "openmc_r2s")
