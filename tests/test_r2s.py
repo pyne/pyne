@@ -14,8 +14,7 @@ from pyne.mcnp import Meshtal
 from pyne.material import Material
 from pyne.r2s import irradiation_setup, photon_sampling_setup, \
                      total_photon_source_intensity, tag_e_bounds,\
-                     tag_source_intensity, tag_decay_time, tag_version,\
-                     photon_source_add_filetype
+                     tag_source_intensity, tag_decay_time, tag_version
 from pyne.utils import QAWarning, file_almost_same, file_block_almost_same
 from pyne.mesh import Mesh, NativeMeshTag, HAVE_PYMOAB
 if not HAVE_PYMOAB:

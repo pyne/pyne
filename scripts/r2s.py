@@ -11,7 +11,7 @@ from pyne.mesh import Mesh, NativeMeshTag
 from pyne.dagmc import cell_materials, load, discretize_geom
 from pyne.r2s import resolve_mesh, irradiation_setup, photon_sampling_setup,\
     total_photon_source_intensity, tag_e_bounds, tag_source_intensity,\
-    tag_decay_time, tag_version, photon_source_add_filetype
+    tag_decay_time, tag_version
 from pyne.alara import photon_source_to_hdf5, photon_source_hdf5_to_mesh,\
     phtn_src_energy_bounds
 from pyne.mcnp import Meshtal
@@ -195,8 +195,6 @@ def step2():
                                    cell_mats=cell_mats)
         p_src_filename = '{0}_{1}.h5m'.format(output, i+1)
         mesh.write_hdf5(p_src_filename)
-        if transport_code.lower() == 'openmc':
-            photon_source_add_filetype(p_src_filename)
         intensity = total_photon_source_intensity(mesh, tag_name,
                                                   sub_voxel=sub_voxel)
         mesh = tag_e_bounds(mesh, e_bounds)
