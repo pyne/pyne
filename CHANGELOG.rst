@@ -9,6 +9,7 @@ Next Version
 
 **Change**
 
+   * Setting CMP0074 in CMakeLists.txt to allow `*_ROOT` variables in the CMake command.
    * Change the e_bounds tag unit from eV to MeV (#1353)
    * Add functions to tag the decay_time, source_intensity and version to source.h5m (#1352)
 
@@ -18,7 +19,7 @@ Next Version
 
 **Maintenance**
 
-v0.7.3 
+v0.7.3
 ======
 
 **Change**
@@ -27,7 +28,7 @@ v0.7.3
    * Bump license date to 2020 (#1348)
    * Add the energy boundaries to photon source file (#1341)
    * Add a new source sampling sampler without e_bounds (#1341)
-   
+
 **Fix**
    * Compatibility fix with MCNP6 ptracs. (#1336)
    * Add some missing pieces in MaterialLibrary API to match std::unordered_map one (#1350)
@@ -38,7 +39,7 @@ v0.7.2
 **Change**
 
    * Now attribute a number to material when adding them into a material library (#1334)
- 
+
 **Fix**
 
    * change the ref address of the materials group in the nuc_data.h5 material_library (to match new format) (#1337)
