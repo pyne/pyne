@@ -1,6 +1,9 @@
 # Defines the CMake commands/policies
 cmake_minimum_required(VERSION 3.0.0)
 
+if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.12.0")
+  cmake_policy(SET CMP0074 NEW)
+endif()
 # Make the scripts available in the 'cmake' directory available for the
 # 'include()' command, 'find_package()' command.
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
@@ -84,7 +87,7 @@ MESSAGE("--    HDF5 Library directories: ${HDF5_LIBRARY_DIRS}")
 MESSAGE("--    HDF5 Libraries: ${HDF5_C_LIBRARIES}")
 MESSAGE("--    HDF5 library version: ${HDF5_VERSION}")
 
-# Version 1.12 of HDF5 deprecates the H5Oget_info_by_idx(), 
+# Version 1.12 of HDF5 deprecates the H5Oget_info_by_idx(),
 # H5O_info_t() and H5Oget_info_by_name() interfaces.
 # Thus, we give these flags to allow usage of the old interface in newer
 # versions of HDF5.
