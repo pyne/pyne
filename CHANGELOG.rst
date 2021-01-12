@@ -16,6 +16,7 @@ Next Version
 **Fix**
 
    * An e_bounds reading problem when old sampler is used without e_bounds text file (#1353)
+   * Fix the compatibility problem of transmuters with numpy version v1.19.x
 
 **Maintenance**
 
