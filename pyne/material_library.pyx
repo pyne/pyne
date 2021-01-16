@@ -248,7 +248,8 @@ cdef class _MaterialLibrary:
         return self._inst.size()
 
     def __delitem__(self, key):
-        self.del_material(ensure_material_key(key))
+        c_key = ensure_material_key(key)
+        self._inst.del_material(< std_string > c_key)
 
     def __iter__(self):
         mat_lib_dict = matlib_to_dict_str_matp(deref(self._inst))
