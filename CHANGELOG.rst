@@ -10,12 +10,14 @@ Next Version
 **Change**
 
    * Update pyne::ValueError to return a pointer to a stored string instead of an out-of-scope string. (#1358)
+   * Setting CMP0074 in CMakeLists.txt to allow `*_ROOT` variables in the CMake command.
    * Change the e_bounds tag unit from eV to MeV (#1353)
    * Add functions to tag the decay_time, source_intensity and version to source.h5m (#1352)
 
 **Fix**
 
    * An e_bounds reading problem when old sampler is used without e_bounds text file (#1353)
+   * Fix the compatibility problem of transmuters with numpy version v1.19.x
 
 **Maintenance**
 
@@ -44,6 +46,9 @@ v0.7.2
 
    * change the ref address of the materials group in the nuc_data.h5 material_library (to match new format) (#1337)
    * clean the remaining calls to the old material_library write_hdf5 API
+
+**Maintenance**
+   * Add dockerhub authentication for pulling images
 
 v0.7.1
 ======
