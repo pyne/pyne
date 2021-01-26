@@ -9,6 +9,7 @@ Next Version
 
 **Change**
 
+   * Update pyne::ValueError to return a pointer to a stored string instead of an out-of-scope string. (#1358)
    * Setting CMP0074 in CMakeLists.txt to allow `*_ROOT` variables in the CMake command.
    * Change the e_bounds tag unit from eV to MeV (#1353)
    * Add functions to tag the decay_time, source_intensity and version to source.h5m (#1352)
