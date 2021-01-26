@@ -17,6 +17,7 @@ Next Version
 
    * An e_bounds reading problem when old sampler is used without e_bounds text file (#1353)
    * Fix the compatibility problem of transmuters with numpy version v1.19.x
+   * Fix to MaterialLibrary.__delitem__ to call the underlying instance.
 
 **Maintenance**
 

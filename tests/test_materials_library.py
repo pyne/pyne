@@ -226,3 +226,31 @@ def test_matlib_query():
     matlib["leu"] = mat_leu
     matlib_leu = matlib["leu"]
     assert_mat_almost_equal(mat_leu, matlib_leu)
+
+def test_matlib_delete():
+    water = Material()
+    water.from_atom_frac({10000000: 2.0, 80000000: 1.0})
+    water.metadata["name"] = "Aqua sera."
+
+    pubr3 = Material({
+        "Br": 0.500617,
+        "Pu-238": 0.000250,
+        "Pu-239": 0.466923,
+        "Pu-240": 0.029963,
+        "Pu-241": 0.001998,
+        "Pu-242": 0.000250
+    },
+        density=6.75,
+        metadata={"name": "Plutonium Bromide"}).expand_elements()
+
+    lib = {"pubr3": pubr3, "aqua": water}
+    matlib = MaterialLibrary(lib)
+
+    # test delete methods
+    matlib.remove_material("pubr3")
+
+    assert len(matlib) == 1
+
+    del matlib["aqua"]
+
+    assert len(matlib) == 0
