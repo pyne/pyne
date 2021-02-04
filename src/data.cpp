@@ -1601,7 +1601,7 @@ double pyne::half_life(int nuc) {
     if (result.size() == 1) {
         return result[0];
     }
-    return 1.0/0.0;
+    return -1.0;
 }
 
 

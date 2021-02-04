@@ -16,7 +16,7 @@ std::string pyne::NUC_DATA_PATH = "";
 std::string pyne::VERSION = "0.7.1";
 
 void pyne::pyne_start() {
-#if defined __WIN_MSVC__
+#if defined _WIN32
   char * tmpPYNE_DATA;
   size_t lenPYNE_DATA;
   errno_t errPYNE_DATA = _dupenv_s(&tmpPYNE_DATA, &lenPYNE_DATA, "PYNE_DATA");
@@ -89,7 +89,7 @@ double pyne::endftod_cpp(char * s) {
   mant = exp = 0;
   if (s[2] == '.') {
     // Convert an ENDF float
-    if (s[9] == '+' or s[9] == '-') {
+    if (s[9] == '+' || s[9] == '-') {
       // All these factors of ten are from place values.
       mant = s[8] + 10 * s[7] + 100 * s[6] + 1000 * s[5] + 10000 * s[4] + \
              100000 * s[3] + 1000000 * s[1] - 1111111 * '0';
@@ -103,8 +103,7 @@ double pyne::endftod_cpp(char * s) {
       dbl_exp = (s[9] == '-'? 1/dbl_exp: dbl_exp) * 1.0e-6;
       // Get mantissa sign, apply exponent.
       v = mant * (s[0] == '-'? -1: 1) * dbl_exp;
-    }
-    else {
+    } else {
       mant = s[7] + 10 * s[6] + 100 * s[5] + 1000 * s[4] + 10000 * s[3] + \
              100000 * s[1] - 111111 * '0';
       exp = s[10] + 10 * s[9] - 11 * '0';
@@ -385,7 +384,11 @@ std::string pyne::get_full_filepath(std::string filename) {
   // remove all extra whitespace
   filename = pyne::remove_characters(" " , filename);
   // use stdlib call
+#ifndef _WIN32
   const char* full_filepath = realpath(filename.c_str(), NULL);
+#else
+  const char* full_filepath = filename.c_str();
+#endif
   return std::string(full_filepath);
 }
 

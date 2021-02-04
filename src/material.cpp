@@ -348,14 +348,12 @@ std::vector<int> pyne::Material::write_hdf5_nucpath(hid_t db, std::string nucpat
       nuclides.push_back(i->first);
     nuc_size = nuclides.size();
 
-    // Create the data if it doesn't exist
-    int nuc_data[nuc_size];
-    for (int n = 0; n != nuc_size; n++) nuc_data[n] = nuclides[n];
     nuc_dims[0] = nuc_size;
     hid_t nuc_space = H5Screate_simple(1, nuc_dims, NULL);
     hid_t nuc_set = H5Dcreate2(db, nucpath.c_str(), H5T_NATIVE_INT, nuc_space,
                                H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    H5Dwrite(nuc_set, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, nuc_data);
+    H5Dwrite(nuc_set, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+             nuclides.data());
     H5Fflush(db, H5F_SCOPE_GLOBAL);
 
     H5Dclose(nuc_set);

@@ -1,5 +1,7 @@
+#ifndef _WIN32
 #include <unistd.h>
-#include <iostream>
+#endif
+#include < iostream>
 
 #ifndef PYNE_IS_AMALGAMATED
 #include "material_library.h"
@@ -301,20 +303,18 @@ void pyne::MaterialLibrary::write_hdf5_nucpath(hid_t db,
                                                std::string nucpath) const {
   int nuc_size;
   nuc_size = nuclist.size();
-  int nuc_data[nuc_size];
-  {
-    int n = 0;
-    for (auto nuc : nuclist) {
-      nuc_data[n] = nuc;
-      n++;
-    }
+  vector<int> nuc_data;
+  for (auto nuc : nuclist) {
+    nuc_data.push_back(nuc);
   }
+
   hsize_t nuc_dims[1];
   nuc_dims[0] = nuc_size;
   hid_t nuc_space = H5Screate_simple(1, nuc_dims, NULL);
   hid_t nuc_set = H5Dcreate2(db, nucpath.c_str(), H5T_NATIVE_INT, nuc_space,
                              H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-  H5Dwrite(nuc_set, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, nuc_data);
+  H5Dwrite(nuc_set, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT,
+           nuc_data.data());
 
   H5Fflush(db, H5F_SCOPE_GLOBAL);
   H5Sclose(nuc_space);
