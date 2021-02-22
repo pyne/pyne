@@ -125,7 +125,7 @@ double pyne::endftod_cpp(char * s) {
     v = 0;
     mant = 1; // Here we use mant for the place value about to be read in.
     pos = 10;
-    while (s[pos] != '-' and s[pos] != '+' and s[pos] != ' ' and pos > 0) {
+    while (s[pos] != '-' && s[pos] != '+' && s[pos] != ' ' && pos > 0) {
       v += mant * (s[pos] - '0');
       mant *= 10;
       pos--;
