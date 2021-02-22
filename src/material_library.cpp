@@ -1,7 +1,7 @@
 #ifndef _WIN32
 #include <unistd.h>
 #endif
-#include < iostream>
+#include <iostream>
 
 #ifndef PYNE_IS_AMALGAMATED
 #include "material_library.h"
