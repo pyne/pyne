@@ -303,7 +303,7 @@ void pyne::MaterialLibrary::write_hdf5_nucpath(hid_t db,
                                                std::string nucpath) const {
   int nuc_size;
   nuc_size = nuclist.size();
-  vector<int> nuc_data;
+  std::vector<int> nuc_data;
   for (auto nuc : nuclist) {
     nuc_data.push_back(nuc);
   }
