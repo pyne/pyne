@@ -198,7 +198,7 @@ namespace h5wrap
     int arr_dim = H5Sget_simple_extent_dims(arr_space, arr_len, NULL);
 
     // Read in data from file to memory
-    T * mem_arr = new T [arr_len[0]];
+    T* mem_arr;
     H5Dread(dset, dtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, mem_arr);
 
     // Load new values into the set
@@ -261,7 +261,7 @@ namespace h5wrap
     // Read in data from file to memory
     // Have to read in as 1D array to get HDF5 and new keyword
     // to play nice with each other
-    T mem_arr [arr_dims[0] * arr_dims[1]];
+    T* mem_arr;
     H5Dread(dset, dtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, mem_arr);
 
     // Load new values into the vector of vectors, using some indexing tricks
@@ -297,7 +297,7 @@ namespace h5wrap
     // Read in data from file to memory
     // Have to read in as 1D array to get HDF5 and new keyword
     // to play nice with each other
-    T mem_arr [arr_dims[0] * arr_dims[1] * arr_dims[2]];
+    T* mem_arr;
     H5Dread(dset, dtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, mem_arr);
 
     // Load new values into the vector of vectors of vectors, using some indexing tricks
