@@ -230,7 +230,7 @@ namespace h5wrap
     int arr_ndim = H5Sget_simple_extent_dims(arr_space, arr_dims, NULL);
 
     // Read in data from file to memory
-    T * mem_arr = new T [arr_dims[0]];
+    T* mem_arr = new T [arr_dims[0]];
     H5Dread(dset, dtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, mem_arr);
 
     // Load new values into the vector
