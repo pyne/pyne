@@ -393,7 +393,7 @@ std::string pyne::get_full_filepath(std::string filename) {
 #ifndef _WIN32
   const char* full_filepath = realpath(filename.c_str(), NULL);
 #else
-  const char* full_filepath = std::filesystem::canonise(filename.c_str());
+  const char* full_filepath = std::filesystem::canonical(filename.c_str());
 #endif
   return std::string(full_filepath);
 }
