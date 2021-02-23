@@ -1601,11 +1601,9 @@ double pyne::half_life(int nuc) {
   if (result.size() == 1) {
     return result[0];
   }
-#ifndef _WIN32
-  return 1.0 / 0.0;
-#else
-  return -1.0;
-#endif
+  double num = 1.0;
+  double den = 0.0;
+  return num / den;
 }
 
 double pyne::half_life(char * nuc) {
