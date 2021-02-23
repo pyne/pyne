@@ -4,9 +4,15 @@ extern "C" double endftod_(char *str, int len);
 #endif
 #include <iomanip>
 
+#ifdef _WIN32
+  #include <filesystem>
+#endif
+
+
 #ifndef PYNE_IS_AMALGAMATED
 #include "utils.h"
 #endif
+
 
 
 // PyNE Globals
@@ -387,7 +393,7 @@ std::string pyne::get_full_filepath(std::string filename) {
 #ifndef _WIN32
   const char* full_filepath = realpath(filename.c_str(), NULL);
 #else
-  const char* full_filepath = filename.c_str();
+  const char* full_filepath = std::filesystem::canonise(filename.c_str());
 #endif
   return std::string(full_filepath);
 }
