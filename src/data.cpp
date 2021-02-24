@@ -1596,14 +1596,15 @@ double pyne::decay_const(std::string nuc) {
 // Half-life data
 //
 double pyne::half_life(int nuc) {
-    std::vector<double> result = data_access<double, level_data>(nuc, 0.0,
-    DBL_MAX, offsetof(level_data, half_life), level_data_lvl_map);
-    if (result.size() == 1) {
-        return result[0];
-    }
-    return 1.0/0.0;
+  std::vector<double> result = data_access<double, level_data>(
+      nuc, 0.0, DBL_MAX, offsetof(level_data, half_life), level_data_lvl_map);
+  if (result.size() == 1) {
+    return result[0];
+  }
+  double num = 1.0;
+  double den = 0.0;
+  return num / den;
 }
-
 
 double pyne::half_life(char * nuc) {
   int nuc_zz = nucname::id(nuc);

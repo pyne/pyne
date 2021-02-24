@@ -309,10 +309,10 @@ void pyne::Sampler::mesh_geom_data(moab::Range ves, std::vector<double> &volumes
   // Grab the coordinates that define 4 connected points within a mesh volume
   // element and setup a data structure to allow uniform sampling with each
   // mesh volume element.
-  double coords[verts_per_ve*3];
+  double* coords = new double [verts_per_ve*3];
   int v;
   for (v=0; v<num_ves; ++v) {
-    rval = mesh->get_coords(&connect[verts_per_ve*v], verts_per_ve, &coords[0]);
+    rval = mesh->get_coords(&connect[verts_per_ve * v], verts_per_ve, coords);
     if (rval != moab::MB_SUCCESS)
       throw std::runtime_error("Problem vertex coordinates.");
     volumes[v] = measure(ve_type, verts_per_ve, &coords[0]);
@@ -632,14 +632,14 @@ int pyne::Sampler::get_cell_list_size() {
    // 0: for unstructured mesh
    // 1: for sub-voxel R2S
    // max_num_cells: for voxel R2S
-   if (ve_type == moab::MBTET or has_cell_fracs == false) {
-      return 0;
+   if (ve_type == moab::MBTET || has_cell_fracs == false) {
+     return 0;
    } else {
-      if (mesh_mode == VOXEL) {
-         return max_num_cells;
-      } else {
-         return 1;
-      }
+     if (mesh_mode == VOXEL) {
+       return max_num_cells;
+     } else {
+       return 1;
+     }
    }
 }
 

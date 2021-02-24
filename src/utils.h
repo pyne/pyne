@@ -33,8 +33,8 @@
   #define isnan(x) __isnand((double)x)
 #endif
 
-#ifdef __WIN_MSVC__
-    #define isnan(x) ((x) != (x))
+#ifdef _WIN32
+#define isnan(x) ((x) != (x))
 #endif
 
 #ifndef JSON_IS_AMALGAMATION
