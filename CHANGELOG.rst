@@ -23,6 +23,8 @@ Next Version
 
 **Maintenance**
 
+   * Auto-update copyright year in docs (#1369)
+
 v0.7.3
 ======
 

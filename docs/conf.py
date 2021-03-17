@@ -13,6 +13,7 @@
 import os
 import sys
 import warnings
+import datetime
 
 from pyne.utils import QAWarning
 import cloud_sptheme as csp
@@ -49,7 +50,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'PyNE'
-copyright = u'2011-2019, The PyNE Development Team'
+copyright = u'2011-{0}, The PyNE Development Team'.format(datetime.datetime.now().year)
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
