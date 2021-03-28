@@ -138,7 +138,7 @@ The example geometry is composed of four cubes of size 10x10x10 cm\ :sup:`3`\ .
 It consists of two different materials, the water (in blue) and the steel
 (in red). The upper left cube (in white) is void. There is an isotropic
 monoenergetic (14 MeV) neutron point source in the center of the bottom right
-cube. The model is irradiated by a neutron source with intensitiy of 1e10 n/s
+cube. The model is irradiated by a neutron source with intensity of 1e10 n/s
 for 3.5 days. The following content demonstrates the process of caculating the
 shutdown dose rate of this model at the time of 1 hour after shutdown.
 Example files can be found in `r2s_examples <https://github.com/pyne/data/blob/master/r2s_examples.tar.gz>`_.
