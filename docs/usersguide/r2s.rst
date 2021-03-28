@@ -108,7 +108,7 @@ decay time. These files will be named like:
 
 source_1.h5m, source_2.h5m ... source_N.h5m
 
-Several information for source sampling are tagged in these *source_x.h5m*
+A variety of information for source sampling is tagged in these *source_x.h5m*
 files:
 
 1. *e_bounds*, the energy boundaries (eV) of the photon source.
