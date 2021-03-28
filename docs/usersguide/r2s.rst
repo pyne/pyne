@@ -40,7 +40,7 @@ pyne.source_sampling module. PyNE R2S has been validated
 using the Frascati Neutron Generator ITER benchmark problem, with close
 agreement to experimental results [4]_.
 
-PyNE R2S is now support DAG-OpenMC [5]_.
+PyNE R2S is now supports DAG-OpenMC [5]_.
 
 ***************
 Using PyNE R2S
@@ -250,4 +250,3 @@ References
 .. [6] X. ZHANG, P. C. Shriwise, S. Liu, P. P.H. Wilson, “PyNE Sub-Voxel R2S
        for Shutdown Dose Rate Analysis”, International Conference on
        Mathematics, Computational Methods & Reactor Physics (M&C 2019), (2019).
-
