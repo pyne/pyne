@@ -190,7 +190,7 @@ Perform R2S setup. The 'alara_params.txt' and 'config.ini' will be generated in 
    $ r2s.py setup
 
 Modify important parameters in the 'alara_params.txt' and 'config.ini' according to the problem.
-Both are two modes of R2S: the voxel R2S and sub-voxel R2S [6]_.
+There are two modes of R2S: the voxel R2S and sub-voxel R2S [6]_.
 Examples input files can be seen in both 'r2s_examples/r2s_run' and 'subvoxel_r2s_run'.
 By setting the parameter 'sub_voxel' (in 'config.ini') to be 'False', the user can perform voxel R2S described in [4]_.
 By setting the parameter 'sub_voxel' to be 'True', the user can perform sub-voxel R2S without any other change.
