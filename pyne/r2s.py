@@ -1,11 +1,13 @@
 from os.path import isfile
 from pyne.utils import QA_warn
 import numpy as np
+import tables as tb
 
 from pyne.mesh import Mesh, NativeMeshTag
 from pyne.mcnp import Meshtal
 from pyne.alara import mesh_to_fluxin, record_to_geom, photon_source_to_hdf5, \
     photon_source_hdf5_to_mesh, responses_output_zone
+from pyne import openmc_utils
 
 QA_warn(__name__)
 
@@ -41,21 +43,31 @@ def resolve_mesh(mesh_reference, tally_num=None, flux_tag="n_flux",
         The PyNE mesh object of the flux data.
     """
 
+    # define tag_names according to the flux_tag
+    tag_names = (flux_tag, flux_tag + "_err", flux_tag + "_total",
+              flux_tag + "_err_total")
     # mesh_reference is Mesh object
     if isinstance(mesh_reference, Mesh):
         m = mesh_reference
+    # mesh_reference is a file path
+    elif isinstance(mesh_reference, str) and not isfile(mesh_reference):
+        raise ValueError("File {0} not found!".format(mesh_reference))
     #  mesh_reference is unstructured mesh file
     elif isinstance(mesh_reference, str) and isfile(mesh_reference) \
             and mesh_reference.endswith(".h5m"):
         m = Mesh(structured=False, mesh=mesh_reference)
+    # mesh_reference is a openmc statepoint file
+    elif isinstance(mesh_reference, str) and isfile(mesh_reference) \
+            and mesh_reference.endswith(".h5"):
+            m = openmc_utils.create_meshtally(mesh_reference,
+                                              tally_id=tally_num,
+                                              tag_names=tag_names)
     #  mesh_reference is Meshtal or meshtal file
     elif tally_num is not None:
         #  mesh_reference is meshtal file
         if isinstance(mesh_reference, str) and isfile(mesh_reference):
             mesh_reference = Meshtal(mesh_reference,
-                                     {tally_num: (flux_tag, flux_tag + "_err",
-                                                  flux_tag + "_total",
-                                                  flux_tag + "_err_total")},
+                                     {tally_num: tag_names},
                                      meshes_have_mats=output_material)
             m = mesh_reference.tally[tally_num]
         #  mesh_reference is Meshtal object
@@ -64,10 +76,11 @@ def resolve_mesh(mesh_reference, tally_num=None, flux_tag="n_flux",
         else:
             raise ValueError("meshtal argument not a Mesh object, Meshtal"
                              " object, MCNP meshtal file or meshtal.h5m file.")
-    # mesh_references is a Meshtal file but no tally_num provided
+    # mesh_references is a Meshtal or statepoint file but no tally_num provided
     else:
         raise ValueError(
-            "Need to provide a tally number when reading a Meshtal file")
+            "Need to provide a tally number when reading a Meshtal or"
+            " statepoint file")
 
     return m
 

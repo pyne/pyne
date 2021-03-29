@@ -30,14 +30,17 @@ calculated using two separate transport steps, using the procedure below:
 PyNE R2S implements a Cartesian- and tetrahedral- mesh-based R2S method that
 operates entirely on CAD geometry. This is accomplished using the Direct
 Accelerated Geometry Monte Carlo (DAGMC) version of MCNP5, known as DAG-MCNP5
-[2]_ and the ALARA activation code [3]_. For Cartesian mesh, the CAD geometry
-must be discretized onto the mesh in order to obtain material compositions in each
-mesh volume element for activation. This is done using a ray-tracing technique.
-For both Cartesian and tetrahedral meshes, mesh-based photon sampling is
-accomplished using MCNP5 compiled with a custom source subroutine which utilizes the
-functionality of the pyne.source_sampling module. PyNE R2S has been validated
+[2]_ and the ALARA activation code [3]_.
+For Cartesian mesh, the CAD geometry must be discretized onto the mesh in order
+to obtain material compositions in each mesh volume element for activation.
+This is done using a ray-tracing technique. For both Cartesian and tetrahedral
+meshes, mesh-based photon sampling is accomplished using MCNP5 compiled with a
+custom source subroutine which utilizes the functionality of the
+pyne.source_sampling module. PyNE R2S has been validated
 using the Frascati Neutron Generator ITER benchmark problem, with close
 agreement to experimental results [4]_.
+
+PyNE R2S now supports DAG-OpenMC [5]_.
 
 ***************
 Using PyNE R2S
@@ -51,8 +54,8 @@ order to use the CLI, the following files are first needed:
 
 1. A material-laden CAD file representing the geometry. Instructions on creating
    this file can be found `here <http://svalinn.github.io/DAGMC/usersguide/uw2.html>`_.
-2. An MCNP MESHTAL file or DAG-MCNP tetrahedral mesh tally containing the
-   neutron fluxes used for neutron activation.
+2. An MCNP MESHTAL file, DAG-MCNP tetrahedral mesh tally, or OpenMC statepoint
+   file containing the neutron fluxes used for neutron activation.
 
 Once these files have been obtained, PyNE R2S can proceed. PyNE R2S is best run
 in its own folder, due the large number of intermediate files created. Create
@@ -105,22 +108,39 @@ decay time. These files will be named like:
 
 source_1.h5m, source_2.h5m ... source_N.h5m
 
-These source files with tag named "e_bounds" can now be used as sources for
-photon transport within MCNP. Information on compiling/using a version of MCNP5
-that can utilize these mesh-based sources is found in the PyNE user's guide entry on 
+A variety of information for source sampling is tagged in these *source_x.h5m*
+files:
+
+1. *e_bounds*, the energy boundaries (eV) of the photon source.
+2. *decay_time*, the decay time (s) after shutdown.
+3. *source_intensity*, the total photon source intensity of the specific decay
+   time.
+4. *r2s_source_file_version*, the version of the source file.
+5. *cell_number*, the cell list in each mesh element.
+6. *cell_fracs*, the cell volume fraction in the mesh element.
+
+These source files with can now be used as sources for photon transport within
+DAG-MCNP or DAG-OpenMC. Information on compiling/using a version of MCNP5 that
+can utilize these mesh-based sources is found in the PyNE user's guide entry on
 `mesh-based source sampling <http://pyne.io/usersguide/source_sampling.html#source-sampling-in-mcnp5>`_.
-Note that each of these source files must be renamed to "source.h5m" for this purpose.
-By using these sources for photon transport, the shutdown dose rate can be obtained. Tally results will have to be normalized by the total photon source intentity. This information is found in the "total_photon_source_intensites.txt" file printed out by r2s.py step2.
+Note that each of these source files must be renamed to "source.h5m" for this
+purpose. By using these sources for photon transport, the shutdown dose rate
+can be obtained. Tally results will have to be normalized by the total photon
+source intentity, which can be found in the "total_photon_source_intensites.txt"
+file printed out by r2s.py step2 or the *source_intensity* tag in *source.h5m*.
 
 ****************
 PyNE R2S example
 ****************
 
 Using a simple geometry as a example, here is how we perform R2S calculation.
-The example geometry is composed of four cubes of size 10x10x10 cm\ :sup:`3`\ . It consists of two different materials, the water (in blue) and the steel (in red). The upper left cube (in white) is void.
-There is an isotropic monoenergetic (14 MeV) neutron point source in the center of the bottom right cube.
-The model is irradiated by a neutron source with intensitiy of 1e10 n/s for 3.5 days.
-The following content demonstrates the process of caculating the shutdown dose rate of this model at the time of 1 hour after shutdown.
+The example geometry is composed of four cubes of size 10x10x10 cm\ :sup:`3`\ .
+It consists of two different materials, the water (in blue) and the steel
+(in red). The upper left cube (in white) is void. There is an isotropic
+monoenergetic (14 MeV) neutron point source in the center of the bottom right
+cube. The model is irradiated by a neutron source with an intensity of :math: `1 \times 10^{10}` neutrons / second.
+for 3.5 days. The following content demonstrates the process of caculating the
+shutdown dose rate of this model at the time of 1 hour after shutdown.
 Example files can be found in `r2s_examples <https://github.com/pyne/data/blob/master/r2s_examples.tar.gz>`_.
 
 
@@ -131,7 +151,8 @@ Example files can be found in `r2s_examples <https://github.com/pyne/data/blob/m
 
 Build the model using Trelis (TM) and set material group and export to `geom_without_material.h5m`.
 
-Prepare material library, build material library. The material lib is then generated in file "example_material_lib.h5".
+Prepare material library, build material library. The material library is then
+generated in file "example_material_lib.h5".
 
 .. code-block:: bash
 
@@ -145,7 +166,8 @@ Combine the geometry file and the material library, using  the following command
 
    $ uwuw_preproc geom.h5m -v -l example_material_lib.h5
 
-Prepare input file, define source, tally and other data cards. Example input file can be seen in r2s_examples/neutron_transport/input.
+Prepare input file, define source, tally and other data cards. Example input
+file can be seen in r2s_examples/neutron_transport/input.
 
 Neutron transport calculation. A meshtal will be generated in this step.
 
@@ -168,7 +190,7 @@ Perform R2S setup. The 'alara_params.txt' and 'config.ini' will be generated in 
    $ r2s.py setup
 
 Modify important parameters in the 'alara_params.txt' and 'config.ini' according to the problem.
-Both are two modes of R2S: the voxel R2S and sub-voxel R2S.
+There are two modes of R2S: the voxel R2S and sub-voxel R2S [6]_.
 Examples input files can be seen in both 'r2s_examples/r2s_run' and 'subvoxel_r2s_run'.
 By setting the parameter 'sub_voxel' (in 'config.ini') to be 'False', the user can perform voxel R2S described in [4]_.
 By setting the parameter 'sub_voxel' to be 'True', the user can perform sub-voxel R2S without any other change.
@@ -221,3 +243,10 @@ References
        Activation for Fusion Systems with PyNE", Transactions of the American 
        Nuclear Society, Vol. 112, (2015).
 
+.. [5] X. Zhang, P. C. Shriwise, S. Liu, “Implementation and Verification of
+       PyNE R2S with DAG-OpenMC” Fusion Engineering and Design, Vol. 160:
+       111837, (2020).
+
+.. [6] X. ZHANG, P. C. Shriwise, S. Liu, P. P.H. Wilson, “PyNE Sub-Voxel R2S
+       for Shutdown Dose Rate Analysis”, International Conference on
+       Mathematics, Computational Methods & Reactor Physics (M&C 2019), (2019).

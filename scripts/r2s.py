@@ -187,6 +187,7 @@ def step2():
         tags = {('TOTAL', dt): tag_name}
         photon_source_hdf5_to_mesh(mesh, h5_file, tags, sub_voxel=sub_voxel,
                                    cell_mats=cell_mats)
+        p_src_filename = '{0}_{1}.h5m'.format(output, i+1)
         intensity = total_photon_source_intensity(mesh, tag_name,
                                                   sub_voxel=sub_voxel)
         mesh = tag_e_bounds(mesh, e_bounds)
