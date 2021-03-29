@@ -151,7 +151,7 @@ Example files can be found in `r2s_examples <https://github.com/pyne/data/blob/m
 
 Build the model using Trelis (TM) and set material group and export to `geom_without_material.h5m`.
 
-Prepare material library, build material library. The material lib is then
+Prepare material library, build material library. The material library is then
 generated in file "example_material_lib.h5".
 
 .. code-block:: bash
