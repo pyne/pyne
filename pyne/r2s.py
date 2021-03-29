@@ -76,7 +76,7 @@ def resolve_mesh(mesh_reference, tally_num=None, flux_tag="n_flux",
         else:
             raise ValueError("meshtal argument not a Mesh object, Meshtal"
                              " object, MCNP meshtal file or meshtal.h5m file.")
-    # mesh_references is a Meshtal or state point file but no tally_num provided
+    # mesh_references is a Meshtal or statepoint file but no tally_num provided
     else:
         raise ValueError(
             "Need to provide a tally number when reading a Meshtal or"
@@ -350,4 +350,3 @@ def tag_version(m):
           storage_type='sparse')
     m.get_tag(_SOURCE_VERSION_TAG_NAME)[m] = _SOURCE_FILE_VERSION
     return m
-
