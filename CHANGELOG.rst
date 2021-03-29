@@ -20,6 +20,7 @@ Next Version
    * Fix the compatibility problem of transmuters with numpy version v1.19.x
    * Fix to MaterialLibrary.__delitem__ to call the underlying instance.
    * Few fixes to enable Windows compilation the DAGMC deps.
+   * Fix documentation to say that the minimum Cython version is 0.29.21 (#1370)
 
 **Maintenance**
 
