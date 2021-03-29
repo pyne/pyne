@@ -40,7 +40,7 @@ pyne.source_sampling module. PyNE R2S has been validated
 using the Frascati Neutron Generator ITER benchmark problem, with close
 agreement to experimental results [4]_.
 
-PyNE R2S is now supports DAG-OpenMC [5]_.
+PyNE R2S now supports DAG-OpenMC [5]_.
 
 ***************
 Using PyNE R2S
