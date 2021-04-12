@@ -1116,24 +1116,29 @@ class Mesh(object):
         """Private function to do mesh +, -, *, /."""
         # Exclude error tags in a case a StatMesh is mistakenly initialized as
         # a Mesh object.
-        tags = set(tag for tag in tags if not tag.endswith('_error'))
+        tag_list = []
+        
+        if isinstance(tags, str):
+            tag_list = [tags]
+        else:
+            tag_list = tags
 
+        tag_list = set(tag for tag in tag_list if not tag.endswith('_error'))
+        
         if in_place:
             mesh_1 = self
         else:
             mesh_1 = copy.copy(self)
-        for tag in tags:
+        for tag in tag_list:
             for ve_1, ve_2 in \
                 zip(zip(iter(meshset_iterate(mesh_1.mesh, mesh_1.structured_set, types.MBMAXTYPE, dim=3))),
                     zip(iter(meshset_iterate(other.mesh,  other.structured_set, types.MBMAXTYPE, dim=3)))):
                 mesh_1_tag = mesh_1.mesh.tag_get_handle(tag)
                 other_tag = other.mesh.tag_get_handle(tag)
-                val = _ops[op](mesh_1.mesh.tag_get_data(mesh_1_tag, ve_1, flat=True)[0],
-                               other.mesh.tag_get_data(other_tag,   ve_2, flat=True)[0])
-                mesh_1.mesh.tag_set_data(mesh_1_tag, ve_1,
-                                         _ops[op](mesh_1.mesh.tag_get_data(mesh_1_tag, ve_1, flat=True)[0],
-                                                  other.mesh.tag_get_data(other_tag,   ve_2, flat=True)[0]))
-
+                val = _ops[op](mesh_1.mesh.tag_get_data(mesh_1_tag, ve_1, flat=True),
+                               other.mesh.tag_get_data(other_tag,   ve_2, flat=True))
+                #removed the [0] from the ops call
+                mesh_1.mesh.tag_set_data(mesh_1_tag, ve_1, val)
         return mesh_1
 
     def common_ve_tags(self, other):
