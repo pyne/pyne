@@ -13,7 +13,8 @@ Next Version
    * Setting CMP0074 in CMakeLists.txt to allow `*_ROOT` variables in the CMake command.
    * Change the e_bounds tag unit from eV to MeV (#1353)
    * Add functions to tag the decay_time, source_intensity and version to source.h5m (#1352)
-
+   * Add vector capabilities to the _do_ops() method in mesh.py (#1371)
+     
 **Fix**
 
    * An e_bounds reading problem when old sampler is used without e_bounds text file (#1353)
