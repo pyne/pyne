@@ -269,26 +269,26 @@ class TestArithmetic():
                                   structured = True)
         self.volumes1 = list(self.mesh_1_vector.structured_iterate_hex("xyz"))
        
-        test_vector_tag = self.mesh_1_vector.mesh.tag_get_handle("testing", 
+        self.test_vector_tag = self.mesh_1_vector.mesh.tag_get_handle("testing", 
                                                           2,
                                                           types.MB_TYPE_DOUBLE,
                                                           types.MB_TAG_DENSE,
                                                           create_if_missing=True)
 
         test_vector_data = [[1.0, 2.0], [1.5, 2.5], [-1.0, -1.5], [-2.0, -2.5]]        
-        self.mesh_1_vector.mesh.tag_set_data(test_vector_tag, self.volumes1, test_vector_data)
+        self.mesh_1_vector.mesh.tag_set_data(self.test_vector_tag, self.volumes1, test_vector_data)
         
         self.mesh_2_vector = Mesh(structured_coords=[[-1, 0, 1], [-1, 0, 1], [0, 1]],
                                   structured = True)
         volumes2 = list(self.mesh_2_vector.structured_iterate_hex("xyz"))
-        test_vector_tag = self.mesh_2_vector.mesh.tag_get_handle("testing",
+        self.test_vector_tag = self.mesh_2_vector.mesh.tag_get_handle("testing",
                                                           2,
                                                           types.MB_TYPE_DOUBLE,
                                                           types.MB_TAG_DENSE,
                                                           create_if_missing=True)
 
         test_vector_data = [[15.0, 25.0], [10.0, 20.0], [-15.0, -25.0], [-20.0, -25.0]]
-        self.mesh_2_vector.mesh.tag_set_data(test_vector_tag, volumes2, test_vector_data)
+        self.mesh_2_vector.mesh.tag_set_data(self.test_vector_tag, volumes2, test_vector_data)
 
 
 
@@ -336,32 +336,32 @@ class TestArithmetic():
         self.arithmetic_mesh_vector_setup()
         self.mesh_1_vector._do_op(self.mesh_2_vector, "testing", "+")
         exp_res = [[16, 27], [11.5, 22.5], [-16, -26.5], [-22, -27.5]]
-        test_tag = self.mesh_1_vector.mesh.tag_get_handle("testing")
-        obs_res = self.mesh_1_vector.mesh.tag_get_data(test_tag, self.volumes1) 
+        self.test_vector_tag = self.mesh_1_vector.mesh.tag_get_handle("testing")
+        obs_res = self.mesh_1_vector.mesh.tag_get_data(self.test_vector_tag, self.volumes1) 
         assert_array_almost_equal(exp_res, obs_res)
 
     def test_subtract_vectors_mesh(self):
         self.arithmetic_mesh_vector_setup()
         self.mesh_1_vector._do_op(self.mesh_2_vector, "testing", "-")
         exp_res = [[-14, -23], [-8.5, -17.5], [14, 23.5], [18, 22.5]]
-        test_tag = self.mesh_1_vector.mesh.tag_get_handle("testing")
-        obs_res = self.mesh_1_vector.mesh.tag_get_data(test_tag, self.volumes1)
+        self.test_vector_tag = self.mesh_1_vector.mesh.tag_get_handle("testing")
+        obs_res = self.mesh_1_vector.mesh.tag_get_data(self.test_vector_tag, self.volumes1)
         assert_array_almost_equal(exp_res, obs_res)
     
     def test_multiply_vectors_mesh(self):
         self.arithmetic_mesh_vector_setup()
         self.mesh_1_vector._do_op(self.mesh_2_vector, "testing", "*")
         exp_res = [[15, 50], [15, 50], [15, 37.5], [40, 62.5]]
-        test_tag = self.mesh_1_vector.mesh.tag_get_handle("testing")
-        obs_res = self.mesh_1_vector.mesh.tag_get_data(test_tag, self.volumes1)
+        self.test_vector_tag = self.mesh_1_vector.mesh.tag_get_handle("testing")
+        obs_res = self.mesh_1_vector.mesh.tag_get_data(self.test_vector_tag, self.volumes1)
         assert_array_almost_equal(exp_res, obs_res)
     
     def test_divide_vectors_mes(self):
         self.arithmetic_mesh_vector_setup()
         self.mesh_1_vector._do_op(self.mesh_2_vector, "testing", "/")
         exp_res = [[.066667, .08], [.15, .125], [.066667, .06], [.1, .1]]
-        test_tag = self.mesh_1_vector.mesh.tag_get_handle("testing")
-        obs_res = self.mesh_1_vector.mesh.tag_get_data(test_tag, self.volumes1)
+        self.test_vector_tag = self.mesh_1_vector.mesh.tag_get_handle("testing")
+        obs_res = self.mesh_1_vector.mesh.tag_get_data(self.test_vector_tag, self.volumes1)
         assert_array_almost_equal(exp_res, obs_res)
 
     def test_add_mesh(self):
