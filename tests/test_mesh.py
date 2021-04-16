@@ -357,7 +357,7 @@ class TestArithmetic():
         obs_res = self.mesh_1_vector.mesh.tag_get_data(test_vector_tag, self.volumes1)
         assert_array_almost_equal(exp_res, obs_res)
     
-    def test_divide_vectors_mes(self):
+    def test_divide_vectors_mesh(self):
         self.arithmetic_mesh_vector_setup()
         self.mesh_1_vector._do_op(self.mesh_2_vector, self.vector_tag_name, "/")
         exp_res = [[.066667, .08], [.15, .125], [.066667, .06], [.1, .1]]
