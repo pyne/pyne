@@ -264,6 +264,35 @@ class TestArithmetic():
         flux_data = [1.1, 2.2, 3.3, 4.4]
         self.mesh_2.mesh.tag_set_data(flux_tag, volumes1, flux_data)
 
+    def arithmetic_mesh_vector_setup(self):
+        self.vector_tag_name = "testing"
+        self.mesh_1_vector = Mesh(structured_coords=[[-1, 0, 1], [-1, 0, 1], [0, 1]],
+                                  structured = True)
+        self.volumes1 = list(self.mesh_1_vector.structured_iterate_hex("xyz"))
+       
+        test_vector_tag = self.mesh_1_vector.mesh.tag_get_handle(self.vector_tag_name, 
+                                                          2,
+                                                          types.MB_TYPE_DOUBLE,
+                                                          types.MB_TAG_DENSE,
+                                                          create_if_missing=True)
+
+        test_vector_data = [[1.0, 2.0], [1.5, 2.5], [-1.0, -1.5], [-2.0, -2.5]]        
+        self.mesh_1_vector.mesh.tag_set_data(test_vector_tag, self.volumes1, test_vector_data)
+        
+        self.mesh_2_vector = Mesh(structured_coords=[[-1, 0, 1], [-1, 0, 1], [0, 1]],
+                                  structured = True)
+        volumes2 = list(self.mesh_2_vector.structured_iterate_hex("xyz"))
+        test_vector_tag = self.mesh_2_vector.mesh.tag_get_handle(self.vector_tag_name,
+                                                          2,
+                                                          types.MB_TYPE_DOUBLE,
+                                                          types.MB_TAG_DENSE,
+                                                          create_if_missing=True)
+
+        test_vector_data = [[15.0, 25.0], [10.0, 20.0], [-15.0, -25.0], [-20.0, -25.0]]
+        self.mesh_2_vector.mesh.tag_set_data(test_vector_tag, volumes2, test_vector_data)
+
+
+
     def arithmetic_statmesh_setup(self):
         self.statmesh_1 = StatMesh(structured_coords=[[-1, 0, 1], [-1, 0, 1], [0, 1]],
                                    structured=True)
@@ -302,6 +331,39 @@ class TestArithmetic():
         error_data = [0.1, 0.2, 0.3, 0.4]
         self.statmesh_2.mesh.tag_set_data(flux_tag, volumes1, flux_data)
         self.statmesh_2.mesh.tag_set_data(error_tag, volumes2, error_data)
+
+
+    def test_add_vectors_mesh(self):
+        self.arithmetic_mesh_vector_setup()
+        self.mesh_1_vector._do_op(self.mesh_2_vector, self.vector_tag_name, "+")
+        exp_res = [[16, 27], [11.5, 22.5], [-16, -26.5], [-22, -27.5]]
+        test_vector_tag = self.mesh_1_vector.mesh.tag_get_handle(self.vector_tag_name)
+        obs_res = self.mesh_1_vector.mesh.tag_get_data(test_vector_tag, self.volumes1) 
+        assert_array_almost_equal(exp_res, obs_res)
+
+    def test_subtract_vectors_mesh(self):
+        self.arithmetic_mesh_vector_setup()
+        self.mesh_1_vector._do_op(self.mesh_2_vector, self.vector_tag_name, "-")
+        exp_res = [[-14, -23], [-8.5, -17.5], [14, 23.5], [18, 22.5]]
+        test_vector_tag = self.mesh_1_vector.mesh.tag_get_handle(self.vector_tag_name)
+        obs_res = self.mesh_1_vector.mesh.tag_get_data(test_vector_tag, self.volumes1)
+        assert_array_almost_equal(exp_res, obs_res)
+    
+    def test_multiply_vectors_mesh(self):
+        self.arithmetic_mesh_vector_setup()
+        self.mesh_1_vector._do_op(self.mesh_2_vector, self.vector_tag_name, "*")
+        exp_res = [[15, 50], [15, 50], [15, 37.5], [40, 62.5]]
+        test_vector_tag = self.mesh_1_vector.mesh.tag_get_handle(self.vector_tag_name)
+        obs_res = self.mesh_1_vector.mesh.tag_get_data(test_vector_tag, self.volumes1)
+        assert_array_almost_equal(exp_res, obs_res)
+    
+    def test_divide_vectors_mesh(self):
+        self.arithmetic_mesh_vector_setup()
+        self.mesh_1_vector._do_op(self.mesh_2_vector, self.vector_tag_name, "/")
+        exp_res = [[.066667, .08], [.15, .125], [.066667, .06], [.1, .1]]
+        test_vector_tag = self.mesh_1_vector.mesh.tag_get_handle(self.vector_tag_name)
+        obs_res = self.mesh_1_vector.mesh.tag_get_data(test_vector_tag, self.volumes1)
+        assert_array_almost_equal(exp_res, obs_res)
 
     def test_add_mesh(self):
         self.arithmetic_mesh_setup()
@@ -395,6 +457,7 @@ class TestArithmetic():
                    for vol in self.statmesh_1.structured_iterate_hex("xyz")]
         assert_array_almost_equal(exp_res, obs_res)
         assert_array_almost_equal(exp_err, obs_err)
+
 
 #############################################
 # Test Structured mesh iteration functionality
