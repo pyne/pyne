@@ -333,6 +333,15 @@ class TestArithmetic():
         self.statmesh_2.mesh.tag_set_data(error_tag, volumes2, error_data)
 
 
+    def test_mutliply_vector_by_scalar(self):
+        self.arithmetic_mesh_vector_setup()
+        scalar = 12.0
+        test_vector_tag = self.mesh_1_vector.mesh.tag_get_handle(self.vector_tag_name)
+        test_data = self.mesh_1_vector.mesh.tag_get_data(test_vector_tag, self.volumes1)
+        exp_res = [[12.0, 24.0], [18.0, 30.0], [-12.0, -18.0], [-24.0, -30.0]]
+        obs_res = scalar*test_data
+        assert_array_almost_equal(exp_res, obs_res)
+    
     def test_add_vectors_mesh(self):
         self.arithmetic_mesh_vector_setup()
         self.mesh_1_vector._do_op(self.mesh_2_vector, self.vector_tag_name, "+")
