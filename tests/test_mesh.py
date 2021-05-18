@@ -278,7 +278,7 @@ class TestArithmetic():
 
         test_vector_data = [[1.0, 2.0], [1.5, 2.5], [-1.0, -1.5], [-2.0, -2.5]]        
         self.mesh_1_vector.mesh.tag_set_data(test_vector_tag, self.volumes1, test_vector_data)
-        
+     
         self.mesh_2_vector = Mesh(structured_coords=[[-1, 0, 1], [-1, 0, 1], [0, 1]],
                                   structured = True)
         volumes2 = list(self.mesh_2_vector.structured_iterate_hex("xyz"))
@@ -360,6 +360,20 @@ class TestArithmetic():
         obs_res = scalar_data*vector_data
         assert_array_almost_equal(exp_res, obs_res)
 
+    def test_multiply_vector_tag_by_scalar_tag_element(self):
+        self.arithmetic_mesh_vector_setup()
+        test_scalar_tag = self.mesh_1_vector.mesh.tag_get_handle(self.scalar_tag_name)
+        test_vector_tag = self.mesh_1_vector.mesh.tag_get_handle(self.vector_tag_name)
+        scalar_data = self.mesh_1_vector.mesh.tag_get_data(test_scalar_tag, self.volumes1)
+        vector_data = self.mesh_1_vector.mesh.tag_get_data(test_vector_tag, self.volumes1)
+        index = 0
+        exp_res = [[[12.0, 24.0], [18.0, 30.0], [-12.0, -18.0], [-24.0, -30.0]],
+                   [[6.0, 12.0], [9.0, 15.0], [-6.0, -9.0], [-12.0, -15.0]],
+                   [[3.0, 6.0], [4.5, 7.5], [-3.0, -4.5], [-6.0, -7.5]],
+                   [[1.5, 3.0], [2.25, 3.75], [-1.5, -2.25], [-3.0, -3.75]]]
+        for result in exp_res:
+            assert_array_almost_equal(result, scalar_data[index]*vector_data)
+            index += 1
 
     def test_add_vectors_mesh(self):
         self.arithmetic_mesh_vector_setup()
