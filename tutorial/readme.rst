@@ -23,3 +23,4 @@ and Jupyter (v4.0+). Note that only `yt-3.0 <https://bitbucket.org/yt_analysis/y
 supports PyNE.  Be sure to use this version of yt rather 
 than the more stable v2.x series.
 
+"""I suggest adding a reference for people to contact incase they have questions here: _________"""

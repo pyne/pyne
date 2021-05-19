@@ -66,3 +66,5 @@ it is as easy as forking the repository on GitHub, making your changes, and
 issuing a pull request. If you have any questions about this process don't
 hesitate to ask the mailing list (https://groups.google.com/forum/#!forum/pyne-dev,
 pyne-dev@googlegroups.com).
+
+Make sure to be appropriate on the forum and provide as clear of an explanation (with examples if possible) of any problems or questions you might have.

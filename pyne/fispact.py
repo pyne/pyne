@@ -200,9 +200,11 @@ def check_fisp_version(data):
 
 
 def isFisII(data):
-    """boolean check if file is fispact-ii output """
-    v = check_fisp_version(data)
-    if v == "FISPACT-II":
+    """boolean check if file is fispact-ii output (or fispact output for the program user's convinience)"""
+    v = check_fisp_version(data) 
+    if v == "FISPACT":
+        print("File is FISPACT instead of FISPACT-II")
+    elif v == "FISPACT-II":
         return True
     else:
         return False
