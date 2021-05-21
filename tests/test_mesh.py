@@ -281,7 +281,7 @@ class TestArithmetic():
      
         self.mesh_2_vector = Mesh(structured_coords=[[-1, 0, 1], [-1, 0, 1], [0, 1]],
                                   structured = True)
-        volumes2 = list(self.mesh_2_vector.structured_iterate_hex("xyz"))
+        self.volumes2 = list(self.mesh_2_vector.structured_iterate_hex("xyz"))
         test_vector_tag = self.mesh_2_vector.mesh.tag_get_handle(self.vector_tag_name,
                                                           2,
                                                           types.MB_TYPE_DOUBLE,
@@ -289,7 +289,7 @@ class TestArithmetic():
                                                           create_if_missing=True)
 
         test_vector_data = [[15.0, 25.0], [10.0, 20.0], [-15.0, -25.0], [-20.0, -25.0]]
-        self.mesh_2_vector.mesh.tag_set_data(test_vector_tag, volumes2, test_vector_data)
+        self.mesh_2_vector.mesh.tag_set_data(test_vector_tag, self.volumes2, test_vector_data)
 
         self.scalar_tag_name = "test_scalar_tag"
         test_scalar_tag = self.mesh_1_vector.mesh.tag_get_handle(self.scalar_tag_name,
@@ -373,6 +373,21 @@ class TestArithmetic():
                    [[1.5, 3.0], [2.25, 3.75], [-1.5, -2.25], [-3.0, -3.75]]]
         for result in exp_res:
             assert_array_almost_equal(result, scalar_data[index]*vector_data)
+            index += 1
+
+    def test_multiply_vector_tag_by_vector_tag_element(self):
+        self.arithmetic_mesh_vector_setup()
+        test_vector_tag_1 = self.mesh_1_vector.mesh.tag_get_handle(self.vector_tag_name)
+        test_vector_tag_2 = self.mesh_2_vector.mesh.tag_get_handle(self.vector_tag_name)
+        vector_data_1 = self.mesh_1_vector.mesh.tag_get_data(test_vector_tag_1, self.volumes1)
+        vector_data_2 = self.mesh_2_vector.mesh.tag_get_data(test_vector_tag_2, self.volumes2)
+        index = 0
+        exp_res = [[[15.0, 50.0], [10.0, 40.0], [-15.0, -50.0], [-20.0, -50.0]], 
+                   [[22.5, 62.5], [15.0, 50.0], [-22.5, -62.5], [-30.0, -62.5]], 
+                   [[-15.0, -37.5], [-10.0, -30.0], [15.0, 37.5], [20.0, 37.5]], 
+                   [[-30.0, -62.5], [-20.0, -50.0], [30.0, 62.5], [40.0, 62.5]]]
+        for result in exp_res:
+            assert_array_almost_equal(result, vector_data_1[index]*vector_data_2)
             index += 1
 
     def test_add_vectors_mesh(self):
