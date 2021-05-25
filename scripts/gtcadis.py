@@ -24,7 +24,7 @@ step1:
     # Path to hdf5 geometry file for photon transport
     geom_file:
     # Volume ID of adjoint photon source cell on
-    # DAGMC input [Trelis/Cubit .sat file]
+    # DAGMC input [Cubit .sat file]
     src_cell:
     # Volume [cm^3] of source cell (detector)
     src_vol:

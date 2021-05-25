@@ -149,7 +149,7 @@ Example files can be found in `r2s_examples <https://github.com/pyne/data/blob/m
 
     **Figure 1:** *Geometry of R2S example (X-Y cross section).*
 
-Build the model using Trelis (TM) and set material group and export to `geom_without_material.h5m`.
+Build the model using Cubit (TM) and set material group and export to `geom_without_material.h5m`.
 
 Prepare material library, build material library. The material library is then
 generated in file "example_material_lib.h5".
