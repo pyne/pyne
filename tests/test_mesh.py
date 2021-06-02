@@ -344,20 +344,19 @@ class TestArithmetic():
     def test_mutliply_vector_by_scalar(self):
         self.arithmetic_mesh_vector_setup()
         scalar = 12.0
+        self.mesh_1_vector.multiply_vector_tag_by_scalar(self.vector_tag_name, scalar)
         test_vector_tag = self.mesh_1_vector.mesh.tag_get_handle(self.vector_tag_name)
-        test_data = self.mesh_1_vector.mesh.tag_get_data(test_vector_tag, self.volumes1)
+        obs_res = self.mesh_1_vector.mesh.tag_get_data(test_vector_tag, self.volumes1)
         exp_res = [[12.0, 24.0], [18.0, 30.0], [-12.0, -18.0], [-24.0, -30.0]]
-        obs_res = scalar*test_data
         assert_array_almost_equal(exp_res, obs_res)
     
     def test_multiply_vector_tag_by_scalar_tag(self):
         self.arithmetic_mesh_vector_setup()
-        test_scalar_tag = self.mesh_1_vector.mesh.tag_get_handle(self.scalar_tag_name)
+        self.mesh_1_vector.multiply_vector_tag_by_scalar(self.vector_tag_name, self.scalar_tag_name)
         test_vector_tag = self.mesh_1_vector.mesh.tag_get_handle(self.vector_tag_name)
-        scalar_data = self.mesh_1_vector.mesh.tag_get_data(test_scalar_tag, self.volumes1)
         vector_data = self.mesh_1_vector.mesh.tag_get_data(test_vector_tag, self.volumes1)
         exp_res = [[12.0, 24.0], [9.0, 15.0], [-3.0, -4.5], [-3.0, -3.75]]
-        obs_res = scalar_data*vector_data
+        obs_res = self.mesh_1_vector.mesh.tag_get_data(test_vector_tag, self.volumes1)
         assert_array_almost_equal(exp_res, obs_res)
 
     def test_multiply_vector_tag_by_scalar_tag_element(self):
