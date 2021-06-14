@@ -1140,6 +1140,23 @@ class Mesh(object):
                 #removed the [0] from the ops call
                 mesh_1.mesh.tag_set_data(mesh_1_tag, ve_1, val)
         return mesh_1
+    
+    def multiply_vector_tag_by_scalar(self, vector_tag_name, scalar):
+        #volume_elements = list(self.structured_iterate_hex("zyx")) #default ordering
+        volume_elements = list(meshset_iterate(self.mesh, self.structured_set, types.MBMAXTYPE, dim = 3))
+        if isinstance(scalar, str):
+            scalar_tag = self.mesh.tag_get_handle(scalar)
+            scalar_data = self.mesh.tag_get_data(scalar_tag, volume_elements)
+        else:
+            scalar_data = scalar
+        vector_tag = self.mesh.tag_get_handle(vector_tag_name)
+        vector_data = self.mesh.tag_get_data(vector_tag, volume_elements)
+        new_data = scalar_data*vector_data
+        print(scalar_data)
+        print(vector_data)
+        print(new_data)
+        self.mesh.tag_set_data(vector_tag, volume_elements, new_data)
+        print(self.mesh.tag_get_data(vector_tag, volume_elements))
 
     def common_ve_tags(self, other):
         """Returns the volume element tags in common between self and other."""
