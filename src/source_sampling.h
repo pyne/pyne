@@ -263,7 +263,6 @@ namespace pyne {
     // get has_cell_fracs
     bool check_cell_fracs(moab::Tag cell_fracs_tag);
   };
-} //end namespace pyne
 
 /// OpenMC custom source
 #ifdef OPENMC_SOURCE_H
@@ -273,11 +272,20 @@ namespace pyne {
 #include "openmc/random_lcg.h"
 #include "openmc/source.h"
 #include "openmc/particle.h"
-class PyneSource : public openmc::CustomSource
+class PyneSource : public openmc::Source
 {
-  openmc::Particle::Bank sample(uint64_t* seed);
+  openmc::SourceSite sample(uint64_t* seed);
 };
+
+// A function to create a unique pointer to an instance of this class when generated
+// via a plugin call using dlopen/dlsym.
+// You must have external C linkage here otherwise dlopen will not find the file
+std::unique_ptr<PyneSource> openmc_create_source(std::string parameters)
+{
+  return std::make_unique<PyneSource>();
+}
 #endif // OPENMC_SOURCE_H
+} //end namespace pyne
 
 #ifdef __cplusplus
 } // extern "C"
