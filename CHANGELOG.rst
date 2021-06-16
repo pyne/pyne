@@ -1,11 +1,22 @@
 ===============
-pyne Change Log
+PyNE Change Log
 ===============
 
 Next Version
 ============
 
 **New Capabilities**
+
+**Change**
+     
+**Fix**
+
+**Maintenance**
+
+
+v0.7.4
+======
+
 
 **Change**
 
