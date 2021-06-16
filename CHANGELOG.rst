@@ -14,7 +14,7 @@ Next Version
 **Maintenance**
 
 
-v0.7.3
+v0.7.4
 ======
 
 
