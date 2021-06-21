@@ -339,11 +339,13 @@ class TestArithmetic():
         self.arithmetic_mesh_vector_setup()
         exp_res = [[12.0, 24.0], [9.0, 15.0], [-3.0, -4.5], [-3.0, -3.75]] 
         scalar_data = self.mesh_1_vector.test_scalar_tag[:]
-        vector_data = self.mesh_1_vector.testing[:]
-        obs_res = scalar_data * vector_data 
+        vector_data = self.mesh_1_vector.testing[:].T
+        print(scalar_data)
+        print(vector_data)
+        obs_res =(scalar_data * vector_data).T
         assert_array_almost_equal(exp_res, obs_res)
 
-"""
+    """
     def test_multiply_vector_tag_by_scalar_tag_element(self):
         self.arithmetic_mesh_vector_setup()
         test_scalar_tag = self.mesh_1_vector.mesh.tag_get_handle(self.scalar_tag_name)
@@ -374,7 +376,7 @@ class TestArithmetic():
         for result in exp_res:
             assert_array_almost_equal(result, vector_data_1[index]*vector_data_2)
             index += 1
-"""
+    """
 
     def test_add_vectors_mesh(self):
         self.arithmetic_mesh_vector_setup()
