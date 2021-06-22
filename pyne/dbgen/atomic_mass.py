@@ -17,7 +17,7 @@ QA_warn(__name__)
 # Note that since ground state and meta-stable isotopes are of the same atomic mass,
 # the meta-stables have been discluded from the following data sets.
 
-MASS_FILE = 'mass.mas16'
+MASS_FILE = 'mass.mas20'
 
 
 def copy_atomic_mass_adjustment(build_dir=""):
@@ -35,7 +35,7 @@ def copy_atomic_mass_adjustment(build_dir=""):
 
 # Note, this regex specifically leaves our free neutrons
 # amdc_regex = re.compile('[ \d-]*? (\d{1,3})[ ]{1,4}(\d{1,3}) [A-Z][a-z]? .*? (\d{1,3}) ([ #.\d]{10,11}) ([ #.\d]{1,10})[ ]*?$')
-amdc_regex = re.compile('[ \d-]*? (\d{1,3})[ ]{1,4}(\d{1,3}) [A-Z][a-z]? .*? (\d{1,3}) ([ #.\d]{5,12}) ([ #.\d]+)[ ]*?$')
+amdc_regex = re.compile('[ \d-]*? (\d{1,3})[ ]{1,4}(\d{1,3}) [A-Z][a-z]? .*? (\d{1,3}) ([ #.\d]{6,13}) ([ #.\d]+)[ ]*?$')
 
 
 def parse_atomic_mass_adjustment(build_dir=""):
@@ -143,7 +143,7 @@ def make_atomic_mass(args):
                 return
 
     # Then grab mass data
-    print("Copying AME 2016 atomic mass data.")
+    print("Copying AME 2020 atomic mass data.")
     copy_atomic_mass_adjustment(build_dir)
 
     # Make atomic mass table once we have the array
