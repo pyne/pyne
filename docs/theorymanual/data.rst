@@ -11,7 +11,7 @@ fundamental nuclear data stored in the `nuc_data.h5` HDF5 database. These
 include the following distinct datasets:
 
 * Fundamental constants common to nuclear engineering problems
-* Atomic mass data (JAEA)
+* Atomic mass data (AMDC)
 * Natural isotopic abundance data (IUPAC2009)
 * Energy/fission (ORIGEN-S) 
 * Gamma Energy/fission (ORIGEN-S)
@@ -28,6 +28,7 @@ Additional Information
 **********************
 For further information, please see:
 
+* `Atomic Mass Data Center (AMDC) <https://www-nds.iaea.org/amdc/>`_
 * `The ENSDF manual <https://www-nds.iaea.org/public/documents/ensdf/ensdf-manual.pdf>`_, 
 * `IAEA nuclear data section <https://www-nds.iaea.org/>`_, 
 * `ORIGEN-S data <https://info.ornl.gov/sites/publications/Files/Pub57380.pdf>`_,
