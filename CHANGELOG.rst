@@ -11,6 +11,8 @@ Next Version
      
 **Fix**
 
+   * Attribution for the atomic mass data in the data theory doc page (#1387)
+
 **Maintenance**
 
 
