@@ -12,6 +12,7 @@ Next Version
 **Fix**
 
    * Attribution for the atomic mass data in the data theory doc page (#1387)
+   * specify encoding when reading files in amalgamation (#1386)
 
 **Maintenance**
 
