@@ -13,6 +13,7 @@ Next Version
 
    * Attribution for the atomic mass data in the data theory doc page (#1387)
    * specify encoding when reading files in amalgamation (#1386)
+   * little fix for usage of filesystem::canonical() for windows... (#1390)
 
 **Maintenance**
 
