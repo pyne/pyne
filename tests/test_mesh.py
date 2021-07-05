@@ -326,33 +326,6 @@ class TestArithmetic():
         self.statmesh_2.mesh.tag_set_data(flux_tag, volumes1, flux_data)
         self.statmesh_2.mesh.tag_set_data(error_tag, volumes2, error_data)
 
-    def test_slice_operator_vector_tag(self):
-        self.arithmetic_mesh_vector_setup()
-        exp_res = [[1.0, 2.0], [1.5, 2.5], [-1.0, -1.5], [-2.0, -2.5]]
-        mesh_1_vector_data = self.mesh_1_vector.testing[:]
-        assert_array_almost_equal(exp_res, mesh_1_vector_data)
-        mesh_2_vector_data = self.mesh_2_vector.testing[:]
-        index = 0
-        exp_res = [[[15.0, 50.0], [10.0, 40.0], [-15.0, -50.0], [-20.0, -50.0]], 
-                   [[22.5, 62.5], [15.0, 50.0], [-22.5, -62.5], [-30.0, -62.5]], 
-                   [[-15.0, -37.5], [-10.0, -30.0], [15.0, 37.5], [20.0, 37.5]], 
-                   [[-30.0, -62.5], [-20.0, -50.0], [30.0, 62.5], [40.0, 62.5]]]
-
-        for result in exp_res:
-            assert_array_almost_equal(result, mesh_1_vector_data[index]*mesh_2_vector_data)
-            index += 1
-
-    def test_slice_operator_scalar_tag(self):
-        self.arithmetic_mesh_vector_setup()
-        exp_res = [12.0, 6.0, 3.0, 1.5]
-        mesh_1_scalar_data = self.mesh_1_vector.test_scalar_tag[:]
-        assert_array_almost_equal(exp_res, mesh_1_scalar_data)
-        mesh_1_vector_data = self.mesh_1_vector.testing[:]
-        index = 0
-        exp_res = [[12.0, 24.0], [9.0, 15.0], [-3.0, -4.5], [-3.0, -3.75]]
-        obs_res = mesh_1_scalar_data[:, None] * mesh_1_vector_data
-        assert_array_almost_equal(exp_res, obs_res) 
- 
     def test_add_vectors_mesh(self):
         self.arithmetic_mesh_vector_setup()
         self.mesh_1_vector._do_op(self.mesh_2_vector, self.vector_tag_name, "+")
@@ -899,6 +872,36 @@ def test_nativetag_expand():
     assert_array_equal(m.clam_000[:], 1.1)
     m.clam_001 = NativeMeshTag(1, float)
     assert_array_equal(m.clam_001[:], 2.2)
+
+def test_nativetag_mult():
+    m = Mesh(structured=True, structured_coords=[[-1, 0, 1], [0, 1], [0,1]])
+    m.peach = NativeMeshTag(1, float)
+    m.peach[:] = [1.5, 2.5]
+    m.tangerine = NativeMeshTag(1, float) 
+    m.tangerine[:] = [5.0, 10.0]
+    assert_array_almost_equal(m.peach.mult(m.tangerine), [7.5, 25.0]) #multiplying two scalar-valued tags
+    
+    m.plum = NativeMeshTag(2, float)
+    m.plum[:] = [[5.0, 10.0], [15.0, 20.0]]
+    assert_array_almost_equal(m.peach.mult(m.plum), [[7.5, 25.0], [22.5, 50.0]]) #multiplying scalar-valued tag by vector-valued tag
+    
+    assert_array_almost_equal(m.plum.mult(m.tangerine), [[25.0, 100.0], [75.0, 200.0]]) #multiplying vector-valued tag by scalar-valued tag
+    
+    m.grapefruit = NativeMeshTag(2, float)
+    m.grapefruit[:] = [[2.0, 4.0], [3.0, 6.0]]
+    assert_array_almost_equal(m.plum.mult(m.grapefruit), [[10.0, 40.0], [45.0, 120.0]]) #multiplying two vector-valued tags
+
+    cherry = 12
+    assert_array_almost_equal(m.plum.mult(cherry), [[60.0, 120.0], [180.0, 240.0]]) #multiplying by int
+    
+    cherry = 5.0
+    assert_array_almost_equal(m.plum.mult(cherry), [[25.0, 50.0], [75.0, 100.0]]) #multiplying by float
+    
+    cherry = [1.0, 2.0]
+    assert_array_almost_equal(m.grapefruit.mult(cherry), [[2.0, 8.0], [3.0, 12.0]]) #multiplying by list
+    
+    cherry = np.asarray(cherry)
+    assert_array_almost_equal(m.plum.mult(cherry), [[5.0, 20.0], [15.0, 40.0]]) #multiplying by ndarray
 
 
 def test_comptag():

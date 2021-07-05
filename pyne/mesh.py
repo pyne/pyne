@@ -591,34 +591,34 @@ class NativeMeshTag(Tag):
                         return self[:] * multiplier[:]
                     except:
                         print("Scalar data must have the same shape")
-                        raise e
+                        #raise e 
                 elif multiplier.size > 1:
                     try:
-                        return self[:, None] * multiplier[:]
+                        return np.asarray([self[:]]) * multiplier[:]
                     except:
                         print("Incompatible shape for scalar or vector data")
-                        raise e
+                        #raise e
             elif self.size > 1:
                 if multiplier.size == 1:
-                    try: 
-                        return self[:] * multiplier[:, None]
+                    try:
+                        return self[:] * multiplier[:][None, :]
                     except:
                         print("Incompatible shape for vector or scalar data")
-                        raise e
+                        #raise e
                 elif multiplier.size > 1:
                     try:
                         return self[:] * multiplier[:]
                     except:
                         print("Vectors must have the same shape")
-                        raise e
-        elif isinstance(multiplier, int) or isinstance(mulitiplier, float):
+                        #raise e
+        elif isinstance(multiplier, int) or isinstance(multiplier, float):
             return self[:]*multiplier
         elif isinstance(multiplier, np.ndarray) or isinstance(multiplier, list):
             try:
                 return self[:]*multiplier
             except:
                 print("Incompatible vector multiplication")
-                raise e
+                #raise e
 
 class ComputedTag(Tag):
     '''A mesh tag which looks itself up by calling a function (or other callable)
