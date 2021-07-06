@@ -584,6 +584,10 @@ class NativeMeshTag(Tag):
 
 
     def mult(self, multiplier):
+        """Multiplication operator for NativeMeshTag. Multiplies self by the multiplier using 
+        NumPy slicing if applicable. Multiplier can be any of the following types: int, float, 
+        ndarray, list, NativeMeshTag. Throws error if shapes are incorrect """
+
         if isinstance(multiplier, NativeMeshTag):
             if self.size == 1:
                 if multiplier.size == 1:
@@ -594,7 +598,7 @@ class NativeMeshTag(Tag):
                         #raise e 
                 elif multiplier.size > 1:
                     try:
-                        return np.asarray([self[:]]) * multiplier[:]
+                        return self[:][:, None] * multiplier[:]
                     except:
                         print("Incompatible shape for scalar or vector data")
                         #raise e

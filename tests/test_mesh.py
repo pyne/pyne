@@ -883,7 +883,7 @@ def test_nativetag_mult():
     
     m.plum = NativeMeshTag(2, float)
     m.plum[:] = [[5.0, 10.0], [15.0, 20.0]]
-    assert_array_almost_equal(m.peach.mult(m.plum), [[7.5, 25.0], [22.5, 50.0]]) #multiplying scalar-valued tag by vector-valued tag
+    assert_array_almost_equal(m.peach.mult(m.plum), [[7.5, 15.0], [37.5, 50.0]]) #multiplying scalar-valued tag by vector-valued tag
     
     assert_array_almost_equal(m.plum.mult(m.tangerine), [[25.0, 100.0], [75.0, 200.0]]) #multiplying vector-valued tag by scalar-valued tag
     
