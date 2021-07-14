@@ -103,7 +103,7 @@ def main():
     description = 'Build a docker image for PyNE'
     parser = ap.ArgumentParser(description=description)
 
-    py_version = 'Require a specific python version'
+    py_version = 'Require a specific python version (default: 3)'
     parser.add_argument('--py_version', type=int, help=py_version,
                         default=3)
 
@@ -112,34 +112,34 @@ def main():
     parser.add_argument('--hdf5_version', help=custom_hdf5,
                         default='')
 
-    moab = 'Build and install MOAB'
+    moab = 'Build and install MOAB (default: False)'
     parser.add_argument('--moab', help=moab,
                         action='store_true', default=False)
 
-    dagmc = 'Build and install DAGMC'
+    dagmc = 'Build and install DAGMC (default: False)'
     parser.add_argument('--dagmc', help=dagmc,
                         action='store_true', default=False)
 
-    pymoab = 'Enable pymoab'
+    pymoab = 'Enable pymoab (default: False)'
     parser.add_argument('--pymoab', help=pymoab,
                         action='store_true', default=False)
 
-    openmc = 'Install OpenMC python API'
+    openmc = 'Install OpenMC python API (default: False)'
     parser.add_argument('--openmc', help=openmc,
                         action='store_true', default=False)
 
-    all_deps = 'Add all dependencies'
+    all_deps = 'Add all dependencies (default: False)'
     parser.add_argument('--all', '-a', '-all', help=all_deps,
                         action='store_true', default=False)
 
-    deps = 'Dependencies only'
+    deps = 'Dependencies only (default: False)'
     parser.add_argument('--deps', help=deps,
                         action='store_true', default=False)
 
-    name = 'Set docker image name'
+    name = 'Set docker image name (default: "")'
     parser.add_argument('--name', help=name, default='')
 
-    push = 'Push docker image on dockerhub'
+    push = 'Push docker image on dockerhub (default: False)'
     parser.add_argument('--push', '-p', '-push', help=push,
                         action='store_true', default=False)
 
