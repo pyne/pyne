@@ -85,7 +85,7 @@ def build_docker(args):
             if args.openmc:
                 raise ValueError("OpenMC Python API does not support python2!")
         elif args.py_version == 3:
-            docker_args += ["--build-arg", "py_version=3.7"]
+            docker_args += ["--build-arg", "py_version=3.6"]
         else:
             print("Can only deal with python 2 or 3")
             return
