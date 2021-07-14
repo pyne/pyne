@@ -17,6 +17,7 @@ def consistancy_check(args):
     args.moab = args.moab or args.dagmc or args.pymoab or args.openmc or args.all
     args.pymoab = args.pymoab or args.openmc or args.all
     args.dagmc = args.dagmc or args.openmc or args.all
+    args.openmc = args.openmc or args.all
 
     return args
 
