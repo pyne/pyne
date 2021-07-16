@@ -52,7 +52,7 @@ jobs:
 
 
     container:
-      image: pyne/ubuntu_18.04_py3${{ matrix.hdf5 }}${{ matrix.pymoab }}${{ matrix.dagmc }}${{ matrix.openmc }}_pyne-deps:latest
+      image: pyne/ubuntu_18.04_py3${{ matrix.hdf5 }}{{ matrix.dagmc }}${{ matrix.pymoab }}$${{ matrix.openmc }}_pyne-deps:latest
 
     steps:
       - name: setup
