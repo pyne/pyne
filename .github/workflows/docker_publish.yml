@@ -1,3 +1,5 @@
+name: Build & Publish docker image for PyNE-CI
+
 on:
   push:
     paths:
