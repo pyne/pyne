@@ -1,4 +1,4 @@
-#name: Standard Build and Test
+name: Standard Build and Test
 
 on:
   # allows us to run workflows manually
@@ -6,29 +6,143 @@ on:
   pull_request:
     branches:
       - develop
+      - master
   push:
     branches:
       - develop
+      - master
 
 jobs:
-  changelog_update:
+  Housekeeping:
     runs-on: ubuntu-latest
     container:
-      image: alpine:3.7
-    
-    name: Is Changelog up-to-date ?
+      image: ghcr.io/svalinn/dagmc-ci-ubuntu-18.04-housekeeping:latest
     steps:
       - name: Install latest git
         run: |
-          apk add --no-cache bash curl jq git openssh
+          apt-get install -y software-properties-common
+          add-apt-repository ppa:git-core/ppa
+          apt update
+          apt install -y git
 
       - name: Checkout repository
         uses: actions/checkout@v2
+
+      - name: Setup environment 
+        run: |
+          echo "REPO_SLUG=${GITHUB_REPOSITORY}" >> $GITHUB_ENV
+          echo "PULL_REQUEST=$(echo  $GITHUB_REF | cut -d"/" -f3)" >> $GITHUB_ENV
+          mkdir /root/build_dir
+          ln -s $GITHUB_WORKSPACE /root/build_dir/DAGMC
     
       - name: Housekeeping
         run: |
           cd $GITHUB_WORKSPACE
-          ci/changelog_test.sh
+          CI/scripts/housekeeping.sh
+
+
+  BuildTest:
+    needs: Housekeeping
+    runs-on: ubuntu-latest
+
+    env:
+      hdf5_versions: ${{ matrix.hdf5_versions }}
+      hdf5_build_dir: hdf5_build_dir
+
+    strategy:
+      matrix:
+        ubuntu_versions : [
+          16.04,
+          18.04,
+          ]
+        compiler : [
+          gcc,
+          clang,
+          ]
+        hdf5_versions : [
+        1.10.4,
+        ]
+        moab_versions : [
+        9c96d17,
+        develop,
+        master,
+        ]
+        isPR:
+          - ${{ contains(github.event_name, 'pull_request') }}
+        exclude:
+          - isPR: true
+            moab_versions: develop
+          - isPR: true
+            moab_versions: master           
+
+    container:
+      image: svalinn/dagmc-ci-ubuntu-${{ matrix.ubuntu_versions }}-${{ matrix.compiler }}-ext-hdf5_${{ matrix.hdf5_versions }}-moab_${{ matrix.moab_versions }}:latest
+
+    steps:
+      - name: Install latest git
+        run: |
+          apt-get install -y software-properties-common
+          add-apt-repository ppa:git-core/ppa
+          apt update
+          apt install -y git
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Setup
+        run: |
+          echo "MOAB_VERSION=${{ matrix.moab_versions }}" >> $GITHUB_ENV
+          echo "COMPILER=${{ matrix.compiler }}" >> $GITHUB_ENV
+          echo "HDF5_VERSION=${{ matrix.hdf5_versions }}" >> $GITHUB_ENV
+          echo "REPO_SLUG=${GITHUB_REPOSITORY}" >> $GITHUB_ENV
+          echo "PULL_REQUEST=$(echo  $GITHUB_REF | cut -d"/" -f3)" >> $GITHUB_ENV
+          echo "DOUBLE_DOWN="OFF"" >> $GITHUB_ENV
+          ln -s $GITHUB_WORKSPACE /root/build_dir/DAGMC
+        
+      - name: Building DAGMC
+        run: |
+          cd $GITHUB_WORKSPACE
+          CI/scripts/install.sh
+
+      - name: Testing DAGMC
+        run: |
+          cd $GITHUB_WORKSPACE
+          CI/scripts/tests.sh
+
+
+#name: Standard Build and Test
+
+# on:
+#   # allows us to run workflows manually
+#   workflow_dispatch:
+#   pull_request:
+#     branches:
+#       - develop
+#   push:
+#     branches:
+#       - develop
+
+# jobs:
+#   changelog_update:
+#     runs-on: ubuntu-latest
+#     container:
+#       image: alpine:3.7
+    
+#     name: Is Changelog up-to-date ?
+#     steps:
+#       - name: Install latest git
+#         run: |
+#           apk add --no-cache bash curl jq git openssh
+
+#       - name: Checkout repository
+#         uses: actions/checkout@v2
+    
+#       - name: Housekeeping
+#         run: |
+#           cd $GITHUB_WORKSPACE
+#           ci/changelog_test.sh
 
 
   # BuildTest:
