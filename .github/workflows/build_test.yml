@@ -43,7 +43,6 @@ jobs:
         ]
         openmc : [
           '',
-          _openmc,
         ]
         hdf5 : [
           '',
@@ -53,6 +52,10 @@ jobs:
             hdf5: _hdf5-1_12_0
             dagmc: _dagmc
             pymoab: _pymoab
+          - openmc: _openmc
+            hdf5: ''
+            dagmc: _dagmc
+            pymoab: _pymoab            
 
         
         
