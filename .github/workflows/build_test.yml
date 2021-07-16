@@ -34,21 +34,26 @@ jobs:
     strategy:
       matrix:
         pymoab : [
-          # '',
+          '',
           _pymoab,
           ]
         dagmc : [
-        # '',
-        _dagmc
+          '',
+          _dagmc
         ]
         openmc : [
-        # '',
-        _openmc,
+          '',
+          _openmc,
         ]
         hdf5 : [
-        # '',
-        _hdf5-1_12_0
+          '',
+          _hdf5-1_12_0
         ]
+      exclude:
+        - openmc: -openmc
+          hdf5: _hdf5-1_12_0
+        
+        
 
 
     container:
