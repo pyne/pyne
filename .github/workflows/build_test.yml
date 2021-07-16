@@ -49,9 +49,9 @@ jobs:
           '',
           _hdf5-1_12_0
         ]
-      exclude:
-        - openmc: -openmc
-          hdf5: _hdf5-1_12_0
+        exclude:
+          - openmc: -openmc
+            hdf5: _hdf5-1_12_0
         
         
 
