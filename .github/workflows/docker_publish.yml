@@ -1,0 +1,107 @@
+on:
+  push:
+    paths:
+      - 'CI/*'
+      - '.github/workflows/docker_publish.yml'
+
+jobs:
+
+  build_and_push:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        ubuntu_versions : [
+          16.04,
+          18.04,
+        ]
+
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Python3
+        uses: docker/build-push-action@v2
+        with:
+          file: ubuntu_18.04-dev.dockerfile
+          context: .
+          push: true
+          build-args: |
+            build_pyne=NO
+            build_moab=NO
+            build_dagmc=NO
+            build_pymoab=NO
+            build_hdf5=NO
+            install_openmc=NO
+          tags: ghcr.io/pyne/ubuntu_18.04_py3_pyne-deps:latest
+
+      - name: Build and push moab/dagmc
+        uses: docker/build-push-action@v2
+        with:
+          file: ubuntu_18.04-dev.dockerfile
+          context: .
+          push: true
+          build-args: |
+            build_pyne=NO
+            build_moab=YES
+            build_dagmc=YES
+            build_pymoab=NO
+            build_hdf5=NO
+            install_openmc=NO
+          tags: ghcr.io/pyne/ubuntu_18.04_py3_dagmc_pyne-deps:latest
+
+      - name: Build and push moab/dagmc/pymoab
+        uses: docker/build-push-action@v2
+        with:
+          file: ubuntu_18.04-dev.dockerfile
+          context: .
+          push: true
+          build-args: |
+            build_pyne=NO
+            build_moab=YES
+            build_dagmc=YES
+            build_pymoab=YES
+            build_hdf5=NO
+            install_openmc=NO
+          tags: ghcr.io/pyne/ubuntu_18.04_py3_dagmc_pymoab_pyne-deps:latest
+
+       - name: Build and push dagmc/pymoab/hdf5_1.12
+        uses: docker/build-push-action@v2
+        with:
+          file: ubuntu_18.04-dev.dockerfile
+          context: .
+          push: true
+          build-args: |
+            build_pyne=NO
+            build_moab=YES
+            build_dagmc=YES
+            build_pymoab=YES
+            build_hdf5=hdf5-1_12_0
+            install_openmc=NO
+          tags: ghcr.io/pyne/ubuntu_18.04_py3_hdf5-1_12_0_dagmc_pymoab_pyne-deps:latest
+
+      - name: Build and push dagmc/pymoab
+        uses: docker/build-push-action@v2
+        with:
+          file: ubuntu_18.04-dev.dockerfile
+          context: .
+          push: true
+          build-args: |
+            build_pyne=NO
+            build_moab=YES
+            build_dagmc=YES
+            build_pymoab=YES
+            build_hdf5=NO
+            install_openmc=YES
+          tags: ghcr.io/pyne/ubuntu_18.04_py3_dagmc_pymoab_openmc_pyne-deps:latest
+

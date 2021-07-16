@@ -21,7 +21,7 @@ to build docker containers with a custom set of
       3.6) (default: `2.7`)
 
 
-Note, if using multiple build arguments `--build-args` has to be repeted, i.e. :
+Note, if using multiple build arguments `--build-args` has to be repeated, i.e. :
 to request DAGMC dependencies only with Python 2.7, the docker build arguments will be: 
 `--build-args build_dagmc=YES --build-args build_pyne=NO --build-args py_version=2.7` 
 

@@ -79,8 +79,8 @@ RUN if [ "$build_hdf5" != "NO" ]; then \
 ENV LD_LIBRARY_PATH $HDF5_INSTALL_PATH/lib:$LD_LIBRARY_PATH
 ENV LIBRARY_PATH $HDF5_INSTALL_PATH/lib:$LIBRARY_PATH
 
-ARG build_moab=NO
-ARG enable_pymoab=NO
+ARG build_moab="NO"
+ARG enable_pymoab="NO"
 ENV INSTALL_PATH=$HOME/opt/moab
 
 # build MOAB
@@ -123,7 +123,7 @@ ENV LIBRARY_PATH $HOME/opt/moab/lib:$LIBRARY_PATH
 ENV PYTHONPATH=$HOME/opt/moab/lib/python${py_version}/site-packages/
 
 # build/install DAGMC
-ARG build_dagmc=NO
+ARG build_dagmc="NO"
 ENV INSTALL_PATH=$HOME/opt/dagmc
 RUN if [ "$build_dagmc" = "YES" ]; then \
         cd /root \
@@ -167,7 +167,7 @@ RUN if [ "$build_pyne" = "YES" ]; then \
     fi
 
 # build/install OpenMC Python API
-ARG install_openmc=NO
+ARG install_openmc="NO"
 RUN if [ "$install_openmc" = "YES" ]; then \
         if [ "$build_hdf5" != "NO" ]; then \
               export HDF5_ROOT="$HDF5_INSTALL_PATH" ; \

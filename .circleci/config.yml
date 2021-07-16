@@ -5,37 +5,37 @@ version: 2.1
 executors:
     py3:
         docker:
-            - image: pyne/ubuntu_18.04_py3_pyne-deps:latest
+            - image: ghcr.io/pyne/ubuntu_18.04_py3_pyne-deps:latest
               auth:
                 username: $DOCKERHUB_USER
                 password: $DOCKERHUB_PASS
     py3_dagmc:
         docker:
-            - image: pyne/ubuntu_18.04_py3_dagmc_pyne-deps:latest
+            - image: ghcr.io/pyne/ubuntu_18.04_py3_dagmc_pyne-deps:latest
               auth:
                 username: $DOCKERHUB_USER
                 password: $DOCKERHUB_PASS
     py3_pymoab:
         docker:
-            - image: pyne/ubuntu_18.04_py3_pymoab_pyne-deps:latest
+            - image: ghcr.io/pyne/ubuntu_18.04_py3_pymoab_pyne-deps:latest
               auth:
                 username: $DOCKERHUB_USER
                 password: $DOCKERHUB_PASS
     py3_dagmc_pymoab:
         docker:
-            - image: pyne/ubuntu_18.04_py3_dagmc_pymoab_pyne-deps:latest
+            - image: ghcr.io/pyne/ubuntu_18.04_py3_dagmc_pymoab_pyne-deps:latest
               auth:
                 username: $DOCKERHUB_USER
                 password: $DOCKERHUB_PASS
     py3_dagmc_pymoab_hdf5_12:
         docker:
-            - image: pyne/ubuntu_18.04_py3_hdf5-1_12_0_dagmc_pymoab_pyne-deps:latest
+            - image: ghcr.io/pyne/ubuntu_18.04_py3_hdf5-1_12_0_dagmc_pymoab_pyne-deps:latest
               auth:
                 username: $DOCKERHUB_USER
                 password: $DOCKERHUB_PASS
     py3_dagmc_pymoab_openmc:
         docker:
-            - image: pyne/ubuntu_18.04_py3_dagmc_pymoab_openmc_pyne-deps:latest
+            - image: ghcr.io/pyne/ubuntu_18.04_py3_dagmc_pymoab_openmc_pyne-deps:latest
               auth:
                 username: $DOCKERHUB_USER
                 password: $DOCKERHUB_PASS
@@ -125,7 +125,7 @@ commands:
           default: "test"
     steps:
       - pull_container:
-          build: "python2_dagmc_pymoab"
+          build: "python3_dagmc_pymoab"
       - add_ssh_keys:
           fingerprints:
             - $PYNE_KEY_FINGERPRINT
