@@ -3,9 +3,9 @@ name: Standard Build and Test
 on:
   # allows us to run workflows manually
   workflow_dispatch:
-  pull_request:
-    branches:
-      - develop
+  # pull_request:
+  #   branches:
+  #     - develop
   push:
     branches:
       - develop
