@@ -35,7 +35,7 @@ jobs:
         with:
           file: docker/ubuntu_18.04-dev.dockerfile
           context: .
-          push: true
+          push: ${{ github.repository_owner == 'pyne' }}
           build-args: |
             build_pyne=NO
             build_moab=NO
@@ -50,8 +50,9 @@ jobs:
         with:
           file: docker/ubuntu_18.04-dev.dockerfile
           context: .
-          push: true
+          push: ${{ github.repository_owner == 'pyne' }}
           build-args: |
+            py_version=3.6
             build_pyne=NO
             build_moab=YES
             build_dagmc=YES
@@ -65,8 +66,9 @@ jobs:
         with:
           file: docker/ubuntu_18.04-dev.dockerfile
           context: .
-          push: true
+          push: ${{ github.repository_owner == 'pyne' }}
           build-args: |
+            py_version=3.6
             build_pyne=NO
             build_moab=YES
             build_dagmc=YES
@@ -80,8 +82,9 @@ jobs:
         with:
           file: docker/ubuntu_18.04-dev.dockerfile
           context: .
-          push: true
+          push: ${{ github.repository_owner == 'pyne' }}
           build-args: |
+            py_version=3.6
             build_pyne=NO
             build_moab=YES
             build_dagmc=YES
@@ -95,8 +98,9 @@ jobs:
         with:
           file: docker/ubuntu_18.04-dev.dockerfile
           context: .
-          push: true
+          push: ${{ github.repository_owner == 'pyne' }}
           build-args: |
+            py_version=3.6
             build_pyne=NO
             build_moab=YES
             build_dagmc=YES
