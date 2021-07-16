@@ -16,7 +16,7 @@ jobs:
     steps:
       - name: Install latest git
         run: |
-          apk add --no-cache bash curl jq git openssh
+          apk add --no-cache bash git openssh
 
       - name: Checkout repository
         uses: actions/checkout@v2
