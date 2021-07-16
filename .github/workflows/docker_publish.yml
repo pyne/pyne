@@ -37,6 +37,7 @@ jobs:
           context: .
           push: ${{ github.repository_owner == 'pyne' }}
           build-args: |
+            py_version=3.6
             build_pyne=NO
             build_moab=NO
             build_dagmc=NO
