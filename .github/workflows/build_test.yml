@@ -10,8 +10,8 @@ jobs:
   changelog_update:
     runs-on: ubuntu-latest
     container:
-      image: alpine:3.7
-    
+      image: alpine:3.14
+      
     name: Is Changelog up-to-date ?
     steps:
       - name: Install latest git
