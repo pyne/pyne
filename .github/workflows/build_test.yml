@@ -35,20 +35,19 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-
-        pymoab: [
+        pymoab : [
           '',
           _pymoab,
           ]
-        dagmc: [
+        dagmc : [
         '',
         _dagmc
         ]
-        openmc: [
+        openmc : [
         '',
         _openmc,
         ]
-        hdf5: [
+        hdf5 : [
         '',
         _hdf5-1_12_0
         ]
