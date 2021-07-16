@@ -1,66 +1,66 @@
 name: Standard Build and Test
 
- on:
-   # allows us to run workflows manually
-   workflow_dispatch:
-   pull_request:
-     branches:
-       - develop
-   push:
-     branches:
-       - develop
+on:
+  # allows us to run workflows manually
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - develop
+  push:
+    branches:
+      - develop
 
- jobs:
-   changelog_update:
-     runs-on: ubuntu-latest
-     container:
-       image: alpine:3.7
-     
-     name: Is Changelog up-to-date ?
-     steps:
-       - name: Install latest git
-         run: |
-           apk add --no-cache bash curl jq git openssh
+jobs:
+  changelog_update:
+    runs-on: ubuntu-latest
+    container:
+      image: alpine:3.7
+    
+    name: Is Changelog up-to-date ?
+    steps:
+      - name: Install latest git
+        run: |
+          apk add --no-cache bash curl jq git openssh
 
-       - name: Checkout repository
-         uses: actions/checkout@v2
-      
-       - name: Housekeeping
-         run: |
-           cd $GITHUB_WORKSPACE
-           ci/changelog_test.sh
+      - name: Checkout repository
+        uses: actions/checkout@v2
+    
+      - name: Housekeeping
+        run: |
+          cd $GITHUB_WORKSPACE
+          ci/changelog_test.sh
 
 
-   BuildTest:
-     runs-on: ubuntu-latest
-     strategy:
-       matrix:
+  BuildTest:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
 
-         pymoab: [
-           '',
-           _pymoab,
-           ]
-         dagmc: [
+        pymoab: [
           '',
-          _dagmc
-         ]
-         openmc: [
-          '',
-          _openmc,
-         ]
-         hdf5: [
-          '',
-          _hdf5-1_12_0
-         ]
- 
+          _pymoab,
+          ]
+        dagmc: [
+        '',
+        _dagmc
+        ]
+        openmc: [
+        '',
+        _openmc,
+        ]
+        hdf5: [
+        '',
+        _hdf5-1_12_0
+        ]
 
-     container:
-       image: pyne/ubuntu_18.04${{ matrix.hdf5 }}${{ matrix.pymoab }}${{ matrix.dagmc }}${{ matrix.openmc }}_pyne-deps:latest
 
-     steps:
-       - name: setup
-         run: |
-           export ADD_FLAG=" "
+    container:
+      image: pyne/ubuntu_18.04${{ matrix.hdf5 }}${{ matrix.pymoab }}${{ matrix.dagmc }}${{ matrix.openmc }}_pyne-deps:latest
+
+    steps:
+      - name: setup
+        run: |
+          export ADD_FLAG=" "
           if [ ${{ matrix.pymoab }} == '_pymoab' ]; then
             export ADD_FLAG="${ADD_FLAG} --moab $HOME/opt/moab"
           fi
@@ -73,16 +73,16 @@ name: Standard Build and Test
           export ADD_FLAG="${ADD_FLAG} "
           echo "ADD_FLAG=${ADD_FLAG}" >> $GITHUB_ENV
 
-       - name: Checkout repository
-         uses: actions/checkout@v2
-          
-       - name: Building DAGMC
-         run: |
-           cd $GITHUB_WORKSPACE
-           CI/scripts/install.sh ${{ env.ADD_FLAG}}
-           cd ../ && nuc_data_make ;
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        
+      - name: Building DAGMC
+        run: |
+          cd $GITHUB_WORKSPACE
+          CI/scripts/install.sh ${{ env.ADD_FLAG}}
+          cd ../ && nuc_data_make ;
 
-       - name: Testing DAGMC
-         run: |
-           cd $GITHUB_WORKSPACE/tests
-           ./travis-run-tests.sh python3
+      - name: Testing DAGMC
+        run: |
+          cd $GITHUB_WORKSPACE/tests
+          ./travis-run-tests.sh python3
