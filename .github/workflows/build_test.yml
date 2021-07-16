@@ -23,7 +23,7 @@ jobs:
     
       - name: Housekeeping
         run: |
-          cd $GITHUB_WORKSPACE
+          cd $GITHUB_WORKSPACE/pyne
           ci/changelog_test.sh
 
 
