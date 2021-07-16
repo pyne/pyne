@@ -31,58 +31,58 @@ jobs:
           ci/changelog_test.sh
 
 
-  BuildTest:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
+  # BuildTest:
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
 
-        pymoab: [
-          '',
-          _pymoab,
-          ]
-        dagmc: [
-        '',
-        _dagmc
-        ]
-        openmc: [
-        '',
-        _openmc,
-        ]
-        hdf5: [
-        '',
-        _hdf5-1_12_0
-        ]
+  #       pymoab: [
+  #         '',
+  #         _pymoab,
+  #         ]
+  #       dagmc: [
+  #       '',
+  #       _dagmc
+  #       ]
+  #       openmc: [
+  #       '',
+  #       _openmc,
+  #       ]
+  #       hdf5: [
+  #       '',
+  #       _hdf5-1_12_0
+  #       ]
 
 
-    container:
-      image: pyne/ubuntu_18.04${{ matrix.hdf5 }}${{ matrix.pymoab }}${{ matrix.dagmc }}${{ matrix.openmc }}_pyne-deps:latest
+  #   container:
+  #     image: pyne/ubuntu_18.04${{ matrix.hdf5 }}${{ matrix.pymoab }}${{ matrix.dagmc }}${{ matrix.openmc }}_pyne-deps:latest
 
-    steps:
-      - name: setup
-        run: |
-          export ADD_FLAG=" "
-          if [ ${{ matrix.pymoab }} == '_pymoab' ]; then
-            export ADD_FLAG="${ADD_FLAG} --moab $HOME/opt/moab"
-          fi
-          if [ ${{ matrix.dagmc }} == '_dagmc' ]; then
-            export ADD_FLAG="${ADD_FLAG} --dagmc $HOME/opt/dagmc"
-          fi
-          if [ ${{ matrix.hdf5 }} == '_hdf5-1_12_0' ]; then
-            export ADD_FLAG="${ADD_FLAG} --hdf5 $HOME/opt/hdf5/hdf5-1_12_0"
-          fi
-          export ADD_FLAG="${ADD_FLAG} "
-          echo "ADD_FLAG=${ADD_FLAG}" >> $GITHUB_ENV
+  #   steps:
+  #     - name: setup
+  #       run: |
+  #         export ADD_FLAG=" "
+  #         if [ ${{ matrix.pymoab }} == '_pymoab' ]; then
+  #           export ADD_FLAG="${ADD_FLAG} --moab $HOME/opt/moab"
+  #         fi
+  #         if [ ${{ matrix.dagmc }} == '_dagmc' ]; then
+  #           export ADD_FLAG="${ADD_FLAG} --dagmc $HOME/opt/dagmc"
+  #         fi
+  #         if [ ${{ matrix.hdf5 }} == '_hdf5-1_12_0' ]; then
+  #           export ADD_FLAG="${ADD_FLAG} --hdf5 $HOME/opt/hdf5/hdf5-1_12_0"
+  #         fi
+  #         export ADD_FLAG="${ADD_FLAG} "
+  #         echo "ADD_FLAG=${ADD_FLAG}" >> $GITHUB_ENV
 
-      - name: Checkout repository
-        uses: actions/checkout@v2
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v2
         
-      - name: Building DAGMC
-        run: |
-          cd $GITHUB_WORKSPACE
-          CI/scripts/install.sh ${{ env.ADD_FLAG}}
-          cd ../ && nuc_data_make ;
+  #     - name: Building DAGMC
+  #       run: |
+  #         cd $GITHUB_WORKSPACE
+  #         CI/scripts/install.sh ${{ env.ADD_FLAG}}
+  #         cd ../ && nuc_data_make ;
 
-      - name: Testing DAGMC
-        run: |
-          cd $GITHUB_WORKSPACE/tests
-          ./travis-run-tests.sh python3
+  #     - name: Testing DAGMC
+  #       run: |
+  #         cd $GITHUB_WORKSPACE/tests
+  #         ./travis-run-tests.sh python3
