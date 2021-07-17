@@ -86,7 +86,7 @@ jobs:
       - name: Building DAGMC
         run: |
           cd $GITHUB_WORKSPACE
-          ci/scripts/install.sh ${{ env.ADD_FLAG}}
+          python setup.py install --user --clean ${{ env.ADD_FLAG}}
           cd ../ && nuc_data_make ;
 
       - name: Testing DAGMC
