@@ -69,13 +69,13 @@ jobs:
         run: |
           export ADD_FLAG=" "
           if [[ "${{ matrix.pymoab }}" == "_pymoab" ]]; then
-            export ADD_FLAG="${ADD_FLAG} --moab $HOME/opt/moab"
+            export ADD_FLAG="${ADD_FLAG} --moab /root/opt/moab"
           fi
           if [[ "${{ matrix.dagmc }}" == "_dagmc" ]]; then
-            export ADD_FLAG="${ADD_FLAG} --dagmc $HOME/opt/dagmc"
+            export ADD_FLAG="${ADD_FLAG} --dagmc /root/opt/dagmc"
           fi
           if [[ "${{ matrix.hdf5 }}" == "_hdf5-1_12_0" ]]; then
-            export ADD_FLAG="${ADD_FLAG} --hdf5 $HOME/opt/hdf5/hdf5-1_12_0"
+            export ADD_FLAG="${ADD_FLAG} --hdf5 /rootopt/hdf5/hdf5-1_12_0"
           fi
           export ADD_FLAG="${ADD_FLAG} "
           echo "ADD_FLAG=${ADD_FLAG}" >> $GITHUB_ENV
