@@ -65,6 +65,7 @@ jobs:
 
     steps:
       - name: setup
+        shell: bash -l {0}
         run: |
           export ADD_FLAG=" "
           if [[ "${{ matrix.pymoab }}" == "_pymoab" ]]; then
@@ -83,12 +84,14 @@ jobs:
         uses: actions/checkout@v2
         
       - name: Building PyNE
+        shell: bash -l {0}
         run: |
           cd $GITHUB_WORKSPACE
           python setup.py install --user --clean ${{ env.ADD_FLAG}}
           cd ../ && nuc_data_make ;
 
       - name: Testing PyNE
+        shell: bash -l {0}
         run: |
           cd $GITHUB_WORKSPACE/tests
           ./travis-run-tests.sh python3
