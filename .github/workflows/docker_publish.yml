@@ -88,14 +88,11 @@ jobs:
       - name: setup
         shell: bash -l {0}
         run: |
-            echo "PYMOAB=YES" >> $GITHUB_ENV
-
           if [[ "${{ matrix.pymoab }}" == "_pymoab" || "${{ matrix.dagmc }}" == "_dagmc" ]]; then
             echo "PYMOAB=YES" >> $GITHUB_ENV
           else
             echo "PYMOAB=NO" >> $GITHUB_ENV
           fi
-
           if [[ "${{ matrix.dagmc }}" == "_dagmc" ]]; then
             echo "DAGMC=YES" >> $GITHUB_ENV
           else
