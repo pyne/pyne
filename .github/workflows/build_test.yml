@@ -62,10 +62,8 @@ jobs:
           - openmc: _openmc
             hdf5: ''
             dagmc: _dagmc
-            pymoab: _pymoab            
-
-        
-        
+            pymoab: _pymoab
+      fail-fast: false
 
 
     container:
