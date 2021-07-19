@@ -6,9 +6,16 @@ on:
   pull_request:
     branches:
       - develop
+      - master
   push:
     branches:
       - develop
+      - master
+
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 
 jobs:
   changelog_update:
