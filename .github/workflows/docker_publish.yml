@@ -51,7 +51,7 @@ jobs:
             py_version=3.6
             build_pyne=NO
             build_moab=YES
-            build_pymoab=YES
+            enable_pymoab=YES
 
           tags: ghcr.io/${{ github.repository_owner }}/ubuntu_18.04_py3_pymoab_pyne-deps:latest
 
@@ -131,7 +131,7 @@ jobs:
             py_version=3.6
             build_pyne=NO
             build_moab=YES
-            build_pymoab=${{ env.PYMOAB }}
+            enable_pymoab=${{ env.PYMOAB }}
             build_dagmc=${{ env.DAGMC }}
             build_hdf5=${{ env.HDF5 }}
             install_openmc=${{ env.HDF5 }}
