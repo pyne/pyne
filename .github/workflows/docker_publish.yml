@@ -169,7 +169,7 @@ jobs:
           cache-from: type=local,src=/tmp/.buildx-cache-${{ github.sha }}
           tags: ghcr.io/${{ github.repository_owner }}/ubuntu_18.04_py3${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:latest
 
-  cleanup_cash:
+  cleanup_cache:
     if: always()
     needs: [build_and_push_python3_pymoab, build_and_push_dagmc]
     runs-on: ubuntu-latest
