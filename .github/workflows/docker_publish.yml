@@ -17,7 +17,6 @@ jobs:
         ]
 
     steps:
-
       - name: Checkout repository
         uses: actions/checkout@v2
 
@@ -84,7 +83,8 @@ jobs:
             dagmc: _dagmc
             pymoab: _pymoab
       fail-fast: false
-
+    
+    steps:
       - name: setup
         shell: bash -l {0}
         run: |
@@ -111,6 +111,18 @@ jobs:
           else
             echo "OPENMC=NO" >> $GITHUB_ENV
           fi
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: pull already build img:
         run: docker pull ghcr.io/${{ github.repository_owner }}/ubuntu_18.04_py3_pymoab_pyne-deps:latest
