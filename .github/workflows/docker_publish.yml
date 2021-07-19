@@ -141,7 +141,7 @@ jobs:
           tags: ghcr.io/${{ github.repository_owner }}/ubuntu_18.04_py3${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:latest
 
   BuildTest:
-    needs: [build_and_push_python3_pymoab, build_and_push_python3_pymoab]
+    needs: [build_and_push_python3_pymoab, build_and_push_dagmc]
     runs-on: ubuntu-latest
     strategy:
       matrix:
