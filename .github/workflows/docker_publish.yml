@@ -198,7 +198,7 @@ jobs:
 
   pushing_test_stable_img:
     #if: ${{ github.repository_owner == 'svalinn' }}
-    needs: [housekeeping, test_img]
+    needs: [BuildTest]
     runs-on: ubuntu-latest
     strategy:
       matrix:
