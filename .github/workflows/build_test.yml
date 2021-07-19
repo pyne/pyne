@@ -83,7 +83,7 @@ jobs:
             export ADD_FLAG="${ADD_FLAG} --moab /root/opt/moab"
           fi
           if [[ "${{ matrix.dagmc }}" == "_dagmc" ]]; then
-            export ADD_FLAG="${ADD_FLAG} --dagmc /root/opt/dagmc"
+            export ADD_FLAG="${ADD_FLAG} --moab /root/opt/moab --dagmc /root/opt/dagmc"
           fi
           if [[ "${{ matrix.hdf5 }}" == "_hdf5-1_12_0" ]]; then
             export ADD_FLAG="${ADD_FLAG} --hdf5 /root/opt/hdf5/hdf5-1_12_0"
