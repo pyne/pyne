@@ -140,10 +140,6 @@ jobs:
           tags: ghcr.io/${{ github.repository_owner }}/ubuntu_18.04_py3${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:latest
 
   cleanup_cash:
-    needs: [build_and_push_python3_pymoab, build_and_push_dagmc]
-    runs-on: ubuntu-latest
-
-  BuildTest:
     if: always()
     needs: [build_and_push_python3_pymoab, build_and_push_dagmc]
     runs-on: ubuntu-latest
@@ -151,6 +147,11 @@ jobs:
       - name: Move cache
         run: |
           rm -rf /tmp/.buildx-cache-${{ github.sha }}
+          
+  BuildTest:
+    needs: [build_and_push_python3_pymoab, build_and_push_dagmc]
+    runs-on: ubuntu-latest
+
       
     strategy:
       matrix:
