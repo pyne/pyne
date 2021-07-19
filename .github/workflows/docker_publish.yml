@@ -121,7 +121,7 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: pull already build img:
+      - name: pull already build img
         run: docker pull ghcr.io/${{ github.repository_owner }}/ubuntu_18.04_py3_pymoab_pyne-deps:latest
 
       - name: Build and push moab/dagmc
