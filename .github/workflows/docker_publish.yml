@@ -52,8 +52,9 @@ jobs:
             build_pyne=NO
             build_moab=YES
             enable_pymoab=YES
-
           tags: ghcr.io/${{ github.repository_owner }}/ubuntu_18.04_py3_pymoab_pyne-deps:latest
+          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-${{ github.sha }}
+
 
   build_and_push_dagmc:
     needs: build_and_push_python3_pymoab
@@ -135,13 +136,22 @@ jobs:
             build_dagmc=${{ env.DAGMC }}
             build_hdf5=${{ env.HDF5 }}
             install_openmc=${{ env.HDF5 }}
-          cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/ubuntu_18.04_py3_pymoab_pyne-deps:latest
-
+          cache-from: type=local,src=/tmp/.buildx-cache-${{ github.sha }}
           tags: ghcr.io/${{ github.repository_owner }}/ubuntu_18.04_py3${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:latest
 
-  BuildTest:
+  cleanup_cash:
     needs: [build_and_push_python3_pymoab, build_and_push_dagmc]
     runs-on: ubuntu-latest
+
+  BuildTest:
+    if: always()
+    needs: [build_and_push_python3_pymoab, build_and_push_dagmc]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache-${{ github.sha }}
+      
     strategy:
       matrix:
         pymoab : [
