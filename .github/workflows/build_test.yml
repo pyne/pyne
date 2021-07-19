@@ -9,8 +9,7 @@ on:
       - master
   push:
     branches:
-      - develop
-      - master
+      - *
 
 
 env:
