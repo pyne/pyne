@@ -6,39 +6,27 @@ executors:
     py3:
         docker:
             - image: ghcr.io/pyne/ubuntu_18.04_py3_pyne-deps:latest
-              auth:
-                username: $DOCKERHUB_USER
-                password: $DOCKERHUB_PASS
+
     py3_dagmc:
         docker:
             - image: ghcr.io/pyne/ubuntu_18.04_py3_dagmc_pyne-deps:latest
-              auth:
-                username: $DOCKERHUB_USER
-                password: $DOCKERHUB_PASS
+
     py3_pymoab:
         docker:
             - image: ghcr.io/pyne/ubuntu_18.04_py3_pymoab_pyne-deps:latest
-              auth:
-                username: $DOCKERHUB_USER
-                password: $DOCKERHUB_PASS
+
     py3_dagmc_pymoab:
         docker:
             - image: ghcr.io/pyne/ubuntu_18.04_py3_dagmc_pymoab_pyne-deps:latest
-              auth:
-                username: $DOCKERHUB_USER
-                password: $DOCKERHUB_PASS
+
     py3_dagmc_pymoab_hdf5_12:
         docker:
             - image: ghcr.io/pyne/ubuntu_18.04_py3_hdf5-1_12_0_dagmc_pymoab_pyne-deps:latest
-              auth:
-                username: $DOCKERHUB_USER
-                password: $DOCKERHUB_PASS
+
     py3_dagmc_pymoab_openmc:
         docker:
             - image: ghcr.io/pyne/ubuntu_18.04_py3_dagmc_pymoab_openmc_pyne-deps:latest
-              auth:
-                username: $DOCKERHUB_USER
-                password: $DOCKERHUB_PASS
+
 
 
 # Commands:
