@@ -40,9 +40,25 @@ jobs:
             py_version=3.6
             build_pyne=NO
           tags: ghcr.io/${{ github.repository_owner }}/ubuntu_18.04_py3_pyne-deps:latest
-      
+
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@master
+        with:
+          install: true
+
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache
+          # Key is named differently to avoid collision
+          key: ${{ runner.os }}-multi-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-multi-buildx
+
       - name: Build and push moab/pymoab
         uses: docker/build-push-action@v2
+        builder: ${{ steps.buildx.outputs.name }}
         with:
           file: docker/ubuntu_18.04-dev.dockerfile
           context: .
@@ -121,6 +137,21 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@master
+        with:
+          install: true
+
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache
+          # Key is named differently to avoid collision
+          key: ${{ runner.os }}-multi-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-multi-buildx
 
       - name: Build and push moab/dagmc
         uses: docker/build-push-action@v2
@@ -147,7 +178,7 @@ jobs:
       - name: Move cache
         run: |
           rm -rf /tmp/.buildx-cache-${{ github.sha }}
-          
+
   BuildTest:
     needs: [build_and_push_python3_pymoab, build_and_push_dagmc]
     runs-on: ubuntu-latest
