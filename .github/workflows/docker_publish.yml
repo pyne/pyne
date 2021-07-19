@@ -172,7 +172,6 @@ jobs:
 
     container:
       image: ghcr.io/${{ github.repository_owner }}/ubuntu_18.04_py3${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:latest
-      user:
 
     steps:
       - name: setup
