@@ -98,8 +98,8 @@ jobs:
           python setup.py install --user --clean ${{ env.ADD_FLAG}}
           export PATH="$PATH:/github/home/.local/bin"
           export PYTHONPATH="$PYTHONPATH:/github/home/.local/lib/python3.6/site-packages/"
-
-          cd ../ && nuc_data_make ;
+          cd ../
+          nuc_data_make
 
       - name: Testing PyNE
         shell: bash -l {0}
