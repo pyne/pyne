@@ -8,7 +8,7 @@ on:
 
 jobs:
 
-  build_and_push:
+  build_and_push_python3_pymoab:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -36,96 +36,100 @@ jobs:
         with:
           file: docker/ubuntu_18.04-dev.dockerfile
           context: .
-          push: ${{ github.repository_owner == 'pyne' }}
+          push: true
           build-args: |
             py_version=3.6
             build_pyne=NO
-            build_moab=NO
-            build_dagmc=NO
-            build_pymoab=NO
-            build_hdf5=NO
-            install_openmc=NO
-          tags: ghcr.io/pyne/ubuntu_18.04_py3_pyne-deps:latest
+          tags: ghcr.io/${{ github.repository_owner }}/ubuntu_18.04_py3_pyne-deps:latest
+      
+      - name: Build and push moab/pymoab
+        uses: docker/build-push-action@v2
+        with:
+          file: docker/ubuntu_18.04-dev.dockerfile
+          context: .
+          push: true
+          build-args: |
+            py_version=3.6
+            build_pyne=NO
+            build_moab=YES
+            build_pymoab=YES
+
+          tags: ghcr.io/${{ github.repository_owner }}/ubuntu_18.04_py3_pymoab_pyne-deps:latest
+
+  build_and_push_dagmc:
+    needs: build_and_push_python3_pymoab
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        pymoab : [
+          '',
+          _pymoab,
+          ]
+        dagmc : [
+          _dagmc
+        ]
+        openmc : [
+          '',
+        ]
+        hdf5 : [
+          '',
+        ]
+        include:
+          - openmc: ''
+            hdf5: _hdf5-1_12_0
+            dagmc: _dagmc
+            pymoab: _pymoab
+          - openmc: _openmc
+            hdf5: ''
+            dagmc: _dagmc
+            pymoab: _pymoab
+      fail-fast: false
+
+      - name: setup
+        shell: bash -l {0}
+        run: |
+            echo "PYMOAB=YES" >> $GITHUB_ENV
+
+          if [[ "${{ matrix.pymoab }}" == "_pymoab" || "${{ matrix.dagmc }}" == "_dagmc" ]]; then
+            echo "PYMOAB=YES" >> $GITHUB_ENV
+          else
+            echo "PYMOAB=NO" >> $GITHUB_ENV
+          fi
+
+          if [[ "${{ matrix.dagmc }}" == "_dagmc" ]]; then
+            echo "DAGMC=YES" >> $GITHUB_ENV
+          else
+            echo "DAGMC=NO" >> $GITHUB_ENV
+          fi
+          if [[ "${{ matrix.hdf5 }}" == "_hdf5-1_12_0" ]]; then
+            echo "HDF5=hdf5-1_12_0" >> $GITHUB_ENV
+          else
+            echo "HDF5=NO" >> $GITHUB_ENV
+          fi
+          if [[ "${{ matrix.openmc }}" == "_openmc" ]]; then
+            echo "OPENMC=YES" >> $GITHUB_ENV
+          else
+            echo "OPENMC=NO" >> $GITHUB_ENV
+          fi
+
+      - name: pull already build img:
+        run: docker pull ghcr.io/${{ github.repository_owner }}/ubuntu_18.04_py3_pymoab_pyne-deps:latest
 
       - name: Build and push moab/dagmc
         uses: docker/build-push-action@v2
         with:
           file: docker/ubuntu_18.04-dev.dockerfile
           context: .
-          push: ${{ github.repository_owner == 'pyne' }}
+          push: true
           build-args: |
             py_version=3.6
             build_pyne=NO
             build_moab=YES
-            build_pymoab=NO
-            build_dagmc=YES
-            build_hdf5=NO
-            install_openmc=NO
-          tags: ghcr.io/pyne/ubuntu_18.04_py3_dagmc_pyne-deps:latest
-
-      - name: Build and push moab/dagmc/pymoab
-        uses: docker/build-push-action@v2
-        with:
-          file: docker/ubuntu_18.04-dev.dockerfile
-          context: .
-          push: ${{ github.repository_owner == 'pyne' }}
-          build-args: |
-            py_version=3.6
-            build_pyne=NO
-            build_moab=YES
-            build_pymoab=YES
-            build_dagmc=NO
-            build_hdf5=NO
-            install_openmc=NO
-          tags: ghcr.io/pyne/ubuntu_18.04_py3_pymoab_pyne-deps:latest
-
-      - name: Build and push moab/dagmc/pymoab
-        uses: docker/build-push-action@v2
-        with:
-          file: docker/ubuntu_18.04-dev.dockerfile
-          context: .
-          push: ${{ github.repository_owner == 'pyne' }}
-          build-args: |
-            py_version=3.6
-            build_pyne=NO
-            build_moab=YES
-            build_pymoab=YES
-            build_dagmc=YES
-            build_hdf5=NO
-            install_openmc=NO
-          tags: ghcr.io/pyne/ubuntu_18.04_py3_dagmc_pymoab_pyne-deps:latest
-
-      - name: Build and push dagmc/pymoab/hdf5_1.12
-        uses: docker/build-push-action@v2
-        with:
-          file: docker/ubuntu_18.04-dev.dockerfile
-          context: .
-          push: ${{ github.repository_owner == 'pyne' }}
-          build-args: |
-            py_version=3.6
-            build_pyne=NO
-            build_moab=YES
-            build_pymoab=YES
-            build_dagmc=YES
-            build_hdf5=hdf5-1_12_0
-            install_openmc=NO
-          tags: ghcr.io/pyne/ubuntu_18.04_py3_hdf5-1_12_0_dagmc_pymoab_pyne-deps:latest
-
-      - name: Build and push dagmc/pymoab
-        uses: docker/build-push-action@v2
-        with:
-          file: docker/ubuntu_18.04-dev.dockerfile
-          context: .
-          push: ${{ github.repository_owner == 'pyne' }}
-          build-args: |
-            py_version=3.6
-            build_pyne=NO
-            build_moab=YES
-            build_pymoab=YES
-            build_dagmc=YES
-            build_hdf5=NO
-            install_openmc=YES
-          tags: ghcr.io/pyne/ubuntu_18.04_py3_dagmc_pymoab_openmc_pyne-deps:latest
+            build_pymoab=${{ env.PYMOAB }}
+            build_dagmc=${{ env.DAGMC }}
+            build_hdf5=${{ env.HDF5 }}
+            install_openmc=${{ env.HDF5 }}
+          tags: ghcr.io/${{ github.repository_owner }}/ubuntu_18.04_py3${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:latest
 
   BuildTest:
     needs: build_and_push
