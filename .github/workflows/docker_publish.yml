@@ -61,7 +61,6 @@ jobs:
     strategy:
       matrix:
         pymoab : [
-          '',
           _pymoab,
           ]
         dagmc : [
@@ -82,6 +81,7 @@ jobs:
             hdf5: ''
             dagmc: _dagmc
             pymoab: _pymoab
+        
       fail-fast: false
     
     steps:
@@ -121,9 +121,6 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: pull already build img
-        run: docker pull ghcr.io/${{ github.repository_owner }}/ubuntu_18.04_py3_pymoab_pyne-deps:latest
-
       - name: Build and push moab/dagmc
         uses: docker/build-push-action@v2
         with:
@@ -138,6 +135,8 @@ jobs:
             build_dagmc=${{ env.DAGMC }}
             build_hdf5=${{ env.HDF5 }}
             install_openmc=${{ env.HDF5 }}
+          cache-from: type=ghcr.io,ref=${{ github.repository_owner }}/ubuntu_18.04_py3_pymoab_pyne-deps:latest
+
           tags: ghcr.io/${{ github.repository_owner }}/ubuntu_18.04_py3${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:latest
 
   BuildTest:
