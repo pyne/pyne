@@ -254,7 +254,7 @@ jobs:
           ./travis-run-tests.sh python3
 
   pushing_test_stable_img:
-    #if: ${{ github.repository_owner == 'svalinn' }}
+    if: ${{ github.repository_owner == 'pyne' }}
     needs: [BuildTest]
     runs-on: ubuntu-latest
     strategy:
