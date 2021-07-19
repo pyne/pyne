@@ -128,6 +128,7 @@ jobs:
           tags: ghcr.io/pyne/ubuntu_18.04_py3_dagmc_pymoab_openmc_pyne-deps:latest
 
   BuildTest:
+    needs: build_and_push
     runs-on: ubuntu-latest
     strategy:
       matrix:
