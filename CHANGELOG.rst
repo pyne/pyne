@@ -9,7 +9,7 @@ Next Version
 * uses GithubAction to build the docker image used in CI (#1394)
 
 **Change**
-   * CI uses GithubAction instead of CIrcleCI (#1393)
+   * CI uses GithubAction instead of CIrcleCI (#1393, #1395)
 
 **Fix**
 
