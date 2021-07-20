@@ -98,7 +98,7 @@ RUN if [ "$build_moab" = "YES" ] || [ "$enable_pymoab" = "YES" ] ; then \
         && cd $HOME/opt \
         && mkdir moab \
         && cd moab \
-        && git clone --single-branch -b 5.2.1 https://bitbucket.org/fathomteam/moab \
+        && git clone --single-branch -b 5.3.0 https://bitbucket.org/fathomteam/moab \
         && cd moab \
         && mkdir build \
         && cd build \

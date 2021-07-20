@@ -17,6 +17,8 @@ Next Version
 
 **Maintenance**
 
+   * update MOAB version to 5.3.0 in CI docker image (#1391)
+
 
 v0.7.4
 ======
