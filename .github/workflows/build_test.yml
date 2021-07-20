@@ -1,0 +1,107 @@
+name: Standard Build and Test
+
+on:
+  # allows us to run workflows manually
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - develop
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
+jobs:
+  changelog_update:
+    runs-on: ubuntu-latest
+    container:
+      image: alpine:3.14
+
+    name: Is Changelog up-to-date ?
+    steps:
+      - name: Install latest git
+        run: |
+          apk add --no-cache bash git openssh
+          git --version
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+    
+      - name: Housekeeping
+        run: |
+          cd $GITHUB_WORKSPACE
+          ci/changelog_test.sh
+
+
+  BuildTest:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        pymoab : [
+          _pymoab,
+          ]
+        dagmc : [
+          '',
+          _dagmc
+        ]
+        openmc : [
+          '',
+        ]
+        hdf5 : [
+          '',
+        ]
+        include:
+          - openmc: ''
+            hdf5: _hdf5-1_12_0
+            dagmc: _dagmc
+            pymoab: _pymoab
+          - openmc: _openmc
+            hdf5: ''
+            dagmc: _dagmc
+            pymoab: _pymoab
+          - openmc: ''
+            hdf5: ''
+            dagmc: ''
+            pymoab: ''
+      fail-fast: false
+
+
+    container:
+      image: ghcr.io/pyne/ubuntu_18.04_py3${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:stable
+
+    steps:
+      - name: setup
+        shell: bash -l {0}
+        run: |
+          export ADD_FLAG=" "
+          if [[ "${{ matrix.pymoab }}" == "_pymoab" || "${{ matrix.dagmc }}" == "_dagmc" ]]; then
+            export ADD_FLAG="${ADD_FLAG} --moab /root/opt/moab"
+          fi
+          if [[ "${{ matrix.dagmc }}" == "_dagmc" ]]; then
+            export ADD_FLAG="${ADD_FLAG} --dagmc /root/opt/dagmc"
+          fi
+          if [[ "${{ matrix.hdf5 }}" == "_hdf5-1_12_0" ]]; then
+            export ADD_FLAG="${ADD_FLAG} --hdf5 /root/opt/hdf5/hdf5-1_12_0"
+          fi
+          export ADD_FLAG="${ADD_FLAG} "
+          echo "ADD_FLAG=${ADD_FLAG}" >> $GITHUB_ENV
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        
+      - name: Building PyNE
+        shell: bash -l {0}
+        run: |
+          cd $GITHUB_WORKSPACE
+          python setup.py install --user --clean ${{ env.ADD_FLAG}}
+          export PATH="$PATH:/github/home/.local/bin"
+          export PYTHONPATH="$PYTHONPATH:/github/home/.local/lib/python3.6/site-packages/"
+          cd ../
+          nuc_data_make
+
+      - name: Testing PyNE
+        shell: bash -l {0}
+        run: |
+          cd $GITHUB_WORKSPACE/tests
+          ./travis-run-tests.sh python3
