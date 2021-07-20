@@ -6,9 +6,11 @@ Next Version
 ============
 
 **New Capabilities**
+   * uses GithubAction to build the docker image used in CI (#1394)
 
 **Change**
-     
+   * CI uses GithubAction instead of CIrcleCI (#1393)
+
 **Fix**
 
    * Attribution for the atomic mass data in the data theory doc page (#1387)
