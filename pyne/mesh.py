@@ -589,40 +589,30 @@ class NativeMeshTag(Tag):
         ndarray, list, NativeMeshTag. Throws error if shapes are incorrect """
 
         if isinstance(multiplier, NativeMeshTag):
-            if self.size == 1:
-                if multiplier.size == 1:
-                    try:
-                        return self[:] * multiplier[:]
-                    except:
-                        print("Scalar data must have the same shape")
-                        #raise e 
-                elif multiplier.size > 1:
-                    try:
-                        return self[:][:, None] * multiplier[:]
-                    except:
-                        print("Incompatible shape for scalar or vector data")
-                        #raise e
+            if self.size == multiplier.size:
+                try:
+                    return self[:] * multiplier[:]
+                except:
+                    raise ValueError("Scalar data must have the same shape")
+            elif multiplier.size > 1:
+                try:
+                    return self[:][:, None] * multiplier[:]
+                except:
+                    raise ValueError("Incompatible shape for scalar or vector data")
             elif self.size > 1:
-                if multiplier.size == 1:
-                    try:
-                        return self[:] * multiplier[:][None, :]
-                    except:
-                        print("Incompatible shape for vector or scalar data")
-                        #raise e
-                elif multiplier.size > 1:
-                    try:
-                        return self[:] * multiplier[:]
-                    except:
-                        print("Vectors must have the same shape")
-                        #raise e
+                try:
+                    return self[:] * multiplier[:][None, :]
+                except:
+                    raise ValueError("Incompatible shape for vector or scalar data")
         elif isinstance(multiplier, int) or isinstance(multiplier, float):
             return self[:]*multiplier
         elif isinstance(multiplier, np.ndarray) or isinstance(multiplier, list):
             try:
                 return self[:]*multiplier
             except:
-                print("Incompatible vector multiplication")
-                #raise e
+                raise ValueError("Incompatible array or list shape")
+        else:
+            raise TypeError("Incorrect multiplier type provided")
 
 class ComputedTag(Tag):
     '''A mesh tag which looks itself up by calling a function (or other callable)
@@ -1182,23 +1172,6 @@ class Mesh(object):
                 mesh_1.mesh.tag_set_data(mesh_1_tag, ve_1, val)
         return mesh_1
     
-    def multiply_vector_tag_by_scalar(self, vector_tag_name, scalar):
-        #volume_elements = list(self.structured_iterate_hex("zyx")) #default ordering
-        volume_elements = list(meshset_iterate(self.mesh, self.structured_set, types.MBMAXTYPE, dim = 3))
-        if isinstance(scalar, str):
-            scalar_tag = self.mesh.tag_get_handle(scalar)
-            scalar_data = self.mesh.tag_get_data(scalar_tag, volume_elements)
-        else:
-            scalar_data = scalar
-        vector_tag = self.mesh.tag_get_handle(vector_tag_name)
-        vector_data = self.mesh.tag_get_data(vector_tag, volume_elements)
-        new_data = scalar_data*vector_data
-        print(scalar_data)
-        print(vector_data)
-        print(new_data)
-        self.mesh.tag_set_data(vector_tag, volume_elements, new_data)
-        print(self.mesh.tag_get_data(vector_tag, volume_elements))
-
     def common_ve_tags(self, other):
         """Returns the volume element tags in common between self and other."""
         self_it = MeshSetIterator(self.mesh,

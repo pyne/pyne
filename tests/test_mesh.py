@@ -879,29 +879,48 @@ def test_nativetag_mult():
     m.peach[:] = [1.5, 2.5]
     m.tangerine = NativeMeshTag(1, float) 
     m.tangerine[:] = [5.0, 10.0]
-    assert_array_almost_equal(m.peach.mult(m.tangerine), [7.5, 25.0]) #multiplying two scalar-valued tags
+    obs = m.peach.mult(m.tangerine)
+    exp = [7.5, 25.0]
+    assert_array_almost_equal(obs, exp) #multiplying two scalar-valued tags
     
     m.plum = NativeMeshTag(2, float)
     m.plum[:] = [[5.0, 10.0], [15.0, 20.0]]
-    assert_array_almost_equal(m.peach.mult(m.plum), [[7.5, 15.0], [37.5, 50.0]]) #multiplying scalar-valued tag by vector-valued tag
+    obs = m.peach.mult(m.plum)
+    exp = [[7.5, 15.0], [37.5, 50.0]]
+    assert_array_almost_equal(obs, exp) #multiplying scalar-valued tag by vector-valued tag
     
-    assert_array_almost_equal(m.plum.mult(m.tangerine), [[25.0, 100.0], [75.0, 200.0]]) #multiplying vector-valued tag by scalar-valued tag
+    obs = m.plum.mult(m.tangerine)
+    exp = [[25.0, 100.0], [75.0, 200.0]]
+    assert_array_almost_equal(obs, exp) #multiplying vector-valued tag by scalar-valued tag
     
     m.grapefruit = NativeMeshTag(2, float)
     m.grapefruit[:] = [[2.0, 4.0], [3.0, 6.0]]
-    assert_array_almost_equal(m.plum.mult(m.grapefruit), [[10.0, 40.0], [45.0, 120.0]]) #multiplying two vector-valued tags
+    obs = m.plum.mult(m.grapefruit)
+    exp = [[10.0, 40.0], [45.0, 120.0]]
+    assert_array_almost_equal(obs, exp) #multiplying two vector-valued tags
 
     cherry = 12
-    assert_array_almost_equal(m.plum.mult(cherry), [[60.0, 120.0], [180.0, 240.0]]) #multiplying by int
+    exp = m.plum.mult(cherry)
+    obs = [[60.0, 120.0], [180.0, 240.0]]
+    assert_array_almost_equal(obs, exp) #multiplying by int
     
     cherry = 5.0
-    assert_array_almost_equal(m.plum.mult(cherry), [[25.0, 50.0], [75.0, 100.0]]) #multiplying by float
+    exp = m.plum.mult(cherry)
+    obs = [[25.0, 50.0], [75.0, 100.0]]
+    assert_array_almost_equal(obs, exp) #multiplying by float
     
     cherry = [1.0, 2.0]
-    assert_array_almost_equal(m.grapefruit.mult(cherry), [[2.0, 8.0], [3.0, 12.0]]) #multiplying by list
+    exp = m.grapefruit.mult(cherry)
+    obs = [[2.0, 8.0], [3.0, 12.0]]
+    assert_array_almost_equal(obs, exp) #mulitplying by list
     
     cherry = np.asarray(cherry)
-    assert_array_almost_equal(m.plum.mult(cherry), [[5.0, 20.0], [15.0, 40.0]]) #multiplying by ndarray
+    exp = m.plum.mult(cherry)
+    obs = [[5.0, 20.0], [15.0, 40.0]]
+    assert_array_almost_equal(obs, exp) #multiplying by ndarray
+
+    cherry = "twelve"
+    assert_raises(TypeError, m.plum.mult, cherry) #using invalid multiplier type
 
 
 def test_comptag():
