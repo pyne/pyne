@@ -8,17 +8,15 @@ on:
 
 jobs:
 
-  build_and_push:
+  build_and_push_python3_pymoab:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         ubuntu_versions : [
-          16.04,
           18.04,
         ]
 
     steps:
-
       - name: Checkout repository
         uses: actions/checkout@v2
 
@@ -37,78 +35,269 @@ jobs:
         with:
           file: docker/ubuntu_18.04-dev.dockerfile
           context: .
-          push: ${{ github.repository_owner == 'pyne' }}
+          push: true
           build-args: |
             py_version=3.6
             build_pyne=NO
-            build_moab=NO
-            build_dagmc=NO
-            build_pymoab=NO
-            build_hdf5=NO
-            install_openmc=NO
-          tags: ghcr.io/pyne/ubuntu_18.04_py3_pyne-deps:latest
+          tags: ghcr.io/${{ github.repository_owner }}/ubuntu_18.04_py3_pyne-deps:latest
+
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@master
+        with:
+          install: true
+
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache-${{ github.sha }}
+          # Key is named differently to avoid collision
+          key: ${{ runner.os }}-multi-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-multi-buildx
+
+      - name: Build and push moab/pymoab
+        uses: docker/build-push-action@v2
+        with:
+          file: docker/ubuntu_18.04-dev.dockerfile
+          context: .
+          push: true
+          build-args: |
+            py_version=3.6
+            build_pyne=NO
+            build_moab=YES
+            enable_pymoab=YES
+          tags: ghcr.io/${{ github.repository_owner }}/ubuntu_18.04_py3_pymoab_pyne-deps:latest
+          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-${{ github.sha }}
+
+
+  build_and_push_dagmc:
+    needs: build_and_push_python3_pymoab
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        pymoab : [
+          _pymoab,
+          ]
+        dagmc : [
+          _dagmc
+        ]
+        openmc : [
+          '',
+        ]
+        hdf5 : [
+          '',
+        ]
+        include:
+          - openmc: ''
+            hdf5: _hdf5-1_12_0
+            dagmc: _dagmc
+            pymoab: _pymoab
+          - openmc: _openmc
+            hdf5: ''
+            dagmc: _dagmc
+            pymoab: _pymoab
+        
+      fail-fast: false
+    
+    steps:
+      - name: setup
+        shell: bash -l {0}
+        run: |
+          if [[ "${{ matrix.pymoab }}" == "_pymoab" || "${{ matrix.dagmc }}" == "_dagmc" ]]; then
+            echo "PYMOAB=YES" >> $GITHUB_ENV
+          else
+            echo "PYMOAB=NO" >> $GITHUB_ENV
+          fi
+          if [[ "${{ matrix.dagmc }}" == "_dagmc" ]]; then
+            echo "DAGMC=YES" >> $GITHUB_ENV
+          else
+            echo "DAGMC=NO" >> $GITHUB_ENV
+          fi
+          if [[ "${{ matrix.hdf5 }}" == "_hdf5-1_12_0" ]]; then
+            echo "HDF5=hdf5-1_12_0" >> $GITHUB_ENV
+          else
+            echo "HDF5=NO" >> $GITHUB_ENV
+          fi
+          if [[ "${{ matrix.openmc }}" == "_openmc" ]]; then
+            echo "OPENMC=YES" >> $GITHUB_ENV
+          else
+            echo "OPENMC=NO" >> $GITHUB_ENV
+          fi
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@master
+        with:
+          install: true
+
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache-${{ github.sha }}
+          # Key is named differently to avoid collision
+          key: ${{ runner.os }}-multi-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-multi-buildx
 
       - name: Build and push moab/dagmc
         uses: docker/build-push-action@v2
         with:
           file: docker/ubuntu_18.04-dev.dockerfile
           context: .
-          push: ${{ github.repository_owner == 'pyne' }}
+          push: true
           build-args: |
             py_version=3.6
             build_pyne=NO
             build_moab=YES
-            build_dagmc=YES
-            build_pymoab=NO
-            build_hdf5=NO
-            install_openmc=NO
-          tags: ghcr.io/pyne/ubuntu_18.04_py3_dagmc_pyne-deps:latest
+            enable_pymoab=${{ env.PYMOAB }}
+            build_dagmc=${{ env.DAGMC }}
+            build_hdf5=${{ env.HDF5 }}
+            install_openmc=${{ env.HDF5 }}
+          cache-from: type=local,src=/tmp/.buildx-cache-${{ github.sha }}
+          tags: ghcr.io/${{ github.repository_owner }}/ubuntu_18.04_py3${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:latest
 
-      - name: Build and push moab/dagmc/pymoab
-        uses: docker/build-push-action@v2
+  cleanup_cache:
+    if: always()
+    needs: [build_and_push_python3_pymoab, build_and_push_dagmc]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache-${{ github.sha }}
+
+  BuildTest:
+    needs: [build_and_push_python3_pymoab, build_and_push_dagmc]
+    runs-on: ubuntu-latest
+
+      
+    strategy:
+      matrix:
+        pymoab : [
+          _pymoab,
+          ]
+        dagmc : [
+          '',
+          _dagmc
+        ]
+        openmc : [
+          '',
+        ]
+        hdf5 : [
+          '',
+        ]
+        include:
+          - openmc: ''
+            hdf5: _hdf5-1_12_0
+            dagmc: _dagmc
+            pymoab: _pymoab
+          - openmc: _openmc
+            hdf5: ''
+            dagmc: _dagmc
+            pymoab: _pymoab
+          - openmc: ''
+            hdf5: ''
+            dagmc: ''
+            pymoab: ''
+      fail-fast: false
+
+
+    container:
+      image: ghcr.io/${{ github.repository_owner }}/ubuntu_18.04_py3${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:latest
+
+    steps:
+      - name: setup
+        shell: bash -l {0}
+        run: |
+          export ADD_FLAG=" "
+          if [[ "${{ matrix.pymoab }}" == "_pymoab" || "${{ matrix.dagmc }}" == "_dagmc" ]]; then
+            export ADD_FLAG="${ADD_FLAG} --moab /root/opt/moab"
+          fi
+          if [[ "${{ matrix.dagmc }}" == "_dagmc" ]]; then
+            export ADD_FLAG="${ADD_FLAG} --dagmc /root/opt/dagmc"
+          fi
+          if [[ "${{ matrix.hdf5 }}" == "_hdf5-1_12_0" ]]; then
+            export ADD_FLAG="${ADD_FLAG} --hdf5 /root/opt/hdf5/hdf5-1_12_0"
+          fi
+          export ADD_FLAG="${ADD_FLAG} "
+          echo "ADD_FLAG=${ADD_FLAG}" >> $GITHUB_ENV
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        
+      - name: Building PyNE
+        shell: bash -l {0}
+        run: |
+          cd $GITHUB_WORKSPACE
+          python setup.py install --user --clean ${{ env.ADD_FLAG}}
+          export PATH="$PATH:/github/home/.local/bin"
+          export PYTHONPATH="$PYTHONPATH:/github/home/.local/lib/python3.6/site-packages/"
+          cd ../
+          nuc_data_make
+
+      - name: Testing PyNE
+        shell: bash -l {0}
+        run: |
+          cd $GITHUB_WORKSPACE/tests
+          ./travis-run-tests.sh python3
+
+  pushing_test_stable_img:
+    if: ${{ github.repository_owner == 'pyne' }}
+    needs: [BuildTest]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        pymoab : [
+          '',
+          _pymoab,
+          ]
+        dagmc : [
+          '',
+          _dagmc
+        ]
+        openmc : [
+          '',
+        ]
+        hdf5 : [
+          '',
+        ]
+        include:
+          - openmc: ''
+            hdf5: _hdf5-1_12_0
+            dagmc: _dagmc
+            pymoab: _pymoab
+          - openmc: _openmc
+            hdf5: ''
+            dagmc: _dagmc
+            pymoab: _pymoab
+
+    name: "${{ github.repository_owner }}/ubuntu_18.04_py3${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}: latest -> stable"
+
+    steps:
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v1
         with:
-          file: docker/ubuntu_18.04-dev.dockerfile
-          context: .
-          push: ${{ github.repository_owner == 'pyne' }}
-          build-args: |
-            py_version=3.6
-            build_pyne=NO
-            build_moab=YES
-            build_dagmc=YES
-            build_pymoab=YES
-            build_hdf5=NO
-            install_openmc=NO
-          tags: ghcr.io/pyne/ubuntu_18.04_py3_dagmc_pymoab_pyne-deps:latest
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push dagmc/pymoab/hdf5_1.12
-        uses: docker/build-push-action@v2
+      - name: Push Image to stable img
+        uses: akhilerm/tag-push-action@v1.0.0
         with:
-          file: docker/ubuntu_18.04-dev.dockerfile
-          context: .
-          push: ${{ github.repository_owner == 'pyne' }}
-          build-args: |
-            py_version=3.6
-            build_pyne=NO
-            build_moab=YES
-            build_dagmc=YES
-            build_pymoab=YES
-            build_hdf5=hdf5-1_12_0
-            install_openmc=NO
-          tags: ghcr.io/pyne/ubuntu_18.04_py3_hdf5-1_12_0_dagmc_pymoab_pyne-deps:latest
-
-      - name: Build and push dagmc/pymoab
-        uses: docker/build-push-action@v2
-        with:
-          file: docker/ubuntu_18.04-dev.dockerfile
-          context: .
-          push: ${{ github.repository_owner == 'pyne' }}
-          build-args: |
-            py_version=3.6
-            build_pyne=NO
-            build_moab=YES
-            build_dagmc=YES
-            build_pymoab=YES
-            build_hdf5=NO
-            install_openmc=YES
-          tags: ghcr.io/pyne/ubuntu_18.04_py3_dagmc_pymoab_openmc_pyne-deps:latest
-
+          src: ghcr.io/${{ github.repository_owner }}/ubuntu_18.04_py3${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:latest
+          dst: ghcr.io/${{ github.repository_owner }}/ubuntu_18.04_py3${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:stable
