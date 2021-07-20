@@ -41,7 +41,6 @@ jobs:
     strategy:
       matrix:
         pymoab : [
-          '',
           _pymoab,
           ]
         dagmc : [
@@ -63,6 +62,10 @@ jobs:
             hdf5: ''
             dagmc: _dagmc
             pymoab: _pymoab
+          - openmc: ''
+            hdf5: ''
+            dagmc: ''
+            pymoab: ''
       fail-fast: false
 
 
