@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # default main repo setup
-PR_BASE_BRANCH=${GITHUB_REF##*/}
+PR_BASE_BRANCH=develop
 echo "Testing changelog against $PR_BASE_BRANCH branch"
 
 master_repo="https://github.com/pyne/pyne.git"
