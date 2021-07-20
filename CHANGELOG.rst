@@ -5,6 +5,14 @@ PyNE Change Log
 Next Version
 ============
 
+**New Capabilities**
+
+**Change**
+
+**Fix**
+
+**Maintenance**
+
 v0.7.5
 ======
 
