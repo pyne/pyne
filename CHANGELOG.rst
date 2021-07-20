@@ -5,6 +5,9 @@ PyNE Change Log
 Next Version
 ============
 
+v0.7.5
+======
+
 **New Capabilities**
 * uses GithubAction to build the docker image used in CI (#1394)
 
