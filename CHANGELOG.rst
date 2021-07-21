@@ -11,7 +11,7 @@ Next Version
 
 **Fix**
 
-   * fixing VR test
+   * fixing VR test (#1399)
 
 **Maintenance**
 
