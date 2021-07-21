@@ -6,9 +6,22 @@ Next Version
 ============
 
 **New Capabilities**
-* uses GithubAction to build the docker image used in CI (#1394)
 
 **Change**
+
+**Fix**
+
+**Maintenance**
+
+v0.7.5
+======
+
+**New Capabilities**
+
+   * uses GithubAction to build the docker image used in CI (#1394)
+
+**Change**
+
    * CI uses GithubAction instead of CIrcleCI (#1393, #1395)
 
 **Fix**
