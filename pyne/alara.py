@@ -18,6 +18,7 @@ from pyne.utils import QA_warn, to_sec, str_to_unicode
 import numpy as np
 import tables as tb
 from io import open
+import re
 
 QA_warn(__name__)
 
@@ -92,27 +93,19 @@ def mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
 
     # Establish for loop bounds based on if forward or backward printing
     # is requested
-    if not reverse:
-        start = 0
-        stop = num_e_groups
-        direction = 1
-    else:
-        start = num_e_groups - 1
-        stop = -1
-        direction = -1
-
+    output_list = []
     output = u""
     if not sub_voxel:
         for i, mat, ve in flux_mesh:
-            # print flux data to file
-            output = _output_flux(ve, tag_flux, output, start, stop, direction)
+            # append each block to list
+            output_list.append(_output_flux_block(ve, tag_flux, reverse))
     else:
         ves = list(flux_mesh.iter_ve())
         for row in cell_fracs:
             if len(cell_mats[row['cell']].comp) != 0:
-                output = _output_flux(ves[row['idx']], tag_flux, output, start,
-                                      stop, direction)
+                output_list.append(_output_flux_block(ves[row['idx']], tag_flux, reverse))
 
+    output = ''.join([value for value in output_list])
     with open(fluxin, "w") as f:
         f.write(output)
 
@@ -1014,6 +1007,25 @@ def _output_flux(ve, tag_flux, output, start, stop, direction):
 
     output += u"\n\n"
     return output
+
+def _output_flux_block(ve, tag_flux, reverse):
+    """
+    This function is used to get neutron flux for fluxin
+
+    Parameters
+    ----------
+    ve : entity, a mesh sub-voxel
+    tag_flux : array, neutron flux of the sub-voxel
+    reverse : bool, whether to reverse the flux
+    """
+
+    flux_data = np.atleast_1d(tag_flux[ve])
+    if reverse:
+        flux_data = np.flip(flux_data)
+    outs = ''.join([u"{:.6E} ".format(value) for value in flux_data])
+    outs = '\n'.join(re.findall('.{1,78}', outs))
+    outs += u"\n\n"
+    return outs
 
 
 def _get_subvoxel_array(mesh, cell_mats):
