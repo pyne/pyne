@@ -19,6 +19,7 @@ import numpy as np
 import tables as tb
 from io import open
 import re
+from memory_profiler import profile
 
 QA_warn(__name__)
 
@@ -41,6 +42,7 @@ response_strings = {'decay_heat': 'Total Decay Heat',
                     'wdr': 'WDR/Clearance index',
                     'photon_source': 'Photon Source Distribution'}
 
+@profile
 def mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
                    reverse=False, sub_voxel=False, cell_fracs=None,
                    cell_mats=None, print_progress=100000):
@@ -98,23 +100,27 @@ def mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
     # is requested
     output_list = []
     output = u""
+    f = open(fluxin, "w")
     if not sub_voxel:
         for i, mat, ve in flux_mesh:
             # append each block to list
-            output_list.append(_output_flux_block(ve, tag_flux, reverse))
+#            output_list.append(_output_flux_block(ve, tag_flux, reverse))
+            f.write(_output_flux_block(ve, tag_flux, reverse))
             if print_progress > 0 and i % print_progress == 0:
                 print(f"processing mesh element {i}")
     else:
         ves = list(flux_mesh.iter_ve())
         for i, row in enumerate(cell_fracs):
             if len(cell_mats[row['cell']].comp) != 0:
-                output_list.append(_output_flux_block(ves[row['idx']], tag_flux, reverse))
+#                output_list.append(_output_flux_block(ves[row['idx']], tag_flux, reverse))
+                f.write(_output_flux_block(ves[row['idx']], tag_flux, reverse))
             if print_progress > 0 and i % print_progress == 0:
                 print(f"processing mesh element {row['idx']}")
 
-    output = ''.join([value for value in output_list])
-    with open(fluxin, "w") as f:
-        f.write(output)
+#    output = ''.join([value for value in output_list])
+    f.close()
+#    with open(fluxin, "w") as f:
+#        f.write(output)
 
 
 def photon_source_to_hdf5(filename, nucs='all', chunkshape=(10000,)):
