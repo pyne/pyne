@@ -192,7 +192,6 @@ def magic(meshtally, tag_name, tag_name_error, **kwargs):
     if total:
         # get value tagged on the mesh itself
         root_tag[meshtally] = np.max(meshtally.e_bounds[:])
-        max_val = np.max(meshtally.vals[:])
 
         vals = []
         errors = []
