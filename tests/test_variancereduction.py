@@ -121,7 +121,7 @@ def test_magic_below_tolerance():
     tally.n_rel_error = NativeMeshTag(1, float)
     tally.n_rel_error[:] = flux_error
 
-    magic(tally, "n_total_flux", "n_rel_error")
+    tally = magic(tally, "n_total_flux", "n_rel_error")
 
     expected_ww = [0.181818182, 0.5, 0.2424242, 0.2575757576]
 
@@ -148,7 +148,7 @@ def test_magic_multi_bins():
     tolerance = 0.15
     null_value = 0.001
 
-    magic(tally, "n_flux", "n_rel_error",
+    tally = magic(tally, "n_flux", "n_rel_error",
           tolerance=tolerance, null_value=null_value)
 
     expected_ww = [[0.2307692308, 0.5],
@@ -179,9 +179,10 @@ def test_magic_e_total():
     tolerance = 0.15
     null_value = 0.001
 
-    magic(tally, "n_total_flux", "n_rel_error",
+    tally = magic(tally, "n_total_flux", "n_rel_error",
           tolerance=tolerance, null_value=null_value)
 
+    
     expected_ww = [0.181818182, 0.5, 0.2424242, 0.001]
 
     assert_array_almost_equal(tally.ww_x[:], expected_ww[:])

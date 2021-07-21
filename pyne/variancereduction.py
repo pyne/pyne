@@ -237,3 +237,4 @@ def magic(meshtally, tag_name, tag_name_error, **kwargs):
     # Create wwinp mesh
     wwinp = Wwinp()
     wwinp.read_mesh(meshtally.mesh)
+    return meshtally
