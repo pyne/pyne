@@ -8,7 +8,6 @@ from pyne.mcnp import Meshtal
 from pyne.alara import mesh_to_fluxin, record_to_geom, photon_source_to_hdf5, \
     photon_source_hdf5_to_mesh, responses_output_zone
 from pyne import openmc_utils
-import time
 
 QA_warn(__name__)
 
@@ -154,11 +153,8 @@ def irradiation_setup(flux_mesh, cell_mats, cell_fracs, alara_params,
     if output_material:
         m.cell_fracs_to_mats(cell_fracs, cell_mats)
 
-    time0 = time.time()
     mesh_to_fluxin(m, flux_tag, fluxin, reverse,
                    sub_voxel, cell_fracs, cell_mats)
-    time1 = time.time()
-    print(f"mesh_to_fluxin time: {time1-time0}")
     record_to_geom(m, cell_fracs, cell_mats, alara_inp, alara_matlib,
                    sub_voxel=sub_voxel)
 
