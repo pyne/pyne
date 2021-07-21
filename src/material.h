@@ -263,6 +263,8 @@ namespace pyne
     /// Return an uwuw name
     std::string get_uwuw_name();
     ///
+    /// Return an GDML input deck record as a string
+    std::string gdml();
     /// Return a fluka input deck MATERIAL card as a string
     std::string fluka(int id, std::string frac_type = "mass");
     /// Convenience function to tell whether a given name needs a material card

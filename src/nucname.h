@@ -31,6 +31,16 @@ namespace nucname
   typedef zzname_t::iterator zzname_iter;   ///< Z num to name iter type
   zzname_t get_zz_name();   ///< Creates standard Z number to name mapping.
   extern zzname_t zz_name;  ///< Z num to name map
+  
+  typedef std::map<name_t, name_t> name_elt_t; ///< Symbolic Xy name and element full name map type
+  typedef name_elt_t::iterator name_elt_iter; ///< Symbolic Xy name and element full iter type
+  name_elt_t get_name_elt();  ///< Creates standard Symbolic Xy name to element full name mapping.
+  extern name_elt_t name_elt; ///< Symbolic Xy name to element full name map
+
+  typedef std::map<name_t, name_t> elt_name_t;  ///< element full name to symbolic Xy name map type
+  typedef elt_name_t::iterator elt_name_iter;   ///< element full name to symbolic Xy name iter type
+  elt_name_t get_elt_name();   ///< Creates element full name to symbolic Xy name mapping.
+  extern elt_name_t elt_name;  ///< element full name to symbolic Xy name map
 
   name_zz_t get_fluka_zz();  ///< Creates standard fluka-name to nucid mapping.
   extern name_zz_t fluka_zz; ///< fluka-name to nucid map

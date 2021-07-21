@@ -6,7 +6,147 @@
 #ifndef PYNE_IS_AMALGAMATED
 #include "nucname.h"
 #include "state_map.cpp"
+#include <iostream>
 #endif
+
+/*** Constructs the LL to element name Dictionary ***/
+pyne::nucname::name_elt_t pyne::nucname::get_name_elt() {
+  pyne::nucname::name_elt_t lname;
+
+  lname["H"] = "Hydrogen";
+  lname["He"] = "Helium";
+  lname["Li"] = "Lithium";
+  lname["Be"] = "Beryllium";
+  lname["B"] = "Boron";
+  lname["C"] = "Carbon";
+  lname["N"] = "Nitrogen";
+  lname["O"] = "Oxygen";
+  lname["F"] = "Fluorine";
+  lname["Ne"] = "Neon";
+  lname["Na"] = "Sodium";
+  lname["Mg"] = "Magnesium";
+  lname["Al"] = "Aluminium";
+  lname["Si"] = "Silicon";
+  lname["P"] = "Phosphorus";
+  lname["S"] = "Sulfur";
+  lname["Cl"] = "Chlorine";
+  lname["Ar"] = "Argon";
+  lname["K"] = "Potassium";
+  lname["Ca"] = "Calcium";
+  lname["Sc"] = "Scandium";
+  lname["Ti"] = "Titanium";
+  lname["V"] = "Vanadium";
+  lname["Cr"] = "Chromium";
+  lname["Mn"] = "Manganese";
+  lname["Fe"] = "Iron";
+  lname["Co"] = "Cobalt";
+  lname["Ni"] = "Nickel";
+  lname["Cu"] = "Copper";
+  lname["Zn"] = "Zinc";
+  lname["Ga"] = "Gallium";
+  lname["Ge"] = "Germanium";
+  lname["As"] = "Arsenic";
+  lname["Se"] = "Selenium";
+  lname["Br"] = "Bromine";
+  lname["Kr"] = "Krypton";
+  lname["Rb"] = "Rubidium";
+  lname["Sr"] = "Strontium";
+  lname["Y"] = "Yttrium";
+  lname["Zr"] = "Zirconium";
+  lname["Nb"] = "Niobium";
+  lname["Mo"] = "Molybdenum";
+  lname["Tc"] = "Technetium";
+  lname["Ru"] = "Ruthenium";
+  lname["Rh"] = "Rhodium";
+  lname["Pd"] = "Palladium";
+  lname["Ag"] = "Silver";
+  lname["Cd"] = "Cadmium";
+  lname["In"] = "Indium";
+  lname["Sn"] = "Tin";
+  lname["Sb"] = "Antimony";
+  lname["Te"] = "Tellurium";
+  lname["I"] = "Iodine";
+  lname["Xe"] = "Xenon";
+  lname["Cs"] = "Caesium";
+  lname["Ba"] = "Barium";
+  lname["La"] = "Lanthanum";
+  lname["Ce"] = "Cerium";
+  lname["Pr"] = "Praseodymium";
+  lname["Nd"] = "Neodymium";
+  lname["Pm"] = "Promethium";
+  lname["Sm"] = "Samarium";
+  lname["Eu"] = "Europium";
+  lname["Gd"] = "Gadolinium";
+  lname["Tb"] = "Terbium";
+  lname["Dy"] = "Dysprosium";
+  lname["Ho"] = "Holmium";
+  lname["Er"] = "Erbium";
+  lname["Tm"] = "Thulium";
+  lname["Yb"] = "Ytterbium";
+  lname["Lu"] = "Lutetium";
+  lname["Hf"] = "Hafnium";
+  lname["Ta"] = "Tantalum";
+  lname["W"] = "Tungsten";
+  lname["Re"] = "Rhenium";
+  lname["Os"] = "Osmium";
+  lname["Ir"] = "Iridium";
+  lname["Pt"] = "Platinum";
+  lname["Au"] = "Gold";
+  lname["Hg"] = "Mercury";
+  lname["Tl"] = "Thallium";
+  lname["Pb"] = "Lead";
+  lname["Bi"] = "Bismuth";
+  lname["Po"] = "Polonium";
+  lname["At"] = "Astatine";
+  lname["Rn"] = "Radon";
+  lname["Fr"] = "Francium";
+  lname["Ra"] = "Radium";
+  lname["Ac"] = "Actinium";
+  lname["Th"] = "Thorium";
+  lname["Pa"] = "Protactinium";
+  lname["U"] = "Uranium";
+  lname["Np"] = "Neptunium";
+  lname["Pu"] = "Plutonium";
+  lname["Am"] = "Americium";
+  lname["Cm"] = "Curium";
+  lname["Bk"] = "Berkelium";
+  lname["Cf"] = "Californium";
+  lname["Es"] = "Einsteinium";
+  lname["Fm"] = "Fermium";
+  lname["Md"] = "Mendelevium";
+  lname["No"] = "Nobelium";
+  lname["Lr"] = "Lawrencium";
+  lname["Rf"] = "Rutherfordium";
+  lname["Db"] = "Dubnium";
+  lname["Sg"] = "Seaborgium";
+  lname["Bh"] = "Bohrium";
+  lname["Hs"] = "Hassium";
+  lname["Mt"] = "Meitnerium";
+  lname["Ds"] = "Darmstadtium";
+  lname["Rg"] = "Roentgenium";
+  lname["Cn"] = "Copernicium";
+  lname["Nh"] = "Nihonium";
+  lname["Fl"] = "Flerovium";
+  lname["Mc"] = "Moscovium";
+  lname["Lv"] = "Livermorium";
+  lname["Ts"] = "Tennessine";
+  lname["Og"] = "Oganesson";
+  return lname;
+}  
+pyne::nucname::name_elt_t pyne::nucname::name_elt = pyne::nucname::get_name_elt();
+
+
+/*** Constructs element full name to symbolic Xy name dictionary **/
+pyne::nucname::elt_name_t pyne::nucname::get_elt_name()
+{
+  elt_name_t zld;
+  for (name_elt_iter i = name_elt.begin(); i != name_elt.end(); i++)
+  {
+    zld[i->second] = i->first;
+  }
+  return zld;
+}
+pyne::nucname::elt_name_t pyne::nucname::elt_name = pyne::nucname::get_elt_name();
 
 
 /*** Constructs the LL to zz Dictionary ***/

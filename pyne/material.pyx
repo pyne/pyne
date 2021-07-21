@@ -374,6 +374,18 @@ cdef class _Material:
         cdef std_string card
         card = self.mat_pointer.mcnp(frac_type.encode(), mult_den)
         return card.decode()
+    
+    def gdml(self):
+        """gdml()
+        Return a gdml input deck
+        ""
+        Parameters
+        ----------
+        """
+
+        cdef std_string card
+        card = self.mat_pointer.gdml()
+        return card.decode()
 
     def get_uwuw_name(self):
         """get_uwuw_name()

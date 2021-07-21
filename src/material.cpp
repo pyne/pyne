@@ -727,7 +727,7 @@ std::string pyne::Material::openmc(std::string frac_type) {
 
   // specify density
   oss << "<density ";
-    // if density is negtaive, report to user
+    // if density is negative, report to user
   if (temp_mat.density < 0.0) {
     throw pyne::ValueError("A density < 0.0 was found. This is not valid for use in OpenMC.");
   }
@@ -956,6 +956,79 @@ std::string pyne::Material::mcnp_frac(std::map<int, double> fracs, std::string f
       oss << fs.str();
     }
   }
+  return oss.str();
+}
+
+std::string pyne::Material::gdml() {
+  std::stringstream oss;
+  std::string mat_name = "mat";
+  std::string mat_name_by_num = "mat";
+
+  // 'name'
+  if (metadata.isMember("name")) {
+    mat_name = metadata["name"].asString();
+  }
+  if (metadata.isMember("mat_number")) {
+    mat_name_by_num += std::to_string(metadata["mat_number"].asInt());
+  }
+
+  // 'Isotope list'
+
+  // 'Element list'
+  std::map<int, double> fracs = comp;
+  std::map<int, std::map<int, double>> elements_list;
+  std::map<std::string, double> element_comp;
+  // loop over the composition and group isotopes per element
+  for (auto it : comp) {
+    int z = nucname::znum(it.first);
+    std::string element_name = mat_name_by_num + "_" + nucname::name_elt[nucname::zz_name[z]];
+    if (elements_list.find(z) == elements_list.end()) {
+      std::map<int, double> list;
+      list[it.first] = it.second;
+      elements_list.insert(std::pair<int, std::map<int, double>>(z, list));
+
+      // add fraction in the material composition
+      element_comp.insert( std::make_pair(element_name, it.second));
+    } else {
+      elements_list[z][it.first] = it.second;
+      // add fraction in the material composition
+      element_comp[element_name] += it.second;
+    }
+  }
+
+  // loop over the different chemical elements
+  for (auto it : elements_list) {
+    int z = nucname::znum(it.first);
+    std::string element_name = mat_name_by_num + "_" + nucname::name_elt[nucname::zz_name[z]];
+    double total_element_frac = element_comp[element_name];
+    if (total_element_frac > 0) {
+      oss << "<element name=\"" << element_name << "\" >"
+          << std::endl;
+
+      // loop over all the isotopes of a chemical element (and normalize
+      // fraction)
+      for (auto isotope : it.second) {
+        oss << "  <fraction ref=\"" << nucname::name(isotope.first) << "\"";
+        oss << " n=\"" << isotope.second / total_element_frac << "\" />";
+        oss << std::endl;
+      }
+      oss << "</element>" << std::endl;
+    }
+  }
+
+  // write material
+  oss << "<material name=\"" << mat_name << "\"";
+  oss << " formula=\"" << mat_name << "\" >" << std::endl;
+  // if density is negative, report to user
+  oss << "  <D value=\"" << density << "\" />" << std::endl;
+  for (auto it : element_comp) {
+    if (it.second > 0) {
+      oss << "  <fraction n=\"" << it.second << "\" ref=\"" << it.first << "\" />";
+      oss << std::endl;
+    }
+  }
+  oss << "</material>" << std::endl;
+
   return oss.str();
 }
 
