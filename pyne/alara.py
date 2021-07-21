@@ -84,6 +84,7 @@ def mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
     print_progress: int, optional
         If desired, the number of processed events can be printed to the
         console each N loops by passing the print_progress=N parameter.
+        The print progress can be turned off by by setting print_progess=0.
     """
 
     tag_flux = flux_mesh.get_tag(flux_tag)
@@ -986,33 +987,6 @@ def cram(N, t, n_0, order):
             order)
         raise ValueError(msg)
 
-
-def _output_flux(ve, tag_flux, output, start, stop, direction):
-    """
-    This function is used to get neutron flux for fluxin
-
-    Parameters
-    ----------
-    ve : entity, a mesh sub-voxel
-    tag_flux : array, neutron flux of the sub-voxel
-    output : string
-    start : int
-    stop : int
-    direction: int
-    """
-
-    count = 0
-    flux_data = np.atleast_1d(tag_flux[ve])
-    for i in range(start, stop, direction):
-        output += u"{:.6E} ".format(flux_data[i])
-        # fluxin formatting: create a new line
-        # after every 6th entry
-        count += 1
-        if count % 6 == 0:
-            output += u"\n"
-
-    output += u"\n\n"
-    return output
 
 def _output_flux_block(ve, tag_flux, reverse):
     """
