@@ -169,8 +169,8 @@ def magic(meshtally, tag_name, tag_name_error, **kwargs):
         meshtally.particle = mcnp(particle).lower()
 
     # Create tags for values and errors
-    meshtally.vals = NativeMeshTag(mesh=meshtally, name=tag_name)
-    meshtally.errors = NativeMeshTag(mesh=meshtally, name=tag_name_error)
+    meshtally.vals = meshtally.tags[tag_name]
+    meshtally.errors = meshtally.tags[tag_name_error]
 
     # Create weight window tags
     tag_size = meshtally.vals[0].size
