@@ -99,14 +99,14 @@ def mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
         if not sub_voxel:
             for i, mat, ve in flux_mesh:
                 f.write(_output_flux_block(ve, tag_flux, reverse))
-                if print_progress > 0 and i % print_progress == 0:
+                if print_progress > 0 and i > 0 and i % print_progress == 0:
                     print(f"processing mesh element {i}")
         else:
             ves = list(flux_mesh.iter_ve())
             for i, row in enumerate(cell_fracs):
                 if len(cell_mats[row['cell']].comp) != 0:
                     f.write(_output_flux_block(ves[row['idx']], tag_flux, reverse))
-                if print_progress > 0 and i % print_progress == 0:
+                if print_progress > 0 and i > 0 and i % print_progress == 0:
                     print(f"processing mesh element {row['idx']}")
 
 
