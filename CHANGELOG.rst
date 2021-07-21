@@ -11,6 +11,8 @@ Next Version
 
 **Fix**
 
+   * fixing VR test
+
 **Maintenance**
 
 v0.7.5
