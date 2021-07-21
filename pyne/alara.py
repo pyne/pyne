@@ -43,7 +43,7 @@ response_strings = {'decay_heat': 'Total Decay Heat',
 
 def mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
                    reverse=False, sub_voxel=False, cell_fracs=None,
-                   cell_mats=None):
+                   cell_mats=None, print_progress=100000):
     """This function creates an ALARA fluxin file from fluxes tagged on a PyNE
     Mesh object. Fluxes are printed in the order of the flux_mesh.__iter__().
 
@@ -79,11 +79,13 @@ def mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
         cell changing fastest.
     cell_mats : dict, optional
         Maps geometry cell numbers to PyNE Material objects.
-
         The cell_fracs and cell_mats are used only when sub_voxel=True.
         If sub_voxel=False, neither cell_fracs nor cell_mats will be used.
-
+    print_progress: int, optional
+        If desired, the number of processed events can be printed to the
+        console each N loops by passing the print_progress=N parameter.
     """
+
     tag_flux = flux_mesh.get_tag(flux_tag)
 
     # find number of e_groups
@@ -99,11 +101,15 @@ def mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
         for i, mat, ve in flux_mesh:
             # append each block to list
             output_list.append(_output_flux_block(ve, tag_flux, reverse))
+            if print_progress > 0 and i % print_progress == 0:
+                print(f"processing mesh element {i}")
     else:
         ves = list(flux_mesh.iter_ve())
-        for row in cell_fracs:
+        for i, row in enumerate(cell_fracs):
             if len(cell_mats[row['cell']].comp) != 0:
                 output_list.append(_output_flux_block(ves[row['idx']], tag_flux, reverse))
+            if print_progress > 0 and i % print_progress == 0:
+                print(f"processing mesh element {row['idx']}")
 
     output = ''.join([value for value in output_list])
     with open(fluxin, "w") as f:
