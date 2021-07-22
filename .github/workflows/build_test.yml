@@ -5,8 +5,8 @@ on:
   workflow_dispatch:
   pull_request:
     paths-ignore:
-      - 'workflow/docker_publish.yml'
-      - '.github/workflow/changelog_test.yml'
+      - '.github/workflows/docker_publish.yml'
+      - '.github/workflows/changelog_test.yml'
       - 'docker/**'
       - 'CHANGELOG.rst'
   push:
