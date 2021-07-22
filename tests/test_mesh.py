@@ -269,37 +269,23 @@ class TestArithmetic():
         self.mesh_1_vector = Mesh(structured_coords=[[-1, 0, 1], [-1, 0, 1], [0, 1]],
                                   structured = True)
         self.volumes1 = list(self.mesh_1_vector.structured_iterate_hex("xyz"))
-       
-        test_vector_tag = self.mesh_1_vector.mesh.tag_get_handle(self.vector_tag_name, 
-                                                          2,
-                                                          types.MB_TYPE_DOUBLE,
-                                                          types.MB_TAG_DENSE,
-                                                          create_if_missing=True)
-
+               
         test_vector_data = [[1.0, 2.0], [1.5, 2.5], [-1.0, -1.5], [-2.0, -2.5]]        
-        self.mesh_1_vector.mesh.tag_set_data(test_vector_tag, self.volumes1, test_vector_data)
+        self.mesh_1_vector.tag(self.vector_tag_name, test_vector_data, tagtype = "nat_mesh", size = 2, 
+                                    dtype='float64', storage_type='dense')
         
         self.mesh_2_vector = Mesh(structured_coords=[[-1, 0, 1], [-1, 0, 1], [0, 1]],
                                   structured = True)
-        volumes2 = list(self.mesh_2_vector.structured_iterate_hex("xyz"))
-        test_vector_tag = self.mesh_2_vector.mesh.tag_get_handle(self.vector_tag_name,
-                                                          2,
-                                                          types.MB_TYPE_DOUBLE,
-                                                          types.MB_TAG_DENSE,
-                                                          create_if_missing=True)
-
+        self.volumes2 = list(self.mesh_2_vector.structured_iterate_hex("xyz"))
+        
         test_vector_data = [[15.0, 25.0], [10.0, 20.0], [-15.0, -25.0], [-20.0, -25.0]]
-        self.mesh_2_vector.mesh.tag_set_data(test_vector_tag, volumes2, test_vector_data)
+        self.mesh_2_vector.tag(self.vector_tag_name, test_vector_data, tagtype = "nat_mesh", size = 2, 
+                                    dtype='float64', storage_type='dense')
 
         self.scalar_tag_name = "test_scalar_tag"
-        test_scalar_tag = self.mesh_1_vector.mesh.tag_get_handle(self.scalar_tag_name,
-                                                          1,
-                                                          types.MB_TYPE_DOUBLE,
-                                                          types.MB_TAG_DENSE,
-                                                          create_if_missing=True)
         test_scalar_data = [12.0, 6.0, 3.0, 1.5]
-        self.mesh_1_vector.mesh.tag_set_data(test_scalar_tag, self.volumes1, test_scalar_data)
-
+        self.mesh_1_vector.tag(self.scalar_tag_name, test_scalar_data, tagtype = "nat_mesh", size = 1, 
+                                    dtype='float64', storage_type='dense')
 
     def arithmetic_statmesh_setup(self):
         self.statmesh_1 = StatMesh(structured_coords=[[-1, 0, 1], [-1, 0, 1], [0, 1]],
@@ -339,27 +325,6 @@ class TestArithmetic():
         error_data = [0.1, 0.2, 0.3, 0.4]
         self.statmesh_2.mesh.tag_set_data(flux_tag, volumes1, flux_data)
         self.statmesh_2.mesh.tag_set_data(error_tag, volumes2, error_data)
-
-
-    def test_mutliply_vector_by_scalar(self):
-        self.arithmetic_mesh_vector_setup()
-        scalar = 12.0
-        test_vector_tag = self.mesh_1_vector.mesh.tag_get_handle(self.vector_tag_name)
-        test_data = self.mesh_1_vector.mesh.tag_get_data(test_vector_tag, self.volumes1)
-        exp_res = [[12.0, 24.0], [18.0, 30.0], [-12.0, -18.0], [-24.0, -30.0]]
-        obs_res = scalar*test_data
-        assert_array_almost_equal(exp_res, obs_res)
-    
-    def test_multiply_vector_tag_by_scalar_tag(self):
-        self.arithmetic_mesh_vector_setup()
-        test_scalar_tag = self.mesh_1_vector.mesh.tag_get_handle(self.scalar_tag_name)
-        test_vector_tag = self.mesh_1_vector.mesh.tag_get_handle(self.vector_tag_name)
-        scalar_data = self.mesh_1_vector.mesh.tag_get_data(test_scalar_tag, self.volumes1)
-        vector_data = self.mesh_1_vector.mesh.tag_get_data(test_vector_tag, self.volumes1)
-        exp_res = [[12.0, 24.0], [9.0, 15.0], [-3.0, -4.5], [-3.0, -3.75]]
-        obs_res = scalar_data*vector_data
-        assert_array_almost_equal(exp_res, obs_res)
-
 
     def test_add_vectors_mesh(self):
         self.arithmetic_mesh_vector_setup()
@@ -907,6 +872,59 @@ def test_nativetag_expand():
     assert_array_equal(m.clam_000[:], 1.1)
     m.clam_001 = NativeMeshTag(1, float)
     assert_array_equal(m.clam_001[:], 2.2)
+
+def test_nativetag_mult():
+    m = Mesh(structured=True, structured_coords=[[-1, 0, 1], [0, 1], [0,1]])
+    m.peach = NativeMeshTag(1, float)
+    m.peach[:] = [1.5, 2.5]
+    m.tangerine = NativeMeshTag(1, float) 
+    m.tangerine[:] = [5.0, 10.0]
+    obs = m.peach.mult(m.tangerine)
+    exp = [7.5, 25.0]
+    assert_array_almost_equal(obs, exp) #multiplying two scalar-valued tags
+    
+    m.plum = NativeMeshTag(2, float)
+    m.plum[:] = [[5.0, 10.0], [15.0, 20.0]]
+    obs = m.peach.mult(m.plum)
+    exp = [[7.5, 15.0], [37.5, 50.0]]
+    assert_array_almost_equal(obs, exp) #multiplying scalar-valued tag by vector-valued tag
+    
+    obs = m.plum.mult(m.tangerine)
+    exp = [[25.0, 100.0], [75.0, 200.0]]
+    assert_array_almost_equal(obs, exp) #multiplying vector-valued tag by scalar-valued tag
+    
+    m.grapefruit = NativeMeshTag(2, float)
+    m.grapefruit[:] = [[2.0, 4.0], [3.0, 6.0]]
+    obs = m.plum.mult(m.grapefruit)
+    exp = [[10.0, 40.0], [45.0, 120.0]]
+    assert_array_almost_equal(obs, exp) #multiplying two vector-valued tags
+
+    cherry = 12
+    exp = m.plum.mult(cherry)
+    obs = [[60.0, 120.0], [180.0, 240.0]]
+    assert_array_almost_equal(obs, exp) #multiplying by int
+    
+    cherry = 5.0
+    exp = m.plum.mult(cherry)
+    obs = [[25.0, 50.0], [75.0, 100.0]]
+    assert_array_almost_equal(obs, exp) #multiplying by float
+    
+    cherry = [1.0, 2.0]
+    exp = m.grapefruit.mult(cherry)
+    obs = [[2.0, 8.0], [3.0, 12.0]]
+    assert_array_almost_equal(obs, exp) #mulitplying by list
+    
+    cherry = np.asarray(cherry)
+    exp = m.plum.mult(cherry)
+    obs = [[5.0, 20.0], [15.0, 40.0]]
+    assert_array_almost_equal(obs, exp) #multiplying by ndarray
+
+    cherry = "twelve"
+    assert_raises(TypeError, m.plum.mult, cherry) #using invalid multiplier type
+    
+    m.quince = NativeMeshTag(3, float)
+    m.quince[:] = [[1.0, 2.0, 4.0], [5.0, 6.0, 8.0]]
+    assert_raises(ValueError, m.quince.mult, m.grapefruit)
 
 
 def test_comptag():
