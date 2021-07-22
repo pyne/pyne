@@ -34,6 +34,7 @@ v0.7.5
 
    * update MOAB version to 5.3.0 in CI docker image (#1391)
    * optimize the mesh_to_fluxin function in r2s step1 (#1397)
+   * add package progress in docker image (#1402)
 
 
 v0.7.4

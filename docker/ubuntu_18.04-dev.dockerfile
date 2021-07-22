@@ -54,7 +54,8 @@ RUN if [ "${py_version%.?}" -eq 3 ] ; \
             matplotlib \
             tables \
             scipy \
-            jinja2
+            jinja2 \
+            progress
 
 # make starting directory
 RUN mkdir -p $HOME/opt
