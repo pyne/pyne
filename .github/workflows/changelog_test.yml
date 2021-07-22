@@ -1,0 +1,35 @@
+name: Changelog check
+
+on:
+  # allows us to run workflows manually
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - develop
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  changelog_update:
+    if: ${{ github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    container:
+      image: alpine:3.14
+
+    name: Is Changelog up-to-date ?
+    steps:
+      - name: Install latest git
+        run: |
+          apk add --no-cache bash git openssh
+          git --version
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+    
+      - name: Housekeeping
+        run: |
+          cd $GITHUB_WORKSPACE
+          ci/changelog_test.sh
+
