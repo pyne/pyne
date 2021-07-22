@@ -921,6 +921,10 @@ def test_nativetag_mult():
 
     cherry = "twelve"
     assert_raises(TypeError, m.plum.mult, cherry) #using invalid multiplier type
+    
+    m.quince = NativeMeshTag(3, float)
+    m.quince[:] = [[1.0, 2.0, 4.0], [5.0, 6.0, 8.0]]
+    assert_raises(ValueError, m.quince.mult, m.grapefruit)
 
 
 def test_comptag():
