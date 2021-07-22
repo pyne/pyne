@@ -1,6 +1,8 @@
 name: Build & Publish docker image for PyNE-CI
 
 on:
+  # allows us to run workflows manually
+  workflow_dispatch:
   push:
     paths:
       - 'docker/*'
@@ -97,7 +99,7 @@ jobs:
             hdf5: ''
             dagmc: _dagmc
             pymoab: _pymoab
-        
+
       fail-fast: false
     
     steps:
