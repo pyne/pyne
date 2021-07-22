@@ -16,6 +16,7 @@ Next Version
    * fixing VR test (#1399)
 
 **Maintenance**
+   * removing old circle-ci rleated stuff (#1405)
 
 v0.7.5
 ======
