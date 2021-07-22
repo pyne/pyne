@@ -18,6 +18,7 @@ Next Version
 **Maintenance**
    * removing old circle-ci related stuff (#1405)
    * adds a manual trigger for docker build workflow (#1406)
+   * clarify the tag name for docker images generated in CI (#1407)
 
 v0.7.5
 ======
