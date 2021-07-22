@@ -1,4 +1,4 @@
-name: Standard Build and Test
+name: Changelog check
 
 on:
   # allows us to run workflows manually
