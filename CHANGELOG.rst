@@ -16,7 +16,8 @@ Next Version
    * fixing VR test (#1399)
 
 **Maintenance**
-   * removing old circle-ci rleated stuff (#1405)
+   * removing old circle-ci related stuff (#1405)
+   * adds a manual trigger for docker build workflow (#1406)
 
 v0.7.5
 ======
