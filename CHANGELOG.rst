@@ -8,6 +8,8 @@ Next Version
 **New Capabilities**
 
 **Change**
+- exclude docker related stuff from build_test (#1404)
+- move changelog test in its own workflow (#1404)
 
 **Fix**
 
