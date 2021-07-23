@@ -14,7 +14,7 @@ try:
 except AttributeError:
     collectionsAbc = collections
 from warnings import warn
-from pyne.utils import QA_warn, to_sec, str_to_unicode
+from pyne.utils import QA_warn, to_sec, str_to_unicode, IfBar
 import numpy as np
 import tables as tb
 from io import open
@@ -43,7 +43,7 @@ response_strings = {'decay_heat': 'Total Decay Heat',
 
 def mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
                    reverse=False, sub_voxel=False, cell_fracs=None,
-                   cell_mats=None, print_progress=100000):
+                   cell_mats=None, print_progress=True):
     """This function creates an ALARA fluxin file from fluxes tagged on a PyNE
     Mesh object. Fluxes are printed in the order of the flux_mesh.__iter__().
 
@@ -81,10 +81,8 @@ def mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
         Maps geometry cell numbers to PyNE Material objects.
         The cell_fracs and cell_mats are used only when sub_voxel=True.
         If sub_voxel=False, neither cell_fracs nor cell_mats will be used.
-    print_progress: int, optional
-        If desired, the number of processed events can be printed to the
-        console each N loops by passing the print_progress=N parameter.
-        The print progress can be turned off by by setting print_progess=0.
+    print_progress : bool
+        Print the progress with progress bar. Set to False to turn off progress.
     """
 
     tag_flux = flux_mesh.get_tag(flux_tag)
@@ -97,18 +95,19 @@ def mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
     # write flux data block by block
     with open(fluxin, "w") as f:
         if not sub_voxel:
+            bar = IfBar("Writing alara fluxin", max=len(flux_mesh), suffix='%(percent).1f%% - %(eta)ds', show=print_progress)
             for i, mat, ve in flux_mesh:
                 f.write(_output_flux_block(ve, tag_flux, reverse))
-                if print_progress > 0 and i > 0 and i % print_progress == 0:
-                    print(f"processing mesh element {i}")
+                bar.next()
+            bar.finish()
         else:
             ves = list(flux_mesh.iter_ve())
+            bar = IfBar("Writing alara fluxin", max=len(cell_fracs), suffix='%(percent).1f%% - %(eta)ds', show=print_progress)
             for i, row in enumerate(cell_fracs):
                 if len(cell_mats[row['cell']].comp) != 0:
                     f.write(_output_flux_block(ves[row['idx']], tag_flux, reverse))
-                if print_progress > 0 and i > 0 and i % print_progress == 0:
-                    print(f"processing mesh element {row['idx']}")
-
+                bar.next()
+            bar.finish()
 
 def photon_source_to_hdf5(filename, nucs='all', chunkshape=(10000,)):
     """Converts a plaintext photon source file to an HDF5 version for

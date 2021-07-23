@@ -62,6 +62,40 @@ def test_write_fluxin_single():
     if os.path.isfile(output):
         os.remove(output)
 
+def test_write_fluxin_single_without_bar():
+    """This function tests the flux_mesh_to_fluxin function for a single energy
+    group case.
+    """
+
+    if not HAVE_PYMOAB:
+        raise SkipTest
+
+    output_name = "fluxin.out"
+    forward_fluxin = os.path.join(thisdir, "files_test_alara",
+                                  "fluxin_single_forward.txt")
+    output = os.path.join(os.getcwd(), output_name)
+
+    flux_mesh = Mesh(structured=True,
+                     structured_coords=[[0, 1, 2], [0, 1, 2], [0, 1]])
+    tag_flux = flux_mesh.tag(name="flux", size=1, dtype=float)
+    flux_data = [1, 2, 3, 4]
+    ves = flux_mesh.structured_iterate_hex("xyz")
+    for i, ve in enumerate(ves):
+        flux_mesh.flux[i] = flux_data[i]
+
+    # test forward writting
+    mesh_to_fluxin(flux_mesh, "flux", output_name, False, print_progress=False)
+
+    with open(output) as f:
+        written = f.readlines()
+
+    with open(forward_fluxin) as f:
+        expected = f.readlines()
+
+    assert_equal(written, expected)
+    if os.path.isfile(output):
+        os.remove(output)
+
 
 def test_write_fluxin_multiple():
     """This function tests the flux_mesh_to_fluxin function for a multiple

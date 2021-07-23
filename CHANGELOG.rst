@@ -20,6 +20,7 @@ Next Version
    * adds a manual trigger for docker build workflow (#1406)
    * clarify the tag name for docker images generated in CI (#1407)
    * add ifbar to cleanup the code about progress bar (#1409)
+   * use ifbar to print progress of mesh_to_fluxin (#1401)
 
 v0.7.5
 ======
@@ -42,7 +43,7 @@ v0.7.5
 
    * update MOAB version to 5.3.0 in CI docker image (#1391)
    * optimize the mesh_to_fluxin function in r2s step1 (#1397)
-   * add package progress in docker image (#1402)
+   * use progress bar for mesh_to_fluxin function (#1401, #1402)
 
 
 v0.7.4
