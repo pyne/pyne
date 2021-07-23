@@ -364,5 +364,16 @@ def test_check_iterable():
     assert(utils.check_iterable(obj))
 
 
+def test_ifbar():
+    loops = 100
+    bar = utils.IfBar("if bar print", max=loops, suffix='%(percent).1f%% - %(eta)ds', show=True)
+    for i in range(loops):
+        bar.next()
+    bar.finish()
+    bar = utils.IfBar("if bar print", max=loops, suffix='%(percent).1f%% - %(eta)ds', show=False)
+    for i in range(loops):
+        bar.next()
+    bar.finish()
+
 if __name__ == "__main__":
     nose.runmodule()
