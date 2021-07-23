@@ -14,12 +14,11 @@ try:
 except AttributeError:
     collectionsAbc = collections
 from warnings import warn
-from pyne.utils import QA_warn, to_sec, str_to_unicode
+from pyne.utils import QA_warn, to_sec, str_to_unicode, IfBar
 import numpy as np
 import tables as tb
 from io import open
 import re
-from progress.bar import Bar
 
 QA_warn(__name__)
 
@@ -96,28 +95,19 @@ def mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
     # write flux data block by block
     with open(fluxin, "w") as f:
         if not sub_voxel:
-            if print_progress:
-                bar = Bar("Writing alara fluxin", max=len(flux_mesh), suffix='%(percent).1f%% - %(eta)ds')
-                for i, mat, ve in flux_mesh:
-                    f.write(_output_flux_block(ve, tag_flux, reverse))
-                    bar.next()
-                bar.finish()
-            else:
-                for i, mat, ve in flux_mesh:
-                    f.write(_output_flux_block(ve, tag_flux, reverse))
+            bar = IfBar("Writing alara fluxin", max=len(flux_mesh), suffix='%(percent).1f%% - %(eta)ds', show=print_progress)
+            for i, mat, ve in flux_mesh:
+                f.write(_output_flux_block(ve, tag_flux, reverse))
+                bar.next()
+            bar.finish()
         else:
             ves = list(flux_mesh.iter_ve())
-            if print_progress:
-                bar = Bar("Writing alara fluxin", max=len(cell_fracs), suffix='%(percent).1f%% - %(eta)ds')
-                for i, row in enumerate(cell_fracs):
-                    if len(cell_mats[row['cell']].comp) != 0:
-                        f.write(_output_flux_block(ves[row['idx']], tag_flux, reverse))
-                    bar.next()
-                bar.finish()
-            else:
-                for i, row in enumerate(cell_fracs):
-                    if len(cell_mats[row['cell']].comp) != 0:
-                        f.write(_output_flux_block(ves[row['idx']], tag_flux, reverse))
+            bar = IfBar("Writing alara fluxin", max=len(cell_fracs), suffix='%(percent).1f%% - %(eta)ds', show=print_progress)
+            for i, row in enumerate(cell_fracs):
+                if len(cell_mats[row['cell']].comp) != 0:
+                    f.write(_output_flux_block(ves[row['idx']], tag_flux, reverse))
+                bar.next()
+            bar.finish()
 
 def photon_source_to_hdf5(filename, nucs='all', chunkshape=(10000,)):
     """Converts a plaintext photon source file to an HDF5 version for

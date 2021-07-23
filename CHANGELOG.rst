@@ -20,6 +20,7 @@ Next Version
    * adds a manual trigger for docker build workflow (#1406)
    * clarify the tag name for docker images generated in CI (#1407)
    * add ifbar to cleanup the code about progress bar (#1409)
+   * use ifbar to print progress of mesh_to_fluxin (#1401)
 
 v0.7.5
 ======
