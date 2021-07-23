@@ -9,14 +9,7 @@ on:
       - '.github/workflows/changelog_test.yml'
       - 'docker/**'
       - 'CHANGELOG.rst'
-  push:
-    branches:
-      - develop
-    paths-ignore:
-      - '.github/workflows/docker_publish.yml'
-      - '.github/workflows/changelog_test.yml'
-      - 'docker/**'
-      - 'CHANGELOG.rst'
+
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
