@@ -10,6 +10,7 @@ Next Version
 **Change**
    * exclude docker related stuff from build_test (#1404 #1408)
    * move changelog test in its own workflow (#1404)
+   * limits some workflows to pull_request trigger only (#1410)
 
 **Fix**
 
