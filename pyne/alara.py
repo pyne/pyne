@@ -44,7 +44,7 @@ response_strings = {'decay_heat': 'Total Decay Heat',
 
 def mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
                    reverse=False, sub_voxel=False, cell_fracs=None,
-                   cell_mats=None):
+                   cell_mats=None, print_progress=True):
     """This function creates an ALARA fluxin file from fluxes tagged on a PyNE
     Mesh object. Fluxes are printed in the order of the flux_mesh.__iter__().
 
@@ -82,6 +82,8 @@ def mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
         Maps geometry cell numbers to PyNE Material objects.
         The cell_fracs and cell_mats are used only when sub_voxel=True.
         If sub_voxel=False, neither cell_fracs nor cell_mats will be used.
+    print_progress : bool
+        Print the progress with progress bar. Set to False to turn off progress.
     """
 
     tag_flux = flux_mesh.get_tag(flux_tag)
@@ -94,17 +96,28 @@ def mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
     # write flux data block by block
     with open(fluxin, "w") as f:
         if not sub_voxel:
-            with Bar("Writing alara fluxin", max=len(flux_mesh), suffix='%(percent).1f%% - %(eta)ds') as bar:
+            if print_progress:
+                bar = Bar("Writing alara fluxin", max=len(flux_mesh), suffix='%(percent).1f%% - %(eta)ds')
                 for i, mat, ve in flux_mesh:
                     f.write(_output_flux_block(ve, tag_flux, reverse))
                     bar.next()
+                bar.finish()
+            else:
+                for i, mat, ve in flux_mesh:
+                    f.write(_output_flux_block(ve, tag_flux, reverse))
         else:
             ves = list(flux_mesh.iter_ve())
-            with Bar("Writing alara fluxin", max=len(cell_fracs), suffix='%(percent).1f%% - %(eta)ds') as bar:
+            if print_progress:
+                bar = Bar("Writing alara fluxin", max=len(cell_fracs), suffix='%(percent).1f%% - %(eta)ds')
                 for i, row in enumerate(cell_fracs):
                     if len(cell_mats[row['cell']].comp) != 0:
                         f.write(_output_flux_block(ves[row['idx']], tag_flux, reverse))
                     bar.next()
+                bar.finish()
+            else:
+                for i, row in enumerate(cell_fracs):
+                    if len(cell_mats[row['cell']].comp) != 0:
+                        f.write(_output_flux_block(ves[row['idx']], tag_flux, reverse))
 
 def photon_source_to_hdf5(filename, nucs='all', chunkshape=(10000,)):
     """Converts a plaintext photon source file to an HDF5 version for
