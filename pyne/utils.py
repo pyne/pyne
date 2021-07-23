@@ -6,6 +6,7 @@ from warnings import warn
 from distutils.dir_util import remove_tree
 import filecmp
 from io import open
+from progress.bar import Bar
 
 from pyne._utils import fromstring_split, fromstring_token, endftod,\
                         use_fast_endftod, fromendf_tok, toggle_warnings,\
@@ -457,3 +458,17 @@ def check_iterable(obj):
         print(obj.__str__(), "is not iterable")
         return False
     return True
+
+class IfBar(Bar):
+    def __init__(self, *args, **kwargs):
+        self.show = kwargs.get('show', True)
+        if self.show:
+            super().__init__(*args, **kwargs)
+
+    def next(self):
+        if self.show:
+            super().next()
+
+    def finish(self):
+        if self.show:
+            super().finish()
