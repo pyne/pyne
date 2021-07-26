@@ -879,52 +879,52 @@ def test_nativetag_mult():
     m.peach[:] = [1.5, 2.5]
     m.tangerine = NativeMeshTag(1, float) 
     m.tangerine[:] = [5.0, 10.0]
-    obs = m.peach.mult(m.tangerine)
+    obs = m.peach * m.tangerine
     exp = [7.5, 25.0]
     assert_array_almost_equal(obs, exp) #multiplying two scalar-valued tags
     
     m.plum = NativeMeshTag(2, float)
     m.plum[:] = [[5.0, 10.0], [15.0, 20.0]]
-    obs = m.peach.mult(m.plum)
+    obs = m.peach * m.plum
     exp = [[7.5, 15.0], [37.5, 50.0]]
     assert_array_almost_equal(obs, exp) #multiplying scalar-valued tag by vector-valued tag
     
-    obs = m.plum.mult(m.tangerine)
+    obs = m.plum * m.tangerine
     exp = [[25.0, 100.0], [75.0, 200.0]]
     assert_array_almost_equal(obs, exp) #multiplying vector-valued tag by scalar-valued tag
     
     m.grapefruit = NativeMeshTag(2, float)
     m.grapefruit[:] = [[2.0, 4.0], [3.0, 6.0]]
-    obs = m.plum.mult(m.grapefruit)
+    obs = m.plum * m.grapefruit
     exp = [[10.0, 40.0], [45.0, 120.0]]
     assert_array_almost_equal(obs, exp) #multiplying two vector-valued tags
 
     cherry = 12
-    exp = m.plum.mult(cherry)
+    exp = m.plum * cherry
     obs = [[60.0, 120.0], [180.0, 240.0]]
     assert_array_almost_equal(obs, exp) #multiplying by int
     
     cherry = 5.0
-    exp = m.plum.mult(cherry)
+    exp = m.plum * cherry
     obs = [[25.0, 50.0], [75.0, 100.0]]
     assert_array_almost_equal(obs, exp) #multiplying by float
     
     cherry = [1.0, 2.0]
-    exp = m.grapefruit.mult(cherry)
+    exp = m.grapefruit * cherry
     obs = [[2.0, 8.0], [3.0, 12.0]]
     assert_array_almost_equal(obs, exp) #mulitplying by list
     
     cherry = np.asarray(cherry)
-    exp = m.plum.mult(cherry)
+    exp = m.plum * cherry
     obs = [[5.0, 20.0], [15.0, 40.0]]
     assert_array_almost_equal(obs, exp) #multiplying by ndarray
 
     cherry = "twelve"
-    assert_raises(TypeError, m.plum.mult, cherry) #using invalid multiplier type
+    assert_raises(TypeError, m.plum.__mul__, cherry) #using invalid multiplier type
     
     m.quince = NativeMeshTag(3, float)
     m.quince[:] = [[1.0, 2.0, 4.0], [5.0, 6.0, 8.0]]
-    assert_raises(ValueError, m.quince.mult, m.grapefruit)
+    assert_raises(ValueError, m.quince.__mul__, m.grapefruit)
 
 
 def test_comptag():
