@@ -872,6 +872,34 @@ def test_nativetag_expand():
     assert_array_equal(m.clam_000[:], 1.1)
     m.clam_001 = NativeMeshTag(1, float)
     assert_array_equal(m.clam_001[:], 2.2)
+def test_nativetag_add():
+    m = Mesh(structured=True, structured_coords=[[-1, 0, 1], [0, 1], [0,1]])
+    m.peach = NativeMeshTag(1, float)
+    m.peach[:] = [1.5, 2.5]
+    m.tangerine = NativeMeshTag(1, float)
+    m.tangerine[:] = [5.0, 10.0]
+    obs = m.peach + m.tangerine
+    exp = [6.5, 12.5]
+    assert_array_almost_equal(obs, exp)
+
+    m.plum = NativeMeshTag(2, float)
+    m.plum[:] = [[5.0, 10.0], [15.0, 20.0]]
+    m.grapefruit = NativeMeshTag(2, float)
+    m.grapefruit[:] = [[1.0, 2.0], [4.0, 8.0]]
+    obs = m.plum + m.grapefruit
+    exp = [[6.0, 12.0], [19.0, 28.0]]
+    assert_array_almost_equal(obs, exp)
+
+    cherry = [10.0, 12.0]
+    obs = m.peach + cherry
+    exp = [11.5, 14.5]
+    assert_array_almost_equal(obs, exp)
+
+    cherry = np.asarray(cherry)
+    obs = m.tangerine + cherry
+    exp = [15.0, 22.0]
+    assert_array_almost_equal(obs, exp)
+
 
 def test_nativetag_mult():
     m = Mesh(structured=True, structured_coords=[[-1, 0, 1], [0, 1], [0,1]])
@@ -925,7 +953,6 @@ def test_nativetag_mult():
     m.quince = NativeMeshTag(3, float)
     m.quince[:] = [[1.0, 2.0, 4.0], [5.0, 6.0, 8.0]]
     assert_raises(ValueError, m.quince.__mul__, m.grapefruit)
-
 
 def test_comptag():
     mats = {

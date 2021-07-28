@@ -582,6 +582,25 @@ class NativeMeshTag(Tag):
                                                 create_if_missing=True)
             self.mesh.mesh.tag_set_data(tag, list(self.mesh.iter_ve()), data)
 
+    def __add__(self, addend):
+        """Addition operator for NativeMeshTag. Adds self to the addend using
+        NumPy slicing if applicable. Addend can be any of the following types: 
+        ndarray, list, NativeMeshTag. Shapes must be the same for addition to work. """
+        if isinstance(addend, NativeMeshTag):
+            if self.size == addend.size:
+                try:
+                    return self[:] + addend[:]
+                except:
+                    raise ValueError("Data must have the same shape")
+            else:
+                raise ValueError("Data must have the same size and shape to be added")
+        elif isinstance(addend, np.ndarray) or isinstance(addend, list):
+            try:
+                return self[:] + addend
+            except:
+                raise ValueError("Array or list must have same shape as tag data")
+        else:
+            raise TypeError("Addend is not of the correct type. Must be NativeMeshTag, list, or ndarray")
 
     def __mul__(self, multiplier):
         """Multiplication operator for NativeMeshTag. Multiplies self by the multiplier using 
@@ -593,7 +612,7 @@ class NativeMeshTag(Tag):
                 try:
                     return self[:] * multiplier[:]
                 except:
-                    raise ValueError("Scalar data must have the same shape")
+                    raise ValueError("Data must have the same shape")
             elif multiplier.size > 1:
                 try:
                     return self[:][:, None] * multiplier[:]
