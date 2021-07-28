@@ -59,7 +59,8 @@ v0.7.4
    * Add the workflow to support PyNE R2S with DAG-OpenMC (#1355)
    * Add vector capabilities to the _do_ops() method in mesh.py (#1371)
    * Add tests for multiplication of vector-valued tags by scalars and scalar-valued tags (#1374)
-   * Add tests for multiplication of vector-valued tags by elements of other tags (#1376)
+   * Add multiplication operator for NativeMeshTag and corresponding tests (#1376)
+   * Incorporate native use of multiplication symbol for NativeMeshTag (#1411)
      
 **Fix**
 

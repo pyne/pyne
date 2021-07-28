@@ -583,7 +583,7 @@ class NativeMeshTag(Tag):
             self.mesh.mesh.tag_set_data(tag, list(self.mesh.iter_ve()), data)
 
 
-    def mult(self, multiplier):
+    def __mul__(self, multiplier):
         """Multiplication operator for NativeMeshTag. Multiplies self by the multiplier using 
         NumPy slicing if applicable. Multiplier can be any of the following types: int, float, 
         ndarray, list, NativeMeshTag. Throws error if shapes are incorrect """
