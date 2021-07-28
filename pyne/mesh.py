@@ -602,6 +602,26 @@ class NativeMeshTag(Tag):
         else:
             raise TypeError("Addend is not of the correct type. Must be NativeMeshTag, list, or ndarray")
 
+    def __sub__(self, subtrahend):
+        """Subtraction operator for NativeMeshTag. Subtracts subtrahend from self using 
+        NumPy slicing, if applicable. Subtrahend can be ay of the following types:
+        ndarray, list, NativeMeshTag. Shapes must be the same for subtraction to work. """
+        if isinstance(subtrahend, NativeMeshTag):
+            if self.size == subtrahend.size:
+                try:
+                    return self[:] - subtrahend[:]
+                except:
+                    raise ValueError("Data must have the same shape")
+            else:
+                raise ValueError("Data must have same size to be subtracted")
+        elif isinstance(subtrahend, np.ndarray) or isinstance(subtrahend, list):
+            try:
+                return self[:] - subtrahend
+            except:
+                raise ValueError("Array or list must have same shape as tag data")
+        else:
+            raise TypeError("Subtrahend is not of the correct type. Must be NativeMeshTag, list, or ndarray")
+
     def __mul__(self, multiplier):
         """Multiplication operator for NativeMeshTag. Multiplies self by the multiplier using 
         NumPy slicing if applicable. Multiplier can be any of the following types: int, float, 
@@ -632,6 +652,38 @@ class NativeMeshTag(Tag):
                 raise ValueError("Incompatible array or list shape")
         else:
             raise TypeError("Incorrect multiplier type provided")
+
+    def __truediv__(self, dividend):
+        """Division operator for NativeMeshTag. Divides self by the dividend using
+        NumPy slicing, if applicable. Dividend can be any of the following types: int, float,
+        ndarray, list, NativeMeshTag. Throws error if shapes are incorrect. """
+        
+        if isinstance(dividend, NativeMeshTag):
+            if self.size == dividend.size:
+                try:
+                    return self[:] / dividend[:]
+                except:
+                    raise ValueError ("Data must have the same shape")
+            elif dividend.size > 1:
+                try:
+                    return self[:][:, None] / dividend[:]
+                except:
+                    raise ValueError("Incompatible shape for scalar or vector data")
+            elif self.size > 1:
+                try:
+                    return self[:] / dividend[:][None, :]
+                except:
+                    raise ValueError("Incompatible shape for vector or scalar data")
+        elif isinstance(dividend, int) or isinstance(dividend, float):
+            return self[:] / dividend
+        elif isinstance(dividend, np.ndarray) or isinstance(dividend, list):
+            try:
+                return self[:] / dividend
+            except:
+                raise ValueError("Incompatible array or list shape")
+        else:
+            raise TypeError("Incorrect dividend type provided")
+
 
 class ComputedTag(Tag):
     '''A mesh tag which looks itself up by calling a function (or other callable)

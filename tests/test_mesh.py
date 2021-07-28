@@ -872,6 +872,8 @@ def test_nativetag_expand():
     assert_array_equal(m.clam_000[:], 1.1)
     m.clam_001 = NativeMeshTag(1, float)
     assert_array_equal(m.clam_001[:], 2.2)
+
+
 def test_nativetag_add():
     m = Mesh(structured=True, structured_coords=[[-1, 0, 1], [0, 1], [0,1]])
     m.peach = NativeMeshTag(1, float)
@@ -898,6 +900,34 @@ def test_nativetag_add():
     cherry = np.asarray(cherry)
     obs = m.tangerine + cherry
     exp = [15.0, 22.0]
+    assert_array_almost_equal(obs, exp)
+
+def test_nativetag_sub():
+    m = Mesh(structured=True, structured_coords=[[-1, 0, 1], [0, 1], [0,1]])
+    m.peach = NativeMeshTag(1, float)
+    m.peach[:] = [1.5, 2.5]
+    m.tangerine = NativeMeshTag(1, float)
+    m.tangerine[:] = [5.0, 10.0]
+    obs = m.peach - m.tangerine
+    exp = [-3.5, -7.5]
+    assert_array_almost_equal(obs, exp)
+
+    m.plum = NativeMeshTag(2, float)
+    m.plum[:] = [[5.0, 10.0], [15.0, 20.0]]
+    m.grapefruit = NativeMeshTag(2, float)
+    m.grapefruit[:] = [[1.0, 2.0], [4.0, 8.0]]
+    obs = m.plum - m.grapefruit
+    exp = [[4.0, 8.0], [11.0, 12.0]]
+    assert_array_almost_equal(obs, exp)
+
+    cherry = [10.0, 12.0]
+    obs = m.peach - cherry
+    exp = [-8.5, -9.5]
+    assert_array_almost_equal(obs, exp)
+
+    cherry = np.asarray(cherry)
+    obs = m.tangerine - cherry
+    exp = [-5.0, -2.0]
     assert_array_almost_equal(obs, exp)
 
 
@@ -953,6 +983,59 @@ def test_nativetag_mult():
     m.quince = NativeMeshTag(3, float)
     m.quince[:] = [[1.0, 2.0, 4.0], [5.0, 6.0, 8.0]]
     assert_raises(ValueError, m.quince.__mul__, m.grapefruit)
+
+def test_nativetag_div():
+    m = Mesh(structured=True, structured_coords=[[-1, 0, 1], [0, 1], [0,1]])
+    m.peach = NativeMeshTag(1, float)
+    m.peach[:] = [1.5, 2.5]
+    m.tangerine = NativeMeshTag(1, float)
+    m.tangerine[:] = [5.0, 10.0]
+    obs = m.peach / m.tangerine
+    exp = [0.3, 0.25]
+    assert_array_almost_equal(obs, exp) #multiplying two scalar-valued tags
+
+    m.plum = NativeMeshTag(2, float)
+    m.plum[:] = [[5.0, 10.0], [15.0, 20.0]]
+    obs = m.peach / m.plum
+    exp = [[0.3, .15], [0.1666667, .125]]
+    assert_array_almost_equal(obs, exp) #multiplying scalar-valued tag by vector-valued tag
+
+    obs = m.plum / m.tangerine
+    exp = [[1.0, 1.0], [3.0, 2.0]]
+    assert_array_almost_equal(obs, exp) #multiplying vector-valued tag by scalar-valued tag
+
+    m.grapefruit = NativeMeshTag(2, float)
+    m.grapefruit[:] = [[2.0, 4.0], [3.0, 6.0]]
+    obs = m.plum / m.grapefruit
+    exp = [[2.5, 2.5], [5.0, 3.333333]]
+    assert_array_almost_equal(obs, exp) #multiplying two vector-valued tags
+
+    cherry = 2
+    exp = m.plum / cherry
+    obs = [[2.5, 5.0], [7.5, 10.0]]
+    assert_array_almost_equal(obs, exp) #multiplying by int
+
+    cherry = 5.0
+    exp = m.plum / cherry
+    obs = [[1.0, 2.0], [3.0, 4.0]]
+    assert_array_almost_equal(obs, exp) #multiplying by float
+
+    cherry = [1.0, 2.0]
+    exp = m.grapefruit / cherry
+    obs = [[2.0, 2.0], [3.0, 3.0]]
+    assert_array_almost_equal(obs, exp) #mulitplying by list
+
+    cherry = np.asarray(cherry)
+    exp = m.plum / cherry
+    obs = [[5.0, 5.0], [15.0, 10.0]]
+    assert_array_almost_equal(obs, exp) #multiplying by ndarray
+
+    cherry = "twelve"
+    assert_raises(TypeError, m.plum.__truediv__, cherry) #using invalid multiplier type
+
+    m.quince = NativeMeshTag(3, float)
+    m.quince[:] = [[1.0, 2.0, 4.0], [5.0, 6.0, 8.0]]
+    assert_raises(ValueError, m.quince.__truediv__, m.grapefruit)
 
 def test_comptag():
     mats = {
