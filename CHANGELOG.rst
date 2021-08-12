@@ -18,6 +18,7 @@ Next Version
    * Add tests for multiplication of vector-valued tags by scalars and scalar-valued tags (#1374)
    * Add multiplication operator for NativeMeshTag and corresponding tests (#1376)
    * Incorporate native use of multiplication symbol for NativeMeshTag (#1411)
+   * Addition, subtraction, and division symbols are now available to manipulate NativeMeshTags (#1412)
      
 **Fix**
 
