@@ -587,13 +587,7 @@ class NativeMeshTag(Tag):
         NumPy slicing if applicable. Addend can be any of the following types: 
         ndarray, list, NativeMeshTag. Shapes must be the same for addition to work. """
         if isinstance(addend, NativeMeshTag):
-            if self.size == addend.size:
-                try:
-                    return self[:] + addend[:]
-                except:
-                    raise ValueError("Data must have the same shape")
-            else:
-                raise ValueError("Data must have the same size and shape to be added")
+            return self._do_native_op(addend, "+")
         elif isinstance(addend, np.ndarray) or isinstance(addend, list):
             try:
                 return self[:] + addend
@@ -607,13 +601,7 @@ class NativeMeshTag(Tag):
         NumPy slicing, if applicable. Subtrahend can be ay of the following types:
         ndarray, list, NativeMeshTag. Shapes must be the same for subtraction to work. """
         if isinstance(subtrahend, NativeMeshTag):
-            if self.size == subtrahend.size:
-                try:
-                    return self[:] - subtrahend[:]
-                except:
-                    raise ValueError("Data must have the same shape")
-            else:
-                raise ValueError("Data must have same size to be subtracted")
+            return self._do_native_op(subtrahend, "-")
         elif isinstance(subtrahend, np.ndarray) or isinstance(subtrahend, list):
             try:
                 return self[:] - subtrahend
