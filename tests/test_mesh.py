@@ -992,46 +992,46 @@ def test_nativetag_div():
     m.tangerine[:] = [5.0, 10.0]
     obs = m.peach / m.tangerine
     exp = [0.3, 0.25]
-    assert_array_almost_equal(obs, exp) #multiplying two scalar-valued tags
+    assert_array_almost_equal(obs, exp) #dividing two scalar-valued tags
 
     m.plum = NativeMeshTag(2, float)
     m.plum[:] = [[5.0, 10.0], [15.0, 20.0]]
     obs = m.peach / m.plum
     exp = [[0.3, .15], [0.1666667, .125]]
-    assert_array_almost_equal(obs, exp) #multiplying scalar-valued tag by vector-valued tag
+    assert_array_almost_equal(obs, exp) #dividing scalar-valued tag by vector-valued tag
 
     obs = m.plum / m.tangerine
     exp = [[1.0, 1.0], [3.0, 2.0]]
-    assert_array_almost_equal(obs, exp) #multiplying vector-valued tag by scalar-valued tag
+    assert_array_almost_equal(obs, exp) #dividing vector-valued tag by scalar-valued tag
 
     m.grapefruit = NativeMeshTag(2, float)
     m.grapefruit[:] = [[2.0, 4.0], [3.0, 6.0]]
     obs = m.plum / m.grapefruit
     exp = [[2.5, 2.5], [5.0, 3.333333]]
-    assert_array_almost_equal(obs, exp) #multiplying two vector-valued tags
+    assert_array_almost_equal(obs, exp) #dividing two vector-valued tags
 
     cherry = 2
     exp = m.plum / cherry
     obs = [[2.5, 5.0], [7.5, 10.0]]
-    assert_array_almost_equal(obs, exp) #multiplying by int
+    assert_array_almost_equal(obs, exp) #dividing by int
 
     cherry = 5.0
     exp = m.plum / cherry
     obs = [[1.0, 2.0], [3.0, 4.0]]
-    assert_array_almost_equal(obs, exp) #multiplying by float
+    assert_array_almost_equal(obs, exp) #dividing by float
 
     cherry = [1.0, 2.0]
     exp = m.grapefruit / cherry
     obs = [[2.0, 2.0], [3.0, 3.0]]
-    assert_array_almost_equal(obs, exp) #mulitplying by list
+    assert_array_almost_equal(obs, exp) #dividing by list
 
     cherry = np.asarray(cherry)
     exp = m.plum / cherry
     obs = [[5.0, 5.0], [15.0, 10.0]]
-    assert_array_almost_equal(obs, exp) #multiplying by ndarray
+    assert_array_almost_equal(obs, exp) #dividing by ndarray
 
     cherry = "twelve"
-    assert_raises(TypeError, m.plum.__truediv__, cherry) #using invalid multiplier type
+    assert_raises(TypeError, m.plum.__truediv__, cherry) #using invalid divisor type
 
     m.quince = NativeMeshTag(3, float)
     m.quince[:] = [[1.0, 2.0, 4.0], [5.0, 6.0, 8.0]]

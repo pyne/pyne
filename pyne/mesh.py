@@ -628,21 +628,7 @@ class NativeMeshTag(Tag):
         ndarray, list, NativeMeshTag. Throws error if shapes are incorrect """
 
         if isinstance(multiplier, NativeMeshTag):
-            if self.size == multiplier.size:
-                try:
-                    return self[:] * multiplier[:]
-                except:
-                    raise ValueError("Data must have the same shape")
-            elif multiplier.size > 1:
-                try:
-                    return self[:][:, None] * multiplier[:]
-                except:
-                    raise ValueError("Incompatible shape for scalar or vector data")
-            elif self.size > 1:
-                try:
-                    return self[:] * multiplier[:][None, :]
-                except:
-                    raise ValueError("Incompatible shape for vector or scalar data")
+            return self._do_native_op(multiplier, "*")
         elif isinstance(multiplier, int) or isinstance(multiplier, float):
             return self[:]*multiplier
         elif isinstance(multiplier, np.ndarray) or isinstance(multiplier, list):
@@ -653,38 +639,43 @@ class NativeMeshTag(Tag):
         else:
             raise TypeError("Incorrect multiplier type provided")
 
-    def __truediv__(self, dividend):
-        """Division operator for NativeMeshTag. Divides self by the dividend using
-        NumPy slicing, if applicable. Dividend can be any of the following types: int, float,
+    def __truediv__(self, divisor):
+        """Division operator for NativeMeshTag. Divides self by the divisor using
+        NumPy slicing, if applicable. Divisor can be any of the following types: int, float,
         ndarray, list, NativeMeshTag. Throws error if shapes are incorrect. """
         
-        if isinstance(dividend, NativeMeshTag):
-            if self.size == dividend.size:
-                try:
-                    return self[:] / dividend[:]
-                except:
-                    raise ValueError ("Data must have the same shape")
-            elif dividend.size > 1:
-                try:
-                    return self[:][:, None] / dividend[:]
-                except:
-                    raise ValueError("Incompatible shape for scalar or vector data")
-            elif self.size > 1:
-                try:
-                    return self[:] / dividend[:][None, :]
-                except:
-                    raise ValueError("Incompatible shape for vector or scalar data")
-        elif isinstance(dividend, int) or isinstance(dividend, float):
-            return self[:] / dividend
-        elif isinstance(dividend, np.ndarray) or isinstance(dividend, list):
+        if isinstance(divisor, NativeMeshTag):
+            return self._do_native_op(divisor, "/")
+        elif isinstance(divisor, int) or isinstance(divisor, float):
+            return self[:] / divisor
+        elif isinstance(divisor, np.ndarray) or isinstance(divisor, list):
             try:
-                return self[:] / dividend
+                return self[:] / divisor
             except:
                 raise ValueError("Incompatible array or list shape")
         else:
-            raise TypeError("Incorrect dividend type provided")
+            raise TypeError("Incorrect divisor type provided")
 
+    def _do_native_op(self, other, op):
+        """ Helper function for the NativeMeshTag operators when the operation is
+        being done on two NativeMeshTag objects"""
 
+        if self.size == other.size:
+            try:
+                return _ops[op](self[:], other[:])
+            except:
+                raise ValueError("Data must have the same shape")
+        elif other.size > 1:
+            try:
+                return _ops[op](self[:][:, None], other[:])
+            except:
+                raise ValueError("Incompatible shape for scalar or vector data")
+        elif self.size > 1:
+            try:
+                return _ops[op](self[:], other[:][None, :])
+            except:
+                raise ValueError("Incompatible shape for vector or scalar data")
+    
 class ComputedTag(Tag):
     '''A mesh tag which looks itself up by calling a function (or other callable)
     with the following signature::
