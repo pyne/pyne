@@ -598,7 +598,7 @@ class NativeMeshTag(Tag):
 
     def __sub__(self, subtrahend):
         """Subtraction operator for NativeMeshTag. Subtracts subtrahend from self using 
-        NumPy slicing, if applicable. Subtrahend can be ay of the following types:
+        NumPy slicing, if applicable. Subtrahend can be any of the following types:
         ndarray, list, NativeMeshTag. Shapes must be the same for subtraction to work. """
         if isinstance(subtrahend, NativeMeshTag):
             return self._do_native_op(subtrahend, "-")
