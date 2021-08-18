@@ -904,6 +904,16 @@ def test_nativetag_add():
     exp = [[6.0, 12.0], [19.0, 28.0]]
     assert_array_almost_equal(obs, exp)
 
+    cherry = 12.0
+    obs = m.peach + cherry
+    exp = [13.5, 14.5]
+    assert_array_almost_equal(obs, exp)
+
+    cherry = 5
+    obs = m.plum + cherry
+    exp = [[10.0, 15.0], [20.0, 25.0]]
+    assert_array_almost_equal(obs, exp)
+
     cherry = [10.0, 12.0]
     obs = m.peach + cherry
     exp = [11.5, 14.5]
@@ -928,6 +938,16 @@ def test_nativetag_sub():
 
     obs = m.plum - m.grapefruit
     exp = [[4.0, 8.0], [11.0, 12.0]]
+    assert_array_almost_equal(obs, exp)
+
+    cherry = 12.0
+    obs = m.peach - cherry
+    exp = [-10.5, -9.5]
+    assert_array_almost_equal(obs, exp)
+
+    cherry = 5
+    obs = m.plum - cherry
+    exp = [[0.0, 5.0], [10.0, 15.0]]
     assert_array_almost_equal(obs, exp)
 
     cherry = [10.0, 12.0]

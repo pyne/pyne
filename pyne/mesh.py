@@ -586,63 +586,40 @@ class NativeMeshTag(Tag):
         """Addition operator for NativeMeshTag. Adds self to the addend using
         NumPy slicing if applicable. Addend can be any of the following types: 
         ndarray, list, NativeMeshTag. Shapes must be the same for addition to work. """
-        if isinstance(addend, NativeMeshTag):
-            return self._do_native_op(addend, "+")
-        elif isinstance(addend, np.ndarray) or isinstance(addend, list):
-            try:
-                return self[:] + addend
-            except:
-                raise ValueError("Array or list must have same shape as tag data")
-        else:
-            raise TypeError("Addend is not of the correct type. Must be NativeMeshTag, list, or ndarray")
-
+    
+        return self._do_op(addend, "+")
+        
     def __sub__(self, subtrahend):
         """Subtraction operator for NativeMeshTag. Subtracts subtrahend from self using 
         NumPy slicing, if applicable. Subtrahend can be any of the following types:
         ndarray, list, NativeMeshTag. Shapes must be the same for subtraction to work. """
-        if isinstance(subtrahend, NativeMeshTag):
-            return self._do_native_op(subtrahend, "-")
-        elif isinstance(subtrahend, np.ndarray) or isinstance(subtrahend, list):
-            try:
-                return self[:] - subtrahend
-            except:
-                raise ValueError("Array or list must have same shape as tag data")
-        else:
-            raise TypeError("Subtrahend is not of the correct type. Must be NativeMeshTag, list, or ndarray")
+        
+        return self._do_op(subtrahend, "-")
 
     def __mul__(self, multiplier):
         """Multiplication operator for NativeMeshTag. Multiplies self by the multiplier using 
         NumPy slicing if applicable. Multiplier can be any of the following types: int, float, 
         ndarray, list, NativeMeshTag. Throws error if shapes are incorrect """
 
-        if isinstance(multiplier, NativeMeshTag):
-            return self._do_native_op(multiplier, "*")
-        elif isinstance(multiplier, int) or isinstance(multiplier, float):
-            return self[:]*multiplier
-        elif isinstance(multiplier, np.ndarray) or isinstance(multiplier, list):
-            try:
-                return self[:]*multiplier
-            except:
-                raise ValueError("Incompatible array or list shape")
-        else:
-            raise TypeError("Incorrect multiplier type provided")
+        return self._do_op(multiplier, "*")
 
     def __truediv__(self, divisor):
         """Division operator for NativeMeshTag. Divides self by the divisor using
         NumPy slicing, if applicable. Divisor can be any of the following types: int, float,
         ndarray, list, NativeMeshTag. Throws error if shapes are incorrect. """
         
-        if isinstance(divisor, NativeMeshTag):
-            return self._do_native_op(divisor, "/")
-        elif isinstance(divisor, int) or isinstance(divisor, float):
-            return self[:] / divisor
-        elif isinstance(divisor, np.ndarray) or isinstance(divisor, list):
-            try:
-                return self[:] / divisor
-            except:
-                raise ValueError("Incompatible array or list shape")
+        return self._do_op(divisor, "/")
+
+    def _do_op(self, other, op):
+        """Helper function for NativeMeshTag operators"""
+        if isinstance(other, NativeMeshTag):
+            return self._do_native_op(other, op)
+        elif isinstance(other, list) or isinstance(other, np.ndarray):
+            return self._do_list_op(other, op)
+        elif isinstance(other, int) or isinstance(other, float):
+            return self._do_scalar_op(other, op)
         else:
-            raise TypeError("Incorrect divisor type provided")
+            raise TypeError("Incorrect operand type provided")
 
     def _do_native_op(self, other, op):
         """ Helper function for the NativeMeshTag operators when the operation is
@@ -663,7 +640,23 @@ class NativeMeshTag(Tag):
                 return _ops[op](self[:], other[:][None, :])
             except:
                 raise ValueError("Incompatible shape for vector or scalar data")
+
+    def _do_list_op(self, other, op):
+        """Helper function for the NativeMeshTag operators when the operation is
+        being done on a list or ndarray object"""
+
+        try:
+            return _ops[op](self[:], other)
+        except:
+            raise ValueError("Incompatible array or list shape")
     
+    def _do_scalar_op(self, other, op):
+        """Helper function for the NativeMeshTag operators when the operation is 
+        being done on a float or int"""
+
+        return _ops[op](self[:], other)
+
+
 class ComputedTag(Tag):
     '''A mesh tag which looks itself up by calling a function (or other callable)
     with the following signature::
