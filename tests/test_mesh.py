@@ -873,7 +873,7 @@ def test_nativetag_expand():
     m.clam_001 = NativeMeshTag(1, float)
     assert_array_equal(m.clam_001[:], 2.2)
 
-def test_nativetag_operator_setup():
+def nativetag_operator_setup():
     m = Mesh(structured=True, structured_coords=[[-1, 0, 1], [0, 1], [0,1]])
     
     m.peach = NativeMeshTag(1, float)
@@ -894,10 +894,18 @@ def test_nativetag_operator_setup():
     return m
 
 def test_nativetag_add():
-    m = test_nativetag_operator_setup()
+    m = nativetag_operator_setup()
 
     obs = m.peach + m.tangerine
     exp = [6.5, 12.5]
+    assert_array_almost_equal(obs, exp)
+
+    obs = m.peach + m.plum
+    exp = [[6.5, 11.5], [17.5, 22.5]]
+    assert_array_almost_equal(obs, exp)
+
+    obs = m.grapefruit + m.tangerine
+    exp = [[6.0, 12.0], [9.0, 18.0]]
     assert_array_almost_equal(obs, exp)
 
     obs = m.plum + m.grapefruit
@@ -930,10 +938,18 @@ def test_nativetag_add():
     assert_raises(ValueError, m.quince.__add__, m.grapefruit) #using improper shape
 
 def test_nativetag_sub():
-    m = test_nativetag_operator_setup()
+    m = nativetag_operator_setup()
     
     obs = m.peach - m.tangerine
     exp = [-3.5, -7.5]
+    assert_array_almost_equal(obs, exp)
+
+    obs = m.peach - m.plum
+    exp = [[-3.5, -8.5], [-12.5, -17.5]]
+    assert_array_almost_equal(obs, exp)
+
+    obs = m.grapefruit - m.tangerine
+    exp = [[-4.0, -8.0], [-1.0, -2.0]]
     assert_array_almost_equal(obs, exp)
 
     obs = m.plum - m.grapefruit
@@ -968,7 +984,7 @@ def test_nativetag_sub():
 
 
 def test_nativetag_mult():
-    m = test_nativetag_operator_setup()
+    m = nativetag_operator_setup()
 
     obs = m.peach * m.tangerine
     exp = [7.5, 25.0]
@@ -1012,7 +1028,7 @@ def test_nativetag_mult():
     assert_raises(ValueError, m.quince.__mul__, m.grapefruit)
 
 def test_nativetag_div():
-    m = test_nativetag_operator_setup()
+    m = nativetag_operator_setup()
 
     obs = m.peach / m.tangerine
     exp = [0.3, 0.25]
