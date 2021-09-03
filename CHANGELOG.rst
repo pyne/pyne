@@ -14,6 +14,7 @@ Next Version
 **Fix**
 
    * fixing VR test (#1399)
+   * fixing output from MaterialLibrary warning. (#1414)
 
 **Maintenance**
    * removing old circle-ci related stuff (#1405)
@@ -62,7 +63,7 @@ v0.7.4
    * Add multiplication operator for NativeMeshTag and corresponding tests (#1376)
    * Incorporate native use of multiplication symbol for NativeMeshTag (#1411)
    * Addition, subtraction, and division symbols are now available to manipulate NativeMeshTags (#1412)
-     
+
 **Fix**
 
    * An e_bounds reading problem when old sampler is used without e_bounds text file (#1353)
