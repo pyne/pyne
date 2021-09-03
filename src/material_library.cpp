@@ -149,7 +149,7 @@ int pyne::MaterialLibrary::ensure_material_number(pyne::Material& mat) const {
     mat_numb_it = mat_number_set.find(mat_number);
     if (mat_numb_it != mat_number_set.end()) {
       std::string msg = "Material number ";
-      msg += mat_number;
+      msg += std::to_string(mat_number);
       msg += " is already in the library.";
       warning(msg);
     }
