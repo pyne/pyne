@@ -23,7 +23,10 @@ else:
 from distutils.core import setup
 
 
-VERSION = '0.7.1'
+from pyne.pyne_version import PYNE_VERSION
+VERSION = PYNE_VERSION
+
+
 IS_NT = os.name == 'nt'
 
 

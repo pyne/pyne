@@ -1,8 +1,9 @@
 import os
 from warnings import warn
 
+from pyne_version import PYNE_VERSION
 
-__version__ = '0.7.1'
+__version__ = PYNE_VERSION
 
 if os.name == 'nt':
     p = os.environ['PATH'].split(';')
