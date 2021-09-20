@@ -99,7 +99,7 @@ RUN if [ "$build_moab" = "YES" ] || [ "$enable_pymoab" = "YES" ] ; then \
         && cd $HOME/opt \
         && mkdir moab \
         && cd moab \
-        && git clone --single-branch -b 5.3.0 https://bitbucket.org/fathomteam/moab \
+        && git clone --depth 1 --single-branch -b 5.3.0 https://bitbucket.org/fathomteam/moab \
         && cd moab \
         && mkdir build \
         && cd build \
@@ -128,7 +128,7 @@ ARG build_dagmc="NO"
 ENV INSTALL_PATH=$HOME/opt/dagmc
 RUN if [ "$build_dagmc" = "YES" ]; then \
         cd /root \
-        && git clone -b develop --single-branch https://github.com/svalinn/DAGMC.git \
+        && git clone --depth 1 --branch stable https://github.com/svalinn/DAGMC.git \
         && cd DAGMC \
         && mkdir bld \
         && cd bld \
