@@ -60,9 +60,6 @@ if '.' not in sys.path:
 def absexpanduser(x): return os.path.abspath(os.path.expanduser(x))
 
 
-# from pyne.pyne_version import PYNE_VERSION
-# VERSION = PYNE_VERSION
-
 IS_NT = os.name == 'nt'
 LOCALDIR = absexpanduser('~/.local')
 CMAKE_BUILD_TYPES = {

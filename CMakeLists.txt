@@ -20,7 +20,6 @@ set(PYNE_VERSION ${PYNE_MAJOR_VERSION}.${PYNE_MINOR_VERSION}.${PYNE_PATCH_VERSIO
 
 # Configure Pyne and cpp version headers
 configure_file(pyne/pyne_version.py.in ${CMAKE_CURRENT_SOURCE_DIR}/pyne/pyne_version.py)
-#install(FILES pyne/DAGMCConfig.cmake DESTINATION ${INSTALL_LIB_DIR}/cmake/)
 configure_file(src/pyne_version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/src/pyne_version.h)
 
 
