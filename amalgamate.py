@@ -20,6 +20,7 @@ HEADER_EXTS |= {e.upper() for e in HEADER_EXTS}
 
 DEFAULT_FILES = [
     'license.txt',
+    'src/version.h',
     'src/utils.h',
     'src/utils.cpp',
     'src/extra_types.h',

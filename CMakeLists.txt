@@ -11,6 +11,18 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 # Setup the project
 project(pyne)
 
+
+# Set PYNE version
+set(PYNE_MAJOR_VERSION 0)
+set(PYNE_MINOR_VERSION 7)
+set(PYNE_PATCH_VERSION 5)
+set(PYNE_VERSION ${PYNE_MAJOR_VERSION}.${PYNE_MINOR_VERSION}.${PYNE_PATCH_VERSION})
+
+# Configure Pyne and cpp version headers
+configure_file(pyne/pyne_version.py.in ${CMAKE_CURRENT_SOURCE_DIR}/pyne/pyne_version.py)
+configure_file(src/pyne_version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/src/pyne_version.h)
+
+
 # check for and enable c++11 support
 INCLUDE(CheckCXXCompilerFlag)
 CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
