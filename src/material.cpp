@@ -698,7 +698,7 @@ std::string pyne::Material::openmc(std::string frac_type, int indent_lvl) {
   std::string new_quote = "\"";
   std::string end_quote = "\" ";
   std::string indent(indent_lvl * 2, ' ');
-  std::string indent2 = indent + indent;
+  std::string indent2 = indent + std::string(2, ' ');
 
   // open the material element
   oss << indent << "<material id=" ;
