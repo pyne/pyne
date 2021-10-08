@@ -334,7 +334,7 @@ cdef class _Material:
         datapath_bytes = datapath.encode('UTF-8')
         c_datapath = datapath_bytes
         cdef char * c_nucpath
-        
+
         if nucpath != "":
             nucpath_bytes = nucpath.encode('UTF-8')
             c_nucpath = nucpath_bytes
@@ -383,12 +383,12 @@ cdef class _Material:
         uwuw_name = self.mat_pointer.get_uwuw_name()
         return uwuw_name.decode()
 
-    def openmc(self, frac_type='mass'):
+    def openmc(self, frac_type='mass', indent_lvl=1):
         """openmc(frac_type)
         Return an openmc xml element for the material
         """
         cdef std_string mat
-        mat = self.mat_pointer.openmc(frac_type.encode())
+        mat = self.mat_pointer.openmc(frac_type.encode(), indent_lvl)
         return mat.decode()
 
     def fluka(self, fid, frac_type='mass'):
@@ -1782,7 +1782,7 @@ class Material(_Material, collectionsAbc.MutableMapping):
         """
         with open(filename, 'a') as f:
             f.write(self.alara())
-         
+
 
 
 #####################################
@@ -1858,7 +1858,7 @@ def from_atom_frac(atom_fracs, double mass=-1.0, double density=-1.0,
         mat.atoms_per_molecule = atoms_per_molecule
 
     return mat
-    
+
 
 
 def from_activity(activities, double mass=-1.0, double density=-1.0,
