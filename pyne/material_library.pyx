@@ -220,6 +220,20 @@ cdef class _MaterialLibrary:
         filename = filename.encode()
         self._inst.write_json(filename)
 
+    def write_openmc(self, filename):
+        """write_openmc(filename)
+        Writes the material library in an OpenMC XML format.
+
+        Parameters
+        ----------
+        filename : str
+            Path to text file to write the data to.  If the file already
+            exists, it will be overwritten.
+
+        """
+        filename = filename.encode()
+        self._inst.write_openmc(filename)
+
     def __setitem__(self, key, value):
         """Add a Material to this material library, if the material key already exist it will be overwritten.
          Parameters

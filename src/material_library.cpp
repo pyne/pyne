@@ -1,6 +1,7 @@
 #ifndef _WIN32
 #include <unistd.h>
 #endif
+#include <fstream>
 #include <iostream>
 
 #ifndef PYNE_IS_AMALGAMATED
@@ -132,6 +133,23 @@ void pyne::MaterialLibrary::write_json(const std::string& filename) {
   std::string s = writer.write(json);
   std::ofstream f(filename.c_str(), std::ios_base::trunc);
   f << s << "\n";
+  f.close();
+}
+
+void pyne::MaterialLibrary::write_openmc(const std::string& filename) const
+{
+  std::ofstream f(filename.c_str());
+  // write header
+  f << "<?xml version=\"1.0\"?>\n";
+  f << "<materials>\n";
+  // write materials
+  for (auto& mat : material_library) {
+    f << mat.second->openmc("atom");
+  }
+  // write footer
+  f << "</materials>";
+
+  // close file
   f.close();
 }
 

@@ -10,7 +10,7 @@ from libcpp.memory cimport shared_ptr
 
 cimport cpp_jsoncpp
 
-from pyne cimport cpp_material 
+from pyne cimport cpp_material
 
 cdef extern from "material_library.h" namespace "pyne":
 
@@ -22,25 +22,25 @@ cdef extern from "material_library.h" namespace "pyne":
 
         # Methods
         void from_hdf5(std_string, std_string) except +
-        
+
         void load_json(cpp_jsoncpp.Value) except +
         cpp_jsoncpp.Value dump_json() except +
         void from_json(std_string) except +
         void write_json(std_string) except +
-
+        void write_openmc(std_string) except +
         void write_hdf5(std_string, std_string, bool) except +
-        
+
         void add_material(cpp_material.Material) except +
         void add_material(std_string, cpp_material.Material) except +
-        
+
         void del_material(cpp_material.Material) except +
         void del_material(std_string) except +
         void merge(MaterialLibrary*) except +
 
         cpp_material.Material get_material(std_string) except +
         shared_ptr[cpp_material.Material] get_material_ptr( std_string ) except +
-        
-        cpp_umap[std_string, shared_ptr[cpp_material.Material]] get_mat_library() except + 
+
+        cpp_umap[std_string, shared_ptr[cpp_material.Material]] get_mat_library() except +
         std_set[std_string] get_keylist() except +
         std_set[int] get_nuclist() except +
         int size() except +
