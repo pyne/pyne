@@ -6,6 +6,7 @@ Next Version
 ============
 
 **New Capabilities**
+   * Adds method to write a MaterialLibrary as an OpenMC XML file.
 
 **Change**
    * exclude docker related stuff from build_test (#1404 #1408)

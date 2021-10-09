@@ -210,7 +210,7 @@ def test_hdf5_protocol_1_old():
     assert_equal(m.metadata['comment'], 'hitting the dancefloor')
 
     os.remove('proto1.h5')
-    
+
     leu = Material({'U235': 0.02, 'U238': 0.98}, 6.34, 2.72, 1.0)
     leu.metadata['comment'] = 'hitting the dancefloor'
     leu.write_hdf5('proto1.h5', datapath="/new_mat", nucpath="/nucid", chunksize=10)
@@ -234,9 +234,9 @@ def test_hdf5_protocol_1_old():
     assert_equal(m.mass, 4.2)
     assert_equal(m.comp, {922350000: 0.04, 922380000: 0.96})
     assert_equal(m.metadata['comment'], 'first light')
-    
+
     os.remove('proto1.h5')
-    
+
 def test_hdf5_protocol_1():
     if 'proto1.h5' in os.listdir('.'):
         os.remove('proto1.h5')
@@ -245,7 +245,7 @@ def test_hdf5_protocol_1():
     leu = Material({'U235': 0.04, 'U238': 0.96}, 4.2, 2.72, 1.0)
     leu.metadata['comment'] = 'first light'
     leu.write_hdf5('proto1.h5')
-    
+
     for i in range(2, 11):
         leu = Material({'U235': 0.04, 'U238': 0.96}, i*4.2, 2.72, 1.0*i)
         leu.metadata['comment'] = 'fire in the disco - {0}'.format(i)
@@ -260,7 +260,7 @@ def test_hdf5_protocol_1():
         assert_equal(m.mass, i*4.2)
         assert_equal(m.comp, {922350000: 0.04, 922380000: 0.96})
         assert_equal(m.metadata['comment'], 'fire in the disco - {0}'.format(i))
-    
+
     m = from_hdf5('proto1.h5', '/mat_name', -1, 1)
     assert_equal(m.density, 2.72)
     assert_equal(m.atoms_per_molecule, 10.0)
@@ -271,7 +271,7 @@ def test_hdf5_protocol_1():
     m = from_hdf5('proto1.h5', '/mat_name', 0, 1)
     assert_equal(m.density, 2.72)
     assert_equal(m.atoms_per_molecule, 1.0)
-    assert_equal(m.mass, 4.2) 
+    assert_equal(m.mass, 4.2)
     assert_equal(m.comp, {922350000: 0.04, 922380000: 0.96})
     assert_equal(m.metadata['comment'], 'first light')
     os.remove('proto1.h5')
@@ -326,7 +326,7 @@ class TestMaterialMethods(TestCase):
         assert_equal(set(obs), set(exp))
         for key in exp:
             assert_almost_equal(obs[key], exp[key])
-    
+
 
     def test_decay_heat_metastable(self):
         mat = Material({471080001: 0.5, 551340001: 0.5}, 2)
@@ -397,7 +397,7 @@ def test_expand_elements3():
     expmat = natmat.expand_elements(exception_ids)
     afrac = expmat.to_atom_frac()
     assert_almost_equal(natmat[60000000], afrac[60000000])
-    
+
 def test_collapse_elements1():
     """ Very simple test to combine nucids"""
     nucvec = {10010000:  1.0,
@@ -1255,7 +1255,7 @@ def test_openmc():
                           'name':'LEU'},
                    density=19.1)
 
-    mass = leu.openmc()
+    mass = leu.openmc(indent_lvl=0)
     mass_exp = ('<material id="2" name="LEU" >\n'
                 '  <density value="19.1" units="g/cc" />\n'
                 '  <nuclide name="U235" wo="4.0000e-02" />\n'
@@ -1263,7 +1263,7 @@ def test_openmc():
                 '</material>\n')
     assert_equal(mass, mass_exp)
 
-    atom = leu.openmc(frac_type='atom')
+    atom = leu.openmc(frac_type='atom', indent_lvl=0)
     atom_exp = ('<material id="2" name="LEU" >\n'
                 '  <density value="19.1" units="g/cc" />\n'
                 '  <nuclide name="U235" ao="4.0491e-02" />\n'
@@ -1277,10 +1277,10 @@ def test_openmc():
     leu_read = Material()
     leu_read.from_hdf5('leu.h5', '/mat_name')
 
-    mass = leu.openmc()
+    mass = leu.openmc(indent_lvl=0)
     assert_equal(mass, mass_exp)
 
-    atom = leu.openmc(frac_type='atom')
+    atom = leu.openmc(frac_type='atom', indent_lvl=0)
     assert_equal(atom, atom_exp)
 
 def test_openmc_mat0():
@@ -1294,7 +1294,7 @@ def test_openmc_mat0():
                           'name':'LEU'},
                    density=19.1)
 
-    mass = leu.openmc()
+    mass = leu.openmc(indent_lvl=0)
     mass_exp = ('<material id="2" name="LEU" >\n'
                 '  <density value="19.1" units="g/cc" />\n'
                 '  <nuclide name="U235" wo="4.0000e-02" />\n'
@@ -1313,7 +1313,7 @@ def test_openmc_sab():
                           'name':'Water'},
                    density=1.001)
 
-    mass = leu.openmc()
+    mass = leu.openmc(indent_lvl=0)
     mass_exp = ('<material id="2" name="Water" >\n'
                 '  <density value="1.001" units="g/cc" />\n'
                 '  <nuclide name="H1" wo="6.6667e-01" />\n'
@@ -1330,10 +1330,10 @@ def test_openmc_c():
                    'name':'silicon carbide'}
     csi.density = 3.16
 
-    atom = csi.openmc(frac_type='atom')
+    atom = csi.openmc(frac_type='atom', indent_lvl=0)
     atom_exp = ('<material id="2" name="silicon carbide" >\n'
                 '  <density value="3.16" units="g/cc" />\n'
-                '  <nuclide name="C0" ao="5.0000e-01" />\n'                
+                '  <nuclide name="C0" ao="5.0000e-01" />\n'
                 '  <nuclide name="Si28" ao="4.6111e-01" />\n'
                 '  <nuclide name="Si29" ao="2.3425e-02" />\n'
                 '  <nuclide name="Si30" ao="1.5460e-02" />\n'
@@ -1358,7 +1358,7 @@ def test_phits():
                 '     92235.15c -4.0000e-02\n'
                 '     92238.25c -9.6000e-01\n')
     assert_equal(mass, mass_exp)
-    
+
     atom = leu.phits(frac_type='atom')
     atom_exp = ('C name: leu\n'
                 'C comments: this is a long comment that will definitly go over the 80 character\n'
@@ -1517,7 +1517,7 @@ def test_uwuw():
     name_exp = ('mat:leu')
     assert_equal(uwuw_name, name_exp)
 
-    
+
     no_name = Material(nucvec={'U235': 0.04, 'U238': 0.96},
                    metadata={'mat_number': 2,
                           'table_ids': {'92235':'15c', '92238':'25c'},
@@ -1577,11 +1577,9 @@ def test_write_openmc():
                           'name':'LEU'},
                    density=19.1)
 
-    leu.write_openmc('openmc_mass_fracs.txt')
-    leu.write_openmc('openmc_mass_fracs.txt', frac_type='atom')
+    leu.write_openmc('openmc_mass_fracs.txt', indent_lvl=0)
+    leu.write_openmc('openmc_mass_fracs.txt', frac_type='atom', indent_lvl=0)
 
-
-    
     with open('openmc_mass_fracs.txt') as f:
         written = f.read()
     expected = ('<material id="2" name="LEU" >\n'
@@ -1596,7 +1594,7 @@ def test_write_openmc():
                 '</material>\n')
     assert_equal(written, expected)
     os.remove('openmc_mass_fracs.txt')
-    
+
 def test_write_mcnp():
     if 'mcnp_mass_fracs.txt' in os.listdir('.'):
         os.remove('mcnp_mass_fracs.txt')

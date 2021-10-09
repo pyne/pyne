@@ -54,6 +54,9 @@ class MaterialLibrary {
   void load_json(Json::Value json);
   Json::Value dump_json();
   void write_json(const std::string& filename);
+  //! Writes the materials in an OpenMC XML format
+  void write_openmc(const std::string& filename) const;
+
   /**
    * \brief Writes MaterialLibrary out to an HDF5 file.
             This happens according to protocol 1.

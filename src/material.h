@@ -185,7 +185,7 @@ namespace pyne
     ///            appended to the end of the dataset.
     /// \param chunksize The chunksize for all material data on disk.
     /// New write_hdf5 which fallback on the old one when required
-    void write_hdf5(std::string filename, std::string datapath="/mat_name", 
+    void write_hdf5(std::string filename, std::string datapath="/mat_name",
         float row=-0.0, int chunksize=DEFAULT_MAT_CHUNKSIZE);
 
     /// Writes this nucpath to an HDF5 file.
@@ -251,7 +251,7 @@ namespace pyne
     void deprecated_write_hdf5(std::string filename, std::string datapath,
                     std::string nucpath, float row=-0.0, int chunksize=DEFAULT_MAT_CHUNKSIZE);
     /// Return an openmc xml material element as a string
-    std::string openmc(std::string fact_type = "mass");
+    std::string openmc(std::string frac_type = "mass", int indent_lvl=1);
 
     /// Return an mcnp input deck record as a string
     std::string mcnp(std::string frac_type = "mass", bool mult_den = true);

@@ -38,7 +38,7 @@ cdef extern from "material.h" namespace "pyne":
 
         # Methods
         void norm_comp() except +
-        std_string openmc(std_string) except +
+        std_string openmc(std_string, int) except +
         std_string mcnp(std_string) except +
         std_string mcnp(std_string, bool) except +
         std_string get_uwuw_name() except +
