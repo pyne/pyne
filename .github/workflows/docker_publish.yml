@@ -10,6 +10,9 @@ on:
 
 jobs:
 
+  # builds and pushes two docker images to ghcr.
+  # These docker images are also cached locally so that they can be efficiently
+  # accessed by the subsequent stage (build_and_push_dagmc).
   build_and_push_python3_pymoab:
     runs-on: ubuntu-latest
     strategy:
@@ -72,18 +75,18 @@ jobs:
           tags: ghcr.io/${{ github.repository_owner }}/ubuntu_18.04_py3_pymoab_pyne-deps:ci_testing
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-${{ github.sha }}
 
-
+  # builds on the previous cached images adding extra layers to the base docker
+  # images created in the previous step. The resulting images include various
+  # combinations of pymoab dagmc, openmc and hdf5.
   build_and_push_dagmc:
     needs: build_and_push_python3_pymoab
     runs-on: ubuntu-latest
     strategy:
       matrix:
         pymoab : [
-          '',
           _pymoab,
           ]
         dagmc : [
-          '',
           _dagmc
         ]
         openmc : [
@@ -173,6 +176,8 @@ jobs:
           cache-from: type=local,src=/tmp/.buildx-cache-${{ github.sha }}
           tags: ghcr.io/${{ github.repository_owner }}/ubuntu_18.04_py3${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:ci_testing
 
+  # Once the previous two steps have finished the docker images are uploaded
+  # to ghcr and therefore the local cached images are removed. 
   cleanup_cache:
     if: always()
     needs: [build_and_push_python3_pymoab, build_and_push_dagmc]
@@ -182,6 +187,8 @@ jobs:
         run: |
           rm -rf /tmp/.buildx-cache-${{ github.sha }}
 
+  # Downloads the images uploaded to ghcr in previous stages and runs pyne
+  # tests to check that they work.
   BuildTest:
     needs: [build_and_push_python3_pymoab, build_and_push_dagmc]
     runs-on: ubuntu-latest
@@ -257,6 +264,9 @@ jobs:
           cd $GITHUB_WORKSPACE/tests
           ./travis-run-tests.sh python3
 
+  # if the previous step that tests the docker images passes then the images
+  # can be copied from the ghcr where they are saved using :ci_testing tags to
+  # :latest and :stable tags.
   pushing_test_stable_img:
     if: ${{ github.repository_owner == 'pyne' }}
     needs: [BuildTest]
@@ -264,11 +274,11 @@ jobs:
     strategy:
       matrix:
         pymoab : [
-          '',
+          # '', commented out as this combination is not built
           _pymoab,
           ]
         dagmc : [
-          '',
+          # '', commented out as this combination is not built
           _dagmc
         ]
         openmc : [
