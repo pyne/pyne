@@ -79,9 +79,11 @@ jobs:
     strategy:
       matrix:
         pymoab : [
+          '',
           _pymoab,
           ]
         dagmc : [
+          '',
           _dagmc
         ]
         openmc : [
