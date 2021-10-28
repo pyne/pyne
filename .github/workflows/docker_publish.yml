@@ -299,13 +299,13 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Push Image to stable img
-        uses: akhilerm/tag-push-action@v1.0.0
+        uses: akhilerm/tag-push-action@v2.0.0
         with:
           src: ghcr.io/${{ github.repository_owner }}/ubuntu_18.04_py3${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:ci_testing
           dst: ghcr.io/${{ github.repository_owner }}/ubuntu_18.04_py3${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:stable
 
-      - name: Push Image to stable img
-        uses: akhilerm/tag-push-action@v1.0.0
+      - name: Push Image to latest img
+        uses: akhilerm/tag-push-action@v2.0.0
         with:
           src: ghcr.io/${{ github.repository_owner }}/ubuntu_18.04_py3${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:ci_testing
           dst: ghcr.io/${{ github.repository_owner }}/ubuntu_18.04_py3${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:latest
