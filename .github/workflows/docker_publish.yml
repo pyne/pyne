@@ -299,7 +299,7 @@ jobs:
             openmc: _openmc
         exclude:
           - hdf5: ''
-            dagmc: ''
+            dagmc: '_dagmc'
             pymoab: ''
             openmc: ''
 
