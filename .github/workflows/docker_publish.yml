@@ -278,11 +278,11 @@ jobs:
           '',
         ]
         dagmc : [
-          # '', commented out as this combination is not built
+          '',
           _dagmc
         ]
         pymoab : [
-          # '', commented out as this combination is not built
+          '',
           _pymoab,
           ]
         openmc : [
@@ -297,6 +297,12 @@ jobs:
             dagmc: _dagmc
             pymoab: _pymoab
             openmc: _openmc
+        exclude:
+          - hdf5: ''
+            dagmc: ''
+            pymoab: ''
+            openmc: ''
+
 
     name: "${{ github.repository_owner }}/ubuntu_18.04_py3${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}: latest -> stable"
 
