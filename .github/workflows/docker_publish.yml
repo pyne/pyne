@@ -83,27 +83,27 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        pymoab : [
-          _pymoab,
-          ]
-        dagmc : [
-          _dagmc
-        ]
-        openmc : [
-          '',
-        ]
         hdf5 : [
           '',
         ]
+        dagmc : [
+          _dagmc
+        ]
+        pymoab : [
+          _pymoab,
+          ]
+        openmc : [
+          '',
+        ]
         include:
-          - openmc: ''
-            hdf5: _hdf5-1_12_0
+          - hdf5: _hdf5-1_12_0
             dagmc: _dagmc
             pymoab: _pymoab
-          - openmc: _openmc
-            hdf5: ''
+            openmc: ''
+          - hdf5: ''
             dagmc: _dagmc
             pymoab: _pymoab
+            openmc: _openmc
 
       fail-fast: false
     
@@ -196,32 +196,32 @@ jobs:
       
     strategy:
       matrix:
-        pymoab : [
-          _pymoab,
-          ]
+        hdf5 : [
+          '',
+        ]
         dagmc : [
           '',
           _dagmc
         ]
+        pymoab : [
+          _pymoab,
+          ]
         openmc : [
           '',
         ]
-        hdf5 : [
-          '',
-        ]
         include:
-          - openmc: ''
-            hdf5: _hdf5-1_12_0
+          - hdf5: _hdf5-1_12_0
             dagmc: _dagmc
             pymoab: _pymoab
-          - openmc: _openmc
-            hdf5: ''
+            openmc: ''
+          - hdf5: ''
             dagmc: _dagmc
             pymoab: _pymoab
-          - openmc: ''
-            hdf5: ''
+            openmc: _openmc
+          - hdf5: ''
             dagmc: ''
             pymoab: ''
+            openmc: ''
       fail-fast: false
 
 
@@ -274,29 +274,29 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        pymoab : [
-          # '', commented out as this combination is not built
-          _pymoab,
-          ]
+        hdf5 : [
+          '',
+        ]
         dagmc : [
           # '', commented out as this combination is not built
           _dagmc
         ]
+        pymoab : [
+          # '', commented out as this combination is not built
+          _pymoab,
+          ]
         openmc : [
           '',
         ]
-        hdf5 : [
-          '',
-        ]
         include:
-          - openmc: ''
-            hdf5: _hdf5-1_12_0
+          - hdf5: _hdf5-1_12_0
             dagmc: _dagmc
             pymoab: _pymoab
-          - openmc: _openmc
-            hdf5: ''
+            openmc: ''
+          - hdf5: ''
             dagmc: _dagmc
             pymoab: _pymoab
+            openmc: _openmc
 
     name: "${{ github.repository_owner }}/ubuntu_18.04_py3${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}: latest -> stable"
 
