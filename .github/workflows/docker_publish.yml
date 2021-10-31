@@ -282,7 +282,6 @@ jobs:
           _dagmc
         ]
         pymoab : [
-          '',
           _pymoab,
           ]
         openmc : [
@@ -297,9 +296,8 @@ jobs:
             dagmc: _dagmc
             pymoab: _pymoab
             openmc: _openmc
-        exclude:
           - hdf5: ''
-            dagmc: '_dagmc'
+            dagmc: ''
             pymoab: ''
             openmc: ''
 
