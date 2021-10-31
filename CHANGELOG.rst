@@ -18,6 +18,7 @@ Next Version
 
    * fixing VR test (#1399)
    * fixing output from MaterialLibrary warning. (#1414)
+   * fixing docker publish CI Github Action (#1426)
 
 **Maintenance**
    * removing old circle-ci related stuff (#1405)
