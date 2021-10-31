@@ -268,8 +268,7 @@ jobs:
   # can be copied from the ghcr where they are saved using :ci_testing tags to
   # :latest and :stable tags.
   pushing_test_stable_img:
-    # if: ${{ github.repository_owner == 'pyne' }}
-    if: ${{ github.repository_owner == 'shimwell' }}
+    if: ${{ github.repository_owner == 'pyne' }}
     needs: [BuildTest]
     runs-on: ubuntu-latest
     strategy:
