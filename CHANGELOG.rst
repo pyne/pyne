@@ -5,6 +5,11 @@ PyNE Change Log
 Next Version
 ============
 
+
+
+v0.7.6
+======
+
 **New Capabilities**
    * Adds method to write a MaterialLibrary as an OpenMC XML file.
 

@@ -15,7 +15,7 @@ project(pyne)
 # Set PYNE version
 set(PYNE_MAJOR_VERSION 0)
 set(PYNE_MINOR_VERSION 7)
-set(PYNE_PATCH_VERSION 5)
+set(PYNE_PATCH_VERSION 6)
 set(PYNE_VERSION ${PYNE_MAJOR_VERSION}.${PYNE_MINOR_VERSION}.${PYNE_PATCH_VERSION})
 
 # Configure Pyne and cpp version headers
