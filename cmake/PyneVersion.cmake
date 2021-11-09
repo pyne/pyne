@@ -10,3 +10,4 @@ MESSAGE(STATUS "Setting PyNE Version to ${PYNE_VERSION} by changing files in ${P
 configure_file(${PYNE_SUBMODULE_PATH}pyne/pyne_version.py.in ${PYNE_SUBMODULE_PATH}${CMAKE_CURRENT_SOURCE_DIR}/pyne/pyne_version.py)
 configure_file(${PYNE_SUBMODULE_PATH}src/pyne_version.h.in ${PYNE_SUBMODULE_PATH}${CMAKE_CURRENT_SOURCE_DIR}/src/pyne_version.h)
 
+MESSAGE(STATUS "Set PyNE Version to ${PYNE_VERSION}")
