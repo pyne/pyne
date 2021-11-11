@@ -13,10 +13,6 @@ project(pyne)
 
 include(PyneVersion)
 
-IF (PYNE_VERSION_ONLY)
-  RETURN()
-ENDIF()
-
 # check for and enable c++11 support
 INCLUDE(CheckCXXCompilerFlag)
 CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
