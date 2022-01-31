@@ -24,6 +24,10 @@ def setup():
 
     with open('C012-n-2p0.ace','w') as f:
         f.writelines(lines)
+        
+    if not os.path.isfile('U235-n.ace'):
+        urllib.urlretrieve('ftp://ftp.nrg.eu/pub/www/talys/tendl2013/neutron_file/U/235/lib/endf/U235-n.ace',
+                           'U235-n.ace')
 
 
 def test_convert_c12():
@@ -94,7 +98,22 @@ def test_read_c12_binary():
 
     assert_equal(table.reactions[2].sigma[0], 78.04874)
     assert_equal(table.reactions[2].sigma[-1], 1.00772)
+    
+def test_sample_functions():
+    u235 = pyne.ace.Library('U235-n.ace')
+    u235.read()
+    table = u235.tables['92235.00c']
+    fission = table.reactions[18]
+    
+    pyne.ace.set_seed(1)
+    assert_almost_equal(table.sample_nu(1)[0], 2.525704)
+    (a, e) = fission.sample(1)
+    assert_almost_equal(a, -0.9997712503653102)
+    assert_almost_equal(e, 2.6309118671014353)
 
 def teardown():
     if os.path.exists('C12-binary.ace'):
         os.remove('C12-binary.ace')
+        
+    if os.path.exists('U235-n.ace'):
+        os.remove('U235-n.ace')
