@@ -1,6 +1,8 @@
 set(PYNE_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}" ${PYNE_INCLUDE_DIRS}
     PARENT_SCOPE)
 
+execute_process("python ../pyne/pyne_version.py")
+
 pyne_download_platform()
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
 
