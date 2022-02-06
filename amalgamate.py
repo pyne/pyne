@@ -11,7 +11,8 @@ import sys
 import io
 from argparse import ArgumentParser
 
-import pyne.pyne_version as pv
+sys.path.append('pyne')
+import pyne_version as pv
 
 pv.write_cpp_header('src')
 
