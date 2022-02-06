@@ -1,3 +1,5 @@
+import os
+
 # Set PYNE version
 PYNE_MAJOR_VERSION = 0
 PYNE_MINOR_VERSION = 7
@@ -5,9 +7,9 @@ PYNE_PATCH_VERSION = 6
 
 PYNE_VERSION = f'{PYNE_MAJOR_VERSION}.{PYNE_MINOR_VERSION}.{PYNE_PATCH_VERSION}'
 
-def write_cpp_header():
+def write_cpp_header(path="."):
 
-    with open('pyne_version.h','w') as pvh:
+    with open(os.path.join(path,'pyne_version.h','w')) as pvh:
         header_text = f'''#ifndef PYNE_VERSION_HEADER
 #define PYNE_VERSION_HEADER
 

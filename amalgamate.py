@@ -11,6 +11,10 @@ import sys
 import io
 from argparse import ArgumentParser
 
+import pyne.pyne_version as pv
+
+pv.write_cpp_header('src')
+
 CODE_EXTS = {'.c', '.cpp', '.cxx', '.h', '.hpp', '.hxx'}
 CODE_EXTS |= {e.upper() for e in CODE_EXTS}
 SOURCE_EXTS = {'.c', '.cpp', '.cxx'}
