@@ -60,6 +60,8 @@ jobs:
 
     steps:
       - uses: actions/setup-python@v2
+        with:
+          python-version: 3.6
 
       - name: setup
         shell: bash -l {0}
@@ -81,8 +83,6 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Building PyNE
-        with:
-          python-version: 3.6
         shell: bash -l {0}
         run: |
           cd $GITHUB_WORKSPACE
@@ -93,8 +93,6 @@ jobs:
           nuc_data_make
 
       - name: Testing PyNE
-        with:
-          python-version: 3.6
         shell: bash -l {0}
         run: |
           cd $GITHUB_WORKSPACE/tests
