@@ -59,6 +59,8 @@ jobs:
       image: ghcr.io/pyne/ubuntu_18.04_py3${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:stable
 
     steps:
+      - uses: actions/setup-python@v2
+
       - name: setup
         shell: bash -l {0}
         run: |
@@ -77,8 +79,10 @@ jobs:
 
       - name: Checkout repository
         uses: actions/checkout@v2
-        
+
       - name: Building PyNE
+        with:
+          python-version: 3.6
         shell: bash -l {0}
         run: |
           cd $GITHUB_WORKSPACE
@@ -89,6 +93,8 @@ jobs:
           nuc_data_make
 
       - name: Testing PyNE
+        with:
+          python-version: 3.6
         shell: bash -l {0}
         run: |
           cd $GITHUB_WORKSPACE/tests
