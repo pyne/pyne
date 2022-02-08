@@ -26,6 +26,7 @@ Next Version
    * clarify the tag name for docker images generated in CI (#1407)
    * add ifbar to cleanup the code about progress bar (#1409)
    * use ifbar to print progress of mesh_to_fluxin (#1401)
+   * pep8 formatting applied to all py files (#1436)
 
 v0.7.5
 ======
