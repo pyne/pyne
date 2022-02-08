@@ -13,7 +13,7 @@ Next Version
    * move changelog test in its own workflow (#1404)
    * Adds 2 templates header files (one for Python one for CPP) to store PYNE version number, cmake will automatically configure proper version files for python and cpp based on the PYNE VERSION number located in the root CMakeFile.txt (#1415)
    * PyNE CI docker container now target DAGMC:'stable' tag instead of develop. (#1415)
-   * Updating Python versin to 3.6 in CI. (#1437)
+   * Updating Python version to 3.6 in CI. (#1437)
 
 **Fix**
 
