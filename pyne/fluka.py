@@ -24,9 +24,11 @@ from pyne.mesh import Mesh, StatMesh, MeshError, HAVE_PYMOAB
 if HAVE_PYMOAB:
     from pyne.mesh import NativeMeshTag
 else:
-    warn("The PyMOAB optional dependency could not be imported. "
-         "Some aspects of the fluka module may be incomplete.",
-         ImportWarning)
+    warn(
+        "The PyMOAB optional dependency could not be imported. "
+        "Some aspects of the fluka module may be incomplete.",
+        ImportWarning,
+    )
 
 
 class Usrbin(object):
@@ -52,20 +54,18 @@ class Usrbin(object):
         """
 
         if not HAVE_PYMOAB:
-            raise RuntimeError("PyMOAB is not available, "
-                               "unable to create Meshtal.")
+            raise RuntimeError("PyMOAB is not available, " "unable to create Meshtal.")
 
         self.tally = {}
 
-        with open(filename, 'r') as fh:
+        with open(filename, "r") as fh:
             self._read_tallies(fh)
 
     def _read_tallies(self, fh):
-        """Read in all of the USRBIN tallies from the USRBIN file.
-        """
+        """Read in all of the USRBIN tallies from the USRBIN file."""
         line = fh.readline()
 
-        while (line != "" and line[0] == '1'):
+        while line != "" and line[0] == "1":
             new_tally = UsrbinTally(fh)
             self.tally[new_tally.name] = new_tally
             line = fh.readline()
@@ -108,8 +108,7 @@ class UsrbinTally(Mesh):
         """
 
         if not HAVE_PYMOAB:
-            raise RuntimeError("PyMOAB is not available, "
-                               "unable to create Meshtal.")
+            raise RuntimeError("PyMOAB is not available, " "unable to create Meshtal.")
 
         part_data = []
         error_data = []
@@ -124,9 +123,8 @@ class UsrbinTally(Mesh):
         self.coord_sys = self.coord_sys.split()[0]
         self.particle = self.particle.split()[-1]
 
-        if self.coord_sys != 'Cartesian':
-            raise ValueError(
-                "Only cartesian coordinate system currently supported")
+        if self.coord_sys != "Cartesian":
+            raise ValueError("Only cartesian coordinate system currently supported")
 
         [x_info, y_info, z_info] = self._read_usrbin_head(fh)
 
@@ -140,14 +138,14 @@ class UsrbinTally(Mesh):
 
         # Read the track-length binning data (part_data) and percentage error
         # data (error_data).
-        num_volume_element = x_info[2]*y_info[2]*z_info[2]
+        num_volume_element = x_info[2] * y_info[2] * z_info[2]
         part_data += [float(x) for x in line.split()]
-        while (len(part_data) < num_volume_element):
+        while len(part_data) < num_volume_element:
             line = fh.readline()
             part_data += [float(x) for x in line.split()]
         for count in range(0, 3):
             line = fh.readline()
-        while (len(error_data) < num_volume_element):
+        while len(error_data) < num_volume_element:
             line = fh.readline()
             error_data += [float(x) for x in line.split()]
 
@@ -184,8 +182,7 @@ class UsrbinTally(Mesh):
         and the width of each evenly spaced bin.
         """
         tokens = line.split()
-        return float(tokens[3]), float(tokens[5]), int(tokens[7]), \
-            float(tokens[10])
+        return float(tokens[3]), float(tokens[5]), int(tokens[7]), float(tokens[10])
 
     def _generate_bounds(self, dim_info):
         """This takes in the dimension information (min, max, bins, and width)
@@ -194,7 +191,7 @@ class UsrbinTally(Mesh):
         [dim_min, dim_max, bins, width] = dim_info
         bound_data = []
         for i in range(0, bins + 1):
-            bound_data.append(dim_min+(i*width))
+            bound_data.append(dim_min + (i * width))
         return bound_data
 
     def _create_mesh(self, part_data, error_data):
@@ -202,14 +199,17 @@ class UsrbinTally(Mesh):
         specified by the user. One mesh object contains both the part_data and
         the error_data.
         """
-        super(UsrbinTally, self).__init__(structured_coords=[self.x_bounds,
-                                                             self.y_bounds, self.z_bounds],
-                                          structured=True,
-                                          structured_ordering='zyx',
-                                          mats=None)
-        self.part_data_tag = NativeMeshTag(size=1, dtype=float, mesh=self,
-                                           name="part_data_{0}".format(self.particle))
-        self.error_data_tag = NativeMeshTag(size=1, dtype=float, mesh=self,
-                                            name="error_data_{0}".format(self.particle))
+        super(UsrbinTally, self).__init__(
+            structured_coords=[self.x_bounds, self.y_bounds, self.z_bounds],
+            structured=True,
+            structured_ordering="zyx",
+            mats=None,
+        )
+        self.part_data_tag = NativeMeshTag(
+            size=1, dtype=float, mesh=self, name="part_data_{0}".format(self.particle)
+        )
+        self.error_data_tag = NativeMeshTag(
+            size=1, dtype=float, mesh=self, name="error_data_{0}".format(self.particle)
+        )
         self.part_data_tag[:] = part_data
         self.error_data_tag[:] = error_data

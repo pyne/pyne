@@ -6,16 +6,24 @@
 from __future__ import print_function
 
 import nose
-from nose.tools import assert_equal, assert_not_equal, assert_raises, raises, \
-    assert_almost_equal, assert_true, assert_false, assert_in
+from nose.tools import (
+    assert_equal,
+    assert_not_equal,
+    assert_raises,
+    raises,
+    assert_almost_equal,
+    assert_true,
+    assert_false,
+    assert_in,
+)
 
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 
 import os
-import numpy  as np
+import numpy as np
 
 from pyne import dtypes
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     nose.run()

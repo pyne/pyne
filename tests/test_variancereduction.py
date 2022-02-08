@@ -7,6 +7,7 @@ from nose.plugins.skip import SkipTest
 import warnings
 
 from pyne.mesh import Mesh, NativeMeshTag, MeshError, HAVE_PYMOAB
+
 if not HAVE_PYMOAB:
     raise SkipTest
 try:
@@ -46,8 +47,17 @@ def test_cadis_single_e():
     q_mesh.q[:] = q_data
 
     # run CADIS
-    cadis(adj_flux_mesh, adj_flux_tag, q_mesh, q_tag,
-          ww_mesh, ww_tag, q_bias_mesh, q_bias_tag, beta=5)
+    cadis(
+        adj_flux_mesh,
+        adj_flux_tag,
+        q_mesh,
+        q_tag,
+        ww_mesh,
+        ww_tag,
+        q_bias_mesh,
+        q_bias_tag,
+        beta=5,
+    )
 
     # checkout output meshes
     expected_ww = [0.3995338, 0.33806706, 0.29299145, 0.258521908]
@@ -88,14 +98,31 @@ def test_cadis_multiple_e():
     q_mesh.q[:] = q_data
 
     # run cadis
-    cadis(adj_flux_mesh, adj_flux_tag, q_mesh, q_tag,
-          ww_mesh, ww_tag, q_bias_mesh, q_bias_tag, beta=5)
+    cadis(
+        adj_flux_mesh,
+        adj_flux_tag,
+        q_mesh,
+        q_tag,
+        ww_mesh,
+        ww_tag,
+        q_bias_mesh,
+        q_bias_tag,
+        beta=5,
+    )
 
     # expected results
-    expected_q_bias = [[0.0306200806, 0.0322518718], [0.0324438472, 0.0335956998],
-                       [0.0, 0.0337876752], [0.0473219428, 0.0]]
-    expected_ww = [[0.3208302538, 0.2940943993], [0.2714717532, 0.2520809137],
-                   [0.0, 0.2205707995], [0.2075960465, 0.1857438311]]
+    expected_q_bias = [
+        [0.0306200806, 0.0322518718],
+        [0.0324438472, 0.0335956998],
+        [0.0, 0.0337876752],
+        [0.0473219428, 0.0],
+    ]
+    expected_ww = [
+        [0.3208302538, 0.2940943993],
+        [0.2714717532, 0.2520809137],
+        [0.0, 0.2205707995],
+        [0.2075960465, 0.1857438311],
+    ]
 
     ww_mesh.ww = NativeMeshTag(2, float)
     q_bias_mesh.q_bias = NativeMeshTag(2, float)
@@ -148,13 +175,14 @@ def test_magic_multi_bins():
     tolerance = 0.15
     null_value = 0.001
 
-    magic(tally, "n_flux", "n_rel_error",
-          tolerance=tolerance, null_value=null_value)
+    magic(tally, "n_flux", "n_rel_error", tolerance=tolerance, null_value=null_value)
 
-    expected_ww = [[0.2307692308, 0.5],
-                   [0.3076923077, 0.001],
-                   [0.2884615385, 0.001],
-                   [0.5, 0.15151515]]
+    expected_ww = [
+        [0.2307692308, 0.5],
+        [0.3076923077, 0.001],
+        [0.2884615385, 0.001],
+        [0.5, 0.15151515],
+    ]
 
     assert_array_almost_equal(tally.ww_x[:], expected_ww[:])
 
@@ -179,15 +207,16 @@ def test_magic_e_total():
     tolerance = 0.15
     null_value = 0.001
 
-    magic(tally, "n_total_flux", "n_rel_error",
-          tolerance=tolerance, null_value=null_value)
+    magic(
+        tally, "n_total_flux", "n_rel_error", tolerance=tolerance, null_value=null_value
+    )
 
     expected_ww = [0.181818182, 0.5, 0.2424242, 0.001]
 
     assert_array_almost_equal(tally.ww_x[:], expected_ww[:])
 
 
-#def test_magic_single_e():
+# def test_magic_single_e():
 #    """Test a single energy group MAGIC case"""
 #
 #    # create mesh

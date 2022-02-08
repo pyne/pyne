@@ -10,22 +10,22 @@ from pyne import rxname
 
 
 PRETTY_RX = {
-    'a': 'α',
-    'alpha': 'α',
-    'bplus': 'β+',
-    'bplus_p': 'β+p',
-    'bplus_n': 'β+n',
-    'bminus': 'β-',
-    'bminus_p': 'β-p',
-    'bminus_n': 'β-n',
-    }
+    "a": "α",
+    "alpha": "α",
+    "bplus": "β+",
+    "bplus_p": "β+p",
+    "bplus_n": "β+n",
+    "bminus": "β-",
+    "bminus_p": "β-p",
+    "bminus_n": "β-n",
+}
 
 
 def graph(nuc):
     """Returns a graphviz Digraph object for the decay chain starting from nuc."""
     i = nucname.name(nuc)
     name = nucname.name(nuc)
-    dot = Digraph(comment='Decay chain for ' + nuc)
+    dot = Digraph(comment="Decay chain for " + nuc)
     dot.node(name)
     nodes_seen = {name}
     kids = data.decay_children(i)
@@ -42,13 +42,13 @@ def graph(nuc):
             if ft not in edges_seen:
                 iname = nucname.name(i)
                 try:
-                    label = rxname.name(i, j, 'decay')
+                    label = rxname.name(i, j, "decay")
                 except RuntimeError:
-                    label = 'sf'
+                    label = "sf"
                 label = PRETTY_RX.get(label, label)
                 br = data.branch_ratio(i, j)
                 if br < 1.0:
-                    label += ', br={0:.3}'.format(br)
+                    label += ", br={0:.3}".format(br)
                 dot.edge(iname, jname, label=label)
                 edges_seen.add(ft)
             kids = data.decay_children(j)

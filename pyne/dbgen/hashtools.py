@@ -12,9 +12,15 @@ from .. import data
 QA_warn(__name__)
 
 # list of nodes from distinct data sets
-nodelist = ['/atomic_mass', '/material_library/materials',
-            '/neutron/eaf_xs', '/neutron/scattering_lengths',
-            '/neutron/simple_xs', '/decay', '/dose_factors']
+nodelist = [
+    "/atomic_mass",
+    "/material_library/materials",
+    "/neutron/eaf_xs",
+    "/neutron/scattering_lengths",
+    "/neutron/simple_xs",
+    "/decay",
+    "/dose_factors",
+]
 
 
 def check_hashes(nuc_data):
@@ -30,7 +36,7 @@ def check_hashes(nuc_data):
     """
     check_list = []
     for item in data.data_checksums:
-        res = (calc_hash(item, nuc_data) == data.data_checksums[item])
+        res = calc_hash(item, nuc_data) == data.data_checksums[item]
         if res is False:
             print("Expected hash: " + str(data.data_checksums[item]))
             print("I got:" + str(calc_hash(item, nuc_data)))
@@ -116,8 +122,8 @@ def set_hash(node, nuc_data):
 
     """
     the_hash = calc_hash(node, nuc_data)
-    with tables.open_file(nuc_data, mode='a') as f:
-        f.set_node_attr(node, 'hash', the_hash)
+    with tables.open_file(nuc_data, mode="a") as f:
+        f.set_node_attr(node, "hash", the_hash)
 
 
 def check_hash(node, nuc_data):
@@ -134,5 +140,5 @@ def check_hash(node, nuc_data):
 
     """
     with tables.open_file(nuc_data) as f:
-        hash_val = f.get_node_attr(node, 'hash')
+        hash_val = f.get_node_attr(node, "hash")
     return calc_hash(node, nuc_data) == hash_val

@@ -6,17 +6,17 @@ from sympy.utilities.codegen import codegen
 
 QA_warn(__name__)
 
+
 def cse_to_c(replacements, reduced_exprs, indent=2, debug=False):
-    """Converts the return value sympy.cse() to a single C code snippet.
-    """
+    """Converts the return value sympy.cse() to a single C code snippet."""
     ccode = ""
     ws = " " * indent
 
-    rtn_pattern = re.compile('\s*?return (.*)')
-    equ_pattern = re.compile('\s*?([\w\[\]]+)\s*?=\s*?(\S.*)')
-    repline_template = '{ind}{name} = {expr}\n'
-    redline_template = '{ind}{name} = {expr}\n'
-    redrtnline_template = '{ind}return {expr}\n'
+    rtn_pattern = re.compile("\s*?return (.*)")
+    equ_pattern = re.compile("\s*?([\w\[\]]+)\s*?=\s*?(\S.*)")
+    repline_template = "{ind}{name} = {expr}\n"
+    redline_template = "{ind}{name} = {expr}\n"
+    redrtnline_template = "{ind}return {expr}\n"
     debug_template = ws + 'std::cout << "{0} = " << {0} << "\\n";\n'
 
     repnames = set()

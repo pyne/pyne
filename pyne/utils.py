@@ -8,66 +8,76 @@ import filecmp
 from io import open
 from progress.bar import Bar
 
-from pyne._utils import fromstring_split, fromstring_token, endftod,\
-                        use_fast_endftod, fromendf_tok, toggle_warnings,\
-                        use_warnings, fromendl_tok
+from pyne._utils import (
+    fromstring_split,
+    fromstring_token,
+    endftod,
+    use_fast_endftod,
+    fromendf_tok,
+    toggle_warnings,
+    use_warnings,
+    fromendl_tok,
+)
+
 
 class QAWarning(UserWarning):
     pass
 
+
 def QA_warn(module_name):
-    if ('PYNE_QA_WARN' in os.environ):
+    if "PYNE_QA_WARN" in os.environ:
         warn(module_name + " is not yet fully QA compliant.", QAWarning)
 
 
-time_conv_dict = {'as': 1e-18,
-                  'attosec': 1e-18,
-                  'attosecond': 1e-18,
-                  'attoseconds': 1e-18,
-                  'fs': 1e-15,
-                  'femtosec': 1e-15,
-                  'femtosecond': 1e-15,
-                  'femtoseconds': 1e-15,
-                  'ps': 1e-12,
-                  'picosec': 1e-12,
-                  'picosecond': 1e-12,
-                  'picoseconds': 1e-12,
-                  'ns': 1e-9,
-                  'nanosec': 1e-9,
-                  'nanosecond': 1e-9,
-                  'nanoseconds': 1e-9,
-                  'us': 1e-6,
-                  'microsec': 1e-6,
-                  'microsecond': 1e-6,
-                  'microseconds': 1e-6,
-                  'ms': 1e-3,
-                  'millisec': 1e-3,
-                  'millisecond': 1e-3,
-                  'milliseconds': 1e-3,
-                  's': 1.0,
-                  'sec': 1.0,
-                  'second': 1.0,
-                  'seconds': 1.0,
-                  'm': 60.0,
-                  'min': 60.0,
-                  'minute': 60.0,
-                  'minutes': 60.0,
-                  'h': 3600.0,
-                  'hour': 3600.0,
-                  'hours': 3600.0,
-                  'd': 86400.0,
-                  'day': 86400.0,
-                  'days': 86400.0,
-                  'w': 86400.0*7.0,
-                  'week': 86400.0*7.0,
-                  'weeks': 86400.0*7.0,
-                  'y': 86400.0*365.25,
-                  'year': 86400.0*365.25,
-                  'years': 86400.0*365.25,
-                  'c': 86400.0*365.25*100,
-                  'century': 86400.0*365.25*100,
-                  'centuries': 86400.0*365.25*100,
-                  }
+time_conv_dict = {
+    "as": 1e-18,
+    "attosec": 1e-18,
+    "attosecond": 1e-18,
+    "attoseconds": 1e-18,
+    "fs": 1e-15,
+    "femtosec": 1e-15,
+    "femtosecond": 1e-15,
+    "femtoseconds": 1e-15,
+    "ps": 1e-12,
+    "picosec": 1e-12,
+    "picosecond": 1e-12,
+    "picoseconds": 1e-12,
+    "ns": 1e-9,
+    "nanosec": 1e-9,
+    "nanosecond": 1e-9,
+    "nanoseconds": 1e-9,
+    "us": 1e-6,
+    "microsec": 1e-6,
+    "microsecond": 1e-6,
+    "microseconds": 1e-6,
+    "ms": 1e-3,
+    "millisec": 1e-3,
+    "millisecond": 1e-3,
+    "milliseconds": 1e-3,
+    "s": 1.0,
+    "sec": 1.0,
+    "second": 1.0,
+    "seconds": 1.0,
+    "m": 60.0,
+    "min": 60.0,
+    "minute": 60.0,
+    "minutes": 60.0,
+    "h": 3600.0,
+    "hour": 3600.0,
+    "hours": 3600.0,
+    "d": 86400.0,
+    "day": 86400.0,
+    "days": 86400.0,
+    "w": 86400.0 * 7.0,
+    "week": 86400.0 * 7.0,
+    "weeks": 86400.0 * 7.0,
+    "y": 86400.0 * 365.25,
+    "year": 86400.0 * 365.25,
+    "years": 86400.0 * 365.25,
+    "c": 86400.0 * 365.25 * 100,
+    "century": 86400.0 * 365.25 * 100,
+    "centuries": 86400.0 * 365.25 * 100,
+}
 
 
 def to_sec(input_time, units):
@@ -92,20 +102,21 @@ def to_sec(input_time, units):
         sec_time = input_time * conv
         return sec_time
     else:
-        raise ValueError('Invalid units: {0}'.format(units))
+        raise ValueError("Invalid units: {0}".format(units))
+
 
 barn_conv_dict = {
-    'mb': 1E-3,
-    'ub': 1E-6,
-    'microbarn': 1E-6,
-    'b': 1.0,
-    'barn': 1.0,
-    'barns': 1.0,
-    'kb': 1E+3,
-    'kilobarn': 1E+3,
-    'cm2': 1E+24,
-    'cm^2': 1E+24,
-    }
+    "mb": 1e-3,
+    "ub": 1e-6,
+    "microbarn": 1e-6,
+    "b": 1.0,
+    "barn": 1.0,
+    "barns": 1.0,
+    "kb": 1e3,
+    "kilobarn": 1e3,
+    "cm2": 1e24,
+    "cm^2": 1e24,
+}
 
 
 def to_barns(xs, units):
@@ -150,7 +161,7 @@ def from_barns(xs, units):
 ### message functions ###
 #########################
 
-USE_COLOR = (os.name is 'posix')
+USE_COLOR = os.name is "posix"
 
 
 def message(s):
@@ -183,6 +194,7 @@ def warning(s):
     tail = "\033[0m" if USE_COLOR else ""
     msg = head + s + tail
     return msg
+
 
 ##################################
 ### Path manipulation routines ###
@@ -218,21 +230,21 @@ def str_to_unicode(s):
     if isinstance(s, str) or isinstance(s, bytes):
         # it is a str, convert to text str
         try:
-            s = s.decode('utf-8')
+            s = s.decode("utf-8")
         except:
             pass
         return s
     else:
         for i, item in enumerate(s):
             try:
-                s[i] = item.decode('utf-8')
+                s[i] = item.decode("utf-8")
             except:
                 pass
-        return s    
+        return s
 
 
 def is_close(a, b, rel_tol=1e-9, abs_tol=0.0):
-    return abs(a-b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
+    return abs(a - b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
 
 
 def is_float(s):
@@ -313,7 +325,7 @@ def file_almost_same(f1, f2, rel_tol=1e-9):
 
     Parameters:
     -----------
-    f1 : str 
+    f1 : str
         Filename of file 1 or lines
     f2 : str
         Filename of file 2 or lines
@@ -334,20 +346,20 @@ def file_almost_same(f1, f2, rel_tol=1e-9):
     else:
         # read lines of f1 and f2, convert to unicode
         if os.path.isfile(f1):
-            with open(f1, 'r') as f:
+            with open(f1, "r") as f:
                 lines1 = f.readlines()
         else:
             lines1 = f1
         lines1 = str_to_unicode(f1)
-        lines1 = lines1.strip().split(u'\n')
+        lines1 = lines1.strip().split("\n")
 
         if os.path.isfile(f2):
-            with open(f2, 'r') as f:
+            with open(f2, "r") as f:
                 lines2 = f.readlines()
         else:
             lines2 = f2
         lines2 = str_to_unicode(f2)
-        lines2 = lines2.strip().split(u'\n')
+        lines2 = lines2.strip().split("\n")
 
         # compare two files
         # check length of lines
@@ -390,6 +402,7 @@ def block_in_blocks(block1, blocks2, rel_tol=1e-9):
             return True
     return False
 
+
 def file_block_almost_same(f1, f2, rel_tol=1e-9):
     """
     Some files are seperated into different blocks without specific sequence.
@@ -421,20 +434,20 @@ def file_block_almost_same(f1, f2, rel_tol=1e-9):
         # convert to different blocks and compare each block
         # read lines of f1 and f2, convert to unicode
         if os.path.isfile(f1):
-            with open(f1, 'r') as f:
+            with open(f1, "r") as f:
                 lines1 = f.readlines()
                 lines1 = str_to_unicode(lines1)
         else:
             lines1 = str_to_unicode(f1)
-        blocks1 = lines1.strip().split(u'\n\n')
+        blocks1 = lines1.strip().split("\n\n")
 
         if os.path.isfile(f2):
-            with open(f2, 'r') as f:
+            with open(f2, "r") as f:
                 lines2 = f.readlines()
                 lines2 = str_to_unicode(lines2)
         else:
             lines2 = str_to_unicode(f2)
-        blocks2 = lines2.strip().split(u'\n\n')
+        blocks2 = lines2.strip().split("\n\n")
 
         # compare two files
         # check length of lines
@@ -450,6 +463,7 @@ def file_block_almost_same(f1, f2, rel_tol=1e-9):
     # no difference found
     return True
 
+
 def check_iterable(obj):
     """Check whether the object is Iterable."""
     try:
@@ -459,9 +473,10 @@ def check_iterable(obj):
         return False
     return True
 
+
 class IfBar(Bar):
     def __init__(self, *args, **kwargs):
-        self.show = kwargs.get('show', True)
+        self.show = kwargs.get("show", True)
         if self.show:
             super().__init__(*args, **kwargs)
 
