@@ -1,4 +1,4 @@
-name: black
+name: auto_format_pep8
 
 on:
   push:
@@ -10,7 +10,7 @@ defaults:
     shell: bash
 
 jobs:
-  black:
+  auto_format_pep8:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -29,4 +29,4 @@ jobs:
           black .
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          commit_message: "[skip ci] Apply formatting changes"
+          commit_message: "[skip ci] Apply pep8 formatting changes"
