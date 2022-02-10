@@ -53,7 +53,7 @@ RUN if [ "${py_version%.?}" -eq 3 ] ; \
             nose \
             cython \
             future \
-            tables \
+            "tables<3.7" \
             scipy \
             jinja2 \
             progress; \
