@@ -3,7 +3,7 @@ FROM ubuntu:18.04
 # Ubuntu Setup
 ENV TZ=America/Chicago
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
-ARG py_version=3.6
+ARG py_version=3.8
 
 ENV HOME /root
 RUN if [ "${py_version%.?}" -eq 3 ] ; \
@@ -20,6 +20,7 @@ RUN if [ "${py_version%.?}" -eq 3 ] ; \
             python${PY_SUFIX}-pip \
             python${PY_SUFIX}-setuptools \
             python${PY_SUFIX}-dev \
+            python${PY_SUFIX}-packaging \
             libpython${PY_SUFIX}-dev \
             git \
             cmake \
@@ -40,6 +41,7 @@ RUN if [ "${py_version%.?}" -eq 3 ] ; \
             update-alternatives --install /usr/bin/python python /usr/bin/python3 10; \
             update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 10; \
     fi;\
+    pip install --upgrade pip; \
     pip install --force-reinstall \
             sphinx \
             cloud_sptheme \
@@ -51,11 +53,13 @@ RUN if [ "${py_version%.?}" -eq 3 ] ; \
             nose \
             cython \
             future \
-            matplotlib \
             tables \
             scipy \
             jinja2 \
-            progress
+            progress; \
+    echo "numpy" >> requirements.txt;\
+    pip install --no-deps -r requirements.txt \
+            matplotlib
 
 # make starting directory
 RUN mkdir -p $HOME/opt
