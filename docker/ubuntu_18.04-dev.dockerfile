@@ -46,6 +46,7 @@ RUN if [ "${py_version%.?}" -eq 3 ] ; \
             sphinx \
             cloud_sptheme \
             prettytable \
+            "setuptools<49" \
             sphinxcontrib_bibtex \
             numpydoc \
             nbconvert \
@@ -57,9 +58,7 @@ RUN if [ "${py_version%.?}" -eq 3 ] ; \
             scipy \
             jinja2 \
             progress; \
-    echo "numpy" >> requirements.txt;\
-    pip install --no-deps -r requirements.txt \
-            matplotlib
+    pip install matplotlib
 
 # make starting directory
 RUN mkdir -p $HOME/opt
