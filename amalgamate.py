@@ -11,6 +11,11 @@ import sys
 import io
 from argparse import ArgumentParser
 
+sys.path.append('pyne')
+import pyne_version as pv
+
+pv.write_cpp_header('src')
+
 CODE_EXTS = {'.c', '.cpp', '.cxx', '.h', '.hpp', '.hxx'}
 CODE_EXTS |= {e.upper() for e in CODE_EXTS}
 SOURCE_EXTS = {'.c', '.cpp', '.cxx'}
@@ -20,7 +25,7 @@ HEADER_EXTS |= {e.upper() for e in HEADER_EXTS}
 
 DEFAULT_FILES = [
     'license.txt',
-    'src/version.h',
+    'src/pyne_version.h',
     'src/utils.h',
     'src/utils.cpp',
     'src/extra_types.h',
