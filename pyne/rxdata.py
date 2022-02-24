@@ -1,4 +1,5 @@
 import collections
+
 try:
     collectionsAbc = collections.abc
 except AttributeError:
@@ -14,6 +15,7 @@ class RxLib(object):
     nuclear data. Eventually it will be able to represent ENDF, ACE, and other
     filetypes.
     """
+
     def __init__(self, data):
         self.data = data
 
@@ -28,6 +30,7 @@ class DoubleSpinDict(collectionsAbc.MutableMapping):
     ----------
     spin_dict: a dictionary where the keys are (spi, [L], [j]) tuples.
     """
+
     def __init__(self, spin_dict):
         self.dict = spin_dict
 
@@ -52,10 +55,10 @@ class DoubleSpinDict(collectionsAbc.MutableMapping):
     def double_spin(self, key):
         try:
             if len(key) == 1:
-                return int(round(2.0*key[0]))
+                return int(round(2.0 * key[0]))
             if len(key) == 2:
-                return (int(round(2.0*key[0])), key[1])
+                return (int(round(2.0 * key[0])), key[1])
             if len(key) == 3:
-                return (int(round(2.0*key[0])), key[1], key[2])
+                return (int(round(2.0 * key[0])), key[1], key[2])
         except TypeError:
             return key

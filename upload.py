@@ -25,10 +25,11 @@ from __future__ import print_function
 import pyrax
 import os
 
-def push_rackspace(fname, cred_file='rs.cred'):
+
+def push_rackspace(fname, cred_file="rs.cred"):
     pyrax.set_credential_file(cred_file)
     cf = pyrax.cloudfiles
-    with open(fname, 'rb') as f:
+    with open(fname, "rb") as f:
         fdata = f.read()
     cont = cf.get_container("pyne-data")
     obj = cf.store_object("pyne-data", fname, fdata)
@@ -36,9 +37,9 @@ def push_rackspace(fname, cred_file='rs.cred'):
 
 
 pyrax.set_setting("identity_type", "rackspace")
-pyrax.set_setting('region', 'ORD')
-pyrax.set_credential_file('rs.cred')
+pyrax.set_setting("region", "ORD")
+pyrax.set_credential_file("rs.cred")
 cf = pyrax.cloudfiles
 print("list_containers: {}".format(cf.list_containers()))
 print("get_all_containers: {}".format(cf.get_all_containers()))
-push_rackspace('prebuilt_nuc_data.h5')
+push_rackspace("prebuilt_nuc_data.h5")

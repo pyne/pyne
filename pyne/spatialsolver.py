@@ -7,11 +7,12 @@ import os
 import time
 import numpy as np
 
-#Solver imports
+# Solver imports
 import pyne.transport_spatial_methods as transport_spatial_methods
 
+
 def solve(inputdict_unchecked):
-    """ 
+    """
     Input Dictionary Required Key Pair Values
     +-----------------------+--------------+----------------------------------+--------------------------+
     |          Key          |     Type     |           Description            |         Example          |
@@ -42,7 +43,7 @@ def solve(inputdict_unchecked):
     |   moments_converged   |     Int      | Moments Converged Upon Per Quad  |            0             |
     +-----------------------+--------------+----------------------------------+--------------------------+
 
-    Output Dictionary Key Pair Values 
+    Output Dictionary Key Pair Values
     +------------+--------------+-----------------------------+
     |    Key     |     Type     |         Description         |
     +------------+--------------+-----------------------------+
@@ -60,62 +61,65 @@ def solve(inputdict_unchecked):
 
     """
     inputdict = _dict_complete(inputdict_unchecked)
-    fortran_returns = transport_spatial_methods.main("test title in",
-        inputdict['solver'],
-        inputdict['solver_type'],
-        inputdict['spatial_order'], 
-        #inputdict['spatial_method'],
-        inputdict['angular_quadrature_order'],
-        inputdict['angular_quadrature_type'],
-        inputdict['nodes_xyz'][0],
-        inputdict['nodes_xyz'][1],
-        inputdict['nodes_xyz'][2],
-        inputdict['num_groups'],
-        inputdict['num_materials'],
-        inputdict['x_cells_widths'],
-        inputdict['y_cells_widths'],
-        inputdict['z_cells_widths'],
-#       np.asfortranarray(inputdict['y_cells_widths']),
-#       np.asfortranarray(inputdict['z_cells_widths']),
-        inputdict['x_boundry_conditions'][0],
-        inputdict['x_boundry_conditions'][1],
-        inputdict['y_boundry_conditions'][0],
-        inputdict['y_boundry_conditions'][1],
-        inputdict['z_boundry_conditions'][0],
-        inputdict['z_boundry_conditions'][1],
-        inputdict['material_id'],
-        inputdict['quadrature_file'],
-        inputdict['xs_file'],
-        inputdict['source_input_file'],
-        inputdict['bc_input_file'],
-        inputdict['flux_output_file'],
-        inputdict['convergence_criterion'],
-        inputdict['max_iterations'],
-        inputdict['moments_converged'],
-        inputdict['converge_tolerence'],
-        inputdict['max_mom_printed'],
-        inputdict['moment_sum_flag'],
-        inputdict['mom_at_a_pt_flag'],
-        inputdict['quad_flux_print_flag'])
+    fortran_returns = transport_spatial_methods.main(
+        "test title in",
+        inputdict["solver"],
+        inputdict["solver_type"],
+        inputdict["spatial_order"],
+        # inputdict['spatial_method'],
+        inputdict["angular_quadrature_order"],
+        inputdict["angular_quadrature_type"],
+        inputdict["nodes_xyz"][0],
+        inputdict["nodes_xyz"][1],
+        inputdict["nodes_xyz"][2],
+        inputdict["num_groups"],
+        inputdict["num_materials"],
+        inputdict["x_cells_widths"],
+        inputdict["y_cells_widths"],
+        inputdict["z_cells_widths"],
+        #       np.asfortranarray(inputdict['y_cells_widths']),
+        #       np.asfortranarray(inputdict['z_cells_widths']),
+        inputdict["x_boundry_conditions"][0],
+        inputdict["x_boundry_conditions"][1],
+        inputdict["y_boundry_conditions"][0],
+        inputdict["y_boundry_conditions"][1],
+        inputdict["z_boundry_conditions"][0],
+        inputdict["z_boundry_conditions"][1],
+        inputdict["material_id"],
+        inputdict["quadrature_file"],
+        inputdict["xs_file"],
+        inputdict["source_input_file"],
+        inputdict["bc_input_file"],
+        inputdict["flux_output_file"],
+        inputdict["convergence_criterion"],
+        inputdict["max_iterations"],
+        inputdict["moments_converged"],
+        inputdict["converge_tolerence"],
+        inputdict["max_mom_printed"],
+        inputdict["moment_sum_flag"],
+        inputdict["mom_at_a_pt_flag"],
+        inputdict["quad_flux_print_flag"],
+    )
 
-    solver_output = inputdict;
-    solver_output['flux'] = fortran_returns[6].tolist()
+    solver_output = inputdict
+    solver_output["flux"] = fortran_returns[6].tolist()
     error_code = fortran_returns[7]
     tsolve = fortran_returns[8]
     ttosolve = fortran_returns[9]
     tend = fortran_returns[10]
-  
-    if(error_code == 0):
-        solver_output['success'] = 1
-        solver_output['time_start'] = tsolve
-        solver_output['total_time'] = tsolve-ttosolve
-        solver_output['print_time'] = tend-ttosolve
-        solver_output['error_msg'] = 0
+
+    if error_code == 0:
+        solver_output["success"] = 1
+        solver_output["time_start"] = tsolve
+        solver_output["total_time"] = tsolve - ttosolve
+        solver_output["print_time"] = tend - ttosolve
+        solver_output["error_msg"] = 0
     else:
-        solver_output['success'] = 0
-        solver_output['error_msg'] = _error_to_string(error_code)
-        print(solver_output['error_msg'])
+        solver_output["success"] = 0
+        solver_output["error_msg"] = _error_to_string(error_code)
+        print(solver_output["error_msg"])
     return solver_output
+
 
 def _error_to_string(error_code):
     err_dictionary = {
@@ -154,94 +158,101 @@ def _error_to_string(error_code):
         1034: "ERROR: Illegal value for max moment to print, momp. Must be between 0 and lambda.",
         1035: "ERROR: Illegal value for flag for moment summing. Must be 0 for off or 1 for on.",
         1036: "ERROR: Illegal value for flag for moment sum at non-center point. Must be 0/1=off/on.",
-        1037: "ERROR: Illegal value for flag for printing average flux of the four quadrants. Must be 0/1 = off/on."
-  };
-    return err_dictionary[error_code] 
+        1037: "ERROR: Illegal value for flag for printing average flux of the four quadrants. Must be 0/1 = off/on.",
+    }
+    return err_dictionary[error_code]
+
 
 def _dict_complete(inputdict):
 
     formatted_dict = {}
     try:
-        if((inputdict['solver'] == "AHOTN") or (inputdict['solver']=="DGFEM") or (inputdict['solver']=="SCTSTEP")):
-            formatted_dict['solver'] = inputdict['solver']
+        if (
+            (inputdict["solver"] == "AHOTN")
+            or (inputdict["solver"] == "DGFEM")
+            or (inputdict["solver"] == "SCTSTEP")
+        ):
+            formatted_dict["solver"] = inputdict["solver"]
         else:
-            assert (0==1), "solver does not exist"
+            assert 0 == 1, "solver does not exist"
     except:
-        assert  (0==1), "solver key does not exist"
+        assert 0 == 1, "solver key does not exist"
     try:
-        formatted_dict['solver_type'] = inputdict['solver_type']
+        formatted_dict["solver_type"] = inputdict["solver_type"]
     except:
-        if(inputdict['solver'] == "AHOTN"):
-            formatted_dict['solver_type'] = "LN"
-        elif(inputdict['solver'] == "DGFEM"):
-            formatted_dict['solver_type'] = "LD"
+        if inputdict["solver"] == "AHOTN":
+            formatted_dict["solver_type"] = "LN"
+        elif inputdict["solver"] == "DGFEM":
+            formatted_dict["solver_type"] = "LD"
     try:
-        formatted_dict['spatial_order'] = inputdict['spatial_order']
+        formatted_dict["spatial_order"] = inputdict["spatial_order"]
     except:
-        formatted_dict['spatial_order'] = 1
+        formatted_dict["spatial_order"] = 1
         warn(warning_msg + " spatial_order value of 1")
     try:
-        formatted_dict['angular_quadrature_order'] = inputdict['angular_quadrature_order']
+        formatted_dict["angular_quadrature_order"] = inputdict[
+            "angular_quadrature_order"
+        ]
     except:
-        formatted_dict['angular_quadrature_order'] = 4
+        formatted_dict["angular_quadrature_order"] = 4
         warn(warning_msg + " angular_quadrature_order value of 4")
     try:
-        formatted_dict['angular_quadrature_type'] = inputdict['angular_quadrature_type']
+        formatted_dict["angular_quadrature_type"] = inputdict["angular_quadrature_type"]
     except:
-        formatted_dict['qangular_uadrature_type'] = 1
+        formatted_dict["qangular_uadrature_type"] = 1
         warn(warning_msg + " angular_quadrature_type value of 1")
-    assert 'nodes_xyz' in inputdict, 'nodes_xyz key not in dict'
-    formatted_dict['nodes_xyz'] = inputdict['nodes_xyz']
-    assert 'num_groups' in inputdict, 'num_groups key not in dict'
-    formatted_dict['num_groups'] = inputdict['num_groups']
-    assert 'num_materials' in inputdict, 'num_materials key not in dict'
-    formatted_dict['num_materials'] = inputdict['num_materials']
-    assert 'x_cells_widths' in inputdict, 'x_cells_widths not in dict'
-    formatted_dict['x_cells_widths'] = inputdict['x_cells_widths']
-    assert 'y_cells_widths' in inputdict, 'y_cells_widths not in dict'
-    formatted_dict['y_cells_widths'] = inputdict['y_cells_widths']
-    assert 'z_cells_widths' in inputdict, 'z_cells_widths not in dict'
-    formatted_dict['z_cells_widths'] = inputdict['z_cells_widths']
-    assert 'x_boundry_conditions' in inputdict, 'x_boundry_conditions not in dict'
-    formatted_dict['x_boundry_conditions'] = inputdict['x_boundry_conditions']
-    assert 'y_boundry_conditions' in inputdict, 'y_boundry_conditions not in dict'
-    formatted_dict['y_boundry_conditions'] = inputdict['y_boundry_conditions']
-    assert 'z_boundry_conditions' in inputdict, 'z_boundry_conditions not in dict'
-    formatted_dict['z_boundry_conditions'] = inputdict['z_boundry_conditions']
-    assert 'material_id' in inputdict, 'material_id not in dict'
-    formatted_dict['material_id'] = inputdict['material_id']
-    assert 'quadrature_file' in inputdict, 'quadrature_file not in dict'
-    formatted_dict['quadrature_file'] = inputdict['quadrature_file']
-    assert 'xs_file' in inputdict, 'xs_file not in dict'
-    formatted_dict['xs_file'] = inputdict['xs_file']
-    assert 'source_input_file' in inputdict, 'source_input_file not in dict'
-    formatted_dict['source_input_file'] = inputdict['source_input_file']
-    assert 'bc_input_file' in inputdict, 'bc_input_file not in dict'
-    formatted_dict['bc_input_file'] = inputdict['bc_input_file']
-    assert 'flux_output_file' in inputdict, 'flux_output_file not in dict'  
-    formatted_dict['flux_output_file'] = inputdict['flux_output_file']  
-    formatted_dict['max_mom_printed'] = 0
-    formatted_dict['moment_sum_flag'] = 0
-    formatted_dict['mom_at_a_pt_flag'] = 0
-    formatted_dict['quad_flux_print_flag'] = 0
+    assert "nodes_xyz" in inputdict, "nodes_xyz key not in dict"
+    formatted_dict["nodes_xyz"] = inputdict["nodes_xyz"]
+    assert "num_groups" in inputdict, "num_groups key not in dict"
+    formatted_dict["num_groups"] = inputdict["num_groups"]
+    assert "num_materials" in inputdict, "num_materials key not in dict"
+    formatted_dict["num_materials"] = inputdict["num_materials"]
+    assert "x_cells_widths" in inputdict, "x_cells_widths not in dict"
+    formatted_dict["x_cells_widths"] = inputdict["x_cells_widths"]
+    assert "y_cells_widths" in inputdict, "y_cells_widths not in dict"
+    formatted_dict["y_cells_widths"] = inputdict["y_cells_widths"]
+    assert "z_cells_widths" in inputdict, "z_cells_widths not in dict"
+    formatted_dict["z_cells_widths"] = inputdict["z_cells_widths"]
+    assert "x_boundry_conditions" in inputdict, "x_boundry_conditions not in dict"
+    formatted_dict["x_boundry_conditions"] = inputdict["x_boundry_conditions"]
+    assert "y_boundry_conditions" in inputdict, "y_boundry_conditions not in dict"
+    formatted_dict["y_boundry_conditions"] = inputdict["y_boundry_conditions"]
+    assert "z_boundry_conditions" in inputdict, "z_boundry_conditions not in dict"
+    formatted_dict["z_boundry_conditions"] = inputdict["z_boundry_conditions"]
+    assert "material_id" in inputdict, "material_id not in dict"
+    formatted_dict["material_id"] = inputdict["material_id"]
+    assert "quadrature_file" in inputdict, "quadrature_file not in dict"
+    formatted_dict["quadrature_file"] = inputdict["quadrature_file"]
+    assert "xs_file" in inputdict, "xs_file not in dict"
+    formatted_dict["xs_file"] = inputdict["xs_file"]
+    assert "source_input_file" in inputdict, "source_input_file not in dict"
+    formatted_dict["source_input_file"] = inputdict["source_input_file"]
+    assert "bc_input_file" in inputdict, "bc_input_file not in dict"
+    formatted_dict["bc_input_file"] = inputdict["bc_input_file"]
+    assert "flux_output_file" in inputdict, "flux_output_file not in dict"
+    formatted_dict["flux_output_file"] = inputdict["flux_output_file"]
+    formatted_dict["max_mom_printed"] = 0
+    formatted_dict["moment_sum_flag"] = 0
+    formatted_dict["mom_at_a_pt_flag"] = 0
+    formatted_dict["quad_flux_print_flag"] = 0
     try:
-        formatted_dict['convergence_criterion'] = inputdict['convergence_criterion']
+        formatted_dict["convergence_criterion"] = inputdict["convergence_criterion"]
     except:
-        formatted_dict['convergence_criterion'] = 1e-12
+        formatted_dict["convergence_criterion"] = 1e-12
         warn(warning_msg + " convergence_criterion value of 1e-12")
     try:
-        formatted_dict['max_iterations'] = inputdict['max_iterations']
+        formatted_dict["max_iterations"] = inputdict["max_iterations"]
     except:
-        formatted_dict['max_iterations'] = 6000
+        formatted_dict["max_iterations"] = 6000
         warn(warning_msg + " max_iterations value of 6000")
     try:
-        formatted_dict['moments_converged'] = inputdict['moments_converged']
+        formatted_dict["moments_converged"] = inputdict["moments_converged"]
     except:
-        formatted_dict['moments_converged'] = 0
+        formatted_dict["moments_converged"] = 0
         warn(warning_msg + " moments_converged value of 0")
     try:
-        formatted_dict['converge_tolerence'] = inputdict['converge_tolerence']
+        formatted_dict["converge_tolerence"] = inputdict["converge_tolerence"]
     except:
-        formatted_dict['converge_tolerence'] = 1e-10
+        formatted_dict["converge_tolerence"] = 1e-10
         warn(warning_msg + " converge_tolerence value of 1e-10")
     return formatted_dict

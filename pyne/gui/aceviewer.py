@@ -12,7 +12,9 @@ from pyne.utils import QA_warn
 import numpy as np
 import matplotlib
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
+from matplotlib.backends.backend_qt4agg import (
+    NavigationToolbar2QTAgg as NavigationToolbar,
+)
 from matplotlib.figure import Figure
 
 # For the time being we're using PyQt4 since matplotlib-support for PySide is
@@ -24,21 +26,21 @@ from pyne import ace
 
 QA_warn(__name__)
 
-matplotlib.use('Qt4Agg')
+matplotlib.use("Qt4Agg")
+
 
 class AceViewer(QMainWindow):
-
     def __init__(self, parent=None):
         super(AceViewer, self).__init__(parent)
 
         # Create GUI elements
         self._create_gui()
-        
+
         # Initial data structures
         self.tables = []
 
         self.populate_reactions()
-        
+
     def _create_gui(self):
         # Set title of window
         self.setWindowTitle("ACE Data Viewer")
@@ -56,7 +58,7 @@ class AceViewer(QMainWindow):
         self.reactionTree.setContextMenuPolicy(Qt.DefaultContextMenu)
 
         # Create canvas
-        self.fig = Figure(dpi=72, facecolor=(1,1,1), edgecolor=(0,0,0))
+        self.fig = Figure(dpi=72, facecolor=(1, 1, 1), edgecolor=(0, 0, 0))
         self.canvas = FigureCanvas(self.fig)
 
         # Create toolbar
@@ -85,22 +87,26 @@ class AceViewer(QMainWindow):
         self.actionOpen = QAction("&Open Library...", self)
         self.actionOpenPartial = QAction("Open &Partial Library...", self)
         self.actionExit = QAction("E&xit", self)
-        self.menuFile.addActions([self.actionOpen, self.actionOpenPartial,
-                                  self.actionExit])
+        self.menuFile.addActions(
+            [self.actionOpen, self.actionOpenPartial, self.actionExit]
+        )
 
         # Actions
         self.connect(self.actionOpen, SIGNAL("triggered()"), self.open_library)
-        self.connect(self.actionOpenPartial, SIGNAL("triggered()"),
-                     self.open_partial_library)
+        self.connect(
+            self.actionOpenPartial, SIGNAL("triggered()"), self.open_partial_library
+        )
         self.connect(self.actionExit, SIGNAL("triggered()"), self.close)
-        self.connect(self.reactionTree, SIGNAL("itemSelectionChanged()"),
-                     self.draw_plot)
+        self.connect(
+            self.reactionTree, SIGNAL("itemSelectionChanged()"), self.draw_plot
+        )
 
-    def open_library(self): 
+    def open_library(self):
         """Select and open an ACE file and store data in memory."""
 
-        filename = QFileDialog.getOpenFileName(self, "Load ACE Library", "./",
-                                               "ACE Libraries (*)")
+        filename = QFileDialog.getOpenFileName(
+            self, "Load ACE Library", "./", "ACE Libraries (*)"
+        )
 
         try:
             if filename:
@@ -123,11 +129,13 @@ class AceViewer(QMainWindow):
     def open_partial_library(self):
         """Select and open an ACE file and store data in memory."""
 
-        filename = QFileDialog.getOpenFileName(self, "Load ACE Library", "./",
-                                               "ACE Libraries (*)")
+        filename = QFileDialog.getOpenFileName(
+            self, "Load ACE Library", "./", "ACE Libraries (*)"
+        )
 
         table_names, completed = QInputDialog.getText(
-            self, "Nuclides", "Enter nuclides:")
+            self, "Nuclides", "Enter nuclides:"
+        )
         if completed:
             table_names = str(table_names).split()
         else:
@@ -204,21 +212,20 @@ class AceViewer(QMainWindow):
 
                 # Get reference to NeutronTable containing Reaction
                 table = reaction.table
-                
+
                 # Plot reaction cross section
-                self.axes.loglog(table.energy[reaction.IE:], reaction.sigma)
-            
+                self.axes.loglog(table.energy[reaction.IE :], reaction.sigma)
+
             # Customize plot
             self.axes.grid(True)
-            self.axes.set_xlabel('Energy (MeV)')
-            self.axes.set_ylabel('Cross section (barns)')
+            self.axes.set_xlabel("Energy (MeV)")
+            self.axes.set_ylabel("Cross section (barns)")
 
             # Display plot on FigureCanvas
             self.canvas.draw()
 
 
 class MyTreeWidget(QTreeWidget):
-
     def __init__(self):
         super(MyTreeWidget, self).__init__()
 
@@ -247,14 +254,18 @@ class MyTreeWidget(QTreeWidget):
         if isinstance(reaction, ace.Reaction):
             # Ask user for incoming energies
             energies, completed = QInputDialog.getText(
-                self.parent(), "Energies", "Enter incoming energies at "
-                "which to plot angular distribution (MeV):")
+                self.parent(),
+                "Energies",
+                "Enter incoming energies at "
+                "which to plot angular distribution (MeV):",
+            )
 
             # Plot angular distribution
             if completed:
                 energies = map(float, str(energies).split())
-                anglePlot = DistributionPlot(reaction, energies, polar=polar,
-                                             parent=self.parent())
+                anglePlot = DistributionPlot(
+                    reaction, energies, polar=polar, parent=self.parent()
+                )
                 anglePlot.show()
 
     def create_angle_polar(self):
@@ -274,20 +285,23 @@ class MyTreeWidget(QTreeWidget):
         if isinstance(reaction, ace.Reaction):
             # Ask user for incoming energies
             energies, completed = QInputDialog.getText(
-                self.parent(), "Energies", "Enter incoming energies at "
-                "which to plot energy distribution (MeV):")
+                self.parent(),
+                "Energies",
+                "Enter incoming energies at "
+                "which to plot energy distribution (MeV):",
+            )
 
             # Plot angular distribution
             if completed:
                 energies = map(float, str(energies).split())
                 anglePlot = DistributionPlot(
-                    reaction, energies, energydist=True, parent=self.parent())
+                    reaction, energies, energydist=True, parent=self.parent()
+                )
                 anglePlot.show()
 
-class DistributionPlot(QMainWindow):
 
-    def __init__(self, reaction, energies, polar=False, energydist=False,
-                 parent=None):
+class DistributionPlot(QMainWindow):
+    def __init__(self, reaction, energies, polar=False, energydist=False, parent=None):
         super(DistributionPlot, self).__init__(parent)
 
         # Initialize data
@@ -314,7 +328,7 @@ class DistributionPlot(QMainWindow):
         self.setCentralWidget(self.main)
 
         # Create canvas
-        self.fig = Figure(dpi=72, facecolor=(1,1,1), edgecolor=(0,0,0))
+        self.fig = Figure(dpi=72, facecolor=(1, 1, 1), edgecolor=(0, 0, 0))
         self.canvas = FigureCanvas(self.fig)
 
         # Create toolbar
@@ -354,9 +368,11 @@ class DistributionPlot(QMainWindow):
         index = bisect_right(self.reaction.ang_energy_in, E_in)
 
         # plot distribution
-        self.axes.plot(self.reaction.ang_cos[index],
-                       self.reaction.ang_pdf[index],
-                       label='E = {0} MeV'.format(E_in))
+        self.axes.plot(
+            self.reaction.ang_cos[index],
+            self.reaction.ang_pdf[index],
+            label="E = {0} MeV".format(E_in),
+        )
 
     def _plot_angle_dist_polar(self, E_in):
         """
@@ -374,11 +390,11 @@ class DistributionPlot(QMainWindow):
         theta = np.linspace(0, np.pi, 100)
         r = np.interp(theta, angles, pdf)
 
-        theta = np.concatenate((theta,theta + np.pi))
-        r = np.concatenate((r,r[::-1]))
+        theta = np.concatenate((theta, theta + np.pi))
+        r = np.concatenate((r, r[::-1]))
 
         # plot angle distribution
-        self.axes.plot(theta, r, label='E = {0} MeV'.format(E_in))
+        self.axes.plot(theta, r, label="E = {0} MeV".format(E_in))
 
     def _plot_energy_dist(self, E_in):
         """
@@ -391,14 +407,19 @@ class DistributionPlot(QMainWindow):
             index = bisect_right(self.reaction.e_dist_energy_in, E_in)
 
             # plot energy distribution
-            self.axes.semilogx(self.reaction.e_dist_energy_out[index],
-                               self.reaction.e_dist_pdf[index],
-                               label='E = {0} MeV'.format(E_in))
+            self.axes.semilogx(
+                self.reaction.e_dist_energy_out[index],
+                self.reaction.e_dist_pdf[index],
+                label="E = {0} MeV".format(E_in),
+            )
         except:
             QMessageBox.warning(
-                self, "Unsupported Energy Distribution",
+                self,
+                "Unsupported Energy Distribution",
                 "Energy distribution for law {0} not yet supported!".format(
-                    self.reaction.e_dist_law))
+                    self.reaction.e_dist_law
+                ),
+            )
 
 
 def main():
@@ -408,5 +429,6 @@ def main():
     app.exec_()
     sys.exit()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

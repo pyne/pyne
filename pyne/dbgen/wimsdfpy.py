@@ -41,68 +41,71 @@ from pyne.dbgen.api import BASIC_FILTERS
 
 QA_warn(__name__)
 
-def grab_fpy(build_dir="", file_out='wimsd-fpyield.html'):
-    """Grabs the WIMS fission product yields from the IAEA website
-    """
+
+def grab_fpy(build_dir="", file_out="wimsd-fpyield.html"):
+    """Grabs the WIMS fission product yields from the IAEA website"""
     build_filename = os.path.join(build_dir, file_out)
     local_filename = os.path.join(os.path.dirname(__file__), file_out)
 
     if os.path.exists(local_filename):
         shutil.copy(local_filename, build_filename)
-        return 
+        return
 
-    nist = urllib2.urlopen('https://www-nds.iaea.org/wimsd/fpyield.htm')
-    with open(build_filename, 'w') as f:
+    nist = urllib2.urlopen("https://www-nds.iaea.org/wimsd/fpyield.htm")
+    with open(build_filename, "w") as f:
         f.write(nist.read())
 
 
 class Parser(HTMLParser):
     """Parser for WIMSD fission product yield files."""
-    
+
     def __init__(self, *args, **kwargs):
         # HTMLParser is not a new style class, no super()
         HTMLParser.__init__(self, *args, **kwargs)
         self._currrow = []
         self._fromnucs = None
         self.fission_product_yields = []
-    
+
     def handle_starttag(self, tag, attrs):
-        if tag == 'tr':
+        if tag == "tr":
             self._currrow = []
 
     def handle_endtag(self, tag):
-        if tag == 'tr':
+        if tag == "tr":
             row = self._currrow
             self._currrow = []
-            if len(row) == 7 and row[0] == 'Fission' and row[1] == 'product':
+            if len(row) == 7 and row[0] == "Fission" and row[1] == "product":
                 self._fromnucs = [nucname.id(x) for x in row[-4:]]
                 return
             if len(row) != 6:
                 return
-            if row[0].endswith('FP'):
+            if row[0].endswith("FP"):
                 return
-            tonuc = nucname.id(row[0].split('-', 1)[1])
-            self.fission_product_yields += zip(self._fromnucs, [tonuc]*4, 
-                                               map(float, row[-4:]))
+            tonuc = nucname.id(row[0].split("-", 1)[1])
+            self.fission_product_yields += zip(
+                self._fromnucs, [tonuc] * 4, map(float, row[-4:])
+            )
 
     def handle_data(self, data):
-        data = ''.join(data.split())
+        data = "".join(data.split())
         if len(data) == 0:
             return
         self._currrow.append(data.strip())
 
 
-fpy_dtype = np.dtype([
-    ('from_nuc', 'i4'),
-    ('to_nuc', 'i4'),
-    ('yields', 'f8'),
-    ])
+fpy_dtype = np.dtype(
+    [
+        ("from_nuc", "i4"),
+        ("to_nuc", "i4"),
+        ("yields", "f8"),
+    ]
+)
 
 
 def parse_fpy(build_dir):
     """Converts fission product yeild data to a numpy array."""
-    build_filename = os.path.join(build_dir, 'wimsd-fpyield.html')
-    with open(build_filename, 'r') as f:
+    build_filename = os.path.join(build_dir, "wimsd-fpyield.html")
+    with open(build_filename, "r") as f:
         raw_data = f.read()
     parser = Parser()
     parser.feed(raw_data)
@@ -122,11 +125,15 @@ def make_fpy_table(nuc_data, build_dir=""):
         Directory the html files in.
     """
     yields = parse_fpy(build_dir)
-    db = tb.open_file(nuc_data, 'a', filters=BASIC_FILTERS)
-    if not hasattr(db.root, 'neutron'):
-        neutron_group = db.create_group('/', 'neutron', 'Neutron Data')
-    fpy_table = db.create_table('/neutron/', 'wimsd_fission_products', yields, 
-                               'WIMSD Fission Product Yields, fractions [unitless]')
+    db = tb.open_file(nuc_data, "a", filters=BASIC_FILTERS)
+    if not hasattr(db.root, "neutron"):
+        neutron_group = db.create_group("/", "neutron", "Neutron Data")
+    fpy_table = db.create_table(
+        "/neutron/",
+        "wimsd_fission_products",
+        yields,
+        "WIMSD Fission Product Yields, fractions [unitless]",
+    )
     fpy_table.flush()
     db.close()
 
@@ -136,11 +143,14 @@ def make_fpy(args):
     nuc_data, build_dir = args.nuc_data, args.build_dir
 
     # Check that the table exists
-    with tb.open_file(nuc_data, 'a', filters=BASIC_FILTERS) as f:
-        if hasattr(f.root, 'neutron') and hasattr(f.root.neutron, 
-                                                  'wimsd_fission_products'):
-            print('skipping WIMSD fission product yield table creation; '
-                  'already exists.')
+    with tb.open_file(nuc_data, "a", filters=BASIC_FILTERS) as f:
+        if hasattr(f.root, "neutron") and hasattr(
+            f.root.neutron, "wimsd_fission_products"
+        ):
+            print(
+                "skipping WIMSD fission product yield table creation; "
+                "already exists."
+            )
             return
 
     # Grab the raw data
@@ -148,6 +158,5 @@ def make_fpy(args):
     grab_fpy(build_dir)
 
     # Make scatering table once we have the data
-    print('Making WIMSD fission product yield table.')
+    print("Making WIMSD fission product yield table.")
     make_fpy_table(nuc_data, build_dir)
-

@@ -20,10 +20,11 @@ from pyne import utils
 if utils.use_warnings():
     utils.toggle_warnings()
 
+
 def test_atomic_mass():
     # set the datapath to nonsense so we call  the cpp data version
     orig = pyne_conf.NUC_DATA_PATH
-    pyne_conf.NUC_DATA_PATH = b'bobbobhonkeytonk'
+    pyne_conf.NUC_DATA_PATH = b"bobbobhonkeytonk"
     o16 = [15.9949146196, 16.0]
     u235 = [235.04392819, 235.0]
     am242m = [242.059547428, 242.0]
@@ -38,7 +39,7 @@ def test_atomic_mass():
 def test_natural_abund_excited_state():
     # set the datapath to nonsense so we call, the cpp data version
     orig = pyne_conf.NUC_DATA_PATH
-    pyne_conf.NUC_DATA_PATH = b'bobbobhonkeytonk'
+    pyne_conf.NUC_DATA_PATH = b"bobbobhonkeytonk"
     # initialize natural_abund_map
     gnd = 902320000
     excited = gnd + 42
@@ -53,15 +54,15 @@ def test_natural_abund_excited_state():
 def test_elements():
     # set the datapath to nonsense so we call, the cpp data version
     orig = pyne_conf.NUC_DATA_PATH
-    pyne_conf.NUC_DATA_PATH = b'bobbobhonkeytonk'
+    pyne_conf.NUC_DATA_PATH = b"bobbobhonkeytonk"
     # initialize natural_abund_map
     # test a series of elements
-    assert_almost_equal(data.atomic_mass('H'), 1.007940754065775)
-    assert_almost_equal(data.atomic_mass('Li'), 6.940036602972684)
-    assert_almost_equal(data.atomic_mass('U'), 238.02890905398374)
+    assert_almost_equal(data.atomic_mass("H"), 1.007940754065775)
+    assert_almost_equal(data.atomic_mass("Li"), 6.940036602972684)
+    assert_almost_equal(data.atomic_mass("U"), 238.02890905398374)
     # NB any elements beyond z = 92 are not natural
     # and therefore have 0.0 atomic mass
-    assert_almost_equal(data.atomic_mass('Pu'), 0.0)
+    assert_almost_equal(data.atomic_mass("Pu"), 0.0)
     # note if you use the nuc_data.h5 file it
     # has the same behaviour
     pyne_conf.NUC_DATA_PATH = orig

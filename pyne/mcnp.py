@@ -37,11 +37,14 @@ QA_warn(__name__)
 if HAVE_PYMOAB:
     from pyne.mesh import NativeMeshTag
 else:
-    warn("The PyMOAB optional dependency could not be imported. "
-         "Some aspects of the mcnp module may be incomplete.",
-         ImportWarning)
+    warn(
+        "The PyMOAB optional dependency could not be imported. "
+        "Some aspects of the mcnp module may be incomplete.",
+        ImportWarning,
+    )
 
 if sys.version_info[0] > 2:
+
     def cmp(a, b):
         return (a > b) - (a < b)
 
@@ -57,7 +60,7 @@ class Mctal(object):
         """
 
         # open file
-        self.f = open(filename, 'r')
+        self.f = open(filename, "r")
 
         # get code name, version, date/time, etc
         words = self.f.readline().split()
@@ -189,24 +192,23 @@ class SurfSrc(_BinaryReader):
         """
 
         header_string = "Code: {0} (version: {1}) [{2}]\n".format(
-            self.kod, self.ver, self.loddat)
+            self.kod, self.ver, self.loddat
+        )
         header_string += "Problem info: ({0}) {1}\n{2}\n".format(
-            self.idtm, self.probid, self.aid)
+            self.idtm, self.probid, self.aid
+        )
         header_string += "Showing dump #{0}\n".format(self.knod)
         header_string += (
             "{0} histories, {1} tracks, {2} record size, "
-            "{0} surfaces, {1} histories\n").format(
-            self.np1, self.nrss, self.ncrd,
-            self.njsw, self.niss)
+            "{0} surfaces, {1} histories\n"
+        ).format(self.np1, self.nrss, self.ncrd, self.njsw, self.niss)
         header_string += (
-            "{0} cells, source particle: {1},"
-            " macrobody facet flag: {2}\n").format(
-            self.niwr, self.mipts, self.kjaq)
+            "{0} cells, source particle: {1}," " macrobody facet flag: {2}\n"
+        ).format(self.niwr, self.mipts, self.kjaq)
         for i in self.surflist:
             header_string += (
-                "Surface {0}: facet {1},"
-                " type {2} with {3} parameters: (").format(
-                i.id, i.facet_id, i.type, i.num_params)
+                "Surface {0}: facet {1}," " type {2} with {3} parameters: ("
+            ).format(i.id, i.facet_id, i.type, i.num_params)
             if i.num_params > 1:
                 for j in i.surf_params:
                     header_string += " {0}".format(j)
@@ -235,18 +237,36 @@ class SurfSrc(_BinaryReader):
             max_tracks = self.nrss
 
         track_data = "Track Data\n"
-        track_data += \
-            "       nps   BITARRAY        WGT        ERG        TME" \
-            "             X             Y             Z" \
+        track_data += (
+            "       nps   BITARRAY        WGT        ERG        TME"
+            "             X             Y             Z"
             "          U          V     COSINE  |       W\n"
+        )
         for cnt, j in enumerate(self.tracklist):
 
-            format_string = "%10d %10g %10.5g %10.5g %10.5g" \
-                            " %13.5e %13.5e %13.5e" \
-                            " %10.5f %10.5f %10.5f  | %10.5f "
-            track_data += format_string % (
-                j.nps, j.bitarray, j.wgt, j.erg, j.tme,
-                j.x, j.y, j.z, j.u, j.v, j.cs, j.w) + "\n"
+            format_string = (
+                "%10d %10g %10.5g %10.5g %10.5g"
+                " %13.5e %13.5e %13.5e"
+                " %10.5f %10.5f %10.5f  | %10.5f "
+            )
+            track_data += (
+                format_string
+                % (
+                    j.nps,
+                    j.bitarray,
+                    j.wgt,
+                    j.erg,
+                    j.tme,
+                    j.x,
+                    j.y,
+                    j.z,
+                    j.u,
+                    j.v,
+                    j.cs,
+                    j.w,
+                )
+                + "\n"
+            )
             if cnt > max_tracks:
                 break
 
@@ -257,8 +277,7 @@ class SurfSrc(_BinaryReader):
         return rtn == 0
 
     def __cmp__(self, other):
-        """ Comparison is not completely robust. Tracklists are not compared!!!
-        """
+        """Comparison is not completely robust. Tracklists are not compared!!!"""
 
         if other.kod != self.kod:
             # kod does not match
@@ -303,22 +322,20 @@ class SurfSrc(_BinaryReader):
                 return cmp(other.surflist[surf].id, self.surflist[surf].id)
             if other.surflist[surf].facet_id != self.surflist[surf].facet_id:
                 # facet_id doesn't match
-                return cmp(other.surflist[surf].facet_id,
-                           self.surflist[surf].facet_id)
+                return cmp(other.surflist[surf].facet_id, self.surflist[surf].facet_id)
             if other.surflist[surf].type != self.surflist[surf].type:
                 # type doesn't match
-                return cmp(other.surflist[surf].type,
-                           self.surflist[surf].type)
-            if other.surflist[surf].num_params != \
-                    self.surflist[surf].num_params:
+                return cmp(other.surflist[surf].type, self.surflist[surf].type)
+            if other.surflist[surf].num_params != self.surflist[surf].num_params:
                 # num_params ddoesn't match
-                return cmp(other.surflist[surf].num_params,
-                           self.surflist[surf].num_params)
-            if other.surflist[surf].surf_params != \
-                    self.surflist[surf].surf_params:
+                return cmp(
+                    other.surflist[surf].num_params, self.surflist[surf].num_params
+                )
+            if other.surflist[surf].surf_params != self.surflist[surf].surf_params:
                 # surf_params doesn't match
-                return cmp(other.surflist[surf].surf_params,
-                           self.surflist[surf].surf_params)
+                return cmp(
+                    other.surflist[surf].surf_params, self.surflist[surf].surf_params
+                )
 
         return 0
 
@@ -333,34 +350,35 @@ class SurfSrc(_BinaryReader):
         # interpret header
         self.kod = header.get_string(8)[0]  # code identifier
 
-        if 'SF_00001' not in self.kod:
+        if "SF_00001" not in self.kod:
             self.ver = header.get_string(5)[0]  # code version identifier
 
-            if '2.6.0' in self.ver:
+            if "2.6.0" in self.ver:
                 self.loddat = header.get_string(28)[0]  # code version date
-            elif '5    ' in self.ver:
+            elif "5    " in self.ver:
                 self.loddat = header.get_string(8)[0]  # code version date
             else:
-                raise NotImplementedError("MCNP5/X Version:" +
-                                          self.ver.rstrip() + " not supported")
+                raise NotImplementedError(
+                    "MCNP5/X Version:" + self.ver.rstrip() + " not supported"
+                )
 
-            self.idtm = header.get_string(19)[0]    # current date and time
+            self.idtm = header.get_string(19)[0]  # current date and time
             self.probid = header.get_string(19)[0]  # problem id string
-            self.aid = header.get_string(80)[0]     # title card of initial run
-            self.knod = header.get_int()[0]         # dump number
+            self.aid = header.get_string(80)[0]  # title card of initial run
+            self.knod = header.get_int()[0]  # dump number
 
             # read table 1 record; various counts and sizes
             tablelengths = self.get_fortran_record()
 
             # interpret table lengths
-            if '2.6.0' in self.ver:
-                self.np1 = tablelengths.get_int()[0]    # hist used to gen. src
-                self.nrss = tablelengths.get_int()[0]   # #tracks to surf src
+            if "2.6.0" in self.ver:
+                self.np1 = tablelengths.get_int()[0]  # hist used to gen. src
+                self.nrss = tablelengths.get_int()[0]  # #tracks to surf src
             else:
-                self.np1 = tablelengths.get_long()[0]   # hist used to gen. src
+                self.np1 = tablelengths.get_long()[0]  # hist used to gen. src
                 self.nrss = tablelengths.get_long()[0]  # #tracks to surf src
 
-        # values in surf src record
+            # values in surf src record
             # 6 for a spherical source
             # 11 otherwise
             self.ncrd = tablelengths.get_int()[0]
@@ -370,26 +388,26 @@ class SurfSrc(_BinaryReader):
             while tablelengths.num_bytes > tablelengths.pos:
                 self.table1extra += tablelengths.get_int()
 
-        elif 'SF_00001' in self.kod:
+        elif "SF_00001" in self.kod:
             header = self.get_fortran_record()
-            self.ver = header.get_string(12)[0]     # code version identifier
-            self.loddat = header.get_string(9)[0]   # code version date
-            self.idtm = header.get_string(19)[0]    # current date and time
+            self.ver = header.get_string(12)[0]  # code version identifier
+            self.loddat = header.get_string(9)[0]  # code version date
+            self.idtm = header.get_string(19)[0]  # current date and time
             self.probid = header.get_string(19)[0]  # problem id string
-            self.aid = header.get_string(80)[0]     # title card of initial run
-            self.knod = header.get_int()[0]         # dump number
+            self.aid = header.get_string(80)[0]  # title card of initial run
+            self.knod = header.get_int()[0]  # dump number
 
             # read table 1 record; various counts and sizes
             tablelengths = self.get_fortran_record()
 
             # interpret table lengths
-            self.np1 = tablelengths.get_int()[0]     # hist used to gen.source
+            self.np1 = tablelengths.get_int()[0]  # hist used to gen.source
             self.notsure0 = tablelengths.get_int()[0]  # vals in surf src rec.
-            self.nrss = tablelengths.get_int()[0]    # tracks writ. to surf.src
+            self.nrss = tablelengths.get_int()[0]  # tracks writ. to surf.src
             self.notsure1 = tablelengths.get_int()[0]  # number of surfaces
-            self.ncrd = tablelengths.get_int()[0]      # histories to surf.src
-            self.njsw = tablelengths.get_int()[0]      # number of surfaces
-            self.niss = tablelengths.get_int()[0]      # histories to surf.src
+            self.ncrd = tablelengths.get_int()[0]  # histories to surf.src
+            self.njsw = tablelengths.get_int()[0]  # number of surfaces
+            self.niss = tablelengths.get_int()[0]  # histories to surf.src
             self.table1extra = list()
             while tablelengths.num_bytes > tablelengths.pos:
                 self.table1extra += tablelengths.get_int()
@@ -398,9 +416,9 @@ class SurfSrc(_BinaryReader):
             # read table 2 record; more size info
             tablelengths = self.get_fortran_record()
 
-            self.niwr = tablelengths.get_int()[0]   # #cells in surf.src card
+            self.niwr = tablelengths.get_int()[0]  # #cells in surf.src card
             self.mipts = tablelengths.get_int()[0]  # source particle type
-            self.kjaq = tablelengths.get_int()[0]   # macrobody facet flag
+            self.kjaq = tablelengths.get_int()[0]  # macrobody facet flag
             self.table2extra = list()
             while tablelengths.num_bytes > tablelengths.pos:
                 self.table2extra += tablelengths.get_int()
@@ -420,30 +438,29 @@ class SurfSrc(_BinaryReader):
             self.surfaceinfo = self.get_fortran_record()
 
             surfinfo = SourceSurf()
-            surfinfo.id = self.surfaceinfo.get_int()            # surface ID
+            surfinfo.id = self.surfaceinfo.get_int()  # surface ID
             if self.kjaq == 1:
                 surfinfo.facet_id = self.surfaceinfo.get_int()  # facet ID
             else:
-                surfinfo.facet_id = -1                        # dummy facet ID
+                surfinfo.facet_id = -1  # dummy facet ID
 
-            surfinfo.type = self.surfaceinfo.get_int()           # surface type
+            surfinfo.type = self.surfaceinfo.get_int()  # surface type
             surfinfo.num_params = self.surfaceinfo.get_int()[0]  # #surface prm
-            surfinfo.surf_params = \
-                self.surfaceinfo.get_double(surfinfo.num_params)
+            surfinfo.surf_params = self.surfaceinfo.get_double(surfinfo.num_params)
 
             self.surflist.append(surfinfo)
 
         # we read any extra records as determined by njsw+niwr...
         # no known case of their actual utility is known currently
-        for j in range(self.njsw, self.njsw+self.niwr):
+        for j in range(self.njsw, self.njsw + self.niwr):
             self.get_fortran_record()
-            warn("Extra info in header not handled: {0}".format(j),
-                 RuntimeWarning)
+            warn("Extra info in header not handled: {0}".format(j), RuntimeWarning)
 
         # read summary table record
         summary_info = self.get_fortran_record()
         self.summary_table = summary_info.get_int(
-            (2+4*self.mipts)*(self.njsw+self.niwr)+1)
+            (2 + 4 * self.mipts) * (self.njsw + self.niwr) + 1
+        )
         self.summary_extra = list()
         while summary_info.num_bytes > summary_info.pos:
             self.summary_extra += summary_info.get_int()
@@ -468,8 +485,11 @@ class SurfSrc(_BinaryReader):
             track_data.v = track_data.record[9]
             track_data.cs = track_data.record[10]
             track_data.w = math.copysign(
-                math.sqrt(1 - track_data.u*track_data.u -
-                          track_data.v*track_data.v), track_data.bitarray)
+                math.sqrt(
+                    1 - track_data.u * track_data.u - track_data.v * track_data.v
+                ),
+                track_data.bitarray,
+            )
             # track_data.bitarray = abs(track_data.bitarray)
 
             self.tracklist.append(track_data)
@@ -477,7 +497,7 @@ class SurfSrc(_BinaryReader):
 
     def put_header(self):
         """Write the header part of the header to the surface source file"""
-        if 'SF_00001' in self.kod:
+        if "SF_00001" in self.kod:
             rec = [self.kod]
             joinrec = "".join(rec)
             newrecord = _FortranRecord(joinrec, len(joinrec))
@@ -489,8 +509,7 @@ class SurfSrc(_BinaryReader):
             newrecord.put_int([self.knod])
             self.put_fortran_record(newrecord)
         else:
-            rec = [self.kod, self.ver, self.loddat,
-                   self.idtm, self.probid, self.aid]
+            rec = [self.kod, self.ver, self.loddat, self.idtm, self.probid, self.aid]
             joinrec = "".join(rec)
             newrecord = _FortranRecord(joinrec, len(joinrec))
             newrecord.put_int([self.knod])
@@ -501,7 +520,7 @@ class SurfSrc(_BinaryReader):
         """Write the table1 part of the header to the surface source file"""
         newrecord = _FortranRecord("", 0)
 
-        if '2.6.0' in self.ver:
+        if "2.6.0" in self.ver:
             newrecord.put_int([self.np1])
             newrecord.put_int([self.nrss])
         else:
@@ -583,33 +602,29 @@ class SurfSrc(_BinaryReader):
         return
 
     def update_tracklist(self, surf_src):
-        """ Update tracklist from another surface source.
+        """Update tracklist from another surface source.
         This updates the surface source in-place.
         """
 
         # Catch for improper non-SurfSrc type
         if type(surf_src) != SurfSrc:
-            raise TypeError('Surface Source is not of type SurfSrc')
+            raise TypeError("Surface Source is not of type SurfSrc")
 
         # Because 'kod' is the first header attribute
-        elif not hasattr(surf_src, 'kod'):
-            raise AttributeError(
-                'No header attributes for surface source argument')
-        elif not hasattr(self, 'kod'):
-            raise AttributeError(
-                'No header attributes read for surface source')
+        elif not hasattr(surf_src, "kod"):
+            raise AttributeError("No header attributes for surface source argument")
+        elif not hasattr(self, "kod"):
+            raise AttributeError("No header attributes read for surface source")
 
         # Because 'tracklist' forms the non-header portion
-        elif not hasattr(surf_src, 'tracklist'):
-            raise AttributeError(
-                'No tracklist read for surface source argument')
-        elif not hasattr(self, 'tracklist'):
-            raise AttributeError(
-                'No tracklist read for surface source')
+        elif not hasattr(surf_src, "tracklist"):
+            raise AttributeError("No tracklist read for surface source argument")
+        elif not hasattr(self, "tracklist"):
+            raise AttributeError("No tracklist read for surface source")
 
         # No point in updating with self
         elif self == surf_src:
-            raise ValueError('Tracklist cannot be updated with itself')
+            raise ValueError("Tracklist cannot be updated with itself")
 
         self.tracklist = surf_src.tracklist
         self.nrss = surf_src.nrss
@@ -661,17 +676,17 @@ class Srctp(_BinaryReader):
     def remaining_sites(self):
         index = self.loc_next - 1
         if (self.loc_next + self.n_run) >= self.n_source:
-            return (self.sites[index:] +
-                    self.sites[:self.n_run - (self.n_source - index)])
+            return (
+                self.sites[index:] + self.sites[: self.n_run - (self.n_source - index)]
+            )
         else:
-            return self.sites[index: index + self.n_run]
+            return self.sites[index : index + self.n_run]
 
     def __repr__(self):
         return "<Srctp: {0}>".format(self.f.name)
 
 
 class SourceSite(object):
-
     def __init__(self):
         pass
 
@@ -680,7 +695,6 @@ class SourceSite(object):
 
 
 class Runtpe(_BinaryReader):
-
     def __init__(self, filename):
         super(Runtpe, self).__init__(filename)
 
@@ -697,7 +711,7 @@ class Runtpe(_BinaryReader):
         self.problem_ID = header.get_string(19)
         self.problem_ID_surf = header.get_string(19)
         self.title = header.get_string(80)
-        header.pos += 3*6*11  # skip user file characteristics
+        header.pos += 3 * 6 * 11  # skip user file characteristics
         self.n_tables = header.get_int()
 
         # read cross-section tables
@@ -741,7 +755,7 @@ class Xsdir(object):
             Path to xsdir file.
         """
 
-        self.f = open(filename, 'r')
+        self.f = open(filename, "r")
         self.filename = os.path.abspath(filename)
         self.directory = os.path.dirname(filename)
         self.awr = {}
@@ -758,31 +772,31 @@ class Xsdir(object):
         line = self.f.readline()
         words = line.split()
         if words:
-            if words[0].lower().startswith('datapath'):
-                index = line.index('=')
-                self.datapath = line[index+1:].strip()
+            if words[0].lower().startswith("datapath"):
+                index = line.index("=")
+                self.datapath = line[index + 1 :].strip()
 
         # Read second section
         line = self.f.readline()
         words = line.split()
         assert len(words) == 3
-        assert words[0].lower() == 'atomic'
-        assert words[1].lower() == 'weight'
-        assert words[2].lower() == 'ratios'
+        assert words[0].lower() == "atomic"
+        assert words[1].lower() == "weight"
+        assert words[2].lower() == "ratios"
 
         while True:
             line = self.f.readline()
             words = line.split()
 
             # Check for end of second section
-            if len(words) % 2 != 0 or words[0] == 'directory':
+            if len(words) % 2 != 0 or words[0] == "directory":
                 break
 
             for zaid, awr in zip(words[::2], words[1::2]):
                 self.awr[zaid] = awr
 
         # Read third section
-        while words[0] != 'directory':
+        while words[0] != "directory":
             words = self.f.readline().split()
 
         while True:
@@ -791,7 +805,7 @@ class Xsdir(object):
                 break
 
             # Handle continuation lines
-            while words[-1] == '+':
+            while words[-1] == "+":
                 extraWords = self.f.readline().split()
                 words = words[:-1] + extraWords
             assert len(words) >= 7
@@ -816,7 +830,7 @@ class Xsdir(object):
             if len(words) > 9:
                 table.temperature = float(words[9])
             if len(words) > 10:
-                table.ptable = (words[10] == 'ptable')
+                table.ptable = words[10] == "ptable"
 
     def find_table(self, name):
         """Find all tables for a given ZIAD.
@@ -847,10 +861,10 @@ class Xsdir(object):
             The output filename.
         """
 
-        xsdata = open(filename, 'w')
+        xsdata = open(filename, "w")
         for table in self.tables:
             if table.serpent_type == 1:
-                xsdata.write(table.to_serpent() + '\n')
+                xsdata.write(table.to_serpent() + "\n")
         xsdata.close()
 
     def __iter__(self):
@@ -867,9 +881,11 @@ class Xsdir(object):
             The valid nuclide ids.
         """
 
-        valid_nucs = set(nucname.id(table.name.split('.')[0])
-                         for table in self.tables if
-                         nucname.isnuclide(table.name.split('.')[0]))
+        valid_nucs = set(
+            nucname.id(table.name.split(".")[0])
+            for table in self.tables
+            if nucname.isnuclide(table.name.split(".")[0])
+        )
         return valid_nucs
 
 
@@ -931,16 +947,16 @@ class XsdirTable(object):
     @property
     def serpent_type(self):
         """Converts cross section table type to Serpent format:
-            :1: continuous energy (c).
-            :2: dosimetry table (y).
-            :3: termal (t).
+        :1: continuous energy (c).
+        :2: dosimetry table (y).
+        :3: termal (t).
         """
 
-        if self.name.endswith('c'):
+        if self.name.endswith("c"):
             return 1
-        elif self.name.endswith('y'):
+        elif self.name.endswith("y"):
             return 2
-        elif self.name.endswith('t'):
+        elif self.name.endswith("t"):
             return 3
         else:
             return None
@@ -952,17 +968,17 @@ class XsdirTable(object):
         """
 
         # Only valid for neutron cross-sections
-        if not self.name.endswith('c'):
+        if not self.name.endswith("c"):
             return
 
         # Handle special case of Am-242 and Am-242m
-        if self.zaid == '95242':
+        if self.zaid == "95242":
             return 1
-        elif self.zaid == '95642':
+        elif self.zaid == "95642":
             return 0
 
         # All other cases
-        A = int(self.name.split('.')[0]) % 1000
+        A = int(self.name.split(".")[0]) % 1000
         if A > 600:
             return 1
         else:
@@ -971,9 +987,9 @@ class XsdirTable(object):
     @property
     def zaid(self):
         """Returns the ZIAD of the nuclide."""
-        return self.name[:self.name.find('.')]
+        return self.name[: self.name.find(".")]
 
-    def to_serpent(self, directory=''):
+    def to_serpent(self, directory=""):
         """Converts table to serpent format.
 
         Parameters
@@ -984,14 +1000,19 @@ class XsdirTable(object):
 
         # Adjust directory
         if directory:
-            if not directory.endswith('/'):
-                directory = directory.strip() + '/'
+            if not directory.endswith("/"):
+                directory = directory.strip() + "/"
 
         return "{0} {0} {1} {2} {3} {4} {5:.11e} {6} {7}".format(
             self.name,
-            self.serpent_type, self.zaid, 1 if self.metastable else 0,
-            self.awr, self.temperature/8.6173423e-11, self.filetype - 1,
-            directory + self.filename)
+            self.serpent_type,
+            self.zaid,
+            1 if self.metastable else 0,
+            self.awr,
+            self.temperature / 8.6173423e-11,
+            self.filetype - 1,
+            directory + self.filename,
+        )
 
     def __repr__(self):
         return "<XsDirTable: {0}>".format(self.name)
@@ -1025,6 +1046,7 @@ class PtracEvent(tables.IsDescription):
 
 class PtracReader(object):
     """Class to read _binary_ PTRAC files generated by MCNP."""
+
     def __init__(self, filename):
         """Construct a new Ptrac reader for a given filename, determine the
         number format and read the file's headers.
@@ -1051,12 +1073,12 @@ class PtracReader(object):
             25: "www",  # cos(z-direction)
             26: "erg",  # energy
             27: "wgt",  # weight
-            28: "tme"
+            28: "tme",
         }
 
         self.eightbytes = False
 
-        self.f = open(filename, 'rb')
+        self.f = open(filename, "rb")
         self.determine_endianness()
         self.read_headers()
         self.read_variable_ids()
@@ -1075,16 +1097,17 @@ class PtracReader(object):
 
         # read and unpack first 4 bytes
         b = self.f.read(4)
-        should_be_4 = struct.unpack('<i', b)[0]
+        should_be_4 = struct.unpack("<i", b)[0]
         if should_be_4 == 4:
-            self.endianness = '<'
+            self.endianness = "<"
         else:
-            self.endianness = '>'
+            self.endianness = ">"
 
         # discard the next 8 bytes (the value -1 and another 4)
         c = self.f.read(8)
-        assert (c[4:8] == b) , "8 byte integers compilation flag "\
-                               "not supported for MCNP6"
+        assert c[4:8] == b, (
+            "8 byte integers compilation flag " "not supported for MCNP6"
+        )
 
     def read_next(self, format, number=1, auto=False, raw_format=False):
         """Helper method for reading records from the Ptrac file.
@@ -1099,38 +1122,40 @@ class PtracReader(object):
         will not be expanded by number, but will be used directly.
         """
 
-        if self.eightbytes and (not raw_format) and format == 'f':
-            format = 'd'
-        if self.eightbytes and (not raw_format) and format == 'i':
-            format = 'q'
+        if self.eightbytes and (not raw_format) and format == "f":
+            format = "d"
+        if self.eightbytes and (not raw_format) and format == "i":
+            format = "q"
 
         # how long is one field of the read values
         format_length = 1
-        if format in ['h', 'H'] and not raw_format:
+        if format in ["h", "H"] and not raw_format:
             format_length = 2
-        elif format in ['i', 'I', 'l', 'L', 'f'] and not raw_format:
+        elif format in ["i", "I", "l", "L", "f"] and not raw_format:
             format_length = 4
-        elif format in ['d', 'q', 'Q'] and not raw_format:
+        elif format in ["d", "q", "Q"] and not raw_format:
             format_length = 8
 
         if auto and not raw_format:
             b = self.f.read(4)
 
-            if b == b'':
+            if b == b"":
                 raise EOFError
 
-            length = struct.unpack(self.endianness.encode() + b'i', b)[0]
+            length = struct.unpack(self.endianness.encode() + b"i", b)[0]
             number = length // format_length
 
             b = self.f.read(length + 4)
-            tmp = struct.unpack(b"".join([self.endianness.encode(),
-                                          (format*number).encode(), b'i']), b)
+            tmp = struct.unpack(
+                b"".join([self.endianness.encode(), (format * number).encode(), b"i"]),
+                b,
+            )
             length2 = tmp[-1]
             tmp = tmp[:-1]
         else:
             bytes_to_read = number * format_length + 8
             b = self.f.read(bytes_to_read)
-            if b == b'':
+            if b == b"":
                 raise EOFError
 
             fmt_string = self.endianness + "i"
@@ -1146,9 +1171,9 @@ class PtracReader(object):
 
         assert length == length2
 
-        if format == 's':
+        if format == "s":
             # return just one string
-            return b''.join(tmp).decode()
+            return b"".join(tmp).decode()
         elif number == 1:
             # just return the number and not a tuple containing just the number
             return tmp[0]
@@ -1162,22 +1187,22 @@ class PtracReader(object):
         """
 
         # mcnp version info
-        self.mcnp_version_info = self.read_next('s', auto=True)
+        self.mcnp_version_info = self.read_next("s", auto=True)
         # problem title
-        self.problem_title = self.read_next('s', auto=True).strip()
+        self.problem_title = self.read_next("s", auto=True).strip()
 
         # ptrac input data. can be omitted for now,
         # but has to be parsed, because it has variable length.
         # Also, this is the first difference between a file generated
         # with 4-byte and 8-byte numbers.
-        line = self.read_next('f', auto=True)
+        line = self.read_next("f", auto=True)
         # if this line doesn't consist of 10 floats, then we've read them with
         # the wrong byte length and re have to re-read them (and every
         # following float) with 8 bytes length.
         if len(line) != 10:
             self.eightbytes = True
-            tmp = struct.pack(self.endianness + "f"*20, *line)
-            line = list(struct.unpack(self.endianness + "d"*10, tmp))
+            tmp = struct.pack(self.endianness + "f" * 20, *line)
+            line = list(struct.unpack(self.endianness + "d" * 10, tmp))
 
         # the first item is 13 in MCNP5, 14 in MCNP6. afterwards, there is
         # that times the following scheme:
@@ -1190,9 +1215,8 @@ class PtracReader(object):
 
         while current_variable <= num_variables:
             n = int(line[current_pos])
-            if current_variable < num_variables and (current_pos + n + 1) >= \
-                    len(line):
-                line += self.read_next('f', 10)
+            if current_variable < num_variables and (current_pos + n + 1) >= len(line):
+                line += self.read_next("f", 10)
             current_pos += n + 1
             current_variable += 1
 
@@ -1209,12 +1233,14 @@ class PtracReader(object):
             mcnp_version = self.mcnp_version_info[8:13]
             if mcnp_version in ["6", "6.mpi"]:
                 variable_info = self.read_next(
-                    "iqqqqqqqqqqiiiiiiiii", 120, raw_format=True)
+                    "iqqqqqqqqqqiiiiiiiii", 120, raw_format=True
+                )
             else:  # Not sure about MCNPX
                 variable_info = self.read_next(
-                    "qqqqqqqqqqqiiiiiiiii", 124, raw_format=True)
+                    "qqqqqqqqqqqiiiiiiiii", 124, raw_format=True
+                )
         else:
-            variable_info = self.read_next('i', 20)
+            variable_info = self.read_next("i", 20)
 
         variable_nums["nps"] = variable_info[0]
         variable_nums["src"] = variable_info[1] + variable_info[2]
@@ -1227,29 +1253,26 @@ class PtracReader(object):
 
         if self.eightbytes:
             # only the NPS vars are in 8 byte, the other ones are still 4
-            fmt_string = "q" * variable_info[0] + \
-                "i" * sum(variable_info[1:11])
+            fmt_string = "q" * variable_info[0] + "i" * sum(variable_info[1:11])
             fmt_length = 8 * variable_info[0] + 4 * sum(variable_info[1:11])
-            all_var_ids = self.read_next(
-                fmt_string, fmt_length, raw_format=True)
+            all_var_ids = self.read_next(fmt_string, fmt_length, raw_format=True)
         else:
-            all_var_ids = self.read_next('i', num_vars_total)
+            all_var_ids = self.read_next("i", num_vars_total)
 
         for l in ["nps", "src", "bnk", "sur", "col", "ter"]:
-            variable_ids[l] = all_var_ids[:variable_nums[l]]
-            all_var_ids = all_var_ids[variable_nums[l]:]
+            variable_ids[l] = all_var_ids[: variable_nums[l]]
+            all_var_ids = all_var_ids[variable_nums[l] :]
 
         self.variable_nums = variable_nums
         self.variable_ids = variable_ids
 
     def read_nps_line(self):
         """Read an NPS record and save the type of the next event."""
-        nps_line = self.read_next('i', self.variable_nums["nps"])
+        nps_line = self.read_next("i", self.variable_nums["nps"])
         self.next_event = nps_line[1]
 
     def read_event_line(self, ptrac_event):
-        """Read an event record and save it to a given PtracParticle instance.
-        """
+        """Read an event record and save it to a given PtracParticle instance."""
 
         # save for current event, because this record
         # contains only the next event's type
@@ -1266,13 +1289,13 @@ class PtracReader(object):
         else:
             e = "bnk"
 
-        evt_line = self.read_next('f', self.variable_nums[e])
+        evt_line = self.read_next("f", self.variable_nums[e])
 
         self.next_event = evt_line[0]
 
         for i, j in enumerate(self.variable_ids[e][1:]):
             if j in self.variable_mappings:
-                ptrac_event[self.variable_mappings[j]] = evt_line[i+1]
+                ptrac_event[self.variable_mappings[j]] = evt_line[i + 1]
         ptrac_event["event_type"] = event_type
 
     def write_to_hdf5_table(self, hdf5_table, print_progress=0):
@@ -1304,11 +1327,13 @@ class PtracReader(object):
 def _is_cell_line(line):
     is_cell = False
     if len(line.split()) > 3:
-        if line.split()[0].isdigit() and \
-           line.split()[1].isdigit() and \
-           not line.split()[2][0].isalpha() and \
-           line[0:5] != '     ' and \
-           line.split()[1] != '0':
+        if (
+            line.split()[0].isdigit()
+            and line.split()[1].isdigit()
+            and not line.split()[2][0].isalpha()
+            and line[0:5] != "     "
+            and line.split()[1] != "0"
+        ):
             is_cell = True
     return is_cell
 
@@ -1338,7 +1363,7 @@ def mats_from_inp(inp):
     line_count = 1
     line = linecache.getline(inp, line_count)
     # scroll through every line of the mcnp inp file
-    while line != '':
+    while line != "":
         line = linecache.getline(inp, line_count)
         # check to see if line contains a cell card. If so, grab the density.
         # information is stored in a dictionary where:
@@ -1353,7 +1378,7 @@ def mats_from_inp(inp):
             else:
                 same_bool = False
                 for j in range(0, len(densities[mat_num])):
-                    if abs((den - densities[mat_num][j])/den) < 1E-4:
+                    if abs((den - densities[mat_num][j]) / den) < 1e-4:
                         same_bool = True
 
                 if same_bool is False:
@@ -1362,7 +1387,7 @@ def mats_from_inp(inp):
         # check line to see if it contain a material card, in the form
         # m* where * is a digit. If so store the line num. and material number
         if line.split() != []:
-            if line.split()[0][0] == 'm' or line.split()[0][0] == 'M':
+            if line.split()[0][0] == "m" or line.split()[0][0] == "M":
                 if line.split()[0][1].isdigit() is True:
                     mat_lines.append(line_count)
                     mat_nums.append(int(line.split()[0][1:]))
@@ -1372,15 +1397,16 @@ def mats_from_inp(inp):
 
     for i in range(0, len(mat_nums)):
         if mat_nums[i] in densities.keys():
-            materials[mat_nums[i]] = mat_from_inp_line(inp, mat_lines[i],
-                                                       densities[mat_nums[i]])
+            materials[mat_nums[i]] = mat_from_inp_line(
+                inp, mat_lines[i], densities[mat_nums[i]]
+            )
         else:
             materials[mat_nums[i]] = mat_from_inp_line(inp, mat_lines[i])
     return materials
 
 
-def mat_from_inp_line(filename, mat_line, densities='None'):
-    """ This function reads an MCNP material card from a file and returns a
+def mat_from_inp_line(filename, mat_line, densities="None"):
+    """This function reads an MCNP material card from a file and returns a
     Material or Multimaterial object for the material described by the card.
     This function is used by :func:`mats_from_inp`.
 
@@ -1400,18 +1426,18 @@ def mat_from_inp_line(filename, mat_line, densities='None'):
         multiple densities are supplied a MultiMaterial is returned.
     """
 
-    data_string = linecache.getline(filename, mat_line).split('$')[0]
+    data_string = linecache.getline(filename, mat_line).split("$")[0]
     # collect all material card data on one string
     line_index = 1
     line = linecache.getline(filename, mat_line + line_index)
     # people sometimes put comments in materials and then this loop breaks                                                                                       # so we need to keep reading if we encounter comments
-    while len(line.split()) > 0 and (line[0:5] == '     ' or line[0].lower() == 'c'):
+    while len(line.split()) > 0 and (line[0:5] == "     " or line[0].lower() == "c"):
         # make sure element/isotope is not commented out
-        if line.split()[0][0] != 'c' and line.split()[0][0] != 'C':
-            data_string += line.split('$')[0]
+        if line.split()[0][0] != "c" and line.split()[0][0] != "C":
+            data_string += line.split("$")[0]
             line_index += 1
             line = linecache.getline(filename, mat_line + line_index)
-            
+
         # otherwise this not a line we care about, move on and
         # skip lines that start with c or C
         else:
@@ -1421,7 +1447,7 @@ def mat_from_inp_line(filename, mat_line, densities='None'):
     # create dictionaries nucvec and table_ids
     nucvec = {}
     table_ids = {}
-    lib_names = ['NLIB', 'PLIB', 'HLIB', 'PNLIB', 'ELIB']
+    lib_names = ["NLIB", "PLIB", "HLIB", "PNLIB", "ELIB"]
     default_libs = {}
 
     # skip the first token that is the material card identifier
@@ -1429,12 +1455,12 @@ def mat_from_inp_line(filename, mat_line, densities='None'):
     while len(token_list) > 0:
         token = token_list.pop(0)
 
-        if '=' in token:
-            lib_name, lib_num = token.split('=')
+        if "=" in token:
+            lib_name, lib_num = token.split("=")
             if lib_name.upper() in lib_names:
                 default_libs[lib_name.upper()] = lib_num
         else:
-            nuc_info = token.split('.')
+            nuc_info = token.split(".")
             zzzaaam = str(nucname.zzaaam(nucname.mcnp_to_id(nuc_info[0])))
             # this allows us to read nuclides that are repeated
             nuc_frac = token_list.pop(0)
@@ -1454,10 +1480,10 @@ def mat_from_inp_line(filename, mat_line, densities='None'):
     while 0 == nucvecvals[n]:
         n += 1
         isatom = 0 < nucvecvals[n]
-    for value in nucvecvals[n+1:]:
+    for value in nucvecvals[n + 1 :]:
         if isatom != (0 <= value):
-            msg = 'Mixed atom and mass fractions not supported.'
-            ' See material defined on line {0}'.format(mat_line)
+            msg = "Mixed atom and mass fractions not supported."
+            " See material defined on line {0}".format(mat_line)
             warn(msg)
 
     # apply all data to material object
@@ -1468,42 +1494,41 @@ def mat_from_inp_line(filename, mat_line, densities='None'):
         # set nucvec attribute to the nucvec dict from above
         mat = Material(nucvec=nucvec)
 
-    mat.metadata['table_ids'] = table_ids
+    mat.metadata["table_ids"] = table_ids
     for lib_name, lib_num in default_libs.items():
         mat.metadata[lib_name] = lib_num
-    mat.metadata['mat_number'] = data_string.split()[0][1:]
+    mat.metadata["mat_number"] = data_string.split()[0][1:]
 
     # collect metadata, if present
-    mds = ['source', 'comments', 'name']
+    mds = ["source", "comments", "name"]
     line_index = 1
     mds_line = linecache.getline(filename, mat_line - line_index)
     # while reading non-empty comment lines
-    while mds_line.strip() not in set('cC') \
-            and mds_line.split()[0] in ['c', 'C']:
-        if mds_line.split()[0] in ['c', 'C'] \
-                and len(mds_line.split()) > 1:
-            possible_md = mds_line.split()[1].split(':')[0].lower()
+    while mds_line.strip() not in set("cC") and mds_line.split()[0] in ["c", "C"]:
+        if mds_line.split()[0] in ["c", "C"] and len(mds_line.split()) > 1:
+            possible_md = mds_line.split()[1].split(":")[0].lower()
             if possible_md in mds:
-                if possible_md.lower() == 'comments':
+                if possible_md.lower() == "comments":
                     comments_string = str(
-                        ''.join(mds_line.split(':')[1:]).split('\n')[0])
+                        "".join(mds_line.split(":")[1:]).split("\n")[0]
+                    )
                     comment_index = 1
                     comment_line = linecache.getline(
-                        filename, mat_line - line_index + comment_index)
-                    while comment_line.split()[0] in ['c', 'C']:
-                        if comment_line.split()[1].split(':')[0].lower() in mds:
+                        filename, mat_line - line_index + comment_index
+                    )
+                    while comment_line.split()[0] in ["c", "C"]:
+                        if comment_line.split()[1].split(":")[0].lower() in mds:
                             break
-                        comments_string += ' ' + ' '.join(
-                            comment_line.split()[1:])
+                        comments_string += " " + " ".join(comment_line.split()[1:])
                         comment_index += 1
-                        comment_line = \
-                            linecache.getline(filename,
-                                              mat_line - line_index +
-                                              comment_index)
+                        comment_line = linecache.getline(
+                            filename, mat_line - line_index + comment_index
+                        )
                     mat.metadata[possible_md] = comments_string
                 else:
-                    mat.metadata[possible_md] = ''.join(
-                        mds_line.split(':')[1:]).split('\n')[0]
+                    mat.metadata[possible_md] = "".join(mds_line.split(":")[1:]).split(
+                        "\n"
+                    )[0]
                     # set metadata
         line_index += 1
         mds_line = linecache.getline(filename, mat_line - line_index)
@@ -1511,13 +1536,13 @@ def mat_from_inp_line(filename, mat_line, densities='None'):
     # Check all the densities. If they are atom densities, convert them to mass
     # densities. If they are mass densities they willl be negative, so make
     # them positive.
-    if densities != 'None':
+    if densities != "None":
         converted_densities = []
         for den in densities:
             if den <= 0:
-                converted_densities.append(-1*float(den))
+                converted_densities.append(-1 * float(den))
             else:
-                converted_densities.append(mat.mass_density(float(den)*1E24))
+                converted_densities.append(mat.mass_density(float(den) * 1e24))
 
         # check to see how many densities are associated with this material.
         # if there is more than one, create a multimaterial
@@ -1593,15 +1618,15 @@ class Wwinp(Mesh):
 
     def __init__(self):
         if not HAVE_PYMOAB:
-            raise RuntimeError("PyMOAB is not available, "
-                               "unable to create Wwinp Mesh.")
+            raise RuntimeError(
+                "PyMOAB is not available, " "unable to create Wwinp Mesh."
+            )
         pass
 
     def read_wwinp(self, filename):
-        """This method creates a Wwinp object from the WWINP file <filename>.
-        """
+        """This method creates a Wwinp object from the WWINP file <filename>."""
 
-        with open(filename, 'r') as f:
+        with open(filename, "r") as f:
             self._read_block1(f)
             self._read_block2(f)
             self._read_block3(f)
@@ -1619,7 +1644,7 @@ class Wwinp(Mesh):
         if self.nr == 10:  # Cartesian
             line_3 = f.readline()
             self.nf = [int(float(x)) for x in line_3.split()[0:3]]
-            self.nft = self.nf[0]*self.nf[1]*self.nf[2]
+            self.nft = self.nf[0] * self.nf[1] * self.nf[2]
             self.origin = [float(x) for x in line_3.split()[3:6]]
 
             line_4 = f.readline()
@@ -1627,7 +1652,7 @@ class Wwinp(Mesh):
             self.nwg = int(float(line_4.split()[3]))
 
         if self.nr == 16:  # Cylindrical
-            raise ValueError('Cylindrical WWINP not currently supported')
+            raise ValueError("Cylindrical WWINP not currently supported")
 
     def _read_block2(self, f):
         # Retrieves all of the information from block 2 of a wwinp file.
@@ -1639,7 +1664,7 @@ class Wwinp(Mesh):
         for i in [0, 1, 2]:
             # Create a list of raw block 2 values.
             raw = []
-            while len(raw) < 3*self.nc[i] + 1:
+            while len(raw) < 3 * self.nc[i] + 1:
                 raw += [float(x) for x in f.readline().split()]
 
             # Remove all the rx(i), ry(i), rz(i) values that
@@ -1660,8 +1685,11 @@ class Wwinp(Mesh):
                     self.fm[i].append(removed_values[j])
                     for k in range(1, int(removed_values[j])):
                         self.bounds[i].append(
-                            (removed_values[j+1] - removed_values[j-1])
-                            * k / removed_values[j] + removed_values[j-1])
+                            (removed_values[j + 1] - removed_values[j - 1])
+                            * k
+                            / removed_values[j]
+                            + removed_values[j - 1]
+                        )
 
     def _read_block3(self, f):
         # Retrives all the information of the block 3 of a wwinp file.
@@ -1671,14 +1699,14 @@ class Wwinp(Mesh):
             while len(self.e[0]) < self.ne[0]:
                 self.e[0] += [float(x) for x in f.readline().split()]
 
-            self._read_wwlb('n', f)
+            self._read_wwlb("n", f)
 
         if len(self.ne) == 2 and self.ne[1] != 0:
             self.e.append([])
             while len(self.e[-1]) < self.ne[1]:
                 self.e[-1] += [float(x) for x in f.readline().split()]
 
-            self._read_wwlb('p', f)
+            self._read_wwlb("p", f)
 
     def _read_wwlb(self, particle, f):
         # Reads the weight window lower bounds from block 3 and returns a
@@ -1687,17 +1715,18 @@ class Wwinp(Mesh):
         # If this is the first time this method is called then created a mesh,
         # otherwise (in the case of n and p in the same WWINP) add to the
         # preexisting mesh.
-        if not hasattr(self, 'mesh'):
-            super(Wwinp, self).__init__(structured_coords=[self.bounds[0],
-                                                           self.bounds[1], self.bounds[2]],
-                                        structured=True)
+        if not hasattr(self, "mesh"):
+            super(Wwinp, self).__init__(
+                structured_coords=[self.bounds[0], self.bounds[1], self.bounds[2]],
+                structured=True,
+            )
 
-        volume_elements = list(self.structured_iterate_hex('zyx'))
+        volume_elements = list(self.structured_iterate_hex("zyx"))
 
-        if particle == 'n':
+        if particle == "n":
             particle_index = 0
 
-        elif particle == 'p':
+        elif particle == "p":
             particle_index = 1
 
         # read in WW data for a single particle type
@@ -1713,8 +1742,9 @@ class Wwinp(Mesh):
 
         # create vector tags for data
         ww_tag_name = "ww_{0}".format(particle)
-        self.tag(ww_tag_name, size=self.ne[particle_index],
-                 dtype=float, tagtype='nat_mesh')
+        self.tag(
+            ww_tag_name, size=self.ne[particle_index], dtype=float, tagtype="nat_mesh"
+        )
         tag_ww = self.get_tag(ww_tag_name)
 
         # tag vector data to mesh
@@ -1722,16 +1752,19 @@ class Wwinp(Mesh):
             tag_ww[volume_element] = ww_data[:, i]
 
         # Save energy upper bounds to rootset.
-        e_bounds_tag_name = '{0}_e_upper_bounds'.format(particle)
-        self.tag(e_bounds_tag_name,
-                 size=len(self.e[particle_index]),
-                 dtype=float, tagtype='nat_mesh')
+        e_bounds_tag_name = "{0}_e_upper_bounds".format(particle)
+        self.tag(
+            e_bounds_tag_name,
+            size=len(self.e[particle_index]),
+            dtype=float,
+            tagtype="nat_mesh",
+        )
         tag_e_bounds = self.get_tag(e_bounds_tag_name)
         tag_e_bounds[self] = self.e[particle_index]
 
     def write_wwinp(self, filename):
         """This method writes a complete WWINP file to <filename>."""
-        with open(filename, 'w') as f:
+        with open(filename, "w") as f:
             self._write_block1(f)
             self._write_block2(f)
             self._write_block3(f)
@@ -1739,34 +1772,39 @@ class Wwinp(Mesh):
     def _write_block1(self, f):
         # Writes the all block 1 data to WWINP file
 
-        block1 = ''
+        block1 = ""
 
         # Create a MCNP formated time string.
         now = datetime.datetime.now()
-        time = '{0:02d}/{1}/{2} {3}:{4}:{5}'.format(
-            now.month, now.day, str(now.year)[2:],
-            now.hour, now.minute, now.second)
+        time = "{0:02d}/{1}/{2} {3}:{4}:{5}".format(
+            now.month, now.day, str(now.year)[2:], now.hour, now.minute, now.second
+        )
 
         # Append line 1.
-        block1 += \
-            "{0:10.0f}{1:10.0f}{2:10.0f}{3:10.0f}" \
-            "{4:>38}\n".format(1, 1,  self.ni, self.nr, time)
+        block1 += "{0:10.0f}{1:10.0f}{2:10.0f}{3:10.0f}" "{4:>38}\n".format(
+            1, 1, self.ni, self.nr, time
+        )
 
         # Append line 2.
         for i in self.ne:
-            block1 += '{0:10.0f}'.format(int(i))
+            block1 += "{0:10.0f}".format(int(i))
 
-        block1 += '\n'
+        block1 += "\n"
 
         # Append line 3.
-        block1 += \
-            '{0:13.5E}{1:13.5E}{2:13.5E}{3:13.5E}{4:13.5E}{5:13.5E}\n'\
-            .format(self.nf[0], self.nf[1], self.nf[2],
-                    self.origin[0], self.origin[1], self.origin[2])
+        block1 += "{0:13.5E}{1:13.5E}{2:13.5E}{3:13.5E}{4:13.5E}{5:13.5E}\n".format(
+            self.nf[0],
+            self.nf[1],
+            self.nf[2],
+            self.origin[0],
+            self.origin[1],
+            self.origin[2],
+        )
 
         # Append line 4.
-        block1 += '{0:13.5E}{1:13.5E}{2:13.5E}{3:13.5E}\n'\
-            .format(self.nc[0], self.nc[1], self.nc[2], self.nwg)
+        block1 += "{0:13.5E}{1:13.5E}{2:13.5E}{3:13.5E}\n".format(
+            self.nc[0], self.nc[1], self.nc[2], self.nwg
+        )
 
         f.write(block1)
 
@@ -1785,14 +1823,14 @@ class Wwinp(Mesh):
         for i in range(0, 3):
             line_count = 0  # number of entries printed to current line, max=6
             for j in range(0, len(block2_array[i])):
-                block2 += '{0:13.5E}'.format(block2_array[i][j])
+                block2 += "{0:13.5E}".format(block2_array[i][j])
                 line_count += 1
                 if line_count == 6:
-                    block2 += '\n'
+                    block2 += "\n"
                     line_count = 0
 
             if line_count != 0:
-                block2 += '\n'
+                block2 += "\n"
 
         f.write(block2)
 
@@ -1800,56 +1838,55 @@ class Wwinp(Mesh):
         # Writes the all block 3 data to WWINP file
 
         if self.ne[0] != 0:
-            self._write_block3_single('n', f)
+            self._write_block3_single("n", f)
 
         if len(self.ne) == 2:
-            self._write_block3_single('p', f)
+            self._write_block3_single("p", f)
 
     def _write_block3_single(self, particle, f):
         # Write all of block 3 a single time (e.g. for WWINP with only n or
         #   p). This function is called twice in the case of the WWINP having
         #   both n and p.
 
-        if particle == 'n':
+        if particle == "n":
             particle_index = 0
 
-        elif particle == 'p':
+        elif particle == "p":
             particle_index = 1
 
         # Append energy line.
-        block3 = ''
+        block3 = ""
         line_count = 0
 
         for e_upper_bound in self.e[particle_index]:
-            block3 += '{0:13.5E}'.format(e_upper_bound)
+            block3 += "{0:13.5E}".format(e_upper_bound)
             line_count += 1
             if line_count == 6:
-                block3 += '\n'
+                block3 += "\n"
                 line_count = 0
 
         if line_count != 0:
-            block3 += '\n'
+            block3 += "\n"
 
         # Get ww_data.
         ww_data = np.empty(shape=(self.nft, self.ne[particle_index]))
-        volume_elements = list(self.structured_iterate_hex('zyx'))
+        volume_elements = list(self.structured_iterate_hex("zyx"))
         for i, volume_element in enumerate(volume_elements):
-            ww_data[i] = self.get_tag("ww_{0}".format(particle))[
-                volume_element]
+            ww_data[i] = self.get_tag("ww_{0}".format(particle))[volume_element]
 
         for i in range(0, self.ne[particle_index]):
             # Append ww_data to block3 string.
             line_count = 0
             for ww in ww_data[:, i]:
-                block3 += '{0:13.5E}'.format(ww)
+                block3 += "{0:13.5E}".format(ww)
                 line_count += 1
 
                 if line_count == 6:
-                    block3 += '\n'
+                    block3 += "\n"
                     line_count = 0
 
             if line_count != 0:
-                block3 += '\n'
+                block3 += "\n"
 
         f.write(block3)
 
@@ -1871,7 +1908,7 @@ class Wwinp(Mesh):
         self.ne = []
         all_tags = [x.name for x in self.get_all_tags()]
 
-        if 'n_e_upper_bounds' in all_tags:
+        if "n_e_upper_bounds" in all_tags:
             n_e_upper_bounds = self.n_e_upper_bounds[self]
             # In the single energy group case, the "E_upper_bounds" tag
             # returns a non-iterable float. If this is the case, put this
@@ -1886,7 +1923,7 @@ class Wwinp(Mesh):
             self.e.append([])
             self.ne.append(0)
 
-        if 'p_e_upper_bounds' in all_tags:
+        if "p_e_upper_bounds" in all_tags:
             p_e_upper_bounds = self.p_e_upper_bounds[self]
             if isinstance(p_e_upper_bounds, float):
                 p_e_upper_bounds = [p_e_upper_bounds]
@@ -1897,9 +1934,11 @@ class Wwinp(Mesh):
         self.ni = int(len(self.ne))
 
         # Set space related attributes.
-        self.bounds = [self.structured_get_divisions('x'),
-                       self.structured_get_divisions('y'),
-                       self.structured_get_divisions('z')]
+        self.bounds = [
+            self.structured_get_divisions("x"),
+            self.structured_get_divisions("y"),
+            self.structured_get_divisions("z"),
+        ]
 
         self.origin = [self.bounds[0][0], self.bounds[1][0], self.bounds[2][0]]
 
@@ -1914,8 +1953,10 @@ class Wwinp(Mesh):
             j = 1
             while j < len(points) - 1:
                 # Floating point comparison characterizes coarse vs. fine.
-                if abs((points[j] - points[j-1]) -
-                       (points[j+1] - points[j])) <= 1.01E-4:
+                if (
+                    abs((points[j] - points[j - 1]) - (points[j + 1] - points[j]))
+                    <= 1.01e-4
+                ):
                     self.fm[i][len(self.cm[i])] += 1
                 else:
                     self.cm[i].append(points[j])
@@ -1928,7 +1969,7 @@ class Wwinp(Mesh):
 
         self.nc = [len(self.cm[0]), len(self.cm[1]), len(self.cm[2])]
         self.nf = [sum(self.fm[0]), sum(self.fm[1]), sum(self.fm[2])]
-        self.nft = self.nf[0]*self.nf[1]*self.nf[2]
+        self.nft = self.nf[0] * self.nf[1] * self.nf[2]
 
 
 class Meshtal(object):
@@ -1977,14 +2018,13 @@ class Meshtal(object):
         """
 
         if not HAVE_PYMOAB:
-            raise RuntimeError("PyMOAB is not available, "
-                               "unable to create Meshtal.")
+            raise RuntimeError("PyMOAB is not available, " "unable to create Meshtal.")
 
         self.tally = {}
         self.tags = tags
         self._meshes_have_mats = meshes_have_mats
 
-        with open(filename, 'r') as f:
+        with open(filename, "r") as f:
             self._read_meshtal_head(f)
             self._read_tallies(f)
 
@@ -2009,20 +2049,23 @@ class Meshtal(object):
         line = f.readline()
 
         while line != "":
-            if line.split()[0:3] == ['Mesh', 'Tally', 'Number']:
+            if line.split()[0:3] == ["Mesh", "Tally", "Number"]:
                 tally_num = int(line.split()[3])
                 if self.tags is not None and tally_num in self.tags.keys():
-                    self.tally[tally_num] = self.create_meshtally(f, tally_num,
-                                                      self.tags[tally_num],
-                                                      mesh_has_mats=self._meshes_have_mats)
+                    self.tally[tally_num] = self.create_meshtally(
+                        f,
+                        tally_num,
+                        self.tags[tally_num],
+                        mesh_has_mats=self._meshes_have_mats,
+                    )
                 else:
-                    self.tally[tally_num] = self.create_meshtally(f, tally_num,
-                                                      mesh_has_mats=self._meshes_have_mats)
+                    self.tally[tally_num] = self.create_meshtally(
+                        f, tally_num, mesh_has_mats=self._meshes_have_mats
+                    )
 
             line = f.readline()
 
-    def create_meshtally(self, f, tally_number, tag_names=None,
-        mesh_has_mats=False):
+    def create_meshtally(self, f, tally_number, tag_names=None, mesh_has_mats=False):
         """
         This function creates a Mesh instance from MCNP meshtal file.
 
@@ -2057,23 +2100,25 @@ class Meshtal(object):
         else:
             m.tag_names = tag_names
 
-        m.x_bounds, m.y_bounds, m.z_bounds, m.e_bounds = \
-                self.read_xyze_bounds(f)
-        m.num_ves = (len(m.x_bounds)-1) * (len(m.y_bounds)-1)\
-            * (len(m.z_bounds)-1)
-        m.num_e_groups = len(m.e_bounds)-1
+        m.x_bounds, m.y_bounds, m.z_bounds, m.e_bounds = self.read_xyze_bounds(f)
+        m.num_ves = (
+            (len(m.x_bounds) - 1) * (len(m.y_bounds) - 1) * (len(m.z_bounds) - 1)
+        )
+        m.num_e_groups = len(m.e_bounds) - 1
         self.read_column_order(f)
         # create mesh
         mats = () if mesh_has_mats is True else None
         super(MeshTally, m).__init__(
-                structured_coords=[m.x_bounds, m.y_bounds, m.z_bounds],
-                structured=True, mats=mats)
+            structured_coords=[m.x_bounds, m.y_bounds, m.z_bounds],
+            structured=True,
+            mats=mats,
+        )
 
         # read result, rel_error, res_tot and rel_err_tot
-        result, rel_error, res_tot, rel_err_tot = \
-                self.read_tally_results_rel_error(f, m.num_e_groups, m.num_ves)
-        m.tag_flux_error_from_tally_results(result, rel_error,
-                res_tot, rel_err_tot)
+        result, rel_error, res_tot, rel_err_tot = self.read_tally_results_rel_error(
+            f, m.num_e_groups, m.num_ves
+        )
+        m.tag_flux_error_from_tally_results(result, rel_error, res_tot, rel_err_tot)
         return m
 
     def read_meshtally_head(self, f):
@@ -2085,7 +2130,7 @@ class Meshtal(object):
         ----------
         f : str or filestream
             Filestream of the meshtal file.
-    
+
         Returns
         -------
         particle : str
@@ -2096,14 +2141,14 @@ class Meshtal(object):
         """
 
         line = f.readline()
-        if ('neutron' in line):
-            particle = 'neutron'
-        elif ('photon' in line):
-            particle = 'photon'
+        if "neutron" in line:
+            particle = "neutron"
+        elif "photon" in line:
+            particle = "photon"
 
         # determine if meshtally flux-to-dose conversion factors are being used.
         line = f.readline()
-        dr_str = 'This mesh tally is modified by a dose response function.'
+        dr_str = "This mesh tally is modified by a dose response function."
         if line.strip() == dr_str:
             dose_response = True
         else:
@@ -2119,7 +2164,7 @@ class Meshtal(object):
         ----------
         f : str or filestream
             Filestream of the meshtal file.
-    
+
         Returns
         -------
         x_bounds : tuple of float
@@ -2134,7 +2179,7 @@ class Meshtal(object):
 
         # advance the file to the line where x, y, z, bounds start
         line = f.readline()
-        while line.strip() != 'Tally bin boundaries:':
+        while line.strip() != "Tally bin boundaries:":
             line = f.readline()
 
         x_bounds = tuple(float(x) for x in f.readline().split()[2:])
@@ -2159,14 +2204,15 @@ class Meshtal(object):
         f.readline()
 
         line = f.readline()
-        column_names = line.replace('Rel ', 'Rel_').replace(
-            'Rslt * ', 'Rslt_*_').strip().split()
+        column_names = (
+            line.replace("Rel ", "Rel_").replace("Rslt * ", "Rslt_*_").strip().split()
+        )
         self.column_idx = dict(zip(column_names, range(0, len(column_names))))
 
     def read_tally_results_rel_error(self, f, num_e_groups, num_ves):
         """
         Read meshtally results and relative error data.
-    
+
         Parameters
         ----------
         f : str or filestream
@@ -2197,8 +2243,7 @@ class Meshtal(object):
             for j in range(num_ves):
                 line = f.readline().split()
                 result_row.append(float(line[self.column_idx["Result"]]))
-                rel_error_row.append(
-                    float(line[self.column_idx["Rel_Error"]]))
+                rel_error_row.append(float(line[self.column_idx["Rel_Error"]]))
             result[i] = result_row
             rel_error[i] = rel_error_row
 
@@ -2210,8 +2255,7 @@ class Meshtal(object):
             for i in range(num_ves):
                 line = f.readline().split()
                 res_tot.append(float(line[self.column_idx["Result"]]))
-                rel_err_tot.append(
-                    float(line[self.column_idx["Rel_Error"]]))
+                rel_err_tot.append(float(line[self.column_idx["Rel_Error"]]))
         else:
             res_tot = result.flatten()
             rel_err_tot = rel_error.flatten()
@@ -2221,7 +2265,8 @@ class Meshtal(object):
         rel_error = rel_error.transpose()
         return result, rel_error, np.array(res_tot), np.array(rel_err_tot)
 
-def mesh_to_geom(mesh, frac_type='mass', title_card="Generated from PyNE Mesh"):
+
+def mesh_to_geom(mesh, frac_type="mass", title_card="Generated from PyNE Mesh"):
     """This function reads a structured Mesh object and returns the geometry
     portion of an MCNP input file (cells, surfaces, materials), prepended by a
     title card. The mesh must be axis aligned. Surfaces and cells are written
@@ -2245,23 +2290,24 @@ def mesh_to_geom(mesh, frac_type='mass', title_card="Generated from PyNE Mesh"):
     """
 
     mesh._structured_check()
-    divs = (mesh.structured_get_divisions('x'),
-            mesh.structured_get_divisions('y'),
-            mesh.structured_get_divisions('z'))
+    divs = (
+        mesh.structured_get_divisions("x"),
+        mesh.structured_get_divisions("y"),
+        mesh.structured_get_divisions("z"),
+    )
 
     cell_cards = _mesh_to_cell_cards(mesh, divs)
     surf_cards = _mesh_to_surf_cards(mesh, divs)
     mat_cards = _mesh_to_mat_cards(mesh, divs, frac_type)
 
-    return "{0}\n{1}\n{2}\n{3}".format(title_card, cell_cards,
-                                       surf_cards, mat_cards)
+    return "{0}\n{1}\n{2}\n{3}".format(title_card, cell_cards, surf_cards, mat_cards)
 
 
 def _mesh_to_cell_cards(mesh, divs):
     """Prepares the cell cards for mesh_to_geom."""
     cell_cards = ""
     count = 1
-    idx = mesh.iter_structured_idx('xyz')
+    idx = mesh.iter_structured_idx("xyz")
 
     # Establish min and max idx values for each dimension.
     x_min = 1
@@ -2275,17 +2321,19 @@ def _mesh_to_cell_cards(mesh, divs):
         for j in range(1, len(divs[1])):
             for k in range(1, len(divs[2])):
                 # Cell number, mat number, density
-                cell_cards += "{0} {1} {2} ".format(count, count,
-                                                    mesh.density[next(idx)])
+                cell_cards += "{0} {1} {2} ".format(
+                    count, count, mesh.density[next(idx)]
+                )
                 # x, y, and z surfaces
                 cell_cards += "{0} -{1} {2} -{3} {4} -{5}\n".format(
-                              i, i + 1, j + x_max, j + x_max + 1,
-                              k + y_max, k + y_max + 1)
+                    i, i + 1, j + x_max, j + x_max + 1, k + y_max, k + y_max + 1
+                )
                 count += 1
 
     # Append graveyard.
     cell_cards += "{0} 0 -{1}:{2}:-{3}:{4}:-{5}:{6}\n".format(
-                  count, x_min, x_max, y_min, y_max, z_min, z_max)
+        count, x_min, x_max, y_min, y_max, z_min, z_max
+    )
 
     return cell_cards
 
@@ -2305,9 +2353,9 @@ def _mesh_to_surf_cards(mesh, divs):
 def _mesh_to_mat_cards(mesh, divs, frac_type):
     """Prepares the material cards for mesh_to_geom."""
     mat_cards = ""
-    idx = mesh.iter_structured_idx('xyz')
+    idx = mesh.iter_structured_idx("xyz")
     for i in idx:
-        mesh.mats[i].metadata['mat_number'] = int(i + 1)
+        mesh.mats[i].metadata["mat_number"] = int(i + 1)
         mat_cards += mesh.mats[i].mcnp(frac_type=frac_type)
 
     return mat_cards

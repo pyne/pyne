@@ -9,6 +9,7 @@ from pyne.material import Material, from_atom_frac
 from pyne.mesh import Mesh, MeshError, HAVE_PYMOAB
 import os
 import collections
+
 try:
     collectionsAbc = collections.abc
 except AttributeError:
@@ -30,20 +31,33 @@ except NameError:
 if HAVE_PYMOAB:
     from pyne.mesh import mesh_iterate
 else:
-    warn("The PyMOAB optional dependency could not be imported. "
-         "Some aspects of the mesh module may be incomplete.", ImportWarning)
+    warn(
+        "The PyMOAB optional dependency could not be imported. "
+        "Some aspects of the mesh module may be incomplete.",
+        ImportWarning,
+    )
 
-response_strings = {'decay_heat': 'Total Decay Heat',
-                    'specific_activity': 'Specific Activity',
-                    'alpha_heat': 'Alpha Decay Heat',
-                    'beta_heat': 'Beta Decay Heat',
-                    'gamma_heat': 'Gamma Decay Heat',
-                    'wdr': 'WDR/Clearance index',
-                    'photon_source': 'Photon Source Distribution'}
+response_strings = {
+    "decay_heat": "Total Decay Heat",
+    "specific_activity": "Specific Activity",
+    "alpha_heat": "Alpha Decay Heat",
+    "beta_heat": "Beta Decay Heat",
+    "gamma_heat": "Gamma Decay Heat",
+    "wdr": "WDR/Clearance index",
+    "photon_source": "Photon Source Distribution",
+}
 
-def mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
-                   reverse=False, sub_voxel=False, cell_fracs=None,
-                   cell_mats=None, print_progress=True):
+
+def mesh_to_fluxin(
+    flux_mesh,
+    flux_tag,
+    fluxin="fluxin.out",
+    reverse=False,
+    sub_voxel=False,
+    cell_fracs=None,
+    cell_mats=None,
+    print_progress=True,
+):
     """This function creates an ALARA fluxin file from fluxes tagged on a PyNE
     Mesh object. Fluxes are printed in the order of the flux_mesh.__iter__().
 
@@ -95,21 +109,32 @@ def mesh_to_fluxin(flux_mesh, flux_tag, fluxin="fluxin.out",
     # write flux data block by block
     with open(fluxin, "w") as f:
         if not sub_voxel:
-            bar = IfBar("Writing alara fluxin", max=len(flux_mesh), suffix='%(percent).1f%% - %(eta)ds', show=print_progress)
+            bar = IfBar(
+                "Writing alara fluxin",
+                max=len(flux_mesh),
+                suffix="%(percent).1f%% - %(eta)ds",
+                show=print_progress,
+            )
             for i, mat, ve in flux_mesh:
                 f.write(_output_flux_block(ve, tag_flux, reverse))
                 bar.next()
             bar.finish()
         else:
             ves = list(flux_mesh.iter_ve())
-            bar = IfBar("Writing alara fluxin", max=len(cell_fracs), suffix='%(percent).1f%% - %(eta)ds', show=print_progress)
+            bar = IfBar(
+                "Writing alara fluxin",
+                max=len(cell_fracs),
+                suffix="%(percent).1f%% - %(eta)ds",
+                show=print_progress,
+            )
             for i, row in enumerate(cell_fracs):
-                if len(cell_mats[row['cell']].comp) != 0:
-                    f.write(_output_flux_block(ves[row['idx']], tag_flux, reverse))
+                if len(cell_mats[row["cell"]].comp) != 0:
+                    f.write(_output_flux_block(ves[row["idx"]], tag_flux, reverse))
                 bar.next()
             bar.finish()
 
-def photon_source_to_hdf5(filename, nucs='all', chunkshape=(10000,)):
+
+def photon_source_to_hdf5(filename, nucs="all", chunkshape=(10000,)):
     """Converts a plaintext photon source file to an HDF5 version for
     quick later use.
 
@@ -139,17 +164,17 @@ def photon_source_to_hdf5(filename, nucs='all', chunkshape=(10000,)):
         A 1D tuple of the HDF5 chunkshape.
 
     """
-    f = open(filename, 'r')
-    header = f.readline().strip().split('\t')
+    f = open(filename, "r")
+    header = f.readline().strip().split("\t")
     f.seek(0)
     G = len(header) - 2
 
-    phtn_dtype = _make_response_dtype('phtn_src', data_length=G)
+    phtn_dtype = _make_response_dtype("phtn_src", data_length=G)
 
-    filters = tb.Filters(complevel=1, complib='zlib')
+    filters = tb.Filters(complevel=1, complib="zlib")
     # set the default output h5_filename
-    h5f = tb.open_file(filename + '.h5', 'w', filters=filters)
-    tab = h5f.create_table('/', 'data', phtn_dtype, chunkshape=chunkshape)
+    h5f = tb.open_file(filename + ".h5", "w", filters=filters)
+    tab = h5f.create_table("/", "data", phtn_dtype, chunkshape=chunkshape)
 
     chunksize = chunkshape[0]
     rows = np.empty(chunksize, dtype=phtn_dtype)
@@ -157,28 +182,36 @@ def photon_source_to_hdf5(filename, nucs='all', chunkshape=(10000,)):
     old = ""
     row_count = 0
     for i, line in enumerate(f, 1):
-        tokens = line.strip().split('\t')
+        tokens = line.strip().split("\t")
 
         # Keep track of the idx by delimiting by the last TOTAL line in a
         # volume element.
-        if tokens[0] != u'TOTAL' and old == u'TOTAL':
+        if tokens[0] != "TOTAL" and old == "TOTAL":
             idx += 1
 
-        if nucs.lower() == 'all':
+        if nucs.lower() == "all":
             row_count += 1
-            j = (row_count-1) % chunksize
-            rows[j] = (idx, tokens[0].strip(), tokens[1].strip(),
-                       np.array(tokens[2:], dtype=np.float64))
-        elif nucs.lower() == 'total':
-            if tokens[0] == 'TOTAL':
+            j = (row_count - 1) % chunksize
+            rows[j] = (
+                idx,
+                tokens[0].strip(),
+                tokens[1].strip(),
+                np.array(tokens[2:], dtype=np.float64),
+            )
+        elif nucs.lower() == "total":
+            if tokens[0] == "TOTAL":
                 row_count += 1
-                j = (row_count-1) % chunksize
-                rows[j] = (idx, tokens[0].strip(), tokens[1].strip(),
-                           np.array(tokens[2:], dtype=np.float64))
+                j = (row_count - 1) % chunksize
+                rows[j] = (
+                    idx,
+                    tokens[0].strip(),
+                    tokens[1].strip(),
+                    np.array(tokens[2:], dtype=np.float64),
+                )
         else:
             h5f.close()
             f.close()
-            raise ValueError(u"Nucs option {0} not support!".format(nucs))
+            raise ValueError("Nucs option {0} not support!".format(nucs))
 
         # Save the nuclide in order to keep track of idx
         old = tokens[0]
@@ -189,7 +222,7 @@ def photon_source_to_hdf5(filename, nucs='all', chunkshape=(10000,)):
             row_count = 0
 
     if row_count % chunksize != 0:
-        tab.append(rows[:j+1])
+        tab.append(rows[: j + 1])
 
     h5f.close()
     f.close()
@@ -229,15 +262,15 @@ def response_to_hdf5(filename, response, chunkshape=(10000,)):
     chunkshape : tuple of int
         A 1D tuple of the HDF5 chunkshape.
     """
-    f = open(filename, 'r')
+    f = open(filename, "r")
     f.seek(0)
 
     response_dtype = _make_response_dtype(response)
 
-    filters = tb.Filters(complevel=1, complib='zlib')
-    h5_filename = os.path.join(os.path.dirname(filename), ''.join([response, '.h5']))
-    h5f = tb.open_file(h5_filename, 'w', filters=filters)
-    tab = h5f.create_table('/', 'data', response_dtype, chunkshape=chunkshape)
+    filters = tb.Filters(complevel=1, complib="zlib")
+    h5_filename = os.path.join(os.path.dirname(filename), "".join([response, ".h5"]))
+    h5f = tb.open_file(h5_filename, "w", filters=filters)
+    tab = h5f.create_table("/", "data", response_dtype, chunkshape=chunkshape)
 
     chunksize = chunkshape[0]
     rows = np.empty(chunksize, dtype=response_dtype)
@@ -249,52 +282,50 @@ def response_to_hdf5(filename, response, chunkshape=(10000,)):
     state = None
     for line in f:
         # terminate condition
-        if state == response_start_state and \
-           ('Totals for all zones.' in line):
+        if state == response_start_state and ("Totals for all zones." in line):
             break
         # get response string
-        if state == zone_start_state and \
-           (response_strings[response] in line):
+        if state == zone_start_state and (response_strings[response] in line):
             state = response_start_state
         # get decay times
-        elif state == response_start_state and \
-             len(decay_times) == 0 and \
-             ('isotope\t shutdown' in line):
-                decay_times = read_decay_times(line)
+        elif (
+            state == response_start_state
+            and len(decay_times) == 0
+            and ("isotope\t shutdown" in line)
+        ):
+            decay_times = read_decay_times(line)
         # get zone idx
-        elif 'Zone #' in line:
+        elif "Zone #" in line:
             zone_idx = _get_zone_idx(line)
             if zone_idx == 0:
                 state = zone_start_state
         # skip lines if we haven't started the response or
         # the lines don't contain wanted data
-        elif state == response_start_state and \
-             _is_data(line):
-    
+        elif state == response_start_state and _is_data(line):
+
             tokens = line.strip().split()
             # put data into table
             # format of each row: zone_idx, nuc, time, decay_heat
             nuc = tokens[0].strip()
-            if nuc.lower() == 'total':
+            if nuc.lower() == "total":
                 nuc = nuc.upper()
-            for dt, response_value in zip(decay_times,tokens[1:]):
-                j = (count-1) % chunksize
+            for dt, response_value in zip(decay_times, tokens[1:]):
+                j = (count - 1) % chunksize
                 rows[j] = (zone_idx, nuc, dt, response_value)
                 if count % chunksize == 0:
                     tab.append(rows)
                     rows = np.empty(chunksize, dtype=response_dtype)
                 count += 1
-    
+
     if count % chunksize != 0:
-        tab.append(rows[:j+1])
+        tab.append(rows[: j + 1])
 
     # close the file
     h5f.close()
     f.close()
 
 
-def photon_source_hdf5_to_mesh(mesh, filename, tags, sub_voxel=False,
-                               cell_mats=None):
+def photon_source_hdf5_to_mesh(mesh, filename, tags, sub_voxel=False, cell_mats=None):
     """This function reads in an hdf5 file produced by photon_source_to_hdf5
     and tags the requested data to the mesh of a PyNE Mesh object. Any
     combinations of nuclides and decay times are allowed. The photon source
@@ -342,8 +373,13 @@ def photon_source_hdf5_to_mesh(mesh, filename, tags, sub_voxel=False,
     tag_size = num_e_groups * max_num_cells
     for tag_name in tags.values():
 
-        mesh.tag(tag_name, np.zeros(tag_size, dtype=float), 'nat_mesh',
-                 size=tag_size, dtype=float)
+        mesh.tag(
+            tag_name,
+            np.zeros(tag_size, dtype=float),
+            "nat_mesh",
+            size=tag_size,
+            dtype=float,
+        )
         tag_handles[tag_name] = mesh.get_tag(tag_name)
 
     decay_times = _read_h5_dt(filename)
@@ -354,16 +390,17 @@ def photon_source_hdf5_to_mesh(mesh, filename, tags, sub_voxel=False,
             # Convert nuclide to the form found in the ALARA phtn_src
             # file, which is similar to the Serpent form. Note this form is
             # different from the ALARA input nuclide form found in nucname.
-            if cond[0] != u"TOTAL":
+            if cond[0] != "TOTAL":
                 nuc = serpent(cond[0]).lower()
             else:
-                nuc = u"TOTAL"
+                nuc = "TOTAL"
 
             # time match, convert string mathch to float mathch
             dt = _find_dt(cond[1], decay_times)
             # create of array of rows that match the nuclide/decay criteria
             matched_data = h5f.root.data.read_where(
-                "(nuc == '{0}') & (time == '{1}')".format(nuc, dt))
+                "(nuc == '{0}') & (time == '{1}')".format(nuc, dt)
+            )
 
         if not sub_voxel:
             idx = 0
@@ -375,15 +412,17 @@ def photon_source_hdf5_to_mesh(mesh, filename, tags, sub_voxel=False,
                     tag_handles[tags[cond]][ve] = [0] * num_e_groups
         else:
             temp_mesh_data = np.empty(
-                shape=(num_vol_elements, max_num_cells, num_e_groups),
-                dtype=float)
+                shape=(num_vol_elements, max_num_cells, num_e_groups), dtype=float
+            )
             temp_mesh_data.fill(0.0)
             for sve, subvoxel in enumerate(subvoxel_array):
-                temp_mesh_data[subvoxel['idx'], subvoxel['scid'], :] = \
-                    matched_data[sve][3][:]
+                temp_mesh_data[subvoxel["idx"], subvoxel["scid"], :] = matched_data[
+                    sve
+                ][3][:]
             for i, _, ve in mesh:
-                tag_handles[tags[cond]][ve] = \
-                    temp_mesh_data[i, :].reshape(max_num_cells * num_e_groups)
+                tag_handles[tags[cond]][ve] = temp_mesh_data[i, :].reshape(
+                    max_num_cells * num_e_groups
+                )
 
 
 def response_hdf5_to_mesh(mesh, filename, tags, response):
@@ -425,8 +464,7 @@ def response_hdf5_to_mesh(mesh, filename, tags, response):
     tag_handles = {}
     for tag_name in tags.values():
 
-        mesh.tag(tag_name, np.zeros(1, dtype=float), 'nat_mesh',
-                 size=1, dtype=float)
+        mesh.tag(tag_name, np.zeros(1, dtype=float), "nat_mesh", size=1, dtype=float)
         tag_handles[tag_name] = mesh.get_tag(tag_name)
 
     decay_times = _read_h5_dt(filename)
@@ -446,7 +484,8 @@ def response_hdf5_to_mesh(mesh, filename, tags, response):
             dt = _find_dt(cond[1], decay_times)
             # create of array of rows that match the nuclide/decay criteria
             matched_data = h5f.root.data.read_where(
-                "(nuc == '{0}') & (time == '{1}')".format(nuc, dt))
+                "(nuc == '{0}') & (time == '{1}')".format(nuc, dt)
+            )
 
         idx = 0
         # index, mat, volume element
@@ -458,8 +497,9 @@ def response_hdf5_to_mesh(mesh, filename, tags, response):
                 tag_handles[tags[cond]][ve] = [0]
 
 
-def record_to_geom(mesh, cell_fracs, cell_mats, geom_file, matlib_file,
-                   sig_figs=6, sub_voxel=False):
+def record_to_geom(
+    mesh, cell_fracs, cell_mats, geom_file, matlib_file, sig_figs=6, sub_voxel=False
+):
     """This function preforms the same task as alara.mesh_to_geom, except the
     geometry is on the basis of the stuctured array output of
     dagmc.discretize_geom rather than a PyNE material object with materials.
@@ -500,96 +540,96 @@ def record_to_geom(mesh, cell_fracs, cell_mats, geom_file, matlib_file,
     # Create geometry information header. Note that the shape of the geometry
     # (rectangular) is actually inconsequential to the ALARA calculation so
     # unstructured meshes are not adversely affected.
-    geometry = u'geometry rectangular\n\n'
+    geometry = "geometry rectangular\n\n"
 
     # Create three strings in order to create all ALARA input blocks in a
     # single mesh iteration.
-    volume = u'volume\n'  # volume input block
-    mat_loading = u'mat_loading\n'  # material loading input block
-    mixture = u''  # mixture blocks
+    volume = "volume\n"  # volume input block
+    mat_loading = "mat_loading\n"  # material loading input block
+    mixture = ""  # mixture blocks
 
     unique_mixtures = []
     if not sub_voxel:
         for i, mat, ve in mesh:
-            volume += u'    {0: 1.6E}    zone_{1}\n'.format(
-                mesh.elem_volume(ve), i)
+            volume += "    {0: 1.6E}    zone_{1}\n".format(mesh.elem_volume(ve), i)
 
             ve_mixture = {}
-            for row in cell_fracs[cell_fracs['idx'] == i]:
-                cell_mat = cell_mats[row['cell']]
-                name = cell_mat.metadata['name']
+            for row in cell_fracs[cell_fracs["idx"] == i]:
+                cell_mat = cell_mats[row["cell"]]
+                name = cell_mat.metadata["name"]
                 if _is_void(name):
-                    name = u'mat_void'
+                    name = "mat_void"
                 if name not in ve_mixture.keys():
-                    ve_mixture[name] = np.round(row['vol_frac'], sig_figs)
+                    ve_mixture[name] = np.round(row["vol_frac"], sig_figs)
                 else:
-                    ve_mixture[name] += np.round(row['vol_frac'], sig_figs)
+                    ve_mixture[name] += np.round(row["vol_frac"], sig_figs)
 
             if ve_mixture not in unique_mixtures:
                 unique_mixtures.append(ve_mixture)
-                mixture += u'mixture mix_{0}\n'.format(
-                    unique_mixtures.index(ve_mixture))
+                mixture += "mixture mix_{0}\n".format(unique_mixtures.index(ve_mixture))
                 for key, value in ve_mixture.items():
-                    mixture += u'    material {0} 1 {1}\n'.format(key, value)
+                    mixture += "    material {0} 1 {1}\n".format(key, value)
 
-                mixture += u'end\n\n'
+                mixture += "end\n\n"
 
-            mat_loading += u'    zone_{0}    mix_{1}\n'.format(i,
-                                                              unique_mixtures.index(ve_mixture))
+            mat_loading += "    zone_{0}    mix_{1}\n".format(
+                i, unique_mixtures.index(ve_mixture)
+            )
     else:
         ves = list(mesh.iter_ve())
         sve_count = 0
         for row in cell_fracs:
-            if len(cell_mats[row['cell']].comp) != 0:
-                volume += u'    {0: 1.6E}    zone_{1}\n'.format(
-                    mesh.elem_volume(ves[row['idx']]) * row['vol_frac'], sve_count)
-                cell_mat = cell_mats[row['cell']]
-                name = cell_mat.metadata['name']
+            if len(cell_mats[row["cell"]].comp) != 0:
+                volume += "    {0: 1.6E}    zone_{1}\n".format(
+                    mesh.elem_volume(ves[row["idx"]]) * row["vol_frac"], sve_count
+                )
+                cell_mat = cell_mats[row["cell"]]
+                name = cell_mat.metadata["name"]
                 if name not in unique_mixtures:
                     unique_mixtures.append(name)
-                    mixture += u'mixture {0}\n'.format(name)
-                    mixture += u'    material {0} 1 1\n'.format(name)
-                    mixture += u'end\n\n'
-                mat_loading += u'    zone_{0}    {1}\n'.format(
-                    sve_count, name)
+                    mixture += "mixture {0}\n".format(name)
+                    mixture += "    material {0} 1 1\n".format(name)
+                    mixture += "end\n\n"
+                mat_loading += "    zone_{0}    {1}\n".format(sve_count, name)
                 sve_count += 1
 
-    volume += u'end\n\n'
-    mat_loading += u'end\n\n'
+    volume += "end\n\n"
+    mat_loading += "end\n\n"
 
-    with open(geom_file, 'w') as f:
+    with open(geom_file, "w") as f:
         f.write(geometry + volume + mat_loading + mixture)
 
-    matlib = u''  # ALARA material library string
+    matlib = ""  # ALARA material library string
 
     printed_mats = []
     print_void = False
     for mat in cell_mats.values():
-        name = mat.metadata['name']
+        name = mat.metadata["name"]
         if _is_void(name):
             print_void = True
             continue
         if name not in printed_mats:
             printed_mats.append(name)
-            matlib += u'{0}    {1: 1.6E}    {2}\n'.format(name, mat.density,
-                                                         len(mat.comp))
+            matlib += "{0}    {1: 1.6E}    {2}\n".format(
+                name, mat.density, len(mat.comp)
+            )
             for nuc, comp in mat.comp.items():
-                matlib += u'{0}    {1: 1.6E}    {2}\n'.format(alara(nuc),
-                                                             comp*100.0, znum(nuc))
-            matlib += u'\n'
+                matlib += "{0}    {1: 1.6E}    {2}\n".format(
+                    alara(nuc), comp * 100.0, znum(nuc)
+                )
+            matlib += "\n"
 
     if print_void:
-        matlib += u'# void material\nmat_void 0.0 1\nhe 1 2\n'
+        matlib += "# void material\nmat_void 0.0 1\nhe 1 2\n"
 
-    with open(matlib_file, 'w') as f:
+    with open(matlib_file, "w") as f:
         f.write(matlib)
 
 
 def _is_void(name):
-    """Private function for determining if a material name specifies void.
-    """
+    """Private function for determining if a material name specifies void."""
     lname = name.lower()
-    return 'vacuum' in lname or 'void' in lname or 'graveyard' in lname
+    return "vacuum" in lname or "void" in lname or "graveyard" in lname
 
 
 def mesh_to_geom(mesh, geom_file, matlib_file):
@@ -611,35 +651,36 @@ def mesh_to_geom(mesh, geom_file, matlib_file):
     # Create geometry information header. Note that the shape of the geometry
     # (rectangular) is actually inconsequential to the ALARA calculation so
     # unstructured meshes are not adversely affected.
-    geometry = u"geometry rectangular\n\n"
+    geometry = "geometry rectangular\n\n"
 
     # Create three strings in order to create all ALARA input blocks in a
     # single mesh iteration.
-    volume = u"volume\n"  # volume input block
-    mat_loading = u"mat_loading\n"  # material loading input block
-    mixture = u""  # mixture blocks
-    matlib = u""  # ALARA material library string
+    volume = "volume\n"  # volume input block
+    mat_loading = "mat_loading\n"  # material loading input block
+    mixture = ""  # mixture blocks
+    matlib = ""  # ALARA material library string
 
     for i, mat, ve in mesh:
-        volume += u"    {0: 1.6E}    zone_{1}\n".format(mesh.elem_volume(ve), i)
-        mat_loading += u"    zone_{0}    mix_{0}\n".format(i)
-        matlib += u"mat_{0}    {1: 1.6E}    {2}\n".format(i, mesh.density[i],
-                                                         len(mesh.comp[i]))
-        mixture += (u"mixture mix_{0}\n"
-                    u"    material mat_{0} 1 1\nend\n\n".format(i))
+        volume += "    {0: 1.6E}    zone_{1}\n".format(mesh.elem_volume(ve), i)
+        mat_loading += "    zone_{0}    mix_{0}\n".format(i)
+        matlib += "mat_{0}    {1: 1.6E}    {2}\n".format(
+            i, mesh.density[i], len(mesh.comp[i])
+        )
+        mixture += "mixture mix_{0}\n" "    material mat_{0} 1 1\nend\n\n".format(i)
 
         for nuc, comp in mesh.comp[i].items():
-            matlib += u"{0}    {1: 1.6E}    {2}\n".format(alara(nuc), comp*100.0,
-                                                         znum(nuc))
-        matlib += u"\n"
+            matlib += "{0}    {1: 1.6E}    {2}\n".format(
+                alara(nuc), comp * 100.0, znum(nuc)
+            )
+        matlib += "\n"
 
-    volume += u"end\n\n"
-    mat_loading += u"end\n\n"
+    volume += "end\n\n"
+    mat_loading += "end\n\n"
 
-    with open(geom_file, 'w') as f:
+    with open(geom_file, "w") as f:
         f.write(geometry + volume + mat_loading + mixture)
 
-    with open(matlib_file, 'w') as f:
+    with open(matlib_file, "w") as f:
         f.write(matlib)
 
 
@@ -670,16 +711,15 @@ def num_density_to_mesh(lines, time, m):
     elif not isinstance(lines, collectionsAbc.Sequence):
         raise TypeError("Lines argument not a file or sequence.")
     # Advance file to number density portion.
-    header = u'Number Density [atoms/cm3]'
-    line = u""
+    header = "Number Density [atoms/cm3]"
+    line = ""
     while line.rstrip() != header:
         line = lines.pop(0)
 
     # Get decay time index from next line (the column the decay time answers
     # appear in.
-    line_strs = lines.pop(0).replace(u'\t', u'  ')
-    time_index = [s.strip() for s in line_strs.split(u'  ')
-                  if s.strip()].index(time)
+    line_strs = lines.pop(0).replace("\t", "  ")
+    time_index = [s.strip() for s in line_strs.split("  ") if s.strip()].index(time)
 
     # Create a dict of mats for the mesh.
     mats = {}
@@ -687,7 +727,7 @@ def num_density_to_mesh(lines, time, m):
     # Read through file until enough material objects are create to fill mesh.
     while count != len(m):
         # Pop lines to the start of the next material.
-        while (lines.pop(0) + u" ")[0] != u'=':
+        while (lines.pop(0) + " ")[0] != "=":
             pass
 
         # Create a new material object and add to mats dict.
@@ -695,12 +735,12 @@ def num_density_to_mesh(lines, time, m):
         nucvec = {}
         density = 0.0
         # Read lines until '=' delimiter at the end of a material.
-        while line[0] != u'=':
+        while line[0] != "=":
             nuc = line.split()[0]
             n = float(line.split()[time_index])
             if n != 0.0:
                 nucvec[nuc] = n
-                density += n * anum(nuc)/N_A
+                density += n * anum(nuc) / N_A
 
             line = lines.pop(0)
         mat = from_atom_frac(nucvec, density=density, mass=0)
@@ -710,10 +750,18 @@ def num_density_to_mesh(lines, time, m):
     m.mats = mats
 
 
-def irradiation_blocks(material_lib, element_lib, data_library, cooling,
-                       flux_file, irr_time, output="number_density",
-                       truncation=1E-12, impurity=(5E-6, 1E-3),
-                       dump_file="dump_file"):
+def irradiation_blocks(
+    material_lib,
+    element_lib,
+    data_library,
+    cooling,
+    flux_file,
+    irr_time,
+    output="number_density",
+    truncation=1e-12,
+    impurity=(5e-6, 1e-3),
+    dump_file="dump_file",
+):
     """irradiation_blocks(material_lib, element_lib, data_library, cooling,
                        flux_file, irr_time, output = "number_density",
                        truncation=1E-12, impurity = (5E-6, 1E-3),
@@ -759,46 +807,51 @@ def irradiation_blocks(material_lib, element_lib, data_library, cooling,
         Irradition-related ALARA input blocks.
     """
 
-    s = u""
+    s = ""
 
     # Material, element, and data_library blocks
-    s += u"material_lib {0}\n".format(material_lib)
-    s += u"element_lib {0}\n".format(element_lib)
-    s += u"data_library {0}\n\n".format(data_library)
+    s += "material_lib {0}\n".format(material_lib)
+    s += "element_lib {0}\n".format(element_lib)
+    s += "data_library {0}\n\n".format(data_library)
 
     # Cooling times
-    s += u"cooling\n"
-    if isinstance(cooling, collectionsAbc.Iterable) and not isinstance(cooling, basestring):
+    s += "cooling\n"
+    if isinstance(cooling, collectionsAbc.Iterable) and not isinstance(
+        cooling, basestring
+    ):
         for c in cooling:
-            s += u"    {0}\n".format(c)
+            s += "    {0}\n".format(c)
     else:
-        s += u"    {0}\n".format(cooling)
+        s += "    {0}\n".format(cooling)
 
-    s += u"end\n\n"
+    s += "end\n\n"
 
     # Flux block
-    s += u"flux flux_1 {0} 1.0 0 default\n".format(flux_file)
+    s += "flux flux_1 {0} 1.0 0 default\n".format(flux_file)
 
     # Flux schedule
-    s += (u"schedule simple_schedule\n"
-          u"    {0} flux_1 pulse_once 0 s\nend\n\n".format(irr_time))
+    s += "schedule simple_schedule\n" "    {0} flux_1 pulse_once 0 s\nend\n\n".format(
+        irr_time
+    )
 
-    s += u"pulsehistory pulse_once\n    1 0.0 s\nend\n\n"
+    s += "pulsehistory pulse_once\n    1 0.0 s\nend\n\n"
 
     # Output block
-    s += u"output zone\n    units Ci cm3\n"
-    if isinstance(output, collectionsAbc.Iterable) and not isinstance(output, basestring):
+    s += "output zone\n    units Ci cm3\n"
+    if isinstance(output, collectionsAbc.Iterable) and not isinstance(
+        output, basestring
+    ):
         for out in output:
-            s += u"    {0}\n".format(out)
+            s += "    {0}\n".format(out)
     else:
-        s += u"    {0}\n".format(output)
+        s += "    {0}\n".format(output)
 
-    s += u"end\n\n"
+    s += "end\n\n"
 
     # Other parameters
-    s += u"truncation {0}\n".format(truncation)
-    s += u"impurity {0} {1}\n".format(impurity[0], impurity[1])
-    s += u"dump_file {0}\n".format(dump_file)
+    s += "truncation {0}\n".format(truncation)
+    s += "impurity {0} {1}\n".format(impurity[0], impurity[1])
+    s += "dump_file {0}\n".format(dump_file)
 
     return s
 
@@ -817,24 +870,24 @@ def phtn_src_energy_bounds(input_file):
     e_bounds : list of floats
     The lower and upper energy bounds for the photon_source discretization. Unit: eV.
     """
-    phtn_src_lines = u""
-    with open(input_file, 'r') as f:
+    phtn_src_lines = ""
+    with open(input_file, "r") as f:
         line = f.readline()
-        while not (u' photon_source ' in line and line.strip()[0] != u"#"):
+        while not (" photon_source " in line and line.strip()[0] != "#"):
             line = f.readline()
         num_groups = float(line.split()[3])
         upper_bounds = [float(x) for x in line.split()[4:]]
         while len(upper_bounds) < num_groups:
             line = f.readline()
-            upper_bounds += [float(x) for x in line.split(u"#")
-                             [0].split(u'end')[0].split()]
-    e_bounds = [0.] + upper_bounds
+            upper_bounds += [
+                float(x) for x in line.split("#")[0].split("end")[0].split()
+            ]
+    e_bounds = [0.0] + upper_bounds
     return e_bounds
 
 
 def _build_matrix(N):
-    """ This function  builds burnup matrix, A. Decay only.
-    """
+    """This function  builds burnup matrix, A. Decay only."""
 
     A = np.zeros((len(N), len(N)))
 
@@ -856,12 +909,12 @@ def _build_matrix(N):
         # Find decay parents
         for k in range(len(N)):
             if N_id[i] in decay_children(N_id[k]):
-                A[i, k] += branch_ratio(N_id[k], N_id[i])*decay_const(N_id[k])
+                A[i, k] += branch_ratio(N_id[k], N_id[i]) * decay_const(N_id[k])
     return A
 
 
 def _rat_apprx_14(A, t, n_0):
-    """ CRAM of order 14
+    """CRAM of order 14
 
     Parameters
     ---------
@@ -873,40 +926,49 @@ def _rat_apprx_14(A, t, n_0):
         Inital composition vector
     """
 
-    theta = np.array([-8.8977731864688888199 + 16.630982619902085304j,
-                      -3.7032750494234480603 + 13.656371871483268171j,
-                      -.2087586382501301251 + 10.991260561901260913j,
-                      3.9933697105785685194 + 6.0048316422350373178j,
-                      5.0893450605806245066 + 3.5888240290270065102j,
-                      5.6231425727459771248 + 1.1940690463439669766j,
-                      2.2697838292311127097 + 8.4617379730402214019j])
+    theta = np.array(
+        [
+            -8.8977731864688888199 + 16.630982619902085304j,
+            -3.7032750494234480603 + 13.656371871483268171j,
+            -0.2087586382501301251 + 10.991260561901260913j,
+            3.9933697105785685194 + 6.0048316422350373178j,
+            5.0893450605806245066 + 3.5888240290270065102j,
+            5.6231425727459771248 + 1.1940690463439669766j,
+            2.2697838292311127097 + 8.4617379730402214019j,
+        ]
+    )
 
-    alpha = np.array([-.000071542880635890672853 + .00014361043349541300111j,
-                      .0094390253107361688779 - .01784791958483017511j,
-                      -.37636003878226968717 + .33518347029450104214j,
-                      -23.498232091082701191 - 5.8083591297142074004j,
-                      46.933274488831293047 + 45.643649768827760791j,
-                      -27.875161940145646468 - 102.14733999056451434j,
-                      4.8071120988325088907 - 1.3209793837428723881j])
+    alpha = np.array(
+        [
+            -0.000071542880635890672853 + 0.00014361043349541300111j,
+            0.0094390253107361688779 - 0.01784791958483017511j,
+            -0.37636003878226968717 + 0.33518347029450104214j,
+            -23.498232091082701191 - 5.8083591297142074004j,
+            46.933274488831293047 + 45.643649768827760791j,
+            -27.875161940145646468 - 102.14733999056451434j,
+            4.8071120988325088907 - 1.3209793837428723881j,
+        ]
+    )
 
     alpha_0 = np.array([1.8321743782540412751e-14])
 
     s = 7
-    A = A*t
-    n = 0*n_0
+    A = A * t
+    n = 0 * n_0
 
     for j in range(7):
-        n = n + np.linalg.solve(A - theta[j] *
-                                np.identity(np.shape(A)[0]), alpha[j]*n_0)
+        n = n + np.linalg.solve(
+            A - theta[j] * np.identity(np.shape(A)[0]), alpha[j] * n_0
+        )
 
-    n = 2*n.real
-    n = n + alpha_0*n_0
+    n = 2 * n.real
+    n = n + alpha_0 * n_0
 
     return n
 
 
 def _rat_apprx_16(A, t, n_0):
-    """ CRAM of order 16
+    """CRAM of order 16
 
     Parameters
     ---------
@@ -917,41 +979,50 @@ def _rat_apprx_16(A, t, n_0):
     n_0: numpy array
         Inital composition vector
     """
-    theta = np.array([-10.843917078696988026 + 19.277446167181652284j,
-                      -5.2649713434426468895 + 16.220221473167927305j,
-                      5.9481522689511774808 + 3.5874573620183222829j,
-                      3.5091036084149180974 + 8.4361989858843750826j,
-                      6.4161776990994341923 + 1.1941223933701386874j,
-                      1.4193758971856659786 + 10.925363484496722585j,
-                      4.9931747377179963991 + 5.9968817136039422260j,
-                      -1.4139284624888862114 + 13.497725698892745389j])
+    theta = np.array(
+        [
+            -10.843917078696988026 + 19.277446167181652284j,
+            -5.2649713434426468895 + 16.220221473167927305j,
+            5.9481522689511774808 + 3.5874573620183222829j,
+            3.5091036084149180974 + 8.4361989858843750826j,
+            6.4161776990994341923 + 1.1941223933701386874j,
+            1.4193758971856659786 + 10.925363484496722585j,
+            4.9931747377179963991 + 5.9968817136039422260j,
+            -1.4139284624888862114 + 13.497725698892745389j,
+        ]
+    )
 
-    alpha = np.array([-.0000005090152186522491565 - .00002422001765285228797j,
-                      .00021151742182466030907 + .0043892969647380673918j,
-                      113.39775178483930527 + 101.9472170421585645j,
-                      15.059585270023467528 - 5.7514052776421819979j,
-                      -64.500878025539646595 - 224.59440762652096056j,
-                      -1.4793007113557999718 + 1.7686588323782937906j,
-                      -62.518392463207918892 - 11.19039109428322848j,
-                      .041023136835410021273 - .15743466173455468191j])
+    alpha = np.array(
+        [
+            -0.0000005090152186522491565 - 0.00002422001765285228797j,
+            0.00021151742182466030907 + 0.0043892969647380673918j,
+            113.39775178483930527 + 101.9472170421585645j,
+            15.059585270023467528 - 5.7514052776421819979j,
+            -64.500878025539646595 - 224.59440762652096056j,
+            -1.4793007113557999718 + 1.7686588323782937906j,
+            -62.518392463207918892 - 11.19039109428322848j,
+            0.041023136835410021273 - 0.15743466173455468191j,
+        ]
+    )
 
     alpha_0 = np.array([2.1248537104952237488e-16])
 
     s = 8
-    A = A*t
-    n = 0*n_0
+    A = A * t
+    n = 0 * n_0
 
     for j in range(8):
-        n = n + np.linalg.solve(A - theta[j] *
-                                np.identity(np.shape(A)[0]), alpha[j]*n_0)
+        n = n + np.linalg.solve(
+            A - theta[j] * np.identity(np.shape(A)[0]), alpha[j] * n_0
+        )
 
-    n = 2*n.real
-    n = n + alpha_0*n_0
+    n = 2 * n.real
+    n = n + alpha_0 * n_0
     return n
 
 
 def cram(N, t, n_0, order):
-    """ This function returns matrix exponential solution n using CRAM14 or CRAM16
+    """This function returns matrix exponential solution n using CRAM14 or CRAM16
 
     Parameters
     ----------
@@ -975,8 +1046,7 @@ def cram(N, t, n_0, order):
         return _rat_apprx_16(A, t, n_0)
 
     else:
-        msg = 'Rational approximation of degree {0} is not supported.'.format(
-            order)
+        msg = "Rational approximation of degree {0} is not supported.".format(order)
         raise ValueError(msg)
 
 
@@ -994,9 +1064,9 @@ def _output_flux_block(ve, tag_flux, reverse):
     flux_data = np.atleast_1d(tag_flux[ve])
     if reverse:
         flux_data = np.flip(flux_data)
-    outs = ''.join([u"{:.6E} ".format(value) for value in flux_data])
-    outs = '\n'.join(re.findall('.{1,78}', outs))
-    outs += u"\n\n"
+    outs = "".join(["{:.6E} ".format(value) for value in flux_data])
+    outs = "\n".join(re.findall(".{1,78}", outs))
+    outs += "\n\n"
     return outs
 
 
@@ -1021,12 +1091,12 @@ def _get_subvoxel_array(mesh, cell_mats):
 
     """
     cell_number_tag = mesh.cell_number
-    subvoxel_array = np.zeros(0, dtype=[('svid', np.int64),
-                                        ('idx', np.int64),
-                                        ('scid', np.int64)])
-    temp_subvoxel = np.zeros(1, dtype=[('svid', np.int64),
-                                       ('idx', np.int64),
-                                       ('scid', np.int64)])
+    subvoxel_array = np.zeros(
+        0, dtype=[("svid", np.int64), ("idx", np.int64), ("scid", np.int64)]
+    )
+    temp_subvoxel = np.zeros(
+        1, dtype=[("svid", np.int64), ("idx", np.int64), ("scid", np.int64)]
+    )
     # calculate the total number of non-void sub-voxel
     non_void_sv_num = 0
     for i, _, ve in mesh:
@@ -1038,15 +1108,18 @@ def _get_subvoxel_array(mesh, cell_mats):
 
     return subvoxel_array
 
+
 def _make_response_dtype(response_name, data_length=1):
 
-    return np.dtype([
-        ('idx', np.int64),
-        ('nuc', 'S6'),
-        ('time', 'S20'),
-        (response_name, np.float64, data_length)
-    ])
- 
+    return np.dtype(
+        [
+            ("idx", np.int64),
+            ("nuc", "S6"),
+            ("time", "S20"),
+            (response_name, np.float64, data_length),
+        ]
+    )
+
 
 def _convert_unit_to_s(dt):
     """
@@ -1062,8 +1135,8 @@ def _convert_unit_to_s(dt):
     """
     dt = str_to_unicode(dt)
     # get num and unit
-    if dt == u'shutdown':
-        num, unit = u'0.0', u's'
+    if dt == "shutdown":
+        num, unit = "0.0", "s"
     else:
         num, unit = dt.split()
     return to_sec(float(num), unit)
@@ -1094,18 +1167,17 @@ def _find_dt(idt, decay_times):
         # Loop over decay times in decay_times list and compare to idt_s.
         for dt in decay_times:
             # Skip "shutdown" string in list.
-            if str_to_unicode(dt) == u'shutdown':
+            if str_to_unicode(dt) == "shutdown":
                 continue
             # Convert to [s].
             dt_s = _convert_unit_to_s(dt)
             if idt_s == dt_s:
                 # idt_s matches dt_s. return original string, dt.
                 return dt
-            elif dt_s != 0.0 and (abs(idt_s - dt_s)/dt_s) < 1e-6:
+            elif dt_s != 0.0 and (abs(idt_s - dt_s) / dt_s) < 1e-6:
                 return dt
         # if idt doesn't match any string in decay_times list, raise an error.
-        raise ValueError(
-            'Decay time {0} not found in decay_times'.format(idt))
+        raise ValueError("Decay time {0} not found in decay_times".format(idt))
 
 
 def responses_output_zone(responses=None, wdr_file=None, alara_params=None):
@@ -1137,28 +1209,32 @@ def responses_output_zone(responses=None, wdr_file=None, alara_params=None):
 
     # set default value for functions do not need response
     if responses == None:
-        return ''
+        return ""
     # input check
     for response in responses:
         if response not in response_strings.keys():
-            raise ValueError('response {0} not supported.'.format(response))
+            raise ValueError("response {0} not supported.".format(response))
 
-    output_strings = {"decay_heat": "      total_heat",
-                      "specific_activity": "      specific_activity",
-                      "alpha_heat": "      alpha_heat",
-                      "beta_heat": "      beta_heat",
-                      "gamma_heat": "      gamma_heat"}
-    if 'wdr' in responses:
-        output_strings['wdr'] = ''.join(["       wdr ", wdr_file])
-    if 'photon_source' in responses:
+    output_strings = {
+        "decay_heat": "      total_heat",
+        "specific_activity": "      specific_activity",
+        "alpha_heat": "      alpha_heat",
+        "beta_heat": "      beta_heat",
+        "gamma_heat": "      gamma_heat",
+    }
+    if "wdr" in responses:
+        output_strings["wdr"] = "".join(["       wdr ", wdr_file])
+    if "photon_source" in responses:
         alara_lib = get_alara_lib(alara_params)
-        output_strings["photon_source"] =  ''.join(["      photon_source ",
-            alara_lib, " phtn_src 1 2e7"])
+        output_strings["photon_source"] = "".join(
+            ["      photon_source ", alara_lib, " phtn_src 1 2e7"]
+        )
     output_zone = ["output zone"]
     for response in responses:
         output_zone.append(output_strings[response])
     output_zone.append("end")
-    return '\n'.join(output_zone)
+    return "\n".join(output_zone)
+
 
 def _is_data(line):
     """
@@ -1182,14 +1258,14 @@ def _is_data(line):
     if len(tokens) < 2:
         return False
     # first block should be a valid nucname or 'total'
-    if not (nucname.isnuclide(tokens[0]) or tokens[0] == 'TOTAL'.lower()):
+    if not (nucname.isnuclide(tokens[0]) or tokens[0] == "TOTAL".lower()):
         return False
     try:
         np.array(tokens[1:]).astype(float)
         return True
     except:
         return False
-    
+
 
 def read_decay_times(line):
     """
@@ -1207,11 +1283,11 @@ def read_decay_times(line):
         Array of decay times.
     """
     tokens = line.strip().split()
-    decay_times = ['shutdown']
+    decay_times = ["shutdown"]
     for i in range(2, len(tokens), 2):
-        decay_times.append(''.join([tokens[i], ' ', tokens[i+1]]))
+        decay_times.append("".join([tokens[i], " ", tokens[i + 1]]))
     return decay_times
-    
+
 
 def _get_zone_idx(line):
     """
@@ -1226,9 +1302,9 @@ def _get_zone_idx(line):
     -------
     int, zone index
     """
-    
+
     last_word = line.strip().split()[-1]
-    return int(last_word.split('_')[-1])
+    return int(last_word.split("_")[-1])
 
 
 def get_alara_lib(alara_params):
@@ -1245,7 +1321,7 @@ def get_alara_lib(alara_params):
     alara_lib: string
         Path to ALARA library.
     """
-    lines = alara_params.split('\n')
+    lines = alara_params.split("\n")
     for line in lines:
         if "data_library" in line:
             alara_lib = line.strip().split()[-1]
