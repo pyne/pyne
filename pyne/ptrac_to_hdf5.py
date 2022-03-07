@@ -13,16 +13,30 @@ except ImportError:
 
 QA_warn(__name__)
 
+
 def main():
-    argparser = argparse.ArgumentParser(description="write the contents of a MCNP PTRAC file to a HDF5 table")
+    argparser = argparse.ArgumentParser(
+        description="write the contents of a MCNP PTRAC file to a HDF5 table"
+    )
     argparser.add_argument("ptrac_file", help="MCNP PTRAC file to read from")
-    argparser.add_argument("hdf5_file", help="HDF5 file to write to (will be created if it does not exist)")
-    argparser.add_argument("-n", "--table-name", default="ptrac",
-            help="name of the HDF5 table (default is \"ptrac\")")
-    argparser.add_argument("-t", "--table-title", default="Ptrac data",
-            help="title of the HDF5 table (default is \"Ptrac data\")")
-    argparser.add_argument("-s", "--show-progress", action="store_true",
-            help="show progress indicator")
+    argparser.add_argument(
+        "hdf5_file", help="HDF5 file to write to (will be created if it does not exist)"
+    )
+    argparser.add_argument(
+        "-n",
+        "--table-name",
+        default="ptrac",
+        help='name of the HDF5 table (default is "ptrac")',
+    )
+    argparser.add_argument(
+        "-t",
+        "--table-title",
+        default="Ptrac data",
+        help='title of the HDF5 table (default is "Ptrac data")',
+    )
+    argparser.add_argument(
+        "-s", "--show-progress", action="store_true", help="show progress indicator"
+    )
     args = argparser.parse_args()
 
     ptrac_filename = args.ptrac_file
@@ -46,5 +60,6 @@ def main():
     table.flush()
     h5file.close()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

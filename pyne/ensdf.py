@@ -2,6 +2,7 @@ from __future__ import division
 import re
 import sys
 import copy
+
 try:
     from collections.abc import defaultdict
 except ImportError:
@@ -18,44 +19,71 @@ if sys.version_info[0] > 2:
 
 QA_warn(__name__)
 
-_valexp = re.compile('([0-9.]*)([Ee][+-]?\d*)')
-_val = re.compile('(\d*)[.](\d*)')
+_valexp = re.compile("([0-9.]*)([Ee][+-]?\d*)")
+_val = re.compile("(\d*)[.](\d*)")
 _specialval = re.compile("([0-9. ]*)[+]([A-Z])")
 _specialval2 = re.compile("([A-Z]*)[+]([0-9.]*)")
-_errpm = re.compile('[+](\d*)[-](\d*)')
-_err = re.compile('[ ]*(\d*)')
-_base = '([ \d]{3}[ A-Za-z]{2})'
-_ident = re.compile(_base + '    (.{30})(.{26})(.{7})(.{6})')
-_g = re.compile(_base + '  G (.{10})(.{2})(.{8})(.{2}).{24}(.{7})(.{2})(.{10})'
-                + '(.{2})')
-_gc = re.compile(_base + '[0-9A-Za-z] [GE] (.{70})')
-_beta = re.compile(_base + '  B (.{10})(.{2})(.{8})(.{2}).{10}(.{8})(.{6})')
-_betac = re.compile(_base + '[0-9A-Za-z] ([BE]) (.{70})')
-_ec = re.compile(_base + '  E (.{10})(.{2})(.{8})(.{2})'
-                 + '(.{8})(.{2})(.{8})(.{6})(.{10})(.{2})')
-_p = re.compile(_base + '  P (.{10})(.{2})(.{18})(.{10})'
-                + '(.{6}).{9}(.{10})(.{2})(.{4})')
-_norm = re.compile(_base + '  N (.{10})(.{2})(.{8})(.{2})(.{8})(.{2})(.{8})'
-                   + '(.{6})(.{7})(.{2})')
-_normp = re.compile(_base +
-                    ' PN (.{10})(.{2})(.{8})(.{2})(.{8})(.{2})(.{7})(.{2})')
-_q = re.compile(_base + '  Q (.{10})(.{2})(.{8})(.{2})'
-                + '(.{8})(.{2})(.{8})(.{6})')
-_alpha = re.compile(_base + '  A (.{10})(.{2})(.{8})(.{2})(.{8})(.{2})')
-_dp = re.compile(_base + '  D(.{1})(.{10})(.{2})(.{8})(.{2})(.{8})(.{10})'
-                 + '(.{6})')
-_decays = ['B-', 'B+A', 'EC', 'B-A', 'B+', 'B+P', 'B-N', 'ECP', 'EC2P', 'N',
-           '2N', 'IT', 'B+2P', 'B-2N', 'B+3P', 'ECA', 'P', '2P', '2B-', 'SF',
-           'A', '2B+', '2EC', '14C']
-_level_regex = re.compile(_base + '  L (.{10})(.{2})(.{18})(.{10})(.{6})'
-                          + '(.{9})(.{10})(.{2})(.{1})([ M])([ 1-9])')
-_level_cont_regex = re.compile('([ \d]{3}[ A-Za-z]{2})[0-9A-Za-z] L (.*)')
+_errpm = re.compile("[+](\d*)[-](\d*)")
+_err = re.compile("[ ]*(\d*)")
+_base = "([ \d]{3}[ A-Za-z]{2})"
+_ident = re.compile(_base + "    (.{30})(.{26})(.{7})(.{6})")
+_g = re.compile(
+    _base + "  G (.{10})(.{2})(.{8})(.{2}).{24}(.{7})(.{2})(.{10})" + "(.{2})"
+)
+_gc = re.compile(_base + "[0-9A-Za-z] [GE] (.{70})")
+_beta = re.compile(_base + "  B (.{10})(.{2})(.{8})(.{2}).{10}(.{8})(.{6})")
+_betac = re.compile(_base + "[0-9A-Za-z] ([BE]) (.{70})")
+_ec = re.compile(
+    _base + "  E (.{10})(.{2})(.{8})(.{2})" + "(.{8})(.{2})(.{8})(.{6})(.{10})(.{2})"
+)
+_p = re.compile(
+    _base + "  P (.{10})(.{2})(.{18})(.{10})" + "(.{6}).{9}(.{10})(.{2})(.{4})"
+)
+_norm = re.compile(
+    _base + "  N (.{10})(.{2})(.{8})(.{2})(.{8})(.{2})(.{8})" + "(.{6})(.{7})(.{2})"
+)
+_normp = re.compile(_base + " PN (.{10})(.{2})(.{8})(.{2})(.{8})(.{2})(.{7})(.{2})")
+_q = re.compile(_base + "  Q (.{10})(.{2})(.{8})(.{2})" + "(.{8})(.{2})(.{8})(.{6})")
+_alpha = re.compile(_base + "  A (.{10})(.{2})(.{8})(.{2})(.{8})(.{2})")
+_dp = re.compile(_base + "  D(.{1})(.{10})(.{2})(.{8})(.{2})(.{8})(.{10})" + "(.{6})")
+_decays = [
+    "B-",
+    "B+A",
+    "EC",
+    "B-A",
+    "B+",
+    "B+P",
+    "B-N",
+    "ECP",
+    "EC2P",
+    "N",
+    "2N",
+    "IT",
+    "B+2P",
+    "B-2N",
+    "B+3P",
+    "ECA",
+    "P",
+    "2P",
+    "2B-",
+    "SF",
+    "A",
+    "2B+",
+    "2EC",
+    "14C",
+]
+_level_regex = re.compile(
+    _base
+    + "  L (.{10})(.{2})(.{18})(.{10})(.{6})"
+    + "(.{9})(.{10})(.{2})(.{1})([ M])([ 1-9])"
+)
+_level_cont_regex = re.compile("([ \d]{3}[ A-Za-z]{2})[0-9A-Za-z] L (.*)")
 
 
 def _getvalue(obj, fn=float, rn=None):
     x = obj.strip()
-    x = x.replace('$', '')
-    x = x.replace('?', '')
+    x = x.replace("$", "")
+    x = x.replace("?", "")
     try:
         return fn(x)
     except ValueError:
@@ -63,10 +91,10 @@ def _getvalue(obj, fn=float, rn=None):
 
 
 def _to_id(nuc):
-    if 'NN' not in nuc:
+    if "NN" not in nuc:
         nucid = nucname.ensdf_to_id(nuc.strip())
     else:
-        warn('Neutron data not supported!')
+        warn("Neutron data not supported!")
         return 0
     return nucid
 
@@ -77,10 +105,11 @@ def _to_id(nuc):
 #    h-bar = 1.054 571 800(13) x 1e-34 J
 #    1 J = 6.241 509 126(38) x 1e18 eV
 HBAR_LN2 = 4.5623775832376968e-16  # h-bar ln(2) in eV s
-energy_conv_dict = {'ev': HBAR_LN2,
-                    'kev': 1e-3 * HBAR_LN2,
-                    'mev': 1e-6 * HBAR_LN2,
-                    }
+energy_conv_dict = {
+    "ev": HBAR_LN2,
+    "kev": 1e-3 * HBAR_LN2,
+    "mev": 1e-6 * HBAR_LN2,
+}
 
 
 def _halflife_to_seconds(value, err, units):
@@ -117,8 +146,10 @@ def _halflife_to_seconds(value, err, units):
     else:
         scale = energy_conv_dict[units]
         sec_time = scale / value
-        sec_err = (scale / max(0.1*value, value - minus) - sec_time,
-                   sec_time - scale / (value + plus))
+        sec_err = (
+            scale / max(0.1 * value, value - minus) - sec_time,
+            sec_time - scale / (value + plus),
+        )
     if err is None:
         return sec_time, None
     elif sec_err[0] == sec_err[1]:
@@ -130,13 +161,13 @@ def _halflife_to_seconds(value, err, units):
 def _to_time(tstr, errstr):
     t = tstr.strip()
     # This accepts questionable levels
-    t = t.replace('?', '')
-    tobj = [s.strip(' ()') for s in t.split()]
+    t = t.replace("?", "")
+    tobj = [s.strip(" ()") for s in t.split()]
     if len(tobj) == 2:
         t, t_unit = tobj
         value, err = _get_val_err(t, errstr)
         tfinal, tfinalerr = _halflife_to_seconds(value, err, t_unit)
-    elif 'STABLE' in t:
+    elif "STABLE" in t:
         tfinal = np.inf
         tfinalerr = None
     else:
@@ -148,11 +179,11 @@ def _to_time(tstr, errstr):
 def _get_val_err(valstr, errstr):
     pm = _errpm.match(errstr)
     err = _err.match(errstr)
-    if pm is None and err.group(1) == '':
+    if pm is None and err.group(1) == "":
         return _getvalue(valstr), None
     val = _valexp.match(valstr)
     if val is None:
-        valexp = ''
+        valexp = ""
         val = valstr
     else:
         valexp = val.group(2)
@@ -176,8 +207,8 @@ def _get_val_err(valstr, errstr):
 
 def _get_err(plen, errstr, valexp):
     errp = list((errstr.strip()).zfill(plen))
-    errp.insert(-plen, '.')
-    return _getvalue(''.join(errp) + valexp)
+    errp.insert(-plen, ".")
+    return _getvalue("".join(errp) + valexp)
 
 
 def _parse_level_record(l_rec):
@@ -207,7 +238,7 @@ def _parse_level_record(l_rec):
     lm = re.match("[ ]*([A-Z]+)(?![A-Z0-9+])", l_rec.group(2))
     spv = _specialval.match(l_rec.group(2).strip())
     spv2 = _specialval2.match(l_rec.group(2).strip())
-    special = ' '
+    special = " "
     if lm is not None:
         special = lm.group(1)
         if "S" in special and len(special.strip()) > 1:
@@ -223,13 +254,13 @@ def _parse_level_record(l_rec):
         if "S" in special and len(special.strip()) > 1:
             special = special.strip()[1]
     else:
-        e, de = _get_val_err(l_rec.group(2).strip('() '), l_rec.group(3))
+        e, de = _get_val_err(l_rec.group(2).strip("() "), l_rec.group(3))
     tfinal, tfinalerr = _to_time(l_rec.group(5), l_rec.group(6))
     from_nuc = _to_id(l_rec.group(1))
     m = l_rec.group(11)
     s = l_rec.group(12)
     state = 0
-    if m == 'M':
+    if m == "M":
         state = s.strip()
         if 0 < len(state):
             state = int(state)
@@ -254,15 +285,15 @@ def _parse_level_continuation_record(lc_rec):
     """
     g = lc_rec.groups()
     dat = {}
-    raw_children = g[-1].replace(' AP ', '=')
-    raw_children = raw_children.replace('$', ' ').split()
+    raw_children = g[-1].replace(" AP ", "=")
+    raw_children = raw_children.replace("$", " ").split()
     for raw_child in raw_children:
-        if '=' in raw_child:
-            rx, br = raw_child.split('=')[:2]
+        if "=" in raw_child:
+            rx, br = raw_child.split("=")[:2]
             br = br.strip()
         else:
             continue
-        if '%' in rx and '?' not in br and len(br) > 0:
+        if "%" in rx and "?" not in br and len(br) > 0:
             dat[rx] = br
     return dat
 
@@ -300,20 +331,20 @@ def _parse_gamma_continuation_record(g, inten, tti):
 
     """
     conversions = {}
-    entries = g.group(2).split('$')
+    entries = g.group(2).split("$")
     for entry in entries:
-        entry = entry.replace('AP', '=')
-        entry = entry.replace('EL1C+EL2C', 'LC')
-        if '+=' in entry or 'EAV' in entry:
+        entry = entry.replace("AP", "=")
+        entry = entry.replace("EL1C+EL2C", "LC")
+        if "+=" in entry or "EAV" in entry:
             continue
-        if 'C=' in entry:
-            tsplit = entry.split('C')
+        if "C=" in entry:
+            tsplit = entry.split("C")
         else:
-            tsplit = entry.split('=')
-            tsplit[0] = tsplit[0].lstrip('C')
+            tsplit = entry.split("=")
+            tsplit[0] = tsplit[0].lstrip("C")
         greff = inten
-        if '/T' in entry:
-            tsplit = entry.split('/T')
+        if "/T" in entry:
+            tsplit = entry.split("/T")
             greff = tti
             if greff is None:
                 greff = inten
@@ -322,8 +353,8 @@ def _parse_gamma_continuation_record(g, inten, tti):
         if len(tsplit) == 2:
             conv = None
             err = None
-            contype = tsplit[0].lstrip('E')
-            eff = tsplit[1].lstrip('= ').split()
+            contype = tsplit[0].lstrip("E")
+            eff = tsplit[1].lstrip("= ").split()
             if len(eff) == 2:
                 conv, err = _get_val_err(eff[0], eff[1])
             elif len(eff) == 1:
@@ -369,12 +400,12 @@ def _parse_beta_continuation_record(bc_rec):
     """
     This parse the beta continuation record for EAV
     """
-    entries = bc_rec.group(3).split('$')
+    entries = bc_rec.group(3).split("$")
     eav = None
     eav_err = None
     for entry in entries:
-        if 'EAV' in entry and '=' in entry:
-            dat = entry.split('=')[1]
+        if "EAV" in entry and "=" in entry:
+            dat = entry.split("=")[1]
             dat = dat.split()
             if len(dat) == 2:
                 eav, eav_err = _get_val_err(dat[0], dat[1])
@@ -464,7 +495,7 @@ def _parse_normalization_record(n_rec):
     else:
         nrbr = None
     if nr_err is not None and br_err is not None:
-        nrbr_err = nrbr*np.sqrt((br_err/br) ** 2 * (nr_err/nr) ** 2)
+        nrbr_err = nrbr * np.sqrt((br_err / br) ** 2 * (nr_err / nr) ** 2)
     else:
         nrbr_err = None
     return nr, nr_err, nt, nt_err, br, br_err, nb, nb_err, nrbr, nrbr_err
@@ -522,7 +553,7 @@ def _parse_parent_record(p_rec):
     lm = re.match("[ ]*([A-Z]+)(?![A-Z0-9+])", p_rec.group(2))
     spv = _specialval.match(p_rec.group(2).strip())
     spv2 = _specialval2.match(p_rec.group(2).strip())
-    special = ' '
+    special = " "
     if lm is not None:
         special = lm.group(1)
         if "S" in special and len(special.strip()) > 1:
@@ -538,7 +569,7 @@ def _parse_parent_record(p_rec):
         if "S" in special and len(special.strip()) > 1:
             special = special.strip()[1]
     else:
-        e, de = _get_val_err(p_rec.group(2).strip('() '), p_rec.group(3))
+        e, de = _get_val_err(p_rec.group(2).strip("() "), p_rec.group(3))
     j = p_rec.group(4)
     tfinal, tfinalerr = _to_time(p_rec.group(5), p_rec.group(6))
     return p_rec.group(1), tfinal, tfinalerr, e, de, special
@@ -669,8 +700,8 @@ def _parse_decay_dataset(lines, decay_s):
     daughter = ident.group(1)
     daughter_id = abs(_to_id(daughter))
     parent = ident.group(2).split()[0]
-    parent = parent.split('(')[0]
-    parents = parent.split(',')
+    parent = parent.split("(")[0]
+    parents = parent.split(",")
     if len(parents) > 1:
         pfinal = abs(_to_id(parents[0]))
     else:
@@ -692,8 +723,7 @@ def _parse_decay_dataset(lines, decay_s):
     for line in lines:
         level_l = _level_regex.match(line)
         if level_l is not None:
-            level, half_lifev, from_nuc, \
-            state, special = _parse_level_record(level_l)
+            level, half_lifev, from_nuc, state, special = _parse_level_record(level_l)
             continue
         b_rec = _beta.match(line)
         if b_rec is not None:
@@ -709,19 +739,18 @@ def _parse_decay_dataset(lines, decay_s):
         if bc_rec is not None:
             bcdat = _parse_beta_continuation_record(bc_rec)
             if bcdat[0] is not None:
-                if bc_rec.group(2) == 'B':
+                if bc_rec.group(2) == "B":
                     betas[-1][3] = bcdat[0]
                 else:
                     ecbp[-1][3] = bcdat[0]
                     bggc = _gc.match(line)
-                    conv = _parse_gamma_continuation_record(bggc, dat[2],
-                                                            dat[8])
-                    if 'K' in conv:
-                        ecbp[-1][-3] = conv['K'][0]
-                    if 'L' in conv:
-                        ecbp[-1][-2] = conv['L'][0]
-                    if 'M' in conv:
-                        ecbp[-1][-1] = conv['M'][0]
+                    conv = _parse_gamma_continuation_record(bggc, dat[2], dat[8])
+                    if "K" in conv:
+                        ecbp[-1][-3] = conv["K"][0]
+                    if "L" in conv:
+                        ecbp[-1][-2] = conv["L"][0]
+                    if "M" in conv:
+                        ecbp[-1][-1] = conv["M"][0]
         a_rec = _alpha.match(line)
         if a_rec is not None:
             dat = _parse_alpha_record(a_rec)
@@ -741,8 +770,7 @@ def _parse_decay_dataset(lines, decay_s):
                 ecparent = parent2
             level = 0.0 if level is None else level
             ecdaughter = abs(data.id_from_level(_to_id(daughter), level))
-            ecbp.append([ecparent, ecdaughter, dat[0], 0.0, dat[2], dat[4],
-                         0, 0, 0])
+            ecbp.append([ecparent, ecdaughter, dat[0], 0.0, dat[2], dat[4], 0, 0, 0])
             continue
         g_rec = _g.match(line)
         if g_rec is not None:
@@ -751,11 +779,11 @@ def _parse_decay_dataset(lines, decay_s):
                 gparent = 0
                 gdaughter = 0
                 if level is not None:
-                    gparent = abs(data.id_from_level(_to_id(daughter), level,
-                                                     special))
+                    gparent = abs(data.id_from_level(_to_id(daughter), level, special))
                     dlevel = level - dat[0]
-                    gdaughter = abs(data.id_from_level(_to_id(daughter), dlevel,
-                                                       special))
+                    gdaughter = abs(
+                        data.id_from_level(_to_id(daughter), dlevel, special)
+                    )
                 if parent2 is None:
                     gp2 = pfinal
                 else:
@@ -773,28 +801,45 @@ def _parse_decay_dataset(lines, decay_s):
             continue
         gc_rec = _gc.match(line)
         if gc_rec is not None and goodgray is True:
-            conv = _parse_gamma_continuation_record(gc_rec, gammarays[-1][6],
-                                                    gammarays[-1][10])
-            if 'K' in conv:
-                gammarays[-1][-3] = conv['K'][0]
-            if 'L' in conv:
-                gammarays[-1][-2] = conv['L'][0]
-            if 'M' in conv:
-                gammarays[-1][-1] = conv['M'][0]
+            conv = _parse_gamma_continuation_record(
+                gc_rec, gammarays[-1][6], gammarays[-1][10]
+            )
+            if "K" in conv:
+                gammarays[-1][-3] = conv["K"][0]
+            if "L" in conv:
+                gammarays[-1][-2] = conv["L"][0]
+            if "M" in conv:
+                gammarays[-1][-1] = conv["M"][0]
             continue
         n_rec = _norm.match(line)
         if n_rec is not None:
-            nr, nr_err, nt, nt_err, br, br_err, nb, nb_err, nrbr, nrbr_err = \
-                _parse_normalization_record(n_rec)
+            (
+                nr,
+                nr_err,
+                nt,
+                nt_err,
+                br,
+                br_err,
+                nb,
+                nb_err,
+                nrbr,
+                nrbr_err,
+            ) = _parse_normalization_record(n_rec)
             if nb is not None and br is not None:
                 nbbr = nb * br
             if nb_err is not None and br_err is not None and nb_err != 0:
-                nbbr_err = nbbr*((br_err/br) ** 2 * (nb_err/nb) ** 2) ** 0.5
+                nbbr_err = nbbr * ((br_err / br) ** 2 * (nb_err / nb) ** 2) ** 0.5
             continue
         np_rec = _normp.match(line)
         if np_rec is not None:
-            nrbr2, nrbr_err2, ntbr, ntbr_err, nbbr2, nbbr_err2 = \
-                _parse_production_normalization_record(np_rec)
+            (
+                nrbr2,
+                nrbr_err2,
+                ntbr,
+                ntbr_err,
+                nbbr2,
+                nbbr_err2,
+            ) = _parse_production_normalization_record(np_rec)
             if nrbr2 is not None and nrbr is None:
                 nrbr = nrbr2
                 nrbr_err = nrbr_err2
@@ -808,13 +853,19 @@ def _parse_decay_dataset(lines, decay_s):
             multi = False
             if parent2 is not None:
                 multi = True
-                pfinal = [parent2,]
-                tfinal = [t,]
-                tfinalerr = [terr,]
+                pfinal = [
+                    parent2,
+                ]
+                tfinal = [
+                    t,
+                ]
+                tfinalerr = [
+                    terr,
+                ]
             parent2, t, terr, e, e_err, special = _parse_parent_record(p_rec)
             parent2 = abs(data.id_from_level(_to_id(parent2), e, special))
             if terr is not None and not isinstance(terr, float):
-                terr = (terr[0] + terr[1])/2.0
+                terr = (terr[0] + terr[1]) / 2.0
             if multi:
                 tfinal.append(t)
                 tfinalerr.append(terr)
@@ -829,20 +880,35 @@ def _parse_decay_dataset(lines, decay_s):
             pfinal = []
             for item in parents:
                 pfinal.append(_to_id(item))
-        return pfinal, daughter_id, rxname.id(decay_s.strip().lower()), \
-               tfinal, tfinalerr, \
-               br, br_err, nrbr, nrbr_err, nbbr, nbbr_err, gammarays, alphas, \
-               betas, ecbp
+        return (
+            pfinal,
+            daughter_id,
+            rxname.id(decay_s.strip().lower()),
+            tfinal,
+            tfinalerr,
+            br,
+            br_err,
+            nrbr,
+            nrbr_err,
+            nbbr,
+            nbbr_err,
+            gammarays,
+            alphas,
+            betas,
+            ecbp,
+        )
     return None
 
 
-_BAD_RX = frozenset([
-    # Be-6 doesn't really alpha decay (leaving He-2), rather it emits 2p
-    (40060000, 1089),
-    # Li-8 -> He-4 + beta- + alpha is really a shortcut for
-    # Li-8 -> Be-8 + beta- -> He-4 + alpha
-    (30080000, 1355894000),
-    ])
+_BAD_RX = frozenset(
+    [
+        # Be-6 doesn't really alpha decay (leaving He-2), rather it emits 2p
+        (40060000, 1089),
+        # Li-8 -> He-4 + beta- + alpha is really a shortcut for
+        # Li-8 -> Be-8 + beta- -> He-4 + alpha
+        (30080000, 1355894000),
+    ]
+)
 
 
 def _adjust_ge100_branches(levellist):
@@ -891,7 +957,7 @@ _BAD_METASTABLES = {
     # Replacing with what KAERI and NNDC report
     (611360001, 2): (611360000, 0),
     (611360000, 1): (611360001, 1),
-    }
+}
 
 
 def _adjust_metastables(levellist):
@@ -912,8 +978,8 @@ _BAD_HALF_LIVES = {
     # Eu-151 lists a very long half-life (5.364792e+25) even though it
     # lists no reaction, and thus no children, and no branch ratio.
     # set to infinity for consistency.
-    (631510000, 0): float('inf'),
-    }
+    (631510000, 0): float("inf"),
+}
 
 
 def _adjust_half_lives(levellist):
@@ -963,15 +1029,31 @@ def levels(filename, levellist=None):
             single character denoting levels with unknown relation to ground
             state
     """
-    badlist = ["ecsf", "34si", "|b{+-}fission", "{+24}ne",
-               "{+22}ne", "24ne", "b-f", "{+20}o", "2|e", "b++ec",
-               "ecp+ec2p", "ecf", "mg", "ne", "{+20}ne", "{+25}ne",
-               "{+28}mg", "sf(+ec+b+)"]
+    badlist = [
+        "ecsf",
+        "34si",
+        "|b{+-}fission",
+        "{+24}ne",
+        "{+22}ne",
+        "24ne",
+        "b-f",
+        "{+20}o",
+        "2|e",
+        "b++ec",
+        "ecp+ec2p",
+        "ecf",
+        "mg",
+        "ne",
+        "{+20}ne",
+        "{+25}ne",
+        "{+28}mg",
+        "sf(+ec+b+)",
+    ]
     special = ""
     if levellist is None:
         levellist = []
     if isinstance(filename, str):
-        with open(filename, 'r') as f:
+        with open(filename, "r") as f:
             dat = f.read()
     else:
         dat = filename.read()
@@ -981,7 +1063,7 @@ def levels(filename, levellist=None):
         ident = re.match(_ident, lines[0])
         if ident is None:
             continue
-        if 'ADOPTED LEVELS' in ident.group(2):
+        if "ADOPTED LEVELS" in ident.group(2):
             leveln = 0
             brs = {}
             level_found = False
@@ -998,15 +1080,25 @@ def levels(filename, levellist=None):
                             if goodkey is True:
                                 rx = rxname.id(keystrip)
                                 branch_percent = float(val.split("(")[0])
-                                levellist.append((nuc_id, rx, half_lifev,
-                                                  level, branch_percent,
-                                                  state, special))
+                                levellist.append(
+                                    (
+                                        nuc_id,
+                                        rx,
+                                        half_lifev,
+                                        level,
+                                        branch_percent,
+                                        state,
+                                        special,
+                                    )
+                                )
                     if level_found is True:
-                        levellist.append((nuc_id, 0, half_lifev, level, 0.0,
-                                          state, special))
+                        levellist.append(
+                            (nuc_id, 0, half_lifev, level, 0.0, state, special)
+                        )
                     brs = {}
-                    level, half_lifev, from_nuc, state, special = \
-                        _parse_level_record(level_l)
+                    level, half_lifev, from_nuc, state, special = _parse_level_record(
+                        level_l
+                    )
                     if from_nuc is not None:
                         nuc_id = from_nuc + leveln
                         leveln += 1
@@ -1028,11 +1120,19 @@ def levels(filename, levellist=None):
                     if goodkey is True:
                         rx = rxname.id(keystrip)
                         branch_percent = float(val.split("(")[0])
-                        levellist.append((nuc_id, rx, half_lifev, level,
-                                          branch_percent, state, special))
+                        levellist.append(
+                            (
+                                nuc_id,
+                                rx,
+                                half_lifev,
+                                level,
+                                branch_percent,
+                                state,
+                                special,
+                            )
+                        )
             if level_found is True:
-                levellist.append((nuc_id, 0, half_lifev, level, 0.0, state,
-                                  special))
+                levellist.append((nuc_id, 0, half_lifev, level, 0.0, state, special))
     _adjust_ge100_branches(levellist)
     _adjust_metastables(levellist)
     _adjust_half_lives(levellist)
@@ -1130,7 +1230,7 @@ def decays(filename, decaylist=None):
     if decaylist is None:
         decaylist = []
     if isinstance(filename, str):
-        with open(filename, 'r') as f:
+        with open(filename, "r") as f:
             dat = f.read()
     else:
         dat = filename.read()
@@ -1142,7 +1242,7 @@ def decays(filename, decaylist=None):
         ident = re.match(_ident, lines[0])
         if ident is None:
             continue
-        if 'DECAY' in ident.group(2):
+        if "DECAY" in ident.group(2):
             decay_s = ident.group(2).split()[1]
             decay = _parse_decay_dataset(lines, decay_s)
             if decay is not None:
@@ -1195,7 +1295,7 @@ def _dlist_gen(f):
         list of decay types in the ENSDF file eg. ['B+','B-','A']
     """
     if isinstance(f, str):
-        with open(f, 'r') as f:
+        with open(f, "r") as f:
             dat = f.read()
     else:
         dat = f.read()
@@ -1205,7 +1305,7 @@ def _dlist_gen(f):
         lines = dataset.splitlines()
         ident = re.match(_ident, lines[0])
         if ident is not None:
-            if 'DECAY' in ident.group(2):
+            if "DECAY" in ident.group(2):
                 fin = ident.group(2).split()[1]
                 if fin not in decaylist:
                     decaylist.append(fin)
@@ -1228,7 +1328,7 @@ def _level_dlist_gen(f, keys):
         list of decay types in the ENSDF file eg. ['B+','B-','A']
     """
     if isinstance(f, str):
-        with open(f, 'r') as f:
+        with open(f, "r") as f:
             dat = f.read()
     else:
         dat = f.read()
@@ -1237,7 +1337,7 @@ def _level_dlist_gen(f, keys):
         lines = dataset.splitlines()
         ident = re.match(_ident, lines[0])
         if ident is not None:
-            if 'ADOPTED LEVELS' in ident.group(2):
+            if "ADOPTED LEVELS" in ident.group(2):
                 for line in lines:
                     levelc = _level_cont_regex.match(line)
                     if levelc is None:

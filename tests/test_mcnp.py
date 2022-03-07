@@ -6,8 +6,14 @@ import struct
 import warnings
 
 import nose.tools
-from nose.tools import assert_almost_equal, assert_equal, assert_true, \
-    assert_not_equal, assert_false, assert_raises
+from nose.tools import (
+    assert_almost_equal,
+    assert_equal,
+    assert_true,
+    assert_not_equal,
+    assert_false,
+    assert_raises,
+)
 from nose.plugins.skip import SkipTest
 
 import tables
@@ -53,8 +59,8 @@ def test_read_header_block():
 
 
 def check_read_header_block(ssrname):
-    if 'mcnp_surfsrc.w' in ssrname:
-        ssr = mcnp.SurfSrc(ssrname, 'rb')
+    if "mcnp_surfsrc.w" in ssrname:
+        ssr = mcnp.SurfSrc(ssrname, "rb")
 
         try:
             ssr.read_header()
@@ -67,9 +73,11 @@ def check_read_header_block(ssrname):
         assert_equal(ssr.loddat, "01232009")
         assert_equal(ssr.idtm, " 10/31/11 13:52:39 ")
         assert_equal(ssr.probid, " 10/31/11 13:52:35 ")
-        assert_equal(ssr.aid,
-                     "c Test deck with H20 cube, point n source, "
-                     "SSW of top surface interactions      ")
+        assert_equal(
+            ssr.aid,
+            "c Test deck with H20 cube, point n source, "
+            "SSW of top surface interactions      ",
+        )
         assert_equal(ssr.knod, 2)
         # table 1 record values
         assert_equal(ssr.np1, 1000)
@@ -82,8 +90,8 @@ def check_read_header_block(ssrname):
         assert_equal(ssr.mipts, 3)
         assert_equal(ssr.kjaq, 0)
 
-    elif 'mcnp6_surfsrc.w' in ssrname:
-        ssr = mcnp.SurfSrc(ssrname, 'rb')
+    elif "mcnp6_surfsrc.w" in ssrname:
+        ssr = mcnp.SurfSrc(ssrname, "rb")
         try:
             ssr.read_header()
         except:
@@ -94,15 +102,18 @@ def check_read_header_block(ssrname):
         assert_equal(ssr.loddat, " 05/08/13")
         assert_equal(ssr.idtm, " 11/18/13 17:50:49 ")
         assert_equal(ssr.probid, " 11/18/13 17:50:43 ")
-        assert_equal(ssr.aid, "Simple MCNP Example that uses SSW"
-                              "                       "
-                              "                        ")
+        assert_equal(
+            ssr.aid,
+            "Simple MCNP Example that uses SSW"
+            "                       "
+            "                        ",
+        )
         assert_equal(ssr.knod, 2)
         # table 1 record values
         assert_equal(ssr.np1, 10000)
         assert_equal(ssr.nrss, 1710)
         assert_equal(ssr.ncrd, -11)
-        #assert_equal(ssrA, ssrB)
+        # assert_equal(ssrA, ssrB)
         assert_equal(ssr.njsw, 1)
         assert_equal(ssr.niss, 1701)
         # table 2 record values
@@ -110,8 +121,8 @@ def check_read_header_block(ssrname):
         assert_equal(ssr.mipts, 37)
         assert_equal(ssr.kjaq, 0)
 
-    elif 'mcnpx_surfsrc.w' in ssrname:
-        ssr = mcnp.SurfSrc(ssrname, 'rb')
+    elif "mcnpx_surfsrc.w" in ssrname:
+        ssr = mcnp.SurfSrc(ssrname, "rb")
         try:
             ssr.read_header()
         except:
@@ -122,8 +133,11 @@ def check_read_header_block(ssrname):
         assert_equal(ssr.loddat, "Wed Apr 09 08:00:00 MST 2008")
         assert_equal(ssr.idtm, "  10/28/13 02:16:22")
         assert_equal(ssr.probid, "  10/28/13 02:16:16")
-        assert_equal(ssr.aid, "Simple MCNP Example that uses SSW"
-                              "                                               ")
+        assert_equal(
+            ssr.aid,
+            "Simple MCNP Example that uses SSW"
+            "                                               ",
+        )
         assert_equal(ssr.knod, 2)
         # table 1 record values
         assert_equal(ssr.np1, 10000)
@@ -146,8 +160,8 @@ def test_compare():
 
 
 def check_compare(ssrname):
-    ssrA = mcnp.SurfSrc(ssrname, 'rb')
-    ssrB = mcnp.SurfSrc(ssrname, 'rb')
+    ssrA = mcnp.SurfSrc(ssrname, "rb")
+    ssrB = mcnp.SurfSrc(ssrname, "rb")
     try:
         ssrA.read_header()
     except:
@@ -230,13 +244,13 @@ def test_read_tracklist():
         # trackData.record is skipped; contains the below components.
         # self.assertEqual(trackData.record  , 0)
         assert_equal(trackData.nps, 1)
-        assert_almost_equal(trackData.bitarray, 8.000048e+06)
+        assert_almost_equal(trackData.bitarray, 8.000048e06)
         assert_almost_equal(trackData.wgt, 0.99995639)
         assert_almost_equal(trackData.erg, 5.54203947)
         assert_almost_equal(trackData.tme, 0.17144023)
         assert_almost_equal(trackData.x, -8.05902e-02)
-        assert_almost_equal(trackData.y, 3.122666098e+00)
-        assert_almost_equal(trackData.z, 5.00000e+00)
+        assert_almost_equal(trackData.y, 3.122666098e00)
+        assert_almost_equal(trackData.z, 5.00000e00)
         assert_almost_equal(trackData.u, -0.35133163)
         assert_almost_equal(trackData.v, 0.48465036)
         assert_almost_equal(trackData.cs, 0.80104937)
@@ -265,13 +279,13 @@ def test_read_tracklist_into_different_surface():
 
     for trackData in ssr1.tracklist:
         assert_equal(trackData.nps, 1)
-        assert_almost_equal(trackData.bitarray, 8.000048e+06)
+        assert_almost_equal(trackData.bitarray, 8.000048e06)
         assert_almost_equal(trackData.wgt, 0.99995639)
         assert_almost_equal(trackData.erg, 5.54203947)
         assert_almost_equal(trackData.tme, 0.17144023)
         assert_almost_equal(trackData.x, -8.05902e-02)
-        assert_almost_equal(trackData.y, 3.122666098e+00)
-        assert_almost_equal(trackData.z, 5.00000e+00)
+        assert_almost_equal(trackData.y, 3.122666098e00)
+        assert_almost_equal(trackData.z, 5.00000e00)
         assert_almost_equal(trackData.u, -0.35133163)
         assert_almost_equal(trackData.v, 0.48465036)
         assert_almost_equal(trackData.cs, 0.80104937)
@@ -280,7 +294,7 @@ def test_read_tracklist_into_different_surface():
 
 
 def test_read_tracklist_into_different_surface_errors():
-    """ 6 Exceptions that are handled by update_tracklist
+    """6 Exceptions that are handled by update_tracklist
     We iterate through each type of error and try match each exception
     We try to confirm each error caught by update_tracklist
     """
@@ -384,21 +398,23 @@ def test_print_header():
         raise SkipTest
     # If comparison output needs to be updated, uncomment the below
     #  and do: nosetests test_mcnp.py --nocapture
-    #print ssr.print_header()
-    assert_equal(ssr.print_header(),
-                 "Code: mcnp     (version: 5    ) [01232009]\n"
-                 "Problem info: ( 07/05/12 17:50:19 )"
-                 "  07/05/12 17:50:16 \n"
-                 "c Test deck with H20 cube, point n source,"
-                 " SSW of top surface interactions      \n"
-                 "Showing dump #2\n"
-                 "1 histories, 1 tracks, 11 record size, "
-                 "1 surfaces, 1 histories\n"
-                 "0 cells, source particle: 3, macrobody facet flag: 0\n"
-                 "Surface [6]: facet -1, type [4]"
-                 " with 1 parameters: ( [5.0])\n"
-                 "Summary Table: [0, 0, 1, 1, 1, 1,"
-                 " 0, 0, 0, 0, 0, 0, 0, 0, 0]")
+    # print ssr.print_header()
+    assert_equal(
+        ssr.print_header(),
+        "Code: mcnp     (version: 5    ) [01232009]\n"
+        "Problem info: ( 07/05/12 17:50:19 )"
+        "  07/05/12 17:50:16 \n"
+        "c Test deck with H20 cube, point n source,"
+        " SSW of top surface interactions      \n"
+        "Showing dump #2\n"
+        "1 histories, 1 tracks, 11 record size, "
+        "1 surfaces, 1 histories\n"
+        "0 cells, source particle: 3, macrobody facet flag: 0\n"
+        "Surface [6]: facet -1, type [4]"
+        " with 1 parameters: ( [5.0])\n"
+        "Summary Table: [0, 0, 1, 1, 1, 1,"
+        " 0, 0, 0, 0, 0, 0, 0, 0, 0]",
+    )
 
     return
 
@@ -419,13 +435,15 @@ def test_print_tracklist():
         observed = ssr.print_tracklist()
     except struct.error:
         raise SkipTest
-    assert_equal(observed,
-                 'Track Data\n       nps   BITARRAY        WGT        ERG'
-                 '        TME             X             Y             Z  '
-                 '        U          V     COSINE  |       W\n         '
-                 '1 8.00005e+06    0.99996      5.542    0.17144  '
-                 '-8.05902e-02   3.12267e+00   5.00000e+00   '
-                 '-0.35133    0.48465    0.80105  |    0.80105 \n')
+    assert_equal(
+        observed,
+        "Track Data\n       nps   BITARRAY        WGT        ERG"
+        "        TME             X             Y             Z  "
+        "        U          V     COSINE  |       W\n         "
+        "1 8.00005e+06    0.99996      5.542    0.17144  "
+        "-8.05902e-02   3.12267e+00   5.00000e+00   "
+        "-0.35133    0.48465    0.80105  |    0.80105 \n",
+    )
 
     return
 
@@ -440,51 +458,65 @@ def test_xsdir():
     xsdir = _gen_xsdir()
 
     #  test atomic mass ratio tables
-    exp_awr = {'1000': '0.99931697', '3000': '6.88131188', '3003': '3.11111111',
-               '3004': '4.11111111', '3005': '5.111111111', '3009': '9.11111111',
-               '0001': '1.000000'}
+    exp_awr = {
+        "1000": "0.99931697",
+        "3000": "6.88131188",
+        "3003": "3.11111111",
+        "3004": "4.11111111",
+        "3005": "5.111111111",
+        "3009": "9.11111111",
+        "0001": "1.000000",
+    }
     assert_equal(xsdir.awr, exp_awr)
 
     # test xs tables
-    assert_equal(xsdir.tables[0].name, '1001.44c')
+    assert_equal(xsdir.tables[0].name, "1001.44c")
     assert_equal(xsdir.tables[0].awr, 1.111111)
-    assert_equal(xsdir.tables[0].filename, 'many_xs/1001.555nc')
-    assert_equal(xsdir.tables[0].access, '0')
+    assert_equal(xsdir.tables[0].filename, "many_xs/1001.555nc")
+    assert_equal(xsdir.tables[0].access, "0")
     assert_equal(xsdir.tables[0].filetype, 1)
     assert_equal(xsdir.tables[0].address, 4)
     assert_equal(xsdir.tables[0].tablelength, 55555)
     assert_equal(xsdir.tables[0].recordlength, 0)
     assert_equal(xsdir.tables[0].entries, 0)
-    assert_equal(xsdir.tables[0].temperature, 5.5555E+05)
+    assert_equal(xsdir.tables[0].temperature, 5.5555e05)
     assert_false(xsdir.tables[0].ptable)
-    assert_equal(xsdir.tables[1].filename, 'such_data/1001.777nc')
+    assert_equal(xsdir.tables[1].filename, "such_data/1001.777nc")
     assert_true(xsdir.tables[1].ptable)
-    assert_equal(xsdir.tables[2].filename, 'more_data/1001.999nc')
+    assert_equal(xsdir.tables[2].filename, "more_data/1001.999nc")
     assert_true(xsdir.tables[2].ptable)
 
 
 def test_xsdir_find_table():
     xsdir = _gen_xsdir()
-    table = xsdir.find_table('1001')
-    assert_equal(table[0].name, '1001.44c')
-    assert_equal(table[1].name, '1001.66c')
-    assert_equal(table[2].name, '1001.70c')
+    table = xsdir.find_table("1001")
+    assert_equal(table[0].name, "1001.44c")
+    assert_equal(table[1].name, "1001.66c")
+    assert_equal(table[2].name, "1001.70c")
 
 
 def test_xsdir_to_serpent():
     xsdir = _gen_xsdir()
-    output = os.path.join(os.getcwd(), 'test_output')
+    output = os.path.join(os.getcwd(), "test_output")
     xsdir.to_xsdata(output)
 
-    with open(output, 'r') as f:
+    with open(output, "r") as f:
         lines = f.readlines()
 
-    exp = [("1001.44c 1001.44c 1 1001 0 1.111111 6.44688328094e+15 0"
-            " many_xs/1001.555nc\n"),
-           ("1001.66c 1001.66c 1 1001 0 1.111111 6.44688328094e+15 0"
-            " such_data/1001.777nc\n"),
-           ("1001.70c 1001.70c 1 1001 0 1.111111 6.44688328094e+15 0"
-            " more_data/1001.999nc\n")]
+    exp = [
+        (
+            "1001.44c 1001.44c 1 1001 0 1.111111 6.44688328094e+15 0"
+            " many_xs/1001.555nc\n"
+        ),
+        (
+            "1001.66c 1001.66c 1 1001 0 1.111111 6.44688328094e+15 0"
+            " such_data/1001.777nc\n"
+        ),
+        (
+            "1001.70c 1001.70c 1 1001 0 1.111111 6.44688328094e+15 0"
+            " more_data/1001.999nc\n"
+        ),
+    ]
 
     assert_equal(lines, exp)
     os.remove(output)
@@ -497,110 +529,160 @@ def test_xsdir_nucs():
 
 def test_xsdirtable_to_serpent():
     xsdir = _gen_xsdir()
-    line = xsdir.tables[0].to_serpent('.')
-    exp_line = ("1001.44c 1001.44c 1 1001 0 1.111111 6.44688328094e+15 0"
-                " ./many_xs/1001.555nc")
+    line = xsdir.tables[0].to_serpent(".")
+    exp_line = (
+        "1001.44c 1001.44c 1 1001 0 1.111111 6.44688328094e+15 0"
+        " ./many_xs/1001.555nc"
+    )
     assert_equal(line, exp_line)
 
 
 def test_read_mcnp():
-    expected_material = Material(nucvec={922350000: 0.04, 922380000: 0.96},
-                                 mass=-1.0,
-                                 density=19.1,
-                                 metadata={"comments": (
-                                     " first line of comments second line of "
-                                     "comments third line of comments forth "
-                                     "line of comments"),
-        "mat_number": "1",
-        "name": " leu",
-        "source": " Some http://URL.com",
-        "table_ids": {'922350': "15c"}})
+    expected_material = Material(
+        nucvec={922350000: 0.04, 922380000: 0.96},
+        mass=-1.0,
+        density=19.1,
+        metadata={
+            "comments": (
+                " first line of comments second line of "
+                "comments third line of comments forth "
+                "line of comments"
+            ),
+            "mat_number": "1",
+            "name": " leu",
+            "source": " Some http://URL.com",
+            "table_ids": {"922350": "15c"},
+        },
+    )
     expected_material.mass = -1.0  # to avoid reassignment to +1.0
-    expected_material_default_lib = Material({10000000: 0.037298334378933776, 
-            60000000: 0.6666767493126631, 80000000: 0.29602491630840305}, 
-            54.04749412269001, 1.1, 6.0,
-            {"mat_number": "3",
-             "HLIB": "42h", "NLIB": "60c", "PLIB": "01p",
-             "table_ids": {}})
-    expected_multimaterial = MultiMaterial({
-        Material(
-            {10000000: 0.1118983878322976, 80000000: 0.8881016121677024},
-            -1.0, 0.9, 3,
-            {"comments":
-             (" Here are comments the comments "
-              "continue here are more even more"),
-             "mat_number": "2",
-             "name": " water",
-             "source": " internet",
-             "table_ids": {'10000': "05c"}}): 1,
-        Material(
-            {10000000: 0.1118983878322976, 80000000: 0.8881016121677024},
-            -1.0,
-            1.0021552889251644, 3,
-            {"comments":
-             (" Here are comments the comments "
-              "continue here are more even more"),
-             "mat_number": "2",
-             "name": " water",
-             "source": " internet",
-             "table_ids": {'10000': "05c"}}): 1,
-        Material(
-            {10000000: 0.1118983878322976, 80000000: 0.8881016121677024},
-            -1.0, 1.1, 3,
-            {"comments":
-             (" Here are comments the comments "
-              "continue here are more even more"),
-             "mat_number": "2",
-             "name": " water",
-             "source": " internet",
-             "table_ids": {'10000': "05c"}}): 1})
+    expected_material_default_lib = Material(
+        {
+            10000000: 0.037298334378933776,
+            60000000: 0.6666767493126631,
+            80000000: 0.29602491630840305,
+        },
+        54.04749412269001,
+        1.1,
+        6.0,
+        {
+            "mat_number": "3",
+            "HLIB": "42h",
+            "NLIB": "60c",
+            "PLIB": "01p",
+            "table_ids": {},
+        },
+    )
+    expected_multimaterial = MultiMaterial(
+        {
+            Material(
+                {10000000: 0.1118983878322976, 80000000: 0.8881016121677024},
+                -1.0,
+                0.9,
+                3,
+                {
+                    "comments": (
+                        " Here are comments the comments "
+                        "continue here are more even more"
+                    ),
+                    "mat_number": "2",
+                    "name": " water",
+                    "source": " internet",
+                    "table_ids": {"10000": "05c"},
+                },
+            ): 1,
+            Material(
+                {10000000: 0.1118983878322976, 80000000: 0.8881016121677024},
+                -1.0,
+                1.0021552889251644,
+                3,
+                {
+                    "comments": (
+                        " Here are comments the comments "
+                        "continue here are more even more"
+                    ),
+                    "mat_number": "2",
+                    "name": " water",
+                    "source": " internet",
+                    "table_ids": {"10000": "05c"},
+                },
+            ): 1,
+            Material(
+                {10000000: 0.1118983878322976, 80000000: 0.8881016121677024},
+                -1.0,
+                1.1,
+                3,
+                {
+                    "comments": (
+                        " Here are comments the comments "
+                        "continue here are more even more"
+                    ),
+                    "mat_number": "2",
+                    "name": " water",
+                    "source": " internet",
+                    "table_ids": {"10000": "05c"},
+                },
+            ): 1,
+        }
+    )
 
-    read_materials = mats_from_inp('mcnp_inp.txt')
+    read_materials = mats_from_inp("mcnp_inp.txt")
     assert_almost_equal(expected_material, read_materials[1])
     assert_equal(expected_material_default_lib, read_materials[3])
     assert_equal(
         list(expected_multimaterial._mats.keys())[0].comp.keys(),
-        list(read_materials[2]._mats.keys())[0].comp.keys())
+        list(read_materials[2]._mats.keys())[0].comp.keys(),
+    )
     for i in range(2):
         assert_almost_equal(
-            list(list(expected_multimaterial._mats.keys())
-                 [0].comp.values())[i],
-            list(list(read_materials[2]._mats.keys())[0].comp.values())[i])
+            list(list(expected_multimaterial._mats.keys())[0].comp.values())[i],
+            list(list(read_materials[2]._mats.keys())[0].comp.values())[i],
+        )
     assert_almost_equal(
         list(expected_multimaterial._mats.keys())[0].mass,
-        list(read_materials[2]._mats.keys())[0].mass)
+        list(read_materials[2]._mats.keys())[0].mass,
+    )
     assert_almost_equal(
         list(expected_multimaterial._mats.keys())[0].density,
-        list(read_materials[2]._mats.keys())[0].density)
+        list(read_materials[2]._mats.keys())[0].density,
+    )
     assert_equal(
         list(expected_multimaterial._mats.keys())[0].atoms_per_molecule,
-        list(read_materials[2]._mats.keys())[0].atoms_per_molecule)
+        list(read_materials[2]._mats.keys())[0].atoms_per_molecule,
+    )
     assert_equal(
         list(expected_multimaterial._mats.keys())[0].metadata,
-        list(read_materials[2]._mats.keys())[0].metadata)
+        list(read_materials[2]._mats.keys())[0].metadata,
+    )
     assert_equal(
         list(expected_multimaterial._mats.keys())[1].comp.keys(),
-        list(read_materials[2]._mats.keys())[1].comp.keys())
+        list(read_materials[2]._mats.keys())[1].comp.keys(),
+    )
     for i in range(2):
         assert_almost_equal(
-            list(list(expected_multimaterial._mats.keys())
-                 [1].comp.values())[i],
-            list(list(read_materials[2]._mats.keys())[1].comp.values())[i])
+            list(list(expected_multimaterial._mats.keys())[1].comp.values())[i],
+            list(list(read_materials[2]._mats.keys())[1].comp.values())[i],
+        )
     assert_equal(
         list(expected_multimaterial._mats.keys())[1].mass,
-        list(read_materials[2]._mats.keys())[1].mass)
+        list(read_materials[2]._mats.keys())[1].mass,
+    )
     assert_almost_equal(
         list(expected_multimaterial._mats.keys())[1].density,
-        list(read_materials[2]._mats.keys())[1].density)
+        list(read_materials[2]._mats.keys())[1].density,
+    )
     assert_equal(
         list(expected_multimaterial._mats.keys())[1].atoms_per_molecule,
-        list(read_materials[2]._mats.keys())[1].atoms_per_molecule)
+        list(read_materials[2]._mats.keys())[1].atoms_per_molecule,
+    )
     assert_equal(
         list(expected_multimaterial._mats.keys())[1].metadata,
-        list(read_materials[2]._mats.keys())[1].metadata)
+        list(read_materials[2]._mats.keys())[1].metadata,
+    )
     assert_almost_equal(
         list(expected_multimaterial._mats.keys())[2].density,
-        list(read_materials[2]._mats.keys())[2].density)
+        list(read_materials[2]._mats.keys())[2].density,
+    )
+
 
 # test to ensure the mats_from_inp function can read repeated mcnp
 # materials like
@@ -610,21 +692,27 @@ def test_read_mcnp():
 
 
 def test_read_mcnp_wcomments():
-    expected_material = Material(nucvec={922350000: 0.04, 922380000: 0.96},
-                                 mass=-1.0,
-                                 density=19.1,
-                                 metadata={"comments": (
-                                     " first line of comments second line of "
-                                     "comments third line of comments forth "
-                                     "line of comments"),
-        "mat_number": "1",
-        "name": " leu",
-        "source": " Some http://URL.com",
-        "table_ids": {'922350': "15c"}})
+    expected_material = Material(
+        nucvec={922350000: 0.04, 922380000: 0.96},
+        mass=-1.0,
+        density=19.1,
+        metadata={
+            "comments": (
+                " first line of comments second line of "
+                "comments third line of comments forth "
+                "line of comments"
+            ),
+            "mat_number": "1",
+            "name": " leu",
+            "source": " Some http://URL.com",
+            "table_ids": {"922350": "15c"},
+        },
+    )
     expected_material.mass = -1.0  # to avoid reassignment to +1.0
 
-    read_materials = mats_from_inp('mcnp_inp_comments.txt')
+    read_materials = mats_from_inp("mcnp_inp_comments.txt")
     assert_equal(expected_material, read_materials[1])
+
 
 # Test PtracReader class
 
@@ -632,15 +720,15 @@ def test_read_mcnp_wcomments():
 def test_read_headers():
     p = mcnp.PtracReader("mcnp_ptrac_i4_little.ptrac")
     assert_equal(
-        p.problem_title,
-        "Generate a well-defined PTRAC file for PyNE test cases")
+        p.problem_title, "Generate a well-defined PTRAC file for PyNE test cases"
+    )
     del p
 
     # 8-byte ints, little endian
     p = mcnp.PtracReader("mcnp_ptrac_i8_little.ptrac")
     assert_equal(
-        p.problem_title,
-        "Generate a well-defined PTRAC file for PyNE test cases")
+        p.problem_title, "Generate a well-defined PTRAC file for PyNE test cases"
+    )
     del p
 
 
@@ -673,9 +761,11 @@ def test_read_events():
 
 
 def test_write_to_hdf5():
-    test_files = ["mcnp_ptrac_i4_little.ptrac",
-                  "mcnp_ptrac_i8_little.ptrac",
-                  "mcnp6_ptrac_i4_little.ptrac"]
+    test_files = [
+        "mcnp_ptrac_i4_little.ptrac",
+        "mcnp_ptrac_i8_little.ptrac",
+        "mcnp6_ptrac_i4_little.ptrac",
+    ]
 
     for test_file in test_files:
         p = mcnp.PtracReader(test_file)
@@ -710,10 +800,10 @@ def test_wwinp_n():
         raise SkipTest
 
     thisdir = os.path.dirname(__file__)
-    wwinp_file = os.path.join(thisdir, 'mcnp_wwinp_wwinp_n.txt')
-    expected_h5m = os.path.join(thisdir, 'mcnp_wwinp_mesh_n.h5m')
+    wwinp_file = os.path.join(thisdir, "mcnp_wwinp_wwinp_n.txt")
+    expected_h5m = os.path.join(thisdir, "mcnp_wwinp_mesh_n.h5m")
     expected_sm = Mesh(mesh=expected_h5m, structured=True)
-    output = os.path.join(os.getcwd(), 'test_wwinp')
+    output = os.path.join(os.getcwd(), "test_wwinp")
 
     # Read in the wwinp file to an object and check resulting attributes.
     ww1 = mcnp.Wwinp()
@@ -728,20 +818,51 @@ def test_wwinp_n():
     assert_equal(ww1.cm, [[-99, -97, 97, 99, 100], [-50, 60, 100], [100]])
     assert_equal(ww1.fm, [[1, 1, 11, 1, 1], [1, 3, 4], [6]])
     assert_array_equal(
-        ww1.e,
-        [[0.1, 0.14678, 0.21544, 0.31623, 0.46416, 0.68129, 1.0000]])
+        ww1.e, [[0.1, 0.14678, 0.21544, 0.31623, 0.46416, 0.68129, 1.0000]]
+    )
     assert_equal(
         ww1.bounds,
-        [[-100.0, -99.0, -97.0, -79.36363636363636,
-          -61.727272727272727, -44.090909090909093,
-          -26.454545454545453, -8.818181818181813,
-          8.818181818181813, 26.454545454545453,
-          44.090909090909093, 61.72727272727272,
-          79.363636363636374, 97.0, 99.0, 100.0],
-         [-100.0, -50.0, -13.333333333333336,
-          23.333333333333329, 60.0, 70.0, 80.0, 90.0, 100.0],
-         [-100.0, -66.666666666666657, -33.333333333333329,
-          0.0, 33.333333333333343, 66.666666666666657, 100.0]])
+        [
+            [
+                -100.0,
+                -99.0,
+                -97.0,
+                -79.36363636363636,
+                -61.727272727272727,
+                -44.090909090909093,
+                -26.454545454545453,
+                -8.818181818181813,
+                8.818181818181813,
+                26.454545454545453,
+                44.090909090909093,
+                61.72727272727272,
+                79.363636363636374,
+                97.0,
+                99.0,
+                100.0,
+            ],
+            [
+                -100.0,
+                -50.0,
+                -13.333333333333336,
+                23.333333333333329,
+                60.0,
+                70.0,
+                80.0,
+                90.0,
+                100.0,
+            ],
+            [
+                -100.0,
+                -66.666666666666657,
+                -33.333333333333329,
+                0.0,
+                33.333333333333343,
+                66.666666666666657,
+                100.0,
+            ],
+        ],
+    )
 
     expected_ves = list(expected_sm.structured_iterate_hex("zyx"))
     written_ves = list(expected_sm.structured_iterate_hex("zyx"))
@@ -764,20 +885,51 @@ def test_wwinp_n():
     assert_equal(ww2.cm, [[-99, -97, 97, 99, 100], [-50, 60, 100], [100]])
     assert_equal(ww2.fm, [[1, 1, 11, 1, 1], [1, 3, 4], [6]])
     assert_array_equal(
-        ww2.e,
-        [[0.1, 0.14678, 0.21544, 0.31623, 0.46416, 0.68129, 1.0000]])
+        ww2.e, [[0.1, 0.14678, 0.21544, 0.31623, 0.46416, 0.68129, 1.0000]]
+    )
     assert_equal(
         ww2.bounds,
-        [[-100.0, -99.0, -97.0, -79.36363636363636,
-          -61.727272727272727, -44.090909090909093,
-          -26.454545454545453, -8.818181818181813,
-          8.818181818181813, 26.454545454545453,
-          44.090909090909093, 61.72727272727272,
-          79.363636363636374, 97.0, 99.0, 100.0],
-         [-100.0, -50.0, -13.333333333333336,
-          23.333333333333329, 60.0, 70.0, 80.0, 90.0, 100.0],
-         [-100.0, -66.666666666666657, -33.333333333333329,
-          0.0, 33.333333333333343, 66.666666666666657, 100.0]])
+        [
+            [
+                -100.0,
+                -99.0,
+                -97.0,
+                -79.36363636363636,
+                -61.727272727272727,
+                -44.090909090909093,
+                -26.454545454545453,
+                -8.818181818181813,
+                8.818181818181813,
+                26.454545454545453,
+                44.090909090909093,
+                61.72727272727272,
+                79.363636363636374,
+                97.0,
+                99.0,
+                100.0,
+            ],
+            [
+                -100.0,
+                -50.0,
+                -13.333333333333336,
+                23.333333333333329,
+                60.0,
+                70.0,
+                80.0,
+                90.0,
+                100.0,
+            ],
+            [
+                -100.0,
+                -66.666666666666657,
+                -33.333333333333329,
+                0.0,
+                33.333333333333343,
+                66.666666666666657,
+                100.0,
+            ],
+        ],
+    )
 
     expected_ves = list(expected_sm.structured_iterate_hex("zyx"))
     written_ves = list(expected_sm.structured_iterate_hex("zyx"))
@@ -803,9 +955,7 @@ def test_wwinp_n():
     assert_equal(len(written), len(expected))
     for i in range(1, len(expected)):
         for j in range(0, len(expected[i].split())):
-            assert_equal(
-                float(written[i].split()[j]),
-                float(expected[i].split()[j]))
+            assert_equal(float(written[i].split()[j]), float(expected[i].split()[j]))
 
     os.remove(output)
 
@@ -815,10 +965,10 @@ def test_wwinp_p():
         raise SkipTest
 
     thisdir = os.path.dirname(__file__)
-    wwinp_file = os.path.join(thisdir, 'mcnp_wwinp_wwinp_p.txt')
-    expected_h5m = os.path.join(thisdir, 'mcnp_wwinp_mesh_p.h5m')
+    wwinp_file = os.path.join(thisdir, "mcnp_wwinp_wwinp_p.txt")
+    expected_h5m = os.path.join(thisdir, "mcnp_wwinp_mesh_p.h5m")
     expected_sm = Mesh(mesh=expected_h5m, structured=True)
-    output = os.path.join(os.getcwd(), 'test_wwinp')
+    output = os.path.join(os.getcwd(), "test_wwinp")
 
     # Read in the wwinp file to an object and check resulting attributes.
     ww1 = mcnp.Wwinp()
@@ -834,14 +984,34 @@ def test_wwinp_p():
     assert_equal(ww1.fm, [[1], [1, 3, 4], [6]])
     assert_equal(ww1.e[0], [])
     assert_array_equal(
-        ww1.e[1], [0.1, 0.14678, 0.21544, 0.31623, 0.46416, 0.68129, 1.0000])
+        ww1.e[1], [0.1, 0.14678, 0.21544, 0.31623, 0.46416, 0.68129, 1.0000]
+    )
     assert_equal(
         ww1.bounds,
-        [[-100.0, 100],
-         [-100.0, -50.0, -13.333333333333336,
-          23.333333333333329, 60.0, 70.0, 80.0, 90.0, 100.0],
-         [-100.0, -66.666666666666657, -33.333333333333329,
-          0.0, 33.333333333333343, 66.666666666666657, 100.0]])
+        [
+            [-100.0, 100],
+            [
+                -100.0,
+                -50.0,
+                -13.333333333333336,
+                23.333333333333329,
+                60.0,
+                70.0,
+                80.0,
+                90.0,
+                100.0,
+            ],
+            [
+                -100.0,
+                -66.666666666666657,
+                -33.333333333333329,
+                0.0,
+                33.333333333333343,
+                66.666666666666657,
+                100.0,
+            ],
+        ],
+    )
 
     expected_ves = list(expected_sm.structured_iterate_hex("zyx"))
     written_ves = list(expected_sm.structured_iterate_hex("zyx"))
@@ -865,14 +1035,34 @@ def test_wwinp_p():
     assert_equal(ww2.fm, [[1], [1, 3, 4], [6]])
     assert_equal(ww2.e[0], [])
     assert_array_equal(
-        ww2.e[1], [0.1, 0.14678, 0.21544, 0.31623, 0.46416, 0.68129, 1.0000])
+        ww2.e[1], [0.1, 0.14678, 0.21544, 0.31623, 0.46416, 0.68129, 1.0000]
+    )
     assert_equal(
         ww2.bounds,
-        [[-100.0, 100],
-         [-100.0, -50.0, -13.333333333333336,
-          23.333333333333329, 60.0, 70.0, 80.0, 90.0, 100.0],
-         [-100.0, -66.666666666666657, -33.333333333333329,
-          0.0, 33.333333333333343, 66.666666666666657, 100.0]])
+        [
+            [-100.0, 100],
+            [
+                -100.0,
+                -50.0,
+                -13.333333333333336,
+                23.333333333333329,
+                60.0,
+                70.0,
+                80.0,
+                90.0,
+                100.0,
+            ],
+            [
+                -100.0,
+                -66.666666666666657,
+                -33.333333333333329,
+                0.0,
+                33.333333333333343,
+                66.666666666666657,
+                100.0,
+            ],
+        ],
+    )
 
     expected_ves = list(expected_sm.structured_iterate_hex("zyx"))
     written_ves = list(expected_sm.structured_iterate_hex("zyx"))
@@ -898,8 +1088,7 @@ def test_wwinp_p():
     assert_equal(len(written), len(expected))
     for i in range(1, len(expected)):
         for j in range(0, len(expected[i].split())):
-            assert_equal(
-                float(written[i].split()[j]), float(expected[i].split()[j]))
+            assert_equal(float(written[i].split()[j]), float(expected[i].split()[j]))
 
     os.remove(output)
 
@@ -909,10 +1098,10 @@ def test_wwinp_np():
         raise SkipTest
 
     thisdir = os.path.dirname(__file__)
-    wwinp_file = os.path.join(thisdir, 'mcnp_wwinp_wwinp_np.txt')
-    expected_h5m = os.path.join(thisdir, 'mcnp_wwinp_mesh_np.h5m')
+    wwinp_file = os.path.join(thisdir, "mcnp_wwinp_wwinp_np.txt")
+    expected_h5m = os.path.join(thisdir, "mcnp_wwinp_mesh_np.h5m")
     expected_sm = Mesh(mesh=expected_h5m, structured=True)
-    output = os.path.join(os.getcwd(), 'test_wwinp')
+    output = os.path.join(os.getcwd(), "test_wwinp")
 
     # Read in the wwinp file to an object and check resulting attributes.
     ww1 = mcnp.Wwinp()
@@ -926,16 +1115,34 @@ def test_wwinp_np():
     assert_equal(ww1.nwg, 1)
     assert_equal(ww1.cm, [[100], [-50, 60, 100], [100]])
     assert_equal(ww1.fm, [[1], [1, 3, 4], [6]])
-    assert_equal(
-        ww1.e[0], [0.1, 0.14678, 0.21544, 0.31623, 0.46416, 0.68129, 1.0000])
+    assert_equal(ww1.e[0], [0.1, 0.14678, 0.21544, 0.31623, 0.46416, 0.68129, 1.0000])
     assert_array_equal(ww1.e[1], [100])
     assert_equal(
         ww1.bounds,
-        [[-100.0, 100],
-         [-100.0, -50.0, -13.333333333333336,
-          23.333333333333329, 60.0, 70.0, 80.0, 90.0, 100.0],
-         [-100.0, -66.666666666666657, -33.333333333333329,
-          0.0, 33.333333333333343, 66.666666666666657, 100.0]])
+        [
+            [-100.0, 100],
+            [
+                -100.0,
+                -50.0,
+                -13.333333333333336,
+                23.333333333333329,
+                60.0,
+                70.0,
+                80.0,
+                90.0,
+                100.0,
+            ],
+            [
+                -100.0,
+                -66.666666666666657,
+                -33.333333333333329,
+                0.0,
+                33.333333333333343,
+                66.666666666666657,
+                100.0,
+            ],
+        ],
+    )
 
     expected_ves = list(expected_sm.structured_iterate_hex("zyx"))
     written_ves = list(expected_sm.structured_iterate_hex("zyx"))
@@ -965,15 +1172,35 @@ def test_wwinp_np():
     assert_equal(ww2.cm, [[100], [-50, 60, 100], [100]])
     assert_equal(ww2.fm, [[1], [1, 3, 4], [6]])
     assert_array_equal(
-        ww2.e[0], [0.1, 0.14678, 0.21544, 0.31623, 0.46416, 0.68129, 1.0000])
+        ww2.e[0], [0.1, 0.14678, 0.21544, 0.31623, 0.46416, 0.68129, 1.0000]
+    )
     assert_array_equal(ww2.e[1], [100])
     assert_equal(
         ww2.bounds,
-        [[-100.0, 100],
-         [-100.0, -50.0, -13.333333333333336,
-          23.333333333333329, 60.0, 70.0, 80.0, 90.0, 100.0],
-         [-100.0, -66.666666666666657, -33.333333333333329,
-          0.0, 33.333333333333343, 66.666666666666657, 100.0]])
+        [
+            [-100.0, 100],
+            [
+                -100.0,
+                -50.0,
+                -13.333333333333336,
+                23.333333333333329,
+                60.0,
+                70.0,
+                80.0,
+                90.0,
+                100.0,
+            ],
+            [
+                -100.0,
+                -66.666666666666657,
+                -33.333333333333329,
+                0.0,
+                33.333333333333343,
+                66.666666666666657,
+                100.0,
+            ],
+        ],
+    )
 
     expected_ves = list(expected_sm.structured_iterate_hex("zyx"))
     written_ves = list(expected_sm.structured_iterate_hex("zyx"))
@@ -1006,16 +1233,14 @@ def test_wwinp_np():
     assert_equal(len(written), len(expected))
     for i in range(1, len(expected)):
         for j in range(0, len(expected[i].split())):
-            assert_equal(
-                float(written[i].split()[j]), float(expected[i].split()[j]))
+            assert_equal(float(written[i].split()[j]), float(expected[i].split()[j]))
 
     os.remove(output)
 
 
 # Test Meshtal and Meshtally classes
 def test_single_meshtally_meshtal():
-    """Test a meshtal file containing a single mesh tally.
-    """
+    """Test a meshtal file containing a single mesh tally."""
 
     if not HAVE_PYMOAB:
         raise SkipTest
@@ -1025,19 +1250,17 @@ def test_single_meshtally_meshtal():
     expected_h5m = os.path.join(thisdir, "mcnp_meshtal_single_mesh.h5m")
     expected_sm = Mesh(mesh=expected_h5m, structured=True)
 
-    tags = {4: ["n_result", "n_rel_error",
-                "n_total_result", "n_total_rel_error"]}
+    tags = {4: ["n_result", "n_rel_error", "n_total_result", "n_total_rel_error"]}
 
     meshtal_object = mcnp.Meshtal(meshtal_file, tags, meshes_have_mats=True)
     assert_not_equal(meshtal_object.tally[4].mats, None)
 
     # test Meshtal attributes
-    assert_equal(meshtal_object.version, '5.mpi')
+    assert_equal(meshtal_object.version, "5.mpi")
 
     assert_equal(meshtal_object.ld, "09282010")
 
-    assert_equal(meshtal_object.title,
-                 "Input file to general test meshtal file")
+    assert_equal(meshtal_object.title, "Input file to general test meshtal file")
 
     assert_equal(meshtal_object.histories, 100000)
 
@@ -1045,43 +1268,44 @@ def test_single_meshtally_meshtal():
     assert_equal(meshtal_object.tally[4].tally_number, 4)
     assert_equal(meshtal_object.tally[4].particle, "neutron")
     assert_equal(meshtal_object.tally[4].dose_response, True)
-    assert_equal(
-        meshtal_object.tally[4].x_bounds,
-        (-200.00, -66.67, 66.67, 200.00))
+    assert_equal(meshtal_object.tally[4].x_bounds, (-200.00, -66.67, 66.67, 200.00))
     assert_equal(
         meshtal_object.tally[4].y_bounds,
-        (-200.00, -120.00, -40.00, 40.00, 120.00, 200.00))
+        (-200.00, -120.00, -40.00, 40.00, 120.00, 200.00),
+    )
+    assert_equal(meshtal_object.tally[4].z_bounds, (-200.00, -50.00, 100.00, 200.00))
     assert_equal(
-        meshtal_object.tally[4].z_bounds,
-        (-200.00, -50.00, 100.00, 200.00))
-    assert_equal(
-        meshtal_object.tally[4].e_bounds,
-        (0.00E+00, 1.00E-01, 2.00E-01, 1.00E+00))
+        meshtal_object.tally[4].e_bounds, (0.00e00, 1.00e-01, 2.00e-01, 1.00e00)
+    )
 
     # test vector tags
     for v_e, expected_v_e in zip(
-            meshtal_object.tally[4].structured_iterate_hex("xyz"),
-            expected_sm.structured_iterate_hex("xyz")):
+        meshtal_object.tally[4].structured_iterate_hex("xyz"),
+        expected_sm.structured_iterate_hex("xyz"),
+    ):
         written = meshtal_object.tally[4].n_result[v_e]
         expected = expected_sm.n_result[expected_v_e]
         assert_array_equal(written, expected)
     for v_e, expected_v_e in zip(
-            meshtal_object.tally[4].structured_iterate_hex("xyz"),
-            expected_sm.structured_iterate_hex("xyz")):
+        meshtal_object.tally[4].structured_iterate_hex("xyz"),
+        expected_sm.structured_iterate_hex("xyz"),
+    ):
         written = meshtal_object.tally[4].n_rel_error[v_e]
         expected = expected_sm.n_rel_error[expected_v_e]
         assert_array_equal(written, expected)
 
     # test total tag
     for v_e, expected_v_e in zip(
-            meshtal_object.tally[4].structured_iterate_hex("xyz"),
-            expected_sm.structured_iterate_hex("xyz")):
+        meshtal_object.tally[4].structured_iterate_hex("xyz"),
+        expected_sm.structured_iterate_hex("xyz"),
+    ):
         written = meshtal_object.tally[4].n_total_result[v_e]
         expected = expected_sm.n_total_result[expected_v_e]
         assert_equal(written, expected)
     for v_e, expected_v_e in zip(
-            meshtal_object.tally[4].structured_iterate_hex("xyz"),
-            expected_sm.structured_iterate_hex("xyz")):
+        meshtal_object.tally[4].structured_iterate_hex("xyz"),
+        expected_sm.structured_iterate_hex("xyz"),
+    ):
         written = meshtal_object.tally[4].n_total_rel_error[v_e]
         expected = expected_sm.n_total_rel_error[expected_v_e]
         assert_equal(written, expected)
@@ -1110,102 +1334,112 @@ def test_multiple_meshtally_meshtal():
     expected_h5m_34 = os.path.join(thisdir, "mcnp_meshtal_tally_34.h5m")
     expected_sm_34 = Mesh(mesh=expected_h5m_34, structured=True)
 
-    tags = {4: ["n_result", "n_rel_error",
-                "n_total_result", "n_total_rel_error"],
-            14: ["n_result", "n_rel_error",
-                 "n_total_result", "n_total_rel_error"],
-            24: ["p_result", "p_rel_error",
-                 "p_total_result", "p_total_rel_error"],
-            34: ["p_result", "p_rel_error",
-                 "p_total_result", "p_total_rel_error"]}
+    tags = {
+        4: ["n_result", "n_rel_error", "n_total_result", "n_total_rel_error"],
+        14: ["n_result", "n_rel_error", "n_total_result", "n_total_rel_error"],
+        24: ["p_result", "p_rel_error", "p_total_result", "p_total_rel_error"],
+        34: ["p_result", "p_rel_error", "p_total_result", "p_total_rel_error"],
+    }
     meshtal_object = mcnp.Meshtal(meshtal_file, tags)
-    assert_equal(meshtal_object.version, '5')
+    assert_equal(meshtal_object.version, "5")
     assert_equal(meshtal_object.tally[4].mats, None)
 
     # test meshtally 4
     for v_e, expected_v_e in zip(
-            meshtal_object.tally[4].structured_iterate_hex("xyz"),
-            expected_sm_4.structured_iterate_hex("xyz")):
+        meshtal_object.tally[4].structured_iterate_hex("xyz"),
+        expected_sm_4.structured_iterate_hex("xyz"),
+    ):
         written = meshtal_object.tally[4].n_result[v_e]
         expected = expected_sm_4.n_result[expected_v_e]
         assert_array_equal(written, expected)
 
     for v_e, expected_v_e in zip(
-            meshtal_object.tally[4].structured_iterate_hex("xyz"),
-            expected_sm_4.structured_iterate_hex("xyz")):
+        meshtal_object.tally[4].structured_iterate_hex("xyz"),
+        expected_sm_4.structured_iterate_hex("xyz"),
+    ):
         written = meshtal_object.tally[4].n_rel_error[v_e]
         expected = expected_sm_4.n_rel_error[expected_v_e]
         assert_array_equal(written, expected)
 
     for v_e, expected_v_e in zip(
-            meshtal_object.tally[4].structured_iterate_hex("xyz"),
-            expected_sm_4.structured_iterate_hex("xyz")):
+        meshtal_object.tally[4].structured_iterate_hex("xyz"),
+        expected_sm_4.structured_iterate_hex("xyz"),
+    ):
         written = meshtal_object.tally[4].n_total_result[v_e]
         expected = expected_sm_4.n_total_result[expected_v_e]
         assert_equal(written, expected)
 
     for v_e, expected_v_e in zip(
-            meshtal_object.tally[4].structured_iterate_hex("xyz"),
-            expected_sm_4.structured_iterate_hex("xyz")):
+        meshtal_object.tally[4].structured_iterate_hex("xyz"),
+        expected_sm_4.structured_iterate_hex("xyz"),
+    ):
         written = meshtal_object.tally[4].n_total_rel_error[v_e]
         expected = expected_sm_4.n_total_rel_error[expected_v_e]
         assert_equal(written, expected)
 
     # test meshtally 14
     for v_e, expected_v_e in zip(
-            meshtal_object.tally[14].structured_iterate_hex("xyz"),
-            expected_sm_14.structured_iterate_hex("xyz")):
+        meshtal_object.tally[14].structured_iterate_hex("xyz"),
+        expected_sm_14.structured_iterate_hex("xyz"),
+    ):
         written = meshtal_object.tally[14].n_result[v_e]
         expected = expected_sm_14.n_result[expected_v_e]
         assert_array_equal(written, expected)
 
     for v_e, expected_v_e in zip(
-            meshtal_object.tally[14].structured_iterate_hex("xyz"),
-            expected_sm_14.structured_iterate_hex("xyz")):
+        meshtal_object.tally[14].structured_iterate_hex("xyz"),
+        expected_sm_14.structured_iterate_hex("xyz"),
+    ):
         written = meshtal_object.tally[14].n_rel_error[v_e]
         expected = expected_sm_14.n_rel_error[expected_v_e]
         assert_array_equal(written, expected)
 
     # test meshtally 24
     for v_e, expected_v_e in zip(
-            meshtal_object.tally[24].structured_iterate_hex("xyz"),
-            expected_sm_24.structured_iterate_hex("xyz")):
+        meshtal_object.tally[24].structured_iterate_hex("xyz"),
+        expected_sm_24.structured_iterate_hex("xyz"),
+    ):
         written = meshtal_object.tally[24].p_result[v_e]
         expected = expected_sm_24.p_result[expected_v_e]
         assert_array_equal(written, expected)
 
     for v_e, expected_v_e in zip(
-            meshtal_object.tally[24].structured_iterate_hex("xyz"),
-            expected_sm_24.structured_iterate_hex("xyz")):
+        meshtal_object.tally[24].structured_iterate_hex("xyz"),
+        expected_sm_24.structured_iterate_hex("xyz"),
+    ):
         written = meshtal_object.tally[24].p_rel_error[v_e]
         expected = expected_sm_24.p_rel_error[expected_v_e]
         assert_array_equal(written, expected)
 
     for v_e, expected_v_e in zip(
-            meshtal_object.tally[24].structured_iterate_hex("xyz"),
-            expected_sm_24.structured_iterate_hex("xyz")):
+        meshtal_object.tally[24].structured_iterate_hex("xyz"),
+        expected_sm_24.structured_iterate_hex("xyz"),
+    ):
         written = meshtal_object.tally[24].p_total_result[v_e]
         expected = expected_sm_24.p_total_result[expected_v_e]
         assert_equal(written, expected)
 
     for v_e, expected_v_e in zip(
-            meshtal_object.tally[24].structured_iterate_hex("xyz"),
-            expected_sm_24.structured_iterate_hex("xyz")):
+        meshtal_object.tally[24].structured_iterate_hex("xyz"),
+        expected_sm_24.structured_iterate_hex("xyz"),
+    ):
         written = meshtal_object.tally[24].p_total_rel_error[v_e]
         expected = expected_sm_24.p_total_rel_error[expected_v_e]
         assert_equal(written, expected)
 
     # test meshtally 34
     for v_e, expected_v_e in zip(
-            meshtal_object.tally[34].structured_iterate_hex("xyz"),
-            expected_sm_34.structured_iterate_hex("xyz")):
+        meshtal_object.tally[34].structured_iterate_hex("xyz"),
+        expected_sm_34.structured_iterate_hex("xyz"),
+    ):
         written = meshtal_object.tally[34].p_result[v_e]
         expected = expected_sm_34.p_result[expected_v_e]
         assert_array_equal(written, expected)
 
     for v_e, expected_v_e in zip(
-            meshtal_object.tally[34].structured_iterate_hex("xyz"),
-            expected_sm_34.structured_iterate_hex("xyz")):
+        meshtal_object.tally[34].structured_iterate_hex("xyz"),
+        expected_sm_34.structured_iterate_hex("xyz"),
+    ):
         written = meshtal_object.tally[34].p_rel_error[v_e]
         expected = expected_sm_34.p_rel_error[expected_v_e]
         assert_array_equal(written, expected)
@@ -1216,16 +1450,17 @@ def test_mesh_to_geom():
         raise SkipTest
 
     mats = {
-        0: Material({'H1': 1.0, 'K39': 1.0}, density=42.0),
-        1: Material({'H1': 0.1, 'O16': 1.0}, density=43.0),
-        2: Material({'He4': 42.0}, density=44.0),
-        3: Material({'Tm171': 171.0}, density=45.0),
-        4: Material({'C12': 1.0}, density=47.0),
-        5: Material({'1002': 1.0}, density=5.0),
+        0: Material({"H1": 1.0, "K39": 1.0}, density=42.0),
+        1: Material({"H1": 0.1, "O16": 1.0}, density=43.0),
+        2: Material({"He4": 42.0}, density=44.0),
+        3: Material({"Tm171": 171.0}, density=45.0),
+        4: Material({"C12": 1.0}, density=47.0),
+        5: Material({"1002": 1.0}, density=5.0),
     }
 
-    m = Mesh(structured_coords=[[0, 1, 2, 3], [0, 1, 2], [0, 1]], mats=mats,
-             structured=True)
+    m = Mesh(
+        structured_coords=[[0, 1, 2, 3], [0, 1, 2], [0, 1]], mats=mats, structured=True
+    )
 
     geom = mcnp.mesh_to_geom(m)
 
@@ -1274,6 +1509,7 @@ def test_mesh_to_geom():
         "C name: 5\n"
         "C density = 5.00000\n"
         "m6\n"
-        "     1002 -5.0000e+00\n")
+        "     1002 -5.0000e+00\n"
+    )
 
     assert_equal(geom, exp_geom)

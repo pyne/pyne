@@ -69,5 +69,10 @@ rever/
 !tests/files_test_openmc/*.h5
 
 .vscode
-pyne/pyne_version.py
+
+# ignore version file generated from pyne_version.py
 src/pyne_version.h
+
+# ignore amalgamated source
+pyne.cpp
+pyne.h

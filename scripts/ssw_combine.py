@@ -30,7 +30,7 @@ def combine_multiple_ss_files(newssrname, ssrnames):
         True if successfully created the new ssr file.
 
     """
-    ssrfiles = [SurfSrc(ssrname, 'rb') for ssrname in ssrnames]
+    ssrfiles = [SurfSrc(ssrname, "rb") for ssrname in ssrnames]
 
     # read first surface source file's header
     ssrfiles[0].read_header()
@@ -39,13 +39,16 @@ def combine_multiple_ss_files(newssrname, ssrnames):
         ssrfile.read_header()
         # we quit if there is a mismatch.
         if _compare_compatible(ssrfiles[0], ssrfile) != 0:
-            print("Headers do not match for all files.\nFile #{0} does not "
-                    "match 1st file.".format(ssrnames[cnt]))
+            print(
+                "Headers do not match for all files.\nFile #{0} does not "
+                "match 1st file.".format(ssrnames[cnt])
+            )
             return False
 
     # calculate list of offsets for offsetting each track's nps value.
-    trackoffsets = [sum(ssrfile.np1 for ssrfile in ssrfiles[:x])
-                    for x in xrange(len(ssrfiles))]
+    trackoffsets = [
+        sum(ssrfile.np1 for ssrfile in ssrfiles[:x]) for x in xrange(len(ssrfiles))
+    ]
 
     ######################
     # Create new ssr file's header primarily from first ssr file's header
@@ -61,7 +64,7 @@ def combine_multiple_ss_files(newssrname, ssrnames):
     newssr.knod = ssrfiles[0].knod
 
     # table 1
-    newssr.np1 = sum(x.orignp1 for x in ssrfiles) # note orignp1 vs np1
+    newssr.np1 = sum(x.orignp1 for x in ssrfiles)  # note orignp1 vs np1
     newssr.nrss = sum(x.nrss for x in ssrfiles)
     newssr.ncrd = ssrfiles[0].ncrd
     newssr.njsw = ssrfiles[0].njsw
@@ -78,7 +81,7 @@ def combine_multiple_ss_files(newssrname, ssrnames):
     newssr.surflist = ssrfiles[0].surflist
 
     # whatever the range from njsw to njsw+niwr is...
-    for j in range(ssrfiles[0].njsw,ssrfiles[0].njsw+ssrfiles[0].niwr):
+    for j in range(ssrfiles[0].njsw, ssrfiles[0].njsw + ssrfiles[0].niwr):
         print("unsupported entries; needs mcnp.py additions")
 
     # copy summary info/table
@@ -103,8 +106,7 @@ def combine_multiple_ss_files(newssrname, ssrnames):
 
     newssr.write_tracklist()
 
-    print("Finished writing to new surface source file '{0}'"
-            "".format(newssrname))
+    print("Finished writing to new surface source file '{0}'" "".format(newssrname))
     newssr.close()
 
     return True
@@ -126,23 +128,23 @@ def _compare_compatible(first, other):
     """
 
     # Same code version/build used
-    if other.kod != first.kod: # code name
+    if other.kod != first.kod:  # code name
         return cmp(other.kod, first.kod)
-    if other.ver != first.ver: # major code version
+    if other.ver != first.ver:  # major code version
         return cmp(other.ver, first.ver)
-    if other.loddat != first.loddat: # code version date
+    if other.loddat != first.loddat:  # code version date
         return cmp(other.loddat, first.loddat)
 
     # Particle type
-    if other.mipts != first.mipts: # par type
+    if other.mipts != first.mipts:  # par type
         return cmp(other.mipts, first.mipts)
 
     # Geometry features
-    if other.njsw != first.njsw: # num of surfaces
+    if other.njsw != first.njsw:  # num of surfaces
         return cmp(other.njsw, first.njsw)
-    if other.niwr != first.niwr: # cells
+    if other.niwr != first.niwr:  # cells
         return cmp(other.niwr, first.niwr)
-    if other.kjaq != first.kjaq: # macrobody facet flag
+    if other.kjaq != first.kjaq:  # macrobody facet flag
         return cmp(other.kjaq, first.kjaq)
     for surf in range(len(first.surflist)):
         if other.surflist[surf].id != first.surflist[surf].id:
@@ -150,26 +152,23 @@ def _compare_compatible(first, other):
             return cmp(other.surflist[surf].id, first.surflist[surf].id)
         if other.surflist[surf].facet_id != first.surflist[surf].facet_id:
             # facet_id doesn't match
-            return cmp(other.surflist[surf].facet_id,
-                       first.surflist[surf].facet_id)
+            return cmp(other.surflist[surf].facet_id, first.surflist[surf].facet_id)
         if other.surflist[surf].type != first.surflist[surf].type:
             # type doesn't match
-            return cmp(other.surflist[surf].type,
-                       first.surflist[surf].type)
-        if other.surflist[surf].num_params != \
-                first.surflist[surf].num_params:
+            return cmp(other.surflist[surf].type, first.surflist[surf].type)
+        if other.surflist[surf].num_params != first.surflist[surf].num_params:
             # num_params ddoesn't match
-            return cmp(other.surflist[surf].num_params,
-                       first.surflist[surf].num_params)
-        if other.surflist[surf].surf_params != \
-                first.surflist[surf].surf_params:
+            return cmp(other.surflist[surf].num_params, first.surflist[surf].num_params)
+        if other.surflist[surf].surf_params != first.surflist[surf].surf_params:
             # surf_params doesn't match
-            return cmp(other.surflist[surf].surf_params,
-                       first.surflist[surf].surf_params)
+            return cmp(
+                other.surflist[surf].surf_params, first.surflist[surf].surf_params
+            )
     return 0
 
 
 if __name__ == "__main__":
     import sys
+
     print(sys.argv)
-    combine_multiple_ss_files('newssr', sys.argv[1:])
+    combine_multiple_ss_files("newssr", sys.argv[1:])

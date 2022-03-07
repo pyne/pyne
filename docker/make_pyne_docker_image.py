@@ -11,7 +11,7 @@ def consistancy_check(args):
 
     Parameters
     ----------
-    args : list of arguments 
+    args : list of arguments
 
     """
     args.moab = args.moab or args.dagmc or args.pymoab or args.openmc or args.all
@@ -28,28 +28,28 @@ def build_name(args):
 
     Parameters
     ----------
-    args : list of arguments 
+    args : list of arguments
 
     """
-    if args.name != '':
+    if args.name != "":
         return args.name
 
-    name = 'pyne/ubuntu_18.04'
-    name += '_py'+str(args.py_version)
-    if args.hdf5_version is not '':
+    name = "pyne/ubuntu_18.04"
+    name += "_py" + str(args.py_version)
+    if args.hdf5_version is not "":
         name += "_" + args.hdf5_version
     if args.moab and not args.dagmc and not args.pymoab:
         name += "_moab"
     else:
         if args.dagmc:
-            name += '_dagmc'
+            name += "_dagmc"
         if args.pymoab:
-            name += '_pymoab'
+            name += "_pymoab"
         if args.openmc:
-            name += '_openmc'
+            name += "_openmc"
 
     if args.deps:
-        name += '_pyne-deps'
+        name += "_pyne-deps"
     return name
 
 
@@ -60,14 +60,14 @@ def build_docker(args):
 
     Parameters
     ----------
-    args : list of arguments 
+    args : list of arguments
 
     """
-    dockerfile = ['-f', 'ubuntu_18.04-dev.dockerfile']
+    dockerfile = ["-f", "ubuntu_18.04-dev.dockerfile"]
     tag = build_name(args)
-    tag_flag = ['-t', tag]
+    tag_flag = ["-t", tag]
     docker_args = []
-    if args.hdf5_version is not '':
+    if args.hdf5_version is not "":
         docker_args += ["--build-arg", "build_hdf5=" + args.hdf5_version]
     if args.moab:
         docker_args += ["--build-arg", "build_moab=YES"]
@@ -91,58 +91,55 @@ def build_docker(args):
             return
 
     rtn = subprocess.check_call(
-        ["docker",  "build"] + tag_flag + dockerfile + docker_args + ["."], shell=(os.name == 'nt'))
+        ["docker", "build"] + tag_flag + dockerfile + docker_args + ["."],
+        shell=(os.name == "nt"),
+    )
 
     if args.push:
-        rtn = subprocess.check_call(
-            ["docker", "push",  tag], shell=(os.name == 'nt'))
+        rtn = subprocess.check_call(["docker", "push", tag], shell=(os.name == "nt"))
 
 
 def main():
-    """Parse the different arguments and call the proper methods.
-    """
-    description = 'Build a docker image for PyNE'
+    """Parse the different arguments and call the proper methods."""
+    description = "Build a docker image for PyNE"
     parser = ap.ArgumentParser(description=description)
 
-    py_version = 'Require a specific python version (default: 3)'
-    parser.add_argument('--py_version', type=int, help=py_version,
-                        default=3)
+    py_version = "Require a specific python version (default: 3)"
+    parser.add_argument("--py_version", type=int, help=py_version, default=3)
 
-    custom_hdf5 = 'Build and install custom HDF5 Version. ' \
-        + 'Argument HDF5_VERSION must be a valid git tag or branch at https://github.com/HDFGroup/hdf5'
-    parser.add_argument('--hdf5_version', help=custom_hdf5,
-                        default='')
+    custom_hdf5 = (
+        "Build and install custom HDF5 Version. "
+        + "Argument HDF5_VERSION must be a valid git tag or branch at https://github.com/HDFGroup/hdf5"
+    )
+    parser.add_argument("--hdf5_version", help=custom_hdf5, default="")
 
-    moab = 'Build and install MOAB (default: False)'
-    parser.add_argument('--moab', help=moab,
-                        action='store_true', default=False)
+    moab = "Build and install MOAB (default: False)"
+    parser.add_argument("--moab", help=moab, action="store_true", default=False)
 
-    dagmc = 'Build and install DAGMC (default: False)'
-    parser.add_argument('--dagmc', help=dagmc,
-                        action='store_true', default=False)
+    dagmc = "Build and install DAGMC (default: False)"
+    parser.add_argument("--dagmc", help=dagmc, action="store_true", default=False)
 
-    pymoab = 'Enable pymoab (default: False)'
-    parser.add_argument('--pymoab', help=pymoab,
-                        action='store_true', default=False)
+    pymoab = "Enable pymoab (default: False)"
+    parser.add_argument("--pymoab", help=pymoab, action="store_true", default=False)
 
-    openmc = 'Install OpenMC python API (default: False)'
-    parser.add_argument('--openmc', help=openmc,
-                        action='store_true', default=False)
+    openmc = "Install OpenMC python API (default: False)"
+    parser.add_argument("--openmc", help=openmc, action="store_true", default=False)
 
-    all_deps = 'Add all dependencies (default: False)'
-    parser.add_argument('--all', '-a', '-all', help=all_deps,
-                        action='store_true', default=False)
+    all_deps = "Add all dependencies (default: False)"
+    parser.add_argument(
+        "--all", "-a", "-all", help=all_deps, action="store_true", default=False
+    )
 
-    deps = 'Dependencies only (default: False)'
-    parser.add_argument('--deps', help=deps,
-                        action='store_true', default=False)
+    deps = "Dependencies only (default: False)"
+    parser.add_argument("--deps", help=deps, action="store_true", default=False)
 
     name = 'Set docker image name (default: "")'
-    parser.add_argument('--name', help=name, default='')
+    parser.add_argument("--name", help=name, default="")
 
-    push = 'Push docker image on dockerhub (default: False)'
-    parser.add_argument('--push', '-p', '-push', help=push,
-                        action='store_true', default=False)
+    push = "Push docker image on dockerhub (default: False)"
+    parser.add_argument(
+        "--push", "-p", "-push", help=push, action="store_true", default=False
+    )
 
     args = parser.parse_args()
 
