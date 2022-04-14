@@ -20,7 +20,7 @@ ELSE()
     MESSAGE(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
 ENDIF()
 
-option ( ENABLE_SPATIAL_SOLVERS     "Should build AHOT spatial solvers?"                 ON )
+option ( ENABLE_SPATIAL_SOLVERS     "Should build AHOT spatial solvers?"                 OFF )
 
 include(PyneMacros)
 pyne_print_logo()  # Beware of dragons
