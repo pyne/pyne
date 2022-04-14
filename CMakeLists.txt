@@ -21,6 +21,7 @@ ELSE()
 ENDIF()
 
 option ( ENABLE_SPATIAL_SOLVERS     "Should build AHOT spatial solvers?"                 OFF )
+option ( ENABLE_ENSDF_PROCESSIONG   "Should build ENSDF processing tools?"               OFF )
 
 include(PyneMacros)
 pyne_print_logo()  # Beware of dragons
