@@ -30,6 +30,7 @@ jobs:
     
       - name: Housekeeping
         run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
           cd $GITHUB_WORKSPACE
           ci/changelog_test.sh
 

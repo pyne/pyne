@@ -5,7 +5,8 @@ PyNE Change Log
 Next Version
 ============
 
-
+**Maintenance**
+   * update workflow to accommodate security-driven changes ()
 
 v0.7.6
 ======
