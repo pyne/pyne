@@ -6,7 +6,7 @@ Next Version
 ============
 
 **Maintenance**
-   * update workflow to accommodate security-driven changes ()
+   * update workflow to accommodate security-driven changes (#1445)
 
 v0.7.6
 ======
