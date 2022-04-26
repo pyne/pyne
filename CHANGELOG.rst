@@ -7,6 +7,7 @@ Next Version
 
 **Maintenance**
    * update workflow to accommodate security-driven changes (#1445)
+   * turn off all fortran (spatial solvers and ENSDF processing) by default (#1444)
 
 v0.7.6
 ======
