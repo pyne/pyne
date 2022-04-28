@@ -18,7 +18,7 @@ message(STATUS ${DAGMC_ROOT})
 
 find_path(DAGMC_CMAKE_CONFIG NAMES DAGMCConfig.cmake
           HINTS ${DAGMC_ROOT}
-          PATH_SUFFIXES lib Lib cmake lib/cmake/
+          PATH_SUFFIXES lib Lib cmake dagmc lib/cmake/dagmc
           NO_DEFAULT_PATH)
 
 message(STATUS "Found DAGMC in ${DAGMC_CMAKE_CONFIG}")
