@@ -13,27 +13,16 @@ RUN if [ "${py_version%.?}" -eq 3 ] ; \
     apt-get update \
     && apt-get install -y --fix-missing \
             software-properties-common \
-            wget \
-            g++ \
-            build-essential \
-            python${PY_SUFIX}-setuptools \
             python${PY_SUFIX}-pip \
-            python${PY_SUFIX}-setuptools \
-            python${PY_SUFIX}-dev \
-            python${PY_SUFIX}-packaging \
-            libpython${PY_SUFIX}-dev \
+            wget \
+            build-essential \
             git \
             cmake \
             gfortran \
-            vim emacs \
             libblas-dev \
             liblapack-dev \
             libeigen3-dev \
             libhdf5-dev \
-            libhdf5-serial-dev \
-            autoconf \
-            libtool \
-            doxygen \
             hdf5-tools \
     && apt-get clean -y; \
     if [ "${py_version%.?}" -eq 3 ] ; \
@@ -42,23 +31,16 @@ RUN if [ "${py_version%.?}" -eq 3 ] ; \
             update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 10; \
     fi;\
     pip install --upgrade pip; \
-    pip install --force-reinstall \
-            sphinx \
-            cloud_sptheme \
-            prettytable \
-            setuptools \
-            sphinxcontrib_bibtex \
-            numpydoc \
-            nbconvert \
-            numpy \
-            nose \
-            cython \
-            future \
-            tables \
+    pip install numpy \
             scipy \
+            cython \
+            nose \
+            tables \
+            matplotlib \
             jinja2 \
-            progress; \
-    pip install matplotlib
+            setuptools \
+            future \
+            progress
 
 # make starting directory
 RUN mkdir -p $HOME/opt
