@@ -1,9 +1,9 @@
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 
 # Ubuntu Setup
 ENV TZ=America/Chicago
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
-ARG py_version=3.6
+ARG py_version=3.8
 
 ENV HOME /root
 RUN if [ "${py_version%.?}" -eq 3 ] ; \
@@ -13,27 +13,16 @@ RUN if [ "${py_version%.?}" -eq 3 ] ; \
     apt-get update \
     && apt-get install -y --fix-missing \
             software-properties-common \
-            wget \
-            g++ \
-            build-essential \
-            python${PY_SUFIX}-setuptools \
             python${PY_SUFIX}-pip \
-            python${PY_SUFIX}-setuptools \
-            python${PY_SUFIX}-dev \
-            python${PY_SUFIX}-packaging \
-            libpython${PY_SUFIX}-dev \
+            wget \
+            build-essential \
             git \
             cmake \
             gfortran \
-            vim emacs \
             libblas-dev \
             liblapack-dev \
             libeigen3-dev \
             libhdf5-dev \
-            libhdf5-serial-dev \
-            autoconf \
-            libtool \
-            doxygen \
             hdf5-tools \
     && apt-get clean -y; \
     if [ "${py_version%.?}" -eq 3 ] ; \
@@ -42,23 +31,16 @@ RUN if [ "${py_version%.?}" -eq 3 ] ; \
             update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 10; \
     fi;\
     pip install --upgrade pip; \
-    pip install --force-reinstall \
-            sphinx \
-            cloud_sptheme \
-            prettytable \
-            "setuptools<49" \
-            sphinxcontrib_bibtex \
-            numpydoc \
-            nbconvert \
-            numpy \
-            nose \
-            cython \
-            future \
-            "tables<3.7" \
+    pip install numpy \
             scipy \
+            cython \
+            nose \
+            tables \
+            matplotlib \
             jinja2 \
-            progress; \
-    pip install matplotlib
+            setuptools \
+            future \
+            progress
 
 # make starting directory
 RUN mkdir -p $HOME/opt

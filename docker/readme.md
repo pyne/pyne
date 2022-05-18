@@ -7,7 +7,7 @@ required for the multiple configurations tested by the PyNE CI.
 
 This folder contains:
 
-- A custom Dockerfile: "ubuntu_18.04-dev.dockerfile", allowing the user 
+- A custom Dockerfile: "ubuntu_20.04-dev.dockerfile", allowing the user 
 to build docker containers with a custom set of
   dependencies required by the CI. The configuration of the Docker containers
   can be specified using the `--build-args <flag>` argument. The different flags are:
@@ -18,7 +18,7 @@ to build docker containers with a custom set of
     - `install_openmc=YES` install OpenMC Python3 API (default: `NO`)
     - `build_pyne=NO` do not build PyNE, only add the PyNE dependencies to the container (default: `YES`)
     - `py_version=X.Y` specify the python version to install (options are 2.7 or
-      3.6) (default: `2.7`)
+      3.8) (default: `3.8`)
 
 
 Note, if using multiple build arguments `--build-args` has to be repeated, i.e. :
