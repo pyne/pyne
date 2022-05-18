@@ -1,9 +1,9 @@
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 
 # Ubuntu Setup
 ENV TZ=America/Chicago
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
-ARG py_version=3.6
+ARG py_version=3.8
 
 ENV HOME /root
 RUN if [ "${py_version%.?}" -eq 3 ] ; \
@@ -46,7 +46,7 @@ RUN if [ "${py_version%.?}" -eq 3 ] ; \
             sphinx \
             cloud_sptheme \
             prettytable \
-            "setuptools<49" \
+            setuptools \
             sphinxcontrib_bibtex \
             numpydoc \
             nbconvert \
@@ -54,7 +54,7 @@ RUN if [ "${py_version%.?}" -eq 3 ] ; \
             nose \
             cython \
             future \
-            "tables<3.7" \
+            tables \
             scipy \
             jinja2 \
             progress; \
