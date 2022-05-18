@@ -56,7 +56,7 @@ jobs:
 
 
     container:
-      image: ghcr.io/pyne/ubuntu_18.04_py3${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:stable
+      image: ghcr.io/pyne/ubuntu_20.04_py3${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:stable
 
     steps:
       - name: setup
