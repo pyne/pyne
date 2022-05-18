@@ -18,7 +18,7 @@ jobs:
     strategy:
       matrix:
         ubuntu_versions : [
-          18.04,
+          20.04,
         ]
 
     steps:
@@ -38,13 +38,13 @@ jobs:
       - name: Build and push Python3
         uses: docker/build-push-action@v2
         with:
-          file: docker/ubuntu_18.04-dev.dockerfile
+          file: docker/ubuntu_20.04-dev.dockerfile
           context: .
           push: true
           build-args: |
             py_version=3.6
             build_pyne=NO
-          tags: ghcr.io/${{ github.repository_owner }}/ubuntu_18.04_py3_pyne-deps:ci_testing
+          tags: ghcr.io/${{ github.repository_owner }}/ubuntu_20.04_py3_pyne-deps:ci_testing
 
       - name: Set up Docker Buildx
         id: buildx
@@ -64,7 +64,7 @@ jobs:
       - name: Build and push moab/pymoab
         uses: docker/build-push-action@v2
         with:
-          file: docker/ubuntu_18.04-dev.dockerfile
+          file: docker/ubuntu_20.04-dev.dockerfile
           context: .
           push: true
           build-args: |
@@ -72,7 +72,7 @@ jobs:
             build_pyne=NO
             build_moab=YES
             enable_pymoab=YES
-          tags: ghcr.io/${{ github.repository_owner }}/ubuntu_18.04_py3_pymoab_pyne-deps:ci_testing
+          tags: ghcr.io/${{ github.repository_owner }}/ubuntu_20.04_py3_pymoab_pyne-deps:ci_testing
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-${{ github.sha }}
 
   # builds on the previous cached images adding extra layers to the base docker
@@ -162,7 +162,7 @@ jobs:
       - name: Build and push moab/dagmc
         uses: docker/build-push-action@v2
         with:
-          file: docker/ubuntu_18.04-dev.dockerfile
+          file: docker/ubuntu_20.04-dev.dockerfile
           context: .
           push: true
           build-args: |
@@ -174,7 +174,7 @@ jobs:
             build_hdf5=${{ env.HDF5 }}
             install_openmc=${{ env.HDF5 }}
           cache-from: type=local,src=/tmp/.buildx-cache-${{ github.sha }}
-          tags: ghcr.io/${{ github.repository_owner }}/ubuntu_18.04_py3${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:ci_testing
+          tags: ghcr.io/${{ github.repository_owner }}/ubuntu_20.04_py3${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:ci_testing
 
   # Once the previous two steps have finished the docker images are uploaded
   # to ghcr and therefore the local cached images are removed. 
@@ -226,7 +226,7 @@ jobs:
 
 
     container:
-      image: ghcr.io/${{ github.repository_owner }}/ubuntu_18.04_py3${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:ci_testing
+      image: ghcr.io/${{ github.repository_owner }}/ubuntu_20.04_py3${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:ci_testing
 
     steps:
       - name: setup
@@ -301,7 +301,7 @@ jobs:
             openmc: ''
 
 
-    name: "${{ github.repository_owner }}/ubuntu_18.04_py3${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}: latest -> stable"
+    name: "${{ github.repository_owner }}/ubuntu_20.04_py3${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}: latest -> stable"
 
     steps:
       - name: Set up QEMU
@@ -317,11 +317,11 @@ jobs:
       - name: Push Image to stable img
         uses: akhilerm/tag-push-action@v2.0.0
         with:
-          src: ghcr.io/${{ github.repository_owner }}/ubuntu_18.04_py3${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:ci_testing
-          dst: ghcr.io/${{ github.repository_owner }}/ubuntu_18.04_py3${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:stable
+          src: ghcr.io/${{ github.repository_owner }}/ubuntu_20.04_py3${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:ci_testing
+          dst: ghcr.io/${{ github.repository_owner }}/ubuntu_20.04_py3${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:stable
 
       - name: Push Image to latest img
         uses: akhilerm/tag-push-action@v2.0.0
         with:
-          src: ghcr.io/${{ github.repository_owner }}/ubuntu_18.04_py3${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:ci_testing
-          dst: ghcr.io/${{ github.repository_owner }}/ubuntu_18.04_py3${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:latest
+          src: ghcr.io/${{ github.repository_owner }}/ubuntu_20.04_py3${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:ci_testing
+          dst: ghcr.io/${{ github.repository_owner }}/ubuntu_20.04_py3${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:latest

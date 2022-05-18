@@ -63,7 +63,7 @@ def build_docker(args):
     args : list of arguments
 
     """
-    dockerfile = ["-f", "ubuntu_18.04-dev.dockerfile"]
+    dockerfile = ["-f", "ubuntu_20.04-dev.dockerfile"]
     tag = build_name(args)
     tag_flag = ["-t", tag]
     docker_args = []
