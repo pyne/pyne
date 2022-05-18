@@ -39,7 +39,7 @@ download_file(
     "5349513f196ad594d172bc6ea61dc382",
 )
 
-nuc_data = pyne_conf.NUC_DATA_PATH
+nuc_data = str(pyne_conf.NUC_DATA_PATH,'UTF-8')
 
 # These tests require nuc_data
 if not os.path.isfile(nuc_data):
