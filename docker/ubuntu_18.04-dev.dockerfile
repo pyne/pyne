@@ -46,7 +46,7 @@ RUN if [ "${py_version%.?}" -eq 3 ] ; \
             sphinx \
             cloud_sptheme \
             prettytable \
-            "setuptools<49" \
+            setuptools \
             sphinxcontrib_bibtex \
             numpydoc \
             nbconvert \
@@ -54,7 +54,7 @@ RUN if [ "${py_version%.?}" -eq 3 ] ; \
             nose \
             cython \
             future \
-            "tables<3.7" \
+            tables \
             scipy \
             jinja2 \
             progress; \
