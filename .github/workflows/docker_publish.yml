@@ -42,7 +42,7 @@ jobs:
           context: .
           push: true
           build-args: |
-            py_version=3.6
+            py_version=3.8
             build_pyne=NO
           tags: ghcr.io/${{ github.repository_owner }}/ubuntu_20.04_py3_pyne-deps:ci_testing
 
@@ -68,7 +68,7 @@ jobs:
           context: .
           push: true
           build-args: |
-            py_version=3.6
+            py_version=3.8
             build_pyne=NO
             build_moab=YES
             enable_pymoab=YES
@@ -166,7 +166,7 @@ jobs:
           context: .
           push: true
           build-args: |
-            py_version=3.6
+            py_version=3.8
             build_pyne=NO
             build_moab=YES
             enable_pymoab=${{ env.PYMOAB }}
@@ -254,7 +254,7 @@ jobs:
           cd $GITHUB_WORKSPACE
           python setup.py install --user --clean ${{ env.ADD_FLAG}}
           export PATH="$PATH:/github/home/.local/bin"
-          export PYTHONPATH="$PYTHONPATH:/github/home/.local/lib/python3.6/site-packages/"
+          export PYTHONPATH="$PYTHONPATH:/github/home/.local/lib/python3.8/site-packages/"
           cd ../
           nuc_data_make
 
