@@ -1231,7 +1231,7 @@ class PtracReader(object):
 
         if self.eightbytes:
             mcnp_version = self.mcnp_version_info[8:13]
-            if mcnp_version in ["6", "6.mpi"]:
+            if mcnp_version in ["6    ", "6.mpi"]:
                 variable_info = self.read_next(
                     "iqqqqqqqqqqiiiiiiiii", 120, raw_format=True
                 )
