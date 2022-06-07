@@ -14,6 +14,7 @@ v0.7.7
    * update where to look for DAGMC CMake files (#1446)
    * ensure NUC_DATA_PATH is a string (#1447)
    * update CI to Ubuntu 20.04 (#1449)
+   * update mcnp version check in PtracReader (#1454)
 
 v0.7.6
 ======
