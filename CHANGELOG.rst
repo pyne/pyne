@@ -5,6 +5,9 @@ PyNE Change Log
 Next Version
 ============
 
+**Fix**
+   * fixing typos in user warning message (#1456)
+
 v0.7.7
 ======
 

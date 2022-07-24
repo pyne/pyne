@@ -25,7 +25,7 @@ pyne::MaterialLibrary::MaterialLibrary(const std::string& filename,
     from_hdf5(filename, datapath);
   else if (datapath != "") {
     std::string wrng =
-        filename + " is not an hdf5 file but a datapath was prodided!";
+        filename + " is not an hdf5 file but a datapath was provided!";
     pyne::warning(wrng);
   }
   from_json(filename);
@@ -355,7 +355,7 @@ int pyne::MaterialLibrary::get_length_of_table(
 
   hid_t ds = H5Dopen2(db, datapath.c_str(), H5P_DEFAULT);
 
-  // Initilize to dataspace, to find the indices we are looping over
+  // Initialize to dataspace, to find the indices we are looping over
   hid_t arr_space = H5Dget_space(ds);
   // failure to read the dapaspace return 0 for the size
   if (arr_space < 0) return 0;
