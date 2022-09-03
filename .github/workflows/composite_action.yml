@@ -1,5 +1,5 @@
 name: setup QEMU & log into GHCR
-
+description: a composite action to simplify other workflows
 runs:
   using: "composite"
   steps:
