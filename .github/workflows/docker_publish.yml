@@ -25,6 +25,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      - uses: actions/checkout@v2
       - id: compositeAction
         uses: bquan0/pyne@v1.1
 
@@ -127,6 +128,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      - uses: actions/checkout@v2
       - id: compositeAction
         uses: bquan0/pyne@v1.1
 
@@ -290,6 +292,7 @@ jobs:
     name: "${{ github.repository_owner }}/ubuntu_20.04_py3${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}: latest -> stable"
 
     steps:
+      - uses: actions/checkout@v2
       - id: compositeAction
         uses: bquan0/pyne@v1.1
 
