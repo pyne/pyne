@@ -6,7 +6,7 @@ Next Version
 ============
 
 **Fix**
-   * add composite action to github workflows(#1459)
+   * add composite actions to github workflows(#1459)
    * fixing typos in user warning message (#1456)
 
 v0.7.7
