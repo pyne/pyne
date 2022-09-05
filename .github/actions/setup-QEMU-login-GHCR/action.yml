@@ -1,5 +1,9 @@
 name: setup QEMU & log into GHCR
 description: a composite action to simplify other workflows
+inputs:
+  token:
+    description: 'secrets.GITHUB_TOKEN used to log into GHCR'
+    required: true
 runs:
   using: "composite"
   steps:
@@ -11,4 +15,4 @@ runs:
       with:
         registry: ghcr.io
         username: ${{ github.repository_owner }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+        password: ${{ inputs.token }}

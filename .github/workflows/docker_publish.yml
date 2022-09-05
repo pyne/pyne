@@ -28,6 +28,8 @@ jobs:
       - uses: actions/checkout@v2
       - name: compositeAction
         uses: ./.github/actions/setup-QEMU-login-GHCR
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push Python3
         uses: docker/build-push-action@v2
@@ -131,6 +133,8 @@ jobs:
       - uses: actions/checkout@v2
       - name: compositeAction
         uses: ./.github/actions/setup-QEMU-login-GHCR
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Docker Buildx
         id: buildx
@@ -295,7 +299,9 @@ jobs:
       - uses: actions/checkout@v2
       - name: compositeAction
         uses: ./.github/actions/setup-QEMU-login-GHCR
-
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
       - name: Push Image to stable img
         uses: akhilerm/tag-push-action@v2.0.0
         with:
