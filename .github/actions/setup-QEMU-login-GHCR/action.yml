@@ -1,5 +1,5 @@
 name: setup QEMU & log into GHCR
-description: a composite action to simplify other workflows
+description: a composite action to simplify docker_publish.yml. It sets up QEMU and logs into GHCR
 inputs:
   token:
     description: 'secrets.GITHUB_TOKEN used to log into GHCR'
