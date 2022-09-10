@@ -1,0 +1,20 @@
+name: Setup Docker Buildx & Cache Docker layers
+description: a composite action used to simplify docker_publish.yml. It sets up Buildx and caches Docker layers 
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Docker Buildx
+      id: buildx
+      uses: docker/setup-buildx-action@master
+      with:
+        install: true
+
+    - name: Cache Docker layers
+      uses: actions/cache@v2
+      with:
+        path: /tmp/.buildx-cache-${{ github.sha }}
+        # Key is named differently to avoid collision
+        key: ${{ runner.os }}-multi-buildx-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-multi-buildx
+          
