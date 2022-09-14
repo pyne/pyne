@@ -26,8 +26,8 @@ jobs:
         uses: actions/checkout@v2
 
       - uses: actions/checkout@v2
-      - name: setup QEMU & log into GHCR
-        uses: ./.github/actions/setup-QEMU-login-GHCR
+      - name: log into GHCR
+        uses: ./.github/actions/login-GHCR
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -119,8 +119,8 @@ jobs:
         uses: actions/checkout@v2
 
       - uses: actions/checkout@v2
-      - name: setup QEMU & log into GHCR
-        uses: ./.github/actions/setup-QEMU-login-GHCR
+      - name: log into GHCR
+        uses: ./.github/actions/login-GHCR
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -273,8 +273,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: setup QEMU & log into GHCR
-        uses: ./.github/actions/setup-QEMU-login-GHCR
+      - name: log into GHCR
+        uses: ./.github/actions/login-GHCR
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
