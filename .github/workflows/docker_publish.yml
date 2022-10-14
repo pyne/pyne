@@ -26,8 +26,8 @@ jobs:
         uses: actions/checkout@v2
 
       - uses: actions/checkout@v2
-      - name: log into GHCR
-        uses: ./.github/actions/login-GHCR
+      - name: log into GHCR, setup Docker Buildx, Cache Docker layers
+        uses: ./.github/actions/login-buildx-cache
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -41,9 +41,6 @@ jobs:
             py_version=3.8
             build_pyne=NO
           tags: ghcr.io/${{ github.repository_owner }}/ubuntu_20.04_py3_pyne-deps:ci_testing
-
-      - name: Setup Docker Buildx & Cache Docker layers
-        uses: ./.github/actions/setup-buildx-cache
 
       - name: Build and push moab/pymoab
         uses: docker/build-push-action@v2
@@ -119,13 +116,10 @@ jobs:
         uses: actions/checkout@v2
 
       - uses: actions/checkout@v2
-      - name: log into GHCR
-        uses: ./.github/actions/login-GHCR
+      - name: log into GHCR, setup Docker Buildx, Cache Docker layers
+        uses: ./.github/actions/login-buildx-cache
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Setup Docker Buildx & Cache Docker layers
-        uses: ./.github/actions/setup-buildx-cache
 
       - name: Build and push moab/dagmc
         uses: docker/build-push-action@v2
@@ -273,8 +267,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: log into GHCR
-        uses: ./.github/actions/login-GHCR
+      - name: log into GHCR, setup Docker Buildx, Cache Docker layers
+        uses: ./.github/actions/login-buildx-cache
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
