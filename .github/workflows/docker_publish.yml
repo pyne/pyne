@@ -191,7 +191,7 @@ jobs:
 
 
     container:
-      image: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:ci_testing
+      image: ${{ matrix.env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:ci_testing
 
     steps:
       - name: setup
