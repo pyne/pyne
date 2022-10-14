@@ -43,7 +43,7 @@ jobs:
           build-args: |
             py_version=3.8
             build_pyne=NO
-          tags: ${{ DOCKER_IMAGE_BASENAME }}_pyne-deps:ci_testing
+          tags: ${{ env.DOCKER_IMAGE_BASENAME }}_pyne-deps:ci_testing
 
       - name: Build and push moab/pymoab
         uses: docker/build-push-action@v2
@@ -56,7 +56,7 @@ jobs:
             build_pyne=NO
             build_moab=YES
             enable_pymoab=YES
-          tags: ${{ DOCKER_IMAGE_BASENAME }}_pymoab_pyne-deps:ci_testing
+          tags: ${{ env.DOCKER_IMAGE_BASENAME }}_pymoab_pyne-deps:ci_testing
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-${{ github.sha }}
 
   # builds on the previous cached images adding extra layers to the base docker
@@ -139,7 +139,7 @@ jobs:
             build_hdf5=${{ env.HDF5 }}
             install_openmc=${{ env.HDF5 }}
           cache-from: type=local,src=/tmp/.buildx-cache-${{ github.sha }}
-          tags: ${{ DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:ci_testing
+          tags: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:ci_testing
 
   # Once the previous two steps have finished the docker images are uploaded
   # to ghcr and therefore the local cached images are removed. 
@@ -191,7 +191,7 @@ jobs:
 
 
     container:
-      image: ${{ DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:ci_testing
+      image: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:ci_testing
 
     steps:
       - name: setup
@@ -278,11 +278,11 @@ jobs:
       - name: Push Image to stable img
         uses: akhilerm/tag-push-action@v2.0.0
         with:
-          src: ${{ DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:ci_testing
-          dst: ${{ DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:stable
+          src: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:ci_testing
+          dst: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:stable
 
       - name: Push Image to latest img
         uses: akhilerm/tag-push-action@v2.0.0
         with:
-          src: ${{ DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:ci_testing
-          dst: ${{ DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:latest
+          src: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:ci_testing
+          dst: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:latest
