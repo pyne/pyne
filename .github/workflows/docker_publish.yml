@@ -8,6 +8,9 @@ on:
       - 'docker/*'
       - '.github/workflows/docker_publish.yml'
 
+env: 
+  DOCKER_IMAGE_BASENAME: ghcr.io/${{ github.repository_owner }}/ubuntu_20.04_py3
+
 jobs:
 
   # builds and pushes two docker images to ghcr.
@@ -26,8 +29,8 @@ jobs:
         uses: actions/checkout@v2
 
       - uses: actions/checkout@v2
-      - name: setup QEMU & log into GHCR
-        uses: ./.github/actions/setup-QEMU-login-GHCR
+      - name: log into GHCR, setup Docker Buildx, Cache Docker layers
+        uses: ./.github/actions/login-buildx-cache
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -40,10 +43,7 @@ jobs:
           build-args: |
             py_version=3.8
             build_pyne=NO
-          tags: ghcr.io/${{ github.repository_owner }}/ubuntu_20.04_py3_pyne-deps:ci_testing
-
-      - name: Setup Docker Buildx & Cache Docker layers
-        uses: ./.github/actions/setup-buildx-cache
+          tags: ${{ env.DOCKER_IMAGE_BASENAME }}_pyne-deps:ci_testing
 
       - name: Build and push moab/pymoab
         uses: docker/build-push-action@v2
@@ -56,7 +56,7 @@ jobs:
             build_pyne=NO
             build_moab=YES
             enable_pymoab=YES
-          tags: ghcr.io/${{ github.repository_owner }}/ubuntu_20.04_py3_pymoab_pyne-deps:ci_testing
+          tags: ${{ env.DOCKER_IMAGE_BASENAME }}_pymoab_pyne-deps:ci_testing
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-${{ github.sha }}
 
   # builds on the previous cached images adding extra layers to the base docker
@@ -119,13 +119,10 @@ jobs:
         uses: actions/checkout@v2
 
       - uses: actions/checkout@v2
-      - name: setup QEMU & log into GHCR
-        uses: ./.github/actions/setup-QEMU-login-GHCR
+      - name: log into GHCR, setup Docker Buildx, Cache Docker layers
+        uses: ./.github/actions/login-buildx-cache
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Setup Docker Buildx & Cache Docker layers
-        uses: ./.github/actions/setup-buildx-cache
 
       - name: Build and push moab/dagmc
         uses: docker/build-push-action@v2
@@ -142,7 +139,7 @@ jobs:
             build_hdf5=${{ env.HDF5 }}
             install_openmc=${{ env.HDF5 }}
           cache-from: type=local,src=/tmp/.buildx-cache-${{ github.sha }}
-          tags: ghcr.io/${{ github.repository_owner }}/ubuntu_20.04_py3${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:ci_testing
+          tags: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:ci_testing
 
   # Once the previous two steps have finished the docker images are uploaded
   # to ghcr and therefore the local cached images are removed. 
@@ -273,19 +270,19 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: setup QEMU & log into GHCR
-        uses: ./.github/actions/setup-QEMU-login-GHCR
+      - name: log into GHCR, setup Docker Buildx, Cache Docker layers
+        uses: ./.github/actions/login-buildx-cache
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Push Image to stable img
         uses: akhilerm/tag-push-action@v2.0.0
         with:
-          src: ghcr.io/${{ github.repository_owner }}/ubuntu_20.04_py3${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:ci_testing
-          dst: ghcr.io/${{ github.repository_owner }}/ubuntu_20.04_py3${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:stable
+          src: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:ci_testing
+          dst: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:stable
 
       - name: Push Image to latest img
         uses: akhilerm/tag-push-action@v2.0.0
         with:
-          src: ghcr.io/${{ github.repository_owner }}/ubuntu_20.04_py3${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:ci_testing
-          dst: ghcr.io/${{ github.repository_owner }}/ubuntu_20.04_py3${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:latest
+          src: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:ci_testing
+          dst: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:latest
