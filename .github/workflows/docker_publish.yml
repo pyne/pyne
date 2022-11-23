@@ -38,7 +38,7 @@ jobs:
       - uses: firehed/multistage-docker-build-action@v1
         id: build
         with:
-          repository: ${{ DOCKER_IMAGE_BASENAME }}
+          repository: ${{ env.DOCKER_IMAGE_BASENAME }}
           tag-latest-on-default: true
           stages: base_python, moab, dagmc
           server-stage: openmc
@@ -51,7 +51,7 @@ jobs:
       - uses: firehed/multistage-docker-build-action@v1
         id: build
         with:
-          repository: ${{ DOCKER_IMAGE_BASENAME }}
+          repository: ${{ env.DOCKER_IMAGE_BASENAME }}
           tag-latest-on-default: true
           stages: base_python, moab
           server-stage: dagmc
