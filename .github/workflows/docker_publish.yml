@@ -36,7 +36,6 @@ jobs:
 
       # build base python, moab, dagmc, openmc using multistage docker build action
       - uses: firehed/multistage-docker-build-action@v1
-        id: build
         with:
           repository: ${{ env.DOCKER_IMAGE_BASENAME }}
           tag-latest-on-default: true
@@ -49,7 +48,6 @@ jobs:
 
       # build HDF5 using multistage docker build action 
       - uses: firehed/multistage-docker-build-action@v1
-        id: build
         with:
           repository: ${{ env.DOCKER_IMAGE_BASENAME }}
           tag-latest-on-default: true
