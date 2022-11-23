@@ -41,7 +41,7 @@ jobs:
           tag-latest-on-default: true
           stages: base_python, moab, dagmc
           server-stage: openmc
-          dockerfile: ../../docker/ubuntu_20.04-dev.dockerfile
+          dockerfile: docker/ubuntu_20.04-dev.dockerfile
           build-args: |
             py_version=3.8
             build_hdf5=NO
@@ -53,7 +53,7 @@ jobs:
           tag-latest-on-default: true
           stages: base_python, moab
           server-stage: dagmc
-          dockerfile: ../../docker/ubuntu_20.04-dev.dockerfile
+          dockerfile: docker/ubuntu_20.04-dev.dockerfile
           build-args: |
             py_version=3.8
             build_hdf5=YES
