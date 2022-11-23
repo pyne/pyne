@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:20.04 AS base_python
 
 # Ubuntu Setup
 ENV TZ=America/Chicago
@@ -65,6 +65,7 @@ RUN if [ "$build_hdf5" != "NO" ]; then \
 ENV LD_LIBRARY_PATH $HDF5_INSTALL_PATH/lib:$LD_LIBRARY_PATH
 ENV LIBRARY_PATH $HDF5_INSTALL_PATH/lib:$LIBRARY_PATH
 
+FROM base_python AS moab
 ARG build_moab="NO"
 ARG enable_pymoab="NO"
 ENV INSTALL_PATH=$HOME/opt/moab
@@ -108,58 +109,51 @@ ENV LD_LIBRARY_PATH $HOME/opt/moab/lib:$LD_LIBRARY_PATH
 ENV LIBRARY_PATH $HOME/opt/moab/lib:$LIBRARY_PATH
 ENV PYTHONPATH=$HOME/opt/moab/lib/python${py_version}/site-packages/
 
+FROM moab AS dagmc
 # build/install DAGMC
-ARG build_dagmc="NO"
 ENV INSTALL_PATH=$HOME/opt/dagmc
-RUN if [ "$build_dagmc" = "YES" ]; then \
-        cd /root \
-        && git clone --depth 1 --branch stable https://github.com/svalinn/DAGMC.git \
-        && cd DAGMC \
-        && mkdir bld \
-        && cd bld \
-        && cmake .. -DMOAB_DIR=$HOME/opt/moab \
-                 -DCMAKE_INSTALL_PREFIX=$INSTALL_PATH \
-                 -DBUILD_STATIC_LIBS=OFF \
-                 -DBUILD_UWUW=OFF \
-                 -DBUILD_TALLY=OFF \
-                 -DBUILD_MAKE_WATERTIGHT=OFF \
-                 -DBUILD_OVERLAP_CHECK=OFF \
-                 -DBUILD_TESTS=OFF \
-        && make -j 3\
-        && make install \
-        && cd ../.. \
-        && rm -rf DAGMC; \
-    fi
+RUN cd /root \
+    && git clone --depth 1 --branch stable https://github.com/svalinn/DAGMC.git \
+    && cd DAGMC \
+    && mkdir bld \
+    && cd bld \
+    && cmake .. -DMOAB_DIR=$HOME/opt/moab \
+                -DCMAKE_INSTALL_PREFIX=$INSTALL_PATH \
+                -DBUILD_STATIC_LIBS=OFF \
+                -DBUILD_UWUW=OFF \
+                -DBUILD_TALLY=OFF \
+                -DBUILD_MAKE_WATERTIGHT=OFF \
+                -DBUILD_OVERLAP_CHECK=OFF \
+                -DBUILD_TESTS=OFF \
+    && make -j 3\
+    && make install \
+    && cd ../.. \
+    && rm -rf DAGMC; \
 
-ARG build_pyne=YES
 # Build/Install PyNE
-RUN if [ "$build_pyne" = "YES" ]; then \
-        export PYNE_HDF5_ARGS="" ;\
-        if [ "$build_hdf5" != "NO" ]; then \
-              export PYNE_HDF5_ARGS="--hdf5 $HDF5_INSTALL_PATH" ; \
-        fi \
-        && cd $HOME/opt \
-        && git clone -b develop --single-branch https://github.com/pyne/pyne.git \
-        && cd pyne \
-        && python setup.py install --user \
-                                    --moab $HOME/opt/moab --dagmc $HOME/opt/dagmc \
-                                    $PYNE_HDF5_ARGS \
-                                    --clean -j 3; \
-    fi
+RUN export PYNE_HDF5_ARGS="" ;\
+    if [ "$build_hdf5" != "NO" ]; then \
+            export PYNE_HDF5_ARGS="--hdf5 $HDF5_INSTALL_PATH" ; \
+    fi \
+    && cd $HOME/opt \
+    && git clone -b develop --single-branch https://github.com/pyne/pyne.git \
+    && cd pyne \
+    && python setup.py install --user \
+                                --moab $HOME/opt/moab --dagmc $HOME/opt/dagmc \
+                                $PYNE_HDF5_ARGS \
+                                --clean -j 3; \
 ENV PATH $HOME/.local/bin:$PATH
 RUN if [ "$build_pyne" = "YES" ]; then \
         cd $HOME \
         && nuc_data_make ; \
     fi
 
+FROM dagmc AS openmc
 # build/install OpenMC Python API
-ARG install_openmc="NO"
-RUN if [ "$install_openmc" = "YES" ]; then \
-        if [ "$build_hdf5" != "NO" ]; then \
-              export HDF5_ROOT="$HDF5_INSTALL_PATH" ; \
-        fi ;\
-        git clone https://github.com/openmc-dev/openmc.git $HOME/opt/openmc \
-        && cd  $HOME/opt/openmc \
-        && pip install . ; \
-    fi
+RUN if [ "$build_hdf5" != "NO" ]; then \
+            export HDF5_ROOT="$HDF5_INSTALL_PATH" ; \
+    fi ;\
+    git clone https://github.com/openmc-dev/openmc.git $HOME/opt/openmc \
+    && cd  $HOME/opt/openmc \
+    && pip install . ; \
 

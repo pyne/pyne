@@ -34,6 +34,33 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      # build base python, moab, dagmc, openmc using multistage docker build action
+      - uses: firehed/multistage-docker-build-action@v1
+        id: build
+        with:
+          repository: ${{ DOCKER_IMAGE_BASENAME }}
+          tag-latest-on-default: true
+          stages: base_python, moab, dagmc
+          server-stage: openmc
+          dockerfile: ../../docker/ubuntu_20.04-dev.dockerfile
+          build-args: |
+            py_version=3.8
+            build_hdf5=NO
+
+      # build HDF5 using multistage docker build action 
+      - uses: firehed/multistage-docker-build-action@v1
+        id: build
+        with:
+          repository: ${{ DOCKER_IMAGE_BASENAME }}
+          tag-latest-on-default: true
+          stages: base_python, moab
+          server-stage: dagmc
+          dockerfile: ../../docker/ubuntu_20.04-dev.dockerfile
+          build-args: |
+            py_version=3.8
+            build_hdf5=YES
+
+
       - name: Build and push Python3
         uses: docker/build-push-action@v2
         with:
