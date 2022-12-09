@@ -61,7 +61,7 @@ RUN if [ "$build_hdf5" != "NO" ]; then \
         && cd .. \
         && rm -rf hdf5; \
     fi
-# put MOAB on the path
+# put HDF5 on the path
 ENV LD_LIBRARY_PATH $HDF5_INSTALL_PATH/lib:$LD_LIBRARY_PATH
 ENV LIBRARY_PATH $HDF5_INSTALL_PATH/lib:$LIBRARY_PATH
 

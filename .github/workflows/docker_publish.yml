@@ -38,51 +38,19 @@ jobs:
       - uses: firehed/multistage-docker-build-action@v1
         with:
           repository: ${{ env.DOCKER_IMAGE_BASENAME }}
-          tag-latest-on-default: true
           stages: base_python, moab, dagmc
           server-stage: openmc
           dockerfile: docker/ubuntu_20.04-dev.dockerfile
-          build-args: |
-            py_version=3.8
-            build_hdf5=NO
+          build-args: py_version=3.8, build_hdf5=NO
 
       # build HDF5 using multistage docker build action 
       - uses: firehed/multistage-docker-build-action@v1
         with:
           repository: ${{ env.DOCKER_IMAGE_BASENAME }}
-          tag-latest-on-default: true
           stages: base_python, moab
           server-stage: dagmc
           dockerfile: docker/ubuntu_20.04-dev.dockerfile
-          build-args: |
-            py_version=3.8
-            build_hdf5=YES
-
-
-      - name: Build and push Python3
-        uses: docker/build-push-action@v2
-        with:
-          file: docker/ubuntu_20.04-dev.dockerfile
-          context: .
-          push: true
-          build-args: |
-            py_version=3.8
-            build_pyne=NO
-          tags: ${{ env.DOCKER_IMAGE_BASENAME }}_pyne-deps:ci_testing
-
-      - name: Build and push moab/pymoab
-        uses: docker/build-push-action@v2
-        with:
-          file: docker/ubuntu_20.04-dev.dockerfile
-          context: .
-          push: true
-          build-args: |
-            py_version=3.8
-            build_pyne=NO
-            build_moab=YES
-            enable_pymoab=YES
-          tags: ${{ env.DOCKER_IMAGE_BASENAME }}_pymoab_pyne-deps:ci_testing
-          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-${{ github.sha }}
+          build-args: py_version=3.8, build_hdf5=YES
 
   # builds on the previous cached images adding extra layers to the base docker
   # images created in the previous step. The resulting images include various
