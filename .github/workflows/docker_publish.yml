@@ -8,9 +8,8 @@ on:
       - 'docker/*'
       - '.github/workflows/docker_publish.yml'
 
-env: 
-  DOCKER_IMAGE_BASENAME: ghcr.io/${{ github.repository }}/ubuntu_20.04_py3
-  # DOCKER_IMAGE_BASENAME: ghcr.io/${{ github.repository_owner }}/ubuntu_20.04_py3
+env:
+  DOCKER_IMAGE_BASENAME: ghcr.io/${{ github.repository_owner }}/ubuntu_20.04_py3
 
 jobs:
 
@@ -29,11 +28,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - uses: actions/checkout@v2
-      - name: log into GHCR, setup Docker Buildx, Cache Docker layers
-        uses: ./.github/actions/login-buildx-cache
+      # - uses: actions/checkout@v2
+      # - name: log into GHCR, setup Docker Buildx, Cache Docker layers
+      #   uses: ./.github/actions/login-buildx-cache
+      #   with:
+      #     token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Log in to the Container Registry
+        uses: docker/login-action@v2
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       # build base python, moab, dagmc, openmc using multistage docker build action
       - uses: firehed/multistage-docker-build-action@v1
