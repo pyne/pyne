@@ -14,18 +14,18 @@ runs:
         username: ${{ github.repository_owner }}
         password: ${{ inputs.token }}
         
-    - name: Set up Docker Buildx
-      id: buildx
-      uses: docker/setup-buildx-action@master
-      with:
-        install: true
+    # - name: Set up Docker Buildx
+    #   id: buildx
+    #   uses: docker/setup-buildx-action@master
+    #   with:
+    #     install: true
 
-    - name: Cache Docker layers
-      uses: actions/cache@v2
-      with:
-        path: /tmp/.buildx-cache-${{ github.sha }}
-        # Key is named differently to avoid collision
-        key: ${{ runner.os }}-multi-buildx-${{ github.sha }}
-        restore-keys: |
-          ${{ runner.os }}-multi-buildx
+    # - name: Cache Docker layers
+    #   uses: actions/cache@v2
+    #   with:
+    #     path: /tmp/.buildx-cache-${{ github.sha }}
+    #     # Key is named differently to avoid collision
+    #     key: ${{ runner.os }}-multi-buildx-${{ github.sha }}
+    #     restore-keys: |
+    #       ${{ runner.os }}-multi-buildx
           
