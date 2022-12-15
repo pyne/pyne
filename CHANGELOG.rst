@@ -9,6 +9,7 @@ Next Version
    * remove setup-QEMU step from composite action(#1461)
    * add composite actions to github workflows(#1459)
    * fixing typos in user warning message (#1456)
+   * fix reorder error in member variables (#1466)
 
 v0.7.7
 ======
