@@ -10,6 +10,7 @@ Next Version
    * add composite actions to github workflows(#1459)
    * fixing typos in user warning message (#1456)
    * fix reorder error in member variables (#1466)
+   * remove unusable C-linkage with std::vector (#1468)
 
 v0.7.7
 ======
