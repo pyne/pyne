@@ -209,12 +209,12 @@ namespace pyne {
     // problem parameters
     std::string filename; ///< MOAB mesh file path
     std::string src_tag_name; ///< Unbiased source density distribution
-    std::string bias_tag_name; ///< Biased source density distribution
     std::string cell_number_tag_name; ///< Cell number tag
     std::string cell_fracs_tag_name; ///< Cell volume fraction tag
     std::map<std::string, std::string> tag_names; /// < tag names
     std::string e_bounds_tag_name; ///< Energy boundaries tag name
     std::vector<double> e_bounds;  ///< Energy boundaries
+    std::string bias_tag_name; ///< Biased source density distribution
     int num_e_groups; ///< Number of groups in tag \a _src_tag_name
     int num_bias_groups; ///< Number of groups tag \a _bias_tag_name
     int max_num_cells; /// Max number of cells in voxels
