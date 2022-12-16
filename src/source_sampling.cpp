@@ -710,3 +710,112 @@ pyne::SourceParticle::SourceParticle(double _x, double _y, double _z,
       e(_e), w(_w), cell_list(_cell_list) {}
 
 pyne::SourceParticle::~SourceParticle() {};
+
+/// OpenMC custom source
+#ifdef OPENMC_SOURCE_H
+/// for OpenMC custom source
+//openmc::Particle::Bank PyneSource::sample(uint64_t* seed)
+//{
+//  // init pyne sampler
+//  std::map<std::string, std::string> tag_names;
+//  tag_names.insert(std::pair<std::string, std::string> ("src_tag_name",
+//        "source_density"));
+//  tag_names.insert(std::pair<std::string, std::string> ("bias_tag_name",
+//        "biased_source_density"));
+//  tag_names.insert(std::pair<std::string, std::string> ("cell_number_tag_name",
+//        "cell_number"));
+//  tag_names.insert(std::pair<std::string, std::string> ("cell_fracs_tag_name",
+//        "cell_fracs"));
+//  tag_names.insert(std::pair<std::string, std::string> ("e_bounds_tag_name",
+//        "e_bounds"));
+//  int mode = 0;
+//  sampler = new pyne::Sampler('source.h5m', tag_names, *mode);
+//  // fake rands for test
+//  std::vector<double> rands;
+//  for (int i=0; i<6; i++) {
+//      rands.push_back(0.5);
+//  }
+//  pyne::SourceParticle pyne_src = sampler.particle_birth(rands)
+//  // convert pyne source particle to openmc particle
+//  openmc::Particle::Bank particle;
+//  // particle type
+//  particle.particle = openmc::Particle::Type::photon;
+//  // wgt
+//  particle.wgt = pyne_src.get_w();
+//  // position
+//  particle.r = Position(pyne_src.get_x(), pyne_src.get_y(), pyne_src.get_z());
+//  // angle
+//  Isotropic angle;
+//  particle.u = angle.sample();
+//  particle.E = pyne_src.get_e();
+//  particle.delayed_group = 0;
+//  return particle;
+//}
+
+openmc::SourceSite pyne::PyneSource::sample(uint64_t* seed)
+{
+  // init pyne sampler
+  std::map<std::string, std::string> tag_names;
+  tag_names.insert(std::pair<std::string, std::string> ("src_tag_name",
+        "source_density"));
+  tag_names.insert(std::pair<std::string, std::string> ("bias_tag_name",
+        "biased_source_density"));
+  tag_names.insert(std::pair<std::string, std::string> ("cell_number_tag_name",
+        "cell_number"));
+  tag_names.insert(std::pair<std::string, std::string> ("cell_fracs_tag_name",
+        "cell_fracs"));
+  tag_names.insert(std::pair<std::string, std::string> ("e_bounds_tag_name",
+        "e_bounds"));
+  int mode = 0;
+  sampler = new pyne::Sampler('source.h5m', tag_names, *mode);
+  // fake rands for test
+  std::vector<double> rands;
+  for (int i=0; i<6; i++) {
+      rands.push_back(0.5);
+  }
+  pyne::SourceParticle pyne_src = sampler.particle_birth(rands)
+  // convert pyne source particle to openmc particle
+  openmc::SourceSite particle;
+  // particle type
+  particle.particle = openmc::ParticleType::photon;
+  // wgt
+  particle.wgt = pyne_src.get_w();
+  // position
+  particle.r = Position(pyne_src.get_x(), pyne_src.get_y(), pyne_src.get_z());
+  // angle
+  Isotropic angle;
+  particle.u = angle.sample();
+  particle.E = pyne_src.get_e();
+  particle.delayed_group = 0;
+  return particle;
+}
+//class RingSource : public openmc::Source
+//{
+//  openmc::SourceSite sample(uint64_t* seed) const
+//  {
+//    openmc::SourceSite particle;
+//    // wgt
+//    particle.particle = openmc::ParticleType::neutron;
+//    particle.wgt = 1.0;
+//    // position
+//    double angle = 2.0 * M_PI * openmc::prn(seed);
+//    double radius = 3.0;
+//    particle.r.x = radius * std::cos(angle);
+//    particle.r.y = radius * std::sin(angle);
+//    particle.r.z = 0.0;
+//    // angle
+//    particle.u = {1.0, 0.0, 0.0};
+//    particle.E = 14.08e6;
+//    particle.delayed_group = 0;
+//    return particle;
+//  }
+//};
+
+//// A function to create a unique pointer to an instance of this class when generated
+//// via a plugin call using dlopen/dlsym.
+//// You must have external C linkage here otherwise dlopen will not find the file
+//extern "C" std::unique_ptr<PyneSource> openmc_create_source(std::string parameters)
+//{
+//  return std::make_unique<PyneSource>();
+//}
+#endif // OPENMC_SOURCE_H
