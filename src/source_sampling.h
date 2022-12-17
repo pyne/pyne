@@ -42,10 +42,6 @@
 #endif
 #include "moab/CartVect.hpp"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 namespace pyne {
 
   /// MCNP interface for source sampling setup
@@ -263,9 +259,5 @@ namespace pyne {
     bool check_cell_fracs(moab::Tag cell_fracs_tag);
   };
 } //end namespace pyne
-
-#ifdef __cplusplus
-} // extern "C"
-#endif
 
 #endif // PYNE_6OR6BJURKJHHTOFWXO2VMQM5EY
