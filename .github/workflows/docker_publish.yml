@@ -42,7 +42,7 @@ jobs:
           server-stage: openmc
           quiet: false
           dockerfile: docker/ubuntu_20.04-dev.dockerfile
-          build-args: py_version=3.8, build_hdf5=NO
+          build-args: py_version=3.8, build_hdf5=NO, build_moab=YES
 
       # build HDF5 using multistage docker build action 
       - uses: firehed/multistage-docker-build-action@v1
@@ -52,7 +52,7 @@ jobs:
           server-stage: dagmc
           quiet: false
           dockerfile: docker/ubuntu_20.04-dev.dockerfile
-          build-args: py_version=3.8, build_hdf5=YES
+          build-args: py_version=3.8, build_hdf5=YES, build_moab=YES
 
   # builds on the previous cached images adding extra layers to the base docker
   # images created in the previous step. The resulting images include various
