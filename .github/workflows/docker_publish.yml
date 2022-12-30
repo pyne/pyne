@@ -42,7 +42,7 @@ jobs:
           server-stage: openmc
           quiet: false
           dockerfile: docker/ubuntu_20.04-dev.dockerfile
-          build-args: py_version=3.8, build_hdf5=NO, build_moab=YES, enable_pymoab=YES
+          build-args: py_version=3.8, build_moab=YES, enable_pymoab=YES
 
       # build HDF5 using multistage docker build action 
       - uses: firehed/multistage-docker-build-action@v1
