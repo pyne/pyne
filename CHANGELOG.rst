@@ -6,6 +6,7 @@ Next Version
 ============
 
 **Fix**
+   * use multistage docker build action in docker_publish.yml(#1470)
    * remove setup-QEMU step from composite action(#1461)
    * add composite actions to github workflows(#1459)
    * fixing typos in user warning message (#1456)
