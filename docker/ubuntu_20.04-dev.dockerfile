@@ -156,5 +156,5 @@ RUN if [ "$build_hdf5" != "NO" ]; then \
     fi ;\
     git clone https://github.com/openmc-dev/openmc.git $HOME/opt/openmc \
     && cd  $HOME/opt/openmc \
-    && pip install . ; \
+    && pip install . 
 
