@@ -67,43 +67,36 @@ ENV LD_LIBRARY_PATH $HDF5_INSTALL_PATH/lib:$LD_LIBRARY_PATH
 ENV LIBRARY_PATH $HDF5_INSTALL_PATH/lib:$LIBRARY_PATH
 
 FROM base_python AS moab
-ARG build_moab="NO"
-ARG enable_pymoab="NO"
 ENV INSTALL_PATH=$HOME/opt/moab
 
 # build MOAB
-RUN if [ "$build_moab" = "YES" ] || [ "$enable_pymoab" = "YES" ] ; then \
-        if [ "$enable_pymoab" = "YES" ] ; \
-        then \ 
-            export PYMOAB_FLAG="-DENABLE_PYMOAB=ON"; \
-        fi;\
-        echo $PYMOAB_FLAG ;\
-        export MOAB_HDF5_ARGS=""; \
-        if [ "$build_hdf5" != "NO" ] ; \ 
-        then \
-              export MOAB_HDF5_ARGS="-DHDF5_ROOT=$HDF5_INSTALL_PATH"; \
-        fi \
-        && cd $HOME/opt \
-        && mkdir moab \
-        && cd moab \
-        && git clone --depth 1 --single-branch -b 5.3.0 https://bitbucket.org/fathomteam/moab \
-        && cd moab \
-        && mkdir build \
-        && cd build \
-        && ls ..\
-      # build/install shared lib
-        && cmake .. \
-              ${PYMOAB_FLAG} \
-              -DCMAKE_INSTALL_PREFIX=$INSTALL_PATH \
-              -DENABLE_HDF5=ON $MOAB_HDF5_ARGS \
-              -DBUILD_SHARED_LIBS=ON \
-              -DENABLE_BLASLAPACK=OFF \
-              -DENABLE_FORTRAN=OFF \
-        && make -j 3 \
-        && make install \
-        && cd .. \
-        && rm -rf moab ; \
-    fi
+RUN export PYMOAB_FLAG="-DENABLE_PYMOAB=ON"; \
+    echo $PYMOAB_FLAG ;\
+    export MOAB_HDF5_ARGS=""; \
+    if [ "$build_hdf5" != "NO" ] ; \ 
+    then \
+            export MOAB_HDF5_ARGS="-DHDF5_ROOT=$HDF5_INSTALL_PATH"; \
+    fi \
+    && cd $HOME/opt \
+    && mkdir moab \
+    && cd moab \
+    && git clone --depth 1 --single-branch -b 5.3.0 https://bitbucket.org/fathomteam/moab \
+    && cd moab \
+    && mkdir build \
+    && cd build \
+    && ls ..\
+    # build/install shared lib
+    && cmake .. \
+            ${PYMOAB_FLAG} \
+            -DCMAKE_INSTALL_PREFIX=$INSTALL_PATH \
+            -DENABLE_HDF5=ON $MOAB_HDF5_ARGS \
+            -DBUILD_SHARED_LIBS=ON \
+            -DENABLE_BLASLAPACK=OFF \
+            -DENABLE_FORTRAN=OFF \
+    && make -j 3 \
+    && make install \
+    && cd .. \
+    && rm -rf moab ;
 
 # put MOAB on the path
 ENV LD_LIBRARY_PATH $HOME/opt/moab/lib:$LD_LIBRARY_PATH
