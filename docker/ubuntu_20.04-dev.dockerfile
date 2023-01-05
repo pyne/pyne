@@ -129,7 +129,7 @@ RUN cd /root \
     && make -j 3\
     && make install \
     && cd ../.. \
-    && rm -rf DAGMC; \
+    && rm -rf DAGMC
 
 # Build/Install PyNE
 RUN export PYNE_HDF5_ARGS="" ;\
