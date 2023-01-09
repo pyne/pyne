@@ -13,10 +13,10 @@ env:
 
 jobs:
 
-  # builds and pushes two docker images to ghcr.
-  # These docker images are also cached locally so that they can be efficiently
-  # accessed by the subsequent stage (build_and_push_dagmc).
-  build_and_push_python3_pymoab:
+  # builds and pushes docker images of various stages to ghcr.
+  # These docker images are also stored in ghcr and can be pulled
+  # to be built upon by the subsequent stage.
+  multistage_image_build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -57,10 +57,9 @@ jobs:
   # Downloads the images uploaded to ghcr in previous stages and runs pyne
   # tests to check that they work.
   BuildTest:
-    needs: [build_and_push_python3_pymoab, build_and_push_dagmc]
+    needs: [multistage_image_build]
     runs-on: ubuntu-latest
 
-      
     strategy:
       matrix:
         hdf5 : [
