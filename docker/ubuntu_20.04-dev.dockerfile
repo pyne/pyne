@@ -22,8 +22,6 @@ RUN if [ "${py_version%.?}" -eq 3 ] ; \
             libblas-dev \
             liblapack-dev \
             libeigen3-dev \
-            libhdf5-dev \
-            hdf5-tools \
     && apt-get clean -y; \
     if [ "${py_version%.?}" -eq 3 ] ; \
        then \ 
