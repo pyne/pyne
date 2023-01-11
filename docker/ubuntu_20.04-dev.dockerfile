@@ -74,7 +74,7 @@ RUN apt-get update \
             libhdf5-dev \
             hdf5-tools \
     && apt-get clean -y
-    export PYMOAB_FLAG="-DENABLE_PYMOAB=ON"; \
+RUN export PYMOAB_FLAG="-DENABLE_PYMOAB=ON"; \
     echo $PYMOAB_FLAG ;\
     export MOAB_HDF5_ARGS=""; \
     if [ "$build_hdf5" != "NO" ] ; \ 
