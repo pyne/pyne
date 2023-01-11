@@ -73,8 +73,7 @@ RUN apt-get update \
     && apt-get install -y --fix-missing \
             libhdf5-dev \
             hdf5-tools \
-    && apt-get clean -y;
-    
+    && apt-get clean -y
     export PYMOAB_FLAG="-DENABLE_PYMOAB=ON"; \
     echo $PYMOAB_FLAG ;\
     export MOAB_HDF5_ARGS=""; \
