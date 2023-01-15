@@ -132,6 +132,9 @@ RUN cd /root \
     && rm -rf DAGMC
 
 # Build/Install PyNE
+FROM dagmc AS pyne
+ARG build_hdf5
+
 RUN export PYNE_HDF5_ARGS="" ;\
     if [ "$build_hdf5" != "NO" ]; then \
             export PYNE_HDF5_ARGS="--hdf5 $HDF5_INSTALL_PATH" ; \
