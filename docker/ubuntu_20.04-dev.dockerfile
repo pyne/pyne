@@ -142,7 +142,7 @@ RUN export PYNE_HDF5_ARGS="" ;\
     && python setup.py install --user \
                                 --moab $HOME/opt/moab --dagmc $HOME/opt/dagmc \
                                 $PYNE_HDF5_ARGS \
-                                --clean -j 3; \
+                                --clean -j 3; 
 ENV PATH $HOME/.local/bin:$PATH
 RUN if [ "$build_pyne" = "YES" ]; then \
         cd $HOME \
