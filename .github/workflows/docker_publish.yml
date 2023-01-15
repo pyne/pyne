@@ -63,6 +63,7 @@ jobs:
     strategy:
       matrix:
         stage: [base_python, moab, dagmc, openmc]
+        hdf5: ['']
         include:
           - stage: dagmc
             hdf5: /hdf5
@@ -118,6 +119,7 @@ jobs:
     strategy:
       matrix:
         stage: [base_python, moab, dagmc, openmc]
+        hdf5: ['']
         include:
           - stage: dagmc
             hdf5: /hdf5
