@@ -70,7 +70,7 @@ jobs:
 
 
     container:
-      image: ghcr.io/${{ github.repository_owner }}/ubuntu_20.04_py3/${{ matrix.hdf5 }}${{ matrix.stage }}:refs_heads_multistage-docker-bk0
+      image: ghcr.io/${{ github.repository_owner }}/ubuntu_20.04_py3${{ matrix.hdf5 }}/${{ matrix.stage }}:refs_heads_multistage-docker-bk0
 
     steps:
       - name: setup
@@ -117,35 +117,12 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        hdf5 : [
-          '',
-        ]
-        dagmc : [
-          '',
-          _dagmc
-        ]
-        pymoab : [
-          _pymoab,
-          ]
-        openmc : [
-          '',
-        ]
+        stage: [base_python, moab, dagmc, openmc]
         include:
-          - hdf5: _hdf5-1_12_0
-            dagmc: _dagmc
-            pymoab: _pymoab
-            openmc: ''
-          - hdf5: ''
-            dagmc: _dagmc
-            pymoab: _pymoab
-            openmc: _openmc
-          - hdf5: ''
-            dagmc: ''
-            pymoab: ''
-            openmc: ''
+          - stage: dagmc
+            hdf5: /hdf5
 
-
-    name: "${{ github.repository_owner }}/ubuntu_20.04_py3${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}: latest -> stable"
+    name: "${{ github.repository_owner }}/ubuntu_20.04_py3${{ matrix.hdf5 }}/${{ matrix.stage }}:refs_heads_multistage-docker-bk0: latest -> stable"
 
     steps:
       - uses: actions/checkout@v2
@@ -157,11 +134,11 @@ jobs:
       - name: Push Image to stable img
         uses: akhilerm/tag-push-action@v2.0.0
         with:
-          src: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:ci_testing
-          dst: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:stable
+          src: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}/${{ matrix.stage }}:refs_heads_multistage-docker-bk0:ci_testing
+          dst: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}/${{ matrix.stage }}:refs_heads_multistage-docker-bk0:stable
 
       - name: Push Image to latest img
         uses: akhilerm/tag-push-action@v2.0.0
         with:
-          src: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:ci_testing
-          dst: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:latest
+          src: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}/${{ matrix.stage }}:refs_heads_multistage-docker-bk0:ci_testing
+          dst: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}/${{ matrix.stage }}:refs_heads_multistage-docker-bk0:latest
