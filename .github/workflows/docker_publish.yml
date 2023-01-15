@@ -70,7 +70,7 @@ jobs:
 
 
     container:
-      image: ghcr.io/${{ github.repository_owner }}/ubuntu_20.04_py3/${{ matrix.hdf5 }}${{ matrix.stage }}
+      image: ghcr.io/${{ github.repository_owner }}/ubuntu_20.04_py3/${{ matrix.hdf5 }}${{ matrix.stage }}:refs_heads_multistage-docker-bk0
 
     steps:
       - name: setup
