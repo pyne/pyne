@@ -25,6 +25,8 @@ RUN if [ "${py_version%.?}" -eq 3 ] ; \
             libblas-dev \
             liblapack-dev \
             libeigen3-dev \
+            libhdf5-dev \
+            hdf5-tools \
     && apt-get clean -y; \
     if [ "${py_version%.?}" -eq 3 ] ; \
        then \ 
@@ -72,11 +74,6 @@ ARG build_hdf5
 ENV INSTALL_PATH=$HOME/opt/moab
 
 # build MOAB
-RUN apt-get update \
-    && apt-get install -y --fix-missing \
-            libhdf5-dev \
-            hdf5-tools \
-    && apt-get clean -y
 RUN export PYMOAB_FLAG="-DENABLE_PYMOAB=ON"; \
     echo $PYMOAB_FLAG ;\
     export MOAB_HDF5_ARGS=""; \
