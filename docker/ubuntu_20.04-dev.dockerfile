@@ -150,6 +150,7 @@ RUN if [ "$build_pyne" = "YES" ]; then \
     fi
 
 FROM dagmc AS openmc
+ARG build_hdf5
 # build/install OpenMC Python API
 RUN if [ "$build_hdf5" != "NO" ]; then \
             export HDF5_ROOT="$HDF5_INSTALL_PATH" ; \
