@@ -34,7 +34,7 @@ RUN if [ "${py_version%.?}" -eq 3 ] ; \
             update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 10; \
     fi;\
     pip install --upgrade pip; \
-    pip install numpy \
+    pip install numpy==1.23 \
             scipy \
             cython \
             nose \
