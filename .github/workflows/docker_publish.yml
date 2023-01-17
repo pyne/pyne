@@ -142,5 +142,5 @@ jobs:
       - name: Push Image to latest img
         uses: akhilerm/tag-push-action@v2.0.0
         with:
-          src: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}/${{ matrix.stage }}:refs_heads_multistage-docker-bk0:ci_testing
-          dst: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}/${{ matrix.stage }}:refs_heads_multistage-docker-bk0:latest
+          src: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}/${{ matrix.stage }}:refs_heads_multistage-docker-bk0
+          dst: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}/${{ matrix.stage }}:latest
