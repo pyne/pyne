@@ -26,13 +26,14 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3.3.0
 
-      - uses: actions/checkout@v2
-      - name: log into GHCR, setup Docker Buildx, Cache Docker layers
-        uses: ./.github/actions/login-buildx-cache
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2.1.0
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ inputs.token }}
 
       # build base python, moab, dagmc, openmc using multistage docker build action
       - uses: firehed/multistage-docker-build-action@v1
@@ -91,7 +92,7 @@ jobs:
           echo "ADD_FLAG=${ADD_FLAG}" >> $GITHUB_ENV
 
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3.3.0
         
       - name: Building PyNE
         shell: bash -l {0}
@@ -127,11 +128,12 @@ jobs:
     name: "${{ github.repository_owner }}/ubuntu_20.04_py3${{ matrix.hdf5 }}/${{ matrix.stage }}:refs_heads_multistage-docker-bk0: latest -> stable"
 
     steps:
-      - uses: actions/checkout@v2
-      - name: log into GHCR, setup Docker Buildx, Cache Docker layers
-        uses: ./.github/actions/login-buildx-cache
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2.1.0
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ inputs.token }}
 
       - name: Push Image to stable img
         uses: akhilerm/tag-push-action@v2.0.0
