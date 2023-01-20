@@ -26,10 +26,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3.3.0
+        uses: actions/checkout@v3
 
       - name: Log in to the Container registry
-        uses: docker/login-action@v2.1.0
+        uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
@@ -92,7 +92,7 @@ jobs:
           echo "ADD_FLAG=${ADD_FLAG}" >> $GITHUB_ENV
 
       - name: Checkout repository
-        uses: actions/checkout@v3.3.0
+        uses: actions/checkout@v3
         
       - name: Building PyNE
         shell: bash -l {0}
@@ -129,20 +129,20 @@ jobs:
 
     steps:
       - name: Log in to the Container registry
-        uses: docker/login-action@v2.1.0
+        uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Push Image to stable img
-        uses: akhilerm/tag-push-action@v2.0.0
+        uses: akhilerm/tag-push-action@v2
         with:
           src: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}/${{ matrix.stage }}:refs_heads_multistage-docker-bk0
           dst: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}/${{ matrix.stage }}:stable
 
       - name: Push Image to latest img
-        uses: akhilerm/tag-push-action@v2.0.0
+        uses: akhilerm/tag-push-action@v2
         with:
           src: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}/${{ matrix.stage }}:refs_heads_multistage-docker-bk0
           dst: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}/${{ matrix.stage }}:latest
