@@ -6,7 +6,7 @@ FROM ubuntu:20.04 AS base_python
 # Ubuntu Setup
 ENV TZ=America/Chicago
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
-ARG py_version=3.8
+ARG py_version
 
 ENV HOME /root
 RUN if [ "${py_version%.?}" -eq 3 ] ; \

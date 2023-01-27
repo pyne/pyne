@@ -9,7 +9,7 @@ on:
       - '.github/workflows/docker_publish.yml'
 
 env:
-  DOCKER_IMAGE_BASENAME: ghcr.io/${{ github.repository_owner }}/ubuntu_20.04_py3
+  DOCKER_IMAGE_BASENAME: ghcr.io/${{ github.repository_owner }}/pyne/ubuntu_20.04_py3
 
 jobs:
 
@@ -72,7 +72,7 @@ jobs:
 
 
     container:
-      image: ghcr.io/${{ github.repository_owner }}/ubuntu_20.04_py3${{ matrix.hdf5 }}/${{ matrix.stage }}:refs_heads_multistage-docker-bk0
+      image: ghcr.io/${{ github.repository_owner }}/pyne/ubuntu_20.04_py3${{ matrix.hdf5 }}/${{ matrix.stage }}:refs_heads_multistage-docker-bk0
 
     steps:
       - name: setup
@@ -125,7 +125,7 @@ jobs:
           - stage: dagmc
             hdf5: /hdf5
 
-    name: "${{ github.repository_owner }}/ubuntu_20.04_py3${{ matrix.hdf5 }}/${{ matrix.stage }}:refs_heads_multistage-docker-bk0: latest -> stable"
+    name: "${{ github.repository_owner }}/pyne/ubuntu_20.04_py3${{ matrix.hdf5 }}/${{ matrix.stage }}:refs_heads_multistage-docker-bk0: latest -> stable"
 
     steps:
       - name: Log in to the Container registry
