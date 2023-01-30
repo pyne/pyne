@@ -67,7 +67,7 @@ jobs:
         hdf5: ['']
         include:
           - stage: dagmc
-            hdf5: /hdf5
+            hdf5: _hdf5
       fail-fast: false
 
 
