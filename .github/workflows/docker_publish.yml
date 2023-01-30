@@ -9,7 +9,7 @@ on:
       - '.github/workflows/docker_publish.yml'
 
 env:
-  DOCKER_IMAGE_BASENAME: ghcr.io/${{ github.repository_owner }}/pyne/ubuntu_20.04_py3
+  DOCKER_IMAGE_BASENAME: ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_20.04_py3
 
 jobs:
 
