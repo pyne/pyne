@@ -72,7 +72,7 @@ jobs:
 
 
     container:
-      image: ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_20.04_py3${{ matrix.hdf5 }}/${{ matrix.stage }}:refs_heads_multistage-docker-bk0
+      image: ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_20.04_py3${{ matrix.hdf5 }}_${{ matrix.stage }}:refs_heads_multistage-docker-bk0
 
     steps:
       - name: setup
@@ -125,7 +125,7 @@ jobs:
           - stage: dagmc
             hdf5: _hdf5
 
-    name: "${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}_${{ matrix.stage }}:refs_heads_multistage-docker-bk0: latest -> stable"
+    name: "ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_20.04_py3${{ matrix.hdf5 }}_${{ matrix.stage }}:refs_heads_multistage-docker-bk0: latest -> stable"
 
     steps:
       - name: Log in to the Container registry
