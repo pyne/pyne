@@ -1,9 +1,12 @@
-FROM ubuntu:20.04
+ARG py_version=3.8
+ARG build_hdf5="NO"
+
+FROM ubuntu:20.04 AS base_python
 
 # Ubuntu Setup
 ENV TZ=America/Chicago
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
-ARG py_version=3.8
+ARG py_version
 
 ENV HOME /root
 RUN if [ "${py_version%.?}" -eq 3 ] ; \
@@ -31,7 +34,7 @@ RUN if [ "${py_version%.?}" -eq 3 ] ; \
             update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 10; \
     fi;\
     pip install --upgrade pip; \
-    pip install numpy \
+    pip install numpy==1.23 \
             scipy \
             cython \
             nose \
@@ -61,105 +64,99 @@ RUN if [ "$build_hdf5" != "NO" ]; then \
         && cd .. \
         && rm -rf hdf5; \
     fi
-# put MOAB on the path
+# put HDF5 on the path
 ENV LD_LIBRARY_PATH $HDF5_INSTALL_PATH/lib:$LD_LIBRARY_PATH
 ENV LIBRARY_PATH $HDF5_INSTALL_PATH/lib:$LIBRARY_PATH
 
-ARG build_moab="NO"
-ARG enable_pymoab="NO"
+FROM base_python AS moab
+ARG py_version
+ARG build_hdf5
 ENV INSTALL_PATH=$HOME/opt/moab
 
 # build MOAB
-RUN if [ "$build_moab" = "YES" ] || [ "$enable_pymoab" = "YES" ] ; then \
-        if [ "$enable_pymoab" = "YES" ] ; \
-        then \ 
-            export PYMOAB_FLAG="-DENABLE_PYMOAB=ON"; \
-        fi;\
-        echo $PYMOAB_FLAG ;\
-        export MOAB_HDF5_ARGS=""; \
-        if [ "$build_hdf5" != "NO" ] ; \ 
-        then \
-              export MOAB_HDF5_ARGS="-DHDF5_ROOT=$HDF5_INSTALL_PATH"; \
-        fi \
-        && cd $HOME/opt \
-        && mkdir moab \
-        && cd moab \
-        && git clone --depth 1 --single-branch -b 5.3.0 https://bitbucket.org/fathomteam/moab \
-        && cd moab \
-        && mkdir build \
-        && cd build \
-        && ls ..\
-      # build/install shared lib
-        && cmake .. \
-              ${PYMOAB_FLAG} \
-              -DCMAKE_INSTALL_PREFIX=$INSTALL_PATH \
-              -DENABLE_HDF5=ON $MOAB_HDF5_ARGS \
-              -DBUILD_SHARED_LIBS=ON \
-              -DENABLE_BLASLAPACK=OFF \
-              -DENABLE_FORTRAN=OFF \
-        && make -j 3 \
-        && make install \
-        && cd .. \
-        && rm -rf moab ; \
-    fi
+RUN export PYMOAB_FLAG="-DENABLE_PYMOAB=ON"; \
+    echo $PYMOAB_FLAG ;\
+    export MOAB_HDF5_ARGS=""; \
+    if [ "$build_hdf5" != "NO" ] ; \ 
+    then \
+            export MOAB_HDF5_ARGS="-DHDF5_ROOT=$HDF5_INSTALL_PATH"; \
+    fi \
+    && cd $HOME/opt \
+    && mkdir moab \
+    && cd moab \
+    && git clone --depth 1 --single-branch -b 5.3.0 https://bitbucket.org/fathomteam/moab \
+    && cd moab \
+    && mkdir build \
+    && cd build \
+    && ls ..\
+    # build/install shared lib
+    && cmake .. \
+            ${PYMOAB_FLAG} \
+            -DCMAKE_INSTALL_PREFIX=$INSTALL_PATH \
+            -DENABLE_HDF5=ON $MOAB_HDF5_ARGS \
+            -DBUILD_SHARED_LIBS=ON \
+            -DENABLE_BLASLAPACK=OFF \
+            -DENABLE_FORTRAN=OFF \
+    && make -j 3 \
+    && make install \
+    && cd .. \
+    && rm -rf moab ;
 
 # put MOAB on the path
 ENV LD_LIBRARY_PATH $HOME/opt/moab/lib:$LD_LIBRARY_PATH
 ENV LIBRARY_PATH $HOME/opt/moab/lib:$LIBRARY_PATH
 ENV PYTHONPATH=$HOME/opt/moab/lib/python${py_version}/site-packages/
 
+FROM moab AS dagmc
 # build/install DAGMC
-ARG build_dagmc="NO"
 ENV INSTALL_PATH=$HOME/opt/dagmc
-RUN if [ "$build_dagmc" = "YES" ]; then \
-        cd /root \
-        && git clone --depth 1 --branch stable https://github.com/svalinn/DAGMC.git \
-        && cd DAGMC \
-        && mkdir bld \
-        && cd bld \
-        && cmake .. -DMOAB_DIR=$HOME/opt/moab \
-                 -DCMAKE_INSTALL_PREFIX=$INSTALL_PATH \
-                 -DBUILD_STATIC_LIBS=OFF \
-                 -DBUILD_UWUW=OFF \
-                 -DBUILD_TALLY=OFF \
-                 -DBUILD_MAKE_WATERTIGHT=OFF \
-                 -DBUILD_OVERLAP_CHECK=OFF \
-                 -DBUILD_TESTS=OFF \
-        && make -j 3\
-        && make install \
-        && cd ../.. \
-        && rm -rf DAGMC; \
-    fi
+RUN cd /root \
+    && git clone --depth 1 --branch stable https://github.com/svalinn/DAGMC.git \
+    && cd DAGMC \
+    && mkdir bld \
+    && cd bld \
+    && cmake .. -DMOAB_DIR=$HOME/opt/moab \
+                -DCMAKE_INSTALL_PREFIX=$INSTALL_PATH \
+                -DBUILD_STATIC_LIBS=OFF \
+                -DBUILD_UWUW=OFF \
+                -DBUILD_TALLY=OFF \
+                -DBUILD_MAKE_WATERTIGHT=OFF \
+                -DBUILD_OVERLAP_CHECK=OFF \
+                -DBUILD_TESTS=OFF \
+    && make -j 3\
+    && make install \
+    && cd ../.. \
+    && rm -rf DAGMC
 
-ARG build_pyne=YES
 # Build/Install PyNE
-RUN if [ "$build_pyne" = "YES" ]; then \
-        export PYNE_HDF5_ARGS="" ;\
-        if [ "$build_hdf5" != "NO" ]; then \
-              export PYNE_HDF5_ARGS="--hdf5 $HDF5_INSTALL_PATH" ; \
-        fi \
-        && cd $HOME/opt \
-        && git clone -b develop --single-branch https://github.com/pyne/pyne.git \
-        && cd pyne \
-        && python setup.py install --user \
-                                    --moab $HOME/opt/moab --dagmc $HOME/opt/dagmc \
-                                    $PYNE_HDF5_ARGS \
-                                    --clean -j 3; \
-    fi
+FROM dagmc AS pyne
+ARG build_hdf5
+
+RUN export PYNE_HDF5_ARGS="" ;\
+    if [ "$build_hdf5" != "NO" ]; then \
+            export PYNE_HDF5_ARGS="--hdf5 $HDF5_INSTALL_PATH" ; \
+    fi \
+    && cd $HOME/opt \
+    && git clone -b develop --single-branch https://github.com/pyne/pyne.git \
+    && cd pyne \
+    && python setup.py install --user \
+                                --moab $HOME/opt/moab --dagmc $HOME/opt/dagmc \
+                                $PYNE_HDF5_ARGS \
+                                --clean -j 3; 
 ENV PATH $HOME/.local/bin:$PATH
 RUN if [ "$build_pyne" = "YES" ]; then \
         cd $HOME \
         && nuc_data_make ; \
     fi
 
+FROM dagmc AS openmc
+ARG build_hdf5
 # build/install OpenMC Python API
-ARG install_openmc="NO"
-RUN if [ "$install_openmc" = "YES" ]; then \
-        if [ "$build_hdf5" != "NO" ]; then \
-              export HDF5_ROOT="$HDF5_INSTALL_PATH" ; \
-        fi ;\
-        git clone https://github.com/openmc-dev/openmc.git $HOME/opt/openmc \
-        && cd  $HOME/opt/openmc \
-        && pip install . ; \
-    fi
+RUN if [ "$build_hdf5" != "NO" ]; then \
+            export HDF5_ROOT="$HDF5_INSTALL_PATH" ; \
+    fi ;\
+    git clone https://github.com/openmc-dev/openmc.git $HOME/opt/openmc \
+    && cd  $HOME/opt/openmc \
+    && git checkout tags/v0.13.0 \
+    && pip install . 
 
