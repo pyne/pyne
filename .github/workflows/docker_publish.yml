@@ -85,7 +85,7 @@ jobs:
           if [[ "${{ matrix.stage }}" == "dagmc" ]]; then
             export ADD_FLAG="${ADD_FLAG} --dagmc /root/opt/dagmc"
           fi
-          if [[ "${{ matrix.hdf5 }}" == "/hdf5" ]]; then
+          if [[ "${{ matrix.hdf5 }}" == "_hdf5" ]]; then
             export ADD_FLAG="${ADD_FLAG} --hdf5 /root/opt/hdf5/hdf5-1_12_0"
           fi
           export ADD_FLAG="${ADD_FLAG} "

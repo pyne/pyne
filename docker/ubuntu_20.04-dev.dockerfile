@@ -108,7 +108,6 @@ ENV LIBRARY_PATH $HOME/opt/moab/lib:$LIBRARY_PATH
 ENV PYTHONPATH=$HOME/opt/moab/lib/python${py_version}/site-packages/
 
 FROM moab AS dagmc
-ARG build_hdf5
 # build/install DAGMC
 ENV INSTALL_PATH=$HOME/opt/dagmc
 RUN cd /root \
