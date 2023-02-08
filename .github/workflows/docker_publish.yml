@@ -10,6 +10,7 @@ on:
 
 env:
   DOCKER_IMAGE_BASENAME: ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_20.04_py3
+  DOCKER_IMAGE_TAG: :refs_heads_${{ GITHUB_REF_NAME }}-bk0
 
 jobs:
 
@@ -35,6 +36,12 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - if: GITHUB_REF_NAME == "develop"
+        run: |
+          echo $DOCKER_IMAGE_TAG
+          echo "" >> $DOCKER_IMAGE_TAG
+          echo $DOCKER_IMAGE_TAG
+
       # build base python, moab, dagmc, openmc using multistage docker build action
       - uses: firehed/multistage-docker-build-action@v1
         with:
@@ -42,6 +49,7 @@ jobs:
           stages: base_python, moab, dagmc
           server-stage: openmc
           quiet: false
+          tag-latest-on-default: false
           dockerfile: docker/ubuntu_20.04-dev.dockerfile
           build-args: py_version=3.8
 
@@ -52,6 +60,7 @@ jobs:
           stages: base_python, moab
           server-stage: dagmc
           quiet: false
+          tag-latest-on-default: false
           dockerfile: docker/ubuntu_20.04-dev.dockerfile
           build-args: py_version=3.8, build_hdf5=hdf5-1_12_0
 
@@ -72,7 +81,7 @@ jobs:
 
 
     container:
-      image: ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_20.04_py3${{ matrix.hdf5 }}/${{ matrix.stage }}:refs_heads_multistage-docker-bk0
+      image: ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_20.04_py3${{ matrix.hdf5 }}/${{ matrix.stage }}${{ env.DOCKER_IMAGE_TAG }}
 
     steps:
       - name: setup
@@ -125,7 +134,7 @@ jobs:
           - stage: dagmc
             hdf5: _hdf5
 
-    name: "ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_20.04_py3${{ matrix.hdf5 }}/${{ matrix.stage }}:refs_heads_multistage-docker-bk0: latest -> stable"
+    name: "ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_20.04_py3${{ matrix.hdf5 }}/${{ matrix.stage }}${{ env.DOCKER_IMAGE_TAG }}: latest -> stable"
 
     steps:
       - name: Log in to the Container registry
@@ -138,11 +147,11 @@ jobs:
       - name: Push Image to stable img
         uses: akhilerm/tag-push-action@v2
         with:
-          src: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}/${{ matrix.stage }}:refs_heads_multistage-docker-bk0
+          src: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}/${{ matrix.stage }}${{ env.DOCKER_IMAGE_TAG }}
           dst: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}/${{ matrix.stage }}:stable
 
       - name: Push Image to latest img
         uses: akhilerm/tag-push-action@v2
         with:
-          src: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}/${{ matrix.stage }}:refs_heads_multistage-docker-bk0
+          src: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}/${{ matrix.stage }}${{ env.DOCKER_IMAGE_TAG }}
           dst: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}/${{ matrix.stage }}:latest
