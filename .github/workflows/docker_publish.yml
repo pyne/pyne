@@ -10,7 +10,7 @@ on:
 
 env:
   DOCKER_IMAGE_BASENAME: ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_20.04_py3
-  DOCKER_IMAGE_TAG: :refs_heads_${{ GITHUB_REF_NAME }}-bk0
+  DOCKER_IMAGE_TAG: :refs_heads_${{ github.ref_name }}-bk0
 
 jobs:
 
