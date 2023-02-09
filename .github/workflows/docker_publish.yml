@@ -38,7 +38,7 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - if: github.ref_name == "develop"
+      - if: github.ref_name == 'develop'
         run: |
           echo $DOCKER_IMAGE_TAG
           echo "" >> $DOCKER_IMAGE_TAG
