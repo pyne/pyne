@@ -24,6 +24,8 @@ jobs:
         ubuntu_versions : [
           20.04,
         ]
+    outputs:
+      image_tag: ${{ steps.output_tag.outputs.test }}
 
     steps:
       - name: Checkout repository
@@ -36,7 +38,7 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - if: GITHUB_REF_NAME == "develop"
+      - if: github.ref_name == "develop"
         run: |
           echo $DOCKER_IMAGE_TAG
           echo "" >> $DOCKER_IMAGE_TAG
@@ -64,6 +66,9 @@ jobs:
           dockerfile: docker/ubuntu_20.04-dev.dockerfile
           build-args: py_version=3.8, build_hdf5=hdf5-1_12_0
 
+      - id: output_tag
+        run: echo $DOCKER_IMAGE_TAG >> $GITHUB_OUTPUT
+
   # Downloads the images uploaded to ghcr in previous stages and runs pyne
   # tests to check that they work.
   BuildTest:
@@ -79,10 +84,8 @@ jobs:
             hdf5: _hdf5
       fail-fast: false
 
-
     container:
-      image: ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_20.04_py3${{ matrix.hdf5 }}/${{ matrix.stage }}${{ env.DOCKER_IMAGE_TAG }}
-
+      image: ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_20.04_py3${{ matrix.hdf5 }}/${{ matrix.stage }}${{ needs.multistage_image_build.outputs.image_tag }}
     steps:
       - name: setup
         shell: bash -l {0}
@@ -134,7 +137,7 @@ jobs:
           - stage: dagmc
             hdf5: _hdf5
 
-    name: "ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_20.04_py3${{ matrix.hdf5 }}/${{ matrix.stage }}${{ env.DOCKER_IMAGE_TAG }}: latest -> stable"
+    name: "ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_20.04_py3${{ matrix.hdf5 }}/${{ matrix.stage }}: latest -> stable"
 
     steps:
       - name: Log in to the Container registry
