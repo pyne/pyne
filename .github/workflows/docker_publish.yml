@@ -103,6 +103,8 @@ jobs:
           export ADD_FLAG="${ADD_FLAG} "
           echo "ADD_FLAG=${ADD_FLAG}" >> $GITHUB_ENV
 
+      - run: echo ${{ needs.multistage_image_build.outputs.image_tag }}
+
       - name: Checkout repository
         uses: actions/checkout@v3
         
