@@ -38,9 +38,10 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - run: echo $env.DOCKER_IMAGE_TAG
+
       - if: github.ref_name == 'develop'
         run: |
-          echo $DOCKER_IMAGE_TAG
           echo "" >> $DOCKER_IMAGE_TAG
           echo $DOCKER_IMAGE_TAG
 
@@ -68,7 +69,7 @@ jobs:
 
       - id: output_tag
         run: |
-          echo "$env.DOCKER_IMAGE_TAG" >> "$github.output"
+          echo "test=$env.DOCKER_IMAGE_TAG" >> $GITHUB_OUTPUT
           echo "$env.DOCKER_IMAGE_TAG"
 
   # Downloads the images uploaded to ghcr in previous stages and runs pyne
