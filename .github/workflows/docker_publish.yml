@@ -67,7 +67,7 @@ jobs:
           build-args: py_version=3.8, build_hdf5=hdf5-1_12_0
 
       - id: output_tag
-        run: echo $DOCKER_IMAGE_TAG >> $GITHUB_OUTPUT
+        run: echo $DOCKER_IMAGE_TAG >> $github.output
 
   # Downloads the images uploaded to ghcr in previous stages and runs pyne
   # tests to check that they work.
