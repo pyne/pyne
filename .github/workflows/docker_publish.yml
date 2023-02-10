@@ -38,8 +38,6 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - run: echo $DOCKER_IMAGE_TAG
-
       # build base python, moab, dagmc, openmc using multistage docker build action
       - uses: firehed/multistage-docker-build-action@v1
         with:
@@ -65,7 +63,6 @@ jobs:
       - id: output_tag
         run: |
           echo "image_tag=$DOCKER_IMAGE_TAG" >> $GITHUB_OUTPUT
-          echo "$DOCKER_IMAGE_TAG"
 
   # Downloads the images uploaded to ghcr in previous stages and runs pyne
   # tests to check that they work.
@@ -100,8 +97,6 @@ jobs:
           fi
           export ADD_FLAG="${ADD_FLAG} "
           echo "ADD_FLAG=${ADD_FLAG}" >> $GITHUB_ENV
-
-      - run: echo "$needs.multistage_image_build.outputs.image_tag"
 
       - name: Checkout repository
         uses: actions/checkout@v3
