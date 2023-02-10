@@ -67,7 +67,9 @@ jobs:
           build-args: py_version=3.8, build_hdf5=hdf5-1_12_0
 
       - id: output_tag
-        run: echo $DOCKER_IMAGE_TAG >> $github.output
+        run: |
+          echo $env.DOCKER_IMAGE_TAG >> $github.output
+          echo $env.DOCKER_IMAGE_TAG
 
   # Downloads the images uploaded to ghcr in previous stages and runs pyne
   # tests to check that they work.
@@ -103,7 +105,7 @@ jobs:
           export ADD_FLAG="${ADD_FLAG} "
           echo "ADD_FLAG=${ADD_FLAG}" >> $GITHUB_ENV
 
-      - run: echo ${{ needs.multistage_image_build.outputs.image_tag }}
+      - run: echo $needs.multistage_image_build.outputs.image_tag
 
       - name: Checkout repository
         uses: actions/checkout@v3
