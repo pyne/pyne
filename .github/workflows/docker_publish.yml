@@ -10,6 +10,7 @@ on:
 
 env:
   DOCKER_IMAGE_BASENAME: ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_20.04_py3
+  DOCKER_IMAGE_TAG: :refs_heads_${{ github.ref_name }}-bk0
 
 jobs:
 
@@ -23,6 +24,8 @@ jobs:
         ubuntu_versions : [
           20.04,
         ]
+    outputs:
+      image_tag: ${{ steps.output_tag.outputs.image_tag }}
 
     steps:
       - name: Checkout repository
@@ -42,6 +45,7 @@ jobs:
           stages: base_python, moab, dagmc
           server-stage: openmc
           quiet: false
+          tag-latest-on-default: false
           dockerfile: docker/ubuntu_20.04-dev.dockerfile
           build-args: py_version=3.8
 
@@ -52,8 +56,13 @@ jobs:
           stages: base_python, moab
           server-stage: dagmc
           quiet: false
+          tag-latest-on-default: false
           dockerfile: docker/ubuntu_20.04-dev.dockerfile
           build-args: py_version=3.8, build_hdf5=hdf5-1_12_0
+
+      - id: output_tag
+        run: |
+          echo "image_tag=$DOCKER_IMAGE_TAG" >> $GITHUB_OUTPUT
 
   # Downloads the images uploaded to ghcr in previous stages and runs pyne
   # tests to check that they work.
@@ -70,10 +79,8 @@ jobs:
             hdf5: _hdf5
       fail-fast: false
 
-
     container:
-      image: ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_20.04_py3${{ matrix.hdf5 }}/${{ matrix.stage }}:refs_heads_multistage-docker-bk0
-
+      image: ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_20.04_py3${{ matrix.hdf5 }}/${{ matrix.stage }}${{ needs.multistage_image_build.outputs.image_tag }}
     steps:
       - name: setup
         shell: bash -l {0}
@@ -125,7 +132,7 @@ jobs:
           - stage: dagmc
             hdf5: _hdf5
 
-    name: "ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_20.04_py3${{ matrix.hdf5 }}/${{ matrix.stage }}:refs_heads_multistage-docker-bk0: latest -> stable"
+    name: "ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_20.04_py3${{ matrix.hdf5 }}/${{ matrix.stage }}: latest -> stable"
 
     steps:
       - name: Log in to the Container registry
@@ -138,11 +145,11 @@ jobs:
       - name: Push Image to stable img
         uses: akhilerm/tag-push-action@v2
         with:
-          src: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}/${{ matrix.stage }}:refs_heads_multistage-docker-bk0
+          src: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}/${{ matrix.stage }}${{ env.DOCKER_IMAGE_TAG }}
           dst: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}/${{ matrix.stage }}:stable
 
       - name: Push Image to latest img
         uses: akhilerm/tag-push-action@v2
         with:
-          src: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}/${{ matrix.stage }}:refs_heads_multistage-docker-bk0
+          src: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}/${{ matrix.stage }}${{ env.DOCKER_IMAGE_TAG }}
           dst: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}/${{ matrix.stage }}:latest

@@ -128,8 +128,19 @@ RUN cd /root \
     && cd ../.. \
     && rm -rf DAGMC
 
+FROM dagmc AS openmc
+ARG build_hdf5
+# build/install OpenMC Python API
+RUN if [ "$build_hdf5" != "NO" ]; then \
+            export HDF5_ROOT="$HDF5_INSTALL_PATH" ; \
+    fi ;\
+    git clone https://github.com/openmc-dev/openmc.git $HOME/opt/openmc \
+    && cd  $HOME/opt/openmc \
+    && git checkout tags/v0.13.0 \
+    && pip install . 
+
 # Build/Install PyNE
-FROM dagmc AS pyne
+FROM openmc AS pyne
 ARG build_hdf5
 
 RUN export PYNE_HDF5_ARGS="" ;\
@@ -148,15 +159,3 @@ RUN if [ "$build_pyne" = "YES" ]; then \
         cd $HOME \
         && nuc_data_make ; \
     fi
-
-FROM dagmc AS openmc
-ARG build_hdf5
-# build/install OpenMC Python API
-RUN if [ "$build_hdf5" != "NO" ]; then \
-            export HDF5_ROOT="$HDF5_INSTALL_PATH" ; \
-    fi ;\
-    git clone https://github.com/openmc-dev/openmc.git $HOME/opt/openmc \
-    && cd  $HOME/opt/openmc \
-    && git checkout tags/v0.13.0 \
-    && pip install . 
-
