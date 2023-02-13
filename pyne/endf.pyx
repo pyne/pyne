@@ -16,7 +16,8 @@ from __future__ import print_function, division, unicode_literals
 import re
 import os
 try:
-    from collections.abc import OrderedDict, Iterable
+    from collections.abc import Iterable
+    from collections import OrderedDict
 except ImportError:
     from collections import OrderedDict, Iterable
 from warnings import warn
