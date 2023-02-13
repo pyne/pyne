@@ -23,6 +23,7 @@ v0.7.7
    * update where to look for DAGMC CMake files (#1446)
    * ensure NUC_DATA_PATH is a string (#1447)
    * update CI to Ubuntu 20.04 (#1449)
+   * fixed compatibility issue with Python 3.10 in endf.py 
 
 v0.7.6
 ======
