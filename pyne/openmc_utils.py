@@ -330,7 +330,6 @@ def calc_structured_coords(lower_left, upper_right, dimension):
         for i in range(dimension[dim] + 1):
             bounds.append(lower_left[dim] + i * step)
         structured_coords.append(bounds)
-    print(structured_coords)
     return structured_coords
 
 
