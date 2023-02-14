@@ -1,6 +1,6 @@
 """Transmuter tests"""
 from nose.tools import assert_equal, assert_almost_equal
-
+import nose
 from pyne import data
 from pyne import cram
 from pyne import nucname
