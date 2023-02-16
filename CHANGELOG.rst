@@ -6,9 +6,7 @@ Next Version
 ============
 
 **Fix**
-   * specify version of akhilerm/tag-push-action to be v2.1.0 so the pushing_test_stable_img job can run(#1473)
-   * fix BuildTest job not finding images problem caused by #1470 (#1471)
-   * use multistage docker build action in docker_publish.yml(#1470)
+   * use multistage docker build action in docker_publish.yml(#1470 #1471 #1473)
    * remove setup-QEMU step from composite action(#1461)
    * add composite actions to github workflows(#1459)
    * fixing typos in user warning message (#1456)
