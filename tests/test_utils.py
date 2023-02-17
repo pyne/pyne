@@ -199,7 +199,6 @@ def test_toggle_warnings():
     observed = utils.toggle_warnings()
     assert_equal(state, not observed)
 
-
 def test_str_to_unicode():
     """
     Convert binary str to unicode str.
@@ -222,14 +221,11 @@ def test_str_to_unicode():
     # set of str
     s = {"test1", "test2", b"test3"}
     exp_answer = {"test1", "test2", "test3"}
-    # Fix: assert_equal not working
-    assert (utils.str_to_unicode(s), exp_answer)
-
+    assert_equal(utils.str_to_unicode(s), exp_answer)
     # tuple of str
     s = ("test1", "test2", b"test3")
     exp_answer = ("test1", "test2", "test3")
-    # Fix: assert_equal not working
-    assert (utils.str_to_unicode(s), exp_answer)
+    assert_equal(utils.str_to_unicode(s), exp_answer)
 
 
 def test_str_almost_same():

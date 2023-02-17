@@ -216,31 +216,20 @@ def remove(path):
 
 def str_to_unicode(s):
     """
-    This function convert a str from binary or unicode to str (unicode).
-    If it is a list of string, convert every element of the list.
-
-    Parameters:
-    -----------
-    s : str or list of str
-
-    Returns:
-    --------
-    s : text str or list of unicode str
+    Convert str to unicode str.
     """
-    if isinstance(s, str) or isinstance(s, bytes):
-        # it is a str, convert to text str
-        try:
-            s = s.decode("utf-8")
-        except:
-            pass
+    if isinstance(s, bytes):
+        return s.decode()
+    elif isinstance(s, str):
         return s
+    elif isinstance(s, list):
+        return [str_to_unicode(x) for x in s]
+    elif isinstance(s, set):
+        return set(x if isinstance(x, str) else x.decode() for x in list(s))
+    elif isinstance(s, tuple):
+        return tuple(str_to_unicode(x) for x in s)
     else:
-        for i, item in enumerate(s):
-            try:
-                s[i] = item.decode("utf-8")
-            except:
-                pass
-        return s
+        raise TypeError("Expected str, bytes, list, set, or tuple, but got %s" % type(s))
 
 
 def is_close(a, b, rel_tol=1e-9, abs_tol=0.0):
