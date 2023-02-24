@@ -26,57 +26,35 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        pymoab : [
-          _pymoab,
-          ]
-        dagmc : [
-          '',
-          _dagmc
-        ]
-        openmc : [
-          '',
-        ]
-        hdf5 : [
-          '',
-        ]
+        stage: [base_python, moab, dagmc, openmc]
+        hdf5: ['']
         include:
-          - openmc: ''
-            hdf5: _hdf5-1_12_0
-            dagmc: _dagmc
-            pymoab: _pymoab
-          - openmc: _openmc
-            hdf5: ''
-            dagmc: _dagmc
-            pymoab: _pymoab
-          - openmc: ''
-            hdf5: ''
-            dagmc: ''
-            pymoab: ''
+          - stage: dagmc
+            hdf5: _hdf5
       fail-fast: false
 
-
     container:
-      image: ghcr.io/pyne/ubuntu_20.04_py3${{ matrix.hdf5 }}${{ matrix.dagmc }}${{ matrix.pymoab }}${{ matrix.openmc }}_pyne-deps:stable
+      image: ghcr.io/pyne/pyne_ubuntu_20.04_py3${{ matrix.hdf5 }}/${{ matrix.stage }}:stable
 
     steps:
       - name: setup
         shell: bash -l {0}
         run: |
           export ADD_FLAG=" "
-          if [[ "${{ matrix.pymoab }}" == "_pymoab" || "${{ matrix.dagmc }}" == "_dagmc" ]]; then
+          if [[ "${{ matrix.stage }}" == "moab" || "${{ matrix.stage }}" == "dagmc" ]]; then
             export ADD_FLAG="${ADD_FLAG} --moab /root/opt/moab"
           fi
-          if [[ "${{ matrix.dagmc }}" == "_dagmc" ]]; then
+          if [[ "${{ matrix.stage }}" == "dagmc" ]]; then
             export ADD_FLAG="${ADD_FLAG} --dagmc /root/opt/dagmc"
           fi
-          if [[ "${{ matrix.hdf5 }}" == "_hdf5-1_12_0" ]]; then
+          if [[ "${{ matrix.hdf5 }}" == "_hdf5" ]]; then
             export ADD_FLAG="${ADD_FLAG} --hdf5 /root/opt/hdf5/hdf5-1_12_0"
           fi
           export ADD_FLAG="${ADD_FLAG} "
           echo "ADD_FLAG=${ADD_FLAG}" >> $GITHUB_ENV
 
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         
       - name: Building PyNE
         shell: bash -l {0}
