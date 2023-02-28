@@ -222,6 +222,7 @@ def test_str_to_unicode():
     s = {"test1", "test2", b"test3"}
     exp_answer = {"test1", "test2", "test3"}
     assert_equal(utils.str_to_unicode(s), exp_answer)
+
     # tuple of str
     s = ("test1", "test2", b"test3")
     exp_answer = ("test1", "test2", "test3")
