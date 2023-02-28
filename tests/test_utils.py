@@ -204,12 +204,15 @@ def test_str_to_unicode():
     Convert binary str to unicode str.
     """
     exp_answer = "test"
+    
     # default str
     s = "test"
     assert_equal(utils.str_to_unicode(s), exp_answer)
+    
     # binary str
     s = b"test"
     assert_equal(utils.str_to_unicode(s), exp_answer)
+    
     # unicode str
     s = "test"
     assert_equal(utils.str_to_unicode(s), exp_answer)
@@ -218,6 +221,7 @@ def test_str_to_unicode():
     s = ["test1", "test2", b"test3"]
     exp_answer = ["test1", "test2", "test3"]
     assert_array_equal(utils.str_to_unicode(s), exp_answer)
+    
     # set of str
     s = {"test1", "test2", b"test3"}
     exp_answer = {"test1", "test2", "test3"}
