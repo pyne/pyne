@@ -161,7 +161,7 @@ def from_barns(xs, units):
 ### message functions ###
 #########################
 
-USE_COLOR = os.name is "posix"
+USE_COLOR = os.name == "posix"
 
 
 def message(s):
@@ -217,6 +217,23 @@ def remove(path):
 def str_to_unicode(s):
     """
     Convert str to unicode str.
+
+    Args:
+        s: A str, bytes, list, set, or tuple object.
+
+    Returns:
+        A unicode str object, or a container object (list, set or tuple) containing unicode str objects.
+
+    Raises:
+        TypeError: If s is not one of the expected types (str, bytes, list, set or tuple).
+
+    This function takes a str, bytes, list, set or tuple object and converts it to a unicode str object, or a container object (list, set or tuple) containing unicode str objects.
+
+    If the input s is already a str object, it will be returned as it is. If it is a bytes object, it will be decoded into a str object using the default encoding.
+
+    If s is a container object (list, set or tuple), this function will recursively convert all its elements to unicode str objects using the same logic as above.
+
+    If s is not one of the expected types, a TypeError will be raised with an appropriate error message.
     """
     if isinstance(s, bytes):
         return s.decode()
@@ -225,7 +242,7 @@ def str_to_unicode(s):
     elif isinstance(s, list):
         return [str_to_unicode(x) for x in s]
     elif isinstance(s, set):
-        return set(x if isinstance(x, str) else x.decode() for x in list(s))
+        return {str_to_unicode(x) for x in s}
     elif isinstance(s, tuple):
         return tuple(str_to_unicode(x) for x in s)
     else:
