@@ -315,7 +315,7 @@ def calc_structured_coords(lower_left, upper_right, dimension):
     --------
     structured_coords : numpy array
         A nested numpy array definning the boundaries of the mesh element in
-        each dimension. Format: [[x_bounds1, x_bounds2. ...],
+        each dimension. Format: [[x_bounds1, x_bounds2, ...],
                                  [y_bounds1, y_bounds2, ...],
                                  [z_bounds1, z_bounds2, ...]]
     """

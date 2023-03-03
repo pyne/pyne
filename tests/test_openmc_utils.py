@@ -145,9 +145,11 @@ def test_calc_structured_coords():
     lower_left = np.array([0.0, 0.0, 0.0])
     upper_right = np.array([1.0, 2.0, 3.0])
     dimension = np.array([2, 4, 5])
-    exp_structured_coords = np.array(
-        [[0.0, 0.5, 1.0], [0.0, 0.5, 1.0, 1.5, 2.0], [0.0, 0.6, 1.2, 1.8, 2.4, 3.0]]
-    )
+    exp_structured_coords = [
+            [0.0, 0.5, 1.0],
+            [0.0, 0.5, 1.0, 1.5, 2.0],
+            [0.0, 0.6, 1.2, 1.8, 2.4, 3.0]
+        ]
     structured_coords = openmc_utils.calc_structured_coords(
         lower_left, upper_right, dimension
     )

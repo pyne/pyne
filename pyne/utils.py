@@ -161,7 +161,7 @@ def from_barns(xs, units):
 ### message functions ###
 #########################
 
-USE_COLOR = os.name is "posix"
+USE_COLOR = os.name == "posix"
 
 
 def message(s):
@@ -216,31 +216,37 @@ def remove(path):
 
 def str_to_unicode(s):
     """
-    This function convert a str from binary or unicode to str (unicode).
-    If it is a list of string, convert every element of the list.
+    Convert str to unicode str.
 
-    Parameters:
-    -----------
-    s : str or list of str
+    Args:
+        s: A str, bytes, list, set, or tuple object.
 
     Returns:
-    --------
-    s : text str or list of unicode str
+        A unicode str object, or a container object (list, set or tuple) containing unicode str objects.
+
+    Raises:
+        TypeError: If s is not one of the expected types (str, bytes, list, set or tuple).
+
+    This function takes a str, bytes, list, set or tuple object and converts it to a unicode str object, or a container object (list, set or tuple) containing unicode str objects.
+
+    If the input s is already a str object, it will be returned as it is. If it is a bytes object, it will be decoded into a str object using the default encoding.
+
+    If s is a container object (list, set or tuple), this function will recursively convert all its elements to unicode str objects using the same logic as above.
+
+    If s is not one of the expected types, a TypeError will be raised with an appropriate error message.
     """
-    if isinstance(s, str) or isinstance(s, bytes):
-        # it is a str, convert to text str
-        try:
-            s = s.decode("utf-8")
-        except:
-            pass
+    if isinstance(s, bytes):
+        return s.decode()
+    elif isinstance(s, str):
         return s
+    elif isinstance(s, list):
+        return [str_to_unicode(x) for x in s]
+    elif isinstance(s, set):
+        return {str_to_unicode(x) for x in s}
+    elif isinstance(s, tuple):
+        return tuple(str_to_unicode(x) for x in s)
     else:
-        for i, item in enumerate(s):
-            try:
-                s[i] = item.decode("utf-8")
-            except:
-                pass
-        return s
+        raise TypeError("Expected str, bytes, list, set, or tuple, but got %s" % type(s))
 
 
 def is_close(a, b, rel_tol=1e-9, abs_tol=0.0):

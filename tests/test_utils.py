@@ -92,14 +92,14 @@ def test_from_barns():
 
 
 def test_message():
-    if os.name is "posix":
+    if os.name == "posix":
         assert_equal("\033[1;32mHello\033[0m", utils.message("Hello"))
     else:
         assert_equal("*** MESSAGE ***: Hello", utils.message("Hello"))
 
 
 def test_failure():
-    if os.name is "posix":
+    if os.name == "posix":
         assert_equal("\033[1;31mWorld\033[0m", utils.failure("World"))
     else:
         assert_equal("*** FAILURE ***: World", utils.failure("World"))
@@ -199,18 +199,20 @@ def test_toggle_warnings():
     observed = utils.toggle_warnings()
     assert_equal(state, not observed)
 
-
 def test_str_to_unicode():
     """
     Convert binary str to unicode str.
     """
     exp_answer = "test"
+    
     # default str
     s = "test"
     assert_equal(utils.str_to_unicode(s), exp_answer)
+    
     # binary str
     s = b"test"
     assert_equal(utils.str_to_unicode(s), exp_answer)
+    
     # unicode str
     s = "test"
     assert_equal(utils.str_to_unicode(s), exp_answer)
@@ -219,16 +221,16 @@ def test_str_to_unicode():
     s = ["test1", "test2", b"test3"]
     exp_answer = ["test1", "test2", "test3"]
     assert_array_equal(utils.str_to_unicode(s), exp_answer)
-
+    
     # set of str
     s = {"test1", "test2", b"test3"}
     exp_answer = {"test1", "test2", "test3"}
-    assert (utils.str_to_unicode(s), exp_answer)
+    assert_equal(utils.str_to_unicode(s), exp_answer)
 
     # tuple of str
     s = ("test1", "test2", b"test3")
     exp_answer = ("test1", "test2", "test3")
-    assert (utils.str_to_unicode(s), exp_answer)
+    assert_equal(utils.str_to_unicode(s), exp_answer)
 
 
 def test_str_almost_same():
