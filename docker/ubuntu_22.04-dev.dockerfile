@@ -1,7 +1,7 @@
 ARG py_version=3.8
 ARG build_hdf5="NO"
 
-FROM ubuntu:20.04 AS base_python
+FROM ubuntu:22.04 AS base_python
 
 # Ubuntu Setup
 ENV TZ=America/Chicago
