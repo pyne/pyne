@@ -9,7 +9,7 @@ on:
       - '.github/workflows/docker_publish.yml'
 
 env:
-  DOCKER_IMAGE_BASENAME: ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_20.04_py3
+  DOCKER_IMAGE_BASENAME: ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_22.04_py3
   DOCKER_IMAGE_TAG: :refs_heads_${{ github.ref_name }}-bk0
 
 jobs:
@@ -46,7 +46,7 @@ jobs:
           server-stage: openmc
           quiet: false
           tag-latest-on-default: false
-          dockerfile: docker/ubuntu_20.04-dev.dockerfile
+          dockerfile: docker/ubuntu_22.04-dev.dockerfile
           build-args: py_version=3.8
 
       # build HDF5 using multistage docker build action 
@@ -57,7 +57,7 @@ jobs:
           server-stage: dagmc
           quiet: false
           tag-latest-on-default: false
-          dockerfile: docker/ubuntu_20.04-dev.dockerfile
+          dockerfile: docker/ubuntu_22.04-dev.dockerfile
           build-args: py_version=3.8, build_hdf5=hdf5-1_12_0
 
       - id: output_tag
