@@ -9,10 +9,7 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 ARG py_version
 
 ENV HOME /root
-RUN if [ "${py_version%.?}" -eq 3 ] ; \
-    then \ 
-            export PY_SUFIX=${py_version%.?}; \
-    fi;\
+RUN export PY_SUFIX=${py_version%.?}; \
     apt-get update \
     && apt-get install -y --fix-missing \
             software-properties-common \
@@ -28,11 +25,8 @@ RUN if [ "${py_version%.?}" -eq 3 ] ; \
             libhdf5-dev \
             hdf5-tools \
     && apt-get clean -y; \
-    if [ "${py_version%.?}" -eq 3 ] ; \
-       then \ 
-            update-alternatives --install /usr/bin/python python /usr/bin/python3 10; \
-            update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 10; \
-    fi;\
+    update-alternatives --install /usr/bin/python python /usr/bin/python3 10; \
+    update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 10; \
     pip install --upgrade pip; \
     pip install numpy==1.23 \
             scipy \
