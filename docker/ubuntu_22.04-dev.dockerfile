@@ -10,11 +10,10 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 ARG py_version
 
 ENV HOME /root
-RUN export PY_SUFIX=${py_version%.?}; \
-    apt-get update \
+RUN apt-get update \
     && apt-get install -y --fix-missing \
             software-properties-common \
-            python${PY_SUFIX}-pip \
+            python3-pip \
             wget \
             build-essential \
             git \

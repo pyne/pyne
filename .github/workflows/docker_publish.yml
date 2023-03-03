@@ -22,7 +22,7 @@ jobs:
     strategy:
       matrix:
         ubuntu_versions : [
-          20.04,
+          22.04,
         ]
     outputs:
       image_tag: ${{ steps.output_tag.outputs.image_tag }}
@@ -80,7 +80,7 @@ jobs:
       fail-fast: false
 
     container:
-      image: ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_20.04_py3${{ matrix.hdf5 }}/${{ matrix.stage }}${{ needs.multistage_image_build.outputs.image_tag }}
+      image: ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_22.04_py3${{ matrix.hdf5 }}/${{ matrix.stage }}${{ needs.multistage_image_build.outputs.image_tag }}
     steps:
       - name: setup
         shell: bash -l {0}
@@ -132,7 +132,7 @@ jobs:
           - stage: dagmc
             hdf5: _hdf5
 
-    name: "ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_20.04_py3${{ matrix.hdf5 }}/${{ matrix.stage }}: latest -> stable"
+    name: "ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_22.04_py3${{ matrix.hdf5 }}/${{ matrix.stage }}: latest -> stable"
 
     steps:
       - name: Log in to the Container registry
