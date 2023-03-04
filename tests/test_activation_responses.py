@@ -37,6 +37,10 @@ responses = [
     "photon_source",
 ]
 
+@pytest.fixture(autouse=True)
+def change_test_dir(request, monkeypatch):
+    monkeypatch.chdir(request.fspath.dirname)
+
 
 def _generate_exp_h5(filename, response, exp_h5_filename):
     """
