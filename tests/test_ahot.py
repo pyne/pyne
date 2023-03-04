@@ -1,10 +1,9 @@
-import nose
-from nose.plugins.skip import Skip, SkipTest
+import pytest
 
 try:
     from spatial_solvers import ahot_script
 except:
-    raise SkipTest
+    pytest.skip()
 
 
 def test_ahotn_ln():

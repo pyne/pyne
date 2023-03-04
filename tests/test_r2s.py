@@ -1,7 +1,6 @@
 import os
 import warnings
-from nose.tools import assert_equal, assert_almost_equal
-from nose.plugins.skip import SkipTest
+import pytest
 import numpy as np
 import tables as tb
 from numpy.testing import assert_array_equal
@@ -25,7 +24,7 @@ from pyne.utils import QAWarning, file_almost_same, file_block_almost_same
 from pyne.mesh import Mesh, NativeMeshTag, HAVE_PYMOAB
 
 if not HAVE_PYMOAB:
-    raise SkipTest
+    pytest.skip()
 
 if sys.version_info[0] > 2:
     izip = zip
@@ -145,15 +144,15 @@ def irradiation_setup_structured(flux_tag="n_flux", meshtal_file="meshtal_2x2x1"
     for nf, nfe, nft, nfte, comp, density in izip(
         n_flux, n_flux_err, n_flux_total, n_flux_err_total, comps, densities
     ):
-        assert_almost_equal(density, 1.962963e00)
-        assert_equal(len(comp), 3)
-        assert_almost_equal(comp[20040000], 1.886792e-02)
-        assert_almost_equal(comp[30060000], 5.886792e-01)
-        assert_almost_equal(comp[30070000], 3.924528e-01)
+        assert density == pytest.approx(1.962963e00)
+        assert len(comp) == 3
+        assert comp[20040000] == pytest.approx(1.886792e-02)
+        assert comp[30060000] == pytest.approx(5.886792e-01)
+        assert comp[30070000] == pytest.approx(3.924528e-01)
         assert_array_equal(nf, fluxes[i])
         assert_array_equal(nfe, errs[i])
-        assert_almost_equal(nft, tot_fluxes[i])
-        assert_almost_equal(nfte, tot_errs[i])
+        assert nft == pytest.approx(tot_fluxes[i])
+        assert nfte == pytest.approx(tot_errs[i])
         i += 1
 
     os.remove(alara_inp)
@@ -344,14 +343,14 @@ def irradiation_setup_unstructured(flux_tag="n_flux"):
     for nf, nfe, nft, nfte, comp, density in izip(
         n_flux, n_flux_err, n_flux_total, n_flux_err_total, comps, densities
     ):
-        assert_almost_equal(density, 2.0)
-        assert_equal(len(comp), 2)
-        assert_almost_equal(comp[30060000], 0.6)
-        assert_almost_equal(comp[30070000], 0.4)
+        assert density == pytest.approx(2.0)
+        assert len(comp) == 2
+        assert comp[30060000] == pytest.approx(0.6)
+        assert comp[30070000] == pytest.approx(0.4)
         assert_array_equal(nf, fluxes[i])
         assert_array_equal(nfe, errs[i])
-        assert_almost_equal(nft, tot_fluxes[i])
-        assert_almost_equal(nfte, tot_errs[i])
+        assert nft == pytest.approx(tot_fluxes[i])
+        assert nfte == pytest.approx(tot_errs[i])
         i += 1
 
     os.remove(meshtal_mesh_file)
@@ -411,7 +410,7 @@ def test_total_photon_source_intensity():
     m.source_density[:] = [[1.0, 2.0], [3.0, 4.0], [5.0, 6.0], [7.0, 8.0]]
 
     intensity = total_photon_source_intensity(m, "source_density")
-    assert_equal(intensity, 58)
+    assert intensity == 58
 
 
 def test_total_photon_source_intensity_subvoxel():
@@ -457,7 +456,7 @@ def test_total_photon_source_intensity_subvoxel():
     expected_intensity += 2 * 0.5 * (2.0 + 2.0) + 2 * 0.5 * (3.0 + 3.0)
     expected_intensity += 1 * 0.5 * (4.0 + 4.0) + 1 * 0.5 * (5.0 + 5.0)
     expected_intensity += 2 * 0.5 * (6.0 + 6.0) + 2 * 0.5 * (7.0 + 7.0)
-    assert_equal(intensity, expected_intensity)
+    assert intensity == expected_intensity
 
 
 def test_irradiation_setup_unstructured_nondef_tag():
@@ -533,9 +532,9 @@ def _r2s_test_step1(r2s_run_dir, remove_step1_out=True):
     os.remove(step1_file)
     os.remove(dst)
 
-    assert_equal(f1, True)
-    assert_equal(f2, True)
-    assert_equal(f3, True)
+    assert f1 == True
+    assert f2 == True
+    assert f3 == True
 
 
 def _r2s_test_step2(r2s_run_dir, remove_step1_out=True):
@@ -568,7 +567,7 @@ def _r2s_test_step2(r2s_run_dir, remove_step1_out=True):
     t_p_src = os.path.join(r2s_run_dir, "total_photon_source_intensities.txt")
     exp_t_p_src = os.path.join(r2s_run_dir, "exp_total_photon_source_intensities.txt")
     f5 = file_almost_same(t_p_src, exp_t_p_src)
-    assert_equal(f5, True)
+    assert f5 == True
     os.remove(t_p_src)
 
     # compare the results
@@ -600,7 +599,7 @@ def _r2s_test_step2(r2s_run_dir, remove_step1_out=True):
         diff_flag = os.system(command)
         # return value 0 if no difference, 1 if differences found, 2 if error
         f6 = True if diff_flag == 0 else False
-        assert_equal(f6, True)
+        assert f6 == True
 
         # compare e_bounds
         f4 = True
@@ -616,7 +615,7 @@ def _r2s_test_step2(r2s_run_dir, remove_step1_out=True):
         )
         diff_flag = os.system(command)
         f4 = True if diff_flag == 0 else False
-        assert_equal(f4, True)
+        assert f4 == True
         # compare decay_time
         f7 = True
         command = "".join(
@@ -631,7 +630,7 @@ def _r2s_test_step2(r2s_run_dir, remove_step1_out=True):
         )
         diff_flag = os.system(command)
         f7 = True if diff_flag == 0 else False
-        assert_equal(f7, True)
+        assert f7 == True
         # compare total_photon_source_intensity
         f8 = True
         command = "".join(
@@ -646,7 +645,7 @@ def _r2s_test_step2(r2s_run_dir, remove_step1_out=True):
         )
         diff_flag = os.system(command)
         f8 = True if diff_flag == 0 else False
-        assert_equal(f8, True)
+        assert f8 == True
         # compare r2s soruce file version
         f9 = True
         command = "".join(
@@ -661,7 +660,7 @@ def _r2s_test_step2(r2s_run_dir, remove_step1_out=True):
         )
         diff_flag = os.system(command)
         f9 = True if diff_flag == 0 else False
-        assert_equal(f9, True)
+        assert f9 == True
 
     os.remove(src_c1)
 
@@ -671,7 +670,7 @@ def test_r2s_script_step_by_step():
     try:
         from pyne import dagmc
     except ImportError:
-        raise SkipTest
+        pytest.skip()
 
     remove_step1_out = True
     r2s_run_dir = os.path.join(thisdir, "files_test_r2s", "r2s_examples", "r2s_run")
@@ -693,7 +692,7 @@ def test_r2s_script_step_by_step():
     try:
         import openmc
     except:
-        raise SkipTest
+        pytest.skip()
     r2s_run_dir = os.path.join(thisdir, "files_test_r2s", "r2s_examples", "openmc_r2s")
     _r2s_test_step1(r2s_run_dir, remove_step1_out)
     _r2s_test_step2(r2s_run_dir, remove_step1_out)
@@ -704,7 +703,7 @@ def test_r2s_script():
     try:
         from pyne import dagmc
     except ImportError:
-        raise SkipTest
+        pytest.skip()
 
     remove_step1_out = False
     # test voxel r2s
@@ -727,7 +726,7 @@ def test_r2s_script():
     try:
         import openmc
     except ImportError:
-        raise SkipTest
+        pytest.skip()
     r2s_run_dir = os.path.join(thisdir, "files_test_r2s", "r2s_examples", "openmc_r2s")
     _r2s_test_step1(r2s_run_dir, remove_step1_out)
     _r2s_test_step2(r2s_run_dir, remove_step1_out)

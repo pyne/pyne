@@ -1,14 +1,7 @@
 import os
 import numpy as np
 import tables as tb
-from nose.tools import (
-    assert_true,
-    assert_false,
-    assert_almost_equal,
-    assert_equal,
-    assert_raises,
-)
-
+import pytest
 
 import pyne.nucname as nucname
 from pyne.pyne_config import pyne_conf
@@ -31,17 +24,15 @@ nucvec = {
 leu = {922380000: 0.96, 922350000: 0.04}
 
 
-def assert_mat_almost_equal(first, second, places=7):
-    assert_almost_equal(first.mass, second.mass, places=places)
-    assert_almost_equal(first.density, second.density, places=places)
-    assert_almost_equal(
-        first.atoms_per_molecule, second.atoms_per_molecule, places=places
-    )
-    assert_equal(first.metadata["name"], second.metadata["name"])
+def assert_mat_almost_equal(first, second, places=1E-7):
+    assert first.mass == pytest.approx(second.mass, rel=places)
+    assert first.density == pytest.approx(second.density, rel=places)
+    assert first.atoms_per_molecule == pytest.approx(second.atoms_per_molecule, rel=places)
+    assert first.metadata["name"] == second.metadata["name"]
     nucs = set(second.comp)
-    assert_equal(set(first.comp), nucs)
+    assert set(first.comp) == nucs
     for nuc in nucs:
-        assert_almost_equal(first.comp[nuc], second.comp[nuc], places=places)
+        assert first.comp[nuc] == pytest.approx(second.comp[nuc], rel=places)
 
 
 def assert_close(obs, exp, margin=1e-6):
@@ -93,11 +84,11 @@ def test_is_comp_matname_or_density():
         [None, None, None, "Weight", "Atom", "Atom", None],
         ["Element", "Neutron ZA", "Photon ZA", "Fraction", "Fraction", "Density", None],
     ]
-    assert_true(is_comp_matname_or_density(comp))
-    assert_true(is_comp_matname_or_density(matname))
-    assert_true(is_comp_matname_or_density(density))
+    assert is_comp_matname_or_density(comp)
+    assert is_comp_matname_or_density(matname)
+    assert is_comp_matname_or_density(density)
     for line in badlines:
-        assert_false(is_comp_matname_or_density(line))
+        assert not is_comp_matname_or_density(line)
 
 
 def test_grab_materials_compendium():
@@ -159,21 +150,19 @@ def test_against_nuc_data():
 
     obs_gasoline = obs_matslib["Gasoline"]
     # remove empty elements
-    assert_equal(
-        {(x, val) for x, val in set(obs_gasoline.comp.items()) if val > 0},
-        set(gasoline.comp.items()),
-    )
-    assert_equal(obs_gasoline.density, gasoline.density)
-    assert_equal(obs_gasoline.metadata["name"], gasoline.metadata["name"])
+    assert (
+        {(x, val) for x, val in set(obs_gasoline.comp.items()) if val > 0} ==
+        set(gasoline.comp.items()))
+    assert obs_gasoline.density == gasoline.density
+    assert obs_gasoline.metadata["name"] == gasoline.metadata["name"]
 
     obs_pubr3 = obs_matslib["Plutonium Bromide"]
     # remove empty elements
-    assert_equal(
-        {(x, val) for x, val in set(obs_pubr3.comp.items()) if val > 0},
-        set(pubr3.comp.items()),
-    )
-    assert_equal(obs_pubr3.density, pubr3.density)
-    assert_equal(obs_pubr3.metadata["name"], pubr3.metadata["name"])
+    assert (
+        {(x, val) for x, val in set(obs_pubr3.comp.items()) if val > 0} ==
+        set(pubr3.comp.items()))
+    assert obs_pubr3.density == pubr3.density
+    assert obs_pubr3.metadata["name"] == pubr3.metadata["name"]
 
 
 def test_matlib_json():
@@ -187,7 +176,7 @@ def test_matlib_json():
 
     rmatlib = MaterialLibrary()
     rmatlib.from_json(filename)
-    assert_equal(set(wmatlib), set(rmatlib))
+    assert set(wmatlib) == set(rmatlib)
     for key in rmatlib:
         assert_mat_almost_equal(wmatlib[key], rmatlib[key])
     os.remove(filename)
@@ -219,7 +208,7 @@ def test_matlib_hdf5():
     # Round trip!
     rmatlib.write_hdf5(filename, "/mats1")
     wmatlib = MaterialLibrary(filename, "/mats1")
-    assert_equal(set(wmatlib), set(rmatlib))
+    assert set(wmatlib) == set(rmatlib)
     for key in rmatlib:
         assert_mat_almost_equal(wmatlib[key], rmatlib[key])
     os.remove(filename)
@@ -239,7 +228,7 @@ def test_hdf5_overwrite():
     lib = {"leu": Material(leu)}
     umatlib = MaterialLibrary(lib)
     # test error raise if path already exists
-    assert_raises(RuntimeError, umatlib.write_hdf5, filename, "/mats1", False)
+    pytest.raises(RuntimeError, umatlib.write_hdf5, filename, "/mats1", False)
 
     # test overwriting
     umatlib.write_hdf5(filename, "/mats1", h5_overwrite=True)
@@ -247,7 +236,7 @@ def test_hdf5_overwrite():
     rmatlib.from_hdf5(filename, "/mats1")
 
     # Round trip!
-    assert_equal(set(umatlib), set(rmatlib))
+    assert set(umatlib) == set(rmatlib)
     for key in rmatlib:
         assert_mat_almost_equal(umatlib[key], rmatlib[key])
     os.remove(filename)

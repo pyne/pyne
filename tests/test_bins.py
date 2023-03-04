@@ -2,16 +2,8 @@
 import os
 import warnings
 
-import nose
+import pytest
 
-from nose.tools import (
-    assert_equal,
-    assert_not_equal,
-    assert_raises,
-    raises,
-    assert_in,
-    assert_true,
-)
 
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 
@@ -37,16 +29,16 @@ def test_stair_step():
     xexp = [0.1, 1.0, 1.0, 10.0, 10.0, 100.0]
     yexp = [2.0, 2.0, 3.0, 3.0, 4.0, 4.0]
 
-    assert_equal(len(xobs), len(yobs))
-    assert_equal(len(yobs), 2 * len(y))
+    assert len(xobs) == len(yobs)
+    assert len(yobs) == 2 * len(y)
     assert_array_almost_equal(xobs, xexp)
     assert_array_almost_equal(yobs, yexp)
 
 
 def check_pointwise_linear_collapse(x_g, x, y, exp):
     obs = bins.pointwise_linear_collapse(x_g, x, y)
-    assert_equal(len(exp), len(obs))
-    assert_equal(len(x_g) - 1, len(obs))
+    assert len(exp) == len(obs)
+    assert len(x_g) - 1 == len(obs)
     assert_array_almost_equal(exp, obs)
 
 
@@ -112,13 +104,13 @@ def test_point_collase_raises():
     x = np.array([0.1, 1.0, 2.0])
     y = np.array([0.1, 1.0, 2.0])
 
-    with assert_raises(ValueError):
+    with pytest.raises(ValueError):
         bins.pointwise_collapse(x_g, np.array([2.0, 1.0, 2.0]), y)
 
-    with assert_raises(ValueError):
+    with pytest.raises(ValueError):
         bins.pointwise_collapse(np.array([-1, 1.0, 2.0]), x, y, logx=True)
 
-    with assert_raises(ValueError):
+    with pytest.raises(ValueError):
         bins.pointwise_collapse(x_g, x, np.array([0, 1.0, 2.0]), log=True)
 
 

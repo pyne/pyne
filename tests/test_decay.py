@@ -13,16 +13,6 @@ else:
 
     lru_cache = lambda *args, **kwargs: (lambda f: f)
 
-import nose
-from nose.tools import (
-    assert_equal,
-    assert_not_equal,
-    assert_raises,
-    raises,
-    assert_in,
-    assert_true,
-    assert_less,
-)
 
 import numpy as np
 import tables as tb
@@ -198,7 +188,7 @@ def check_materr(row):
     if maxrelerr < 0.01:
         return
     weightederr = row[7]
-    assert_less(weightederr, 0.1)
+    assert weightederr < 0.1
 
 
 def test_benchmark():

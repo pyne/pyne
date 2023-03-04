@@ -3,21 +3,9 @@
 """Fortran reader and writer tests"""
 import os
 import unittest
-import nose
 import struct
 import warnings
 import tables
-import nose.tools
-
-from nose.tools import (
-    assert_almost_equal,
-    assert_equal,
-    assert_true,
-    assert_not_equal,
-    assert_false,
-    assert_raises,
-)
-from nose.plugins.skip import SkipTest
 from pyne.utils import QAWarning
 from pyne.fortranformat import FortranRecordReader
 from pyne.fortranformat import FortranRecordWriter
@@ -52,8 +40,8 @@ def test_read_int():
     set_integer1 = "   60"
     word = read_line(set_integer, "(2I5)")
     word1 = read_line(set_integer1, "(I5)")
-    assert_equal(word, [2, 4])
-    assert_equal(word1, [60])
+    assert word == [2, 4]
+    assert word1 == [60]
 
 
 # test writing simple integers
@@ -63,8 +51,8 @@ def test_write_int():
     set_integer1 = [60]
     word = write_line(set_integer, "(2I5)")
     word1 = write_line(set_integer1, "(I5)")
-    assert_equal(word, "    2    4")
-    assert_equal(word1, "   60")
+    assert word == "    2    4"
+    assert word1 == "   60"
 
 
 # Tests reading a mix of integers and strings
@@ -77,9 +65,9 @@ def test_read_mix_int_string():
     word1 = read_line(set_int_string1, "(A5,4I5)")
     word2 = read_line(set_int_string2, "(I4,A5,A4,I4)")
 
-    assert_equal(word, ["ntal", 2])
-    assert_equal(word1, ["tally", 4, -1, 0, 0])
-    assert_equal(word2, [2, "  tin", "  he", 40])
+    assert word == ["ntal", 2]
+    assert word1 == ["tally", 4, -1, 0, 0]
+    assert word2 == [2, "  tin", "  he", 40]
 
 
 # tests writing integers and strings mixed
@@ -90,9 +78,9 @@ def test_write_mix_int_string():
     word = write_line(set_int_string, "(A4,I6,1X,A5,I6)")
     word1 = write_line(set_int_string1, "(A5,4I5)")
     word2 = write_line(set_int_string2, "(I4,A5,A4,I4)")
-    assert_equal(word, "ntal     2")
-    assert_equal(word1, "tally    4   -1    0    0")
-    assert_equal(word2, "   2  tin  he  40")
+    assert word == "ntal     2"
+    assert word1 == "tally    4   -1    0    0"
+    assert word2 == "   2  tin  he  40"
 
 
 # test reading strings
@@ -102,8 +90,8 @@ def test_read_string():
     set_string1 = "Hello World!"
     word = read_line(set_string, "(1x,A30)")
     word1 = read_line(set_string1, "(A13)")
-    assert_equal(word, ["Sample Problem Input Deck     "])
-    assert_equal(word1, ["Hello World! "])
+    assert word == ["Sample Problem Input Deck     "]
+    assert word1 == ["Hello World! "]
 
 
 # tests writing strings
@@ -113,8 +101,8 @@ def test_write_string():
     set_string1 = ["Hello World! "]
     word = write_line(string_set, "(1x,A26)")
     word1 = write_line(set_string1, "(A13)")
-    assert_equal(word, "  Sample Problem Input Deck")
-    assert_equal(word1, "Hello World! ")
+    assert word == "  Sample Problem Input Deck"
+    assert word1 == "Hello World! "
 
 
 # tests reading float numbers
@@ -122,8 +110,8 @@ def test_read_floating():
 
     floating_set = "  2.06784E-05 0.7239  1.80389E-05 0.7299  2.62211E-05 0.7411  0.00000E+00 0.0000"
     word = read_line(floating_set, "(4(1PE13.5,0PF7.4))")
-    assert_equal(
-        word,
+    assert (
+        word ==
         [
             2.06784e-05,
             0.7239,
@@ -133,8 +121,7 @@ def test_read_floating():
             0.7411,
             0.00000e00,
             0.000,
-        ],
-    )
+        ])
 
 
 # tests writing float numbers
@@ -151,10 +138,9 @@ def test_write_floating():
         0.0000,
     ]
     word = write_line(floating_set, "(4(1PE13.5,0PF7.4))")
-    assert_equal(
-        word,
-        "  2.06784E-05 0.7239  1.80389E-05 0.7299  2.62211E-05 0.7411  0.00000E+00 0.0000",
-    )
+    assert (
+        word ==
+        "  2.06784E-05 0.7239  1.80389E-05 0.7299  2.62211E-05 0.7411  0.00000E+00 0.0000")
 
 
 # tests reading integers and floats mixed
@@ -162,7 +148,7 @@ def test_read_mix_int_float():
 
     int_float_set = "       8000  2.15273E-04  9.99937E-01"
     word = read_line(int_float_set, "(I11,1P2E13.5)")
-    assert_equal(word, [8000, 2.15273e-04, 9.99937e-01])
+    assert word == [8000, 2.15273e-04, 9.99937e-01]
 
 
 # tests writing integers and floads mixed
@@ -170,7 +156,7 @@ def test_write_mix_int_float():
 
     int_float_set = [8000, 2.15273e-04, 9.99937e-01]
     word = write_line(int_float_set, "(I11,1P3E13.5)")
-    assert_equal(word, "       8000  2.15273E-04  9.99937E-01")
+    assert word == "       8000  2.15273E-04  9.99937E-01"
 
 
 # tests a  mctal file
@@ -250,4 +236,4 @@ def test_mctal_file():
         word = read_line(line, fs)
         word1 = [item for item in word if item is not None]
         l = write_line(word1, fs)
-    assert_equal(l, fs1)
+    assert l == fs1

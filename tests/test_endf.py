@@ -4,10 +4,7 @@ import warnings
 from math import e
 from hashlib import md5
 
-import nose
-from nose.tools import assert_equal
-from nose import SkipTest
-
+import pytest
 import numpy as np
 from numpy.testing import assert_array_equal, assert_allclose, assert_array_almost_equal
 
@@ -28,7 +25,7 @@ def try_download(url, target, sha):
     try:
         download_file(url, target, sha)
     except:
-        raise SkipTest(url + " not available")
+        pytest.skip(url + " not available")
 
 
 def ignore_future_warnings(func):
@@ -117,7 +114,7 @@ def test_loadtape():
         [10010000, 30060000, 40090000, 50110000, 30070000, 60000000, 50100000]
     )
     obs_nuclides = set(map(int, testlib.structure.keys()))
-    assert_equal(exp_nuclides, obs_nuclides)
+    assert exp_nuclides == obs_nuclides
 
 
 def test_get():
@@ -270,7 +267,7 @@ def test_DoubleSpinDict():
 
     obs = subject[(3.48, 8, 9)]
     exp = {"E": "e", "F": "f"}
-    assert_equal(exp, obs)
+    assert exp == obs
 
 
 def test_resolved_breitwigner():
@@ -289,13 +286,13 @@ def test_resolved_breitwigner():
     # Check to see if NRO is reading from the right place.
     # NRO = 0 case
     range_nro_0 = data[2]
-    assert_equal(range_nro_0[-1]["NRO"], 0)
+    assert range_nro_0[-1]["NRO"] == 0
     # NRO = 1 case
     # Check to see if NAPS is reading from the right place
-    assert_equal(range_nro_0[-1]["NAPS"], 1)
+    assert range_nro_0[-1]["NAPS"] == 1
     # Check to see if SPI, NLS are reading from the right place
-    assert_equal(range_nro_0[-1]["SPI"], 0.5)
-    assert_equal(range_nro_0[-1]["NLS"], 1)
+    assert range_nro_0[-1]["SPI"] == 0.5
+    assert range_nro_0[-1]["NLS"] == 1
     # Check to see if the data is alright...
     expected = {
         "ER": [350000.0, 4500000.0],
@@ -458,7 +455,7 @@ def test_resolved_r_matrix_kbk_kps():
                 assert_array_equal(ch1_exp[key][intkey], ch1_obs[key][intkey])
         else:
             assert_array_equal(ch1_obs[key], ch1_exp[key])
-    assert_equal(ch0_obs, ch0_exp)
+    assert ch0_obs == ch0_exp
 
     lbk1_obs = obs_4["ch0"]
     lbk2_obs = obs_4["ch1"]
@@ -508,7 +505,7 @@ def test_resolved_r_matrix_kbk_kps():
     lbk2_exp["LBK"] = 2
     del lbk2_exp[0]
 
-    assert_equal(lbk2_exp, lbk2_obs)
+    assert lbk2_exp == lbk2_obs
 
 
 def test_resolved_r_matrix():
@@ -635,7 +632,7 @@ def test_xs():
     exp_600_flags = dict(zip(("QM", "QI", 0, "LM", "NR", "NP"), exp_600_a[1]))  #
     exp_600_flags.update({"ZA": 4.004e3, "AWR": 6.287192})
     del exp_600_flags[0]
-    assert_equal(obs_600_flags, exp_600_flags)
+    assert obs_600_flags == exp_600_flags
 
 
 def test_xs_data_without_res():
@@ -713,7 +710,7 @@ def test_int_hist_only_interpolate_one_endpoint():
         np.array([0.0, 1, 0, 0, 0]),
     )
     exp = 0.5
-    assert_equal(exp, obs)
+    assert exp == obs
 
 
 def test_int_linlin():
@@ -743,7 +740,7 @@ def test_int_linlin_interpolation_2():
         np.array([0.0, 1, 0, 0, 0]),
     )
     exp = (0.75 + 1) / 4
-    assert_equal(exp, obs)
+    assert exp == obs
 
 
 def test_int_linlin_only_interpolate_one_endpoint():
@@ -895,8 +892,8 @@ def test_photoatomic():
     photondata = Library("Zn.txt")
     xs_data = photondata.get_xs(300000000, 501)[0]
     Eints, sigmas = xs_data["e_int"], xs_data["xs"]
-    assert_equal(len(Eints), 1864)
-    assert_equal(len(sigmas), 1864)
+    assert len(Eints) == 1864
+    assert len(sigmas) == 1864
     assert_array_equal(Eints[0:5], [1.0, 1.109887, 1.217224, 1.2589, 1.334942])
     assert_array_equal(
         Eints[-5:],
@@ -1135,7 +1132,7 @@ def test_evaluation_electroatomic():
             "2139a23258c517ae3bfa5f2cc346da4c",
         )
     except:
-        raise SkipTest(
+        pytest.skip(
             "http://t2.lanl.gov/nis/data/data/ENDFB-VII.1-neutron not available"
         )
 

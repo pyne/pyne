@@ -10,16 +10,7 @@ try:
 except ImportError:
     from io import StringIO
 
-import nose
-from nose.tools import (
-    assert_equal,
-    assert_not_equal,
-    assert_raises,
-    raises,
-    assert_in,
-    assert_true,
-    assert_false,
-)
+import pytest
 
 import glob
 
@@ -46,8 +37,8 @@ def test_notebooks():
                 except:
                     failed.append(notebook)
 
-    assert_equal(
-        len(failed),
+    assert (
+        len(failed) ==
         0,
         "Not all notebooks contained valid JSON. [%s] failed." % ", ".join(failed),
     )

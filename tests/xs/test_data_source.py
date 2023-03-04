@@ -12,13 +12,6 @@ except ImportError:
 import numpy as np
 import tables as tb
 
-from nose.tools import (
-    assert_equal,
-    assert_not_equal,
-    assert_almost_equal,
-    assert_true,
-    assert_is,
-)
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 
 from pyne.utils import QAWarning
@@ -65,8 +58,8 @@ def test_cinder_sigma_f():
         sigma_f_n_U235 = np.array(f.root.neutron.cinder_xs.fission[28]["xs"])
     obs = cinderds.reaction("U235", "fission")
     assert_array_equal(sigma_f_n_U235, obs)
-    assert_equal(id(obs), id(cinderds.reaction("U235", "fission")))
-    assert_equal(id(obs), id(cinderds.reaction(922350, "fission")))
+    assert id(obs) == id(cinderds.reaction("U235", "fission"))
+    assert id(obs) == id(cinderds.reaction(922350, "fission"))
 
 
 def test_cinder_sigma_a():
@@ -76,8 +69,8 @@ def test_cinder_sigma_a():
         sigma_a_n_H1 = np.array(f.root.neutron.cinder_xs.absorption[0]["xs"])
     obs = cinderds.reaction(10010, "absorption")
     assert_array_equal(sigma_a_n_H1, obs)
-    assert_equal(id(obs), id(cinderds.reaction(10010, "absorption")))
-    assert_equal(id(obs), id(cinderds.reaction("H1", "absorption")))
+    assert id(obs) == id(cinderds.reaction(10010, "absorption"))
+    assert id(obs) == id(cinderds.reaction("H1", "absorption"))
 
 
 def test_cinder_sigma_f_n1():
@@ -609,8 +602,8 @@ def test_simple_sigma_f():
     sigma_f_n_U235 = np.array([2.056, 1.235, 584.4])
     obs = simpleds.reaction("U235", "fission")
     assert_array_equal(sigma_f_n_U235, obs)
-    assert_equal(id(obs), id(simpleds.reaction("U235", "fission")))
-    assert_equal(id(obs), id(simpleds.reaction(922350, "fission")))
+    assert id(obs) == id(simpleds.reaction("U235", "fission"))
+    assert id(obs) == id(simpleds.reaction(922350, "fission"))
 
 
 def test_simple_sigma_a():
@@ -619,8 +612,8 @@ def test_simple_sigma_a():
     sigma_a_n_H1 = np.array([2.983e-5, 3.927e-5, 0.332])
     obs = simpleds.reaction(10010, "absorption")
     assert_array_almost_equal(sigma_a_n_H1, obs)
-    assert_equal(id(obs), id(simpleds.reaction(10010, "absorption")))
-    assert_equal(id(obs), id(simpleds.reaction("H1", "absorption")))
+    assert id(obs) == id(simpleds.reaction(10010, "absorption"))
+    assert id(obs) == id(simpleds.reaction("H1", "absorption"))
 
 
 def test_simple_not_in_table():
@@ -628,7 +621,7 @@ def test_simple_not_in_table():
         return
     exp = None
     obs = simpleds.reaction(10030, "z_4n")
-    assert_equal(obs, exp)
+    assert obs == exp
 
 
 def test_simple_not_a_rx():
@@ -636,7 +629,7 @@ def test_simple_not_a_rx():
         return
     exp = None
     obs = simpleds.reaction(10010, "42")
-    assert_equal(obs, exp)
+    assert obs == exp
 
 
 def test_simple_discretize_no_weights1():
@@ -646,8 +639,8 @@ def test_simple_discretize_no_weights1():
     simpleds.dst_group_struct = dst_g
     obs = simpleds.discretize("U235", "fission")
     mask = obs[:-1] <= obs[1:]
-    assert_true((obs[mask][:-1] <= obs[mask][1:]).all())
-    assert_true((obs[~mask][:-1] >= obs[~mask][1:]).all())
+    assert (obs[mask][:-1] <= obs[mask][1:]).all()
+    assert (obs[~mask][:-1] >= obs[~mask][1:]).all()
     simpleds.dst_group_struct = None
 
 
@@ -657,7 +650,7 @@ def test_simple_discretize_no_weights2():
     dst_g = cinderds.src_group_struct
     simpleds.dst_group_struct = dst_g
     obs = simpleds.discretize(10010, "a")
-    assert_true((obs[:-1] <= obs[1:]).all())
+    assert (obs[:-1] <= obs[1:]).all()
     simpleds.dst_group_struct = None
 
 
@@ -669,7 +662,7 @@ def test_simple_discretize_weights1():
     phi_g[:25] = 0.0
     simpleds.dst_group_struct = dst_g
     obs = simpleds.discretize("U235", "fission", dst_phi_g=phi_g)
-    assert_true((obs[:-1] <= obs[1:]).all())
+    assert (obs[:-1] <= obs[1:]).all()
     simpleds.dst_group_struct = None
 
 
@@ -793,18 +786,18 @@ def test_openmc():
         cross_sections=sample_xs_openmc, src_group_struct=np.logspace(1, -9, 11)
     )
     obs = ods.reaction("W180", 2)
-    assert_equal(10, len(obs))
+    assert 10 == len(obs)
 
     obs = ods.reaction("W180", "total")
-    assert_equal(10, len(obs))
+    assert 10 == len(obs)
 
     obs = ods.reaction("U-235", 42)
-    assert_is(None, obs)
+    assert None is obs
 
     # threshold reactoin
     obs = ods.reaction("W180", "z_3n")
-    assert_equal(10, len(obs))
-    assert_true(np.all(obs >= 0.0))
+    assert 10 == len(obs)
+    assert np.all(obs >= 0.0)
 
 
 def test_openmc_bkg_none():
@@ -850,7 +843,7 @@ def test_openmc_self_shielding1():
     ods.atom_dens = atom_dens
 
     observed = ods.reaction(W_180, "gamma", 300)
-    assert_true(np.all(observed <= non_ss))
+    assert np.all(observed <= non_ss)
 
 
 def test_open_self_shielding2():

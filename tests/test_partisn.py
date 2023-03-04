@@ -6,8 +6,7 @@ import os
 import numpy as np
 from numpy.testing import assert_array_almost_equal
 import filecmp
-from nose.tools import assert_almost_equal
-from nose.plugins.skip import SkipTest
+import pytest
 import multiprocessing
 import unittest
 
@@ -50,7 +49,7 @@ def test_get_material_lib_with_names():
     assert unique_names == expected_unique_names
     for matname, mat in mat_lib_expected.items():
         for nuc, frac in mat.items():
-            assert_almost_equal(mat_lib[matname][nuc], frac)
+            assert mat_lib[matname][nuc] == pytest.approx(frac)
 
 
 def test_get_material_lib_no_names():
@@ -84,7 +83,7 @@ def test_get_material_lib_no_names():
     assert unique_names == expected_unique_names
     for matname, mat in mat_lib_expected.items():
         for nuc, frac in mat.items():
-            assert_almost_equal(mat_lib[matname][nuc], frac)
+            assert mat_lib[matname][nuc] == pytest.approx(frac)
 
 
 def test_nucid_to_xs_with_names():
@@ -138,7 +137,7 @@ def test_get_coord_sys_1D():
     """Test the _get_coord_sys function for a 1D mesh."""
 
     if not HAVE_PYMOAB:
-        raise SkipTest
+        pytest.skip()
 
     # Create mesh
     xvals = [0.0, 2.0]
@@ -163,7 +162,7 @@ def test_get_coord_sys_2D():
     """Test the _get_coord_sys function for a 2D mesh."""
 
     if not HAVE_PYMOAB:
-        raise SkipTest
+        pytest.skip()
 
     # Create mesh
     xvals = [-1.0, 0.0, 2.0]
@@ -188,7 +187,7 @@ def test_get_coord_sys_3D():
     """Test the _get_coord_sys function for a 3D mesh."""
 
     if not HAVE_PYMOAB:
-        raise SkipTest
+        pytest.skip()
 
     # Create mesh
     xvals = [-1.0, 0.0, 2.0]
@@ -219,10 +218,10 @@ def get_zones_no_void():
     try:
         from pyne import dagmc
     except:
-        raise SkipTest
+        pytest.skip()
 
     if not HAVE_PYMOAB:
-        raise SkipTest
+        pytest.skip()
 
     # hdf5 test file
     THIS_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -285,10 +284,10 @@ def get_zones_iteration_order():
     try:
         from pyne import dagmc
     except:
-        raise SkipTest
+        pytest.skip()
 
     if not HAVE_PYMOAB:
-        raise SkipTest
+        pytest.skip()
 
     # hdf5 test file
     THIS_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -339,10 +338,10 @@ def get_zones_with_void():
     try:
         from pyne import dagmc
     except:
-        raise SkipTest
+        pytest.skip()
 
     if not HAVE_PYMOAB:
-        raise SkipTest
+        pytest.skip()
 
     # hdf5 test file
     THIS_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -422,10 +421,10 @@ def write_partisn_input_1D():
     try:
         from pyne import dagmc
     except:
-        raise SkipTest
+        pytest.skip()
 
     if not HAVE_PYMOAB:
-        raise SkipTest
+        pytest.skip()
 
     # Path to hdf5 test file
     THIS_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -480,10 +479,10 @@ def write_partisn_input_2D():
     try:
         from pyne import dagmc
     except:
-        raise SkipTest
+        pytest.skip()
 
     if not HAVE_PYMOAB:
-        raise SkipTest
+        pytest.skip()
 
     # Path to hdf5 test file
     THIS_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -537,10 +536,10 @@ def write_partisn_input_3D():
     try:
         from pyne import dagmc
     except:
-        raise SkipTest
+        pytest.skip()
 
     if not HAVE_PYMOAB:
-        raise SkipTest
+        pytest.skip()
 
     # Path to hdf5 test file
     THIS_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -594,10 +593,10 @@ def write_partisn_input_with_names_dict():
     try:
         from pyne import dagmc
     except:
-        raise SkipTest
+        pytest.skip()
 
     if not HAVE_PYMOAB:
-        raise SkipTest
+        pytest.skip()
 
     # Path to hdf5 test file
     THIS_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -656,7 +655,7 @@ def test_write_partisn_input_with_names_dict():
 
 def write_partisn_input_options():
     if not HAVE_PYMOAB:
-        raise SkipTest
+        pytest.skip()
 
     """Test PARTISN input file creation with a slew of keyword arguments
     """
@@ -762,10 +761,10 @@ def test_mesh_to_isotropic_source():
     try:
         from pyne import dagmc
     except:
-        raise SkipTest
+        pytest.skip()
 
     if not HAVE_PYMOAB:
-        raise SkipTest
+        pytest.skip()
 
     m = Mesh(structured=True, structured_coords=[range(5), range(5), range(5)])
     m.src = NativeMeshTag(4, float)
@@ -858,10 +857,10 @@ def test_isotropic_vol_source():
     try:
         from pyne import dagmc
     except:
-        raise SkipTest
+        pytest.skip()
 
     if not HAVE_PYMOAB:
-        raise SkipTest
+        pytest.skip()
 
     sc = np.linspace(-25, 25, 6)
     m = Mesh(structured=True, structured_coords=[sc, sc, sc])

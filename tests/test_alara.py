@@ -1,11 +1,8 @@
 """alara module tests"""
 import os
-import nose
+import pytest
 import subprocess
 
-from nose.tools import assert_almost_equal
-from nose.tools import assert_equal, assert_true, with_setup, assert_raises
-from nose.plugins.skip import SkipTest
 import numpy as np
 from numpy.testing import assert_array_equal
 import tables as tb
@@ -45,7 +42,7 @@ def test_write_fluxin_single():
     """
 
     if not HAVE_PYMOAB:
-        raise SkipTest
+        pytest.skip()
 
     output_name = "fluxin.out"
     forward_fluxin = os.path.join(
@@ -69,7 +66,7 @@ def test_write_fluxin_single():
     with open(forward_fluxin) as f:
         expected = f.readlines()
 
-    assert_equal(written, expected)
+    assert written == expected
     if os.path.isfile(output):
         os.remove(output)
 
@@ -80,7 +77,7 @@ def test_write_fluxin_single_without_bar():
     """
 
     if not HAVE_PYMOAB:
-        raise SkipTest
+        pytest.skip()
 
     output_name = "fluxin.out"
     forward_fluxin = os.path.join(
@@ -104,7 +101,7 @@ def test_write_fluxin_single_without_bar():
     with open(forward_fluxin) as f:
         expected = f.readlines()
 
-    assert_equal(written, expected)
+    assert written == expected
     if os.path.isfile(output):
         os.remove(output)
 
@@ -115,7 +112,7 @@ def test_write_fluxin_multiple():
     """
 
     if not HAVE_PYMOAB:
-        raise SkipTest
+        pytest.skip()
 
     output_name = "fluxin.out"
     forward_fluxin = os.path.join(
@@ -139,7 +136,7 @@ def test_write_fluxin_multiple():
     with open(forward_fluxin) as f:
         expected = f.readlines()
 
-    assert_equal(written, expected)
+    assert written == expected
     if os.path.isfile(output):
         os.remove(output)
 
@@ -152,7 +149,7 @@ def test_write_fluxin_multiple():
     with open(reverse_fluxin) as f:
         expected = f.readlines()
 
-    assert_equal(written, expected)
+    assert written == expected
     if os.path.isfile(output):
         os.remove(output)
 
@@ -163,7 +160,7 @@ def test_write_fluxin_multiple_subvoxel():
     """
 
     if not HAVE_PYMOAB:
-        raise SkipTest
+        pytest.skip()
 
     output_name = "fluxin_subvoxel.out"
     forward_fluxin = os.path.join(
@@ -217,7 +214,7 @@ def test_write_fluxin_multiple_subvoxel():
     with open(forward_fluxin) as f:
         expected = f.readlines()
 
-    assert_equal(written, expected)
+    assert written == expected
     if os.path.isfile(output):
         os.remove(output)
 
@@ -230,7 +227,7 @@ def test_write_fluxin_multiple_subvoxel():
     with open(reverse_fluxin) as f:
         expected = f.readlines()
 
-    assert_equal(written, expected)
+    assert written == expected
     if os.path.isfile(output):
         os.remove(output)
 
@@ -239,7 +236,7 @@ def test_photon_source_to_hdf5():
     """Tests the function photon_source_to_hdf5."""
     filename = os.path.join(thisdir, "files_test_alara", "phtn_src")
     photon_source_to_hdf5(filename, chunkshape=(10,))
-    assert_true(os.path.exists(filename + ".h5"))
+    assert os.path.exists(filename + ".h5")
 
     with tb.open_file(filename + ".h5") as h5f:
         obs = h5f.root.data[:]
@@ -253,9 +250,9 @@ def test_photon_source_to_hdf5():
             if tokens[0] != "TOTAL" and old == "TOTAL":
                 count += 1
 
-            assert_equal(count, row["idx"])
-            assert_equal(tokens[0].strip(), row["nuc"].decode())
-            assert_equal(tokens[1].strip(), row["time"].decode())
+            assert count == row["idx"]
+            assert tokens[0].strip() == row["nuc"].decode()
+            assert tokens[1].strip() == row["time"].decode()
             assert_array_equal(np.array(tokens[2:], dtype=np.float64), row["phtn_src"])
             old = tokens[0]
 
@@ -263,18 +260,18 @@ def test_photon_source_to_hdf5():
         os.remove(filename + ".h5")
 
     # wrong nuc option raise test
-    assert_raises(ValueError, photon_source_to_hdf5, filename, "test")
+    pytest.raises(ValueError, photon_source_to_hdf5, filename, "test")
 
 
 def test_photon_source_hdf5_to_mesh():
     """Tests the function photon source_h5_to_mesh."""
 
     if not HAVE_PYMOAB:
-        raise SkipTest
+        pytest.skip()
 
     filename = os.path.join(thisdir, "files_test_alara", "phtn_src")
     photon_source_to_hdf5(filename, chunkshape=(10,))
-    assert_true(os.path.exists(filename + ".h5"))
+    assert os.path.exists(filename + ".h5")
 
     mesh = Mesh(structured=True, structured_coords=[[0, 1, 2], [0, 1, 2], [0, 1]])
 
@@ -299,11 +296,11 @@ def test_photon_source_hdf5_to_mesh_subvoxel():
     under sub-voxel r2s condition."""
 
     if not HAVE_PYMOAB:
-        raise SkipTest
+        pytest.skip()
 
     filename = os.path.join(thisdir, "files_test_alara", "phtn_src")
     photon_source_to_hdf5(filename, chunkshape=(10,))
-    assert_true(os.path.exists(filename + ".h5"))
+    assert os.path.exists(filename + ".h5")
     sub_voxel = True
     mesh = Mesh(structured=True, structured_coords=[[0, 1, 2], [0, 1, 2], [0, 1]])
     cell_fracs = np.zeros(
@@ -364,11 +361,11 @@ def test_photon_source_hdf5_to_mesh_subvoxel_size1():
     under sub-voxel r2s condition."""
 
     if not HAVE_PYMOAB:
-        raise SkipTest
+        pytest.skip()
 
     filename = os.path.join(thisdir, "files_test_alara", "phtn_src")
     photon_source_to_hdf5(filename, chunkshape=(10,))
-    assert_true(os.path.exists(filename + ".h5"))
+    assert os.path.exists(filename + ".h5")
     sub_voxel = True
     mesh = Mesh(structured=True, structured_coords=[[0, 1, 2], [0, 1, 2], [0, 1]])
     cell_fracs = np.zeros(
@@ -426,7 +423,7 @@ def test_photon_source_hdf5_to_mesh_subvoxel_size1():
 def test_record_to_geom():
 
     if not HAVE_PYMOAB:
-        raise SkipTest
+        pytest.skip()
 
     expected_geom = os.path.join(thisdir, "files_test_alara", "alara_record_geom.txt")
     expected_matlib = os.path.join(
@@ -490,7 +487,7 @@ def test_record_to_geom():
 def test_record_to_geom_subvoxel():
 
     if not HAVE_PYMOAB:
-        raise SkipTest
+        pytest.skip()
 
     expected_geom = os.path.join(
         thisdir, "files_test_alara", "alara_record_geom_subvoxel.txt"
@@ -555,7 +552,7 @@ def test_record_to_geom_subvoxel():
 def test_mesh_to_geom():
 
     if not HAVE_PYMOAB:
-        raise SkipTest
+        pytest.skip()
 
     expected_geom = os.path.join(thisdir, "files_test_alara", "alara_geom.txt")
     expected_matlib = os.path.join(thisdir, "files_test_alara", "alara_matlib.txt")
@@ -579,7 +576,7 @@ def test_mesh_to_geom():
     with open(geom) as f:
         written = f.readlines()
 
-    assert_equal(written, expected)
+    assert written == expected
 
     if os.path.isfile(geom):
         os.remove(geom)
@@ -589,7 +586,7 @@ def test_mesh_to_geom():
 
     with open(matlib) as f:
         written = f.readlines()
-    assert_equal(written, expected)
+    assert written == expected
 
     if os.path.isfile(matlib):
         os.remove(matlib)
@@ -598,7 +595,7 @@ def test_mesh_to_geom():
 def test_num_den_to_mesh_shutdown():
 
     if not HAVE_PYMOAB:
-        raise SkipTest
+        pytest.skip()
 
     filename = os.path.join(thisdir, "files_test_alara", "num_density_output.txt")
     m = Mesh(structured=True, structured_coords=[[0, 1], [0, 1], [0, 1, 2]])
@@ -626,26 +623,26 @@ def test_num_den_to_mesh_shutdown():
     act_comp_0 = m.mats[0].to_atom_frac()
     act_comp_1 = m.mats[1].to_atom_frac()
 
-    assert_equal(len(exp_comp_0), len(act_comp_0))
+    assert len(exp_comp_0) == len(act_comp_0)
     for key, value in exp_comp_0.items():
-        assert_almost_equal(value / act_comp_0[key], 1.0, 15)
+        assert value / act_comp_0[key] == pytest.approx(1.0, rel=1e-15)
 
-    assert_equal(len(exp_comp_1), len(act_comp_1))
+    assert len(exp_comp_1) == len(act_comp_1)
     for key, value in exp_comp_1.items():
-        assert_almost_equal(value / act_comp_1[key], 1.0, 15)
+        assert value / act_comp_1[key] == pytest.approx(1.0, rel=1e-15)
 
     # compare densities
     exp_density_0 = 8.96715e-05
     exp_density_1 = 1.785214e-04
 
-    assert_almost_equal(exp_density_0, m.mats[0].density)
-    assert_almost_equal(exp_density_1, m.mats[1].density)
+    assert exp_density_0 == pytest.approx(m.mats[0].density)
+    assert exp_density_1 == pytest.approx(m.mats[1].density)
 
 
 def test_num_den_to_mesh_stdout():
 
     if not HAVE_PYMOAB:
-        raise SkipTest
+        pytest.skip()
 
     filename = os.path.join(thisdir, "files_test_alara", "num_density_output.txt")
     m = Mesh(structured=True, structured_coords=[[0, 1], [0, 1], [0, 1, 2]])
@@ -676,26 +673,26 @@ def test_num_den_to_mesh_stdout():
     act_comp_0 = m.mats[0].to_atom_frac()
     act_comp_1 = m.mats[1].to_atom_frac()
 
-    assert_equal(len(exp_comp_0), len(act_comp_0))
+    assert len(exp_comp_0) == len(act_comp_0)
     for key, value in exp_comp_0.items():
-        assert_almost_equal(value / act_comp_0[key], 1.0, 15)
+        assert value / act_comp_0[key] == pytest.approx(1.0, rel=1e-15)
 
-    assert_equal(len(exp_comp_1), len(act_comp_1))
+    assert len(exp_comp_1) == len(act_comp_1)
     for key, value in exp_comp_1.items():
-        assert_almost_equal(value / act_comp_1[key], 1.0, 15)
+        assert value / act_comp_1[key] == pytest.approx(1.0, rel=1e-15)
 
     # compare densities
     exp_density_0 = 8.96715e-05
     exp_density_1 = 1.785214e-04
 
-    assert_almost_equal(exp_density_0, m.mats[0].density)
-    assert_almost_equal(exp_density_1, m.mats[1].density)
+    assert exp_density_0 == m.mats[0].density
+    assert exp_density_1 == m.mats[1].density
 
 
 def test_num_den_to_mesh_1_y():
 
     if not HAVE_PYMOAB:
-        raise SkipTest
+        pytest.skip()
 
     filename = os.path.join(thisdir, "files_test_alara", "num_density_output.txt")
     m = Mesh(structured=True, structured_coords=[[0, 1], [0, 1], [0, 1, 2]])
@@ -721,19 +718,19 @@ def test_num_den_to_mesh_1_y():
     act_comp_0 = m.mats[0].to_atom_frac()
     act_comp_1 = m.mats[1].to_atom_frac()
 
-    assert_equal(len(exp_comp_0), len(act_comp_0))
+    assert len(exp_comp_0) == len(act_comp_0)
     for key, value in exp_comp_0.items():
-        assert_almost_equal(value / act_comp_0[key], 1.0, 15)
+        assert value / act_comp_0[key] == pytest.approx(1.0, rel=1e-15)
 
-    assert_equal(len(exp_comp_1), len(act_comp_1))
+    assert len(exp_comp_1) == len(act_comp_1)
     for key, value in exp_comp_1.items():
-        assert_almost_equal(value / act_comp_1[key], 1.0, 15)
+        assert value / act_comp_1[key] == pytest.approx(1.0, rel=1e-15)
 
     # compare densities
     exp_density_0 = 8.96715e-05
     exp_density_1 = 1.78521e-04
-    assert_almost_equal(exp_density_0, m.mats[0].density)
-    assert_almost_equal(exp_density_1, m.mats[1].density)
+    assert exp_density_0 == m.mats[0].density
+    assert exp_density_1 == m.mats[1].density
 
 
 def test_irradiation_blocks():
@@ -778,7 +775,7 @@ def test_irradiation_blocks():
         "dump_file dump_file\n"
     )
 
-    assert_equal(act, exp)
+    assert act == exp
 
 
 def test_phtn_src_energy_bounds():
@@ -824,9 +821,9 @@ def test_alara_responses_output_zone():
       specific_activity
 end"""
     response_code = responses_output_zone(response)
-    assert_equal(response_code, exp_response_code)
+    assert response_code == exp_response_code
     # wrong nuc option raise test
-    assert_raises(ValueError, responses_output_zone, "test")
+    pytest.raises(ValueError, responses_output_zone, "test")
 
 
 def test_is_data():
@@ -840,7 +837,7 @@ def test_is_data():
         "Zone #1: zone_0",
     ]
     for line in lines:
-        assert_equal(_is_data(line), False)
+        assert _is_data(line) == False
 
     lines = [
         "h-3     9.5258e-18  9.5258e-18  9.5251e-18  9.5214e-18",
@@ -848,10 +845,10 @@ def test_is_data():
         "total   1.4597e-08  9.3939e-09  5.3291e-10  8.3915e-11",
     ]
     for line in lines:
-        assert_equal(_is_data(line), True)
+        assert _is_data(line) == True
     # test special line
     line = "===========\n"
-    assert_equal(_is_data(line), False)
+    assert _is_data(line) == False
 
 
 def test_read_decay_times():
@@ -866,7 +863,7 @@ def test_read_decay_times():
 
 def test_get_zone_idx():
     line = "Zone #1: zone_0"
-    assert_equal(_get_zone_idx(line), 0)
+    assert _get_zone_idx(line) == 0
 
 
 def test_get_alara_lib():
@@ -893,4 +890,4 @@ impurity 5e-6 1e-3
 dump_file dump.file"""
     alara_lib = get_alara_lib(alara_params)
     exp_alara_lib = "data/fendl2.0bin"
-    assert_equal(alara_lib, exp_alara_lib)
+    assert alara_lib == exp_alara_lib

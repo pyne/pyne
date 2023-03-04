@@ -1,10 +1,7 @@
 #!/usr/bin/python
 
 import os
-import nose.tools
-from nose.plugins.skip import SkipTest
-from nose.tools import assert_equal
-
+import pytest
 from pyne import fluka
 
 # Mesh specific imports
@@ -17,7 +14,7 @@ def test_single_usrbin():
     """Test a usrbin file containing a single tally."""
 
     if not HAVE_PYMOAB:
-        raise SkipTest
+        pytest.skip()
 
     thisdir = os.path.dirname(__file__)
     usrbin_file = os.path.join(thisdir, "fluka_usrbin_single.lis")
@@ -28,12 +25,12 @@ def test_single_usrbin():
     expected_xbounds = [-3.0, 0.0, 3.0, 6.0]
     expected_ybounds = [-3.0, -1.0, 1.0, 3.0]
     expected_zbounds = [-3.0, -2.0, -1.0, 0.0]
-    assert_equal(usrbin_object.tally["single_n"].coord_sys, "Cartesian")
-    assert_equal(usrbin_object.tally["single_n"].name, "single_n")
-    assert_equal(usrbin_object.tally["single_n"].particle, "8")
-    assert_equal(usrbin_object.tally["single_n"].x_bounds, expected_xbounds)
-    assert_equal(usrbin_object.tally["single_n"].y_bounds, expected_ybounds)
-    assert_equal(usrbin_object.tally["single_n"].z_bounds, expected_zbounds)
+    assert usrbin_object.tally["single_n"].coord_sys == "Cartesian"
+    assert usrbin_object.tally["single_n"].name == "single_n"
+    assert usrbin_object.tally["single_n"].particle == "8"
+    assert usrbin_object.tally["single_n"].x_bounds == expected_xbounds
+    assert usrbin_object.tally["single_n"].y_bounds == expected_ybounds
+    assert usrbin_object.tally["single_n"].z_bounds == expected_zbounds
 
     # Test error and part data values match
     expected_part_data = [
@@ -99,26 +96,25 @@ def test_single_usrbin():
         usrbin_object.tally["single_n"].structured_iterate_hex("zyx")
     ):
         read = usrbin_object.tally["single_n"].part_data_tag[v_e]
-        assert_equal(usrbin_object.tally["single_n"].part_data_tag.name, "part_data_8")
+        assert usrbin_object.tally["single_n"].part_data_tag.name == "part_data_8"
         expected = expected_part_data[i]
-        assert_equal(read, expected)
+        assert read == expected
 
     for i, v_e in enumerate(
         usrbin_object.tally["single_n"].structured_iterate_hex("zyx")
     ):
         read = usrbin_object.tally["single_n"].error_data_tag[v_e]
-        assert_equal(
-            usrbin_object.tally["single_n"].error_data_tag.name, "error_data_8"
-        )
+        assert (
+            usrbin_object.tally["single_n"].error_data_tag.name == "error_data_8")
         expected = expected_error_data[i]
-        assert_equal(read, expected)
+        assert read == expected
 
 
 def test_multiple_usrbin():
     """Test a usrbin file containing multiple (two) tallies."""
 
     if not HAVE_PYMOAB:
-        raise SkipTest
+        pytest.skip()
 
     thisdir = os.path.dirname(__file__)
     usrbin_file = os.path.join(thisdir, "fluka_usrbin_multiple.lis")
@@ -130,12 +126,12 @@ def test_multiple_usrbin():
     expected_xbounds = [-3.0, 0.0, 3.0, 6.0]
     expected_ybounds = [-3.0, -1.0, 1.0, 3.0]
     expected_zbounds = [-3.0, -2.0, -1.0, 0.0]
-    assert_equal(usrbin_object.tally["multi_p"].coord_sys, "Cartesian")
-    assert_equal(usrbin_object.tally["multi_p"].name, "multi_p")
-    assert_equal(usrbin_object.tally["multi_p"].particle, "7")
-    assert_equal(usrbin_object.tally["multi_p"].x_bounds, expected_xbounds)
-    assert_equal(usrbin_object.tally["multi_p"].y_bounds, expected_ybounds)
-    assert_equal(usrbin_object.tally["multi_p"].z_bounds, expected_zbounds)
+    assert usrbin_object.tally["multi_p"].coord_sys == "Cartesian"
+    assert usrbin_object.tally["multi_p"].name == "multi_p"
+    assert usrbin_object.tally["multi_p"].particle == "7"
+    assert usrbin_object.tally["multi_p"].x_bounds == expected_xbounds
+    assert usrbin_object.tally["multi_p"].y_bounds == expected_ybounds
+    assert usrbin_object.tally["multi_p"].z_bounds == expected_zbounds
 
     # Test error and part data values match
     expected_part_data = [
@@ -201,29 +197,29 @@ def test_multiple_usrbin():
         usrbin_object.tally["multi_p"].structured_iterate_hex("zyx")
     ):
         read = usrbin_object.tally["multi_p"].part_data_tag[v_e]
-        assert_equal(usrbin_object.tally["multi_p"].part_data_tag.name, "part_data_7")
+        assert usrbin_object.tally["multi_p"].part_data_tag.name == "part_data_7"
         expected = expected_part_data[i]
-        assert_equal(read, expected)
+        assert read == expected
 
     for i, v_e in enumerate(
         usrbin_object.tally["multi_p"].structured_iterate_hex("zyx")
     ):
         read = usrbin_object.tally["multi_p"].error_data_tag[v_e]
-        assert_equal(usrbin_object.tally["multi_p"].error_data_tag.name, "error_data_7")
+        assert usrbin_object.tally["multi_p"].error_data_tag.name == "error_data_7"
         expected = expected_error_data[i]
-        assert_equal(read, expected)
+        assert read == expected
 
     # Tally #2:
     # Test UsrbinTally attributes
     expected_xbounds = [-3.0, 0.0, 3.0, 6.0]
     expected_ybounds = [-3.0, -1.0, 1.0, 3.0]
     expected_zbounds = [-3.0, -2.0, -1.0, 0.0]
-    assert_equal(usrbin_object.tally["multi_n"].coord_sys, "Cartesian")
-    assert_equal(usrbin_object.tally["multi_n"].name, "multi_n")
-    assert_equal(usrbin_object.tally["multi_n"].particle, "8")
-    assert_equal(usrbin_object.tally["multi_n"].x_bounds, expected_xbounds)
-    assert_equal(usrbin_object.tally["multi_n"].y_bounds, expected_ybounds)
-    assert_equal(usrbin_object.tally["multi_n"].z_bounds, expected_zbounds)
+    assert usrbin_object.tally["multi_n"].coord_sys == "Cartesian"
+    assert usrbin_object.tally["multi_n"].name == "multi_n"
+    assert usrbin_object.tally["multi_n"].particle == "8"
+    assert usrbin_object.tally["multi_n"].x_bounds == expected_xbounds
+    assert usrbin_object.tally["multi_n"].y_bounds == expected_ybounds
+    assert usrbin_object.tally["multi_n"].z_bounds == expected_zbounds
 
     # Test error and part data values match
     expected_part_data = [
@@ -291,7 +287,7 @@ def test_multiple_usrbin():
         read = usrbin_object.tally["multi_n"].part_data_tag[v_e]
         assert usrbin_object.tally["multi_n"].part_data_tag.name == "part_data_8"
         expected = expected_part_data[i]
-        assert_equal(read, expected)
+        assert read == expected
 
     for i, v_e in enumerate(
         usrbin_object.tally["multi_n"].structured_iterate_hex("zyx")
@@ -299,7 +295,7 @@ def test_multiple_usrbin():
         read = usrbin_object.tally["multi_n"].error_data_tag[v_e]
         assert usrbin_object.tally["multi_n"].error_data_tag.name == "error_data_8"
         expected = expected_error_data[i]
-        assert_equal(read, expected)
+        assert read == expected
 
 
 def test_degenerate_usrbin():
@@ -308,7 +304,7 @@ def test_degenerate_usrbin():
     """
 
     if not HAVE_PYMOAB:
-        raise SkipTest
+        pytest.skip()
 
     thisdir = os.path.dirname(__file__)
     usrbin_file = os.path.join(thisdir, "fluka_usrbin_degenerate.lis")
@@ -320,12 +316,12 @@ def test_degenerate_usrbin():
     expected_xbounds = [-3.0, 0.0, 3.0, 6.0]
     expected_ybounds = [-3.0, 0.0, 3.0]
     expected_zbounds = [-3.0, 0.0]
-    assert_equal(usrbin_object.tally["degen1"].coord_sys, "Cartesian")
-    assert_equal(usrbin_object.tally["degen1"].name, "degen1")
-    assert_equal(usrbin_object.tally["degen1"].particle, "8")
-    assert_equal(usrbin_object.tally["degen1"].x_bounds, expected_xbounds)
-    assert_equal(usrbin_object.tally["degen1"].y_bounds, expected_ybounds)
-    assert_equal(usrbin_object.tally["degen1"].z_bounds, expected_zbounds)
+    assert usrbin_object.tally["degen1"].coord_sys == "Cartesian"
+    assert usrbin_object.tally["degen1"].name == "degen1"
+    assert usrbin_object.tally["degen1"].particle == "8"
+    assert usrbin_object.tally["degen1"].x_bounds == expected_xbounds
+    assert usrbin_object.tally["degen1"].y_bounds == expected_ybounds
+    assert usrbin_object.tally["degen1"].z_bounds == expected_zbounds
 
     # Test error and part data values match
     expected_part_data = [
@@ -351,7 +347,7 @@ def test_degenerate_usrbin():
         read = usrbin_object.tally["degen1"].part_data_tag[v_e]
         assert usrbin_object.tally["degen1"].part_data_tag.name == "part_data_8"
         expected = expected_part_data[i]
-        assert_equal(read, expected)
+        assert read == expected
 
     for i, v_e in enumerate(
         usrbin_object.tally["degen1"].structured_iterate_hex("zyx")
@@ -359,19 +355,19 @@ def test_degenerate_usrbin():
         read = usrbin_object.tally["degen1"].error_data_tag[v_e]
         assert usrbin_object.tally["degen1"].error_data_tag.name == "error_data_8"
         expected = expected_error_data[i]
-        assert_equal(read, expected)
+        assert read == expected
 
     # Tally #2:
     # Test UsrbinTally attributes
     expected_xbounds = [-3.0, 1.5, 6.0]
     expected_ybounds = [-3.0, 3.0]
     expected_zbounds = [-3.0, -2.0, -1.0, 0.0]
-    assert_equal(usrbin_object.tally["degen2"].coord_sys, "Cartesian")
-    assert_equal(usrbin_object.tally["degen2"].name, "degen2")
-    assert_equal(usrbin_object.tally["degen2"].particle, "8")
-    assert_equal(usrbin_object.tally["degen2"].x_bounds, expected_xbounds)
-    assert_equal(usrbin_object.tally["degen2"].y_bounds, expected_ybounds)
-    assert_equal(usrbin_object.tally["degen2"].z_bounds, expected_zbounds)
+    assert usrbin_object.tally["degen2"].coord_sys == "Cartesian"
+    assert usrbin_object.tally["degen2"].name == "degen2"
+    assert usrbin_object.tally["degen2"].particle == "8"
+    assert usrbin_object.tally["degen2"].x_bounds == expected_xbounds
+    assert usrbin_object.tally["degen2"].y_bounds == expected_ybounds
+    assert usrbin_object.tally["degen2"].z_bounds == expected_zbounds
 
     # Test error and part data values match
     expected_part_data = [
@@ -397,7 +393,7 @@ def test_degenerate_usrbin():
         read = usrbin_object.tally["degen2"].part_data_tag[v_e]
         assert usrbin_object.tally["degen2"].part_data_tag.name == "part_data_8"
         expected = expected_part_data[i]
-        assert_equal(read, expected)
+        assert read == expected
 
     for i, v_e in enumerate(
         usrbin_object.tally["degen2"].structured_iterate_hex("zyx")
@@ -405,19 +401,19 @@ def test_degenerate_usrbin():
         read = usrbin_object.tally["degen2"].error_data_tag[v_e]
         assert usrbin_object.tally["degen2"].error_data_tag.name == "error_data_8"
         expected = expected_error_data[i]
-        assert_equal(read, expected)
+        assert read == expected
 
     # Tally #3:
     # Test UsrbinTally attributes
     expected_xbounds = [-3.0, 6.0]
     expected_ybounds = [-3.0, -1.0, 1.0, 3.0]
     expected_zbounds = [-3.0, -1.5, 0.0]
-    assert_equal(usrbin_object.tally["degen3"].coord_sys, "Cartesian")
-    assert_equal(usrbin_object.tally["degen3"].name, "degen3")
-    assert_equal(usrbin_object.tally["degen3"].particle, "8")
-    assert_equal(usrbin_object.tally["degen3"].x_bounds, expected_xbounds)
-    assert_equal(usrbin_object.tally["degen3"].y_bounds, expected_ybounds)
-    assert_equal(usrbin_object.tally["degen3"].z_bounds, expected_zbounds)
+    assert usrbin_object.tally["degen3"].coord_sys == "Cartesian"
+    assert usrbin_object.tally["degen3"].name == "degen3"
+    assert usrbin_object.tally["degen3"].particle == "8"
+    assert usrbin_object.tally["degen3"].x_bounds == expected_xbounds
+    assert usrbin_object.tally["degen3"].y_bounds == expected_ybounds
+    assert usrbin_object.tally["degen3"].z_bounds == expected_zbounds
 
     # Test error and part data values match
     expected_part_data = [
@@ -443,7 +439,7 @@ def test_degenerate_usrbin():
         read = usrbin_object.tally["degen3"].part_data_tag[v_e]
         assert usrbin_object.tally["degen3"].part_data_tag.name == "part_data_8"
         expected = expected_part_data[i]
-        assert_equal(read, expected)
+        assert read == expected
 
     for i, v_e in enumerate(
         usrbin_object.tally["degen3"].structured_iterate_hex("zyx")
@@ -451,7 +447,7 @@ def test_degenerate_usrbin():
         read = usrbin_object.tally["degen3"].error_data_tag[v_e]
         assert usrbin_object.tally["degen3"].error_data_tag.name == "error_data_8"
         expected = expected_error_data[i]
-        assert_equal(read, expected)
+        assert read == expected
 
 
 # test file writing to catch upstream changes in mesh
@@ -459,7 +455,7 @@ def test_degenerate_usrbin():
 
 def test_mesh_write():
     if not HAVE_PYMOAB:
-        raise SkipTest
+        pytest.skip()
 
     thisdir = os.path.dirname(__file__)
     usrbin_file = os.path.join(thisdir, "fluka_usrbin_single.lis")

@@ -7,9 +7,8 @@ except ImportError:
     from io import StringIO
 from itertools import groupby
 
-import nose
+import pytest
 
-from nose.tools import assert_equal, assert_almost_equal, assert_less_equal
 from numpy.testing import assert_allclose
 import numpy as np
 
@@ -379,8 +378,7 @@ def test_decays():
     gr = ensdf.decays(f)
     f.close()
 
-    assert_almost_equal(
-        gr[0][0:11],
+    assert gr[0][0:11] == pytest.approx(
         (
             631520000,
             641520000,
@@ -395,8 +393,8 @@ def test_decays():
             None,
         ),
     )
-    assert_equal(
-        gr[0][13],
+    assert (
+        gr[0][13] ==
         [
             [631520000, 641520001, None, 535.4, 8.1],
             [631520000, 641520003, None, 364.6, 0.9],
@@ -411,11 +409,10 @@ def test_decays():
             [631520000, 641520019, None, 58.5, 0.101],
             [631520000, 641520020, None, 47.4, 1.819],
             [631520000, 641520023, None, 33.4, 0.0213],
-        ],
-    )
+        ])
 
-    assert_equal(
-        gr[0][11],
+    assert (
+        gr[0][11] ==
         [
             [
                 641520001,
@@ -1148,8 +1145,7 @@ def test_decays():
                 0,
                 0,
             ],
-        ],
-    )
+        ])
 
 
 def test_no_nan_levels():
@@ -1169,20 +1165,19 @@ def test_no_branches_gt100_levels():
     for nuc, grp in groupby(ll, lambda row: row[0]):
         grp = np.array(list(grp))
         total_br = grp[grp["rx_id"] != 0]["branch_ratio"].sum()
-        assert_less_equal(
-            total_br, 100.0 + 1e-14, msg="Branch ratios failed for " + str(nuc)
-        )
+        assert (
+            total_br <= 100.0 + 1e-14), "Branch ratios failed for " + str(nuc)
 
 
 def test_time():
-    assert_equal((120.0, None), ensdf._halflife_to_seconds(2, None, "M"))
-    assert_equal((120.0, None), ensdf._to_time("2 M", ""))
-    assert_equal((150.0, 6.0), ensdf._to_time("2.50 M", "10"))
-    assert_equal((150.0, (6.0, 12.0)), ensdf._to_time("2.50 M", "+10-20"))
+    assert (120.0, None) == ensdf._halflife_to_seconds(2, None, "M")
+    assert (120.0, None) == ensdf._to_time("2 M", "")
+    assert (150.0, 6.0) == ensdf._to_time("2.50 M", "10")
+    assert (150.0, (6.0, 12.0)) == ensdf._to_time("2.50 M", "+10-20")
     t, err = ensdf._to_time("2.30 MS", "+10-20")
-    assert_equal((0.0023, (0.0001, 0.0002)), (t, err))
+    assert (0.0023, (0.0001, 0.0002)) == (t, err)
     t, err = ensdf._to_time("2.30E-3 S", "+10-20")
-    assert_equal((0.0023, (0.0001, 0.0002)), (t, err))
+    assert (0.0023, (0.0001, 0.0002)) == (t, err)
     t, err = ensdf._to_time("2.5 KEV", "2")
     v = ensdf.HBAR_LN2 / 2.5e3
     vplus = ensdf.HBAR_LN2 / (2.3e3) - v
