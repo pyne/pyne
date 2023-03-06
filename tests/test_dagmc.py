@@ -23,7 +23,7 @@ try:
     pyne_mod = imp.load_module("pyne", *pyne_info)
     imp.find_module("dagmc", pyne_mod.__path__)
 except ImportError:
-    pytest.skip()
+    raise pytest.skip(allow_module_level=True)
 
 if sys.version_info[0] < 3:
     STRING_TYPES = (basestring, str, unicode)
@@ -146,7 +146,7 @@ def failures():
     # if Exception is raised, then None is returned, else nothing is returned
     # and test will fail
     i = pytest.raises(Exception, dagmc.point_in_volume, [100, (0, 0, 0)])
-    j = pytest.raises(Exception, dagmc.point_in_volume, [1, (0, 0, 0, 0)])
+    j = pytest.raises(Exception, dagmc.point_in_volume, [1, (0, 0, 0, 0])
     k = pytest.raises(Exception, dagmc.fire_one_ray, [2, (0, 0, 0), 1])
 
     return [i, j, k]

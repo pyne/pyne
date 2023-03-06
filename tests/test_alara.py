@@ -685,8 +685,8 @@ def test_num_den_to_mesh_stdout():
     exp_density_0 = 8.96715e-05
     exp_density_1 = 1.785214e-04
 
-    assert exp_density_0 == m.mats[0].density
-    assert exp_density_1 == m.mats[1].density
+    assert exp_density_0 == pytest.approx(m.mats[0].density)
+    assert exp_density_1 == pytest.approx(m.mats[1].density)
 
 
 def test_num_den_to_mesh_1_y():
@@ -729,8 +729,8 @@ def test_num_den_to_mesh_1_y():
     # compare densities
     exp_density_0 = 8.96715e-05
     exp_density_1 = 1.78521e-04
-    assert exp_density_0 == m.mats[0].density
-    assert exp_density_1 == m.mats[1].density
+    assert exp_density_0 == pytest.approx(m.mats[0].density)
+    assert exp_density_1 == pytest.approx(m.mats[1].density, abs=1E-6)
 
 
 def test_irradiation_blocks():

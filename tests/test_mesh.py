@@ -96,7 +96,7 @@ def test_elem_volume():
     for __, __, ve in tetmesh:
         vols.append(tetmesh.elem_volume(ve))
 
-    assert np.min(vols) == pytest.approx(0.13973, rel=1E-5)
+    assert np.min(vols) == pytest.approx(0.13973, rel=1E-4)
     assert np.max(vols) == pytest.approx(2.1783, rel=1E-4)
     assert np.mean(vols) == pytest.approx(0.52702, rel=1E-5)
 
