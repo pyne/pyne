@@ -146,7 +146,7 @@ def failures():
     # if Exception is raised, then None is returned, else nothing is returned
     # and test will fail
     i = pytest.raises(Exception, dagmc.point_in_volume, [100, (0, 0, 0)])
-    j = pytest.raises(Exception, dagmc.point_in_volume, [1, (0, 0, 0, 0])
+    j = pytest.raises(Exception, dagmc.point_in_volume, [1, (0, 0, 0, 0)])
     k = pytest.raises(Exception, dagmc.fire_one_ray, [2, (0, 0, 0), 1])
 
     return [i, j, k]
