@@ -106,4 +106,4 @@ def test_net_count():
 
 
 if __name__ == "__main__":
-    nose.runmodule()
+    pytest.main()

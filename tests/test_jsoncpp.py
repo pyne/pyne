@@ -408,4 +408,4 @@ def test_customwriter():
 
 
 if __name__ == "__main__":
-    nose.runmodule()
+    pytest.main()

@@ -1,6 +1,7 @@
 """Tally tests"""
 import os
 import warnings
+import pytest
 
 from unittest import TestCase
 
@@ -936,4 +937,4 @@ def test_fluka_tally_muonp():
 # Run as script
 #
 if __name__ == "__main__":
-    nose.runmodule()
+    pytest.main()

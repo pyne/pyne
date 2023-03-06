@@ -2,6 +2,7 @@
 import os
 import math
 import warnings
+import pytest
 
 import numpy as np
 import numpy.testing as npt
@@ -44,4 +45,4 @@ def test_with_internal_data():
 # Run as script
 #
 if __name__ == "__main__":
-    nose.runmodule()
+    pytest.main()

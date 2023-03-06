@@ -4,6 +4,7 @@ import os
 import sys
 import json
 import warnings
+import pytest
 
 if sys.version_info[0] >= 3:
     from urllib.request import urlretrieve
@@ -198,4 +199,4 @@ def test_benchmark():
 
 
 if __name__ == "__main__":
-    nose.runmodule()
+    pytest.main()

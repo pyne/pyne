@@ -96,4 +96,4 @@ def test_geant4_id():
 # Run as script
 #
 if __name__ == "__main__":
-    nose.runmodule()
+    pytest.main()

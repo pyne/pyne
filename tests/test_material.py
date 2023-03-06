@@ -2361,4 +2361,4 @@ def test_cram_h3():
 # Run as script
 #
 if __name__ == "__main__":
-    nose.runmodule()
+    pytest.main()

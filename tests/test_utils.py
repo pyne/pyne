@@ -381,4 +381,4 @@ def test_ifbar():
 
 
 if __name__ == "__main__":
-    nose.runmodule()
+    pytest.main()

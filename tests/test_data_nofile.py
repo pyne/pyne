@@ -68,4 +68,4 @@ def test_elements():
 
 
 if __name__ == "__main__":
-    nose.runmodule()
+    pytest.main()

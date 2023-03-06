@@ -2,6 +2,7 @@
 from pyne.source import PointSource
 import os
 import warnings
+import pytest
 
 from unittest import TestCase
 
@@ -93,4 +94,4 @@ def test_point_source_mcnp_5():
 # Run as script
 #
 if __name__ == "__main__":
-    nose.runmodule()
+    pytest.main()

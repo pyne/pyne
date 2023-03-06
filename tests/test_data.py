@@ -752,4 +752,4 @@ def test_special_children():
 
 
 if __name__ == "__main__":
-    nose.runmodule()
+    pytest.main()

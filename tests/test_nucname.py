@@ -1145,4 +1145,4 @@ def test_ensdf_to_id():
 
 
 if __name__ == "__main__":
-    nose.runmodule()
+    pytest.main()

@@ -361,7 +361,6 @@ def file_comp(file_out, file_ref, exceptions):
     return diff_dict
 
 
-#  nose.runmodule()
 if __name__ == "__main__":
     alphad = test_alphad()
     bldhst = test_bldhst()

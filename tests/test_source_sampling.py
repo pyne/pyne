@@ -19,8 +19,6 @@ try:
     pyne_mod = imp.load_module("pyne", *pyne_info)
     imp.find_module("source_sampling", pyne_mod.__path__)
 except ImportError:
-    from nose.plugins.skip import SkipTest
-
     pytest.skip()
 
 from pyne.source_sampling import Sampler, AliasTable

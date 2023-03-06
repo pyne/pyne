@@ -367,4 +367,4 @@ def test_tungsten():
 
 
 if __name__ == "__main__":
-    nose.runmodule()
+    pytest.main()

@@ -3,6 +3,7 @@ import os
 import io
 import warnings
 import sys
+import pytest
 from hashlib import md5
 
 import numpy as np
@@ -119,4 +120,4 @@ def test_ionization_spectra():
 
 
 if __name__ == "__main__":
-    nose.runmodule()
+    pytest.main()

@@ -45,4 +45,4 @@ def test_notebooks():
 
 
 if __name__ == "__main__":
-    nose.runmodule()
+    pytest.main()

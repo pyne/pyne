@@ -758,4 +758,4 @@ def test_map_int_vector_double():
 
 
 if __name__ == "__main__":
-    nose.run()
+    pytest.main()

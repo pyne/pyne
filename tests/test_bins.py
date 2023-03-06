@@ -115,4 +115,4 @@ def test_point_collase_raises():
 
 
 if __name__ == "__main__":
-    nose.runmodule()
+    pytest.main()
