@@ -52,6 +52,7 @@ jobs:
           fi
           export ADD_FLAG="${ADD_FLAG} "
           echo "ADD_FLAG=${ADD_FLAG}" >> $GITHUB_ENV
+          pip install pytest
 
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -70,4 +71,4 @@ jobs:
         shell: bash -l {0}
         run: |
           cd $GITHUB_WORKSPACE/tests
-          ./travis-run-tests.sh python3
+          pytest
