@@ -24,7 +24,7 @@ from pyne.utils import QAWarning, file_almost_same, file_block_almost_same
 from pyne.mesh import Mesh, NativeMeshTag, HAVE_PYMOAB
 
 if not HAVE_PYMOAB:
-    pytest.skip()
+    pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
 
 if sys.version_info[0] > 2:
     izip = zip
@@ -34,6 +34,10 @@ else:
 warnings.simplefilter("ignore", QAWarning)
 
 thisdir = os.path.dirname(__file__)
+
+@pytest.fixture(autouse=True)
+def change_test_dir(request, monkeypatch):
+    monkeypatch.chdir(request.fspath.dirname)
 
 
 def irradiation_setup_structured(flux_tag="n_flux", meshtal_file="meshtal_2x2x1"):

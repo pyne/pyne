@@ -29,7 +29,7 @@ from pyne.utils import QAWarning
 from pyne.mesh import HAVE_PYMOAB
 
 if not HAVE_PYMOAB:
-    pytest.skip()
+    pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
 from pyne.mesh import (
     NativeMeshTag,
     ComputedTag,

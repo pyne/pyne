@@ -28,7 +28,7 @@ from pyne.material import Material
 if not os.path.isfile(pyne.nuc_data):
     raise RuntimeError("Tests require nuc_data.h5.  Please run nuc_data_make.")
 
-
+@pytest.fixture(autouse=True)
 def setup():
     np.seterr(all="ignore")
     xs_cache.clear()

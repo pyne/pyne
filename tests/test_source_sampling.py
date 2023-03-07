@@ -19,7 +19,7 @@ try:
     pyne_mod = imp.load_module("pyne", *pyne_info)
     imp.find_module("source_sampling", pyne_mod.__path__)
 except ImportError:
-    pytest.skip()
+    pytest.skip("Can't import mesh, skipping tests", allow_module_level=True)
 
 from pyne.source_sampling import Sampler, AliasTable
 from pyne.mesh import Mesh, NativeMeshTag
