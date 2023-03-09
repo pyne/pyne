@@ -1,4 +1,3 @@
-ARG py_version=3.8
 ARG build_hdf5="NO"
 ARG ubuntu_version=22.04
 
@@ -7,7 +6,6 @@ FROM ubuntu:${ubuntu_version} AS base_python
 # Ubuntu Setup
 ENV TZ=America/Chicago
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
-ARG py_version
 
 ENV HOME /root
 RUN apt-get update \
@@ -63,7 +61,6 @@ ENV LD_LIBRARY_PATH $HDF5_INSTALL_PATH/lib:$LD_LIBRARY_PATH
 ENV LIBRARY_PATH $HDF5_INSTALL_PATH/lib:$LIBRARY_PATH
 
 FROM base_python AS moab
-ARG py_version
 ARG build_hdf5
 ENV INSTALL_PATH=$HOME/opt/moab
 
@@ -99,7 +96,7 @@ RUN export PYMOAB_FLAG="-DENABLE_PYMOAB=ON"; \
 # put MOAB on the path
 ENV LD_LIBRARY_PATH $HOME/opt/moab/lib:$LD_LIBRARY_PATH
 ENV LIBRARY_PATH $HOME/opt/moab/lib:$LIBRARY_PATH
-ENV PYTHONPATH=$HOME/opt/moab/lib/python${py_version}/site-packages/
+ENV PYTHONPATH=$HOME/opt/moab/lib/python3.10/site-packages/
 
 FROM moab AS dagmc
 # build/install DAGMC
