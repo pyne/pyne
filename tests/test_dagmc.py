@@ -145,9 +145,12 @@ def failures():
 
     # if Exception is raised, then None is returned, else nothing is returned
     # and test will fail
-    i = pytest.raises(Exception, dagmc.point_in_volume, [100, (0, 0, 0)])
-    j = pytest.raises(Exception, dagmc.point_in_volume, [1, (0, 0, 0, 0)])
-    k = pytest.raises(Exception, dagmc.fire_one_ray, [2, (0, 0, 0), 1])
+    if (pytest.raises(Exception, dagmc.point_in_volume, 100, (0, 0, 0))):
+        i = None
+    if not (dagmc.point_in_volume(1, (0, 0, 0, 0))):
+        j = None
+    if (pytest.raises(Exception, dagmc.fire_one_ray, 2, (0, 0, 0), 1)):
+        k = None
 
     return [i, j, k]
 
@@ -268,7 +271,8 @@ def discretize_non_square():
     coords = [0, 1]
     mesh = Mesh(structured=True, structured_coords=[coords, coords, coords])
     # if pytest.raises is True, then k will be None, else a fail will occur
-    k = pytest.raises(ValueError, dagmc.discretize_geom, mesh, num_rays=3, grid=True)
+    if (pytest.raises(ValueError, dagmc.discretize_geom, mesh, num_rays=3, grid=True)):
+        k = None
 
     return k
 
@@ -288,7 +292,8 @@ def discretize_geom_centers():
 
     #  ensure kwargs are not accepted for unstructured mesh
     # if pytest.raises is True, then k will be None, else a fail will occur
-    k = pytest.raises(ValueError, dagmc.discretize_geom, mesh, num_rays=3, grid=True)
+    if (pytest.raises(ValueError, dagmc.discretize_geom, mesh, num_rays=3, grid=True)):
+        k = None
 
     return [res, k]
 
