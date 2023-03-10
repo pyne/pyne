@@ -71,4 +71,4 @@ jobs:
         shell: bash -l {0}
         run: |
           cd $GITHUB_WORKSPACE/tests
-          pytest
+          ./ci-run-tests.sh
