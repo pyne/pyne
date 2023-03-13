@@ -215,6 +215,7 @@ def test_get_coord_sys_3D():
 def get_zones_no_void():
     """Test the _get_zones function if no void is in the meshed area."""
 
+    from pyne import dagmc
     # hdf5 test file
     THIS_DIR = os.path.dirname(os.path.realpath(__file__))
     hdf5 = THIS_DIR + "/files_test_partisn/partisn_test_geom.h5m"
@@ -268,11 +269,10 @@ def test_get_zones_no_void():
     try:
         from pyne import dagmc
     except:
-        pytest.skip()
+        raise pytest.skip()
 
     if not HAVE_PYMOAB:
         pytest.skip()
-
     p = multiprocessing.Pool()
     r = p.apply_async(get_zones_no_void)
     p.close()
@@ -283,6 +283,7 @@ def test_get_zones_no_void():
 def get_zones_iteration_order():
     """Test that _get_zones function gives results in zyx order."""
 
+    from pyne import dagmc
     # hdf5 test file
     THIS_DIR = os.path.dirname(os.path.realpath(__file__))
     hdf5 = THIS_DIR + "/files_test_partisn/fractal_box.h5m"
@@ -338,6 +339,7 @@ def test_get_zones_iteration_order():
 def get_zones_with_void():
     """Test the _get_zones function if a void is present."""
 
+    from pyne import dagmc
     # hdf5 test file
     THIS_DIR = os.path.dirname(os.path.realpath(__file__))
     hdf5 = THIS_DIR + "/files_test_partisn/partisn_test_geom.h5m"
