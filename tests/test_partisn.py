@@ -215,14 +215,6 @@ def test_get_coord_sys_3D():
 def get_zones_no_void():
     """Test the _get_zones function if no void is in the meshed area."""
 
-    try:
-        from pyne import dagmc
-    except:
-        pytest.skip()
-
-    if not HAVE_PYMOAB:
-        pytest.skip()
-
     # hdf5 test file
     THIS_DIR = os.path.dirname(os.path.realpath(__file__))
     hdf5 = THIS_DIR + "/files_test_partisn/partisn_test_geom.h5m"
@@ -272,6 +264,15 @@ def get_zones_no_void():
 
 def test_get_zones_no_void():
     """Test the _get_zones function if no void is in the meshed area."""
+
+    try:
+        from pyne import dagmc
+    except:
+        pytest.skip()
+
+    if not HAVE_PYMOAB:
+        pytest.skip()
+
     p = multiprocessing.Pool()
     r = p.apply_async(get_zones_no_void)
     p.close()
@@ -281,13 +282,6 @@ def test_get_zones_no_void():
 
 def get_zones_iteration_order():
     """Test that _get_zones function gives results in zyx order."""
-    try:
-        from pyne import dagmc
-    except:
-        pytest.skip()
-
-    if not HAVE_PYMOAB:
-        pytest.skip()
 
     # hdf5 test file
     THIS_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -326,6 +320,14 @@ def get_zones_iteration_order():
 
 def test_get_zones_iteration_order():
     """Test that _get_zones function gives results in zyx order."""
+    try:
+        from pyne import dagmc
+    except:
+        pytest.skip()
+
+    if not HAVE_PYMOAB:
+        pytest.skip()
+
     p = multiprocessing.Pool()
     r = p.apply_async(get_zones_iteration_order)
     p.close()
@@ -335,13 +337,6 @@ def test_get_zones_iteration_order():
 
 def get_zones_with_void():
     """Test the _get_zones function if a void is present."""
-    try:
-        from pyne import dagmc
-    except:
-        pytest.skip()
-
-    if not HAVE_PYMOAB:
-        pytest.skip()
 
     # hdf5 test file
     THIS_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -394,6 +389,14 @@ def get_zones_with_void():
 
 def test_get_zones_with_void():
     """Test the _get_zones function if a void is present."""
+    try:
+        from pyne import dagmc
+    except:
+        pytest.skip()
+
+    if not HAVE_PYMOAB:
+        pytest.skip()
+
     p = multiprocessing.Pool()
     r = p.apply_async(get_zones_with_void)
     p.close()
@@ -418,13 +421,6 @@ def test_check_fine_mesh_total_false():
 
 
 def write_partisn_input_1D():
-    try:
-        from pyne import dagmc
-    except:
-        pytest.skip()
-
-    if not HAVE_PYMOAB:
-        pytest.skip()
 
     # Path to hdf5 test file
     THIS_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -468,14 +464,6 @@ def write_partisn_input_1D():
 
 def test_write_partisn_input_1D():
     """Test full input file creation for 1D case"""
-    p = multiprocessing.Pool()
-    r = p.apply_async(write_partisn_input_1D)
-    p.close()
-    p.join()
-    assert r.get() == True
-
-
-def write_partisn_input_2D():
     try:
         from pyne import dagmc
     except:
@@ -484,6 +472,14 @@ def write_partisn_input_2D():
     if not HAVE_PYMOAB:
         pytest.skip()
 
+    p = multiprocessing.Pool()
+    r = p.apply_async(write_partisn_input_1D)
+    p.close()
+    p.join()
+    assert r.get() == True
+
+
+def write_partisn_input_2D():
     # Path to hdf5 test file
     THIS_DIR = os.path.dirname(os.path.realpath(__file__))
     hdf5 = THIS_DIR + "/files_test_partisn/partisn_test_geom.h5m"
@@ -525,14 +521,6 @@ def write_partisn_input_2D():
 
 def test_write_partisn_input_2D():
     """Test full input file creation for 2D case"""
-    p = multiprocessing.Pool()
-    r = p.apply_async(write_partisn_input_2D)
-    p.close()
-    p.join()
-    assert r.get() == True
-
-
-def write_partisn_input_3D():
     try:
         from pyne import dagmc
     except:
@@ -541,6 +529,14 @@ def write_partisn_input_3D():
     if not HAVE_PYMOAB:
         pytest.skip()
 
+    p = multiprocessing.Pool()
+    r = p.apply_async(write_partisn_input_2D)
+    p.close()
+    p.join()
+    assert r.get() == True
+
+
+def write_partisn_input_3D():
     # Path to hdf5 test file
     THIS_DIR = os.path.dirname(os.path.realpath(__file__))
     hdf5 = THIS_DIR + "/files_test_partisn/partisn_test_geom.h5m"
@@ -582,14 +578,6 @@ def write_partisn_input_3D():
 
 def test_write_partisn_input_3D():
     """Test full input file creation for 3D case"""
-    p = multiprocessing.Pool()
-    r = p.apply_async(write_partisn_input_3D)
-    p.close()
-    p.join()
-    assert r.get() == True
-
-
-def write_partisn_input_with_names_dict():
     try:
         from pyne import dagmc
     except:
@@ -598,6 +586,14 @@ def write_partisn_input_with_names_dict():
     if not HAVE_PYMOAB:
         pytest.skip()
 
+    p = multiprocessing.Pool()
+    r = p.apply_async(write_partisn_input_3D)
+    p.close()
+    p.join()
+    assert r.get() == True
+
+
+def write_partisn_input_with_names_dict():
     # Path to hdf5 test file
     THIS_DIR = os.path.dirname(os.path.realpath(__file__))
     hdf5 = THIS_DIR + "/files_test_partisn/partisn_test_geom.h5m"
@@ -646,6 +642,14 @@ def write_partisn_input_with_names_dict():
 
 def test_write_partisn_input_with_names_dict():
     """Test full input file creation for 1D case with a names_dict provided"""
+    try:
+        from pyne import dagmc
+    except:
+        pytest.skip()
+
+    if not HAVE_PYMOAB:
+        pytest.skip()
+
     p = multiprocessing.Pool()
     r = p.apply_async(write_partisn_input_with_names_dict)
     p.close()
@@ -654,9 +658,6 @@ def test_write_partisn_input_with_names_dict():
 
 
 def write_partisn_input_options():
-    if not HAVE_PYMOAB:
-        pytest.skip()
-
     """Test PARTISN input file creation with a slew of keyword arguments
     """
 
@@ -739,6 +740,9 @@ def write_partisn_input_options():
 
 def test_write_partisn_input_options():
     """Test full input file creation for 1D case with a lot of key work args"""
+
+    if not HAVE_PYMOAB:
+        pytest.skip()
 
     p = multiprocessing.Pool()
     r = p.apply_async(write_partisn_input_options)
