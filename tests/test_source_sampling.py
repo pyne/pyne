@@ -38,13 +38,15 @@ SUBVOXEL_ANALOG = 3
 SUBVOXEL_UNIFORM = 4
 SUBVOXEL_USER = 5
 
+@pytest.fixture
+def try_rm_file():
+    files = ["sampling_mesh.h5m", "tet.h5m"]
+    yield files
+    for filename in files:
+        os.remove(filename) if os.path.exists(filename) else None
 
-def try_rm_file(filename):
-    return lambda: os.remove(filename) if os.path.exists(filename) else None
 
-
-# @with_setup(None, try_rm_file("sampling_mesh.h5m"))
-def test_single_hex_tag_names_map():
+def test_single_hex_tag_names_map(try_rm_file):
     """This test tests uniform sampling within a single hex volume element.
     This is done by dividing the volume element in 4 smaller hex and ensuring
     that each sub-hex is sampled equally.
@@ -155,8 +157,7 @@ def test_single_hex_tag_names_map():
     pytest.raises(RuntimeError, Sampler, filename, tag_names, e_bounds, SUBVOXEL_USER)
 
 
-# @with_setup(None, try_rm_file("sampling_mesh.h5m"))
-def test_analog_single_hex():
+def test_analog_single_hex(try_rm_file):
     """This test tests that particles of sampled evenly within the phase-space
     of a single mesh volume element with one energy group in an analog sampling
     scheme. This done by dividing each dimension (x, y, z, E) in half, then
@@ -213,8 +214,7 @@ def test_analog_single_hex():
             assert abs(np.sum(np.rollaxis(tally, i)[j, :, :, :]) - 0.5) < 0.05
 
 
-# @with_setup(None, try_rm_file("sampling_mesh.h5m"))
-def test_analog_multiple_hex():
+def test_analog_multiple_hex(try_rm_file):
     """This test tests that particle are sampled uniformly from a uniform source
     defined on eight mesh volume elements in two energy groups. This is done
     using the exact same method ass test_analog_multiple_hex.
@@ -279,8 +279,7 @@ def test_analog_multiple_hex():
             assert abs(halfspace_sum - 0.5) / 0.5 < 0.1
 
 
-# @with_setup(None, try_rm_file("tet.h5m"))
-def test_analog_single_tet():
+def test_analog_single_tet(try_rm_file):
     """This test tests uniform sampling within a single tetrahedron. This is
     done by dividing the tetrahedron in 4 smaller tetrahedrons and ensuring
     that each sub-tet is sampled equally.
@@ -325,8 +324,7 @@ def test_analog_single_tet():
         assert abs(t - 0.25) / 0.25 < 0.2
 
 
-# @with_setup(None, try_rm_file("sampling_mesh.h5m"))
-def test_uniform():
+def test_uniform(try_rm_file):
     """This test tests that the uniform biasing scheme:
     1. Samples space uniformly. This is checked using the same method
        described in test_analog_single_hex().
@@ -402,8 +400,7 @@ def test_uniform():
         assert abs(e_tally[i] - expected_e_tally[i]) / expected_e_tally[i] < 0.1
 
 
-# @with_setup(None, try_rm_file("sampling_mesh.h5m"))
-def test_single_hex_single_subvoxel_analog():
+def test_single_hex_single_subvoxel_analog(try_rm_file):
     """This test tests that particles of sampled evenly within the phase-space
     of a single mesh volume element (also a sub-voxel) with one energy group
     in an analog sampling scheme. This done by dividing each dimension
@@ -464,8 +461,7 @@ def test_single_hex_single_subvoxel_analog():
             assert abs(np.sum(np.rollaxis(tally, i)[j, :, :, :]) - 0.5) < 0.05
 
 
-# @with_setup(None, try_rm_file("sampling_mesh.h5m"))
-def test_single_hex_multiple_subvoxel_analog():
+def test_single_hex_multiple_subvoxel_analog(try_rm_file):
     """This test tests that particles of sampled analog within the phase-space
     of a single mesh volume element but multiple sub-voxels with one energy
     group in an analog sampling scheme. Then sampling particles and tallying
@@ -523,8 +519,7 @@ def test_single_hex_multiple_subvoxel_analog():
     assert abs(tally[2] - 0.8) / 0.8 < 0.05
 
 
-# @with_setup(None, try_rm_file("sampling_mesh.h5m"))
-def test_multiple_hex_multiple_subvoxel_analog():
+def test_multiple_hex_multiple_subvoxel_analog(try_rm_file):
     """This test tests that particle are sampled analog from a uniform source
     defined on eight mesh volume elements in two energy groups.
     """
@@ -590,8 +585,7 @@ def test_multiple_hex_multiple_subvoxel_analog():
             assert abs(halfspace_sum - 0.5) / 0.5 < 0.1
 
 
-# @with_setup(None, try_rm_file("sampling_mesh.h5m"))
-def test_single_hex_subvoxel_uniform():
+def test_single_hex_subvoxel_uniform(try_rm_file):
     """This test tests that particles of sampled evenly within the phase-space
     of a single mesh volume element with one energy group in an uniform sampling
     scheme. This done by dividing each dimension (x, y, z, E) in half, then
@@ -652,8 +646,7 @@ def test_single_hex_subvoxel_uniform():
             assert abs(np.sum(np.rollaxis(tally, i)[j, :, :, :]) - 0.5) < 0.05
 
 
-# @with_setup(None, try_rm_file("sampling_mesh.h5m"))
-def test_single_hex_multiple_subvoxel_uniform():
+def test_single_hex_multiple_subvoxel_uniform(try_rm_file):
     """This test tests that particles of sampled evenly within the phase-space
     of a single mesh volume element with one energy group in an uniform sampling
     scheme. This done by dividing each dimension (x, y, z, E) in half, then
@@ -713,8 +706,7 @@ def test_single_hex_multiple_subvoxel_uniform():
     assert abs(tally[2] - 0.5) < 0.05
 
 
-# @with_setup(None, try_rm_file("sampling_mesh.h5m"))
-def test_multiple_hex_multiple_subvoxel_uniform():
+def test_multiple_hex_multiple_subvoxel_uniform(try_rm_file):
     """This test tests that particle are sampled uniformly from a uniform source
     defined on eight mesh volume elements in two energy groups.
     """
@@ -784,8 +776,7 @@ def test_multiple_hex_multiple_subvoxel_uniform():
             assert abs(item - 0.25) / 0.25 < 0.05
 
 
-# @with_setup(None, try_rm_file("sampling_mesh.h5m"))
-def test_bias():
+def test_bias(try_rm_file):
     """This test tests that a user-specified biasing scheme:
     1. Samples space uniformly according to the scheme.
     2. Adjusts weights accordingly. Sample calculations are provided in Case 2
@@ -849,8 +840,7 @@ def test_bias():
         assert abs(a - b) / b < 0.25
 
 
-# @with_setup(None, try_rm_file("sampling_mesh.h5m"))
-def test_bias_spatial():
+def test_bias_spatial(try_rm_file):
     """This test tests a user-specified biasing scheme for which the only 1
     bias group is supplied for a source distribution containing two energy
     groups. This bias group is applied to both energy groups. In this test,
@@ -929,8 +919,7 @@ def test_bias_spatial():
         assert abs(e_tally[i] - expected_e_tally[i]) / expected_e_tally[i] < 0.1
 
 
-# @with_setup(None, try_rm_file("sampling_mesh.h5m"))
-def test_subvoxel_multiple_hex_bias_1():
+def test_subvoxel_multiple_hex_bias_1(try_rm_file):
     """This test tests that particle are sampled from a biased source
     defined on two voxels (2*2 = 4 sub-voxels) with the biased tag length of 1.
     """
@@ -1014,8 +1003,7 @@ def test_subvoxel_multiple_hex_bias_1():
                 )
 
 
-# @with_setup(None, try_rm_file("sampling_mesh.h5m"))
-def test_subvoxel_multiple_hex_bias_max_num_cells_num_e_groups():
+def test_subvoxel_multiple_hex_bias_max_num_cells_num_e_groups(try_rm_file):
     """This test tests that particle are sampled from a biased source
     defined on two voxels (2*2 = 4 sub-voxels) with the biased tag length
     of max_num_cells*num_e_group.
@@ -1098,8 +1086,7 @@ def test_subvoxel_multiple_hex_bias_max_num_cells_num_e_groups():
                 )
 
 
-# @with_setup(None, try_rm_file("sampling_mesh.h5m"))
-def test_subvoxel_multiple_hex_bias_e_groups():
+def test_subvoxel_multiple_hex_bias_e_groups(try_rm_file):
     """This test tests that particle are sampled from a biased source
     defined on two voxels (2*2 = 4 sub-voxels) with the biased tag length
     of energy groups.
@@ -1843,7 +1830,6 @@ def _get_e_dis_exp(mode, cell_fracs, src_tag, bias_tag=None):
     return e_dis_exp
 
 
-# @with_setup(None, try_rm_file("sampling_mesh.h5m"))
 def _source_sampling_test_template(mode, cell_fracs_list, src_tag, bias_tag=None):
     """
     This function serve as a template for all source_sampling test cases.

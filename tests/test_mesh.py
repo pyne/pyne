@@ -50,8 +50,12 @@ from pyne.mesh import (
 
 warnings.simplefilter("ignore", QAWarning)
 
-def try_rm_file(filename):
-    return lambda: os.remove(filename) if os.path.exists(filename) else None
+@pytest.fixture
+def try_rm_file():
+    files = ["test_matlib.h5m", "test_matlib2.h5m", "test_no_matlib.h5m"]
+    yield files
+    for filename in files:
+        os.remove(filename) if os.path.exists(filename) else None
 
 
 def gen_mesh(mats=()):
@@ -681,9 +685,7 @@ def test_large_iterator():
 """
 
 
-# @with_setup(None, try_rm_file("test_matlib.h5m"))
-# @with_setup(None, try_rm_file("test_matlib2.h5m"))
-def test_matlib():
+def test_matlib(try_rm_file):
     mats = {
         0: Material({"H1": 1.0, "K39": 1.0}, density=1.1, metadata={"mat_number": 1}),
         1: Material({"H1": 0.1, "O16": 1.0}, density=2.2, metadata={"mat_number": 2}),
@@ -707,8 +709,7 @@ def test_matlib():
         assert m2.idx[i] == i
 
 
-# @with_setup(None, try_rm_file("test_no_matlib.h5m"))
-def test_no_matlib():
+def test_no_matlib(try_rm_file):
     m = gen_mesh(mats=None)
     m.write_hdf5("test_no_matlib.h5m")
 
