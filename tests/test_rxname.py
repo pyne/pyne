@@ -312,6 +312,3 @@ def test_no_id_mt_clash():
     badids = [rxid for rxid in rxname.id_name if rxid < 1000]
     assert 0 == len(badids)
 
-
-if __name__ == "__main__":
-    pytest.main()

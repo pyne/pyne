@@ -66,6 +66,3 @@ def test_elements():
     # has the same behaviour
     pyne_conf.NUC_DATA_PATH = orig
 
-
-if __name__ == "__main__":
-    pytest.main()

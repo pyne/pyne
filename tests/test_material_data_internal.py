@@ -2,7 +2,6 @@
 import os
 import math
 import warnings
-import pytest
 
 import numpy as np
 import numpy.testing as npt
@@ -41,8 +40,3 @@ def test_with_internal_data():
 
     pyne_conf.NUC_DATA_PATH = orig
 
-
-# Run as script
-#
-if __name__ == "__main__":
-    pytest.main()

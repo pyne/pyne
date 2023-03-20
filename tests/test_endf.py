@@ -1269,6 +1269,3 @@ How about the following three???
         else:
             print("OTHER   : '{}'".format(line))
 
-
-if __name__ == "__main__":
-    pytest.main()

@@ -2357,8 +2357,3 @@ def test_cram_h3():
     assert 0.5 == pytest.approx(obs[nucname.id("H3")])
     assert 0.5 == pytest.approx(obs[nucname.id("He3")])
 
-
-# Run as script
-#
-if __name__ == "__main__":
-    pytest.main()

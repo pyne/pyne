@@ -365,6 +365,3 @@ def test_tungsten():
     for solver in SOLVERS:
         yield check_tungsten, solver
 
-
-if __name__ == "__main__":
-    pytest.main()

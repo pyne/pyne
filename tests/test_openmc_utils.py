@@ -318,6 +318,3 @@ def test_create_meshtally():
     assert_array_almost_equal(mesh.n_flux[:], exp_result)
     assert_array_almost_equal(mesh.n_flux_err[:], exp_rel_err)
 
-
-if __name__ == "__main__":
-    pytest.main()

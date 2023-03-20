@@ -3,7 +3,6 @@ import os
 import io
 import warnings
 import sys
-import pytest
 from hashlib import md5
 
 import numpy as np
@@ -118,6 +117,3 @@ def test_ionization_spectra():
     assert_allclose(np.min(data, axis=0), min_values)
     assert_allclose(np.max(data, axis=0), max_values)
 
-
-if __name__ == "__main__":
-    pytest.main()

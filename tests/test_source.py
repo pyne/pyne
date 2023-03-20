@@ -2,7 +2,6 @@
 from pyne.source import PointSource
 import os
 import warnings
-import pytest
 
 from unittest import TestCase
 
@@ -90,8 +89,3 @@ def test_point_source_mcnp_5():
     exp_str = "SDEF POS=1 2 3\n" "     ERG=14\n" "     WGT=1\n" "     PAR=n"
     assert exp_str == pt_src.mcnp(6)
 
-
-# Run as script
-#
-if __name__ == "__main__":
-    pytest.main()

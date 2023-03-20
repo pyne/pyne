@@ -3,7 +3,6 @@ import os
 import warnings
 
 from unittest import TestCase
-import pytest
 
 
 from pyne.utils import QAWarning
@@ -92,8 +91,3 @@ def test_geant4_id():
     assert geant4("Proton") == "proton"
     assert geant4("Hydrogen") == "proton"
 
-
-# Run as script
-#
-if __name__ == "__main__":
-    pytest.main()

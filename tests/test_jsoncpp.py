@@ -406,6 +406,3 @@ def test_customwriter():
     assert cw.write(Value({"hello": 1})) == '{"hello": 1\n}\n'
     assert cw.write(Value("hello")) == '"hello"\n'
 
-
-if __name__ == "__main__":
-    pytest.main()

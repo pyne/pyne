@@ -13,6 +13,3 @@ import numpy as np
 
 from pyne import dtypes
 
-
-if __name__ == "__main__":
-    pytest.main()

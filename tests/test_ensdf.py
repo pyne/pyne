@@ -1185,6 +1185,3 @@ def test_time():
     assert_allclose(t, v, rtol=1e-14)
     assert_allclose(err, (vplus, vminus), rtol=1e-14)
 
-
-if __name__ == "__main__":
-    pytest.main()

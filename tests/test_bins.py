@@ -113,6 +113,3 @@ def test_point_collase_raises():
     with pytest.raises(ValueError):
         bins.pointwise_collapse(x_g, x, np.array([0, 1.0, 2.0]), log=True)
 
-
-if __name__ == "__main__":
-    pytest.main()

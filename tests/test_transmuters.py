@@ -14,8 +14,3 @@ def test_transmuters_cram():
     assert 0.5 == pytest.approx(n1[nucname.id("H3")])
     assert 0.5 == pytest.approx(n1[nucname.id("He3")])
 
-
-# Run as script
-#
-if __name__ == "__main__":
-    pytest.main()

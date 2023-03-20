@@ -4,7 +4,6 @@ import os
 import sys
 import json
 import warnings
-import pytest
 
 if sys.version_info[0] >= 3:
     from urllib.request import urlretrieve
@@ -197,6 +196,3 @@ def test_benchmark():
     for row in mat_err_compare(nuc_keys):
         yield check_materr, row
 
-
-if __name__ == "__main__":
-    pytest.main()

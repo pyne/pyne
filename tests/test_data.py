@@ -3,7 +3,6 @@ import os
 import math
 import warnings
 
-import pytest
 import numpy as np
 import numpy.testing as npt
 
@@ -750,6 +749,3 @@ def test_special_children():
             set(data.decay_data_children(nucname.id_to_state_id(item))) ==
             special_children[item])
 
-
-if __name__ == "__main__":
-    pytest.main()

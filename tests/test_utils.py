@@ -379,6 +379,3 @@ def test_ifbar():
         bar.next()
     bar.finish()
 
-
-if __name__ == "__main__":
-    pytest.main()

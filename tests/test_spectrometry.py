@@ -104,6 +104,3 @@ def test_gross_counts():
 def test_net_count():
     nc = sa.net_counts(gspec1, 475, 484, 1)
 
-
-if __name__ == "__main__":
-    pytest.main()

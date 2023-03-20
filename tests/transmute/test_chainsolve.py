@@ -145,9 +145,3 @@ def test_tm171_decay():
     obs = tm.transmute(inp, t=t_sim, phi=0.0, tol=1e-7)
     assert exp == pytest.approx(obs["TM171"], rel=1E-12)
 
-
-#
-# Run as script
-#
-if __name__ == "__main__":
-    pytest.main()

@@ -49,6 +49,3 @@ def test_internal_hashes():
     if remove_data:
         os.remove(test_data)
 
-
-if __name__ == "__main__":
-    pytest.main()

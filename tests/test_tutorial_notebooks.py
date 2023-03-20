@@ -10,7 +10,6 @@ try:
 except ImportError:
     from io import StringIO
 
-import pytest
 
 import glob
 
@@ -43,6 +42,3 @@ def test_notebooks():
         "Not all notebooks contained valid JSON. [%s] failed." % ", ".join(failed),
     )
 
-
-if __name__ == "__main__":
-    pytest.main()

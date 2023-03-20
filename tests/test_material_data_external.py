@@ -2,7 +2,6 @@
 import os
 import math
 import warnings
-import pytest
 
 import numpy as np
 import numpy.testing as npt
@@ -38,8 +37,3 @@ def test_with_external_data():
     assert (id("Fe56") in mat.comp) == True
     assert (id("Mn55") in mat.comp) == True
 
-
-# Run as script
-#
-if __name__ == "__main__":
-    pytest.main()

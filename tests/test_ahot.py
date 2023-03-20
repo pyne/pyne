@@ -60,6 +60,3 @@ def test_dgfem_lagrange_alternating():
 def test_sct_step_alternating():
     ahot_script.test_sct_step_alternating()
 
-
-if __name__ == "__main__":
-    pytest.main()

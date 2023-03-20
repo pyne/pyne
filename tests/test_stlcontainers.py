@@ -756,6 +756,3 @@ def test_map_int_vector_double():
     else:
         assert_array_almost_equal(m[42], [1.0, -65.5555, 1.0, -65.5555])
 
-
-if __name__ == "__main__":
-    pytest.main()

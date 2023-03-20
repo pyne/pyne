@@ -1143,6 +1143,3 @@ def test_ensdf_to_id():
     assert nucname.ensdf_to_id("28614") == 1142860000
     assert nucname.ensdf_to_id("269Hs") == 1082690000
 
-
-if __name__ == "__main__":
-    pytest.main()
