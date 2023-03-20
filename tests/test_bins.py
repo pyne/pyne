@@ -41,9 +41,7 @@ def check_pointwise_linear_collapse(x_g, x, y, exp):
     assert len(x_g) - 1 == len(obs)
     assert_array_almost_equal(exp, obs)
 
-
-def test_pointwise_linear_collapse():
-    cases = [
+@pytest.mark.parametrize("x_g, x, y, exp", [
         [
             np.array([0.0, 1.0, 2.0]),
             np.linspace(0.0, 2.0, 101),
@@ -68,10 +66,10 @@ def test_pointwise_linear_collapse():
             [2.0 / 3.0],
         ],
         [np.array([1.0, 2.0]), np.array([0.0, 2.0]), np.array([4.0, 6.0]), [5.5]],
-    ]
-    for x_g, x, y, exp in cases:
-        yield check_pointwise_linear_collapse, x_g, x, y, exp
-        yield check_pointwise_linear_collapse, x_g[::-1], x[::-1], y[::-1], exp[::-1]
+    ])
+def test_pointwise_linear_collapse(x_g, x, y, exp):
+    check_pointwise_linear_collapse(x_g, x, y, exp)
+    check_pointwise_linear_collapse(x_g[::-1], x[::-1], y[::-1], exp[::-1])
 
 
 def test_point_collapse():

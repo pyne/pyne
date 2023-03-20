@@ -488,7 +488,7 @@ def test_znum():
         92,
     ]
     for case, exp in zip(cases, exps):
-        yield check_cases, nucname.znum, case, exp
+        check_cases(nucname.znum, case, exp)
 
 
 def test_anum():
@@ -518,13 +518,13 @@ def test_anum():
         0,
     ]
     for case, exp in zip(cases, exps):
-        yield check_cases, nucname.anum, case, exp
+        check_cases(nucname.anum, case, exp)
 
 
 def test_snum():
     exps = [0, 0, 0, 0, 1, 0, 0, 1, 1, 4, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0]
     for case, exp in zip(cases, exps):
-        yield check_cases, nucname.snum, case, exp
+        check_cases(nucname.snum, case, exp)
 
 
 def test_zzaaam():
@@ -587,7 +587,7 @@ def test_zzaaam_to_id():
     for val, id in set(zip(vals, caseids)):
         if val is None:
             continue
-        yield check_cases, nucname.zzaaam_to_id, val, id
+        check_cases(nucname.zzaaam_to_id, val, id)
 
 
 def test_zzzaaa():
@@ -717,10 +717,10 @@ def test_mcnp_to_id():
     for val, id in set(zip(vals, caseids)):
         if val is None:
             continue
-        yield check_cases, nucname.mcnp_to_id, val, id
+        check_cases(nucname.mcnp_to_id, val, id)
 
     # tests for invalid inputs
-    yield pytest.raises, RuntimeError, nucname.mcnp_to_id, 92
+    pytest.raises(RuntimeError, nucname.mcnp_to_id, 92)
 
 
 def test_openmc():
@@ -781,10 +781,10 @@ def test_openmc_to_id():
     for val, id in set(zip(vals, caseids)):
         if val is None:
             continue
-        yield check_cases, nucname.openmc_to_id, val, id
+        check_cases(nucname.openmc_to_id, val, id)
 
     # tests for invalid inputs
-    yield pytest.raises, Exception, nucname.openmc_to_id, 92
+    pytest.raises(Exception, nucname.openmc_to_id, 92)
 
 
 def test_fluka():
@@ -846,7 +846,7 @@ def test_serpent_to_id():
     for val, id in set(zip(vals, caseids)):
         if val is None:
             continue
-        yield check_cases, nucname.serpent_to_id, val, id
+        check_cases(nucname.serpent_to_id, val, id)
 
 
 def test_nist():
@@ -896,7 +896,7 @@ def test_nist_to_id():
     for val, id in set(zip(vals, caseids)):
         if val is None:
             continue
-        yield check_cases, nucname.nist_to_id, val, id
+        check_cases(nucname.nist_to_id, val, id)
 
 
 def test_cinder():
@@ -946,7 +946,7 @@ def test_cinder_to_id():
     for val, id in set(zip(vals, caseids)):
         if val is None:
             continue
-        yield check_cases, nucname.cinder_to_id, val, id
+        check_cases(nucname.cinder_to_id, val, id)
 
 
 def test_alara():
@@ -1000,7 +1000,7 @@ def test_alara_to_id():
     for val, id in set(zip(vals, caseids)):
         if val is None:
             continue
-        yield check_cases, nucname.alara_to_id, val, id
+        check_cases(nucname.alara_to_id, val, id)
 
 
 def test_sza():
@@ -1098,34 +1098,34 @@ def test_sza_to_id():
     for val, id in set(zip(vals, caseids)):
         if val is None:
             continue
-        yield check_cases, nucname.sza_to_id, val, id
+        check_cases(nucname.sza_to_id, val, id)
 
 
 def test_isnuclide():
     are = [922350, "U235"]
     arent = ["U3", -30060000]
     for nuc in are:
-        yield assert_true, nucname.isnuclide(nuc)
+        assert nucname.isnuclide(nuc)
     for nuc in arent:
-        yield assert_false, nucname.isnuclide(nuc)
+        assert not nucname.isnuclide(nuc)
 
 
 def test_iselement_U235():
     are = [92, "U"]
     arent = [922350, "U235"]
     for nuc in are:
-        yield assert_true, nucname.iselement(nuc)
+        assert nucname.iselement(nuc)
     for nuc in arent:
-        yield assert_false, nucname.iselement(nuc)
+        assert not nucname.iselement(nuc)
 
 
 def test_iselement_H1():
     are = [1, "H"]
     arent = [1001, "H1"]
     for nuc in are:
-        yield assert_true, nucname.iselement(nuc)
+        assert nucname.iselement(nuc)
     for nuc in arent:
-        yield assert_false, nucname.iselement(nuc)
+        assert not nucname.iselement(nuc)
 
 
 def test_state_id_to_id():

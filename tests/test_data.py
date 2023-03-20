@@ -2,7 +2,7 @@
 import os
 import math
 import warnings
-
+import pytest
 import numpy as np
 import numpy.testing as npt
 
@@ -234,16 +234,14 @@ def test_abundance_by_z_for_soundness():
             assert abs(1 - sum([v[1] for v in vs])) < 1e-12
 
 
-def test_constants():
-    cases = [
+@pytest.mark.parametrize("exp,obs",[
         (3.14159265359, data.pi),
         (6.0221415e23, data.N_A),
         (1e24, data.barns_per_cm2),
         (1e-24, data.cm2_per_barn),
-        (24.0 * 3600.0, data.sec_per_day),
-    ]
-    for exp, obs in cases:
-        yield assert_equal, exp, obs
+        (24.0 * 3600.0, data.sec_per_day)])
+def test_constants(exp,obs):
+    assert exp == obs
 
 
 def test_metastable_id():

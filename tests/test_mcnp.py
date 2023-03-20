@@ -45,7 +45,7 @@ def test_read_header_block():
     """
 
     for ssrname in ssrnames:
-        yield check_read_header_block, ssrname
+        check_read_header_block(ssrname)
 
 
 def check_read_header_block(ssrname):
@@ -143,7 +143,7 @@ def test_compare():
     Tricky to test... this just verifies that comparisons are done right.
     """
     for ssrname in ssrnames:
-        yield check_compare, ssrname
+        check_compare(ssrname)
 
 
 def check_compare(ssrname):
@@ -164,7 +164,7 @@ def test_put_header_block():
     This tests that information is preserved correctly when written.
     """
     for ssrname, sswname in zip(ssrnames, sswnames):
-        yield check_put_header_block, ssrname, sswname
+        check_put_header_block(ssrname, sswname)
 
 
 def check_put_header_block(ssrname, sswname):

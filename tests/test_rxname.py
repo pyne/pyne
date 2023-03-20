@@ -58,7 +58,7 @@ def test_hash():
         "n_8",
     ]
     for rx in rxs:
-        yield assert_equal, rxname.hash(rx), _hash(rx)
+        assert rxname.hash(rx) == _hash(rx)
 
 
 def test_name_names():
