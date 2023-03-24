@@ -845,7 +845,7 @@ def test_is_data():
         "total   1.4597e-08  9.3939e-09  5.3291e-10  8.3915e-11",
     ]
     for line in lines:
-        assert _is_data(line) == True
+        assert _is_data(line)
     # test special line
     line = "===========\n"
     assert _is_data(line) == False
