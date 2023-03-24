@@ -848,7 +848,7 @@ def test_is_data():
         assert _is_data(line)
     # test special line
     line = "===========\n"
-    assert _is_data(line) == False
+    assert !_is_data(line)
 
 
 def test_read_decay_times():
