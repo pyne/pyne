@@ -19,9 +19,9 @@ from pyne import enrichment as enr
 if not os.path.isfile(pyne.nuc_data):
     raise RuntimeError("Tests require nuc_data.h5.  Please run nuc_data_make.")
 
-@pytest.fixture()
-def solver_array():
-    return ["symbolic", "numeric"]
+@pytest.fixture(params=["symbolic", "numeric"])
+def solver(request):
+    return request.param
 
 
 #
@@ -243,9 +243,8 @@ def check_sample_feed(solver):
     assert casc.swu_per_prod / 8.000914029577306 == pytest.approx(1.0, rel=1E-5)
 
 
-def test_sample_feed(solver_array):
-    for solver in solver_array:
-        check_sample_feed(solver)
+def test_sample_feed(solver):
+    check_sample_feed(solver)
 
 
 def check_NU(solver):
@@ -279,9 +278,8 @@ def check_NU(solver):
     assert casc.swu_per_prod / 7.69362000806 == pytest.approx(1.0, rel=1E-5)
 
 
-def test_NU(solver_array):
-    for solver in solver_array:
-        check_NU(solver)
+def test_NU(solver):
+    check_NU(solver)
 
 
 def check_vision(solver):
@@ -315,9 +313,8 @@ def check_vision(solver):
     assert casc.swu_per_prod / 7.85797310499 == pytest.approx(1.0, rel=1E-4)
 
 
-def test_vision(solver_array):
-    for solver in solver_array:
-        check_vision(solver)
+def test_vision(solver):
+    check_vision(solver)
 
 
 def check_tungsten(solver):
@@ -363,7 +360,6 @@ def check_tungsten(solver):
     assert casc.swu_per_prod / 900.810164953 == pytest.approx(1.0, rel=1E-3)
 
 
-def test_tungsten(solver_array):
-    for solver in solver_array:
-        check_tungsten(solver)
+def test_tungsten(solver):
+    check_tungsten(solver)
 
