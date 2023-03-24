@@ -77,7 +77,7 @@ def test_rtflux_basics():
     assert rt.effk == 0.892322838306427
     assert rt.power == 1.0
     assert rt.nblok == 1
-    assert rt.adjoint == False
+    assert not rt.adjoint
 
 
 def test_rtflux_3D():
@@ -256,7 +256,7 @@ def test_rtflux_raises():
 
 def test_atflux_adjoint():
     at = Atflux("files_test_cccc/atflux_3D")
-    assert at.adjoint == True
+    assert at.adjoint
 
 
 def test_atflux_eng_order():

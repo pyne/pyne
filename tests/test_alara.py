@@ -837,7 +837,7 @@ def test_is_data():
         "Zone #1: zone_0",
     ]
     for line in lines:
-        assert !_is_data(line)
+        assert not _is_data(line)
 
     lines = [
         "h-3     9.5258e-18  9.5258e-18  9.5251e-18  9.5214e-18",
@@ -848,7 +848,7 @@ def test_is_data():
         assert _is_data(line)
     # test special line
     line = "===========\n"
-    assert !_is_data(line)
+    assert not _is_data(line)
 
 
 def test_read_decay_times():
