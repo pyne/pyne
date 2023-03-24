@@ -837,7 +837,7 @@ def test_is_data():
         "Zone #1: zone_0",
     ]
     for line in lines:
-        assert _is_data(line) == False
+        assert !_is_data(line)
 
     lines = [
         "h-3     9.5258e-18  9.5258e-18  9.5251e-18  9.5214e-18",
