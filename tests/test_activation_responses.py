@@ -239,9 +239,9 @@ def _activation_responses_test_step1(activation_responses_run_dir):
     os.remove(step1_file)
     os.remove(dst)
 
-    assert f1 == True
-    assert f2 == True
-    assert f3 == True
+    assert f1
+    assert f2
+    assert f3
 
 
 def _activation_responses_test_step2(activation_responses_run_dir):
