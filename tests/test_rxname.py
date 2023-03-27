@@ -24,8 +24,7 @@ def _hash(s):
     return h
 
 
-def test_hash():
-    rxs = [
+@pytest.mark.parametrize("rx",[
         "a",
         "hello",
         "total",
@@ -56,9 +55,9 @@ def test_hash():
         "n_6",
         "n_7",
         "n_8",
-    ]
-    for rx in rxs:
-        assert rxname.hash(rx) == _hash(rx)
+    ])
+def test_hash(rx):
+    assert rxname.hash(rx) == _hash(rx)
 
 
 def test_name_names():

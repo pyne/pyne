@@ -37,15 +37,15 @@ ssrname_onetrack = os.path.join(thisdir, "mcnp_surfsrc_onetrack.w")
 # Test SurfSrc class
 
 
-def test_read_header_block():
+@pytest.mark.parametrize("ssrname", ssrnames)
+def test_read_header_block(ssrname):
     """Test the read_header() method in the SurfSrc class
     We compare the SurfSrc object variables with expected values from the
     multiple write files
     'mcnp_surfsrc.w', 'mcnpx_surfsrc.w', and 'mcnp6_surfsrc.w'.
     """
 
-    for ssrname in ssrnames:
-        check_read_header_block(ssrname)
+    check_read_header_block(ssrname)
 
 
 def check_read_header_block(ssrname):
@@ -138,12 +138,12 @@ def check_read_header_block(ssrname):
         assert ssr.kjaq == 0
 
 
-def test_compare():
+@pytest.mark.parametrize("ssrname", ssrnames)
+def test_compare(ssrname):
     """Test the __cmp__() method in the SurfSrc class
     Tricky to test... this just verifies that comparisons are done right.
     """
-    for ssrname in ssrnames:
-        check_compare(ssrname)
+    check_compare(ssrname)
 
 
 def check_compare(ssrname):
@@ -159,12 +159,12 @@ def check_compare(ssrname):
     ssrB.close()
 
 
-def test_put_header_block():
+@pytest.mark.parametrize("ssrname, sswname", zip(ssrnames,sswnames))
+def test_put_header_block(ssrname,sswname):
     """We copy the header block, write to new file, re-read, and compare.
     This tests that information is preserved correctly when written.
     """
-    for ssrname, sswname in zip(ssrnames, sswnames):
-        check_put_header_block(ssrname, sswname)
+    check_put_header_block(ssrname,sswname)
 
 
 def check_put_header_block(ssrname, sswname):

@@ -461,8 +461,7 @@ def test_name():
     assert nucname.name(2420950) == "Am242"
 
 
-def test_znum():
-    exps = [
+@pytest.mark.parametrize("case, exp", zip(cases,[
         2,
         2,
         96,
@@ -486,13 +485,12 @@ def test_znum():
         94,
         95,
         92,
-    ]
-    for case, exp in zip(cases, exps):
-        check_cases(nucname.znum, case, exp)
+    ]))
+def test_znum(case,exp):
+    check_cases(nucname.znum, case, exp)
 
 
-def test_anum():
-    exps = [
+@pytest.mark.parametrize("case, exp",zip(cases,[
         4,
         4,
         244,
@@ -516,15 +514,15 @@ def test_anum():
         239,
         242,
         0,
-    ]
-    for case, exp in zip(cases, exps):
-        check_cases(nucname.anum, case, exp)
+    ]))
+def test_anum(case, exp):
+    check_cases(nucname.anum, case, exp)
 
 
-def test_snum():
-    exps = [0, 0, 0, 0, 1, 0, 0, 1, 1, 4, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0]
-    for case, exp in zip(cases, exps):
-        check_cases(nucname.snum, case, exp)
+@pytest.mark.parametrize("case, exp",zip(cases,
+    [0, 0, 0, 0, 1, 0, 0, 1, 1, 4, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0]))
+def test_snum(case, exp):
+    check_cases(nucname.snum, case, exp)
 
 
 def test_zzaaam():
@@ -558,8 +556,7 @@ def test_zzaaam():
     assert nucname.zzaaam(2420950) == 952420
 
 
-def test_zzaaam_to_id():
-    vals = [
+@pytest.mark.parametrize("val, id",set(zip([
         20040,
         20040,
         962440,
@@ -583,10 +580,9 @@ def test_zzaaam_to_id():
         942390,
         952420,
         920000,
-    ]
-    for val, id in set(zip(vals, caseids)):
-        if val is None:
-            continue
+    ],caseids)))
+def test_zzaaam_to_id(val, id):
+    if val is not None:
         check_cases(nucname.zzaaam_to_id, val, id)
 
 
@@ -688,8 +684,7 @@ def test_mcnp():
     assert nucname.mcnp(2360921) == 92636
 
 
-def test_mcnp_to_id():
-    vals = [
+@pytest.mark.parametrize("val, id",set(zip([
         2004,
         2004,
         96244,
@@ -713,10 +708,9 @@ def test_mcnp_to_id():
         94239,
         95642,
         92000,
-    ]
-    for val, id in set(zip(vals, caseids)):
-        if val is None:
-            continue
+    ], caseids)))
+def test_mcnp_to_id(val, id):
+    if val is not None:
         check_cases(nucname.mcnp_to_id, val, id)
 
     # tests for invalid inputs
@@ -752,8 +746,7 @@ def test_openmc():
     assert nucname.openmc(930000000) == "Np0"
 
 
-def test_openmc_to_id():
-    vals = [
+@pytest.mark.parametrize("val, id", set(zip([
         "He4",
         "He4",
         "Cm244",
@@ -777,10 +770,9 @@ def test_openmc_to_id():
         "Pu239",
         "Am242",
         "U0",
-    ]
-    for val, id in set(zip(vals, caseids)):
-        if val is None:
-            continue
+    ], caseids)))
+def test_openmc_to_id(val, id):
+    if val is not None:
         check_cases(nucname.openmc_to_id, val, id)
 
     # tests for invalid inputs
@@ -816,9 +808,7 @@ def test_serpent():
     assert nucname.serpent(2420951) == "Am-242m"
 
 
-def test_serpent_to_id():
-    # use None for impossible forms
-    vals = [
+@pytest.mark.parametrize("val, id",set(zip([
         "He-4",
         "He-4",
         "Cm-244",
@@ -842,10 +832,9 @@ def test_serpent_to_id():
         "Pu-239",
         "Am-242",
         "U-nat",
-    ]
-    for val, id in set(zip(vals, caseids)):
-        if val is None:
-            continue
+    ], caseids)))
+def test_serpent_to_id(val, id):
+    if val is not None:
         check_cases(nucname.serpent_to_id, val, id)
 
 
@@ -866,9 +855,7 @@ def test_nist():
     assert nucname.nist(2420951) == "242Am"
 
 
-def test_nist_to_id():
-    # use None for impossible forms
-    vals = [
+@pytest.mark.parametrize("val, id",set(zip([
         "4He",
         "4He",
         "244Cm",
@@ -892,10 +879,9 @@ def test_nist_to_id():
         "239Pu",
         "242Am",
         "U",
-    ]
-    for val, id in set(zip(vals, caseids)):
-        if val is None:
-            continue
+    ], caseids)))
+def test_nist_to_id(val,id):
+    if val is not None:
         check_cases(nucname.nist_to_id, val, id)
 
 
@@ -917,8 +903,7 @@ def test_cinder():
     assert nucname.cinder(2420951) == 2420951
 
 
-def test_cinder_to_id():
-    vals = [
+@pytest.mark.parametrize("val, id",set(zip([
         40020,
         40020,
         2440960,
@@ -942,10 +927,9 @@ def test_cinder_to_id():
         2390940,
         2420950,
         920,
-    ]
-    for val, id in set(zip(vals, caseids)):
-        if val is None:
-            continue
+    ], caseids)))
+def test_cinder_to_id(val, id):
+    if val is not None:
         check_cases(nucname.cinder_to_id, val, id)
 
 
@@ -970,9 +954,7 @@ def test_alara():
     assert nucname.alara(2420950) == "am:242"
 
 
-def test_alara_to_id():
-    # use None for impossible forms
-    vals = [
+@pytest.mark.parametrize("val, id",set(zip([
         "he:4",
         "he:4",
         "cm:244",
@@ -996,10 +978,9 @@ def test_alara_to_id():
         "pu:239",
         "am:242",
         "u",
-    ]
-    for val, id in set(zip(vals, caseids)):
-        if val is None:
-            continue
+    ], caseids)))
+def test_alara_to_id(val, id):
+    if val is not None:
         check_cases(nucname.alara_to_id, val, id)
 
 
@@ -1069,8 +1050,7 @@ def test_groundstate():
     assert nucname.groundstate("95-Am-242") == 952420000
 
 
-def test_sza_to_id():
-    vals = [
+@pytest.mark.parametrize("val, id",set(zip([
         2004,
         2004,
         96244,
@@ -1094,38 +1074,40 @@ def test_sza_to_id():
         94239,
         95242,
         92000,
-    ]
-    for val, id in set(zip(vals, caseids)):
-        if val is None:
-            continue
+    ], caseids)))
+def test_sza_to_id(val, id):
+    if val is not None:
         check_cases(nucname.sza_to_id, val, id)
 
 
-def test_isnuclide():
-    are = [922350, "U235"]
-    arent = ["U3", -30060000]
-    for nuc in are:
-        assert nucname.isnuclide(nuc)
-    for nuc in arent:
-        assert not nucname.isnuclide(nuc)
+@pytest.mark.parametrize("nuc", [922350, "U235"])
+def test_isnuclide(nuc):
+    assert nucname.isnuclide(nuc)
 
 
-def test_iselement_U235():
-    are = [92, "U"]
-    arent = [922350, "U235"]
-    for nuc in are:
-        assert nucname.iselement(nuc)
-    for nuc in arent:
-        assert not nucname.iselement(nuc)
+@pytest.mark.parametrize("nuc", ["U3", -30060000])
+def test_isnotnuclide(nuc):
+    assert not nucname.isnuclide(nuc)
 
 
-def test_iselement_H1():
-    are = [1, "H"]
-    arent = [1001, "H1"]
-    for nuc in are:
-        assert nucname.iselement(nuc)
-    for nuc in arent:
-        assert not nucname.iselement(nuc)
+@pytest.mark.parametrize("nuc", [92, "U"])
+def test_iselement_U235(nuc):
+    assert nucname.iselement(nuc)
+
+
+@pytest.mark.parametrize("nuc", [922350, "U235"])
+def test_isnotelement_U235(nuc):
+    assert not nucname.iselement(nuc)
+
+
+@pytest.mark.parametrize("nuc", [1, "H"])
+def test_iselement_H1(nuc):
+    assert nucname.iselement(nuc)
+
+
+@pytest.mark.parametrize("nuc", [1001, "H1"])
+def test_isnotelement_H1(nuc):
+    assert not nucname.iselement(nuc)
 
 
 def test_state_id_to_id():
