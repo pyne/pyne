@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 import os
 
-from nose.tools import assert_equal, assert_in, assert_almost_equal
+import pytest
 
 import pyne.ace
 
@@ -37,69 +37,69 @@ def test_read_c12_ascii():
     c12 = pyne.ace.Library("C012-n.ace")
     c12.read()
 
-    assert_in("6000.00c", c12.tables)
+    assert "6000.00c" in c12.tables
     table = c12.tables["6000.00c"]
 
-    assert_equal(table.nxs[1], 38937)
-    assert_equal(table.nxs[2], 6000)
-    assert_equal(table.nxs[3], 1513)
-    assert_equal(table.jxs[1], 1)
+    assert table.nxs[1] == 38937
+    assert table.nxs[2] == 6000
+    assert table.nxs[3] == 1513
+    assert table.jxs[1] == 1
 
-    assert_in(2, table.reactions)
-    assert_in(107, table.reactions)
-    assert_in(204, table.reactions)
-    assert_in(444, table.reactions)
+    assert 2 in table.reactions
+    assert 107 in table.reactions
+    assert 204 in table.reactions
+    assert 444 in table.reactions
 
-    assert_almost_equal(table.energy[0], 1.0e-11)
+    assert table.energy[0] == pytest.approx(1.0e-11)
 
-    assert_equal(table.reactions[2].sigma[0], 78.04874)
-    assert_equal(table.reactions[2].sigma[-1], 1.00772)
+    assert table.reactions[2].sigma[0] == 78.04874
+    assert table.reactions[2].sigma[-1] == 1.00772
 
 
 def test_read_c12_2p0_ascii():
     c12 = pyne.ace.Library("C012-n-2p0.ace")
     c12.read()
 
-    assert_in("6000.000nc", c12.tables)
+    assert "6000.000nc" in c12.tables
     table = c12.tables["6000.000nc"]
 
-    assert_equal(table.nxs[1], 38937)
-    assert_equal(table.nxs[2], 6000)
-    assert_equal(table.nxs[3], 1513)
-    assert_equal(table.jxs[1], 1)
+    assert table.nxs[1] == 38937
+    assert table.nxs[2] == 6000
+    assert table.nxs[3] == 1513
+    assert table.jxs[1] == 1
 
-    assert_in(2, table.reactions)
-    assert_in(107, table.reactions)
-    assert_in(204, table.reactions)
-    assert_in(444, table.reactions)
+    assert 2 in table.reactions
+    assert 107 in table.reactions
+    assert 204 in table.reactions
+    assert 444 in table.reactions
 
-    assert_almost_equal(table.energy[0], 1.0e-11)
+    assert table.energy[0] == pytest.approx(1.0e-11)
 
-    assert_equal(table.reactions[2].sigma[0], 78.04874)
-    assert_equal(table.reactions[2].sigma[-1], 1.00772)
+    assert table.reactions[2].sigma[0] == 78.04874
+    assert table.reactions[2].sigma[-1] == 1.00772
 
 
 def test_read_c12_binary():
     c12 = pyne.ace.Library("C12-binary.ace")
     c12.read()
 
-    assert_in("6000.00c", c12.tables)
+    assert "6000.00c" in c12.tables
     table = c12.tables["6000.00c"]
 
-    assert_equal(table.nxs[1], 38937)
-    assert_equal(table.nxs[2], 6000)
-    assert_equal(table.nxs[3], 1513)
-    assert_equal(table.jxs[1], 1)
+    assert table.nxs[1] == 38937
+    assert table.nxs[2] == 6000
+    assert table.nxs[3] == 1513
+    assert table.jxs[1] == 1
 
-    assert_in(2, table.reactions)
-    assert_in(107, table.reactions)
-    assert_in(204, table.reactions)
-    assert_in(444, table.reactions)
+    assert 2 in table.reactions
+    assert 107 in table.reactions
+    assert 204 in table.reactions
+    assert 444 in table.reactions
 
-    assert_almost_equal(table.energy[0], 1.0e-11)
+    assert table.energy[0] == pytest.approx(1.0e-11)
 
-    assert_equal(table.reactions[2].sigma[0], 78.04874)
-    assert_equal(table.reactions[2].sigma[-1], 1.00772)
+    assert table.reactions[2].sigma[0] == 78.04874
+    assert table.reactions[2].sigma[-1] == 1.00772
 
 
 def teardown():

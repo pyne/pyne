@@ -1,20 +1,7 @@
 """chainsolve transmutation tests."""
 import os
-import nose
+import pytest
 import warnings
-
-from nose.tools import (
-    assert_equal,
-    assert_not_equal,
-    assert_raises,
-    raises,
-    assert_almost_equal,
-    assert_true,
-    assert_false,
-    assert_is,
-    with_setup,
-    assert_less,
-)
 
 from numpy.testing import dec, assert_array_equal
 
@@ -53,15 +40,15 @@ def test_check_phi():
 
     # First check that None is properly converted
     tm._phi = None
-    assert_is(tm.phi, None)
+    assert tm.phi is None
     tm.phi = np.ones(numeaf)
     assert_array_equal(tm.phi, np.ones(numeaf))
     # Check that incorrect number of entries raises an exception
-    assert_raises(ValueError, set_phi, np.ones((50, 1)))
+    pytest.raises(ValueError, set_phi, np.ones((50, 1)))
     # Check that a negative entry raises an exception
     x = np.ones(numeaf)
     x[123] = -1
-    assert_raises(ValueError, set_phi, x)
+    pytest.raises(ValueError, set_phi, x)
 
 
 def test_grow_matrix1():
@@ -90,7 +77,7 @@ def test_grow_matrix2():
     assert_array_equal(exp, obs)
 
 
-@with_setup(None, lambda: os.remove("log.txt") if os.path.exists("log.txt") else None)
+# @with_setup(None, lambda: os.remove("log.txt") if os.path.exists("log.txt") else None)
 def test_tree_log():
     "Tests corret implementation of the _log_tree() function"
     filename = "log.txt"
@@ -130,7 +117,7 @@ def test_tree_log():
     # print repr(exp)
     # print repr(obs)
     # print obs == exp
-    assert_equal(exp, obs)
+    assert exp == obs
 
 
 def test_zero_flux():
@@ -138,7 +125,7 @@ def test_zero_flux():
     an isotope with a zero decay-constant."""
     inp = Material({"FE56": 1.0}, mass=1.0)
     obs = tm.transmute(inp, t=100.0, tol=1e-7)
-    assert_almost_equal(obs["FE56"], 1.0)
+    assert obs["FE56"] == pytest.approx(1.0)
 
 
 def test_root_decrease():
@@ -146,7 +133,7 @@ def test_root_decrease():
     phi = 1e12 * np.ones(175)
     inp = Material({"FE56": 1.0}, mass=1.0)
     obs = tm.transmute(inp, t=100.0, phi=phi, tol=1e-7)
-    assert_less(obs["FE56"], 1.0)
+    assert obs["FE56"] < 1.0
 
 
 def test_tm171_decay():
@@ -156,11 +143,5 @@ def test_tm171_decay():
     exp = np.exp(-1 * lamb * t_sim)
     inp = Material({"TM171": 1.0}, mass=1.0)
     obs = tm.transmute(inp, t=t_sim, phi=0.0, tol=1e-7)
-    assert_almost_equal(exp, obs["TM171"], 12)
+    assert exp == pytest.approx(obs["TM171"], rel=1E-12)
 
-
-#
-# Run as script
-#
-if __name__ == "__main__":
-    nose.runmodule()

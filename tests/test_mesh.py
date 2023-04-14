@@ -20,22 +20,7 @@ except ImportError:
     from itertools import zip_longest
 
 from operator import itemgetter
-from nose.tools import (
-    assert_true,
-    assert_equal,
-    assert_raises,
-    with_setup,
-    assert_is,
-    assert_is_instance,
-    assert_in,
-    assert_not_in,
-    assert_almost_equal,
-    assert_is_none,
-    assert_is_not_none,
-    assert_false,
-)
-from nose.plugins.skip import SkipTest
-
+import pytest
 import numpy as np
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 
@@ -44,7 +29,7 @@ from pyne.utils import QAWarning
 from pyne.mesh import HAVE_PYMOAB
 
 if not HAVE_PYMOAB:
-    raise SkipTest
+    pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
 from pyne.mesh import (
     NativeMeshTag,
     ComputedTag,
@@ -65,9 +50,12 @@ from pyne.mesh import (
 
 warnings.simplefilter("ignore", QAWarning)
 
-
-def try_rm_file(filename):
-    return lambda: os.remove(filename) if os.path.exists(filename) else None
+@pytest.fixture
+def try_rm_file():
+    files = ["test_matlib.h5m", "test_matlib2.h5m", "test_no_matlib.h5m"]
+    yield files
+    for filename in files:
+        os.remove(filename) if os.path.exists(filename) else None
 
 
 def gen_mesh(mats=()):
@@ -112,9 +100,9 @@ def test_elem_volume():
     for __, __, ve in tetmesh:
         vols.append(tetmesh.elem_volume(ve))
 
-    assert_almost_equal(np.min(vols), 0.13973, places=5)
-    assert_almost_equal(np.max(vols), 2.1783, places=4)
-    assert_almost_equal(np.mean(vols), 0.52702, places=5)
+    assert np.min(vols) == pytest.approx(0.13973, rel=1E-4)
+    assert np.max(vols) == pytest.approx(2.1783, rel=1E-4)
+    assert np.mean(vols) == pytest.approx(0.52702, rel=1E-5)
 
     # Test hex elements recognition and calculation
     filename = os.path.join(os.path.dirname(__file__), "files_mesh_test/grid543.h5m")
@@ -122,14 +110,14 @@ def test_elem_volume():
     vols = list()
     for __, __, ve in mesh:
         vols.append(mesh.elem_volume(ve))
-    assert_almost_equal(np.mean(vols), 51.3333, places=4)
+    assert np.mean(vols) == pytest.approx(51.3333, rel=1E-4)
 
 
 def test_ve_center():
     m = Mesh(structured=True, structured_coords=[[-1, 3, 5], [-1, 1], [-1, 1]])
     exp_centers = [(1, 0, 0), (4, 0, 0)]
     for i, mat, ve in m:
-        assert_equal(m.ve_center(ve), exp_centers[i])
+        assert m.ve_center(ve) == exp_centers[i]
 
 
 #############################################
@@ -141,9 +129,9 @@ def test_structured_mesh_from_coords():
     sm = Mesh(
         structured_coords=[range(1, 5), range(1, 4), range(1, 3)], structured=True
     )
-    assert_true(sm.dims == [0, 0, 0, 3, 2, 1])
+    assert sm.dims == [0, 0, 0, 3, 2, 1]
     assert_array_equal(sm.structured_coords, [range(1, 5), range(1, 4), range(1, 3)])
-    assert_equal(sm.structured_ordering, "xyz")
+    assert sm.structured_ordering == "xyz"
 
 
 def test_create_by_set():
@@ -164,33 +152,33 @@ def test_create_by_set():
     coords[2::3] = np.repeat(pnts, pnts.size * pnts.size)
     a = scdi.construct_box(low, high, coords).box_set()
     sm = Mesh(mesh=mesh, structured_set=a, structured=True)
-    assert_true(sm.dims == [0, 0, 0, 1, 1, 1])
+    assert sm.dims == [0, 0, 0, 1, 1, 1]
 
 
 def test_create_by_file():
     filename = os.path.join(os.path.dirname(__file__), "files_mesh_test/")
     filename += "grid543.h5m"
     sm = Mesh(mesh=filename, structured=True)
-    assert_true(sm.dims == [1, 11, -5, 5, 14, -3])
+    assert sm.dims == [1, 11, -5, 5, 14, -3]
     # # This mesh is interesting because the i/j/k space is not numbered from
     # # zero. Check that divisions are correct
 
-    assert_equal(sm.structured_get_divisions("x"), [1.0, 2.0, 3.0, 4.0, 5.0])
-    assert_equal(sm.structured_get_divisions("y"), [1.0, 5.0, 10.0, 15.0])
-    assert_equal(sm.structured_get_divisions("z"), [-10.0, 2.0, 12.0])
+    assert sm.structured_get_divisions("x") == [1.0, 2.0, 3.0, 4.0, 5.0]
+    assert sm.structured_get_divisions("y") == [1.0, 5.0, 10.0, 15.0]
+    assert sm.structured_get_divisions("z") == [-10.0, 2.0, 12.0]
 
-    assert_equal(len(sm.structured_coords[0]), len(np.linspace(1, 5, num=5)))
+    assert len(sm.structured_coords[0]) == len(np.linspace(1, 5, num=5))
     for a, e in zip(sm.structured_coords[0], np.linspace(1, 5, num=5)):
-        assert_equal(a, e)
-    assert_equal(sm.structured_coords[1], [1.0, 5.0, 10.0, 15.0])
-    assert_equal(sm.structured_coords[2], [-10.0, 2.0, 12.0])
+        assert a == e
+    assert sm.structured_coords[1] == [1.0, 5.0, 10.0, 15.0]
+    assert sm.structured_coords[2] == [-10.0, 2.0, 12.0]
 
     # loading a test file without structured mesh metadata should raise an
     # error
     filename2 = os.path.join(
         os.path.dirname(__file__), "files_mesh_test/no_str_mesh.h5m"
     )
-    assert_raises(RuntimeError, Mesh, mesh=filename2, structured=True)
+    pytest.raises(RuntimeError, Mesh, mesh=filename2, structured=True)
 
 
 def test_structured_get_hex():
@@ -200,32 +188,32 @@ def test_structured_get_hex():
     )
 
     def check(e):
-        assert_true(isinstance(e, _eh_py_type))
+        assert isinstance(e, _eh_py_type)
 
     check(sm.structured_get_hex(0, 0, 0))
     check(sm.structured_get_hex(1, 1, 1))
     check(sm.structured_get_hex(3, 0, 0))
     check(sm.structured_get_hex(3, 2, 1))
 
-    assert_raises(MeshError, sm.structured_get_hex, -1, -1, -1)
-    assert_raises(MeshError, sm.structured_get_hex, 4, 0, 0)
-    assert_raises(MeshError, sm.structured_get_hex, 0, 3, 0)
-    assert_raises(MeshError, sm.structured_get_hex, 0, 0, 2)
+    pytest.raises(MeshError, sm.structured_get_hex, -1, -1, -1)
+    pytest.raises(MeshError, sm.structured_get_hex, 4, 0, 0)
+    pytest.raises(MeshError, sm.structured_get_hex, 0, 3, 0)
+    pytest.raises(MeshError, sm.structured_get_hex, 0, 0, 2)
 
 
 def test_structured_hex_volume():
 
     sm = Mesh(structured_coords=[[0, 1, 3], [-3, -2, 0], [12, 13, 15]], structured=True)
-    assert_equal(sm.structured_hex_volume(0, 0, 0), 1)
-    assert_equal(sm.structured_hex_volume(1, 0, 0), 2)
-    assert_equal(sm.structured_hex_volume(0, 1, 0), 2)
-    assert_equal(sm.structured_hex_volume(1, 1, 0), 4)
-    assert_equal(sm.structured_hex_volume(1, 1, 1), 8)
+    assert sm.structured_hex_volume(0, 0, 0) == 1
+    assert sm.structured_hex_volume(1, 0, 0) == 2
+    assert sm.structured_hex_volume(0, 1, 0) == 2
+    assert sm.structured_hex_volume(1, 1, 0) == 4
+    assert sm.structured_hex_volume(1, 1, 1) == 8
 
     ijk_all = itertools.product(*([[0, 1]] * 3))
 
     for V, ijk in zip_longest(sm.structured_iterate_hex_volumes(), ijk_all):
-        assert_equal(V, sm.structured_hex_volume(*ijk))
+        assert V == sm.structured_hex_volume(*ijk)
 
 
 def test_structured_get_vertex():
@@ -242,7 +230,7 @@ def test_structured_get_vertex():
                 print("{0} {1} {2}".format(i, j, k))
                 vtx = sm.structured_get_vertex(i, j, k)
                 vcoord = sm.mesh.get_coords(vtx)
-                assert_true(all(vcoord == [x, y, z]))
+                assert all(vcoord == [x, y, z])
 
 
 def test_get_divs():
@@ -252,16 +240,16 @@ def test_get_divs():
 
     sm = Mesh(structured_coords=[x, y, z], structured=True)
 
-    assert_equal(sm.structured_get_divisions("x"), x)
-    assert_equal(sm.structured_get_divisions("y"), y)
-    assert_equal(sm.structured_get_divisions("z"), z)
+    assert sm.structured_get_divisions("x") == x
+    assert sm.structured_get_divisions("y") == y
+    assert sm.structured_get_divisions("z") == z
 
 
 def test_iter_structured_idx():
     m = gen_mesh()  # gen_mesh uses zyx order
     xyz_idx = [0, 2, 1, 3]  # expected results in xyz order
     for n, i in enumerate(m.iter_structured_idx("xyz")):
-        assert_equal(i, xyz_idx[n])
+        assert i == xyz_idx[n]
 
 
 #############################################
@@ -546,11 +534,11 @@ def test_bad_iterates():
         structured=True, structured_coords=[range(10, 15), range(21, 25), range(31, 34)]
     )
 
-    assert_raises(MeshError, sm.structured_iterate_hex, "abc")
-    assert_raises(TypeError, sm.structured_iterate_hex, 12)
-    assert_raises(MeshError, sm.structured_iterate_hex, "xxyz")
-    assert_raises(MeshError, sm.structured_iterate_hex, "yyx")
-    assert_raises(MeshError, sm.structured_iterate_hex, "xyz", z=[0, 1, 2])
+    pytest.raises(MeshError, sm.structured_iterate_hex, "abc")
+    pytest.raises(TypeError, sm.structured_iterate_hex, 12)
+    pytest.raises(MeshError, sm.structured_iterate_hex, "xxyz")
+    pytest.raises(MeshError, sm.structured_iterate_hex, "yyx")
+    pytest.raises(MeshError, sm.structured_iterate_hex, "xyz", z=[0, 1, 2])
 
 
 def test_iterate_3d():
@@ -568,7 +556,7 @@ def test_iterate_3d():
     # Test the zyx order, which is default; it should be equivalent
     # to the standard pyne.mesh iterator
     for it_x, sm_x in zip_longest(it, sm.structured_iterate_hex()):
-        assert_equal(it_x, sm_x)
+        assert it_x == sm_x
 
     # testing xyz
 
@@ -577,7 +565,7 @@ def test_iterate_3d():
     for ijk_index, sm_x in zip_longest(
         all_indices_zyx, sm.structured_iterate_hex("xyz")
     ):
-        assert_equal(sm.structured_get_hex(*ijk_index), sm_x)
+        assert sm.structured_get_hex(*ijk_index) == sm_x
 
     def _tuple_sort(collection, indices):
         # sorting function for order test
@@ -597,7 +585,7 @@ def test_iterate_3d():
         for ijk_index, sm_x in zip_longest(
             _tuple_sort(all_indices, order), sm.structured_iterate_hex(order, **kw)
         ):
-            assert_equal(sm.structured_get_hex(*ijk_index), sm_x)
+            assert sm.structured_get_hex(*ijk_index) == sm_x
 
     test_order("yxz", I, J, K)
     test_order("yzx", I, J, K)
@@ -619,7 +607,7 @@ def test_iterate_2d():
 
     def test_order(iter1, iter2):
         for i1, i2 in zip_longest(iter1, iter2):
-            assert_equal(i1, i2)
+            assert i1 == i2
 
     test_order(sm.structured_iterate_hex("yx"), sm.structured_iterate_hex("zyx", z=[0]))
     test_order(
@@ -633,7 +621,7 @@ def test_iterate_2d():
     )
 
     # Cannot iterate over multiple z's without specifing z order
-    assert_raises(MeshError, sm.structured_iterate_hex, "yx", z=[0, 1])
+    pytest.raises(MeshError, sm.structured_iterate_hex, "yx", z=[0, 1])
 
 
 def test_iterate_1d():
@@ -643,7 +631,7 @@ def test_iterate_1d():
 
     def test_equal(ijk_list, miter):
         for ijk, i in zip_longest(ijk_list, miter):
-            assert_equal(sm.structured_get_hex(*ijk), i)
+            assert sm.structured_get_hex(*ijk) == i
 
     test_equal([[0, 0, 0], [0, 0, 1]], sm.structured_iterate_hex("z"))
 
@@ -665,21 +653,21 @@ def test_vtx_iterator():
 
     # test the default order
     for (it_x, sm_x) in zip(it, sm.structured_iterate_vertex("zyx")):
-        assert_equal(it_x, sm_x)
+        assert it_x == sm_x
 
     # Do the same again, but use an arbitrary kwarg to structured_iterate_vertex
     # to prevent optimization from kicking in
     it.reset()
     for (it_x, sm_x) in zip(it, sm.structured_iterate_vertex("zyx", no_opt=True)):
-        assert_equal(it_x, sm_x)
+        assert it_x == sm_x
 
     it.reset()
     for (it_x, sm_x) in zip(it, sm.structured_iterate_vertex("yx", z=sm.dims[2])):
-        assert_equal(it_x, sm_x)
+        assert it_x == sm_x
 
     it.reset()
     for (it_x, sm_x) in zip(it, sm.structured_iterate_vertex("x")):
-        assert_equal(it_x, sm_x)
+        assert it_x == sm_x
 
 
 """\
@@ -697,9 +685,7 @@ def test_large_iterator():
 """
 
 
-@with_setup(None, try_rm_file("test_matlib.h5m"))
-@with_setup(None, try_rm_file("test_matlib2.h5m"))
-def test_matlib():
+def test_matlib(try_rm_file):
     mats = {
         0: Material({"H1": 1.0, "K39": 1.0}, density=1.1, metadata={"mat_number": 1}),
         1: Material({"H1": 0.1, "O16": 1.0}, density=2.2, metadata={"mat_number": 2}),
@@ -708,24 +694,22 @@ def test_matlib():
     }
     m = gen_mesh(mats=mats)
     for i, ve in enumerate(mesh_iterate(m.mesh)):
-        assert_equal(m.mats[i], mats[i])
-        assert_equal(
-            m.mesh.tag_get_data(m.mesh.tag_get_handle("idx"), ve, flat=True)[0], i
-        )
+        assert m.mats[i] == mats[i]
+        assert (
+            m.mesh.tag_get_data(m.mesh.tag_get_handle("idx"), ve, flat=True)[0] == i)
 
     m.write_hdf5("test_matlib.h5m")
     shutil.copy("test_matlib.h5m", "test_matlib2.h5m")
     m2 = Mesh(mesh="test_matlib2.h5m")  # MOAB fails to flush
     for i, mat, ve in m2:
-        assert_equal(len(mat.comp), len(mats[i].comp))
+        assert len(mat.comp) == len(mats[i].comp)
         for key in mats[i]:
-            assert_equal(mat.comp[key], mats[i].comp[key])
-        assert_equal(mat.density, mats[i].density)
-        assert_equal(m2.idx[i], i)
+            assert mat.comp[key] == mats[i].comp[key]
+        assert mat.density == mats[i].density
+        assert m2.idx[i] == i
 
 
-@with_setup(None, try_rm_file("test_no_matlib.h5m"))
-def test_no_matlib():
+def test_no_matlib(try_rm_file):
     m = gen_mesh(mats=None)
     m.write_hdf5("test_no_matlib.h5m")
 
@@ -740,7 +724,7 @@ def test_matproptag():
     m = gen_mesh(mats=mats)
 
     # Getting tags
-    assert_equal(m.density[0], 42.0)
+    assert m.density[0] == 42.0
     assert_array_equal(m.density[::2], np.array([42.0, 44.0]))
     mask = np.array([True, False, True, True], dtype=bool)
     assert_array_equal(m.density[mask], np.array([42.0, 44.0, 45.0]))
@@ -748,7 +732,7 @@ def test_matproptag():
 
     # setting tags
     m.density[0] = 65.0
-    assert_equal(m.density[0], 65.0)
+    assert m.density[0] == 65.0
 
     m.density[::2] = 18.0
     m.density[1::2] = [36.0, 54.0]
@@ -777,7 +761,7 @@ def test_matmethtag():
     mws = np.array([mat.molecular_mass() for i, mat in mats.items()])
 
     # Getting tags
-    assert_equal(m.molecular_mass[0], mws[0])
+    assert m.molecular_mass[0] == mws[0]
     assert_array_equal(m.molecular_mass[::2], mws[::2])
     mask = np.array([True, False, True, True], dtype=bool)
     assert_array_equal(m.molecular_mass[mask], mws[mask])
@@ -796,15 +780,15 @@ def test_metadatatag():
     m.doc[:] = ["write", "awesome", "code", "now"]
 
     # Getting tags
-    assert_equal(m.doc[0], "write")
-    assert_equal(m.doc[::2], ["write", "code"])
+    assert m.doc[0] == "write"
+    assert m.doc[::2] == ["write", "code"]
     mask = np.array([True, False, True, True], dtype=bool)
-    assert_equal(m.doc[mask], ["write", "code", "now"])
-    assert_equal(m.doc[1, 0, 1, 3], ["awesome", "write", "awesome", "now"])
+    assert m.doc[mask] == ["write", "code", "now"]
+    assert m.doc[1, 0, 1, 3] == ["awesome", "write", "awesome", "now"]
 
     # setting tags
     m.doc[0] = 65.0
-    assert_equal(m.doc[0], 65.0)
+    assert m.doc[0] == 65.0
 
     m.doc[::2] = 18.0
     m.doc[1::2] = [36.0, 54.0]
@@ -836,7 +820,7 @@ def test_nativetag():
     m.f[:] = [1.0, 2.0, 3.0, 4.0]
 
     # Getting tags
-    assert_equal(m.f[0], 1.0)
+    assert m.f[0] == 1.0
     assert_array_equal(m.f[::2], [1.0, 3.0])
     mask = np.array([True, False, True, True], dtype=bool)
     assert_array_equal(m.f[mask], [1.0, 3.0, 4.0])
@@ -844,7 +828,7 @@ def test_nativetag():
 
     # setting tags
     m.f[0] = 65.0
-    assert_equal(m.f[0], 65.0)
+    assert m.f[0] == 65.0
 
     m.f[::2] = 18.0
     m.f[1::2] = [36.0, 54.0]
@@ -877,7 +861,7 @@ def test_del_nativetag():
     m.g = NativeMeshTag(mesh=m, name="g")
     m.g[:] = [1.0, 2.0, 3.0, 4.0]
 
-    assert_raises(ValueError, m.delete_tag, -12)
+    pytest.raises(ValueError, m.delete_tag, -12)
 
     import sys
 
@@ -892,16 +876,16 @@ def test_del_nativetag():
     # 1. is the tag_ref created above
     # 2. is the one that automatically is the temporary
     #    reference created as the argument to getrefcount
-    assert_equal(2, sys.getrefcount(tag_ref))
+    assert 2 == sys.getrefcount(tag_ref)
 
-    assert_raises(RuntimeError, m.mesh.tag_get_handle, "f")
+    pytest.raises(RuntimeError, m.mesh.tag_get_handle, "f")
 
     # deleting tag by tag handle
     tag_ref = m.g
     m.delete_tag(m.g)
-    assert_equal(2, sys.getrefcount(tag_ref))
+    assert 2 == sys.getrefcount(tag_ref)
 
-    assert_raises(RuntimeError, m.mesh.tag_get_handle, "g")
+    pytest.raises(RuntimeError, m.mesh.tag_get_handle, "g")
 
 
 def test_nativetag_fancy_indexing():
@@ -1022,9 +1006,9 @@ def test_nativetag_add():
     assert_array_almost_equal(obs, exp)
 
     cherry = "twelve"
-    assert_raises(TypeError, m.plum.__add__, cherry)  # using invalid addend type
+    pytest.raises(TypeError, m.plum.__add__, cherry)  # using invalid addend type
 
-    assert_raises(ValueError, m.quince.__add__, m.grapefruit)  # using improper shape
+    pytest.raises(ValueError, m.quince.__add__, m.grapefruit)  # using improper shape
 
 
 def test_nativetag_sub():
@@ -1067,9 +1051,9 @@ def test_nativetag_sub():
     assert_array_almost_equal(obs, exp)
 
     cherry = "twelve"
-    assert_raises(TypeError, m.plum.__sub__, cherry)  # using invalid subtrahend type
+    pytest.raises(TypeError, m.plum.__sub__, cherry)  # using invalid subtrahend type
 
-    assert_raises(ValueError, m.quince.__sub__, m.grapefruit)  # using improper shape
+    pytest.raises(ValueError, m.quince.__sub__, m.grapefruit)  # using improper shape
 
 
 def test_nativetag_mult():
@@ -1116,9 +1100,9 @@ def test_nativetag_mult():
     assert_array_almost_equal(obs, exp)  # multiplying by ndarray
 
     cherry = "twelve"
-    assert_raises(TypeError, m.plum.__mul__, cherry)  # using invalid multiplier type
+    pytest.raises(TypeError, m.plum.__mul__, cherry)  # using invalid multiplier type
 
-    assert_raises(ValueError, m.quince.__mul__, m.grapefruit)
+    pytest.raises(ValueError, m.quince.__mul__, m.grapefruit)
 
 
 def test_nativetag_div():
@@ -1165,9 +1149,9 @@ def test_nativetag_div():
     assert_array_almost_equal(obs, exp)  # dividing by ndarray
 
     cherry = "twelve"
-    assert_raises(TypeError, m.plum.__truediv__, cherry)  # using invalid divisor type
+    pytest.raises(TypeError, m.plum.__truediv__, cherry)  # using invalid divisor type
 
-    assert_raises(ValueError, m.quince.__truediv__, m.grapefruit)
+    pytest.raises(ValueError, m.quince.__truediv__, m.grapefruit)
 
 
 def test_comptag():
@@ -1186,7 +1170,7 @@ def test_comptag():
     m.density2 = ComputedTag(d2, m, "density2")
 
     # Getting tags
-    assert_equal(m.density2[0], 42.0**2)
+    assert m.density2[0] == 42.0**2
     assert_array_equal(m.density2[::2], np.array([42.0, 44.0]) ** 2)
     mask = np.array([True, False, True, True], dtype=bool)
     assert_array_equal(m.density2[mask], np.array([42.0, 44.0, 45.0]) ** 2)
@@ -1202,7 +1186,7 @@ def test_addtag():
     }
     m = gen_mesh(mats=mats)
     m.tag("meaning", value=42.0)
-    assert_is_instance(m.meaning, NativeMeshTag)
+    assert isinstance(m.meaning, NativeMeshTag)
     assert_array_equal(m.meaning[:], np.array([42.0] * len(m)))
 
 
@@ -1210,7 +1194,7 @@ def test_lazytaginit():
     m = gen_mesh()
     m.cactus = NativeMeshTag(3, "i")
     m.cactus[:] = np.array([42, 43, 44])
-    assert_in("cactus", m.tags)
+    assert "cactus" in m.tags
     assert_array_equal(m.cactus[0], [42, 43, 44])
 
     x = np.arange(len(m))[:, np.newaxis] * np.array([42, 43, 44])
@@ -1236,9 +1220,9 @@ def test_iter():
     j = 0
     idx_tag = m.mesh.tag_get_handle("idx")
     for i, mat, ve in m:
-        assert_equal(j, i)
-        assert_equal(mats[i], mat)
-        assert_equal(j, m.mesh.tag_get_data(idx_tag, ve, flat=True)[0])
+        assert j == i
+        assert mats[i] == mat
+        assert j == m.mesh.tag_get_data(idx_tag, ve, flat=True)[0]
         j += 1
 
 
@@ -1256,8 +1240,8 @@ def test_iter_ve():
 
 def test_contains():
     m = gen_mesh()
-    assert_in(1, m)
-    assert_not_in(42, m)
+    assert 1 in m
+    assert 42 not in m
 
 
 def test_cell_fracs_to_mats():
@@ -1299,8 +1283,8 @@ def test_cell_fracs_to_mats():
     ]
 
     for i, mat, _ in m:
-        assert_equal(mat.comp, exp_comps[i])
-        assert_equal(mat.density, 1.0)
+        assert mat.comp == exp_comps[i]
+        assert mat.density == 1.0
 
 
 def test_cell_fracs_sort_vol_frac_reverse():
@@ -1386,8 +1370,8 @@ def test_tag_cell_fracs():
     for i in range(len(m)):
         assert_array_equal(m.cell_number[i], exp_cell_number[i])
         assert_array_equal(m.cell_fracs[i], exp_cell_fracs[i])
-        assert_equal(m.cell_largest_frac_number[i], exp_cell_largest_frac_number[i])
-        assert_equal(m.cell_largest_frac[i], exp_cell_largest_frac[i])
+        assert m.cell_largest_frac_number[i] == exp_cell_largest_frac_number[i]
+        assert m.cell_largest_frac[i] == exp_cell_largest_frac[i]
 
 
 def test_tag_cell_fracs_subvoxel_equal_voxel():
@@ -1428,15 +1412,15 @@ def test_tag_cell_fracs_subvoxel_equal_voxel():
     for i in range(len(m)):
         assert_array_equal(m.cell_number[i], exp_cell_number[i])
         assert_array_equal(m.cell_fracs[i], exp_cell_fracs[i])
-        assert_equal(m.cell_largest_frac_number[i], exp_cell_largest_frac_number[i])
-        assert_equal(m.cell_largest_frac[i], exp_cell_largest_frac[i])
+        assert m.cell_largest_frac_number[i] == exp_cell_largest_frac_number[i]
+        assert m.cell_largest_frac[i] == exp_cell_largest_frac[i]
 
 
 def test_no_mats():
     mesh = gen_mesh(mats=None)
-    assert_true(mesh.mats is None)
+    assert mesh.mats is None
     i, mat, ve = next(iter(mesh))
-    assert_true(mat is None)
+    assert mat is None
 
 
 def test_check_meshtally_tag_names():
@@ -1450,13 +1434,13 @@ def test_check_meshtally_tag_names():
     assert _check_meshtally_tag_names(tag_names)
     # not iterable
     tag_names = "a"
-    assert_raises(ValueError, _check_meshtally_tag_names, tag_names)
+    pytest.raises(ValueError, _check_meshtally_tag_names, tag_names)
     # wrong length
     tag_names = ("a", "b", "c")
-    assert_raises(ValueError, _check_meshtally_tag_names, tag_names)
+    pytest.raises(ValueError, _check_meshtally_tag_names, tag_names)
     # wrong content
     tag_names = (1, 2, 3, 4)
-    assert_raises(ValueError, _check_meshtally_tag_names, tag_names)
+    pytest.raises(ValueError, _check_meshtally_tag_names, tag_names)
     # a string of length 4
     tag_names = "abcd"
-    assert_raises(ValueError, _check_meshtally_tag_names, tag_names)
+    pytest.raises(ValueError, _check_meshtally_tag_names, tag_names)

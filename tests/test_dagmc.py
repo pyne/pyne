@@ -3,8 +3,7 @@ import sys
 import unittest
 import os.path
 import warnings
-from nose.tools import assert_equal, assert_almost_equal, assert_raises, assert_true
-from nose.plugins.skip import SkipTest
+import pytest
 from numpy.testing import assert_array_equal
 import imp
 import multiprocessing
@@ -24,7 +23,7 @@ try:
     pyne_mod = imp.load_module("pyne", *pyne_info)
     imp.find_module("dagmc", pyne_mod.__path__)
 except ImportError:
-    raise SkipTest
+    raise pytest.skip(allow_module_level=True)
 
 if sys.version_info[0] < 3:
     STRING_TYPES = (basestring, str, unicode)
@@ -146,9 +145,12 @@ def failures():
 
     # if Exception is raised, then None is returned, else nothing is returned
     # and test will fail
-    i = assert_raises(Exception, dagmc.point_in_volume, [100, (0, 0, 0)])
-    j = assert_raises(Exception, dagmc.point_in_volume, [1, (0, 0, 0, 0)])
-    k = assert_raises(Exception, dagmc.fire_one_ray, [2, (0, 0, 0), 1])
+    if (pytest.raises(Exception, dagmc.point_in_volume, 100, (0, 0, 0))):
+        i = None
+    if not (dagmc.point_in_volume(1, (0, 0, 0, 0))):
+        j = None
+    if (pytest.raises(Exception, dagmc.fire_one_ray, 2, (0, 0, 0), 1)):
+        k = None
 
     return [i, j, k]
 
@@ -268,8 +270,9 @@ def discretize_non_square():
 
     coords = [0, 1]
     mesh = Mesh(structured=True, structured_coords=[coords, coords, coords])
-    # if assert_raises is True, then k will be None, else a fail will occur
-    k = assert_raises(ValueError, dagmc.discretize_geom, mesh, num_rays=3, grid=True)
+    # if pytest.raises is True, then k will be None, else a fail will occur
+    if (pytest.raises(ValueError, dagmc.discretize_geom, mesh, num_rays=3, grid=True)):
+        k = None
 
     return k
 
@@ -288,8 +291,9 @@ def discretize_geom_centers():
     res = dagmc.discretize_geom(mesh)
 
     #  ensure kwargs are not accepted for unstructured mesh
-    # if assert_raises is True, then k will be None, else a fail will occur
-    k = assert_raises(ValueError, dagmc.discretize_geom, mesh, num_rays=3, grid=True)
+    # if pytest.raises is True, then k will be None, else a fail will occur
+    if (pytest.raises(ValueError, dagmc.discretize_geom, mesh, num_rays=3, grid=True)):
+        k = None
 
     return [res, k]
 
@@ -326,11 +330,11 @@ def test_metadata():
     rets2 = r[1]
     md = r[2]
 
-    assert_equal(rets1, [True, False, False, False])
-    assert_equal(rets2, [False, False, False, True])
-    assert_equal(md["material"], 5)
-    assert_equal(md["rho"], 0.5)
-    assert_true(all(x in md for x in ["material", "rho", "imp"]))
+    assert rets1 == [True, False, False, False]
+    assert rets2 == [False, False, False, True]
+    assert md["material"] == 5
+    assert md["rho"] == 0.5
+    assert all(x in md for x in ["material", "rho", "imp"])
 
 
 def test_versions():
@@ -340,9 +344,9 @@ def test_versions():
     p.join()
     returned = results.get()
 
-    assert_equal(len(returned), 2)
-    assert_true(isinstance(returned[0], STRING_TYPES))
-    assert_true(isinstance(returned[1], int))
+    assert len(returned) == 2
+    assert isinstance(returned[0], STRING_TYPES)
+    assert isinstance(returned[1], int)
 
 
 def test_list_functions():
@@ -353,8 +357,8 @@ def test_list_functions():
     r = results.get()
     surfs = r[0]
     vols = r[1]
-    assert_equal(set(surfs), set(range(1, 19)))
-    assert_equal(set(vols), set(range(1, 5)))
+    assert set(surfs) == set(range(1, 19))
+    assert set(vols) == set(range(1, 5))
 
 
 def test_boundary():
@@ -366,8 +370,8 @@ def test_boundary():
     low = r[0]
     high = r[1]
     for i in range(0, 3):
-        assert_true(low[i] <= -1.0)
-        assert_true(high[i] >= 1.0)
+        assert low[i] <= -1.0
+        assert high[i] >= 1.0
 
 
 def test_pt_in_vol():
@@ -378,8 +382,8 @@ def test_pt_in_vol():
     r = results.get()
     rets1 = r[0]
     rets2 = r[1]
-    assert_equal(rets1, [False, True, False, False])
-    assert_equal(rets2, [False, False, True, False])
+    assert rets1 == [False, True, False, False]
+    assert rets2 == [False, False, True, False]
 
 
 def test_find_volume():
@@ -395,13 +399,13 @@ def test_find_volume():
     vol4 = r[3]
     vols = r[4]
 
-    assert_equal(vol1, 2)
-    assert_equal(vol2, 2)
-    assert_equal(vol3, 3)
-    assert_equal(vol4, 3)
+    assert vol1 == 2
+    assert vol2 == 2
+    assert vol3 == 3
+    assert vol4 == 3
 
     for vol in vols:
-        assert_true(vol in (2, 3))
+        assert vol in (2, 3)
 
 
 def test_one_ray():
@@ -417,11 +421,11 @@ def test_one_ray():
     fromvol3a = r[3]
     fromvol3b = r[4]
 
-    assert_almost_equal(fromcenter[1], 1.0)
-    assert_almost_equal(fromhalf[1], 1.5)
-    assert_equal(fromoutside, None)
-    assert_almost_equal(fromvol3a[1], 0.1)
-    assert_almost_equal(fromvol3b[1], 3.056921938)
+    assert fromcenter[1] == pytest.approx(1.0)
+    assert fromhalf[1] == pytest.approx(1.5)
+    assert fromoutside == None
+    assert fromvol3a[1] == pytest.approx(0.1)
+    assert fromvol3b[1] == pytest.approx(3.056921938)
 
 
 def test_failures():
@@ -435,9 +439,9 @@ def test_failures():
     j = r[1]
     k = r[2]
 
-    assert_equal(i, None)
-    assert_equal(j, None)
-    assert_equal(k, None)
+    assert i == None
+    assert j == None
+    assert k == None
 
 
 def test_ray_iterator():
@@ -460,19 +464,19 @@ def test_ray_iterator():
     expected_vols = [2, 3, 1, 4]
     expected_dists = [1, 2, 3.156921938, 0]
 
-    assert_equal(startvol, 3)
+    assert startvol == 3
 
     for k, vol in enumerate(vols1):
-        assert_equal(expected_vols[k], vol)
+        assert expected_vols[k] == vol
         if expected_dists[k] != 0:
-            assert_almost_equal(expected_dists[k], dists1[k])
-    assert_equal(i, 3)
+            assert expected_dists[k] == pytest.approx(dists1[k])
+    assert i == 3
 
     for k, vol in enumerate(vols2):
-        assert_equal(expected_vols[k], vol)
+        assert expected_vols[k] == vol
         if expected_dists[k] != 0:
-            assert_almost_equal(expected_dists[k], dists2[k])
-    assert_equal(j, 1)
+            assert expected_dists[k] ==  pytest.approx(dists2[k])
+    assert j == 1
 
 
 def test_ray_story():
@@ -495,8 +499,8 @@ def test_util_graveyard_bounds():
 
     grave_diam = 4.15692194
     for i in range(0, 3):
-        assert_almost_equal(lo[i], -grave_diam)
-        assert_almost_equal(hi[i], grave_diam)
+        assert lo[i] == pytest.approx(-grave_diam)
+        assert hi[i] == pytest.approx(grave_diam)
 
 
 def test_util_matlist():
@@ -508,8 +512,8 @@ def test_util_matlist():
 
     mats1 = r[0]
     mats2 = r[1]
-    assert_equal(set((0, 5)), mats1)
-    assert_equal(set([(0, 0.0), (5, 0.5)]), mats2)
+    assert set((0, 5)) == mats1
+    assert set([(0, 0.0), (5, 0.5)]) == mats2
 
 
 def test_discretize_geom_rand():
@@ -517,7 +521,7 @@ def test_discretize_geom_rand():
     random sampling.
     """
     if not HAVE_PYMOAB:
-        raise SkipTest
+        pytest.skip()
 
     p = multiprocessing.Pool()
     r = p.apply_async(discretize_geom_rand)
@@ -528,15 +532,15 @@ def test_discretize_geom_rand():
     results = rr[0]
     coords = rr[1]
 
-    assert_equal(len(results), (len(coords) - 1) ** 3)
+    assert len(results) == (len(coords) - 1) ** 3
 
     for res in results:
         if res["idx"] != 13:
-            assert_equal(res["cell"], 3)
+            assert res["cell"] == 3
         else:
-            assert_equal(res["cell"], 2)
+            assert res["cell"] == 2
 
-        assert_almost_equal(res["vol_frac"], 1.0)
+        assert res["vol_frac"] == pytest.approx(1.0)
 
 
 def test_discretize_geom_grid():
@@ -544,7 +548,7 @@ def test_discretize_geom_grid():
     grid sampling.
     """
     if not HAVE_PYMOAB:
-        raise SkipTest
+        pytest.skip()
 
     p = multiprocessing.Pool()
     rr = p.apply_async(discretize_geom_grid)
@@ -555,15 +559,15 @@ def test_discretize_geom_grid():
     results = r[0]
     coords = r[1]
 
-    assert_equal(len(results), (len(coords) - 1) ** 3)
+    assert len(results) == (len(coords) - 1) ** 3
 
     for res in results:
         if res["idx"] != 13:
-            assert_equal(res["cell"], 3)
+            assert res["cell"] == 3
         else:
-            assert_equal(res["cell"], 2)
+            assert res["cell"] == 2
 
-        assert_almost_equal(res["vol_frac"], 1.0)
+        assert res["vol_frac"] == pytest.approx(1.0)
 
 
 def test_discretize_geom_mix():
@@ -571,7 +575,7 @@ def test_discretize_geom_mix():
     2 and 3.
     """
     if not HAVE_PYMOAB:
-        raise SkipTest
+        pytest.skip()
 
     p = multiprocessing.Pool()
     results = p.apply_async(discretize_geom_mix)
@@ -582,10 +586,10 @@ def test_discretize_geom_mix():
     results1 = r[0]
     results2 = r[1]
 
-    assert_equal(results1[0]["cell"], 2)
-    assert_almost_equal(results1[0]["vol_frac"], 0.5)
-    assert_equal(results1[1]["cell"], 3)
-    assert_almost_equal(results1[1]["vol_frac"], 0.5)
+    assert results1[0]["cell"] == 2
+    assert results1[0]["vol_frac"] == pytest.approx(0.5)
+    assert results1[1]["cell"] == 3
+    assert results1[1]["vol_frac"] == pytest.approx(0.5)
 
     # To to make sure standard error decreases with increasing rays
     assert results2[0]["rel_error"] < results1[0]["rel_error"]
@@ -597,18 +601,18 @@ def test_descritize_non_square():
     perfect square raises ValueError.
     """
     if not HAVE_PYMOAB:
-        raise SkipTest
+        pytest.skip()
 
     p = multiprocessing.Pool()
     results = p.apply_async(discretize_non_square)
     r = results.get()
-    assert_equal(r, None)
+    assert r == None
 
 
 def test_discretize_geom_centers():
     """Test that unstructured mesh is sampled by mesh ve centers."""
     if not HAVE_PYMOAB:
-        raise SkipTest
+        pytest.skip()
 
     p = multiprocessing.Pool()
     results = p.apply_async(discretize_geom_centers)
@@ -623,7 +627,7 @@ def test_discretize_geom_centers():
     assert_array_equal(res["cell"], [2, 3])
     assert_array_equal(res["vol_frac"], [1.0, 1.0])
     assert_array_equal(res["rel_error"], [1.0, 1.0])
-    assert_equal(k, None)
+    assert k == None
 
 
 def test_cells_at_ve_centers():
@@ -631,7 +635,7 @@ def test_cells_at_ve_centers():
     correct results.
     """
     if not HAVE_PYMOAB:
-        raise SkipTest
+        pytest.skip()
 
     p = multiprocessing.Pool()
     results = p.apply_async(cells_at_ve_centers)
@@ -660,12 +664,12 @@ def cell_material_assignments():
 def test_cell_material_assignments():
     """Test cell_material_assigments()."""
     if not HAVE_PYMOAB:
-        raise SkipTest
+        pytest.skip()
     p = multiprocessing.Pool()
     r = p.apply_async(cell_material_assignments)
     p.close()
     p.join()
-    assert_true(r.get())
+    assert r.get()
 
 
 def cell_materials():
@@ -694,9 +698,9 @@ def cell_materials():
 def test_cell_materials():
     """Test cell_materials()."""
     if not HAVE_PYMOAB:
-        raise SkipTest
+        pytest.skip()
     p = multiprocessing.Pool()
     r = p.apply_async(cell_materials)
     p.close()
     p.join()
-    assert_true(r.get())
+    assert r.get()

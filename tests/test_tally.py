@@ -3,18 +3,6 @@ import os
 import warnings
 
 from unittest import TestCase
-import nose
-
-from nose.tools import (
-    assert_equal,
-    assert_not_equal,
-    assert_raises,
-    raises,
-    assert_almost_equal,
-    assert_true,
-    assert_false,
-    assert_in,
-)
 
 from pyne.utils import QAWarning
 
@@ -87,42 +75,42 @@ def write_arb_p(file_name, path):
 # tests the default constructor
 def test_tally1():
     tally = Tally()
-    assert_equal(tally.tally_type, "")
+    assert tally.tally_type == ""
 
 
 def test_tally2():
     tally = Tally()
-    assert_equal(tally.particle_names, [])
+    assert tally.particle_names == []
 
 
 def test_tally3():
     tally = Tally()
-    assert_equal(tally.entity_type, "")
+    assert tally.entity_type == ""
 
 
 def test_tally4():
     tally = Tally()
-    assert_equal(tally.entity_name, "")
+    assert tally.entity_name == ""
 
 
 def test_tally5():
     tally = Tally()
-    assert_equal(tally.entity_id, -1)
+    assert tally.entity_id == -1
 
 
 def test_tally6():
     tally = Tally()
-    assert_equal(tally.tally_name, "")
+    assert tally.tally_name == ""
 
 
 def test_tally7():
     tally = Tally()
-    assert_equal(tally.entity_size, -1.0)
+    assert tally.entity_size == -1.0
 
 
 def test_tally7a():
     tally = Tally()
-    assert_equal(tally.normalization, 1.0)
+    assert tally.normalization == 1.0
 
 
 ###############################################################################
@@ -131,49 +119,49 @@ def test_tally8():
     tally = Tally(
         "Flux", "Photon", 12, "Volume", "Volume 12", "Photon Flux in Cell 12", 35.0
     )
-    assert_equal(tally.tally_type, "Flux")
+    assert tally.tally_type == "Flux"
 
 
 def test_tally9():
     tally = Tally(
         "Flux", "Photon", 12, "Volume", "Volume 12", "Photon Flux in Cell 12", 35.0
     )
-    assert_equal(tally.particle_names, ["Photon"])
+    assert tally.particle_names == ["Photon"]
 
 
 def test_tally10():
     tally = Tally(
         "Flux", "Photon", 12, "Volume", "Volume 12", "Photon Flux in Cell 12", 35.0
     )
-    assert_equal(tally.entity_type, "Volume")
+    assert tally.entity_type == "Volume"
 
 
 def test_tally11():
     tally = Tally(
         "Flux", "Photon", 12, "Volume", "Volume 12", "Photon Flux in Cell 12", 35.0
     )
-    assert_equal(tally.entity_name, "Volume 12")
+    assert tally.entity_name == "Volume 12"
 
 
 def test_tally12():
     tally = Tally(
         "Flux", "Photon", 12, "Volume", "Volume 12", "Photon Flux in Cell 12", 35.0
     )
-    assert_equal(tally.entity_id, 12)
+    assert tally.entity_id == 12
 
 
 def test_tally13():
     tally = Tally(
         "Flux", "Photon", 12, "Volume", "Volume 12", "Photon Flux in Cell 12", 35.0
     )
-    assert_equal(tally.tally_name, "Photon Flux in Cell 12")
+    assert tally.tally_name == "Photon Flux in Cell 12"
 
 
 def test_tally14():
     tally = Tally(
         "Flux", "Photon", 12, "Volume", "Volume 12", "Photon Flux in Cell 12", 35.0
     )
-    assert_equal(tally.entity_size, 35.0)
+    assert tally.entity_size == 35.0
 
 
 def test_tally14a():
@@ -187,7 +175,7 @@ def test_tally14a():
         35.0,
         1.0e20,
     )
-    assert_equal(tally.normalization, 1.0e20)
+    assert tally.normalization == 1.0e20
 
 
 ################################################################################
@@ -208,7 +196,7 @@ def test_tally15():
 
     new_tally = Tally()
     new_tally.from_hdf5("test_tally.h5", "tally", 0)
-    assert_equal(tally.tally_type, new_tally.tally_type)
+    assert tally.tally_type == new_tally.tally_type
 
 
 def test_tally16():
@@ -227,7 +215,7 @@ def test_tally16():
 
     new_tally = Tally()
     new_tally.from_hdf5("test_tally.h5", "tally", 0)
-    assert_equal(tally.particle_names, new_tally.particle_names)
+    assert tally.particle_names == new_tally.particle_names
 
 
 def test_tally17():
@@ -246,7 +234,7 @@ def test_tally17():
 
     new_tally = Tally()
     new_tally.from_hdf5("test_tally.h5", "tally", 0)
-    assert_equal(tally.entity_type, new_tally.entity_type)
+    assert tally.entity_type == new_tally.entity_type
 
 
 def test_tally18():
@@ -265,7 +253,7 @@ def test_tally18():
 
     new_tally = Tally()
     new_tally.from_hdf5("test_tally.h5", "tally", 0)
-    assert_equal(tally.entity_name, new_tally.entity_name)
+    assert tally.entity_name == new_tally.entity_name
 
 
 def test_tally19():
@@ -284,7 +272,7 @@ def test_tally19():
 
     new_tally = Tally()
     new_tally.from_hdf5("test_tally.h5", "tally", 0)
-    assert_equal(tally.entity_id, new_tally.entity_id)
+    assert tally.entity_id == new_tally.entity_id
 
 
 def test_tally20():
@@ -303,7 +291,7 @@ def test_tally20():
 
     new_tally = Tally()
     new_tally.from_hdf5("test_tally.h5", "tally", 0)
-    assert_equal(tally.tally_name, new_tally.tally_name)
+    assert tally.tally_name == new_tally.tally_name
 
 
 def test_tally21():
@@ -323,7 +311,7 @@ def test_tally21():
     new_tally = Tally()
     new_tally.from_hdf5("test_tally.h5", "tally", 0)
 
-    assert_equal(tally.entity_size, new_tally.entity_size)
+    assert tally.entity_size == new_tally.entity_size
 
 
 def test_tally21a():
@@ -343,7 +331,7 @@ def test_tally21a():
     new_tally = Tally()
     new_tally.from_hdf5("test_tally.h5", "/tally", 0)
 
-    assert_equal(tally.normalization, new_tally.normalization)
+    assert tally.normalization == new_tally.normalization
 
 
 ################################################################################
@@ -365,7 +353,7 @@ def test_tally22():
     )
     new_tally = Tally()
     new_tally.from_hdf5("test_tally.h5", "tally", 1)
-    assert_equal(tally.tally_type, new_tally.tally_type)
+    assert tally.tally_type == new_tally.tally_type
 
 
 def test_tally23():
@@ -385,7 +373,7 @@ def test_tally23():
     )
     new_tally = Tally()
     new_tally.from_hdf5("test_tally.h5", "tally", 1)
-    assert_equal(tally.particle_names, new_tally.particle_names)
+    assert tally.particle_names == new_tally.particle_names
 
 
 def test_tally24():
@@ -406,7 +394,7 @@ def test_tally24():
     new_tally = Tally()
     new_tally.from_hdf5("test_tally.h5", "tally", 1)
 
-    assert_equal(tally.entity_type, new_tally.entity_type)
+    assert tally.entity_type == new_tally.entity_type
 
 
 def test_tally25():
@@ -427,7 +415,7 @@ def test_tally25():
     new_tally = Tally()
     new_tally.from_hdf5("test_tally.h5", "tally", 1)
 
-    assert_equal(tally.entity_name, new_tally.entity_name)
+    assert tally.entity_name == new_tally.entity_name
 
 
 def test_tally26():
@@ -448,7 +436,7 @@ def test_tally26():
     new_tally = Tally()
     new_tally.from_hdf5("test_tally.h5", "tally", 1)
 
-    assert_equal(tally.entity_id, new_tally.entity_id)
+    assert tally.entity_id == new_tally.entity_id
 
 
 def test_tally27():
@@ -469,7 +457,7 @@ def test_tally27():
     new_tally = Tally()
     new_tally.from_hdf5("test_tally.h5", "tally", 1)
 
-    assert_equal(tally.tally_name, new_tally.tally_name)
+    assert tally.tally_name == new_tally.tally_name
 
 
 def test_tally28():
@@ -490,7 +478,7 @@ def test_tally28():
     new_tally = Tally()
     new_tally.from_hdf5("test_tally.h5", "tally", 1)
 
-    assert_equal(tally.entity_size, new_tally.entity_size)
+    assert tally.entity_size == new_tally.entity_size
 
 
 def test_tally28a():
@@ -511,7 +499,7 @@ def test_tally28a():
     new_tally = Tally()
     new_tally.from_hdf5("test_tally.h5", "tally", 1)
 
-    assert_equal(tally.normalization, new_tally.normalization)
+    assert tally.normalization == new_tally.normalization
 
 
 ################################################################################
@@ -533,7 +521,7 @@ def test_tally29():
 
     new_tally = Tally()
     new_tally.from_hdf5("test_tally.h5", "tally", 0)
-    assert_not_equal(tally.tally_type, new_tally.tally_type)
+    assert tally.tally_type != new_tally.tally_type
 
 
 def test_tally30():
@@ -553,7 +541,7 @@ def test_tally30():
     new_tally = Tally()
     new_tally.from_hdf5("test_tally.h5", "tally", 0)
 
-    assert_not_equal(tally.particle_names, new_tally.particle_names)
+    assert tally.particle_names != new_tally.particle_names
 
 
 def test_tally31():
@@ -573,7 +561,7 @@ def test_tally31():
     new_tally = Tally()
     new_tally.from_hdf5("test_tally.h5", "tally", 0)
 
-    assert_not_equal(tally.entity_type, new_tally.entity_type)
+    assert tally.entity_type != new_tally.entity_type
 
 
 def test_tally32():
@@ -593,7 +581,7 @@ def test_tally32():
     new_tally = Tally()
     new_tally.from_hdf5("test_tally.h5", "tally", 0)
 
-    assert_not_equal(tally.entity_name, new_tally.entity_name)
+    assert tally.entity_name != new_tally.entity_name
 
 
 def test_tally33():
@@ -613,7 +601,7 @@ def test_tally33():
     new_tally = Tally()
     new_tally.from_hdf5("test_tally.h5", "tally", 0)
 
-    assert_not_equal(tally.entity_id, new_tally.entity_id)
+    assert tally.entity_id != new_tally.entity_id
 
 
 def test_tally34():
@@ -633,7 +621,7 @@ def test_tally34():
     new_tally = Tally()
     new_tally.from_hdf5("test_tally.h5", "tally", 0)
 
-    assert_not_equal(tally.tally_name, new_tally.tally_name)
+    assert tally.tally_name != new_tally.tally_name
 
 
 def test_tally35():
@@ -653,7 +641,7 @@ def test_tally35():
     new_tally = Tally()
     new_tally.from_hdf5("test_tally.h5", "tally", 0)
 
-    assert_not_equal(tally.entity_size, new_tally.entity_size)
+    assert tally.entity_size != new_tally.entity_size
 
 
 ################################################################################
@@ -673,7 +661,7 @@ def test_tally36():
 
     new_tally = Tally()
     new_tally.from_hdf5("test_tally.h5", "bob_geldof", 0)
-    assert_equal(tally.tally_type, new_tally.tally_type)
+    assert tally.tally_type == new_tally.tally_type
 
 
 # test append and retrive from arbitrary location
@@ -688,7 +676,7 @@ def test_tally37():
 
     new_tally = Tally()
     new_tally.from_hdf5("test_tally.h5", "bob_geldof", 1)
-    assert_equal(tally.tally_type, new_tally.tally_type)
+    assert tally.tally_type == new_tally.tally_type
 
 
 # test multi-particle tally
@@ -709,7 +697,7 @@ def test_tally38():
     new_tally = Tally()
     new_tally.from_hdf5("test_tally.h5", "tally")
 
-    assert_not_equal(tally.particle_names, new_tally.particle_names)
+    assert tally.particle_names != new_tally.particle_names
 
 
 # test write particle for mcnp
@@ -723,9 +711,8 @@ def test_mcnp5_tally_surf_current():
         "Neutron Current across surface 12",
         -1.0,
     )
-    assert_equal(
-        "C Neutron Current across surface 12\nF11:n 12\n", tally.mcnp(1, "mcnp5")
-    )
+    assert (
+        "C Neutron Current across surface 12\nF11:n 12\n" == tally.mcnp(1, "mcnp5"))
 
 
 def test_mcnp5_tally_surf_current_norm():
@@ -739,10 +726,9 @@ def test_mcnp5_tally_surf_current_norm():
         -1.0,
         1.0e13,
     )
-    assert_equal(
-        "C Neutron Current across surface 12\nF11:n 12\nFM11 1.000000e+13\n",
-        tally.mcnp(1, "mcnp5"),
-    )
+    assert (
+        "C Neutron Current across surface 12\nF11:n 12\nFM11 1.000000e+13\n" ==
+        tally.mcnp(1, "mcnp5"))
 
 
 def test_mcnp5_tally_surf_flux():
@@ -755,7 +741,7 @@ def test_mcnp5_tally_surf_flux():
         "Neutron Flux across surface 12",
         -1.0,
     )
-    assert_equal("C Neutron Flux across surface 12\nF12:n 12\n", tally.mcnp(1, "mcnp5"))
+    assert "C Neutron Flux across surface 12\nF12:n 12\n" == tally.mcnp(1, "mcnp5")
 
 
 def test_mcnp5_tally_surf_flux_norm():
@@ -769,24 +755,23 @@ def test_mcnp5_tally_surf_flux_norm():
         -1.0,
         1.0e13,
     )
-    assert_equal(
-        "C Neutron Flux across surface 12\nF12:n 12\nFM12 1.000000e+13\n",
-        tally.mcnp(1, "mcnp5"),
-    )
+    assert (
+        "C Neutron Flux across surface 12\nF12:n 12\nFM12 1.000000e+13\n" ==
+        tally.mcnp(1, "mcnp5"))
 
 
 def test_mcnp5_tally_vol():
     tally = Tally(
         "Flux", "Gamma", 12, "Volume", "Volume 12", "Photon Flux in Cell 12", -1.0
     )
-    assert_equal("C Photon Flux in Cell 12\nF14:p 12\n", tally.mcnp(1, "mcnp5"))
+    assert "C Photon Flux in Cell 12\nF14:p 12\n" == tally.mcnp(1, "mcnp5")
 
 
 def test_mcnp6_tally_vol():
     tally = Tally(
         "Flux", "Gamma", 12, "Volume", "Volume 12", "Photon Flux in Cell 12", -1.0
     )
-    assert_equal("C Photon Flux in Cell 12\nF14:p 12\n", tally.mcnp(1, "mcnp6"))
+    assert "C Photon Flux in Cell 12\nF14:p 12\n" == tally.mcnp(1, "mcnp6")
 
 
 def test_mcnp6_tally_vol_norm():
@@ -800,27 +785,25 @@ def test_mcnp6_tally_vol_norm():
         -1.0,
         1.0e13,
     )
-    assert_equal(
-        "C Photon Flux in Cell 12\nF14:p 12\nFM14 1.000000e+13\n",
-        tally.mcnp(1, "mcnp6"),
-    )
+    assert (
+        "C Photon Flux in Cell 12\nF14:p 12\nFM14 1.000000e+13\n" ==
+        tally.mcnp(1, "mcnp6"))
 
 
 def test_mcnp6_tally_vol_proton():
     tally = Tally(
         "Flux", "Proton", 12, "Volume", "Volume 12", "Proton Flux in Cell 12", -1.0
     )
-    assert_equal("C Proton Flux in Cell 12\nF14:h 12\n", tally.mcnp(1, "mcnp6"))
+    assert "C Proton Flux in Cell 12\nF14:h 12\n" == tally.mcnp(1, "mcnp6")
 
 
 def test_mcnp6_tally_vol_proton_volume_set():
     tally = Tally(
         "Flux", "Proton", 12, "Volume", "Volume 12", "Proton Flux in Cell 12", 100.0
     )
-    assert_equal(
-        "C Proton Flux in Cell 12\n" + "F14:h 12\n" + "SD14 100.000000\n",
-        tally.mcnp(1, "mcnp6"),
-    )
+    assert (
+        "C Proton Flux in Cell 12\n" + "F14:h 12\n" + "SD14 100.000000\n" ==
+        tally.mcnp(1, "mcnp6"))
 
 
 def test_mcnp_mesh_tally_xyz():
@@ -863,7 +846,7 @@ def test_mcnp_mesh_tally_xyz():
         + "          EINTS=1 1 2\n"
         + "          OUT=IJ"
     )
-    assert_equal(mcnp_tally, tally.mcnp(1, "mcnp6", out))
+    assert mcnp_tally == tally.mcnp(1, "mcnp6", out)
 
 
 def test_mcnp_mesh_tally_cyl():
@@ -910,7 +893,7 @@ def test_mcnp_mesh_tally_cyl():
         + "          EMESH=0.000000 10.000000 100.000000\n"
         + "          EINTS=1 1 2"
     )
-    assert_equal(mcnp_tally, tally.mcnp(1, "mcnp6"))
+    assert mcnp_tally == tally.mcnp(1, "mcnp6")
 
 
 # test write particle for fluka
@@ -923,7 +906,7 @@ def test_fluka_tally():
         + "USRTRACK         1.0    PHOTON     -21.0     Reg12       1.0     1000.Photon F\n"
         + "USRTRACK       10.E1     1.E-3                                               &"
     )
-    assert_equal(fluka_string, tally.fluka("-21.0"))
+    assert fluka_string == tally.fluka("-21.0")
 
 
 # test write particle for fluka
@@ -936,7 +919,7 @@ def test_fluka_tally_proton():
         + "USRTRACK         1.0    PROTON     -21.0     Reg12       1.0     1000.Proton F\n"
         + "USRTRACK       10.E1     1.E-3                                               &"
     )
-    assert_equal(fluka_string, tally.fluka("-21.0"))
+    assert fluka_string == tally.fluka("-21.0")
 
 
 # test write particle for fluka
@@ -947,10 +930,5 @@ def test_fluka_tally_muonp():
         + "USRTRACK         1.0     MUON+     -21.0     Reg12       1.0     1000.Muon Flu\n"
         + "USRTRACK       10.E1     1.E-3                                               &"
     )
-    assert_equal(fluka_string, tally.fluka("-21.0"))
+    assert fluka_string == tally.fluka("-21.0")
 
-
-# Run as script
-#
-if __name__ == "__main__":
-    nose.runmodule()

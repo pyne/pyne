@@ -1,20 +1,10 @@
 """PyNE MCNP tools tests"""
 import os
 import unittest
-import nose
 import struct
 import warnings
 
-import nose.tools
-from nose.tools import (
-    assert_almost_equal,
-    assert_equal,
-    assert_true,
-    assert_not_equal,
-    assert_false,
-    assert_raises,
-)
-from nose.plugins.skip import SkipTest
+import pytest
 
 import tables
 from numpy.testing import assert_array_equal
@@ -28,7 +18,7 @@ try:
     from pyne import mcnp
     from pyne.mcnp import mats_from_inp
 except ImportError:
-    raise SkipTest
+    pytest.skip()
 
 
 thisdir = os.path.dirname(__file__)
@@ -47,15 +37,15 @@ ssrname_onetrack = os.path.join(thisdir, "mcnp_surfsrc_onetrack.w")
 # Test SurfSrc class
 
 
-def test_read_header_block():
+@pytest.mark.parametrize("ssrname", ssrnames)
+def test_read_header_block(ssrname):
     """Test the read_header() method in the SurfSrc class
     We compare the SurfSrc object variables with expected values from the
     multiple write files
     'mcnp_surfsrc.w', 'mcnpx_surfsrc.w', and 'mcnp6_surfsrc.w'.
     """
 
-    for ssrname in ssrnames:
-        yield check_read_header_block, ssrname
+    check_read_header_block(ssrname)
 
 
 def check_read_header_block(ssrname):
@@ -65,98 +55,95 @@ def check_read_header_block(ssrname):
         try:
             ssr.read_header()
         except:
-            raise SkipTest
+            pytest.skip()
 
         # header record values
-        assert_equal(ssr.kod, "mcnp    ")
-        assert_equal(ssr.ver, "5    ")
-        assert_equal(ssr.loddat, "01232009")
-        assert_equal(ssr.idtm, " 10/31/11 13:52:39 ")
-        assert_equal(ssr.probid, " 10/31/11 13:52:35 ")
-        assert_equal(
-            ssr.aid,
+        assert ssr.kod == "mcnp    "
+        assert ssr.ver == "5    "
+        assert ssr.loddat == "01232009"
+        assert ssr.idtm == " 10/31/11 13:52:39 "
+        assert ssr.probid == " 10/31/11 13:52:35 "
+        assert (
+            ssr.aid ==
             "c Test deck with H20 cube, point n source, "
-            "SSW of top surface interactions      ",
-        )
-        assert_equal(ssr.knod, 2)
+            "SSW of top surface interactions      ")
+        assert ssr.knod == 2
         # table 1 record values
-        assert_equal(ssr.np1, 1000)
-        assert_equal(ssr.nrss, 173)
-        assert_equal(ssr.ncrd, 11)
-        assert_equal(ssr.njsw, 1)
-        assert_equal(ssr.niss, 173)
+        assert ssr.np1 == 1000
+        assert ssr.nrss == 173
+        assert ssr.ncrd == 11
+        assert ssr.njsw == 1
+        assert ssr.niss == 173
         # table 2 record values
-        assert_equal(ssr.niwr, 0)
-        assert_equal(ssr.mipts, 3)
-        assert_equal(ssr.kjaq, 0)
+        assert ssr.niwr == 0
+        assert ssr.mipts == 3
+        assert ssr.kjaq == 0
 
     elif "mcnp6_surfsrc.w" in ssrname:
         ssr = mcnp.SurfSrc(ssrname, "rb")
         try:
             ssr.read_header()
         except:
-            raise SkipTest
+            pytest.skip()
         # header record values
-        assert_equal(ssr.kod, "SF_00001")
-        assert_equal(ssr.ver, "mcnp    6   ")
-        assert_equal(ssr.loddat, " 05/08/13")
-        assert_equal(ssr.idtm, " 11/18/13 17:50:49 ")
-        assert_equal(ssr.probid, " 11/18/13 17:50:43 ")
-        assert_equal(
-            ssr.aid,
+        assert ssr.kod == "SF_00001"
+        assert ssr.ver == "mcnp    6   "
+        assert ssr.loddat == " 05/08/13"
+        assert ssr.idtm == " 11/18/13 17:50:49 "
+        assert ssr.probid == " 11/18/13 17:50:43 "
+        assert (
+            ssr.aid ==
             "Simple MCNP Example that uses SSW"
             "                       "
-            "                        ",
-        )
-        assert_equal(ssr.knod, 2)
+            "                        ")
+        assert ssr.knod == 2
         # table 1 record values
-        assert_equal(ssr.np1, 10000)
-        assert_equal(ssr.nrss, 1710)
-        assert_equal(ssr.ncrd, -11)
+        assert ssr.np1 == 10000
+        assert ssr.nrss == 1710
+        assert ssr.ncrd == -11
         # assert_equal(ssrA, ssrB)
-        assert_equal(ssr.njsw, 1)
-        assert_equal(ssr.niss, 1701)
+        assert ssr.njsw == 1
+        assert ssr.niss == 1701
         # table 2 record values
-        assert_equal(ssr.niwr, 0)
-        assert_equal(ssr.mipts, 37)
-        assert_equal(ssr.kjaq, 0)
+        assert ssr.niwr == 0
+        assert ssr.mipts == 37
+        assert ssr.kjaq == 0
 
     elif "mcnpx_surfsrc.w" in ssrname:
         ssr = mcnp.SurfSrc(ssrname, "rb")
         try:
             ssr.read_header()
         except:
-            raise SkipTest
+            pytest.skip()
         # header record values
-        assert_equal(ssr.kod, "mcnpx   ")
-        assert_equal(ssr.ver, "2.6.0")
-        assert_equal(ssr.loddat, "Wed Apr 09 08:00:00 MST 2008")
-        assert_equal(ssr.idtm, "  10/28/13 02:16:22")
-        assert_equal(ssr.probid, "  10/28/13 02:16:16")
-        assert_equal(
-            ssr.aid,
+        assert ssr.kod == "mcnpx   "
+        assert ssr.ver == "2.6.0"
+        assert ssr.loddat == "Wed Apr 09 08:00:00 MST 2008"
+        assert ssr.idtm == "  10/28/13 02:16:22"
+        assert ssr.probid == "  10/28/13 02:16:16"
+        assert (
+            ssr.aid ==
             "Simple MCNP Example that uses SSW"
-            "                                               ",
-        )
-        assert_equal(ssr.knod, 2)
+            "                                               ")
+        assert ssr.knod == 2
         # table 1 record values
-        assert_equal(ssr.np1, 10000)
-        assert_equal(ssr.nrss, 1658)
-        assert_equal(ssr.ncrd, 11)
-        assert_equal(ssr.njsw, 1)
-        assert_equal(ssr.niss, 1652)
+        assert ssr.np1 == 10000
+        assert ssr.nrss == 1658
+        assert ssr.ncrd == 11
+        assert ssr.njsw == 1
+        assert ssr.niss == 1652
         # table 2 record values
-        assert_equal(ssr.niwr, 0)
-        assert_equal(ssr.mipts, 35)
-        assert_equal(ssr.kjaq, 0)
+        assert ssr.niwr == 0
+        assert ssr.mipts == 35
+        assert ssr.kjaq == 0
 
 
-def test_compare():
+@pytest.mark.parametrize("ssrname", ssrnames)
+def test_compare(ssrname):
     """Test the __cmp__() method in the SurfSrc class
     Tricky to test... this just verifies that comparisons are done right.
     """
-    for ssrname in ssrnames:
-        yield check_compare, ssrname
+    check_compare(ssrname)
 
 
 def check_compare(ssrname):
@@ -165,19 +152,19 @@ def check_compare(ssrname):
     try:
         ssrA.read_header()
     except:
-        raise SkipTest
+        pytest.skip()
     ssrB.read_header()
-    assert_true(ssrA == ssrB)
+    assert ssrA == ssrB
     ssrA.close()
     ssrB.close()
 
 
-def test_put_header_block():
+@pytest.mark.parametrize("ssrname, sswname", zip(ssrnames,sswnames))
+def test_put_header_block(ssrname,sswname):
     """We copy the header block, write to new file, re-read, and compare.
     This tests that information is preserved correctly when written.
     """
-    for ssrname, sswname in zip(ssrnames, sswnames):
-        yield check_put_header_block, ssrname, sswname
+    check_put_header_block(ssrname,sswname)
 
 
 def check_put_header_block(ssrname, sswname):
@@ -186,7 +173,7 @@ def check_put_header_block(ssrname, sswname):
     try:
         ssr.read_header()
     except:
-        raise SkipTest
+        pytest.skip()
     # header record values
     ssw.kod = ssr.kod
     ssw.ver = ssr.ver
@@ -219,7 +206,7 @@ def check_put_header_block(ssrname, sswname):
     sswr = mcnp.SurfSrc(sswname, "rb")
     sswr.read_header()
 
-    assert_equal(ssr.print_header(), sswr.print_header())
+    assert ssr.print_header() == sswr.print_header()
 
     ssr.close()
     sswr.close()
@@ -235,7 +222,7 @@ def test_read_tracklist():
     try:
         ssr.read_header()
     except:
-        raise SkipTest
+        pytest.skip()
     ssr.read_tracklist()
 
     # print "Length: " + str(len(ssr.tracklist))
@@ -243,18 +230,18 @@ def test_read_tracklist():
         # Should only be one trackData in tracklist
         # trackData.record is skipped; contains the below components.
         # self.assertEqual(trackData.record  , 0)
-        assert_equal(trackData.nps, 1)
-        assert_almost_equal(trackData.bitarray, 8.000048e06)
-        assert_almost_equal(trackData.wgt, 0.99995639)
-        assert_almost_equal(trackData.erg, 5.54203947)
-        assert_almost_equal(trackData.tme, 0.17144023)
-        assert_almost_equal(trackData.x, -8.05902e-02)
-        assert_almost_equal(trackData.y, 3.122666098e00)
-        assert_almost_equal(trackData.z, 5.00000e00)
-        assert_almost_equal(trackData.u, -0.35133163)
-        assert_almost_equal(trackData.v, 0.48465036)
-        assert_almost_equal(trackData.cs, 0.80104937)
-        assert_almost_equal(trackData.w, 0.80104937)
+        assert trackData.nps == 1
+        assert trackData.bitarray == pytest.approx(8.000048e06)
+        assert trackData.wgt == pytest.approx(0.99995639)
+        assert trackData.erg == pytest.approx(5.54203947)
+        assert trackData.tme == pytest.approx(0.17144023)
+        assert trackData.x == pytest.approx(-8.05902e-02)
+        assert trackData.y == pytest.approx(3.122666098e00)
+        assert trackData.z == pytest.approx(5.00000e00)
+        assert trackData.u == pytest.approx(-0.35133163)
+        assert trackData.v == pytest.approx(0.48465036)
+        assert trackData.cs == pytest.approx(0.80104937)
+        assert trackData.w == pytest.approx(0.80104937)
     return
 
 
@@ -267,7 +254,7 @@ def test_read_tracklist_into_different_surface():
     try:
         ssr1.read_header()
     except:
-        raise SkipTest
+        pytest.skip()
     ssr1.read_tracklist()
 
     ssr2 = mcnp.SurfSrc(ssrname_onetrack, "rb")
@@ -278,18 +265,18 @@ def test_read_tracklist_into_different_surface():
     ssr1.update_tracklist(ssr2)
 
     for trackData in ssr1.tracklist:
-        assert_equal(trackData.nps, 1)
-        assert_almost_equal(trackData.bitarray, 8.000048e06)
-        assert_almost_equal(trackData.wgt, 0.99995639)
-        assert_almost_equal(trackData.erg, 5.54203947)
-        assert_almost_equal(trackData.tme, 0.17144023)
-        assert_almost_equal(trackData.x, -8.05902e-02)
-        assert_almost_equal(trackData.y, 3.122666098e00)
-        assert_almost_equal(trackData.z, 5.00000e00)
-        assert_almost_equal(trackData.u, -0.35133163)
-        assert_almost_equal(trackData.v, 0.48465036)
-        assert_almost_equal(trackData.cs, 0.80104937)
-        assert_almost_equal(trackData.w, 0.80104937)
+        assert trackData.nps == 1
+        assert trackData.bitarray == pytest.approx(8.000048e06)
+        assert trackData.wgt == pytest.approx(0.99995639)
+        assert trackData.erg == pytest.approx(5.54203947)
+        assert trackData.tme == pytest.approx(0.17144023)
+        assert trackData.x == pytest.approx(-8.05902e-02)
+        assert trackData.y == pytest.approx(3.122666098e00)
+        assert trackData.z == pytest.approx(5.00000e00)
+        assert trackData.u == pytest.approx(-0.35133163)
+        assert trackData.v == pytest.approx(0.48465036)
+        assert trackData.cs == pytest.approx(0.80104937)
+        assert trackData.w == pytest.approx(0.80104937)
     return
 
 
@@ -303,7 +290,7 @@ def test_read_tracklist_into_different_surface_errors():
     try:
         ssr1.read_header()
     except:
-        raise SkipTest
+        pytest.skip()
     ssr1.read_tracklist()
 
     ssr2 = mcnp.SurfSrc(ssrname_onetrack, "rb")
@@ -314,7 +301,7 @@ def test_read_tracklist_into_different_surface_errors():
     def wrong_type():
         ssr1.update_tracklist(1)
 
-    assert_raises(TypeError, wrong_type)
+    pytest.raises(TypeError, wrong_type)
 
     # AttributeError #2: If there is no header variables in surf_src argument
     ssrname = "mcnp5_surfsrc.w"
@@ -326,7 +313,7 @@ def test_read_tracklist_into_different_surface_errors():
     def surf_src_arg_no_header():
         ssr1.update_tracklist(ssr2)
 
-    assert_raises(AttributeError, surf_src_arg_no_header)
+    pytest.raises(AttributeError, surf_src_arg_no_header)
 
     # AttributeError #3: If there are no header variables in surf_src
     ssrname = "mcnp5_surfsrc.w"
@@ -338,7 +325,7 @@ def test_read_tracklist_into_different_surface_errors():
     def surf_src_no_header():
         ssr1.update_tracklist(ssr2)
 
-    assert_raises(AttributeError, surf_src_no_header)
+    pytest.raises(AttributeError, surf_src_no_header)
 
     # AttributeError #4: If there is no tracklist in surf_src argument
     ssrname = "mcnp5_surfsrc.w"
@@ -352,7 +339,7 @@ def test_read_tracklist_into_different_surface_errors():
     def surf_src_arg_no_tracklist():
         ssr1.update_tracklist(ssr2)
 
-    assert_raises(AttributeError, surf_src_arg_no_tracklist)
+    pytest.raises(AttributeError, surf_src_arg_no_tracklist)
 
     # AttributeError #5: If there is no tracklist in surf_src
     ssrname = "mcnp5_surfsrc.w"
@@ -366,7 +353,7 @@ def test_read_tracklist_into_different_surface_errors():
     def surf_src_no_tracklist():
         ssr1.update_tracklist(ssr2)
 
-    assert_raises(AttributeError, surf_src_no_tracklist)
+    pytest.raises(AttributeError, surf_src_no_tracklist)
 
     # ValueError #6: Update ssr1 with ssr1's tracklist
     ssrname = "mcnp5_surfsrc.w"
@@ -374,14 +361,14 @@ def test_read_tracklist_into_different_surface_errors():
     try:
         ssr1.read_header()
     except:
-        raise SkipTest
+        pytest.skip()
 
     ssr1.read_tracklist()
 
     def update_with_self():
         ssr1.update_tracklist(ssr1)
 
-    assert_raises(ValueError, update_with_self)
+    pytest.raises(ValueError, update_with_self)
 
     return
 
@@ -395,12 +382,12 @@ def test_print_header():
     try:
         ssr.read_header()
     except:
-        raise SkipTest
+        pytest.skip()
     # If comparison output needs to be updated, uncomment the below
     #  and do: nosetests test_mcnp.py --nocapture
     # print ssr.print_header()
-    assert_equal(
-        ssr.print_header(),
+    assert (
+        ssr.print_header() ==
         "Code: mcnp     (version: 5    ) [01232009]\n"
         "Problem info: ( 07/05/12 17:50:19 )"
         "  07/05/12 17:50:16 \n"
@@ -413,8 +400,7 @@ def test_print_header():
         "Surface [6]: facet -1, type [4]"
         " with 1 parameters: ( [5.0])\n"
         "Summary Table: [0, 0, 1, 1, 1, 1,"
-        " 0, 0, 0, 0, 0, 0, 0, 0, 0]",
-    )
+        " 0, 0, 0, 0, 0, 0, 0, 0, 0]")
 
     return
 
@@ -427,23 +413,22 @@ def test_print_tracklist():
     try:
         ssr.read_header()
     except struct.error:
-        raise SkipTest
+        pytest.skip()
     ssr.read_tracklist()
     # If comparison output needs to be updated, uncomment the below
     #  and do: nosetests test_mcnp.py --nocapture
     try:
         observed = ssr.print_tracklist()
     except struct.error:
-        raise SkipTest
-    assert_equal(
-        observed,
+        pytest.skip()
+    assert (
+        observed ==
         "Track Data\n       nps   BITARRAY        WGT        ERG"
         "        TME             X             Y             Z  "
         "        U          V     COSINE  |       W\n         "
         "1 8.00005e+06    0.99996      5.542    0.17144  "
         "-8.05902e-02   3.12267e+00   5.00000e+00   "
-        "-0.35133    0.48465    0.80105  |    0.80105 \n",
-    )
+        "-0.35133    0.48465    0.80105  |    0.80105 \n")
 
     return
 
@@ -467,32 +452,32 @@ def test_xsdir():
         "3009": "9.11111111",
         "0001": "1.000000",
     }
-    assert_equal(xsdir.awr, exp_awr)
+    assert xsdir.awr == exp_awr
 
     # test xs tables
-    assert_equal(xsdir.tables[0].name, "1001.44c")
-    assert_equal(xsdir.tables[0].awr, 1.111111)
-    assert_equal(xsdir.tables[0].filename, "many_xs/1001.555nc")
-    assert_equal(xsdir.tables[0].access, "0")
-    assert_equal(xsdir.tables[0].filetype, 1)
-    assert_equal(xsdir.tables[0].address, 4)
-    assert_equal(xsdir.tables[0].tablelength, 55555)
-    assert_equal(xsdir.tables[0].recordlength, 0)
-    assert_equal(xsdir.tables[0].entries, 0)
-    assert_equal(xsdir.tables[0].temperature, 5.5555e05)
-    assert_false(xsdir.tables[0].ptable)
-    assert_equal(xsdir.tables[1].filename, "such_data/1001.777nc")
-    assert_true(xsdir.tables[1].ptable)
-    assert_equal(xsdir.tables[2].filename, "more_data/1001.999nc")
-    assert_true(xsdir.tables[2].ptable)
+    assert xsdir.tables[0].name == "1001.44c"
+    assert xsdir.tables[0].awr == 1.111111
+    assert xsdir.tables[0].filename == "many_xs/1001.555nc"
+    assert xsdir.tables[0].access == "0"
+    assert xsdir.tables[0].filetype == 1
+    assert xsdir.tables[0].address == 4
+    assert xsdir.tables[0].tablelength == 55555
+    assert xsdir.tables[0].recordlength == 0
+    assert xsdir.tables[0].entries == 0
+    assert xsdir.tables[0].temperature == 5.5555e05
+    assert not xsdir.tables[0].ptable
+    assert xsdir.tables[1].filename == "such_data/1001.777nc"
+    assert xsdir.tables[1].ptable
+    assert xsdir.tables[2].filename == "more_data/1001.999nc"
+    assert xsdir.tables[2].ptable
 
 
 def test_xsdir_find_table():
     xsdir = _gen_xsdir()
     table = xsdir.find_table("1001")
-    assert_equal(table[0].name, "1001.44c")
-    assert_equal(table[1].name, "1001.66c")
-    assert_equal(table[2].name, "1001.70c")
+    assert table[0].name == "1001.44c"
+    assert table[1].name == "1001.66c"
+    assert table[2].name == "1001.70c"
 
 
 def test_xsdir_to_serpent():
@@ -518,13 +503,13 @@ def test_xsdir_to_serpent():
         ),
     ]
 
-    assert_equal(lines, exp)
+    assert lines == exp
     os.remove(output)
 
 
 def test_xsdir_nucs():
     xsdir = _gen_xsdir()
-    assert_equal(xsdir.nucs(), set([10010000]))
+    assert xsdir.nucs() == set([10010000])
 
 
 def test_xsdirtable_to_serpent():
@@ -534,7 +519,7 @@ def test_xsdirtable_to_serpent():
         "1001.44c 1001.44c 1 1001 0 1.111111 6.44688328094e+15 0"
         " ./many_xs/1001.555nc"
     )
-    assert_equal(line, exp_line)
+    assert line == exp_line
 
 
 def test_read_mcnp():
@@ -626,62 +611,49 @@ def test_read_mcnp():
     )
 
     read_materials = mats_from_inp("mcnp_inp.txt")
-    assert_almost_equal(expected_material, read_materials[1])
-    assert_equal(expected_material_default_lib, read_materials[3])
-    assert_equal(
-        list(expected_multimaterial._mats.keys())[0].comp.keys(),
-        list(read_materials[2]._mats.keys())[0].comp.keys(),
-    )
+    assert expected_material == pytest.approx(read_materials[1])
+    assert expected_material_default_lib == read_materials[3]
+    assert (
+        list(expected_multimaterial._mats.keys())[0].comp.keys() ==
+        list(read_materials[2]._mats.keys())[0].comp.keys())
     for i in range(2):
-        assert_almost_equal(
-            list(list(expected_multimaterial._mats.keys())[0].comp.values())[i],
-            list(list(read_materials[2]._mats.keys())[0].comp.values())[i],
-        )
-    assert_almost_equal(
-        list(expected_multimaterial._mats.keys())[0].mass,
-        list(read_materials[2]._mats.keys())[0].mass,
-    )
-    assert_almost_equal(
-        list(expected_multimaterial._mats.keys())[0].density,
-        list(read_materials[2]._mats.keys())[0].density,
-    )
-    assert_equal(
-        list(expected_multimaterial._mats.keys())[0].atoms_per_molecule,
-        list(read_materials[2]._mats.keys())[0].atoms_per_molecule,
-    )
-    assert_equal(
-        list(expected_multimaterial._mats.keys())[0].metadata,
-        list(read_materials[2]._mats.keys())[0].metadata,
-    )
-    assert_equal(
-        list(expected_multimaterial._mats.keys())[1].comp.keys(),
-        list(read_materials[2]._mats.keys())[1].comp.keys(),
-    )
+        assert (
+            list(list(expected_multimaterial._mats.keys())[0].comp.values())[i] ==
+            pytest.approx(list(list(read_materials[2]._mats.keys())[0].comp.values())[i]))
+    assert (
+        list(expected_multimaterial._mats.keys())[0].mass ==
+        pytest.approx(list(read_materials[2]._mats.keys())[0].mass))
+    assert (
+        list(expected_multimaterial._mats.keys())[0].density ==
+        pytest.approx(list(read_materials[2]._mats.keys())[0].density))
+    assert (
+        list(expected_multimaterial._mats.keys())[0].atoms_per_molecule ==
+        list(read_materials[2]._mats.keys())[0].atoms_per_molecule)
+    assert (
+        list(expected_multimaterial._mats.keys())[0].metadata ==
+        list(read_materials[2]._mats.keys())[0].metadata)
+    assert (
+        list(expected_multimaterial._mats.keys())[1].comp.keys() ==
+        list(read_materials[2]._mats.keys())[1].comp.keys())
     for i in range(2):
-        assert_almost_equal(
-            list(list(expected_multimaterial._mats.keys())[1].comp.values())[i],
-            list(list(read_materials[2]._mats.keys())[1].comp.values())[i],
-        )
-    assert_equal(
-        list(expected_multimaterial._mats.keys())[1].mass,
-        list(read_materials[2]._mats.keys())[1].mass,
-    )
-    assert_almost_equal(
-        list(expected_multimaterial._mats.keys())[1].density,
-        list(read_materials[2]._mats.keys())[1].density,
-    )
-    assert_equal(
-        list(expected_multimaterial._mats.keys())[1].atoms_per_molecule,
-        list(read_materials[2]._mats.keys())[1].atoms_per_molecule,
-    )
-    assert_equal(
-        list(expected_multimaterial._mats.keys())[1].metadata,
-        list(read_materials[2]._mats.keys())[1].metadata,
-    )
-    assert_almost_equal(
-        list(expected_multimaterial._mats.keys())[2].density,
-        list(read_materials[2]._mats.keys())[2].density,
-    )
+        assert (
+            list(list(expected_multimaterial._mats.keys())[1].comp.values())[i] ==
+            pytest.approx(list(list(read_materials[2]._mats.keys())[1].comp.values())[i]))
+    assert (
+        list(expected_multimaterial._mats.keys())[1].mass ==
+        list(read_materials[2]._mats.keys())[1].mass)
+    assert (
+        list(expected_multimaterial._mats.keys())[1].density ==
+        pytest.approx(list(read_materials[2]._mats.keys())[1].density))
+    assert (
+        list(expected_multimaterial._mats.keys())[1].atoms_per_molecule ==
+        list(read_materials[2]._mats.keys())[1].atoms_per_molecule)
+    assert (
+        list(expected_multimaterial._mats.keys())[1].metadata ==
+        list(read_materials[2]._mats.keys())[1].metadata)
+    assert (
+        list(expected_multimaterial._mats.keys())[2].density ==
+        pytest.approx(list(read_materials[2]._mats.keys())[2].density))
 
 
 # test to ensure the mats_from_inp function can read repeated mcnp
@@ -711,7 +683,7 @@ def test_read_mcnp_wcomments():
     expected_material.mass = -1.0  # to avoid reassignment to +1.0
 
     read_materials = mats_from_inp("mcnp_inp_comments.txt")
-    assert_equal(expected_material, read_materials[1])
+    assert expected_material == read_materials[1]
 
 
 # Test PtracReader class
@@ -719,28 +691,26 @@ def test_read_mcnp_wcomments():
 
 def test_read_headers():
     p = mcnp.PtracReader("mcnp_ptrac_i4_little.ptrac")
-    assert_equal(
-        p.problem_title, "Generate a well-defined PTRAC file for PyNE test cases"
-    )
+    assert (
+        p.problem_title == "Generate a well-defined PTRAC file for PyNE test cases")
     del p
 
     # 8-byte ints, little endian
     p = mcnp.PtracReader("mcnp_ptrac_i8_little.ptrac")
-    assert_equal(
-        p.problem_title, "Generate a well-defined PTRAC file for PyNE test cases"
-    )
+    assert (
+        p.problem_title == "Generate a well-defined PTRAC file for PyNE test cases")
     del p
 
 
 def test_determine_format():
     # 4-byte ints, little endian
     p = mcnp.PtracReader("mcnp_ptrac_i4_little.ptrac")
-    assert_equal(p.endianness, "<")
+    assert p.endianness == "<"
     del p
 
     # 8-byte ints, little endian
     p = mcnp.PtracReader("mcnp_ptrac_i8_little.ptrac")
-    assert_equal(p.endianness, "<")
+    assert p.endianness == "<"
     del p
 
 
@@ -750,12 +720,12 @@ def test_read_events():
     evt = {}
 
     p.read_nps_line()
-    assert_equal(p.next_event, 1000)
+    assert p.next_event == 1000
 
     p.read_event_line(evt)
-    assert_equal(evt["xxx"], 0.0)
-    assert_equal(evt["yyy"], 0.0)
-    assert_equal(evt["zzz"], 0.0)
+    assert evt["xxx"] == 0.0
+    assert evt["yyy"] == 0.0
+    assert evt["zzz"] == 0.0
     del p
     del evt
 
@@ -783,7 +753,7 @@ def test_write_to_hdf5():
         h5file = tables.open_file("mcnp_ptrac_hdf5_file.h5")
         tab = h5file.get_node("/t")
         selected = [1 for x in tab.iterrows() if x["event_type"] == 1000]
-        assert_equal(len(selected), 5)
+        assert len(selected) == 5
         h5file.close()
         del tab
         del h5file
@@ -797,7 +767,7 @@ def test_write_to_hdf5():
 # and ouputs are easily strung together.
 def test_wwinp_n():
     if not HAVE_PYMOAB:
-        raise SkipTest
+        pytest.skip()
 
     thisdir = os.path.dirname(__file__)
     wwinp_file = os.path.join(thisdir, "mcnp_wwinp_wwinp_n.txt")
@@ -808,20 +778,20 @@ def test_wwinp_n():
     # Read in the wwinp file to an object and check resulting attributes.
     ww1 = mcnp.Wwinp()
     ww1.read_wwinp(wwinp_file)
-    assert_equal(ww1.ni, 1)
-    assert_equal(ww1.nr, 10)
-    assert_equal(ww1.ne, [7])
-    assert_equal(ww1.nf, [15, 8, 6])
-    assert_equal(ww1.origin, [-100, -100, -100])
-    assert_equal(ww1.nc, [5, 3, 1])
-    assert_equal(ww1.nwg, 1)
-    assert_equal(ww1.cm, [[-99, -97, 97, 99, 100], [-50, 60, 100], [100]])
-    assert_equal(ww1.fm, [[1, 1, 11, 1, 1], [1, 3, 4], [6]])
+    assert ww1.ni == 1
+    assert ww1.nr == 10
+    assert ww1.ne == [7]
+    assert ww1.nf == [15, 8, 6]
+    assert ww1.origin == [-100, -100, -100]
+    assert ww1.nc == [5, 3, 1]
+    assert ww1.nwg == 1
+    assert ww1.cm == [[-99, -97, 97, 99, 100], [-50, 60, 100], [100]]
+    assert ww1.fm == [[1, 1, 11, 1, 1], [1, 3, 4], [6]]
     assert_array_equal(
         ww1.e, [[0.1, 0.14678, 0.21544, 0.31623, 0.46416, 0.68129, 1.0000]]
     )
-    assert_equal(
-        ww1.bounds,
+    assert (
+        ww1.bounds ==
         [
             [
                 -100.0,
@@ -861,8 +831,7 @@ def test_wwinp_n():
                 66.666666666666657,
                 100.0,
             ],
-        ],
-    )
+        ])
 
     expected_ves = list(expected_sm.structured_iterate_hex("zyx"))
     written_ves = list(expected_sm.structured_iterate_hex("zyx"))
@@ -875,20 +844,20 @@ def test_wwinp_n():
     # object and check resutling attributes.
     ww2 = mcnp.Wwinp()
     ww2.read_mesh(ww1.mesh)
-    assert_equal(ww2.ni, 1)
-    assert_equal(ww2.nr, 10)
-    assert_equal(ww2.ne, [7])
-    assert_equal(ww2.nf, [15, 8, 6])
-    assert_equal(ww2.origin, [-100, -100, -100])
-    assert_equal(ww2.nc, [5, 3, 1])
-    assert_equal(ww2.nwg, 1)
-    assert_equal(ww2.cm, [[-99, -97, 97, 99, 100], [-50, 60, 100], [100]])
-    assert_equal(ww2.fm, [[1, 1, 11, 1, 1], [1, 3, 4], [6]])
+    assert ww2.ni == 1
+    assert ww2.nr == 10
+    assert ww2.ne == [7]
+    assert ww2.nf == [15, 8, 6]
+    assert ww2.origin == [-100, -100, -100]
+    assert ww2.nc == [5, 3, 1]
+    assert ww2.nwg == 1
+    assert ww2.cm == [[-99, -97, 97, 99, 100], [-50, 60, 100], [100]]
+    assert ww2.fm == [[1, 1, 11, 1, 1], [1, 3, 4], [6]]
     assert_array_equal(
         ww2.e, [[0.1, 0.14678, 0.21544, 0.31623, 0.46416, 0.68129, 1.0000]]
     )
-    assert_equal(
-        ww2.bounds,
+    assert (
+        ww2.bounds ==
         [
             [
                 -100.0,
@@ -928,8 +897,7 @@ def test_wwinp_n():
                 66.666666666666657,
                 100.0,
             ],
-        ],
-    )
+        ])
 
     expected_ves = list(expected_sm.structured_iterate_hex("zyx"))
     written_ves = list(expected_sm.structured_iterate_hex("zyx"))
@@ -951,18 +919,18 @@ def test_wwinp_n():
 
     # check to make sure file are the same except for the data/time info
     # on line 1
-    assert_equal(written[0].split()[:-2], expected[0].split()[:-2])
-    assert_equal(len(written), len(expected))
+    assert written[0].split()[:-2] == expected[0].split()[:-2]
+    assert len(written) == len(expected)
     for i in range(1, len(expected)):
         for j in range(0, len(expected[i].split())):
-            assert_equal(float(written[i].split()[j]), float(expected[i].split()[j]))
+            assert float(written[i].split()[j]) == float(expected[i].split()[j])
 
     os.remove(output)
 
 
 def test_wwinp_p():
     if not HAVE_PYMOAB:
-        raise SkipTest
+        pytest.skip()
 
     thisdir = os.path.dirname(__file__)
     wwinp_file = os.path.join(thisdir, "mcnp_wwinp_wwinp_p.txt")
@@ -973,21 +941,21 @@ def test_wwinp_p():
     # Read in the wwinp file to an object and check resulting attributes.
     ww1 = mcnp.Wwinp()
     ww1.read_wwinp(wwinp_file)
-    assert_equal(ww1.ni, 2)
-    assert_equal(ww1.nr, 10)
-    assert_equal(ww1.ne, [0, 7])
-    assert_equal(ww1.nf, [1, 8, 6])
-    assert_equal(ww1.origin, [-100, -100, -100])
-    assert_equal(ww1.nc, [1, 3, 1])
-    assert_equal(ww1.nwg, 1)
-    assert_equal(ww1.cm, [[100], [-50, 60, 100], [100]])
-    assert_equal(ww1.fm, [[1], [1, 3, 4], [6]])
-    assert_equal(ww1.e[0], [])
+    assert ww1.ni == 2
+    assert ww1.nr == 10
+    assert ww1.ne == [0, 7]
+    assert ww1.nf == [1, 8, 6]
+    assert ww1.origin == [-100, -100, -100]
+    assert ww1.nc == [1, 3, 1]
+    assert ww1.nwg == 1
+    assert ww1.cm == [[100], [-50, 60, 100], [100]]
+    assert ww1.fm == [[1], [1, 3, 4], [6]]
+    assert ww1.e[0] == []
     assert_array_equal(
         ww1.e[1], [0.1, 0.14678, 0.21544, 0.31623, 0.46416, 0.68129, 1.0000]
     )
-    assert_equal(
-        ww1.bounds,
+    assert (
+        ww1.bounds ==
         [
             [-100.0, 100],
             [
@@ -1010,8 +978,7 @@ def test_wwinp_p():
                 66.666666666666657,
                 100.0,
             ],
-        ],
-    )
+        ])
 
     expected_ves = list(expected_sm.structured_iterate_hex("zyx"))
     written_ves = list(expected_sm.structured_iterate_hex("zyx"))
@@ -1024,21 +991,21 @@ def test_wwinp_p():
     # object and check resutling attributes.
     ww2 = mcnp.Wwinp()
     ww2.read_mesh(ww1.mesh)
-    assert_equal(ww2.ni, 2)
-    assert_equal(ww2.nr, 10)
-    assert_equal(ww2.ne, [0, 7])
-    assert_equal(ww2.nf, [1, 8, 6])
-    assert_equal(ww2.origin, [-100, -100, -100])
-    assert_equal(ww2.nc, [1, 3, 1])
-    assert_equal(ww2.nwg, 1)
-    assert_equal(ww2.cm, [[100], [-50, 60, 100], [100]])
-    assert_equal(ww2.fm, [[1], [1, 3, 4], [6]])
-    assert_equal(ww2.e[0], [])
+    assert ww2.ni == 2
+    assert ww2.nr == 10
+    assert ww2.ne == [0, 7]
+    assert ww2.nf == [1, 8, 6]
+    assert ww2.origin == [-100, -100, -100]
+    assert ww2.nc == [1, 3, 1]
+    assert ww2.nwg == 1
+    assert ww2.cm == [[100], [-50, 60, 100], [100]]
+    assert ww2.fm == [[1], [1, 3, 4], [6]]
+    assert ww2.e[0] == []
     assert_array_equal(
         ww2.e[1], [0.1, 0.14678, 0.21544, 0.31623, 0.46416, 0.68129, 1.0000]
     )
-    assert_equal(
-        ww2.bounds,
+    assert (
+        ww2.bounds ==
         [
             [-100.0, 100],
             [
@@ -1061,8 +1028,7 @@ def test_wwinp_p():
                 66.666666666666657,
                 100.0,
             ],
-        ],
-    )
+        ])
 
     expected_ves = list(expected_sm.structured_iterate_hex("zyx"))
     written_ves = list(expected_sm.structured_iterate_hex("zyx"))
@@ -1084,18 +1050,18 @@ def test_wwinp_p():
 
     # check to make sure file are the same except for the data/time info
     # on line 1
-    assert_equal(written[0].split()[:-2], expected[0].split()[:-2])
-    assert_equal(len(written), len(expected))
+    assert written[0].split()[:-2] == expected[0].split()[:-2]
+    assert len(written) == len(expected)
     for i in range(1, len(expected)):
         for j in range(0, len(expected[i].split())):
-            assert_equal(float(written[i].split()[j]), float(expected[i].split()[j]))
+            assert float(written[i].split()[j]) == float(expected[i].split()[j])
 
     os.remove(output)
 
 
 def test_wwinp_np():
     if not HAVE_PYMOAB:
-        raise SkipTest
+        pytest.skip()
 
     thisdir = os.path.dirname(__file__)
     wwinp_file = os.path.join(thisdir, "mcnp_wwinp_wwinp_np.txt")
@@ -1106,19 +1072,19 @@ def test_wwinp_np():
     # Read in the wwinp file to an object and check resulting attributes.
     ww1 = mcnp.Wwinp()
     ww1.read_wwinp(wwinp_file)
-    assert_equal(ww1.ni, 2)
-    assert_equal(ww1.nr, 10)
-    assert_equal(ww1.ne, [7, 1])
-    assert_equal(ww1.nf, [1, 8, 6])
-    assert_equal(ww1.origin, [-100, -100, -100])
-    assert_equal(ww1.nc, [1, 3, 1])
-    assert_equal(ww1.nwg, 1)
-    assert_equal(ww1.cm, [[100], [-50, 60, 100], [100]])
-    assert_equal(ww1.fm, [[1], [1, 3, 4], [6]])
-    assert_equal(ww1.e[0], [0.1, 0.14678, 0.21544, 0.31623, 0.46416, 0.68129, 1.0000])
+    assert ww1.ni == 2
+    assert ww1.nr == 10
+    assert ww1.ne == [7, 1]
+    assert ww1.nf == [1, 8, 6]
+    assert ww1.origin == [-100, -100, -100]
+    assert ww1.nc == [1, 3, 1]
+    assert ww1.nwg == 1
+    assert ww1.cm == [[100], [-50, 60, 100], [100]]
+    assert ww1.fm == [[1], [1, 3, 4], [6]]
+    assert ww1.e[0] == [0.1, 0.14678, 0.21544, 0.31623, 0.46416, 0.68129, 1.0000]
     assert_array_equal(ww1.e[1], [100])
-    assert_equal(
-        ww1.bounds,
+    assert (
+        ww1.bounds ==
         [
             [-100.0, 100],
             [
@@ -1141,8 +1107,7 @@ def test_wwinp_np():
                 66.666666666666657,
                 100.0,
             ],
-        ],
-    )
+        ])
 
     expected_ves = list(expected_sm.structured_iterate_hex("zyx"))
     written_ves = list(expected_sm.structured_iterate_hex("zyx"))
@@ -1162,21 +1127,21 @@ def test_wwinp_np():
     # object and check resutling attributes.
     ww2 = mcnp.Wwinp()
     ww2.read_mesh(ww1.mesh)
-    assert_equal(ww2.ni, 2)
-    assert_equal(ww2.nr, 10)
-    assert_equal(ww2.ne, [7, 1])
-    assert_equal(ww2.nf, [1, 8, 6])
-    assert_equal(ww2.origin, [-100, -100, -100])
-    assert_equal(ww2.nc, [1, 3, 1])
-    assert_equal(ww2.nwg, 1)
-    assert_equal(ww2.cm, [[100], [-50, 60, 100], [100]])
-    assert_equal(ww2.fm, [[1], [1, 3, 4], [6]])
+    assert ww2.ni == 2
+    assert ww2.nr == 10
+    assert ww2.ne == [7, 1]
+    assert ww2.nf == [1, 8, 6]
+    assert ww2.origin == [-100, -100, -100]
+    assert ww2.nc == [1, 3, 1]
+    assert ww2.nwg == 1
+    assert ww2.cm == [[100], [-50, 60, 100], [100]]
+    assert ww2.fm == [[1], [1, 3, 4], [6]]
     assert_array_equal(
         ww2.e[0], [0.1, 0.14678, 0.21544, 0.31623, 0.46416, 0.68129, 1.0000]
     )
     assert_array_equal(ww2.e[1], [100])
-    assert_equal(
-        ww2.bounds,
+    assert (
+        ww2.bounds ==
         [
             [-100.0, 100],
             [
@@ -1199,8 +1164,7 @@ def test_wwinp_np():
                 66.666666666666657,
                 100.0,
             ],
-        ],
-    )
+        ])
 
     expected_ves = list(expected_sm.structured_iterate_hex("zyx"))
     written_ves = list(expected_sm.structured_iterate_hex("zyx"))
@@ -1229,11 +1193,11 @@ def test_wwinp_np():
 
     # check to make sure file are the same except for the data/time info
     # on line 1
-    assert_equal(written[0].split()[:-2], expected[0].split()[:-2])
-    assert_equal(len(written), len(expected))
+    assert written[0].split()[:-2] == expected[0].split()[:-2]
+    assert len(written) == len(expected)
     for i in range(1, len(expected)):
         for j in range(0, len(expected[i].split())):
-            assert_equal(float(written[i].split()[j]), float(expected[i].split()[j]))
+            assert float(written[i].split()[j]) == float(expected[i].split()[j])
 
     os.remove(output)
 
@@ -1243,7 +1207,7 @@ def test_single_meshtally_meshtal():
     """Test a meshtal file containing a single mesh tally."""
 
     if not HAVE_PYMOAB:
-        raise SkipTest
+        pytest.skip()
 
     thisdir = os.path.dirname(__file__)
     meshtal_file = os.path.join(thisdir, "mcnp_meshtal_single_meshtal.txt")
@@ -1253,30 +1217,28 @@ def test_single_meshtally_meshtal():
     tags = {4: ["n_result", "n_rel_error", "n_total_result", "n_total_rel_error"]}
 
     meshtal_object = mcnp.Meshtal(meshtal_file, tags, meshes_have_mats=True)
-    assert_not_equal(meshtal_object.tally[4].mats, None)
+    assert meshtal_object.tally[4].mats != None
 
     # test Meshtal attributes
-    assert_equal(meshtal_object.version, "5.mpi")
+    assert meshtal_object.version == "5.mpi"
 
-    assert_equal(meshtal_object.ld, "09282010")
+    assert meshtal_object.ld == "09282010"
 
-    assert_equal(meshtal_object.title, "Input file to general test meshtal file")
+    assert meshtal_object.title == "Input file to general test meshtal file"
 
-    assert_equal(meshtal_object.histories, 100000)
+    assert meshtal_object.histories == 100000
 
     # test MeshTally attributes
-    assert_equal(meshtal_object.tally[4].tally_number, 4)
-    assert_equal(meshtal_object.tally[4].particle, "neutron")
-    assert_equal(meshtal_object.tally[4].dose_response, True)
-    assert_equal(meshtal_object.tally[4].x_bounds, (-200.00, -66.67, 66.67, 200.00))
-    assert_equal(
-        meshtal_object.tally[4].y_bounds,
-        (-200.00, -120.00, -40.00, 40.00, 120.00, 200.00),
-    )
-    assert_equal(meshtal_object.tally[4].z_bounds, (-200.00, -50.00, 100.00, 200.00))
-    assert_equal(
-        meshtal_object.tally[4].e_bounds, (0.00e00, 1.00e-01, 2.00e-01, 1.00e00)
-    )
+    assert meshtal_object.tally[4].tally_number == 4
+    assert meshtal_object.tally[4].particle == "neutron"
+    assert meshtal_object.tally[4].dose_response == True
+    assert meshtal_object.tally[4].x_bounds == (-200.00, -66.67, 66.67, 200.00)
+    assert (
+        meshtal_object.tally[4].y_bounds ==
+        (-200.00, -120.00, -40.00, 40.00, 120.00, 200.00))
+    assert meshtal_object.tally[4].z_bounds == (-200.00, -50.00, 100.00, 200.00)
+    assert (
+        meshtal_object.tally[4].e_bounds == (0.00e00, 1.00e-01, 2.00e-01, 1.00e00))
 
     # test vector tags
     for v_e, expected_v_e in zip(
@@ -1301,14 +1263,14 @@ def test_single_meshtally_meshtal():
     ):
         written = meshtal_object.tally[4].n_total_result[v_e]
         expected = expected_sm.n_total_result[expected_v_e]
-        assert_equal(written, expected)
+        assert written == expected
     for v_e, expected_v_e in zip(
         meshtal_object.tally[4].structured_iterate_hex("xyz"),
         expected_sm.structured_iterate_hex("xyz"),
     ):
         written = meshtal_object.tally[4].n_total_rel_error[v_e]
         expected = expected_sm.n_total_rel_error[expected_v_e]
-        assert_equal(written, expected)
+        assert written == expected
 
 
 def test_multiple_meshtally_meshtal():
@@ -1317,7 +1279,7 @@ def test_multiple_meshtally_meshtal():
     """
 
     if not HAVE_PYMOAB:
-        raise SkipTest
+        pytest.skip()
 
     thisdir = os.path.dirname(__file__)
     meshtal_file = os.path.join(thisdir, "mcnp_meshtal_multiple_meshtal.txt")
@@ -1341,8 +1303,8 @@ def test_multiple_meshtally_meshtal():
         34: ["p_result", "p_rel_error", "p_total_result", "p_total_rel_error"],
     }
     meshtal_object = mcnp.Meshtal(meshtal_file, tags)
-    assert_equal(meshtal_object.version, "5")
-    assert_equal(meshtal_object.tally[4].mats, None)
+    assert meshtal_object.version == "5"
+    assert meshtal_object.tally[4].mats == None
 
     # test meshtally 4
     for v_e, expected_v_e in zip(
@@ -1367,7 +1329,7 @@ def test_multiple_meshtally_meshtal():
     ):
         written = meshtal_object.tally[4].n_total_result[v_e]
         expected = expected_sm_4.n_total_result[expected_v_e]
-        assert_equal(written, expected)
+        assert written == expected
 
     for v_e, expected_v_e in zip(
         meshtal_object.tally[4].structured_iterate_hex("xyz"),
@@ -1375,7 +1337,7 @@ def test_multiple_meshtally_meshtal():
     ):
         written = meshtal_object.tally[4].n_total_rel_error[v_e]
         expected = expected_sm_4.n_total_rel_error[expected_v_e]
-        assert_equal(written, expected)
+        assert written == expected
 
     # test meshtally 14
     for v_e, expected_v_e in zip(
@@ -1417,7 +1379,7 @@ def test_multiple_meshtally_meshtal():
     ):
         written = meshtal_object.tally[24].p_total_result[v_e]
         expected = expected_sm_24.p_total_result[expected_v_e]
-        assert_equal(written, expected)
+        assert written == expected
 
     for v_e, expected_v_e in zip(
         meshtal_object.tally[24].structured_iterate_hex("xyz"),
@@ -1425,7 +1387,7 @@ def test_multiple_meshtally_meshtal():
     ):
         written = meshtal_object.tally[24].p_total_rel_error[v_e]
         expected = expected_sm_24.p_total_rel_error[expected_v_e]
-        assert_equal(written, expected)
+        assert written == expected
 
     # test meshtally 34
     for v_e, expected_v_e in zip(
@@ -1447,7 +1409,7 @@ def test_multiple_meshtally_meshtal():
 
 def test_mesh_to_geom():
     if not HAVE_PYMOAB:
-        raise SkipTest
+        pytest.skip()
 
     mats = {
         0: Material({"H1": 1.0, "K39": 1.0}, density=42.0),
@@ -1512,4 +1474,4 @@ def test_mesh_to_geom():
         "     1002 -5.0000e+00\n"
     )
 
-    assert_equal(geom, exp_geom)
+    assert geom == exp_geom

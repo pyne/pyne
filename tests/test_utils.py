@@ -1,16 +1,8 @@
 """PyNE utility tests"""
 import os
 
-import nose
+import pytest
 
-from nose.tools import (
-    assert_equal,
-    assert_not_equal,
-    assert_raises,
-    raises,
-    assert_in,
-    assert_true,
-)
 
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 
@@ -20,115 +12,115 @@ import numpy as np
 
 def test_to_sec():
     # as
-    assert_equal(2e-18, utils.to_sec(2, "AS"))
-    assert_equal(2e-18, utils.to_sec(2, "attosec"))
-    assert_equal(2e-18, utils.to_sec(2, "attosecond"))
-    assert_equal(2e-18, utils.to_sec(2, "attoseconds"))
+    assert 2e-18 == utils.to_sec(2, "AS")
+    assert 2e-18 == utils.to_sec(2, "attosec")
+    assert 2e-18 == utils.to_sec(2, "attosecond")
+    assert 2e-18 == utils.to_sec(2, "attoseconds")
     # fs
-    assert_equal(2e-15, utils.to_sec(2, "FS"))
-    assert_equal(2e-15, utils.to_sec(2, "femtosec"))
-    assert_equal(2e-15, utils.to_sec(2, "femtosecond"))
-    assert_equal(2e-15, utils.to_sec(2, "femtoseconds"))
+    assert 2e-15 == utils.to_sec(2, "FS")
+    assert 2e-15 == utils.to_sec(2, "femtosec")
+    assert 2e-15 == utils.to_sec(2, "femtosecond")
+    assert 2e-15 == utils.to_sec(2, "femtoseconds")
     # ps
-    assert_equal(2e-12, utils.to_sec(2, "PS"))
-    assert_equal(2e-12, utils.to_sec(2, "picosec"))
-    assert_equal(2e-12, utils.to_sec(2, "picosecond"))
-    assert_equal(2e-12, utils.to_sec(2, "picoseconds"))
+    assert 2e-12 == utils.to_sec(2, "PS")
+    assert 2e-12 == utils.to_sec(2, "picosec")
+    assert 2e-12 == utils.to_sec(2, "picosecond")
+    assert 2e-12 == utils.to_sec(2, "picoseconds")
     # ns
-    assert_equal(2e-9, utils.to_sec(2, "NS"))
-    assert_equal(2e-9, utils.to_sec(2, "nanosec"))
-    assert_equal(2e-9, utils.to_sec(2, "nanosecond"))
-    assert_equal(2e-9, utils.to_sec(2, "nanoseconds"))
+    assert 2e-9 == utils.to_sec(2, "NS")
+    assert 2e-9 == utils.to_sec(2, "nanosec")
+    assert 2e-9 == utils.to_sec(2, "nanosecond")
+    assert 2e-9 == utils.to_sec(2, "nanoseconds")
     # us
-    assert_equal(2e-6, utils.to_sec(2, "US"))
-    assert_equal(2e-6, utils.to_sec(2, "microsec"))
-    assert_equal(2e-6, utils.to_sec(2, "microsecond"))
-    assert_equal(2e-6, utils.to_sec(2, "microseconds"))
+    assert 2e-6 == utils.to_sec(2, "US")
+    assert 2e-6 == utils.to_sec(2, "microsec")
+    assert 2e-6 == utils.to_sec(2, "microsecond")
+    assert 2e-6 == utils.to_sec(2, "microseconds")
     # ms
-    assert_equal(2e-3, utils.to_sec(2, "MS"))
-    assert_equal(2e-3, utils.to_sec(2, "millisec"))
-    assert_equal(2e-3, utils.to_sec(2, "millisecond"))
-    assert_equal(2e-3, utils.to_sec(2, "milliseconds"))
+    assert 2e-3 == utils.to_sec(2, "MS")
+    assert 2e-3 == utils.to_sec(2, "millisec")
+    assert 2e-3 == utils.to_sec(2, "millisecond")
+    assert 2e-3 == utils.to_sec(2, "milliseconds")
     # s
-    assert_equal(2.0, utils.to_sec(2, "S"))
-    assert_equal(2.0, utils.to_sec(2, "sec"))
-    assert_equal(2.0, utils.to_sec(2, "second"))
-    assert_equal(2.0, utils.to_sec(2, "seconds"))
+    assert 2.0 == utils.to_sec(2, "S")
+    assert 2.0 == utils.to_sec(2, "sec")
+    assert 2.0 == utils.to_sec(2, "second")
+    assert 2.0 == utils.to_sec(2, "seconds")
     # m
-    assert_equal(120.0, utils.to_sec(2, "M"))
-    assert_equal(120.0, utils.to_sec(2, "min"))
-    assert_equal(120.0, utils.to_sec(2, "minute"))
-    assert_equal(120.0, utils.to_sec(2, "minutes"))
+    assert 120.0 == utils.to_sec(2, "M")
+    assert 120.0 == utils.to_sec(2, "min")
+    assert 120.0 == utils.to_sec(2, "minute")
+    assert 120.0 == utils.to_sec(2, "minutes")
     # h
-    assert_equal(7200.0, utils.to_sec(2, "H"))
-    assert_equal(7200.0, utils.to_sec(2, "hour"))
-    assert_equal(7200.0, utils.to_sec(2, "hours"))
+    assert 7200.0 == utils.to_sec(2, "H")
+    assert 7200.0 == utils.to_sec(2, "hour")
+    assert 7200.0 == utils.to_sec(2, "hours")
     # d
-    assert_equal(172800.0, utils.to_sec(2, "D"))
-    assert_equal(172800.0, utils.to_sec(2, "day"))
-    assert_equal(172800.0, utils.to_sec(2, "days"))
+    assert 172800.0 == utils.to_sec(2, "D")
+    assert 172800.0 == utils.to_sec(2, "day")
+    assert 172800.0 == utils.to_sec(2, "days")
     # w
-    assert_equal(1209600.0, utils.to_sec(2, "W"))
-    assert_equal(1209600.0, utils.to_sec(2, "week"))
-    assert_equal(1209600.0, utils.to_sec(2, "weeks"))
+    assert 1209600.0 == utils.to_sec(2, "W")
+    assert 1209600.0 == utils.to_sec(2, "week")
+    assert 1209600.0 == utils.to_sec(2, "weeks")
     # y
-    assert_equal(63115200.0, utils.to_sec(2, "Y"))
-    assert_equal(63115200.0, utils.to_sec(2, "year"))
-    assert_equal(63115200.0, utils.to_sec(2, "years"))
+    assert 63115200.0 == utils.to_sec(2, "Y")
+    assert 63115200.0 == utils.to_sec(2, "year")
+    assert 63115200.0 == utils.to_sec(2, "years")
     # c
-    assert_equal(6311520000.0, utils.to_sec(2, "C"))
-    assert_equal(6311520000.0, utils.to_sec(2, "century"))
-    assert_equal(6311520000.0, utils.to_sec(2, "centuries"))
+    assert 6311520000.0 == utils.to_sec(2, "C")
+    assert 6311520000.0 == utils.to_sec(2, "century")
+    assert 6311520000.0 == utils.to_sec(2, "centuries")
     # undifined unit trigs ValueError
-    assert_raises(ValueError, utils.to_sec, 2, "month")
+    pytest.raises(ValueError, utils.to_sec, 2, "month")
 
 
 def test_to_barns():
-    assert_equal(3e3, utils.to_barns(3, "KB"))
+    assert 3e3 == utils.to_barns(3, "KB")
 
 
 def test_from_barns():
-    assert_equal(3e-3, utils.from_barns(3, "KB"))
+    assert 3e-3 == utils.from_barns(3, "KB")
 
 
 def test_message():
     if os.name == "posix":
-        assert_equal("\033[1;32mHello\033[0m", utils.message("Hello"))
+        assert "\033[1;32mHello\033[0m" == utils.message("Hello")
     else:
-        assert_equal("*** MESSAGE ***: Hello", utils.message("Hello"))
+        assert "*** MESSAGE ***: Hello" == utils.message("Hello")
 
 
 def test_failure():
     if os.name == "posix":
-        assert_equal("\033[1;31mWorld\033[0m", utils.failure("World"))
+        assert "\033[1;31mWorld\033[0m" == utils.failure("World")
     else:
-        assert_equal("*** FAILURE ***: World", utils.failure("World"))
+        assert "*** FAILURE ***: World" == utils.failure("World")
 
 
 def test_remove():
     # test file removal
-    assert_true("hello.txt" not in os.listdir("."))
+    assert "hello.txt" not in os.listdir(".")
     with open("hello.txt", "w") as f:
         f.write("Hello PyNE!")
-    assert_true("hello.txt" in os.listdir("."))
+    assert "hello.txt" in os.listdir(".")
 
     utils.remove("hello.txt")
-    assert_true("hello.txt" not in os.listdir("."))
+    assert "hello.txt" not in os.listdir(".")
 
     # test recursive dir removal
-    assert_true("rawr" not in os.listdir("."))
+    assert "rawr" not in os.listdir(".")
     os.mkdir("rawr")
 
-    assert_true("hello.txt" not in os.listdir("rawr"))
+    assert "hello.txt" not in os.listdir("rawr")
     with open("rawr/hello.txt", "w") as f:
         f.write("Hello PyNE!")
-    assert_true("hello.txt" in os.listdir("rawr"))
+    assert "hello.txt" in os.listdir("rawr")
 
     utils.remove("rawr")
-    assert_true("rawr" not in os.listdir("."))
+    assert "rawr" not in os.listdir(".")
 
     # Test pass through on non-existant
-    assert_true("Medic!" not in os.listdir("."))
+    assert "Medic!" not in os.listdir(".")
     utils.remove("Medic!")
 
 
@@ -191,13 +183,13 @@ def test_fromstring_token4():
 def test_use_warnings():
     first = utils.use_warnings()
     second = utils.use_warnings()
-    assert_equal(first, second)
+    assert first == second
 
 
 def test_toggle_warnings():
     state = utils.use_warnings()
     observed = utils.toggle_warnings()
-    assert_equal(state, not observed)
+    assert state == (not observed)
 
 def test_str_to_unicode():
     """
@@ -207,15 +199,15 @@ def test_str_to_unicode():
     
     # default str
     s = "test"
-    assert_equal(utils.str_to_unicode(s), exp_answer)
+    assert utils.str_to_unicode(s) == exp_answer
     
     # binary str
     s = b"test"
-    assert_equal(utils.str_to_unicode(s), exp_answer)
+    assert utils.str_to_unicode(s) == exp_answer
     
     # unicode str
     s = "test"
-    assert_equal(utils.str_to_unicode(s), exp_answer)
+    assert utils.str_to_unicode(s) == exp_answer
 
     # list of str
     s = ["test1", "test2", b"test3"]
@@ -225,12 +217,12 @@ def test_str_to_unicode():
     # set of str
     s = {"test1", "test2", b"test3"}
     exp_answer = {"test1", "test2", "test3"}
-    assert_equal(utils.str_to_unicode(s), exp_answer)
+    assert utils.str_to_unicode(s) == exp_answer
 
     # tuple of str
     s = ("test1", "test2", b"test3")
     exp_answer = ("test1", "test2", "test3")
-    assert_equal(utils.str_to_unicode(s), exp_answer)
+    assert utils.str_to_unicode(s) == exp_answer
 
 
 def test_str_almost_same():
@@ -387,6 +379,3 @@ def test_ifbar():
         bar.next()
     bar.finish()
 
-
-if __name__ == "__main__":
-    nose.runmodule()

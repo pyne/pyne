@@ -3,8 +3,6 @@ import os
 import math
 import warnings
 
-import nose
-from nose.tools import assert_equal, assert_in, assert_true, assert_almost_equal
 import numpy as np
 import numpy.testing as npt
 
@@ -31,16 +29,11 @@ def test_with_external_data():
     mat = Material(nucvec, density=7.8)
     mat = mat.expand_elements()
 
-    assert_equal(id("He3") in mat.comp, False)
-    assert_equal(id("Co58") in mat.comp, False)
-    assert_equal(id("Ni58") in mat.comp, False)
+    assert (id("He3") in mat.comp) == False
+    assert (id("Co58") in mat.comp) == False
+    assert (id("Ni58") in mat.comp) == False
 
-    assert_equal(id("H1") in mat.comp, True)
-    assert_equal(id("Fe56") in mat.comp, True)
-    assert_equal(id("Mn55") in mat.comp, True)
+    assert (id("H1") in mat.comp) == True
+    assert (id("Fe56") in mat.comp) == True
+    assert (id("Mn55") in mat.comp) == True
 
-
-# Run as script
-#
-if __name__ == "__main__":
-    nose.runmodule()

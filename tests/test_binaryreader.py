@@ -5,9 +5,7 @@ import struct
 import filecmp
 import os
 import warnings
-
-from nose.tools import assert_equal
-from nose.plugins.skip import SkipTest
+import pytest
 
 from pyne.utils import QAWarning
 
@@ -538,11 +536,11 @@ def test_read_BR():
     try:
         test_int = test_record.get_int()[0]
     except:
-        raise SkipTest
-    assert_equal(set_int, test_int)
+        pytest.skip()
+    assert set_int == test_int
 
     test_string = test_record.get_string(12)[0]
-    assert_equal(set_string.decode(), test_string)
+    assert set_string.decode() == test_string
 
     test_double_list = test_record.get_double(2)
     if test_double_list != set_double_list:

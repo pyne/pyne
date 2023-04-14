@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 from unittest import TestCase
 import warnings
-from nose.tools import assert_equal, assert_raises
-from nose.plugins.skip import SkipTest
+import pytest
 import numpy as np
 from numpy.testing import assert_array_almost_equal
 
@@ -19,7 +18,7 @@ class TestIsotxs(TestCase):
         try:
             self.iso.read()
         except:
-            raise SkipTest
+            pytest.skip()
 
     def test_isotxs_data(self):
         assert self.iso.emax[0] == 10000000.0
@@ -66,25 +65,25 @@ class TestIsotxs(TestCase):
 
 def test_rtflux_basics():
     rt = Rtflux("files_test_cccc/rtflux_3D")
-    assert_equal(rt.hname, "rtflux")
-    assert_equal(rt.huse, "155339")
-    assert_equal(rt.ivers, "081220")
-    assert_equal(rt.ndim, 3)
-    assert_equal(rt.ngroup, 4)
-    assert_equal(rt.ninti, 4)
-    assert_equal(rt.nintj, 4)
-    assert_equal(rt.nintk, 4)
-    assert_equal(rt.niter, 23)
-    assert_equal(rt.effk, 0.892322838306427)
-    assert_equal(rt.power, 1.0)
-    assert_equal(rt.nblok, 1)
-    assert_equal(rt.adjoint, False)
+    assert rt.hname == "rtflux"
+    assert rt.huse == "155339"
+    assert rt.ivers == "081220"
+    assert rt.ndim == 3
+    assert rt.ngroup == 4
+    assert rt.ninti == 4
+    assert rt.nintj == 4
+    assert rt.nintk == 4
+    assert rt.niter == 23
+    assert rt.effk == 0.892322838306427
+    assert rt.power == 1.0
+    assert rt.nblok == 1
+    assert not rt.adjoint
 
 
 def test_rtflux_3D():
 
     if not HAVE_PYMOAB:
-        raise SkipTest
+        pytest.skip()
     from pyne.mesh import Mesh, NativeMeshTag
 
     rt = Rtflux("files_test_cccc/rtflux_3D")
@@ -173,7 +172,7 @@ def test_rtflux_3D():
 
 def test_rtflux_2D():
     if not HAVE_PYMOAB:
-        raise SkipTest
+        pytest.skip()
     from pyne.mesh import Mesh, NativeMeshTag
 
     rt = Rtflux("files_test_cccc/rtflux_2D")
@@ -222,7 +221,7 @@ def test_rtflux_2D():
 
 def test_rt_flux_1D():
     if not HAVE_PYMOAB:
-        raise SkipTest
+        pytest.skip()
     from pyne.mesh import Mesh, NativeMeshTag
 
     rt = Rtflux("files_test_cccc/rtflux_1D")
@@ -245,25 +244,25 @@ def test_rt_flux_1D():
 
 def test_rtflux_raises():
     if not HAVE_PYMOAB:
-        raise SkipTest
+        pytest.skip()
     from pyne.mesh import Mesh, NativeMeshTag
 
     rt = Rtflux("files_test_cccc/rtflux_1D")
     structured_coords = [[0.0, 1.0], [0.0, 1.0], [0.0, 1.0]]
     m = Mesh(structured=True, structured_coords=structured_coords)
-    with assert_raises(ValueError):
+    with pytest.raises(ValueError):
         rt.to_mesh(m, "flux")
 
 
 def test_atflux_adjoint():
     at = Atflux("files_test_cccc/atflux_3D")
-    assert_equal(at.adjoint, True)
+    assert at.adjoint
 
 
 def test_atflux_eng_order():
     """Ensure the energy order is read in reverse for atflux file."""
     if not HAVE_PYMOAB:
-        raise SkipTest
+        pytest.skip()
     from pyne.mesh import Mesh, NativeMeshTag
 
     # This file is created with: source=1 174R 0 0 1 40R 0

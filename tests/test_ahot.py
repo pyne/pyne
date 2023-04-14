@@ -1,11 +1,9 @@
-import nose
-from nose.plugins.skip import Skip, SkipTest
+import pytest
 
 try:
     from spatial_solvers import ahot_script
 except:
-    raise SkipTest
-
+     raise pytest.skip("No ahot_script available", allow_module_level=True)
 
 def test_ahotn_ln():
     ahot_script.test_ahotn_ln()
@@ -62,6 +60,3 @@ def test_dgfem_lagrange_alternating():
 def test_sct_step_alternating():
     ahot_script.test_sct_step_alternating()
 
-
-if __name__ == "__main__":
-    nose.runmodule()

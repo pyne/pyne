@@ -2,18 +2,17 @@
 Tests for PyNE variance_reduction module.
 """
 from numpy.testing import assert_array_almost_equal
-from nose.tools import assert_almost_equal
-from nose.plugins.skip import SkipTest
 import warnings
+import pytest
 
 from pyne.mesh import Mesh, NativeMeshTag, MeshError, HAVE_PYMOAB
 
 if not HAVE_PYMOAB:
-    raise SkipTest
+    pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
 try:
     from pyne import mcnp
 except ImportError:
-    raise SkipTest
+    pytest.skip()
 from pyne.variancereduction import cadis, magic
 from pyne.utils import QAWarning
 

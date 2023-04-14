@@ -7,8 +7,6 @@ from hashlib import md5
 
 import numpy as np
 from numpy.testing import assert_array_equal, assert_allclose
-import nose
-from nose.tools import assert_equal
 
 from pyne.utils import QAWarning
 
@@ -119,6 +117,3 @@ def test_ionization_spectra():
     assert_allclose(np.min(data, axis=0), min_values)
     assert_allclose(np.max(data, axis=0), max_values)
 
-
-if __name__ == "__main__":
-    nose.runmodule()

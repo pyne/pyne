@@ -6,14 +6,8 @@ try:
 except ImportError:
     from io import StringIO
 
+import pytest
 import numpy as np
-from nose.tools import (
-    assert_equal,
-    assert_true,
-    assert_raises,
-    assert_in,
-    assert_is_instance,
-)
 from numpy.testing import assert_array_equal
 
 from pyne.utils import QAWarning
@@ -26,16 +20,16 @@ from pyne.material import Material
 
 
 def test_sec_to_time_unit():
-    assert_equal(origen22.sec_to_time_unit(1.0), (1.0, 1))
-    assert_equal(origen22.sec_to_time_unit(10.0), (10.0, 1))
+    assert origen22.sec_to_time_unit(1.0) == (1.0, 1)
+    assert origen22.sec_to_time_unit(10.0) == (10.0, 1)
 
-    assert_equal(origen22.sec_to_time_unit(60.0), (1.0, 2))
-    assert_equal(origen22.sec_to_time_unit(120.0), (2.0, 2))
+    assert origen22.sec_to_time_unit(60.0) == (1.0, 2)
+    assert origen22.sec_to_time_unit(120.0) == (2.0, 2)
 
-    assert_equal(origen22.sec_to_time_unit(np.inf), (0.0, 6))
-    assert_equal(origen22.sec_to_time_unit(315569260.0), (10.0, 5))
-    assert_equal(origen22.sec_to_time_unit(31556926.0 * 1e7), (10.0, 8))
-    assert_equal(origen22.sec_to_time_unit(31556926.0 * 1e10), (10.0, 9))
+    assert origen22.sec_to_time_unit(np.inf) == (0.0, 6)
+    assert origen22.sec_to_time_unit(315569260.0) == (10.0, 5)
+    assert origen22.sec_to_time_unit(31556926.0 * 1e7) == (10.0, 8)
+    assert origen22.sec_to_time_unit(31556926.0 * 1e10) == (10.0, 9)
 
 
 def test_write_tape4():
@@ -49,42 +43,42 @@ def test_write_tape4():
         "2 922350 9.5000000000E-01   0 0   0 0   0 0\n"
         "0 0 0 0\n"
     )
-    assert_equal(observed, expected)
+    assert observed == expected
 
 
 def test_out_table_string1():
     obs = origen22._out_table_string(None, None)
     exp = "1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1"
-    assert_equal(obs, exp)
+    assert obs == exp
 
 
 def test_out_table_string2():
     obs = origen22._out_table_string((False, False, True), None)
     exp = "1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1"
-    assert_equal(obs, exp)
+    assert obs == exp
 
 
 def test_out_table_string3():
     obs = origen22._out_table_string((False, False, True), range(1, 25))
     exp = "7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7 7"
-    assert_equal(obs, exp)
+    assert obs == exp
 
 
 def test_out_table_string4():
     obs = origen22._out_table_string((False, False, True), [10, 5])
     exp = "8 8 8 8 7 8 8 8 8 7 8 8 8 8 8 8 8 8 8 8 8 8 8 8"
-    assert_equal(obs, exp)
+    assert obs == exp
 
 
 def test_out_table_string5():
     obs = origen22._out_table_string((True, False, True), [10, 5])
     exp = "8 8 8 8 3 8 8 8 8 3 8 8 8 8 8 8 8 8 8 8 8 8 8 8"
-    assert_equal(obs, exp)
+    assert obs == exp
 
 
 def test_write_nan_tape5_irradiation():
     tape5 = StringIO()
-    with assert_raises(ValueError) as context:
+    with pytest.raises(ValueError) as context:
         origen22.write_tape5_irradiation(
             "IRP",
             100,
@@ -95,13 +89,13 @@ def test_write_nan_tape5_irradiation():
             out_table_laf=(True, False, True),
             out_table_num=[5, 10],
         )
-    ex = context.exception
-    assert_equal(ex.args[0], "Irradiation value is NaN.")
+    ex = context.value
+    assert ex.args[0] == "Irradiation value is NaN."
 
 
 def test_write_inf_tape5_irradiation():
     tape5 = StringIO()
-    with assert_raises(ValueError) as context:
+    with pytest.raises(ValueError) as context:
         origen22.write_tape5_irradiation(
             "IRP",
             100,
@@ -112,8 +106,8 @@ def test_write_inf_tape5_irradiation():
             out_table_laf=(True, False, True),
             out_table_num=[5, 10],
         )
-    ex = context.exception
-    assert_equal(ex.args[0], "Irradiation value is infinite.")
+    ex = context.value
+    assert ex.args[0] == "Irradiation value is infinite."
 
 
 def test_write_tape5_irradiation():
@@ -153,7 +147,7 @@ def test_write_tape5_irradiation():
         "  END\n"
     )
 
-    assert_equal(observed, expected)
+    assert observed == expected
 
 
 def test_write_tape5_decay():
@@ -190,12 +184,12 @@ def test_write_tape5_decay():
         "  OUT     2  1 1 0\n"
         "  END\n"
     )
-    assert_equal(observed, expected)
+    assert observed == expected
 
 
 def test_parse_tape6():
     r = origen22.parse_tape6("tape6.test")
-    assert_true(0 < len(r))
+    assert 0 < len(r)
 
     assert_array_equal(r["time_sec"], [0.0, 8.64e06])
     assert_array_equal(r["flux"], [0.0, 1.71e17])
@@ -211,13 +205,12 @@ def test_parse_tape6():
     tab_keys = set(
         ["table_{0}".format(n) for n in list(range(1, 11)) + list(range(13, 25))]
     )
-    assert_true(tab_keys <= set(r))
+    assert tab_keys <= set(r)
 
     for tk in tab_keys:
         for ttype in ["nuclide", "element", "summary"]:
             if ttype in r[tk]:
-                assert_true(
-                    set(r[tk][ttype])
+                assert (set(r[tk][ttype])
                     <= set(
                         [
                             "title",
@@ -226,20 +219,19 @@ def test_parse_tape6():
                             "actinides",
                             "fission_products",
                         ]
-                    )
-                )
+                    ))
 
     assert_array_equal(r["alpha_neutron_source"]["U235"], [7.509e-04, 2.442e-14])
     assert_array_equal(r["spont_fiss_neutron_source"]["ES255"], [0.000e00, 1.917e05])
 
-    assert_true("materials" in r)
-    assert_equal(len(r["materials"]), len(r["time_sec"]))
+    assert "materials" in r
+    assert len(r["materials"]) == len(r["time_sec"])
 
 
 def test_parse_tape6_PWRM021():
     "Originally found at https://typhoon.jaea.go.jp/origen22/sample_pwrmox_orlibj33/PWRM0210.out"
     r = origen22.parse_tape6("tape6_PWRM0210.test")
-    assert_true(0 < len(r))
+    assert 0 < len(r)
 
     assert_array_equal(
         r["time_sec"],
@@ -278,13 +270,12 @@ def test_parse_tape6_PWRM021():
     )
 
     tab_keys = set(["table_{0}".format(n) for n in [5]])
-    assert_true(tab_keys <= set(r))
+    assert tab_keys <= set(r)
 
     for tk in tab_keys:
         for ttype in ["nuclide", "element", "summary"]:
             if ttype in r[tk]:
-                assert_true(
-                    set(r[tk][ttype])
+                assert (set(r[tk][ttype])
                     <= set(
                         [
                             "title",
@@ -293,8 +284,7 @@ def test_parse_tape6_PWRM021():
                             "actinides",
                             "fission_products",
                         ]
-                    )
-                )
+                    ))
 
     assert_array_equal(
         r["alpha_neutron_source"]["CM242"],
@@ -331,14 +321,14 @@ def test_parse_tape6_PWRM021():
         ],
     )
 
-    assert_true("materials" in r)
-    assert_equal(len(r["materials"]), len(r["time_sec"]))
+    assert "materials" in r
+    assert len(r["materials"]) == len(r["time_sec"])
 
 
 def test_parse_tape6_sf97():
     """Originally found at https://typhoon.jaea.go.jp/origen22/sample_pwruo2_orlibj33/SF97-4.out"""
     r = origen22.parse_tape6("tape6_SF97_4.test")
-    assert_true(0 < len(r))
+    assert 0 < len(r)
 
     assert_array_equal(
         r["time_sec"], [1.07e08, 1.11e08, 1.13e08, 1.15e08, 1.16e08, 1.16e08, 1.25e08]
@@ -348,13 +338,12 @@ def test_parse_tape6_sf97():
     )
 
     tab_keys = set(["table_{0}".format(n) for n in [5]])
-    assert_true(tab_keys <= set(r))
+    assert tab_keys <= set(r)
 
     for tk in tab_keys:
         for ttype in ["nuclide", "element", "summary"]:
             if ttype in r[tk]:
-                assert_true(
-                    set(r[tk][ttype])
+                assert (set(r[tk][ttype])
                     <= set(
                         [
                             "title",
@@ -363,8 +352,7 @@ def test_parse_tape6_sf97():
                             "actinides",
                             "fission_products",
                         ]
-                    )
-                )
+                    ))
 
     assert_array_equal(
         r["alpha_neutron_source"]["PU240"],
@@ -391,8 +379,8 @@ def test_parse_tape6_sf97():
         ],
     )
 
-    assert_true("materials" in r)
-    assert_equal(len(r["materials"]), len(r["time_sec"]))
+    assert "materials" in r
+    assert len(r["materials"]) == len(r["time_sec"])
 
 
 sample_tape9 = """\
@@ -484,118 +472,118 @@ def test_parse_tape9():
     tape9_file = StringIO(sample_tape9)
     tape9 = origen22.parse_tape9(tape9_file)
 
-    assert_equal(set(tape9), set([1, 2, 3, 381, 382, 383]))
+    assert set(tape9) == set([1, 2, 3, 381, 382, 383])
 
     # Activation product decay
     deck1 = tape9[1]
-    assert_equal(deck1["_type"], "decay")
-    assert_equal(deck1["title"], "SAMPLE DECAY LIB: ACTIVATION PRODUCTS")
-    assert_equal(deck1["half_life"][10020], np.inf)
-    assert_equal(deck1["half_life"][10040], 1.000e-03)
-    assert_equal(deck1["half_life"][200410], 8.100e01 * 31556926.0 * 1e3)
-    assert_equal(deck1["half_life"][781900], 6.000e02 * 31556926.0 * 1e9)
-    assert_equal(deck1["frac_beta_minus_x"][10010], 0.0)
-    assert_equal(deck1["frac_beta_plus_or_electron_capture"][200410], 1.0)
-    assert_equal(deck1["frac_beta_plus_or_electron_capture_x"][10010], 0.0)
-    assert_equal(deck1["frac_alpha"][781900], 1.0)
-    assert_equal(deck1["frac_isomeric_transition"][10020], 0.0)
-    assert_equal(deck1["frac_spont_fiss"][10020], 0.0)
-    assert_equal(deck1["frac_beta_n"][10020], 0.0)
-    assert_equal(deck1["recoverable_energy"][10030], 5.680e-03)
-    assert_equal(deck1["frac_natural_abund"][10020], 1.500e-02 * 0.01)
-    assert_equal(deck1["inhilation_concentration"][781900], 2.000e-14)
-    assert_equal(deck1["ingestion_concentration"][781900], 3.000e-08)
+    assert deck1["_type"] == "decay"
+    assert deck1["title"] == "SAMPLE DECAY LIB: ACTIVATION PRODUCTS"
+    assert deck1["half_life"][10020] == np.inf
+    assert deck1["half_life"][10040] == 1.000e-03
+    assert deck1["half_life"][200410] == 8.100e01 * 31556926.0 * 1e3
+    assert deck1["half_life"][781900] == 6.000e02 * 31556926.0 * 1e9
+    assert deck1["frac_beta_minus_x"][10010] == 0.0
+    assert deck1["frac_beta_plus_or_electron_capture"][200410] == 1.0
+    assert deck1["frac_beta_plus_or_electron_capture_x"][10010] == 0.0
+    assert deck1["frac_alpha"][781900] == 1.0
+    assert deck1["frac_isomeric_transition"][10020] == 0.0
+    assert deck1["frac_spont_fiss"][10020] == 0.0
+    assert deck1["frac_beta_n"][10020] == 0.0
+    assert deck1["recoverable_energy"][10030] == 5.680e-03
+    assert deck1["frac_natural_abund"][10020] == 1.500e-02 * 0.01
+    assert deck1["inhilation_concentration"][781900] == 2.000e-14
+    assert deck1["ingestion_concentration"][781900] == 3.000e-08
 
     # Actinide Decay
     deck2 = tape9[2]
-    assert_equal(deck2["_type"], "decay")
-    assert_equal(deck2["title"], "SAMPLE DECAY LIB: ACTINIDES")
-    assert_equal(deck2["half_life"][932410], 1.600e01 * 60.0)
-    assert_equal(deck2["half_life"][942370], 4.560e01 * 86400.0)
+    assert deck2["_type"] == "decay"
+    assert deck2["title"] == "SAMPLE DECAY LIB: ACTINIDES"
+    assert deck2["half_life"][932410] == 1.600e01 * 60.0
+    assert deck2["half_life"][942370] == 4.560e01 * 86400.0
 
     # Fission Product Decay
     deck3 = tape9[3]
-    assert_equal(deck3["_type"], "decay")
-    assert_equal(deck3["title"], "SAMPLE DECAY LIB: FISSION PRODUCTS")
-    assert_equal(deck3["half_life"][611460], 5.500e00 * 31556926.0)
-    assert_equal(deck3["half_life"][621460], 7.000e01 * 31556926.0 * 1e6)
-    assert_equal(deck3["half_life"][691720], 6.360e01 * 3600.0)
+    assert deck3["_type"] == "decay"
+    assert deck3["title"] == "SAMPLE DECAY LIB: FISSION PRODUCTS"
+    assert deck3["half_life"][611460] == 5.500e00 * 31556926.0
+    assert deck3["half_life"][621460] == 7.000e01 * 31556926.0 * 1e6
+    assert deck3["half_life"][691720] == 6.360e01 * 3600.0
 
     # Activation product cross sections
     deck381 = tape9[381]
-    assert_equal(deck381["_type"], "xsfpy")
-    assert_equal(deck381["_subtype"], "activation_products")
-    assert_equal(deck381["title"], "SAMPLE ACTIVATION PRODUCT XS LIB")
-    assert_true(all(["_fiss_yield" not in key for key in deck381]))
+    assert deck381["_type"] == "xsfpy"
+    assert deck381["_subtype"] == "activation_products"
+    assert deck381["title"] == "SAMPLE ACTIVATION PRODUCT XS LIB"
+    assert all(["_fiss_yield" not in key for key in deck381])
 
-    assert_true("sigma_alpha" in deck381)
-    assert_true("sigma_3n" not in deck381)
+    assert "sigma_alpha" in deck381
+    assert "sigma_3n" not in deck381
 
-    assert_true("sigma_p" in deck381)
-    assert_true("sigma_f" not in deck381)
+    assert "sigma_p" in deck381
+    assert "sigma_f" not in deck381
 
-    assert_equal(deck381["sigma_gamma"][80170], 7.341e-05)
-    assert_equal(deck381["sigma_2n"][80170], 9.378e-06)
-    assert_equal(deck381["sigma_alpha"][80170], 3.639e-02)
-    assert_equal(deck381["sigma_p"][80170], 3.310e-06)
-    assert_equal(deck381["sigma_gamma_x"][80170], 0.0)
-    assert_equal(deck381["sigma_2n_x"][80170], 0.0)
-    assert_equal(deck381["fiss_yields_present"][80170], False)
+    assert deck381["sigma_gamma"][80170] == 7.341e-05
+    assert deck381["sigma_2n"][80170] == 9.378e-06
+    assert deck381["sigma_alpha"][80170] == 3.639e-02
+    assert deck381["sigma_p"][80170] == 3.310e-06
+    assert deck381["sigma_gamma_x"][80170] == 0.0
+    assert deck381["sigma_2n_x"][80170] == 0.0
+    assert deck381["fiss_yields_present"][80170] == False
 
     # Actinide cross sections
     deck382 = tape9[382]
-    assert_equal(deck382["_type"], "xsfpy")
-    assert_equal(deck382["_subtype"], "actinides")
-    assert_equal(deck382["title"], "SAMPLE ACTINIDE XS LIB")
-    assert_true(all(["_fiss_yield" not in key for key in deck382]))
+    assert deck382["_type"] == "xsfpy"
+    assert deck382["_subtype"] == "actinides"
+    assert deck382["title"] == "SAMPLE ACTINIDE XS LIB"
+    assert all(["_fiss_yield" not in key for key in deck382])
 
-    assert_true("sigma_alpha" not in deck382)
-    assert_true("sigma_3n" in deck382)
+    assert "sigma_alpha" not in deck382
+    assert "sigma_3n" in deck382
 
-    assert_true("sigma_p" not in deck382)
-    assert_true("sigma_f" in deck382)
+    assert "sigma_p" not in deck382
+    assert "sigma_f" in deck382
 
-    assert_equal(deck382["sigma_gamma"][922380], 2.125e-01)
-    assert_equal(deck382["sigma_2n"][922380], 2.731e-03)
-    assert_equal(deck382["sigma_3n"][922380], 2.132e-05)
-    assert_equal(deck382["sigma_f"][922380], 4.976e-02)
-    assert_equal(deck382["sigma_gamma_x"][922380], 0.0)
-    assert_equal(deck382["sigma_2n_x"][922380], 0.0)
-    assert_equal(deck382["fiss_yields_present"][922380], False)
+    assert deck382["sigma_gamma"][922380] == 2.125e-01
+    assert deck382["sigma_2n"][922380] == 2.731e-03
+    assert deck382["sigma_3n"][922380] == 2.132e-05
+    assert deck382["sigma_f"][922380] == 4.976e-02
+    assert deck382["sigma_gamma_x"][922380] == 0.0
+    assert deck382["sigma_2n_x"][922380] == 0.0
+    assert deck382["fiss_yields_present"][922380] == False
 
     # Fission product cross sections
     deck383 = tape9[383]
-    assert_equal(deck383["_type"], "xsfpy")
-    assert_equal(deck383["_subtype"], "fission_products")
-    assert_equal(deck383["title"], "SAMPLE FISSION PRODUCT YIELD")
-    assert_true(any(["_fiss_yield" in key for key in deck383]))
+    assert deck383["_type"] == "xsfpy"
+    assert deck383["_subtype"] == "fission_products"
+    assert deck383["title"] == "SAMPLE FISSION PRODUCT YIELD"
+    assert any(["_fiss_yield" in key for key in deck383])
 
-    assert_true("sigma_alpha" in deck383)
-    assert_true("sigma_3n" not in deck383)
+    assert "sigma_alpha" in deck383
+    assert "sigma_3n" not in deck383
 
-    assert_true("sigma_p" in deck383)
-    assert_true("sigma_f" not in deck383)
+    assert "sigma_p" in deck383
+    assert "sigma_f" not in deck383
 
-    assert_equal(deck383["sigma_gamma"][300670], 2.600e-02)
-    assert_equal(deck383["sigma_2n"][300670], 0.0)
-    assert_equal(deck383["sigma_alpha"][300670], 3.512e-09)
-    assert_equal(deck383["sigma_p"][300670], 0.0)
-    assert_equal(deck383["sigma_gamma_x"][300670], 0.0)
-    assert_equal(deck383["sigma_2n_x"][300670], 0.0)
-    assert_equal(deck383["fiss_yields_present"][300670], True)
-    assert_equal(deck383["TH232_fiss_yield"][300670], 0.0)
-    assert_equal(deck383["U233_fiss_yield"][300670], 2.50e-09)
-    assert_equal(deck383["U235_fiss_yield"][300670], 3.84e-10)
-    assert_equal(deck383["U238_fiss_yield"][300670], 4.60e-12)
-    assert_equal(deck383["PU239_fiss_yield"][300670], 2.14e-11)
-    assert_equal(deck383["PU241_fiss_yield"][300670], 0.0)
-    assert_equal(deck383["CM245_fiss_yield"][300670], 0.0)
-    assert_equal(deck383["CF249_fiss_yield"][300670], 0.0)
+    assert deck383["sigma_gamma"][300670] == 2.600e-02
+    assert deck383["sigma_2n"][300670] == 0.0
+    assert deck383["sigma_alpha"][300670] == 3.512e-09
+    assert deck383["sigma_p"][300670] == 0.0
+    assert deck383["sigma_gamma_x"][300670] == 0.0
+    assert deck383["sigma_2n_x"][300670] == 0.0
+    assert deck383["fiss_yields_present"][300670] == True
+    assert deck383["TH232_fiss_yield"][300670] == 0.0
+    assert deck383["U233_fiss_yield"][300670] == 2.50e-09
+    assert deck383["U235_fiss_yield"][300670] == 3.84e-10
+    assert deck383["U238_fiss_yield"][300670] == 4.60e-12
+    assert deck383["PU239_fiss_yield"][300670] == 2.14e-11
+    assert deck383["PU241_fiss_yield"][300670] == 0.0
+    assert deck383["CM245_fiss_yield"][300670] == 0.0
+    assert deck383["CF249_fiss_yield"][300670] == 0.0
 
 
 def test_loads_tape9():
     tape9 = origen22.loads_tape9(sample_tape9)
-    assert_equal(set(tape9), set([1, 2, 3, 381, 382, 383]))
+    assert set(tape9) == set([1, 2, 3, 381, 382, 383])
 
 
 def test_merge_tape9():
@@ -613,17 +601,17 @@ def test_merge_tape9():
     tape9 = origen22.merge_tape9([tape9_dict, tape9_file])
 
     # run tests
-    assert_equal(tape9[1]["half_life"][10010], 42.0)
-    assert_true("_bad_key" in tape9[2])
-    assert_equal(tape9[3]["title"], "Sweet Decay")
-    assert_equal(tape9[382]["sigma_f"][922350], 16.0)
+    assert tape9[1]["half_life"][10010] == 42.0
+    assert "_bad_key" in tape9[2]
+    assert tape9[3]["title"] == "Sweet Decay"
+    assert tape9[382]["sigma_f"][922350] == 16.0
 
-    assert_true("_cards" not in tape9[1])
-    assert_true("_cards" not in tape9[2])
-    assert_true("_cards" not in tape9[3])
-    assert_true("_cards" in tape9[381])
-    assert_true("_cards" not in tape9[382])
-    assert_true("_cards" in tape9[383])
+    assert "_cards" not in tape9[1]
+    assert "_cards" not in tape9[2]
+    assert "_cards" not in tape9[3]
+    assert "_cards" in tape9[381]
+    assert "_cards" not in tape9[382]
+    assert "_cards" in tape9[383]
 
 
 def test_write_tape9():
@@ -708,23 +696,17 @@ def test_xslibs():
         obs_meta[n] = {}
         for field in ["_type", "_subtype", "title"]:
             obs_meta[n][field] = obs[n][field]
-    assert_equal(exp, obs_meta)
+    assert exp == obs_meta
     for n in exp:
         for field in obs[n]:
             if not field.startswith("sigma_"):
                 continue
-            assert_true(all([v == 0.0 for v in obs[n][field].values()]))
-    assert_true(
-        set(obs[42].keys())
-        >= set(origen22.ACTIVATION_PRODUCT_FIELDS + origen22.XSFPY_FIELDS)
-    )
-    assert_true(
-        set(obs[43].keys()) >= set(origen22.ACTINIDE_FIELDS + origen22.XSFPY_FIELDS)
-    )
-    assert_true(
-        set(obs[44].keys())
-        >= set(origen22.FISSION_PRODUCT_FIELDS + origen22.XSFPY_FIELDS)
-    )
+            assert all([v == 0.0 for v in obs[n][field].values()])
+    assert (set(obs[42].keys())
+        >= set(origen22.ACTIVATION_PRODUCT_FIELDS + origen22.XSFPY_FIELDS))
+    assert set(obs[43].keys()) >= set(origen22.ACTINIDE_FIELDS + origen22.XSFPY_FIELDS)
+    assert (set(obs[44].keys())
+        >= set(origen22.FISSION_PRODUCT_FIELDS + origen22.XSFPY_FIELDS))
 
 
 def test_nlbs():
@@ -738,7 +720,7 @@ def test_nlbs():
         3: {"_type": "decay"},
     }
     obs = origen22.nlbs(t9)
-    assert_equal(exp, obs)
+    assert exp == obs
 
 
 def test_tape9_dict_structure():
@@ -746,70 +728,70 @@ def test_tape9_dict_structure():
     tape9 = origen22.make_tape9(nucs, nlb=(219, 220, 221))
 
     # check for correct deck ids: 1,2,3 for decay, 219, 220, 221 for xsfpy
-    assert_equal(set(list(tape9.keys())), {1, 2, 3, 219, 220, 221})
+    assert set(list(tape9.keys())) == {1, 2, 3, 219, 220, 221}
 
     # check decay decks for correct structure
     for field in origen22.DECAY_FIELDS:
-        assert_in(field, tape9[1].keys())
-        assert_in(field, tape9[2].keys())
-        assert_in(field, tape9[3].keys())
+        assert field in tape9[1].keys()
+        assert field in tape9[2].keys()
+        assert field in tape9[3].keys()
 
         # check to see if the values are float-valued dicts
-        assert_is_instance(tape9[1][field], dict)
+        assert isinstance(tape9[1][field], dict)
         for value in tape9[1][field].values():
-            assert_is_instance(value, float)
-        assert_is_instance(tape9[2][field], dict)
+            assert isinstance(value, float)
+        assert isinstance(tape9[2][field], dict)
         for value in tape9[2][field].values():
-            assert_is_instance(value, float)
-        assert_is_instance(tape9[3][field], dict)
+            assert isinstance(value, float)
+        assert isinstance(tape9[3][field], dict)
         for value in tape9[3][field].values():
-            assert_is_instance(value, float)
+            assert isinstance(value, float)
 
     # check xsfpy decks for correct structure
     for field in origen22.XSFPY_FIELDS:
-        assert_in(field, tape9[219].keys())
-        assert_in(field, tape9[220].keys())
-        assert_in(field, tape9[221].keys())
+        assert field in tape9[219].keys()
+        assert field in tape9[220].keys()
+        assert field in tape9[221].keys()
 
         # check to see if the values are float-valued dicts
-        assert_is_instance(tape9[219][field], dict)
+        assert isinstance(tape9[219][field], dict)
         for value in tape9[219][field].values():
             if value == "fiss_yields_present":  # except for these bool-valued dicts
-                assert_is_instance(value, bool)
+                assert isinstance(value, bool)
             else:
-                assert_is_instance(value, float)
-        assert_is_instance(tape9[220][field], dict)
+                assert isinstance(value, float)
+        assert isinstance(tape9[220][field], dict)
         for value in tape9[220][field].values():
             if field == "fiss_yields_present":
-                assert_is_instance(value, bool)
+                assert isinstance(value, bool)
             else:
-                assert_is_instance(value, float)
+                assert isinstance(value, float)
         for value in tape9[221][field].values():
             if value == "fiss_yields_present":
-                assert_is_instance(value, bool)
+                assert isinstance(value, bool)
             else:
-                assert_is_instance(value, float)
+                assert isinstance(value, float)
 
     # check activation product deck for correct structure
     for field in origen22.ACTIVATION_PRODUCT_FIELDS:
-        assert_in(field, tape9[219].keys())
+        assert field in tape9[219].keys()
         # make sure everything's a float-valued dict
-        assert_is_instance(tape9[219][field], dict)
+        assert isinstance(tape9[219][field], dict)
         for value in tape9[219][field].values():
-            assert_is_instance(value, float)
+            assert isinstance(value, float)
 
     # check actinide deck for correct structure
     for field in origen22.ACTINIDE_FIELDS:
-        assert_in(field, tape9[220].keys())
+        assert field in tape9[220].keys()
         # make sure everything's a float-valued dict
-        assert_is_instance(tape9[220][field], dict)
+        assert isinstance(tape9[220][field], dict)
         for value in tape9[220][field].values():
-            assert_is_instance(value, float)
+            assert isinstance(value, float)
 
     # check fission product deck for correct structure
     for field in origen22.FISSION_PRODUCT_FIELDS:
-        assert_in(field, tape9[221].keys())
+        assert field in tape9[221].keys()
         # make sure everything's a float-valued dict
-        assert_is_instance(tape9[221][field], dict)
+        assert isinstance(tape9[221][field], dict)
         for value in tape9[221][field].values():
-            assert_is_instance(value, float)
+            assert isinstance(value, float)

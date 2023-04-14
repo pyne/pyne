@@ -2,14 +2,8 @@ import os
 
 import numpy as np
 import tables as tb
+import pytest
 
-from nose.tools import (
-    assert_equal,
-    assert_not_equal,
-    assert_almost_equal,
-    assert_true,
-    assert_raises,
-)
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 
 import pyne
@@ -34,7 +28,7 @@ from pyne.material import Material
 if not os.path.isfile(pyne.nuc_data):
     raise RuntimeError("Tests require nuc_data.h5.  Please run nuc_data_make.")
 
-
+@pytest.fixture(autouse=True)
 def setup():
     np.seterr(all="ignore")
     xs_cache.clear()
@@ -96,15 +90,15 @@ def test_sigma_f():
     E_g = np.array([10.0, 7.5, 5.0, 2.5, 0.1])
     sig_f = sigma_f("U238", group_struct=E_g)
     observed = (0.0 <= sig_f).all()
-    assert_true(observed)
+    assert observed
 
     sig_f = sigma_f("U238", group_struct=E_g)
     observed = (0.0 <= sig_f).all()
-    assert_true(observed)
+    assert observed
 
     sig_f = sigma_f("U235")
     observed = (0.0 <= sig_f).all()
-    assert_true(observed)
+    assert observed
 
 
 def test_sigma_s_gh():
@@ -129,86 +123,86 @@ def test_sigma_a_reaction():
     E_g = np.array([10.0, 7.5, 5.0, 2.5, 0.1])
     sig_rx = sigma_a_reaction("U238", "z_2n", group_struct=E_g)
     observed = (0.0 <= sig_rx).all()
-    assert_true(observed)
+    assert observed
 
     sig_rx = sigma_a_reaction("U238", "gamma", group_struct=E_g)
     observed = (0.0 <= sig_rx).all()
-    assert_true(observed)
+    assert observed
 
     sig_rx = sigma_a_reaction("H1", "gamma")
     observed = (0.0 <= sig_rx).all()
-    assert_true(observed)
+    assert observed
 
 
 def test_metastable_ratio():
     E_g = np.array([10.0, 7.5, 5.0, 2.5, 0.1])
     ms_rx = metastable_ratio("U238", "z_2n", group_struct=E_g)
     observed = (0.0 <= ms_rx).all()
-    assert_true(observed)
+    assert observed
 
     ms_rx = metastable_ratio("U238", "gamma", group_struct=E_g)
     observed = (0.0 <= ms_rx).all()
-    assert_true(observed)
+    assert observed
 
     ms_rx = metastable_ratio("H1", "gamma")
     observed = (0.0 <= ms_rx).all()
-    assert_true(observed)
+    assert observed
 
 
 def test_sigma_a():
     E_g = np.array([10.0, 7.5, 5.0, 2.5, 0.1])
     sig_a = sigma_a("U238", group_struct=E_g)
     observed = (0.0 <= sig_a).all()
-    assert_true(observed)
+    assert observed
 
     sig_a = sigma_a("U238", group_struct=E_g)
     observed = (0.0 <= sig_a).all()
-    assert_true(observed)
+    assert observed
 
     sig_a = sigma_a("U235")
     observed = (0.0 <= sig_a).all()
-    assert_true(observed)
+    assert observed
 
 
 def test_chi():
     E_g = np.array([10.0, 7.5, 5.0, 2.5, 0.1])
     c = chi("U238", group_struct=E_g)
     observed = (0.0 <= c).all()
-    assert_true(observed)
-    assert_almost_equal(c.sum(), 1.0)
+    assert observed
+    assert c.sum() == pytest.approx(1.0)
 
     c = chi("U238", group_struct=E_g)
     observed = (0.0 <= c).all()
-    assert_true(observed)
-    assert_almost_equal(c.sum(), 1.0)
+    assert observed
+    assert c.sum() == pytest.approx(1.0)
 
     c = chi("U235")
     observed = (0.0 <= c).all()
-    assert_true(observed)
-    assert_almost_equal(c.sum(), 1.0)
+    assert observed
+    assert c.sum() == pytest.approx(1.0)
 
     c = chi("H1")
     observed = (0.0 <= c).all()
-    assert_true(observed)
-    assert_almost_equal(c.sum(), 0.0)
+    assert observed
+    assert c.sum() == pytest.approx(0.0)
 
 
 def test_sigma_t():
     E_g = np.array([10.0, 7.5, 5.0, 2.5, 0.1])
     sig_t = sigma_t("U238", 600.0, E_g)
     observed = (0.0 <= sig_t).all()
-    assert_true(observed)
+    assert observed
     expected = sigma_a("U238", 600.0, E_g) + sigma_s("U238", 600.0, E_g)
     assert_array_almost_equal(sig_t, expected)
 
     sig_t = sigma_t("U238", 600.0, E_g)
     observed = (0.0 <= sig_t).all()
-    assert_true(observed)
+    assert observed
     expected = sigma_a("U238", 600.0, E_g) + sigma_s("U238", 600.0, E_g)
     assert_array_almost_equal(sig_t, expected)
 
     sig_t = sigma_t("U235")
     observed = (0.0 <= sig_t).all()
-    assert_true(observed)
+    assert observed
     expected = sigma_a("U235", 600.0) + sigma_s("U235", 600.0, E_g)
     assert_array_almost_equal(sig_t, expected)

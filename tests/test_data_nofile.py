@@ -3,8 +3,7 @@ import os
 import math
 import warnings
 
-import nose
-from nose.tools import assert_equal, assert_in, assert_true, assert_almost_equal
+import pytest
 import numpy as np
 import numpy.testing as npt
 
@@ -30,9 +29,9 @@ def test_atomic_mass():
     am242m = [242.059547428, 242.0]
 
     # zzaam form
-    assert_in(data.atomic_mass(80160), o16)
-    assert_in(data.atomic_mass(922350), u235)
-    assert_in(data.atomic_mass(952421), am242m)
+    assert data.atomic_mass(80160) in o16
+    assert data.atomic_mass(922350) in u235
+    assert data.atomic_mass(952421) in am242m
     pyne_conf.NUC_DATA_PATH = orig
 
 
@@ -45,9 +44,9 @@ def test_natural_abund_excited_state():
     excited = gnd + 42
     data.natural_abund(gnd)
     # excited state should not be in the map yet
-    assert_true(excited not in data.natural_abund_map)
+    assert excited not in data.natural_abund_map
     nabund = data.natural_abund(excited)
-    assert_equal(nabund, data.natural_abund_map.get(excited))
+    assert nabund == data.natural_abund_map.get(excited)
     pyne_conf.NUC_DATA_PATH = orig
 
 
@@ -57,16 +56,13 @@ def test_elements():
     pyne_conf.NUC_DATA_PATH = b"bobbobhonkeytonk"
     # initialize natural_abund_map
     # test a series of elements
-    assert_almost_equal(data.atomic_mass("H"), 1.007940754065775)
-    assert_almost_equal(data.atomic_mass("Li"), 6.940036602972684)
-    assert_almost_equal(data.atomic_mass("U"), 238.02890905398374)
+    assert data.atomic_mass("H") == pytest.approx(1.007940754065775)
+    assert data.atomic_mass("Li") == pytest.approx(6.940036602972684)
+    assert data.atomic_mass("U") == pytest.approx(238.02890905398374)
     # NB any elements beyond z = 92 are not natural
     # and therefore have 0.0 atomic mass
-    assert_almost_equal(data.atomic_mass("Pu"), 0.0)
+    assert data.atomic_mass("Pu") == pytest.approx(0.0)
     # note if you use the nuc_data.h5 file it
     # has the same behaviour
     pyne_conf.NUC_DATA_PATH = orig
 
-
-if __name__ == "__main__":
-    nose.runmodule()

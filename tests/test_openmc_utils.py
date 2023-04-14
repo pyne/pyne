@@ -4,10 +4,8 @@ from io import StringIO
 import warnings
 import os
 import sys
-import nose
-from nose.plugins.skip import SkipTest
+import pytest
 import numpy as np
-from nose.tools import assert_equal, assert_true
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 
 from pyne.utils import QAWarning, is_close
@@ -57,10 +55,10 @@ def test_ace_table_init():
     atab = openmc_utils.AceTable(
         zaid="92235", path="U235.ace", cross_sections_path="/tmp/cross_sections.xml"
     )
-    assert_equal("92235", atab.zaid)
-    assert_equal("U235.ace", atab.path)
-    assert_equal("/tmp/U235.ace", atab.abspath)
-    assert_equal(nucname.id("U235"), atab.nucid)
+    assert "92235" == atab.zaid
+    assert "U235.ace" == atab.path
+    assert "/tmp/U235.ace" == atab.abspath
+    assert nucname.id("U235") == atab.nucid
 
 
 def test_ace_table_xml():
@@ -69,14 +67,14 @@ def test_ace_table_xml():
     )
     exp = '<ace_table path="U235.ace" zaid="92235"/>'
     obs = atab.xml()
-    assert_equal(exp, obs)
+    assert exp == obs
 
 
 def test_cross_sections_read():
     sample_xs.seek(0)
     xs = openmc_utils.CrossSections(sample_xs)
-    assert_equal("ascii", xs.filetype)
-    assert_true(xs.path is None)
+    assert "ascii" == xs.filetype
+    assert xs.path is None
 
     exp = [
         openmc_utils.AceTable(
@@ -107,13 +105,13 @@ def test_cross_sections_read():
             zaid="0",
         ),
     ]
-    assert_equal(exp, xs.ace_tables)
+    assert exp == xs.ace_tables
 
 
 def test_cross_sections_abspath_with_dir():
     xs = openmc_utils.CrossSections(sample_xs_with_dir)
-    assert_equal("ascii", xs.filetype)
-    assert_equal(xs.path, "/")
+    assert "ascii" == xs.filetype
+    assert xs.path == "/"
 
     exp_abspaths = [
         "/293.6K/H_001_293.6K.ace",
@@ -121,15 +119,15 @@ def test_cross_sections_abspath_with_dir():
         "/tsl/zrzrh.acer",
     ]
     obs_abspaths = [table.abspath for table in xs.ace_tables]
-    assert_equal(exp_abspaths, obs_abspaths)
+    assert exp_abspaths == obs_abspaths
 
 
 def test_cross_sections_mcnp_id():
     xstables = openmc_utils.CrossSections(sample_xs_with_mcnp_id).ace_tables
     mcnp_obs = [table.nucid for table in xstables if table.alias == "Co-58m.70c"][0]
-    assert_equal(mcnp_obs, 270580001)
+    assert mcnp_obs == 270580001
     nucid_obs = [table.nucid for table in xstables if table.alias == "Co-58.70c"][0]
-    assert_equal(nucid_obs, 270580000)
+    assert nucid_obs == 270580000
 
 
 def test_cross_sections_roundtrip():
@@ -138,7 +136,7 @@ def test_cross_sections_roundtrip():
     sample_xs.seek(0)
     exp = sample_xs.read()
     obs = xs.xml()
-    assert_equal(exp, obs)
+    assert exp == obs
 
 
 def test_calc_structured_coords():
@@ -153,18 +151,18 @@ def test_calc_structured_coords():
     structured_coords = openmc_utils.calc_structured_coords(
         lower_left, upper_right, dimension
     )
-    assert_equal(len(structured_coords), len(exp_structured_coords))
+    assert len(structured_coords) == len(exp_structured_coords)
     for i in range(len(exp_structured_coords)):
         assert_array_almost_equal(structured_coords[i], exp_structured_coords[i])
 
 
 def test_get_e_bounds_from_openmc_sp():
     if not HAVE_PYMOAB or sys.version_info[0] == 2:
-        raise SkipTest
+        pytest.skip()
     try:
         import openmc
     except:
-        raise SkipTest
+        pytest.skip()
     # energy bin: [0.0, 1.0, 20.0], 2bins
     # 6 volume elemenes
     filename = os.path.join(cwd, "files_test_openmc", "statepoint.10.ebin2.ves6.h5")
@@ -203,11 +201,11 @@ def test_flux_changes_order():
 
 def test_get_result_error_from_openmc_sp():
     if not HAVE_PYMOAB or sys.version_info[0] == 2:
-        raise SkipTest
+        pytest.skip()
     try:
         import openmc
     except:
-        raise SkipTest
+        pytest.skip()
     filename = os.path.join(
         os.getcwd(), "files_test_openmc", "statepoint.10.ebin2.ves6.h5"
     )
@@ -264,11 +262,11 @@ def test_get_result_error_from_openmc_sp():
 
 def test_create_meshtally():
     if not HAVE_PYMOAB or sys.version_info[0] == 2:
-        raise SkipTest
+        pytest.skip()
     try:
         import openmc
     except:
-        raise SkipTest
+        pytest.skip()
     # mesh read from openmc state point file
     # Parameters of the tally and mesh
     # mesh = openmc_utils.Mesh(mesh_id=1, name="n_flux")
@@ -287,7 +285,7 @@ def test_create_meshtally():
     )
     num_ves = len(mesh)
     # check mesh attributes
-    assert_equal(num_ves, 6)
+    assert num_ves == 6
     assert mesh.structured
     # structured_coords
     assert_array_almost_equal(
@@ -320,6 +318,3 @@ def test_create_meshtally():
     assert_array_almost_equal(mesh.n_flux[:], exp_result)
     assert_array_almost_equal(mesh.n_flux_err[:], exp_rel_err)
 
-
-if __name__ == "__main__":
-    nose.runmodule()

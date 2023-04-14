@@ -1,7 +1,6 @@
 import os
 import warnings
-from nose.tools import assert_equal, assert_almost_equal, assert_true
-from nose.plugins.skip import SkipTest
+import pytest
 import numpy as np
 from numpy.testing import assert_array_equal
 import multiprocessing
@@ -17,7 +16,7 @@ from pyne.alara import response_to_hdf5, response_hdf5_to_mesh, _make_response_d
 from pyne.mesh import Mesh, NativeMeshTag, HAVE_PYMOAB
 
 if not HAVE_PYMOAB:
-    raise SkipTest
+    pytest.skip(allow_module_level=True)
 
 if sys.version_info[0] > 2:
     izip = zip
@@ -37,6 +36,10 @@ responses = [
     "wdr",
     "photon_source",
 ]
+
+@pytest.fixture(autouse=True)
+def change_test_dir(request, monkeypatch):
+    monkeypatch.chdir(request.fspath.dirname)
 
 
 def _generate_exp_h5(filename, response, exp_h5_filename):
@@ -86,7 +89,7 @@ def test_response_to_hdf5():
     # skip test if h5diff not exist
     is_h5diff = os.system("which h5diff")
     if is_h5diff != 0:
-        raise SkipTest
+        pytest.skip()
 
     for response in responses:
         # read  output.txt and write h5 file
@@ -112,7 +115,7 @@ def test_response_to_hdf5():
         command = "".join(["h5diff ", h5_filename, " ", exp_h5_filename])
         diff_flag = os.system(command)
         # return value 0 if no difference, 1 if differences found, 2 if error
-        assert_equal(diff_flag, 0)
+        assert diff_flag == 0
 
         # remove generated files
         os.remove(h5_filename)
@@ -133,7 +136,7 @@ def test_responses_to_hdf5_multiple():
     # skip test if h5diff not exist
     is_h5diff = os.system("which h5diff")
     if is_h5diff != 0:
-        raise SkipTest
+        pytest.skip()
 
     for response in responses:
         # read  output.txt and write h5 file
@@ -157,7 +160,7 @@ def test_responses_to_hdf5_multiple():
         command = "".join(["h5diff ", h5_filename, " ", exp_h5_filename])
         diff_flag = os.system(command)
         # return value 0 if no difference, 1 if differences found, 2 if error
-        assert_equal(diff_flag, 0)
+        assert diff_flag == 0
 
         # remove generated files
         os.remove(h5_filename)
@@ -178,7 +181,7 @@ def test_response_hdf5_to_mesh():
             thisdir, "files_test_activation_responses", "".join([response, ".h5"])
         )
         response_to_hdf5(filename, response)
-        assert_true(os.path.exists(h5_filename))
+        assert os.path.exists(h5_filename)
 
         mesh = Mesh(structured=True, structured_coords=[[0, 1], [0, 1], [0, 1]])
 
@@ -191,8 +194,8 @@ def test_response_hdf5_to_mesh():
 
         ves = list(mesh.structured_iterate_hex("xyz"))
         for i, ve in enumerate(ves):
-            assert_equal(mesh.tag1[ve], tag1_answers[i])
-            assert_equal(mesh.tag2[ve], tag2_answers[i])
+            assert mesh.tag1[ve] == tag1_answers[i]
+            assert mesh.tag2[ve] == tag2_answers[i]
 
         if os.path.isfile(h5_filename):
             os.remove(h5_filename)
@@ -236,16 +239,16 @@ def _activation_responses_test_step1(activation_responses_run_dir):
     os.remove(step1_file)
     os.remove(dst)
 
-    assert_equal(f1, True)
-    assert_equal(f2, True)
-    assert_equal(f3, True)
+    assert f1
+    assert f2
+    assert f3
 
 
 def _activation_responses_test_step2(activation_responses_run_dir):
     # skip test if h5diff not exist
     is_h5diff = os.system("which h5diff")
     if is_h5diff != 0:
-        raise SkipTest
+        raise pytest.skip()
 
     os.chdir(thisdir)
     # copy ../scripts/activation_responses.py to activation_responses_run_dir/activation_responses.py
@@ -304,8 +307,8 @@ def _activation_responses_test_step2(activation_responses_run_dir):
     os.remove(dst)
 
     # return value 0 if no difference, 1 if differences found, 2 if error
-    assert_equal(diff_flag4, 0)
-    assert_equal(diff_flag5, 0)
+    assert diff_flag4 == 0
+    assert diff_flag5 == 0
 
 
 def test_activation_responses_script():
@@ -313,7 +316,7 @@ def test_activation_responses_script():
     try:
         from pyne import dagmc
     except ImportError:
-        raise SkipTest
+        raise pytest.skip()
 
     activation_responses_run_dir = os.path.join(
         thisdir, "files_test_activation_responses", "activation_responses_examples"

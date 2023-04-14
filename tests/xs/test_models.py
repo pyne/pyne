@@ -2,14 +2,8 @@ import os
 
 import numpy as np
 import tables as tb
+import pytest
 
-from nose.tools import (
-    assert_equal,
-    assert_not_equal,
-    assert_almost_equal,
-    assert_true,
-    assert_raises,
-)
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 
 import pyne
@@ -205,7 +199,7 @@ def test_partial_energy_matrix3():
     E_g = np.array([0.0, 4.0, 8.0])
     E_n = np.array([0.0, 2.5, 5.0, 7.5, 10.0][::-1])
 
-    assert_raises(ValueError, partial_energy_matrix, E_g, E_n)
+    pytest.raises(ValueError, partial_energy_matrix, E_g, E_n)
 
 
 #
@@ -340,7 +334,7 @@ def test_group_collapse1():
     assert_array_almost_equal(observed, expected)
 
     # bad call
-    assert_raises(ValueError, group_collapse, sigma_n, phi_n)
+    pytest.raises(ValueError, group_collapse, sigma_n, phi_n)
 
 
 def test_wgt_group_collapse1():
@@ -362,42 +356,42 @@ def test_wgt_group_collapse1():
 
 
 def test_chi():
-    assert_equal(chi(0.0), 0.0)
-    assert_equal(chi(1.0), 0.453 * np.exp(-1.036) * np.sinh(np.sqrt(2.29)))
-    assert_equal(chi(10.0), 0.453 * np.exp(-10.36) * np.sinh(np.sqrt(22.9)))
+    assert chi(0.0) == 0.0
+    assert chi(1.0) == 0.453 * np.exp(-1.036) * np.sinh(np.sqrt(2.29))
+    assert chi(10.0) == 0.453 * np.exp(-10.36) * np.sinh(np.sqrt(22.9))
 
     e = np.arange(50, dtype=float)
     assert_array_equal(chi(e), 0.453 * np.exp(-1.036 * e) * np.sinh(np.sqrt(2.29 * e)))
 
 
 def test_alpha():
-    assert_equal(1.0 / k, alpha(0.0, 1.0, 0.0, m_n, 1.0))
+    assert 1.0 / k == alpha(0.0, 1.0, 0.0, m_n, 1.0)
 
-    assert_almost_equal(1.0, (1.0 / (12.0 * k)) / alpha(0.0, 1.0, 0.0, 12 * m_n, 1.0))
+    assert 1.0  == pytest.approx((1.0 / (12.0 * k)) / alpha(0.0, 1.0, 0.0, 12 * m_n, 1.0))
 
-    assert_almost_equal(
-        1.0, (1.5 / (12.0 * k)) / alpha(0.5, 1.0, np.pi / 2, 12 * m_n, 1.0)
-    )
+    assert (
+        1.0 == pytest.approx((1.5 / (12.0 * k)) / alpha(0.5, 1.0, np.pi / 2, 12 * m_n, 1.0)
+    ))
 
-    assert_almost_equal(
-        1.0, (1.5 / (12.0 * k * 2.0)) / alpha(0.5, 1.0, np.pi / 2, 12 * m_n, 2.0)
-    )
+    assert (
+        1.0 == pytest.approx((1.5 / (12.0 * k * 2.0)) / alpha(0.5, 1.0, np.pi / 2, 12 * m_n, 2.0)
+    ))
 
-    assert_almost_equal(
-        1.0,
+    assert (
+        1.0 == pytest.approx(
         ((1.5 - 2 * np.sqrt(0.5) * np.cos(np.pi / 4)) / (12.0 * k * 2.0))
         / alpha(0.5, 1.0, np.pi / 4, 12 * m_n, 2.0),
-    )
+    ))
 
 
 def test_beta():
-    assert_equal((1.0 / k), beta(2.0, 1.0, 1.0))
+    assert (1.0 / k) == beta(2.0, 1.0, 1.0)
 
-    assert_equal((2.0 / k), beta(3.0, 1.0, 1.0))
+    assert (2.0 / k) == beta(3.0, 1.0, 1.0)
 
-    assert_equal((2.0 / (2.0 * k)), beta(3.0, 1.0, 2.0))
+    assert (2.0 / (2.0 * k)) == beta(3.0, 1.0, 2.0)
 
-    assert_equal((-1.0 / (2.0 * k)), beta(0.0, 1.0, 2.0))
+    assert (-1.0 / (2.0 * k)) == beta(0.0, 1.0, 2.0)
 
 
 def test_alpha_at_theta_0():
@@ -460,15 +454,15 @@ def test_one_over_gamma_squared():
 
 
 def test_E_prime_min():
-    assert_equal(0.0, E_prime_min(1.0, m_n))
-    assert_equal(1.0 / 9.0, E_prime_min(1.0, 2.0 * m_n))
-    assert_equal(4.0 / 9.0, E_prime_min(2.0, 2.0 * m_n))
+    assert 0.0 == E_prime_min(1.0, m_n)
+    assert 1.0 / 9.0 == E_prime_min(1.0, 2.0 * m_n)
+    assert 4.0 / 9.0 == E_prime_min(2.0, 2.0 * m_n)
 
 
 def test_sigma_s_const():
-    assert_equal(sigma_s_const(0.0), 0.0)
-    assert_equal(sigma_s_const(0.5), 1e24 * np.pi)
-    assert_equal(sigma_s_const(1.0), 4e24 * np.pi)
+    assert sigma_s_const(0.0) == 0.0
+    assert sigma_s_const(0.5) == 1e24 * np.pi
+    assert sigma_s_const(1.0) == 4e24 * np.pi
 
 
 def test_sigma_s():
@@ -476,12 +470,12 @@ def test_sigma_s():
     E = np.logspace(-9, 2, 101)
 
     sig_s = sigma_s(E)
-    assert_true((0.0 <= sig_s).all())
-    assert_true((sig_s[1:] <= sig_s[:-1]).all())
+    assert (0.0 <= sig_s).all()
+    assert (sig_s[1:] <= sig_s[:-1]).all()
 
     sig_s = sigma_s(E, 12.0, 13.0, 1900.0)
-    assert_true((0.0 <= sig_s).all())
-    assert_true((sig_s[1:] <= sig_s[:-1]).all())
+    assert (0.0 <= sig_s).all()
+    assert (sig_s[1:] <= sig_s[:-1]).all()
 
 
 def test_thermspect():

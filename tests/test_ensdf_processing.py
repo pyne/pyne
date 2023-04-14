@@ -1,9 +1,7 @@
 import filecmp, numpy, os, shutil, io
 from pyne import ensdf_processing
 
-import nose
-from nose.plugins.skip import SkipTest
-
+import pytest
 # path to folder for temporary test files.
 tmp_path = "ensdf_processing/tmp"
 
@@ -18,7 +16,7 @@ def test_alphad():
     try:
         output_dict = ensdf_processing.alphad(input_dict)
     except OSError:
-        raise SkipTest
+        pytest.skip()
     exceptions = [[2, "DATE RUN"]]
     file_comp(
         input_dict["report_file"],
@@ -36,7 +34,7 @@ def optional_t_bricc_interactive():
     try:
         output_dict = ensdf_processing.bricc(input_dict)
     except OSError:
-        raise SkipTest
+        pytest.skip()
     bricc_out_tmp = tmp_path + "/tmp_bricc_out.out"
     bricc_out_ref = "ensdf_processing/bricc/ref_bricc_44.out"
     bricc_outfile = open(tmp_path + "/tmp_bricc_out.out", "w+")
@@ -56,7 +54,7 @@ def optional_t_bricc_evaluation():
     try:
         output_dict = ensdf_processing.bricc(input_dict)
     except OSError:
-        raise SkipTest
+        pytest.skip()
     bricc_comparison_ref = "ensdf_processing/bricc/ref_a228_comparison_report"
     file_comp(input_dict["comparison_report"], bricc_comparison_ref, [])
     cleanup_tmp()
@@ -71,7 +69,7 @@ def test_bldhst():
     try:
         output_dict = ensdf_processing.bldhst(input_dict)
     except OSError:
-        raise SkipTest
+        pytest.skip()
     ref_table = "ensdf_processing/bldhst/ref_icctbl.dat"
     ref_index = "ensdf_processing/bldhst/ref_iccndx.dat"
     d_table = file_comp(input_dict["output_table_file"], ref_table, [])
@@ -87,7 +85,7 @@ def test_delta():
     try:
         output_dict = ensdf_processing.delta(input_dict)
     except OSError:
-        raise SkipTest
+        pytest.skip()
     # exceptions contain lines in the ouptut that can have a tolerable
     # precision difference
     exceptions = [
@@ -155,7 +153,7 @@ def test_gtol():
     try:
         output_dict = ensdf_processing.gtol(input_dict)
     except OSError:
-        raise SkipTest
+        pytest.skip()
     ref_output_report = "ensdf_processing/gtol/ref_gtol.rpt"
     exceptions = [[1, "DATE:"], [1, "INPUT-FILE name:"], [1, "TIME:"]]
     d_report = file_comp(input_dict["report_file"], ref_output_report, exceptions)
@@ -175,7 +173,7 @@ def test_hsicc():
     try:
         output_dict = ensdf_processing.hsicc(input_dict)
     except OSError:
-        raise SkipTest
+        pytest.skip()
     ref_report = "ensdf_processing/hsicc/ref_hscalc.lst"
     ref_card_deck = "ensdf_processing/hsicc/ref_cards.new"
     ref_comparison_report = "ensdf_processing/hsicc/ref_compar.lst"
@@ -198,7 +196,7 @@ def test_hsmrg():
     try:
         output_dict = ensdf_processing.hsmrg(input_dict)
     except OSError:
-        raise SkipTest
+        pytest.skip()
     ref_deck = "ensdf_processing/hsmrg/ref_cards.mrg"
     d_report = file_comp(input_dict["merged_data_deck"], ref_deck, [])
     cleanup_tmp()
@@ -214,7 +212,7 @@ def test_seqhst():
     try:
         output_dict = ensdf_processing.seqhst(input_dict)
     except OSError:
-        raise SkipTest
+        pytest.skip()
     ref_sequence = "ensdf_processing/seqhst/ref_iccseq.dat"
     d_report = file_comp(input_dict["sequential_output_file"], ref_sequence, [])
     cleanup_tmp()
@@ -230,7 +228,7 @@ def test_logft():
     try:
         output_dict = ensdf_processing.logft(input_dict)
     except OSError:
-        raise SkipTest
+        pytest.skip()
     ref_output_data_set = "ensdf_processing/logft/ref_logft.new"
     d_data = file_comp(input_dict["output_data_set"], ref_output_data_set, [])
     cleanup_tmp()
@@ -245,7 +243,7 @@ def test_radd():
     try:
         ensdf_processing.radd(input_dict)
     except OSError:
-        raise SkipTest
+        pytest.skip()
     ref_output = "ensdf_processing/radd/ref_output.out"
     d_report = file_comp(input_dict["output_file"], ref_output, [])
     cleanup_tmp()
@@ -297,7 +295,7 @@ def test_ruler():
     try:
         output_dict = ensdf_processing.ruler(input_dict)
     except OSError:
-        raise SkipTest
+        pytest.skip()
     ref_output = "ensdf_processing/ruler/ref_ruler.rpt"
     exceptions = [[1, "         INPUT FILE:"], [1, "RULER Version 3.2d [20-Jan-2009]"]]
     d_report = file_comp(input_dict["output_report_file"], ref_output, exceptions)
@@ -363,7 +361,6 @@ def file_comp(file_out, file_ref, exceptions):
     return diff_dict
 
 
-#  nose.runmodule()
 if __name__ == "__main__":
     alphad = test_alphad()
     bldhst = test_bldhst()
