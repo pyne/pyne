@@ -15,6 +15,7 @@ Next Version
    * fix reorder error in member variables (#1466)
    * remove unusable C-linkage with std::vector (#1468)
    * fixed compatibility issue with Python 3.10 in endf.py (#1472)
+   * avoid use of deprecated numpy.int alias (#1479)
 
 v0.7.7
 ======
@@ -24,7 +25,7 @@ v0.7.7
    * turn off all fortran (spatial solvers and ENSDF processing) by default (#1444)
    * update where to look for DAGMC CMake files (#1446)
    * ensure NUC_DATA_PATH is a string (#1447)
-   * update CI to Ubuntu 20.04 (#1449) 
+   * update CI to Ubuntu 20.04 (#1449)
 
 v0.7.6
 ======
