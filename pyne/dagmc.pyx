@@ -48,7 +48,7 @@ def get_entity_handle_type():
     return type(str("EntityHandle"), (eh_t,), {})
 
 EntityHandle = get_entity_handle_type()
-_ErrorCode = type(str("ErrorCode"), (np.int,), {})
+_ErrorCode = type(str("ErrorCode"), (np.intc,), {})
 
 class DagmcError(Exception):
     pass
