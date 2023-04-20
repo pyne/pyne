@@ -1,0 +1,20 @@
+name: run install script
+
+on:
+  # allows us to run workflows manually
+  workflow_dispatch:
+  push:
+    paths:
+      - 'scripts/ubuntu.sh'
+      - '.github/workflows/docker_publish.yml'
+
+jobs:
+  run_install_script:
+    runs-on: ubuntu-latest
+    steps:
+      - name: run install script
+        shell: bash -l {0}
+        run: |
+          cd $GITHUB_WORKSPACE/scripts
+          chmod +x ubuntu.sh
+          ./ubuntu.sh
