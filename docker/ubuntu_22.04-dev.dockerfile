@@ -30,6 +30,7 @@ RUN apt-get update \
             scipy \
             cython \
             nose \
+            pytest \
             tables \
             matplotlib \
             jinja2 \
