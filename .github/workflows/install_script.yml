@@ -4,9 +4,9 @@ on:
   # allows us to run workflows manually
   workflow_dispatch:
   push:
-    paths:
-      - 'scripts/ubuntu.sh'
-      - '.github/workflows/docker_publish.yml'
+    # paths:
+    #   - 'scripts/ubuntu.sh'
+    #   - '.github/workflows/docker_publish.yml'
 
 jobs:
   run_install_script:
