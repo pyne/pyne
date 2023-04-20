@@ -115,7 +115,7 @@ jobs:
         shell: bash -l {0}
         run: |
           cd $GITHUB_WORKSPACE/tests
-          ./travis-run-tests.sh python3
+          ./ci-run-tests.sh python3
 
   # if the previous step that tests the docker images passes then the images
   # can be copied from the ghcr where they are saved using :ci_testing tags to
