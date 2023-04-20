@@ -18,3 +18,4 @@ jobs:
           cd $GITHUB_WORKSPACE/scripts
           chmod +x ubuntu.sh
           ./ubuntu.sh
+# comment to trigger workflow run
