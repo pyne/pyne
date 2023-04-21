@@ -83,12 +83,13 @@ RUN export PYMOAB_FLAG="-DENABLE_PYMOAB=ON"; \
     && ls ..\
     # build/install shared lib
     && cmake .. \
-            ${PYMOAB_FLAG} \
+            -DENABLE_PYMOAB=ON \
             -DCMAKE_INSTALL_PREFIX=$INSTALL_PATH \
             -DENABLE_HDF5=ON $MOAB_HDF5_ARGS \
             -DBUILD_SHARED_LIBS=ON \
             -DENABLE_BLASLAPACK=OFF \
             -DENABLE_FORTRAN=OFF \
+    && echo ${PYMOAB_FLAG} \
     && make -j 3 \
     && make install \
     && cd .. \
