@@ -106,10 +106,10 @@ jobs:
           cd $GITHUB_WORKSPACE
           python setup.py install --user --clean ${{ env.ADD_FLAG}}
           export PATH="$PATH:/github/home/.local/bin"
-          export PYTHONPATH="$PYTHONPATH:/github/home/.local/lib/python3.10/site-packages/"
+          export PYTHONPATH="/root/opt/moab/lib/python3.10/site-packages/"
           cd ../
           nuc_data_make
-
+      # export PYTHONPATH="$PYTHONPATH:/github/home/.local/lib/python3.10/site-packages/"
       - name: Testing PyNE
         shell: bash -l {0}
         run: |
