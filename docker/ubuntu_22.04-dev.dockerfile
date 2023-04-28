@@ -92,7 +92,7 @@ RUN export PYMOAB_FLAG="-DENABLE_PYMOAB=ON"; \
     && make -j 3 \
     && cd pymoab \
     && pip install . --user \
-    && cd ..
+    && cd .. \
     && make install \
     && cd .. \
     && rm -rf moab ;
