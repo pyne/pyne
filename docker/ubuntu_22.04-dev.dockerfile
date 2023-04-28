@@ -69,7 +69,7 @@ ENV INSTALL_PATH=$HOME/opt/moab
 RUN export PYMOAB_FLAG="-DENABLE_PYMOAB=ON"; \
     echo $PYMOAB_FLAG ;\
     export MOAB_HDF5_ARGS=""; \
-    if [ "$build_hdf5" != "NO" ] ; \ 
+    if [ "$build_hdf5" != "NO" ] ; \
     then \
             export MOAB_HDF5_ARGS="-DHDF5_ROOT=$HDF5_INSTALL_PATH"; \
     fi \
@@ -90,6 +90,9 @@ RUN export PYMOAB_FLAG="-DENABLE_PYMOAB=ON"; \
             -DENABLE_BLASLAPACK=OFF \
             -DENABLE_FORTRAN=OFF \
     && make -j 3 \
+    && cd pymoab \
+    && pip install . --user \
+    && cd ..
     && make install \
     && cd .. \
     && rm -rf moab ;
@@ -129,7 +132,7 @@ RUN if [ "$build_hdf5" != "NO" ]; then \
     git clone https://github.com/openmc-dev/openmc.git $HOME/opt/openmc \
     && cd  $HOME/opt/openmc \
     && git checkout tags/v0.13.0 \
-    && pip install . 
+    && pip install .
 
 # Build/Install PyNE
 FROM openmc AS pyne
@@ -145,7 +148,7 @@ RUN export PYNE_HDF5_ARGS="" ;\
     && python setup.py install --user \
                                 --moab $HOME/opt/moab --dagmc $HOME/opt/dagmc \
                                 $PYNE_HDF5_ARGS \
-                                --clean -j 3; 
+                                --clean -j 3;
 ENV PATH $HOME/.local/bin:$PATH
 RUN if [ "$build_pyne" = "YES" ]; then \
         cd $HOME \
