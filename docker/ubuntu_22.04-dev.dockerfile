@@ -91,7 +91,7 @@ RUN export PYMOAB_FLAG="-DENABLE_PYMOAB=ON"; \
             -DENABLE_FORTRAN=OFF \
     && make -j 3 \
     && cd pymoab \
-    && pip install . --user \
+    && pip install . \
     && cd .. \
     && make install \
     && cd .. \
