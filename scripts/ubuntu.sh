@@ -89,6 +89,9 @@ cmake ../ -DENABLE_PYMOAB=ON \
           -DENABLE_BLASLAPACK=OFF \
           -DENABLE_FORTRAN=OFF    
 make -j 3 
+cd pymoab
+pip install .
+cd ..
 make install
 cd ..
 rm -rf moab-repo

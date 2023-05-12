@@ -100,7 +100,7 @@ RUN export PYMOAB_FLAG="-DENABLE_PYMOAB=ON"; \
 # put MOAB on the path
 ENV LD_LIBRARY_PATH $HOME/opt/moab/lib:$LD_LIBRARY_PATH
 ENV LIBRARY_PATH $HOME/opt/moab/lib:$LIBRARY_PATH
-ENV PYTHONPATH=$HOME/opt/moab/lib/python3.10/site-packages/
+# ENV PYTHONPATH=$HOME/opt/moab/lib/python3.10/site-packages/
 
 FROM moab AS dagmc
 # build/install DAGMC
