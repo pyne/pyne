@@ -192,7 +192,7 @@ nuc_data_make
 
 # Run tests
 cd ${install_dir}/pyne/pyne-repo/tests
-./travis-run-tests.sh
+./ci-run-tests.sh
 
 
 echo " \
