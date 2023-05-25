@@ -50,7 +50,7 @@ apt-get clean -y;
 update-alternatives --install /usr/bin/python python /usr/bin/python3 10;
 update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 10;
 pip install --upgrade pip;
-pip3 install ${pip_package_list}
+pip install ${pip_package_list}
 
 install_dir=${HOME}/opt
 mkdir -p ${install_dir}
@@ -149,16 +149,15 @@ export PATH="${install_dir}/dagmc/bin:$PATH"
 ####################
 
 cd ${install_dir}
-git clone https://github.com/openmc-dev/openmc.git
+git clone --depth 1 --branch v0.13.0 https://github.com/openmc-dev/openmc.git
 cd openmc
-git checkout tags/v0.13.0
 mkdir bld
 cd bld
 cmake .. -DCMAKE_INSTALL_PREFIX=$HOME/.local
 make
 make install
 cd ..
-pip3 install .
+pip install .
 
 ############
 ### PyNE ###
