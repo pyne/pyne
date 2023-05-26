@@ -49,8 +49,8 @@ sudo apt-get install -y --fix-missing ${apt_package_list}
 apt-get clean -y;
 update-alternatives --install /usr/bin/python python /usr/bin/python3 10;
 update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 10;
-pip install --upgrade pip;
-pip install ${pip_package_list}
+pip install --user --upgrade pip;
+pip install --user ${pip_package_list}
 
 install_dir=${HOME}/opt
 mkdir -p ${install_dir}
@@ -90,7 +90,7 @@ cmake ../ -DENABLE_PYMOAB=ON \
           -DENABLE_FORTRAN=OFF    
 make -j 3 
 cd pymoab
-pip install .
+pip install --user .
 cd ..
 make install
 cd ..
@@ -157,7 +157,7 @@ cmake .. -DCMAKE_INSTALL_PREFIX=$HOME/.local
 make
 make install
 cd ..
-pip install .
+pip install --user .
 
 ############
 ### PyNE ###
