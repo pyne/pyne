@@ -1,4 +1,8 @@
-PyNE: The Nuclear Engineering Toolkit 
+.. |image| image:: https://github.com/pyne/pyne/blob/develop/img/pyne_icon_small.png
+   :class: centered
+   :width: 42px
+
+|image| PyNE: The Nuclear Engineering Toolkit
 =====================================
 The PyNE project aims to provide a common set of tools for nuclear
 science and engineering needs.
@@ -12,10 +16,6 @@ Examples, documentation, and more can be found at
 https://pyne.io, the official PyNE project site.
 
 .. _github: https://github.com/pyne/pyne
-
-.. install-start
-
-.. _install:
 
 ============
 Installation
