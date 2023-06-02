@@ -10,12 +10,11 @@ on:
 
 jobs:
   run_install_script:
+  runs-on: ubuntu-latest
   strategy: 
     matrix:
-      branch: ['develop', 'stable'] # 'develop' can be anything that's not 'stable'
-                                    # this triggers an if statement in ubuntu.sh
-
-    runs-on: ubuntu-latest
+      branch: ['develop', 'stable'] # 'develop' can be anything that's not 'stable'. This triggers an if statement in ubuntu.sh
+      
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
