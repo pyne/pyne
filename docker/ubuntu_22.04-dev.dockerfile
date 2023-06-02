@@ -66,9 +66,7 @@ ARG build_hdf5
 ENV INSTALL_PATH=$HOME/opt/moab
 
 # build MOAB
-RUN export PYMOAB_FLAG="-DENABLE_PYMOAB=ON"; \
-    echo $PYMOAB_FLAG ;\
-    export MOAB_HDF5_ARGS=""; \
+RUN export MOAB_HDF5_ARGS=""; \
     if [ "$build_hdf5" != "NO" ] ; \
     then \
             export MOAB_HDF5_ARGS="-DHDF5_ROOT=$HDF5_INSTALL_PATH"; \
@@ -83,7 +81,7 @@ RUN export PYMOAB_FLAG="-DENABLE_PYMOAB=ON"; \
     && ls ..\
     # build/install shared lib
     && cmake .. \
-            ${PYMOAB_FLAG} \
+            -DENABLE_PYMOAB=ON \
             -DCMAKE_INSTALL_PREFIX=$INSTALL_PATH \
             -DENABLE_HDF5=ON $MOAB_HDF5_ARGS \
             -DBUILD_SHARED_LIBS=ON \
@@ -100,7 +98,6 @@ RUN export PYMOAB_FLAG="-DENABLE_PYMOAB=ON"; \
 # put MOAB on the path
 ENV LD_LIBRARY_PATH $HOME/opt/moab/lib:$LD_LIBRARY_PATH
 ENV LIBRARY_PATH $HOME/opt/moab/lib:$LIBRARY_PATH
-# ENV PYTHONPATH=$HOME/opt/moab/lib/python3.10/site-packages/
 
 FROM moab AS dagmc
 # build/install DAGMC

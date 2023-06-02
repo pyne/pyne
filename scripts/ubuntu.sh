@@ -22,6 +22,7 @@ pip_package_list="numpy==1.23 \
                   scipy \
                   cython \
                   nose \
+                  pytest \
                   tables \
                   matplotlib \
                   jinja2 \
@@ -99,13 +100,13 @@ rm -rf moab-repo
 # Adding MOAB/lib to $LD_LIBRARY_PATH and $LIBRARY_PATH
 export LD_LIBRARY_PATH="${install_dir}/moab/lib:$LD_LIBRARY_PATH"
 
-# Adding pymoab to $PYTHONPATH
-PYTHON_VERSION=$(python -c 'import sys; print(sys.version.split('')[0][0:3])')
-if [ -z $PYTHONPATH ]; then
-  export PYTHONPATH="$install_dir/moab/lib/python${PYTHON_VERSION}/site-packages"
-else
-  export PYTHONPATH="$install_dir/moab/lib/python${PYTHON_VERSION}/site-packages:$PYTHONPATH"
-fi
+# # Adding pymoab to $PYTHONPATH
+# PYTHON_VERSION=$(python -c 'import sys; print(sys.version.split('')[0][0:3])')
+# if [ -z $PYTHONPATH ]; then
+#   export PYTHONPATH="$install_dir/moab/lib/python${PYTHON_VERSION}/site-packages"
+# else
+#   export PYTHONPATH="$install_dir/moab/lib/python${PYTHON_VERSION}/site-packages:$PYTHONPATH"
+# fi
 
 
 #############
