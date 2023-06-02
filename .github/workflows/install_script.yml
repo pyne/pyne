@@ -10,6 +10,11 @@ on:
 
 jobs:
   run_install_script:
+  strategy: 
+    matrix:
+      branch: ['develop', 'stable'] # 'develop' can be anything that's not 'stable'
+                                    # this triggers an if statement in ubuntu.sh
+
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -20,4 +25,8 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE/scripts
           chmod +x ubuntu.sh
-          ./ubuntu.sh
+          ./ubuntu.sh ${{ matrix.branch }}
+
+      # use matrix to have 2 jobs [develop, stable]
+      # ./ubuntu.sh stable
+
