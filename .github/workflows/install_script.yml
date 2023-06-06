@@ -24,7 +24,7 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE/scripts
           chmod +x ubuntu.sh
-          ./ubuntu.sh ${{ matrix.branch }} ${{ build_hdf5 }}
+          ./ubuntu.sh ${{ matrix.branch }} ${{ matrix.build_hdf5 }}
 
       # use matrix to have 2 jobs [develop, stable]
       # ./ubuntu.sh stable
