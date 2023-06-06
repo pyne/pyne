@@ -55,22 +55,43 @@ pip install --user ${pip_package_list}
 
 install_dir=${HOME}/opt
 mkdir -p ${install_dir}
+echo "export PATH=$HOME/.local/bin:\$PATH" >> ~/.bashrc
 
-# hdf5 std directory
+# build HDF5 if necessary
+build_hdf5=$2
 hdf5_libdir=$HOME/opt/hdf5/$build_hdf5
-
-# need to put libhdf5.so on LD_LIBRARY_PATH (Making sure that LD_LIBRARY_PATH is defined first)
-if [ -z $LD_LIBRARY_PATH ]; then
-  export LD_LIBRARY_PATH="${hdf5_libdir}"
-else
-  export LD_LIBRARY_PATH="${hdf5_libdir}:$LD_LIBRARY_PATH"
+if [ $build_hdf5 != "NO" ]; then \
+  cd $install_dir \
+  && mkdir hdf5 \
+  && cd hdf5 \
+  && git clone --single-branch --branch $build_hdf5 https://github.com/HDFGroup/hdf5.git \
+  && cd hdf5 \
+  && ./configure --prefix=$hdf5_libdir --enable-shared \
+  && make -j 3 \
+  && make install \
+  && cd .. \
+  && rm -rf hdf5; \
 fi
+
+# put HDF5 on the path
+export LD_LIBRARY_PATH=$hdf5_libdir/lib:$LD_LIBRARY_PATH
+export LIBRARY_PATH=$hdf5_libdir/lib:$LIBRARY_PATH
+# # need to put libhdf5.so on LD_LIBRARY_PATH (Making sure that LD_LIBRARY_PATH is defined first)
+# if [ -z $LD_LIBRARY_PATH ]; then
+#   export LD_LIBRARY_PATH="${hdf5_libdir}"
+# else
+#   export LD_LIBRARY_PATH="${hdf5_libdir}:$LD_LIBRARY_PATH"
+# fi
 
 
 ############
 ### MOAB ###
 ############
 # pre-setup
+export MOAB_HDF5_ARGS=""
+if [ $build_hdf5 != "NO" ]; then \
+  export MOAB_HDF5_ARGS="-DHDF5_ROOT=$hdf5_libdir"; \
+fi
 cd ${install_dir}
 check_repo moab
 mkdir -p moab
@@ -85,7 +106,7 @@ cd build
 # cmake, build and install
 cmake ../ -DENABLE_PYMOAB=ON \
           -DCMAKE_INSTALL_PREFIX=${install_dir}/moab \
-          -DENABLE_HDF5=ON -DHDF5_ROOT=${hdf5_libdir} \
+          -DENABLE_HDF5=ON $MOAB_HDF5_ARGS \
           -DBUILD_SHARED_LIBS=ON \
           -DENABLE_BLASLAPACK=OFF \
           -DENABLE_FORTRAN=OFF    
@@ -99,6 +120,7 @@ rm -rf moab-repo
 
 # Adding MOAB/lib to $LD_LIBRARY_PATH and $LIBRARY_PATH
 export LD_LIBRARY_PATH="${install_dir}/moab/lib:$LD_LIBRARY_PATH"
+export LIBRARY_PATH="${install_dir}/moab/lib:$LIBRARY_PATH"
 
 #############
 ### DAGMC ###
@@ -139,16 +161,13 @@ export PATH="${install_dir}/dagmc/bin:$PATH"
 ####################
 ### OpenMC API #####
 ####################
-
+if [ $build_hdf5 != "NO" ]; then \
+  export HDF5_ROOT="$hdf5_libdir"; \
+fi
 cd ${install_dir}
-git clone --depth 1 --branch v0.13.0 https://github.com/openmc-dev/openmc.git
+git clone https://github.com/openmc-dev/openmc.git
 cd openmc
-mkdir bld
-cd bld
-cmake .. -DCMAKE_INSTALL_PREFIX=$HOME/.local
-make
-make install
-cd ..
+git checkout tags/v0.13.0
 pip install --user .
 
 ############
@@ -156,7 +175,10 @@ pip install --user .
 ############
 
 # pre-setup
-export PYNE_HDF5_ARGS="--hdf5 ${hdf5_libdir}"
+export PYNE_HDF5_ARGS=""
+if [ $build_hdf5 != "NO" ]; then \
+  export PYNE_HDF5_ARGS="--hdf5 ${hdf5_libdir}"; \
+fi
 cd ${install_dir}
 check_repo pyne
 mkdir -p pyne

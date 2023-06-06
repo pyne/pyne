@@ -14,7 +14,7 @@ jobs:
     strategy: 
       matrix:
         branch: ['develop', 'stable'] # 'develop' can be anything that's not 'stable'. This triggers an if statement in ubuntu.sh
-      
+        build_hdf5: ['NO', 'hdf5-1_12_0']
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -24,7 +24,7 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE/scripts
           chmod +x ubuntu.sh
-          ./ubuntu.sh ${{ matrix.branch }}
+          ./ubuntu.sh ${{ matrix.branch }} ${{ build_hdf5 }}
 
       # use matrix to have 2 jobs [develop, stable]
       # ./ubuntu.sh stable
