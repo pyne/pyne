@@ -208,7 +208,12 @@ nuc_data_make
 
 # Run tests
 cd ${install_dir}/pyne/pyne-repo/tests
-./ci-run-tests.sh
+if [ $1 == 'stable' ] ; then
+  ./travis-run-tests.sh
+else
+  ./ci-run-tests.sh
+fi
+
 
 
 echo " \
