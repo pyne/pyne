@@ -1,22 +1,17 @@
-ARG py_version=3.8
 ARG build_hdf5="NO"
+ARG ubuntu_version=22.04
 
-FROM ubuntu:20.04 AS base_python
+FROM ubuntu:${ubuntu_version} AS base_python
 
 # Ubuntu Setup
 ENV TZ=America/Chicago
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
-ARG py_version
 
 ENV HOME /root
-RUN if [ "${py_version%.?}" -eq 3 ] ; \
-    then \ 
-            export PY_SUFIX=${py_version%.?}; \
-    fi;\
-    apt-get update \
+RUN apt-get update \
     && apt-get install -y --fix-missing \
             software-properties-common \
-            python${PY_SUFIX}-pip \
+            python3-pip \
             wget \
             build-essential \
             git \
@@ -28,16 +23,14 @@ RUN if [ "${py_version%.?}" -eq 3 ] ; \
             libhdf5-dev \
             hdf5-tools \
     && apt-get clean -y; \
-    if [ "${py_version%.?}" -eq 3 ] ; \
-       then \ 
-            update-alternatives --install /usr/bin/python python /usr/bin/python3 10; \
-            update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 10; \
-    fi;\
+    update-alternatives --install /usr/bin/python python /usr/bin/python3 10; \
+    update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 10; \
     pip install --upgrade pip; \
     pip install numpy==1.23 \
             scipy \
             cython \
             nose \
+            pytest \
             tables \
             matplotlib \
             jinja2 \
@@ -69,15 +62,12 @@ ENV LD_LIBRARY_PATH $HDF5_INSTALL_PATH/lib:$LD_LIBRARY_PATH
 ENV LIBRARY_PATH $HDF5_INSTALL_PATH/lib:$LIBRARY_PATH
 
 FROM base_python AS moab
-ARG py_version
 ARG build_hdf5
 ENV INSTALL_PATH=$HOME/opt/moab
 
 # build MOAB
-RUN export PYMOAB_FLAG="-DENABLE_PYMOAB=ON"; \
-    echo $PYMOAB_FLAG ;\
-    export MOAB_HDF5_ARGS=""; \
-    if [ "$build_hdf5" != "NO" ] ; \ 
+RUN export MOAB_HDF5_ARGS=""; \
+    if [ "$build_hdf5" != "NO" ] ; \
     then \
             export MOAB_HDF5_ARGS="-DHDF5_ROOT=$HDF5_INSTALL_PATH"; \
     fi \
@@ -91,13 +81,16 @@ RUN export PYMOAB_FLAG="-DENABLE_PYMOAB=ON"; \
     && ls ..\
     # build/install shared lib
     && cmake .. \
-            ${PYMOAB_FLAG} \
+            -DENABLE_PYMOAB=ON \
             -DCMAKE_INSTALL_PREFIX=$INSTALL_PATH \
             -DENABLE_HDF5=ON $MOAB_HDF5_ARGS \
             -DBUILD_SHARED_LIBS=ON \
             -DENABLE_BLASLAPACK=OFF \
             -DENABLE_FORTRAN=OFF \
     && make -j 3 \
+    && cd pymoab \
+    && pip install . \
+    && cd .. \
     && make install \
     && cd .. \
     && rm -rf moab ;
@@ -105,7 +98,6 @@ RUN export PYMOAB_FLAG="-DENABLE_PYMOAB=ON"; \
 # put MOAB on the path
 ENV LD_LIBRARY_PATH $HOME/opt/moab/lib:$LD_LIBRARY_PATH
 ENV LIBRARY_PATH $HOME/opt/moab/lib:$LIBRARY_PATH
-ENV PYTHONPATH=$HOME/opt/moab/lib/python${py_version}/site-packages/
 
 FROM moab AS dagmc
 # build/install DAGMC
@@ -137,7 +129,7 @@ RUN if [ "$build_hdf5" != "NO" ]; then \
     git clone https://github.com/openmc-dev/openmc.git $HOME/opt/openmc \
     && cd  $HOME/opt/openmc \
     && git checkout tags/v0.13.0 \
-    && pip install . 
+    && pip install .
 
 # Build/Install PyNE
 FROM openmc AS pyne
@@ -153,7 +145,7 @@ RUN export PYNE_HDF5_ARGS="" ;\
     && python setup.py install --user \
                                 --moab $HOME/opt/moab --dagmc $HOME/opt/dagmc \
                                 $PYNE_HDF5_ARGS \
-                                --clean -j 3; 
+                                --clean -j 3;
 ENV PATH $HOME/.local/bin:$PATH
 RUN if [ "$build_pyne" = "YES" ]; then \
         cd $HOME \

@@ -9,7 +9,7 @@ on:
       - '.github/workflows/docker_publish.yml'
 
 env:
-  DOCKER_IMAGE_BASENAME: ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_20.04_py3
+  DOCKER_IMAGE_BASENAME: ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_22.04_py3
   DOCKER_IMAGE_TAG: :refs_heads_${{ github.ref_name }}-bk0
 
 jobs:
@@ -22,7 +22,7 @@ jobs:
     strategy:
       matrix:
         ubuntu_versions : [
-          20.04,
+          22.04,
         ]
     outputs:
       image_tag: ${{ steps.output_tag.outputs.image_tag }}
@@ -40,25 +40,31 @@ jobs:
 
       # build base python, moab, dagmc, openmc using multistage docker build action
       - uses: firehed/multistage-docker-build-action@v1
+        id: build1
         with:
           repository: ${{ env.DOCKER_IMAGE_BASENAME }}
           stages: base_python, moab, dagmc
           server-stage: openmc
           quiet: false
           tag-latest-on-default: false
-          dockerfile: docker/ubuntu_20.04-dev.dockerfile
-          build-args: py_version=3.8
+          dockerfile: docker/ubuntu_22.04-dev.dockerfile
 
       # build HDF5 using multistage docker build action 
       - uses: firehed/multistage-docker-build-action@v1
+        id: build2
         with:
           repository: ${{ env.DOCKER_IMAGE_BASENAME }}_hdf5
           stages: base_python, moab
           server-stage: dagmc
           quiet: false
           tag-latest-on-default: false
-          dockerfile: docker/ubuntu_20.04-dev.dockerfile
-          build-args: py_version=3.8, build_hdf5=hdf5-1_12_0
+          dockerfile: docker/ubuntu_22.04-dev.dockerfile
+          build-args: build_hdf5=hdf5-1_12_0
+
+      # print out server-tags
+      - run: |
+          echo ${{ steps.build1.outputs.server-tag }}
+          echo ${{ steps.build2.outputs.server-tag }}
 
       - id: output_tag
         run: |
@@ -80,7 +86,7 @@ jobs:
       fail-fast: false
 
     container:
-      image: ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_20.04_py3${{ matrix.hdf5 }}/${{ matrix.stage }}${{ needs.multistage_image_build.outputs.image_tag }}
+      image: ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_22.04_py3${{ matrix.hdf5 }}/${{ matrix.stage }}${{ needs.multistage_image_build.outputs.image_tag }}
     steps:
       - name: setup
         shell: bash -l {0}
@@ -107,7 +113,7 @@ jobs:
           cd $GITHUB_WORKSPACE
           python setup.py install --user --clean ${{ env.ADD_FLAG}}
           export PATH="$PATH:/github/home/.local/bin"
-          export PYTHONPATH="$PYTHONPATH:/github/home/.local/lib/python3.8/site-packages/"
+          export PYTHONPATH="$PYTHONPATH:/github/home/.local/lib/python3.10/site-packages/"
           cd ../
           nuc_data_make
 
@@ -115,7 +121,7 @@ jobs:
         shell: bash -l {0}
         run: |
           cd $GITHUB_WORKSPACE/tests
-          ./travis-run-tests.sh python3
+          ./ci-run-tests.sh python3
 
   # if the previous step that tests the docker images passes then the images
   # can be copied from the ghcr where they are saved using :ci_testing tags to
@@ -132,7 +138,7 @@ jobs:
           - stage: dagmc
             hdf5: _hdf5
 
-    name: "ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_20.04_py3${{ matrix.hdf5 }}/${{ matrix.stage }}: latest -> stable"
+    name: "ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_22.04_py3${{ matrix.hdf5 }}/${{ matrix.stage }}: latest -> stable"
 
     steps:
       - name: Log in to the Container registry
