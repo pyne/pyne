@@ -1,4 +1,8 @@
-PyNE: The Nuclear Engineering Toolkit
+.. |image| image:: https://github.com/pyne/pyne/blob/develop/img/pyne_icon_small.png
+   :class: centered
+   :width: 42px
+
+|image| PyNE: The Nuclear Engineering Toolkit
 =====================================
 The PyNE project aims to provide a common set of tools for nuclear
 science and engineering needs.
@@ -9,13 +13,9 @@ and contribute, please let us know either on the mailing list
 pyne-dev@googlegroups.com) or `github`_.
 
 Examples, documentation, and more can be found at
-http://pyne.io/, the official PyNE project site.
+https://pyne.io, the official PyNE project site.
 
 .. _github: https://github.com/pyne/pyne
-
-.. install-start
-
-.. _install:
 
 ============
 Installation
@@ -39,7 +39,7 @@ PyNE has the following dependencies:
    #. `Jinja2 <http://jinja.pocoo.org/>`_
 
 Optional Depenendencies:
-   #. `MOAB <https://press3.mcs.anl.gov/sigma/moab-library>`_
+   #. `MOAB <https://sigma.mcs.anl.gov/moab-library/>`_
    #. `DAGMC <https://svalinn.github.io/DAGMC/install/index.html>`__
    #. `OpenMC <https://docs.openmc.org/en/stable/quickinstall.html>`_
    
@@ -63,6 +63,6 @@ Contributing
 ============
 We highly encourage contributions to PyNE! If you would like to contribute,
 it is as easy as forking the repository on GitHub, making your changes, and
-issuing a pull request. If you have any questions about this process don't
-hesitate to ask the mailing list (https://groups.google.com/forum/#!forum/pyne-dev,
+issuing a pull request. If you have any questions or need assistance during this process,
+don't hesitate to reach out to the PyNE mailing list (https://groups.google.com/forum/#!forum/pyne-dev,
 pyne-dev@googlegroups.com).

@@ -6,6 +6,7 @@ Next Version
 ============
 **Change**
    * move tests from nose to pytest (#1478)
+   * update MOAB dead link and add PyNE logo to readme file (#1481)
 
 **Fix**
    * move install script to main repo(#1477)
