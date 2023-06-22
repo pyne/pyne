@@ -10,11 +10,12 @@ on:
 
 jobs:
   run_install_script:
-    runs-on: ubuntu-latest
     strategy: 
       matrix:
         branch: ['develop', 'stable'] # 'develop' can be anything that's not 'stable'. This triggers an if statement in ubuntu.sh
         build_hdf5: ['NO', 'hdf5-1_12_0']
+        os: ['ubuntu-latest']
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
