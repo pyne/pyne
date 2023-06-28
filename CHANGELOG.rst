@@ -9,6 +9,7 @@ Next Version
    * update MOAB dead link and add PyNE logo to readme file (#1481)
 
 **Fix**
+   * Add missing rxname offsets (#1482)
    * move install script to main repo(#1477)
    * use multistage docker build action in docker_publish.yml(#1470 #1471 #1473 #1475)
    * remove setup-QEMU step from composite action(#1461)
