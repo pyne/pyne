@@ -19,6 +19,7 @@ Next Version
    * remove unusable C-linkage with std::vector (#1468)
    * fixed compatibility issue with Python 3.10 in endf.py (#1472)
    * avoid use of deprecated numpy.int alias (#1479)
+   * Review Tutorial and Bug Fixes (#1486)
 
 v0.7.7
 ======
