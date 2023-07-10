@@ -14,20 +14,20 @@ runs:
   using: "composite"
   steps: 
     - name: setup
-        shell: bash -l {0}
-        run: |
-          export ADD_FLAG=" "
-          if [[ "${{ inputs.stage }}" == "moab" || "${{ inputs.stage }}" == "dagmc" ]]; then
-            export ADD_FLAG="${ADD_FLAG} --moab /root/opt/moab"
-          fi
-          if [[ "${{ inputs.stage }}" == "dagmc" ]]; then
-            export ADD_FLAG="${ADD_FLAG} --dagmc /root/opt/dagmc"
-          fi
-          if [[ "${{ inputs.hdf5 }}" == "_hdf5" ]]; then
-            export ADD_FLAG="${ADD_FLAG} --hdf5 /root/opt/hdf5/hdf5-1_12_0"
-          fi
-          export ADD_FLAG="${ADD_FLAG} "
-          echo "ADD_FLAG=${ADD_FLAG}" >> $GITHUB_ENV
+      shell: bash -l {0}
+      run: |
+        export ADD_FLAG=" "
+        if [[ "${{ inputs.stage }}" == "moab" || "${{ inputs.stage }}" == "dagmc" ]]; then
+          export ADD_FLAG="${ADD_FLAG} --moab /root/opt/moab"
+        fi
+        if [[ "${{ inputs.stage }}" == "dagmc" ]]; then
+          export ADD_FLAG="${ADD_FLAG} --dagmc /root/opt/dagmc"
+        fi
+        if [[ "${{ inputs.hdf5 }}" == "_hdf5" ]]; then
+          export ADD_FLAG="${ADD_FLAG} --hdf5 /root/opt/hdf5/hdf5-1_12_0"
+        fi
+        export ADD_FLAG="${ADD_FLAG} "
+        echo "ADD_FLAG=${ADD_FLAG}" >> $GITHUB_ENV
 
       - name: Checkout repository
         uses: actions/checkout@v3
