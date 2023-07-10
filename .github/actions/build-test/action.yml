@@ -17,10 +17,11 @@ inputs:
     description: The owner of the repository
     required: true
     default: 'pyne'
-container:
-  image: ghcr.io/${{ inputs.owner }}/pyne_ubuntu_22.04_py3${{ inputs.hdf5 }}/${{ inputs.stage }}${{ inputs.tag }}
+
 runs:
   using: "composite"
+  container:
+    image: ghcr.io/${{ inputs.owner }}/pyne_ubuntu_22.04_py3${{ inputs.hdf5 }}/${{ inputs.stage }}${{ inputs.tag }}
   steps: 
     - name: setup
       shell: bash -l {0}
