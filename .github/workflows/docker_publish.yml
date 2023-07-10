@@ -20,11 +20,6 @@ jobs:
   # to be built upon by the subsequent stage.
   multistage_image_build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        ubuntu_versions : [
-          22.04,
-        ]
     outputs:
       image_tag: ${{ steps.output_tag.outputs.image_tag }}
 
@@ -41,7 +36,7 @@ jobs:
 
       # build base python, moab, dagmc, openmc using multistage docker build action
       - uses: firehed/multistage-docker-build-action@v1
-        id: build1
+        id: build_all_stages
         with:
           repository: ${{ env.DOCKER_IMAGE_BASENAME }}
           stages: base_python, moab, dagmc
@@ -52,7 +47,7 @@ jobs:
 
       # build HDF5 using multistage docker build action 
       - uses: firehed/multistage-docker-build-action@v1
-        id: build2
+        id: build_dagmc_with_hdf5
         with:
           repository: ${{ env.DOCKER_IMAGE_BASENAME }}_hdf5
           stages: base_python, moab
@@ -61,11 +56,6 @@ jobs:
           tag-latest-on-default: false
           dockerfile: docker/ubuntu_22.04-dev.dockerfile
           build-args: build_hdf5=hdf5-1_12_0
-
-      # print out server-tags
-      - run: |
-          echo ${{ steps.build1.outputs.server-tag }}
-          echo ${{ steps.build2.outputs.server-tag }}
 
       - id: output_tag
         run: |
@@ -86,8 +76,8 @@ jobs:
             hdf5: _hdf5
       fail-fast: false
 
-    container:
-      image: ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_22.04_py3${{ matrix.hdf5 }}/${{ matrix.stage }}${{ needs.multistage_image_build.outputs.image_tag }}
+    # container:
+    #   image: ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_22.04_py3${{ matrix.hdf5 }}/${{ matrix.stage }}${{ needs.multistage_image_build.outputs.image_tag }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -97,6 +87,8 @@ jobs:
         with:
           stage: ${{ matrix.stage }}
           hdf5: ${{ matrix.hdf5 }}
+          owner: ${{ github.repository_owner }}
+          tag: ${{ env.DOCKER_IMAGE_TAG }}
 
 
   # if the previous step that tests the docker images passes then the images

@@ -9,6 +9,16 @@ inputs:
     description: Information about which version of HDF5 will be used for testing.
     required: true
     default: ''
+  tag:
+    description: The tag for the docker image used to run the tests
+    required: true
+    default: ''
+  owner:
+    description: The owner of the repository
+    required: true
+    default: 'pyne'
+container:
+  image: ghcr.io/${{ inputs.owner }}/pyne_ubuntu_22.04_py3${{ inputs.hdf5 }}/${{ inputs.stage }}${{ inputs.tag }}
 runs:
   using: "composite"
   steps: 
@@ -34,7 +44,6 @@ runs:
         cd $GITHUB_WORKSPACE
         python setup.py install --user --clean ${{ env.ADD_FLAG}}
         export PATH="$PATH:/github/home/.local/bin"
-        export PYTHONPATH="$PYTHONPATH:/github/home/.local/lib/python3.10/site-packages/"
         cd ../
         nuc_data_make
 
