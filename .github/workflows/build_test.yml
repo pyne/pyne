@@ -37,6 +37,7 @@ jobs:
       image: ghcr.io/pyne/pyne_ubuntu_22.04_py3${{ matrix.hdf5 }}/${{ matrix.stage }}:stable
 
     steps:
+      - uses: actions/checkout@v3
       - name: use BuildTest composite action
         uses: ./.github/actions/build-test
         with:
