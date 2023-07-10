@@ -29,18 +29,18 @@ runs:
         export ADD_FLAG="${ADD_FLAG} "
         echo "ADD_FLAG=${ADD_FLAG}" >> $GITHUB_ENV
         
-      - name: Building PyNE
-        shell: bash -l {0}
-        run: |
-          cd $GITHUB_WORKSPACE
-          python setup.py install --user --clean ${{ env.ADD_FLAG}}
-          export PATH="$PATH:/github/home/.local/bin"
-          export PYTHONPATH="$PYTHONPATH:/github/home/.local/lib/python3.10/site-packages/"
-          cd ../
-          nuc_data_make
+    - name: Building PyNE
+      shell: bash -l {0}
+      run: |
+        cd $GITHUB_WORKSPACE
+        python setup.py install --user --clean ${{ env.ADD_FLAG}}
+        export PATH="$PATH:/github/home/.local/bin"
+        export PYTHONPATH="$PYTHONPATH:/github/home/.local/lib/python3.10/site-packages/"
+        cd ../
+        nuc_data_make
 
-      - name: Testing PyNE
-        shell: bash -l {0}
-        run: |
-          cd $GITHUB_WORKSPACE/tests
-          ./ci-run-tests.sh python3
+    - name: Testing PyNE
+      shell: bash -l {0}
+      run: |
+        cd $GITHUB_WORKSPACE/tests
+        ./ci-run-tests.sh python3
