@@ -89,7 +89,9 @@ jobs:
     container:
       image: ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_22.04_py3${{ matrix.hdf5 }}/${{ matrix.stage }}${{ needs.multistage_image_build.outputs.image_tag }}
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
       - name: use BuildTest composite action
         uses: ./.github/actions/build-test
         with:

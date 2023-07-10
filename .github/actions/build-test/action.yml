@@ -28,9 +28,6 @@ runs:
         fi
         export ADD_FLAG="${ADD_FLAG} "
         echo "ADD_FLAG=${ADD_FLAG}" >> $GITHUB_ENV
-
-      - name: Checkout repository
-        uses: actions/checkout@v3
         
       - name: Building PyNE
         shell: bash -l {0}
