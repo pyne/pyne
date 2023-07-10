@@ -1,13 +1,12 @@
 name: BuildTest
-description: tests one docker image built in docker_publish.yml. Used to keep 
-    the build test procedure consistent in docker_publish.yml and build_test.yml
+description: Builds and tests an installation of PyNE in a single docker image.  This action is used for bootstrap testing when building the docker images as well as testing of each PR using those docker images.
 inputs:
   stage:
-    description: matrix variable
+    description: The docker stage that will be used as the docker image for testing.
     required: true
     default: ''
   hdf5:
-    description: matrix variable
+    description: Information about which version of HDF5 will be used for testing.
     required: true
     default: ''
 runs:
