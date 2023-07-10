@@ -76,8 +76,8 @@ jobs:
             hdf5: _hdf5
       fail-fast: false
 
-    # container:
-    #   image: ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_22.04_py3${{ matrix.hdf5 }}/${{ matrix.stage }}${{ needs.multistage_image_build.outputs.image_tag }}
+    container:
+      image: ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_22.04_py3${{ matrix.hdf5 }}/${{ matrix.stage }}${{ needs.multistage_image_build.outputs.image_tag }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -87,9 +87,8 @@ jobs:
         with:
           stage: ${{ matrix.stage }}
           hdf5: ${{ matrix.hdf5 }}
-          owner: ${{ github.repository_owner }}
           tag: ${{ env.DOCKER_IMAGE_TAG }}
-
+          owner: ${{ github.repository_owner }}
 
   # if the previous step that tests the docker images passes then the images
   # can be copied from the ghcr where they are saved using :ci_testing tags to

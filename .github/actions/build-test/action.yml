@@ -9,18 +9,8 @@ inputs:
     description: Information about which version of HDF5 will be used for testing.
     required: true
     default: ''
-  tag:
-    description: The tag for the docker image used to run the tests
-    required: true
-    default: ''
-  owner:
-    description: The owner of the repository
-    required: true
-    default: 'pyne'
-
 runs:
   using: "composite"
-  image: ghcr.io/${{ inputs.owner }}/pyne_ubuntu_22.04_py3${{ inputs.hdf5 }}/${{ inputs.stage }}${{ inputs.tag }}
   steps: 
     - name: setup
       shell: bash -l {0}
