@@ -87,8 +87,6 @@ jobs:
         with:
           stage: ${{ matrix.stage }}
           hdf5: ${{ matrix.hdf5 }}
-          tag: ${{ env.DOCKER_IMAGE_TAG }}
-          owner: ${{ github.repository_owner }}
 
   # if the previous step that tests the docker images passes then the images
   # can be copied from the ghcr where they are saved using :ci_testing tags to

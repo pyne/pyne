@@ -45,6 +45,4 @@ jobs:
         with:
           stage: ${{ matrix.stage }}
           hdf5: ${{ matrix.hdf5 }}
-          tag: ':stable'
-          owner: 'pyne'
 
