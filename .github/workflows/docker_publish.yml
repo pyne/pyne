@@ -7,6 +7,7 @@ on:
     paths:
       - 'docker/*'
       - '.github/workflows/docker_publish.yml'
+      - '.github/actions/build-test/action.yml'
 
 env:
   DOCKER_IMAGE_BASENAME: ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_22.04_py3
@@ -19,11 +20,6 @@ jobs:
   # to be built upon by the subsequent stage.
   multistage_image_build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        ubuntu_versions : [
-          22.04,
-        ]
     outputs:
       image_tag: ${{ steps.output_tag.outputs.image_tag }}
 
@@ -40,7 +36,7 @@ jobs:
 
       # build base python, moab, dagmc, openmc using multistage docker build action
       - uses: firehed/multistage-docker-build-action@v1
-        id: build1
+        id: build_all_stages
         with:
           repository: ${{ env.DOCKER_IMAGE_BASENAME }}
           stages: base_python, moab, dagmc
@@ -51,7 +47,7 @@ jobs:
 
       # build HDF5 using multistage docker build action 
       - uses: firehed/multistage-docker-build-action@v1
-        id: build2
+        id: build_dagmc_with_hdf5
         with:
           repository: ${{ env.DOCKER_IMAGE_BASENAME }}_hdf5
           stages: base_python, moab
@@ -60,11 +56,6 @@ jobs:
           tag-latest-on-default: false
           dockerfile: docker/ubuntu_22.04-dev.dockerfile
           build-args: build_hdf5=hdf5-1_12_0
-
-      # print out server-tags
-      - run: |
-          echo ${{ steps.build1.outputs.server-tag }}
-          echo ${{ steps.build2.outputs.server-tag }}
 
       - id: output_tag
         run: |
@@ -88,40 +79,14 @@ jobs:
     container:
       image: ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_22.04_py3${{ matrix.hdf5 }}/${{ matrix.stage }}${{ needs.multistage_image_build.outputs.image_tag }}
     steps:
-      - name: setup
-        shell: bash -l {0}
-        run: |
-          export ADD_FLAG=" "
-          if [[ "${{ matrix.stage }}" == "moab" || "${{ matrix.stage }}" == "dagmc" ]]; then
-            export ADD_FLAG="${ADD_FLAG} --moab /root/opt/moab"
-          fi
-          if [[ "${{ matrix.stage }}" == "dagmc" ]]; then
-            export ADD_FLAG="${ADD_FLAG} --dagmc /root/opt/dagmc"
-          fi
-          if [[ "${{ matrix.hdf5 }}" == "_hdf5" ]]; then
-            export ADD_FLAG="${ADD_FLAG} --hdf5 /root/opt/hdf5/hdf5-1_12_0"
-          fi
-          export ADD_FLAG="${ADD_FLAG} "
-          echo "ADD_FLAG=${ADD_FLAG}" >> $GITHUB_ENV
-
       - name: Checkout repository
         uses: actions/checkout@v3
-        
-      - name: Building PyNE
-        shell: bash -l {0}
-        run: |
-          cd $GITHUB_WORKSPACE
-          python setup.py install --user --clean ${{ env.ADD_FLAG}}
-          export PATH="$PATH:/github/home/.local/bin"
-          export PYTHONPATH="$PYTHONPATH:/github/home/.local/lib/python3.10/site-packages/"
-          cd ../
-          nuc_data_make
 
-      - name: Testing PyNE
-        shell: bash -l {0}
-        run: |
-          cd $GITHUB_WORKSPACE/tests
-          ./ci-run-tests.sh python3
+      - name: use BuildTest composite action
+        uses: ./.github/actions/build-test
+        with:
+          stage: ${{ matrix.stage }}
+          hdf5: ${{ matrix.hdf5 }}
 
   # if the previous step that tests the docker images passes then the images
   # can be copied from the ghcr where they are saved using :ci_testing tags to
