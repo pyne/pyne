@@ -34,41 +34,15 @@ jobs:
       fail-fast: false
 
     container:
-      image: ghcr.io/pyne/pyne_ubuntu_20.04_py3${{ matrix.hdf5 }}/${{ matrix.stage }}:stable
+      image: ghcr.io/pyne/pyne_ubuntu_22.04_py3${{ matrix.hdf5 }}/${{ matrix.stage }}:stable
 
     steps:
-      - name: setup
-        shell: bash -l {0}
-        run: |
-          export ADD_FLAG=" "
-          if [[ "${{ matrix.stage }}" == "moab" || "${{ matrix.stage }}" == "dagmc" ]]; then
-            export ADD_FLAG="${ADD_FLAG} --moab /root/opt/moab"
-          fi
-          if [[ "${{ matrix.stage }}" == "dagmc" ]]; then
-            export ADD_FLAG="${ADD_FLAG} --dagmc /root/opt/dagmc"
-          fi
-          if [[ "${{ matrix.hdf5 }}" == "_hdf5" ]]; then
-            export ADD_FLAG="${ADD_FLAG} --hdf5 /root/opt/hdf5/hdf5-1_12_0"
-          fi
-          export ADD_FLAG="${ADD_FLAG} "
-          echo "ADD_FLAG=${ADD_FLAG}" >> $GITHUB_ENV
-          pip install pytest
-
       - name: Checkout repository
         uses: actions/checkout@v3
-        
-      - name: Building PyNE
-        shell: bash -l {0}
-        run: |
-          cd $GITHUB_WORKSPACE
-          python setup.py install --user --clean ${{ env.ADD_FLAG}}
-          export PATH="$PATH:/github/home/.local/bin"
-          export PYTHONPATH="$PYTHONPATH:/github/home/.local/lib/python3.8/site-packages/"
-          cd ../
-          nuc_data_make
 
-      - name: Testing PyNE
-        shell: bash -l {0}
-        run: |
-          cd $GITHUB_WORKSPACE/tests
-          ./ci-run-tests.sh
+      - name: use BuildTest composite action
+        uses: ./.github/actions/build-test
+        with:
+          stage: ${{ matrix.stage }}
+          hdf5: ${{ matrix.hdf5 }}
+
