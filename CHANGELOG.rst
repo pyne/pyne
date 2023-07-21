@@ -23,7 +23,7 @@ Next Version
    * Review Tutorial and Bug Fixes (#1486)
    * add composite action for BuildTest job in workflows (#1489)
    * update run conditions for workflows (#1494)
-
+   * add workflow to build virtual machines based on Dockerfile (#1490)
 
 v0.7.7
 ======
