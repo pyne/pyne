@@ -5,8 +5,8 @@ on:
   workflow_dispatch:
   push:
     paths:
-      -'docker/*'
-      -'.github/workflows/virtualbox_image.yml'
+      - 'docker/*'
+      - '.github/workflows/virtualbox_image.yml'
 
 env:
   VM_PASSWORD: temppwd
