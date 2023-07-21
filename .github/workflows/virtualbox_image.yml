@@ -1,0 +1,25 @@
+name: Create VirtualBox disk image from Dockerfile
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      -'docker/*'
+      -'.github/workflows/virtualbox_image.yml'
+
+env:
+  VM_PASSWORD: temppwd
+
+jobs:
+  virtualbox_image_build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Build VirtualBox image using d2vm
+        run: |
+          git clone https://github.com/linka-cloud/d2vm && cd d2vm
+          make install
+          cd ..
+          sudo d2vm build -p ${{ env.VM_PASSWORD }} -f ./docker/ubuntu_22.04-dev.dockerfile -o pyne.vdi .
