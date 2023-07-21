@@ -22,6 +22,7 @@ jobs:
         run: |
           git clone https://github.com/linka-cloud/d2vm && cd d2vm
           make install
-          which d2vm
+          cd ..
           echo "make worked"
+          which d2vm
           sudo ./go/bin/d2vm build -p ${{ env.VM_PASSWORD }} -f ./docker/ubuntu_22.04-dev.dockerfile -o pyne.vdi .
