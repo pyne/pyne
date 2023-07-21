@@ -20,9 +20,7 @@ jobs:
 
       - name: Build VirtualBox image using d2vm
         run: |
-          git clone https://github.com/linka-cloud/d2vm && cd d2vm
-          make install
-          cd ..
+          curl -sL "https://github.com/linka-cloud/d2vm/releases/download/v0.2.0/d2vm_v0.2.0_linux_arm64.tar.gz" | tar -xvz d2vm
+          sudo mv d2vm /usr/local/bin/
           echo "make worked"
-          which d2vm
-          sudo ./go/bin/d2vm build -p ${{ env.VM_PASSWORD }} -f ./docker/ubuntu_22.04-dev.dockerfile -o pyne.vdi .
+          sudo d2vm build -p ${{ env.VM_PASSWORD }} -f ./docker/ubuntu_22.04-dev.dockerfile -o pyne.vdi .
