@@ -1,6 +1,7 @@
 name: Create VirtualBox disk image from Dockerfile
 
 on:
+  # allows us to run workflows manually
   workflow_dispatch:
   push:
     paths:
