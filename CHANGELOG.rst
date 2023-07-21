@@ -24,8 +24,7 @@ Next Version
    * Add composite action for BuildTest job in workflows (#1489)
    * Update run conditions for workflows (#1494)
    * Fix gamma intensity calculation (#1496)
-
-
+   * Add workflow to build virtual machines based on Dockerfile (#1490)
 
 v0.7.7
 ======
