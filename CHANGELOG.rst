@@ -20,7 +20,9 @@ Next Version
    * fixed compatibility issue with Python 3.10 in endf.py (#1472)
    * avoid use of deprecated numpy.int alias (#1479)
    * avoid use of deprecated numpy.bool alias (#1485)
+   * Review Tutorial and Bug Fixes (#1486)
    * add composite action for BuildTest job in workflows (#1489)
+
 
 v0.7.7
 ======

@@ -1,8 +1,8 @@
-"""This module provides an easy interface to very quickly grab multigroup cross 
-sections from the cross section cache and collapse them to the appropriate group 
-structure.  Additionally, it provides interfaces for some higher level functionality, 
-such as computing cross sections for materials, fission energy spectra, metastable
-ratios, etc.
+"""This module offers a user-friendly interface for efficiently retrieving
+multigroup cross sections from the cross section cache and collapsing
+them to match the desired group structure. It also provides interfaces
+for higher-level functionalities, including cross-section computation
+for materials, fission energy spectra, metastable ratios, and more.
 """
 from __future__ import division
 import sys

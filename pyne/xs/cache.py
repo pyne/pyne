@@ -1,5 +1,5 @@
-"""This module provides a cross section cache which automatically extracts 
-cross-sections from provided nuclear data sets."""
+"""This module offers a cross-section cache that automates the extraction of 
+cross-section data from supplied nuclear data sets."""
 import sys
 import inspect
 
