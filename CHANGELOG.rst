@@ -5,7 +5,7 @@ PyNE Change Log
 Next Version
 ============
 **Change**
-   * move tests from nose to pytest (#1478)
+   * move tests from nose to pytest (#1478 #1493)
    * update MOAB dead link and add PyNE logo to readme file (#1481)
 
 **Fix**
