@@ -4,19 +4,13 @@ on:
   # allows us to run workflows manually
   workflow_dispatch:
   pull_request:
-    paths-ignore:
-      - '.github/workflows/docker_publish.yml'
-      - '.github/workflows/changelog_test.yml'
-      - 'docker/**'
-      - 'CHANGELOG.rst'
+    paths:
+      - '.github/workflows/build_test.yml'
+      - '.github/actions/build-test/action.yml'
   push:
-    branches:
-      - develop
-    paths-ignore:
-      - '.github/workflows/docker_publish.yml'
-      - '.github/workflows/changelog_test.yml'
-      - 'docker/**'
-      - 'CHANGELOG.rst'
+    paths:
+      - '.github/workflows/build_test.yml'
+      - '.github/actions/build-test/action.yml'
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

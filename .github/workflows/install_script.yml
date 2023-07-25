@@ -3,7 +3,12 @@ name: run install script
 on:
   # allows us to run workflows manually
   workflow_dispatch:
+  pull_request:
+    branches:
+      - develop
   push:
+    branches:
+      - develop
     paths:
       - 'scripts/ubuntu.sh'
       - '.github/workflows/install_script.yml'
