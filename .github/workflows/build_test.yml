@@ -8,6 +8,8 @@ on:
       - '.github/workflows/build_test.yml'
       - '.github/actions/build-test/action.yml'
   push:
+    branches:
+      - 'develop'
     paths:
       - '.github/workflows/build_test.yml'
       - '.github/actions/build-test/action.yml'
