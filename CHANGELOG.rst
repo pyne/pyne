@@ -4,6 +4,10 @@ PyNE Change Log
 
 Next Version
 ============
+
+**New Capabilities**
+   * Add PNNL Materials Compendium (#1495)
+
 **Change**
    * move tests from nose to pytest (#1478 #1493)
    * update MOAB dead link and add PyNE logo to readme file (#1481)
