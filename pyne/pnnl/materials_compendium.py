@@ -3,12 +3,15 @@ from typing import List
 from typing import Any
 from dataclasses import dataclass
 import json
+
+# Data class for representing contact information
 @dataclass
 class Contact:
     Phone: str
     Name: str
     Email: str
 
+    # Static method to create a Contact object from a dictionary
     @staticmethod
     def from_dict(obj: Any) -> 'Contact':
         _Phone = str(obj.get("Phone", ""))
@@ -16,8 +19,10 @@ class Contact:
         _Email = str(obj.get("Email", ""))
         return Contact(_Phone, _Name, _Email)
 
+# Data class for representing information about an isotope
 @dataclass
 class Isotope:
+    # List all attributes of the Isotope class here
     WeightPercent: float
     Isotope: str
     WeightFraction_whole: float
@@ -61,9 +66,10 @@ class Isotope:
         _IsotopicAtomDensity_whole = float(obj.get("IsotopicAtomDensity_whole"))
         return Isotope(_WeightPercent, _Isotope, _WeightFraction_whole, _IsotopicWeightFraction_whole, _WeightFraction, _Abundance, _IsotopicAtomDensity, _AtomicNumber_whole, _ZAID, _AtomFraction, _AtomicNumber, _IsotopicWeightFraction, _RelativeAtomicMass, _RelativeAtomicMass_whole, _IsotopicAtomFraction, _Abundance_whole, _IsotopicAtomFraction_whole, _AtomFraction_whole, _IsotopicAtomDensity_whole)
 
-
+# Data class for representing an element
 @dataclass
 class Element:
+    # List all attributes of the Element class here
     WeightFraction_whole: float
     NonIsotopic: bool
     Element: str
@@ -97,8 +103,10 @@ class Element:
         _Abundances = str(obj.get("Abundances"))
         return Element(_WeightFraction_whole, _NonIsotopic, _Element, _WeightFraction, _AtomicMass, _ZAID, _AtomFraction, _AtomDensity_whole, _AtomFraction_whole, _id, _Isotopes, _AtomDensity, _AtomicMass_whole, _Abundances)
 
+# Data class for representing a molecule
 @dataclass
 class Mol:
+    # List all attributes of the Mol class here
     Mols: int
     Element: str
     Isotope: str
@@ -110,9 +118,10 @@ class Mol:
         _Isotope = str(obj.get("Isotope"))
         return Mol(_Mols, _Element, _Isotope)
 
-
+# Data class for representing data associated with a material
 @dataclass
 class Datum:
+    # List all attributes of the Datum class here
     Comment: List[str]
     Density: float
     Acronym: object
@@ -146,9 +155,10 @@ class Datum:
         _Formula = str(obj.get("Formula"))
         return Datum(_Comment, _Density, _Acronym, _Elements, _Source, _References, _Contact, _MaterialAtomDensity, _Mols, _MatNum, _MaterialWeight, _Name, _Verification_Notes, _Formula)
 
-
+# Data class for representing the root of the JSON data
 @dataclass
 class Root:
+    # List all attributes of the Datum class here
     siteVersion: str
     data: List[Datum]
 
@@ -158,15 +168,20 @@ class Root:
         _data = [Datum.from_dict(y) for y in obj.get("data")]
         return Root(_siteVersion, _data)
 
+# Get the current directory of the script
 current_directory = os.path.dirname(os.path.abspath(__file__))
 
+# Construct the path to the JSON file
 json_file_path = os.path.join(current_directory, "MaterialsCompendium.json")
 
+# Read the JSON data from the file
 with open(json_file_path, "r") as file:
     jsonstring = file.read()
 
+# Convert the JSON data into a Python dictionary
 json_data = json.loads(jsonstring)
 
+# Convert the Python dictionary into structured objects using the Root class
 MaterialsCompendium = Root.from_dict(json_data)
 
 """
