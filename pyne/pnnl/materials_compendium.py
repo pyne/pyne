@@ -1,8 +1,40 @@
+"""
+This Python script parses the JSON data from the "Compendium of Material
+Composition Data for Radiation Transport Modeling" provided by the Pacific
+Northwest National Laboratory (PNNL). The JSON file contains material properties,
+including material density, atom density, elemental and isotopic compositions
+provided as weight, atom fraction, and atom density. The data in the JSON file
+is intended for radiation transport modeling and can be used with various radiation
+transport codes.
+
+Usage:
+1. Ensure you have downloaded the JSON file "Materials Compendium" from PNNL.
+2. Place the JSON file in the same directory as this script.
+3. Run this script using a Python interpreter.
+
+Disclaimer:
+- The material composition data in the JSON file is based on Revision 2 of the Compendium
+    and is provided with references. Users should be aware of variabilities in composition
+    or densities for certain materials, and ranges are shown where possible in the references.
+- Users may need to supply application-specific impurities for certain materials if they are
+    not found in the known references.
+- It is essential to ensure that the chosen radiation transport code uses appropriate
+    simulation parameters (e.g., reaction cross sections) to ensure simulation accuracy.
+
+Note:
+- This script is specifically designed to parse the JSON file for radiation transport
+    modeling but can potentially be adapted for other purposes.
+
+
+For more information about the Compendium, visit https://compendium.cwmd.pnnl.gov/
+"""
+
 import os
 from typing import List
 from typing import Any
 from dataclasses import dataclass
 import json
+
 
 # Data class for representing contact information
 @dataclass
@@ -18,6 +50,7 @@ class Contact:
         _Name = str(obj.get("Name", ""))
         _Email = str(obj.get("Email", ""))
         return Contact(_Phone, _Name, _Email)
+
 
 # Data class for representing information about an isotope
 @dataclass
@@ -48,7 +81,8 @@ class Isotope:
         _WeightPercent = float(obj.get("WeightPercent"))
         _Isotope = str(obj.get("Isotope"))
         _WeightFraction_whole = float(obj.get("WeightFraction_whole"))
-        _IsotopicWeightFraction_whole = float(obj.get("IsotopicWeightFraction_whole"))
+        _IsotopicWeightFraction_whole = float(
+            obj.get("IsotopicWeightFraction_whole"))
         _WeightFraction = float(obj.get("WeightFraction"))
         _Abundance = float(obj.get("Abundance"))
         _IsotopicAtomDensity = float(obj.get("IsotopicAtomDensity"))
@@ -61,10 +95,19 @@ class Isotope:
         _RelativeAtomicMass_whole = float(obj.get("RelativeAtomicMass_whole"))
         _IsotopicAtomFraction = float(obj.get("IsotopicAtomFraction"))
         _Abundance_whole = float(obj.get("Abundance_whole"))
-        _IsotopicAtomFraction_whole = float(obj.get("IsotopicAtomFraction_whole"))
+        _IsotopicAtomFraction_whole = float(
+            obj.get("IsotopicAtomFraction_whole"))
         _AtomFraction_whole = float(obj.get("AtomFraction_whole"))
-        _IsotopicAtomDensity_whole = float(obj.get("IsotopicAtomDensity_whole"))
-        return Isotope(_WeightPercent, _Isotope, _WeightFraction_whole, _IsotopicWeightFraction_whole, _WeightFraction, _Abundance, _IsotopicAtomDensity, _AtomicNumber_whole, _ZAID, _AtomFraction, _AtomicNumber, _IsotopicWeightFraction, _RelativeAtomicMass, _RelativeAtomicMass_whole, _IsotopicAtomFraction, _Abundance_whole, _IsotopicAtomFraction_whole, _AtomFraction_whole, _IsotopicAtomDensity_whole)
+        _IsotopicAtomDensity_whole = float(
+            obj.get("IsotopicAtomDensity_whole"))
+        return Isotope(_WeightPercent, _Isotope, _WeightFraction_whole,
+                       _IsotopicWeightFraction_whole, _WeightFraction, _Abundance,
+                       _IsotopicAtomDensity, _AtomicNumber_whole, _ZAID, _AtomFraction,
+                       _AtomicNumber, _IsotopicWeightFraction, _RelativeAtomicMass,
+                       _RelativeAtomicMass_whole, _IsotopicAtomFraction, _Abundance_whole,
+                       _IsotopicAtomFraction_whole, _AtomFraction_whole,
+                       _IsotopicAtomDensity_whole)
+
 
 # Data class for representing an element
 @dataclass
@@ -101,9 +144,13 @@ class Element:
         _AtomDensity = float(obj.get("AtomDensity"))
         _AtomicMass_whole = float(obj.get("AtomicMass_whole"))
         _Abundances = str(obj.get("Abundances"))
-        return Element(_WeightFraction_whole, _NonIsotopic, _Element, _WeightFraction, _AtomicMass, _ZAID, _AtomFraction, _AtomDensity_whole, _AtomFraction_whole, _id, _Isotopes, _AtomDensity, _AtomicMass_whole, _Abundances)
+        return Element(_WeightFraction_whole, _NonIsotopic, _Element, _WeightFraction,
+                       _AtomicMass, _ZAID, _AtomFraction, _AtomDensity_whole,
+                       _AtomFraction_whole, _id, _Isotopes, _AtomDensity,
+                       _AtomicMass_whole, _Abundances)
 
-# Data class for representing a molecule
+
+# Data class for representing a molecul
 @dataclass
 class Mol:
     # List all attributes of the Mol class here
@@ -117,6 +164,7 @@ class Mol:
         _Element = str(obj.get("Element"))
         _Isotope = str(obj.get("Isotope"))
         return Mol(_Mols, _Element, _Isotope)
+
 
 # Data class for representing data associated with a material
 @dataclass
@@ -153,7 +201,10 @@ class Datum:
         _Name = str(obj.get("Name"))
         _Verification_Notes = obj.get("Verification Notes")
         _Formula = str(obj.get("Formula"))
-        return Datum(_Comment, _Density, _Acronym, _Elements, _Source, _References, _Contact, _MaterialAtomDensity, _Mols, _MatNum, _MaterialWeight, _Name, _Verification_Notes, _Formula)
+        return Datum(_Comment, _Density, _Acronym, _Elements, _Source, _References,
+                     _Contact, _MaterialAtomDensity, _Mols, _MatNum, _MaterialWeight,
+                     _Name, _Verification_Notes, _Formula)
+
 
 # Data class for representing the root of the JSON data
 @dataclass
@@ -167,6 +218,7 @@ class Root:
         _siteVersion = str(obj.get("siteVersion"))
         _data = [Datum.from_dict(y) for y in obj.get("data")]
         return Root(_siteVersion, _data)
+
 
 # Get the current directory of the script
 current_directory = os.path.dirname(os.path.abspath(__file__))
@@ -183,6 +235,7 @@ json_data = json.loads(jsonstring)
 
 # Convert the Python dictionary into structured objects using the Root class
 MaterialsCompendium = Root.from_dict(json_data)
+
 
 """
 Test
