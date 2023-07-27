@@ -27,6 +27,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Build VirtualBox image using d2vm
         run: |
           curl -sL "https://github.com/linka-cloud/d2vm/releases/download/v0.2.0/d2vm_v0.2.0_linux_amd64.tar.gz" | tar -xvz d2vm
