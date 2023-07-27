@@ -14,6 +14,15 @@ env:
 jobs:
   virtualbox_image_build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        stage: [base_python, moab, dagmc, openmc]
+        hdf5: ['']
+        include:
+          - stage: dagmc
+            hdf5: _hdf5
+      fail-fast: false
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -23,4 +32,5 @@ jobs:
           curl -sL "https://github.com/linka-cloud/d2vm/releases/download/v0.2.0/d2vm_v0.2.0_linux_amd64.tar.gz" | tar -xvz d2vm
           sudo mv d2vm /usr/local/bin/
           echo "make worked"
-          sudo d2vm build -p ${{ env.VM_PASSWORD }} -f ./docker/ubuntu_22.04-dev.dockerfile -o pyne.vdi .
+          sudo d2vm convert ghcr.io/pyne/pyne_ubuntu_22.04_py3${{ matrix.hdf5 }}/${{ matrix.stage }}:stable -p ${{ env.VM_PASSWORD }} -o pyne.vdi
+          
