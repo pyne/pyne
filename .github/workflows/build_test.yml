@@ -4,16 +4,9 @@ on:
   # allows us to run workflows manually
   workflow_dispatch:
   pull_request:
-    paths:
-      - '.github/workflows/build_test.yml'
-      - '.github/actions/build-test/action.yml'
   push:
     branches:
       - 'develop'
-    paths:
-      - '.github/workflows/build_test.yml'
-      - '.github/actions/build-test/action.yml'
-
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

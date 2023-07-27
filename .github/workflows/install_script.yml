@@ -9,9 +9,6 @@ on:
   push:
     branches:
       - develop
-    paths:
-      - 'scripts/ubuntu.sh'
-      - '.github/workflows/install_script.yml'
 
 jobs:
   run_install_script:
