@@ -39,5 +39,5 @@ jobs:
           curl -sL "https://github.com/linka-cloud/d2vm/releases/download/v0.2.0/d2vm_v0.2.0_linux_amd64.tar.gz" | tar -xvz d2vm
           sudo mv d2vm /usr/local/bin/
           echo "make worked"
-          sudo d2vm convert ghcr.io/pyne/pyne_ubuntu_22.04_py3${{ matrix.hdf5 }}/${{ matrix.stage }}:stable -p ${{ env.VM_PASSWORD }} -o pyne.vdi
+          sudo d2vm convert ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_22.04_py3${{ matrix.hdf5 }}/${{ matrix.stage }}:stable -p ${{ env.VM_PASSWORD }} -o pyne.vdi
           
