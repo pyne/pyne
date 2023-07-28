@@ -385,5 +385,4 @@ with open(json_file_path, "r") as file:
 json_data = json.loads(jsonstring)
 
 # Convert the Python dictionary into structured objects using the Root class
-MaterialsCompendium = Root.from_dict(json_data)
-
+MaterialsCompendium = Root.from_dict(json_data).data
