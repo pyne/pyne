@@ -31,7 +31,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build PyNE docker image
-        ses: firehed/multistage-docker-build-action@v1
+        uses: firehed/multistage-docker-build-action@v1
         id: build_pyne
         with:
           repository: ${{ env.DOCKER_IMAGE_BASENAME }}
