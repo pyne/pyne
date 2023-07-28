@@ -10,19 +10,60 @@ on:
 
 env:
   VM_PASSWORD: temppwd
+  DOCKER_IMAGE_BASENAME: ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_22.04_py3
+  DOCKER_IMAGE_TAG: :refs_heads_${{ github.ref_name }}-bk0
 
 jobs:
-  virtualbox_image_build:
+  pyne_image_build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        stage: [base_python, moab, dagmc, openmc]
-        hdf5: ['']
-        include:
-          - stage: dagmc
-            hdf5: _hdf5
-      fail-fast: false
+    outputs:
+      image_tag: ${{ steps.output_tag.outputs.image_tag }}
 
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build PyNE docker image
+        ses: firehed/multistage-docker-build-action@v1
+        id: build_pyne
+        with:
+          repository: ${{ env.DOCKER_IMAGE_BASENAME }}
+          stages: base_python, moab, dagmc, openmc
+          server-stage: pyne
+          quiet: false
+          tag-latest-on-default: false
+          dockerfile: docker/ubuntu_22.04-dev.dockerfile
+
+      - id: output_tag
+        run: |
+          echo "image_tag=$DOCKER_IMAGE_TAG" >> $GITHUB_OUTPUT
+
+  BuildTest:
+    needs: [pyne_image_build]
+    runs-on: ubuntu-latest
+
+    container:
+      image: ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_22.04_py3/pyne${{ needs.multistage_image_build.outputs.image_tag }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: use BuildTest composite action
+        uses: ./.github/actions/build-test
+        with:
+          stage: ${{ matrix.stage }}
+          hdf5: ${{ matrix.hdf5 }}
+      
+  virtualbox_image_build:
+    needs: [BuildTest]
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -39,5 +80,5 @@ jobs:
           curl -sL "https://github.com/linka-cloud/d2vm/releases/download/v0.2.0/d2vm_v0.2.0_linux_amd64.tar.gz" | tar -xvz d2vm
           sudo mv d2vm /usr/local/bin/
           echo "make worked"
-          sudo d2vm convert ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_22.04_py3${{ matrix.hdf5 }}/${{ matrix.stage }}:latest -p ${{ env.VM_PASSWORD }} -o pyne.vdi
+          sudo d2vm convert ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_22.04_py3/pyne${{ env.DOCKER_IMAGE_TAG }} -p ${{ env.VM_PASSWORD }} -o pyne.vdi
           
