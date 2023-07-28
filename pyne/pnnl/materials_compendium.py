@@ -39,6 +39,9 @@ import json
 # Data class for representing contact information
 @dataclass
 class Contact:
+    """
+    Represents a contact with phone, name, and email attributes.
+    """
     Phone: str
     Name: str
     Email: str
@@ -46,6 +49,15 @@ class Contact:
     # Static method to create a Contact object from a dictionary
     @staticmethod
     def from_dict(obj: Any) -> 'Contact':
+        """
+        Create a Contact object from a dictionary representation.
+
+        Parameters:
+        obj (dict): A dictionary containing keys "Phone", "Name", and "Email".
+
+        Returns:
+        Contact: A new Contact object with attributes initialized using the values from the dictionary.
+        """
         _Phone = str(obj.get("Phone", ""))
         _Name = str(obj.get("Name", ""))
         _Email = str(obj.get("Email", ""))
@@ -55,7 +67,35 @@ class Contact:
 # Data class for representing information about an isotope
 @dataclass
 class Isotope:
-    # List all attributes of the Isotope class here
+    """
+    Represents an isotope with various attributes related to its properties.
+
+    Attributes:
+        WeightPercent (float): Weight percent of the isotope.
+        Isotope (str): The name or identifier of the isotope.
+        WeightFraction_whole (float): Weight fraction of the isotope as a whole number.
+        IsotopicWeightFraction_whole (float): Isotopic weight fraction of the
+        isotope as a whole number.
+        WeightFraction (float): Weight fraction of the isotope.
+        Abundance (float): Abundance of the isotope.
+        IsotopicAtomDensity (float): Isotopic atom density of the isotope.
+        AtomicNumber_whole (int): Atomic number of the isotope as a whole number.
+        ZAID (str): ZAID (unique identifier) of the isotope.
+        AtomFraction (float): Atom fraction of the isotope.
+        AtomicNumber (int): Atomic number of the isotope.
+        IsotopicWeightFraction (float): Isotopic weight fraction of the isotope.
+        RelativeAtomicMass (float): Relative atomic mass of the isotope.
+        RelativeAtomicMass_whole (float): Relative atomic mass of the isotope as a whole number.
+        IsotopicAtomFraction (float): Isotopic atom fraction of the isotope.
+        Abundance_whole (float): Abundance of the isotope as a whole number.
+        IsotopicAtomFraction_whole (float): Isotopic atom fraction of the isotope as a whole number.
+        AtomFraction_whole (float): Atom fraction of the isotope as a whole number.
+        IsotopicAtomDensity_whole (float): Isotopic atom density of the isotope as a whole number.
+
+    Methods:
+        from_dict(obj: Any) -> 'Isotope':
+            Create an Isotope object from a dictionary representation.
+    """
     WeightPercent: float
     Isotope: str
     WeightFraction_whole: float
@@ -78,6 +118,16 @@ class Isotope:
 
     @staticmethod
     def from_dict(obj: Any) -> 'Isotope':
+        """
+        Create an Isotope object from a dictionary representation.
+
+        Parameters:
+            obj (dict): A dictionary containing attributes of the Isotope.
+
+        Returns:
+            Isotope: A new Isotope object with attributes initialized using the values 
+            from the dictionary.
+        """
         _WeightPercent = float(obj.get("WeightPercent"))
         _Isotope = str(obj.get("Isotope"))
         _WeightFraction_whole = float(obj.get("WeightFraction_whole"))
@@ -112,7 +162,29 @@ class Isotope:
 # Data class for representing an element
 @dataclass
 class Element:
-    # List all attributes of the Element class here
+    """
+    Represents an element with various attributes related to its properties.
+
+    Attributes:
+        WeightFraction_whole (float): Weight fraction of the element as a whole number.
+        NonIsotopic (bool): Whether the element is non-isotopic.
+        Element (str): The name or identifier of the element.
+        WeightFraction (float): Weight fraction of the element.
+        AtomicMass (float): Atomic mass of the element.
+        ZAID (str): ZAID (unique identifier) of the element.
+        AtomFraction (float): Atom fraction of the element.
+        AtomDensity_whole (float): Atom density of the element as a whole number.
+        AtomFraction_whole (float): Atom fraction of the element as a whole number.
+        id (str): Identifier of the element.
+        Isotopes (List[Isotope]): List of Isotope objects representing the isotopes of the element.
+        AtomDensity (float): Atom density of the element.
+        AtomicMass_whole (float): Atomic mass of the element as a whole number.
+        Abundances (str): Abundances of the element.
+
+    Methods:
+        from_dict(obj: Any) -> 'Element':
+            Create an Element object from a dictionary representation.
+    """
     WeightFraction_whole: float
     NonIsotopic: bool
     Element: str
@@ -130,6 +202,15 @@ class Element:
 
     @staticmethod
     def from_dict(obj: Any) -> 'Element':
+        """
+        Create an Element object from a dictionary representation.
+
+        Parameters:
+            obj (dict): A dictionary containing attributes of the Element.
+
+        Returns:
+            Element: A new Element object with attributes initialized using the values from the dictionary.
+        """
         _WeightFraction_whole = float(obj.get("WeightFraction_whole"))
         _NonIsotopic = bool(obj.get("NonIsotopic"))
         _Element = str(obj.get("Element"))
@@ -153,13 +234,33 @@ class Element:
 # Data class for representing a molecul
 @dataclass
 class Mol:
-    # List all attributes of the Mol class here
+    """
+    Represents a molecular entity with various attributes related to its properties.
+
+    Attributes:
+        Mols (int): The number of moles of the molecular entity.
+        Element (str): The name or identifier of the element in the molecular entity.
+        Isotope (str): The name or identifier of the isotope in the molecular entity.
+
+    Methods:
+        from_dict(obj: Any) -> 'Mol':
+            Create a Mol object from a dictionary representation.
+    """
     Mols: int
     Element: str
     Isotope: str
 
     @staticmethod
     def from_dict(obj: Any) -> 'Mol':
+        """
+        Create a Mol object from a dictionary representation.
+
+        Parameters:
+            obj (dict): A dictionary containing attributes of the Mol.
+
+        Returns:
+            Mol: A new Mol object with attributes initialized using the values from the dictionary.
+        """
         _Mols = int(obj.get("Mols"))
         _Element = str(obj.get("Element"))
         _Isotope = str(obj.get("Isotope"))
@@ -169,7 +270,29 @@ class Mol:
 # Data class for representing data associated with a material
 @dataclass
 class Datum:
-    # List all attributes of the Datum class here
+    """
+    Represents a data entry with various attributes related to its properties.
+
+    Attributes:
+        Comment (List[str]): List of comments associated with the data entry.
+        Density (float): The density value of the data entry.
+        Acronym (object): An acronym or abbreviation associated with the data entry.
+        Elements (List[Element]): List of Element objects representing the elements in the data entry.
+        Source (str): The source of the data entry.
+        References (List[str]): List of references associated with the data entry.
+        Contact (Contact): A Contact object representing the contact information related to the data entry.
+        MaterialAtomDensity (float): The material atom density value of the data entry.
+        Mols (List[Mol]): List of Mol objects representing the molecular entities in the data entry.
+        MatNum (int): The material number associated with the data entry.
+        MaterialWeight (str): The material weight information of the data entry.
+        Name (str): The name of the data entry.
+        Verification_Notes (List[str]): List of verification notes related to the data entry.
+        Formula (str): The formula associated with the data entry.
+
+    Methods:
+        from_dict(obj: Any) -> 'Datum':
+            Create a Datum object from a dictionary representation.
+    """
     Comment: List[str]
     Density: float
     Acronym: object
@@ -187,6 +310,15 @@ class Datum:
 
     @staticmethod
     def from_dict(obj: Any) -> 'Datum':
+        """
+        Create a Datum object from a dictionary representation.
+
+        Parameters:
+            obj (dict): A dictionary containing attributes of the Datum.
+
+        Returns:
+            Datum: A new Datum object with attributes initialized using the values from the dictionary.
+        """
         _Comment = obj.get("Comment")
         _Density = float(obj.get("Density"))
         _Acronym = obj.get("Acronym")
@@ -209,12 +341,31 @@ class Datum:
 # Data class for representing the root of the JSON data
 @dataclass
 class Root:
-    # List all attributes of the Datum class here
+    """
+    Represents a root object that contains site version and a list of data entries.
+
+    Attributes:
+        siteVersion (str): The site version associated with the root object.
+        data (List[Datum]): List of Datum objects representing the data entries.
+
+    Methods:
+        from_dict(obj: Any) -> 'Root':
+            Create a Root object from a dictionary representation.
+    """
     siteVersion: str
     data: List[Datum]
 
     @staticmethod
     def from_dict(obj: Any) -> 'Root':
+        """
+        Create a Root object from a dictionary representation.
+
+        Parameters:
+            obj (dict): A dictionary containing attributes of the Root.
+
+        Returns:
+            Root: A new Root object with attributes initialized using the values from the dictionary.
+        """
         _siteVersion = str(obj.get("siteVersion"))
         _data = [Datum.from_dict(y) for y in obj.get("data")]
         return Root(_siteVersion, _data)
@@ -236,15 +387,3 @@ json_data = json.loads(jsonstring)
 # Convert the Python dictionary into structured objects using the Root class
 MaterialsCompendium = Root.from_dict(json_data)
 
-
-"""
-Test
-
-for datum in MaterialsCompendium.data:
-    if datum.Density == 5.5:
-        print(f"Material Name: {datum.Name}")
-        print("Elements with density 5.5:")
-        for element in datum.Elements:
-            print(element.Element)
-        print("-------------------------")
-"""
