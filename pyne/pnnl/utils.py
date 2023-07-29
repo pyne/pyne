@@ -79,6 +79,7 @@ class IsotopeInfo:
     def get_all(self):
         return (
             f"Isotope: {self.isotope} \n"
+            + f" ZAID: {self.zaid} \n"
             + f" Weight Percent: {self.weight_percent} \n"
             + f" Weight Fraction (Whole): {self.weight_fraction_whole} \n"
             + f" Isotopic Weight Fraction (Whole): {self.isotopic_weight_fraction_whole} \n"
@@ -86,7 +87,6 @@ class IsotopeInfo:
             + f" Abundance: {self.abundance} \n"
             + f" Isotopic Atom Density: {self.isotopic_atom_density} \n"
             + f" Atomic Number (Whole): {self.atomic_number_whole} \n"
-            + f" ZAID: {self.zaid} \n"
             + f" Atom Fraction: {self.atom_fraction} \n"
             + f" Atomic Number: {self.atomic_number} \n"
             + f" Isotopic Weight Fraction: {self.isotopic_weight_fraction} \n"
@@ -120,7 +120,7 @@ class ElementInfo:
         self.abundances = element_data.Abundances
 
     def __str__(self):
-        return f"Element: {self.element} \n Weight Fraction Whole: {self.weight_fraction_whole} \n ZAID: {self.zaid} \n Isotopes:{', '.join([isotope.isotope for isotope in self.isotopes])}"
+        return f"Element: {self.element} \n ZAID: {self.zaid} \n Isotopes:{', '.join([isotope.isotope for isotope in self.isotopes])}"
 
     def get_all(self):
         return (
@@ -135,9 +135,56 @@ class ElementInfo:
             + f" Atom Fraction (Whole): {self.atom_fraction_whole} \n"
             + f" Weight Fraction (Whole): {self.weight_fraction_whole} \n"
             + f" Non Isotopic: {self.non_isotopic} \n"
-            + f" Isotopes:{', '.join([isotope.isotope for isotope in self.isotopes])} \n"
+            + f" Isotopes: {', '.join([isotope.isotope for isotope in self.isotopes])} \n"
             + f" Abundances:{self.abundances}"
         )
+
+    def get_weight_fraction(self):
+        return self.weight_fraction
+
+    def get_weight_fraction_whole(self):
+        return self.weight_fraction_whole
+
+    def get_non_isotopic(self):
+        return self.non_isotopic
+
+    def get_element(self):
+        return self.element
+
+    def get_atomic_mass(self):
+        return self.atomic_mass
+
+    def get_zaid(self):
+        return self.zaid
+
+    def get_atom_fraction(self):
+        return self.atom_fraction
+
+    def get_atom_density_whole(self):
+        return self.atom_density_whole
+
+    def get_atom_fraction_whole(self):
+        return self.atom_fraction_whole
+
+    def get_id(self):
+        return self.id
+
+    def get_isotopes(self):
+        return "\n".join(
+            [
+                f"Index: {index} \n {isotope}"
+                for index, isotope in enumerate(self.isotopes)
+            ]
+        )
+
+    def get_atom_density(self):
+        return self.atom_density
+
+    def get_atomic_mass_whole(self):
+        return self.atomic_mass_whole
+
+    def get_abundances(self):
+        return self.abundances
 
 
 class Material:
@@ -186,7 +233,6 @@ class Material:
             + f"Source: {self.source} \n"
             + f"Verification Notes: {self.verification_notes} \n"
             + f"References: {references} \n"
-            + f"Contact:"
             + contact
         )
 
@@ -200,7 +246,12 @@ class Material:
         return self.acronym
 
     def get_elements(self):
-        return "\n".join([str(element) for element in self.elements])
+        return "\n".join(
+            [
+                f"Index: {index} \n {element}"
+                for index, element in enumerate(self.elements)
+            ]
+        )
 
     def get_source(self):
         return self.source
