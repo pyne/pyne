@@ -25,7 +25,7 @@ class Material:
         self.formula = datum.Formula
 
     def __str__(self):
-        return f"Material Name: {self.name} \nFormula: {self.formula} \nDensity: {self.density} \nSource: {self.source}"
+        return f"Material Name: {self.name} \nAcronym: {self.acronym} \nFormula: {self.formula} \nDensity: {self.density} \nSource: {self.source}"
 
     def get_comment(self):
         return self.comment
@@ -89,13 +89,14 @@ class Material:
     @classmethod
     def from_formula(cls, material_formula):
         matched_materials = []
-        for datum in MaterialsCompendium.data:
-            if datum.Formula == material_formula:
-                return cls(datum)
-            elif difflib.SequenceMatcher(None, material_formula, datum.Formula).ratio() > 0.6:
-                # Consider a match if the similarity ratio is greater than 0.6 (adjust the threshold as needed)
-                matched_materials.append(datum.Name)
 
+        for datum in MaterialsCompendium:
+            if datum.Formula is not None and datum.Formula == material_formula:
+                return cls(datum)
+            elif datum.Formula is not None and difflib.SequenceMatcher(None, material_formula, datum.Formula).ratio() > 0.6:
+                # Consider a match if the similarity ratio is greater than 0.6 (adjust the threshold as needed)
+                matched_materials.append(datum.Formula)
+                
         if matched_materials:
             suggestions = "\n".join(matched_materials)
             print(f"Material with formula '{material_formula}' not found. Did you mean:\n{suggestions}")
@@ -106,12 +107,12 @@ class Material:
     @classmethod
     def from_acronym(cls, material_acronym):
         matched_materials = []
-        for datum in MaterialsCompendium.data:
-            if datum.Acronym == material_acronym:
+        for datum in MaterialsCompendium:
+            if datum.Acronym is not None and datum.Acronym == material_acronym:
                 return cls(datum)
-            elif difflib.SequenceMatcher(None, material_acronym, datum.Acronym).ratio() > 0.6:
+            elif datum.Acronym is not None and difflib.SequenceMatcher(None, material_acronym, datum.Acronym).ratio() > 0.6:
                 # Consider a match if the similarity ratio is greater than 0.6 (adjust the threshold as needed)
-                matched_materials.append(datum.Name)
+                matched_materials.append(datum.Acronym)
 
         if matched_materials:
             suggestions = "\n".join(matched_materials)
