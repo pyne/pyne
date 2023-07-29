@@ -81,7 +81,7 @@ class Material:
 
         if matched_materials:
             suggestions = "\n".join(matched_materials)
-            print(f"Material '{material_name}' not found. Did you mean:\n{suggestions}?")
+            print(f"Material '{material_name}' not found. Did you mean:\n{suggestions}")
         else:
             print(f"Material '{material_name}' not found in the data.")
         return None
@@ -98,7 +98,24 @@ class Material:
 
         if matched_materials:
             suggestions = "\n".join(matched_materials)
-            print(f"Material with formula '{material_formula}' not found. Did you mean:\n{suggestions}?")
+            print(f"Material with formula '{material_formula}' not found. Did you mean:\n{suggestions}")
         else:
             print(f"Material with formula '{material_formula}' not found in the data.")
+        return None
+
+    @classmethod
+    def from_acronym(cls, material_acronym):
+        matched_materials = []
+        for datum in MaterialsCompendium.data:
+            if datum.Acronym == material_acronym:
+                return cls(datum)
+            elif difflib.SequenceMatcher(None, material_acronym, datum.Acronym).ratio() > 0.6:
+                # Consider a match if the similarity ratio is greater than 0.6 (adjust the threshold as needed)
+                matched_materials.append(datum.Name)
+
+        if matched_materials:
+            suggestions = "\n".join(matched_materials)
+            print(f"Material with acronym '{material_acronym}' not found. Did you mean:\n{suggestions}")
+        else:
+            print(f"Material with acronym '{material_acronym}' not found in the data.")
         return None
