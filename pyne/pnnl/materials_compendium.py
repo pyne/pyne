@@ -31,7 +31,7 @@ For more information about the Compendium, visit https://compendium.cwmd.pnnl.go
 
 import os
 from typing import List
-from typing import Any
+from typing import Any, Optional
 from dataclasses import dataclass
 import json
 
@@ -47,19 +47,26 @@ class Contact:
     Email: str
 
     @staticmethod
-    def from_dict(obj: Any) -> "Contact":
+    def from_dict(obj: Optional[dict]) -> Optional["Contact"]:
         """
         Create a Contact object from a dictionary representation.
 
         Parameters:
-        obj (dict): A dictionary containing keys "Phone", "Name", and "Email".
+        obj (Optional[dict]): A dictionary containing keys "Phone", "Name", and "Email".
 
         Returns:
-        Contact: A new Contact object with attributes initialized using the values from the dictionary.
+        Optional[Contact]: A new Contact object with attributes initialized using the values from the dictionary,
+                           or blank data if the input dictionary is None.
         """
-        _Phone = str(obj.get("Phone"))
-        _Name = str(obj.get("Name"))
-        _Email = str(obj.get("Email"))
+        if obj is not None:
+            _Phone = str(obj.get("Phone", ""))
+            _Name = str(obj.get("Name", ""))
+            _Email = str(obj.get("Email", ""))
+        else:
+            _Phone = ""
+            _Name = ""
+            _Email = ""
+
         return Contact(_Phone, _Name, _Email)
 
 
