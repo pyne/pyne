@@ -76,6 +76,29 @@ class IsotopeInfo:
     def __str__(self):
         return f"Isotope: {self.isotope}, Weight Percent: {self.weight_percent}, ZAID: {self.zaid}"
 
+    def get_all(self):
+        return (
+            f"Isotope: {self.isotope} \n"
+            + f" Weight Percent: {self.weight_percent} \n"
+            + f" Weight Fraction (Whole): {self.weight_fraction_whole} \n"
+            + f" Isotopic Weight Fraction (Whole): {self.isotopic_weight_fraction_whole} \n"
+            + f" Weight Fraction: {self.weight_fraction} \n"
+            + f" Abundance: {self.abundance} \n"
+            + f" Isotopic Atom Density: {self.isotopic_atom_density} \n"
+            + f" Atomic Number (Whole): {self.atomic_number_whole} \n"
+            + f" ZAID: {self.zaid} \n"
+            + f" Atom Fraction: {self.atom_fraction} \n"
+            + f" Atomic Number: {self.atomic_number} \n"
+            + f" Isotopic Weight Fraction: {self.isotopic_weight_fraction} \n"
+            + f" Relative Atomic Mass: {self.relative_atomic_mass} \n"
+            + f" Relative Atomic Mass (Whole): {self.relative_atomic_mass_whole} \n"
+            + f" Isotopic Atom Fraction: {self.isotopic_atom_fraction} \n"
+            + f" Abundance (Whole): {self.abundance_whole} \n"
+            + f" Isotopic Atom Fraction (Whole): {self.isotopic_atom_fraction_whole} \n"
+            + f" Atom Fraction (Whole): {self.atom_fraction_whole} \n"
+            + f" Isotopic Atom Density (Whole): {self.isotopic_atom_density_whole} \n"
+        )
+
 
 class ElementInfo:
     def __init__(self, element_data: Element):
@@ -99,6 +122,23 @@ class ElementInfo:
     def __str__(self):
         return f"Element: {self.element} \n Weight Fraction Whole: {self.weight_fraction_whole} \n ZAID: {self.zaid} \n Isotopes:{', '.join([isotope.isotope for isotope in self.isotopes])}"
 
+    def get_all(self):
+        return (
+            f"Element: {self.element} \n"
+            + f" Id: {self.id} \n"
+            + f" ZAID: {self.zaid} \n"
+            + f" Atomic Mass: {self.atomic_mass} \n"
+            + f" Atom Density: {self.atom_density} \n"
+            + f" Atomic Mass (Whole): {self.atomic_mass_whole} \n"
+            + f" Atom Fraction: {self.atom_fraction} \n"
+            + f" Weight Fraction: {self.weight_fraction} \n"
+            + f" Atom Fraction (Whole): {self.atom_fraction_whole} \n"
+            + f" Weight Fraction (Whole): {self.weight_fraction_whole} \n"
+            + f" Non Isotopic: {self.non_isotopic} \n"
+            + f" Isotopes:{', '.join([isotope.isotope for isotope in self.isotopes])} \n"
+            + f" Abundances:{self.abundances}"
+        )
+
 
 class Material:
     def __init__(self, datum: Datum):
@@ -118,11 +158,11 @@ class Material:
         self.formula = datum.Formula
 
     def __str__(self):
-        element_data = []
-        for element in self.elements:
-            element_data.append(element.element)
-        elements_str = ", ".join(element_data)
-        return f"Material Name: {self.name} \nAcronym: {self.acronym} \nFormula: {self.formula} \nDensity: {self.density} \nElements: {elements_str}"
+        return (
+            f"Material Name: {self.name} \n"
+            + f"Formula: {self.formula} \n"
+            + f"Density: {self.density}"
+        )
 
     def get_all(self):
         element_data = []
@@ -130,9 +170,23 @@ class Material:
             element_data.append(element.element)
         elements_str = ", ".join(element_data)
         comments = "\n ".join(self.comment)
-        contact = f"Contact:\n Name: {self.contact.name} \n Phone: {self.contact.phone} \nEmail: {self.contact.email}"
+        acronym = ", ".join(self.acronym)
+        contact = f"Contact:\n Name: {self.contact.name} \n Phone: {self.contact.phone} \n Email: {self.contact.email}"
+        references = "\n ".join(self.references)
         return (
-            f"Material Name: {self.name} \nAcronym: {self.acronym} \nFormula: {self.formula} \nDensity: {self.density} \nMaterial Atom Density: {self.material_atom_density} \nElements: {elements_str} \nMat Num: {self.mat_num} \nMaterial Weight: {self.material_weight} \nComments:\n {comments} \n \nSource: {self.source} \nVerification Notes: {self.verification_notes} \nReferences: {self.references} \nContact:"
+            f"Material Name: {self.name} \n"
+            + f"Acronym: {acronym} \n"
+            + f"Formula: {self.formula} \n"
+            + f"Density: {self.density} \n"
+            + f"Material Atom Density: {self.material_atom_density} \n"
+            + f"Elements: {elements_str} \n"
+            + f"Mat Num: {self.mat_num} \n"
+            + f"Material Weight: {self.material_weight} \n"
+            + f"Comments:\n {comments} \n"
+            + f"Source: {self.source} \n"
+            + f"Verification Notes: {self.verification_notes} \n"
+            + f"References: {references} \n"
+            + f"Contact:"
             + contact
         )
 
@@ -155,7 +209,7 @@ class Material:
         return self.references
 
     def get_contact(self):
-        contact = f"Contact:\n Name: {self.contact.name} \n Phone: {self.contact.phone} \nEmail: {self.contact.email}"
+        contact = f"Contact:\n Name: {self.contact.name} \n Phone: {self.contact.phone} \n Email: {self.contact.email}"
         return contact
 
     def get_material_atom_density(self):
