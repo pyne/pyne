@@ -22,7 +22,7 @@ class ContactInfo:
             contact_data (Contact): An instance of the Contact class containing name, phone, and email information.
 
         Example:
-            contact_data = Contact(name="John Doe", phone="123-456-7890", email="john@example.com")
+            contact_data = Contact(name="Ahnaf Tahmid Chowdhury", phone="123-456-7890", email="tahmid@example.com")
             contact_info = ContactInfo(contact_data)
         """
         self.name = contact_data.Name
@@ -716,7 +716,7 @@ class Material:
             # Output: "Contact:
             #          Name: Ahnaf Tahmid Chowdhury
             #          Phone: 1234567890
-            #          Email: tahmid.doe@example.com"
+            #          Email: tahmid@example.com"
         """
         contact = f"Contact:\n Name: {self.contact.name} \n Phone: {self.contact.phone} \n Email: {self.contact.email}"
         return contact
@@ -800,7 +800,7 @@ class Material:
 
         Example:
             print(material.get_verification_notes())
-            # Output: []"Some verification notes"]
+            # Output: ["Some verification notes"]
         """
         return self.verification_notes
 
