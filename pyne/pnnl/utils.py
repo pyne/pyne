@@ -2,13 +2,56 @@
 Separate classes and functions to perform specific tasks
 to retrieve specific information from the Materials Compendium
 """
-from dataclasses import dataclass
 import difflib
-from .materials_compendium import MaterialsCompendium, Datum, Isotope, Element
+from .materials_compendium import (
+    MaterialsCompendium,
+    Datum,
+    Isotope,
+    Element,
+    Contact,
+    Mol,
+)
 
 
-@dataclass
-class Isotopes:
+class ContactInfo:
+    def __init__(self, contact_data: Contact):
+        self.name = contact_data.Name
+        self.phone = contact_data.Phone
+        self.email = contact_data.Email
+
+    def __str__(self):
+        return f"Name: {self.name}, Phone: {self.phone}, Email: {self.email}"
+
+    def get_name(self):
+        return self.name
+
+    def get_phone(self):
+        return self.phone
+
+    def get_email(self):
+        return self.email
+
+
+class MolsInfo:
+    def __init__(self, mol_data: Mol):
+        self.mols = mol_data.Mols
+        self.isotope = mol_data.Isotope
+        self.element = mol_data.Element
+
+    def __str__(self):
+        return f"Mols: {self.mols}, Isotopes: {self.isotope}, Elements: {self.element}"
+
+    def get_mols(self):
+        return self.mols
+
+    def get_isotope(self):
+        return self.isotope
+
+    def get_element(self):
+        return self.element
+
+
+class IsotopeInfo:
     def __init__(self, isotope_data: Isotope):
         self.weight_percent = isotope_data.WeightPercent
         self.isotope = isotope_data.Isotope
@@ -34,8 +77,7 @@ class Isotopes:
         return f"Isotope: {self.isotope}, Weight Percent: {self.weight_percent}, ZAID: {self.zaid}"
 
 
-@dataclass
-class Elements:
+class ElementInfo:
     def __init__(self, element_data: Element):
         self.weight_fraction_whole = element_data.WeightFraction_whole
         self.non_isotopic = element_data.NonIsotopic
@@ -48,7 +90,7 @@ class Elements:
         self.atom_fraction_whole = element_data.AtomFraction_whole
         self.id = element_data.id
         self.isotopes = [
-            Isotopes(isotope_data) for isotope_data in element_data.Isotopes
+            IsotopeInfo(isotope_data) for isotope_data in element_data.Isotopes
         ]
         self.atom_density = element_data.AtomDensity
         self.atomic_mass_whole = element_data.AtomicMass_whole
@@ -58,18 +100,17 @@ class Elements:
         return f"Element: {self.element} \n Weight Fraction Whole: {self.weight_fraction_whole} \n ZAID: {self.zaid} \n Isotopes:{', '.join([isotope.isotope for isotope in self.isotopes])}"
 
 
-@dataclass
 class Material:
     def __init__(self, datum: Datum):
         self.comment = datum.Comment
         self.density = datum.Density
         self.acronym = datum.Acronym
-        self.elements = [Elements(element_data) for element_data in datum.Elements]
+        self.elements = [ElementInfo(element_data) for element_data in datum.Elements]
         self.source = datum.Source
         self.references = datum.References
-        self.contact = datum.Contact
+        self.contact = ContactInfo(Contact.from_dict(datum.Contact))
         self.material_atom_density = datum.MaterialAtomDensity
-        self.mols = datum.Mols
+        self.mols = [MolsInfo(mol_data) for mol_data in datum.Mols]
         self.mat_num = datum.MatNum
         self.material_weight = datum.MaterialWeight
         self.name = datum.Name
@@ -81,7 +122,19 @@ class Material:
         for element in self.elements:
             element_data.append(element.element)
         elements_str = ", ".join(element_data)
-        return f"Material Name: {self.name} \nAcronym: {self.acronym} \nFormula: {self.formula} \nDensity: {self.density} \nElements: {elements_str} \nSource: {self.source}"
+        return f"Material Name: {self.name} \nAcronym: {self.acronym} \nFormula: {self.formula} \nDensity: {self.density} \nElements: {elements_str}"
+
+    def get_all(self):
+        element_data = []
+        for element in self.elements:
+            element_data.append(element.element)
+        elements_str = ", ".join(element_data)
+        comments = "\n ".join(self.comment)
+        contact = f"Contact:\n Name: {self.contact.name} \n Phone: {self.contact.phone} \nEmail: {self.contact.email}"
+        return (
+            f"Material Name: {self.name} \nAcronym: {self.acronym} \nFormula: {self.formula} \nDensity: {self.density} \nMaterial Atom Density: {self.material_atom_density} \nElements: {elements_str} \nMat Num: {self.mat_num} \nMaterial Weight: {self.material_weight} \nComments:\n {comments} \n \nSource: {self.source} \nVerification Notes: {self.verification_notes} \nReferences: {self.references} \nContact:"
+            + contact
+        )
 
     def get_comment(self):
         return self.comment
@@ -102,7 +155,8 @@ class Material:
         return self.references
 
     def get_contact(self):
-        return self.contact
+        contact = f"Contact:\n Name: {self.contact.name} \n Phone: {self.contact.phone} \nEmail: {self.contact.email}"
+        return contact
 
     def get_material_atom_density(self):
         return self.material_atom_density

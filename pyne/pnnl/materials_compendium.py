@@ -46,7 +46,6 @@ class Contact:
     Name: str
     Email: str
 
-    # Static method to create a Contact object from a dictionary
     @staticmethod
     def from_dict(obj: Any) -> "Contact":
         """
@@ -58,9 +57,9 @@ class Contact:
         Returns:
         Contact: A new Contact object with attributes initialized using the values from the dictionary.
         """
-        _Phone = str(obj.get("Phone", ""))
-        _Name = str(obj.get("Name", ""))
-        _Email = str(obj.get("Email", ""))
+        _Phone = str(obj.get("Phone"))
+        _Name = str(obj.get("Name"))
+        _Email = str(obj.get("Email"))
         return Contact(_Phone, _Name, _Email)
 
 
