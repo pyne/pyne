@@ -15,44 +15,163 @@ from .materials_compendium import (
 
 class ContactInfo:
     def __init__(self, contact_data: Contact):
+        """
+        Initialize a ContactInfo object with contact data.
+
+        Parameters:
+            contact_data (Contact): An instance of the Contact class containing name, phone, and email information.
+
+        Example:
+            contact_data = Contact(name="John Doe", phone="123-456-7890", email="john@example.com")
+            contact_info = ContactInfo(contact_data)
+        """
         self.name = contact_data.Name
         self.phone = contact_data.Phone
         self.email = contact_data.Email
 
     def __str__(self):
+        """
+        Return a string representation of the ContactInfo object.
+
+        Returns:
+            str: A formatted string containing contact information.
+
+        Example:
+            contact_data = Contact(name="Ahnaf Tahmid Chowdhury", phone="123-456-7890", email="tahmid@example.com")
+            contact_info = ContactInfo(contact_data)
+            print(contact_info)
+            # Output: "Name: Ahnaf Tahmid Chowdhury, Phone: 123-456-7890, Email: tahmid@example.com"
+        """
         return f"Name: {self.name}, Phone: {self.phone}, Email: {self.email}"
 
     def get_name(self):
+        """
+        Get the name associated with the contact.
+
+        Returns:
+            str: The name of the contact.
+
+        Example:
+            print(contact_info.get_name())
+            # Output: "Ahnaf Tahmid Chowdhury"
+        """
         return self.name
 
     def get_phone(self):
+        """
+        Get the phone number associated with the contact.
+
+        Returns:
+            str: The phone number of the contact.
+
+        Example:
+            print(contact_info.get_phone())
+            # Output: "123-456-7890"
+        """
         return self.phone
 
     def get_email(self):
+        """
+        Get the email address associated with the contact.
+
+        Returns:
+            str: The email address of the contact.
+
+        Example:
+            print(contact_info.get_email())
+            # Output: "tahmid@example.com"
+        """
         return self.email
 
 
 class MolsInfo:
     def __init__(self, mol_data: Mol):
+        """
+        Initialize a MolsInfo object with molecular data.
+
+        Parameters:
+            mol_data (Mol): An instance of the Mol class containing mols, isotope, and element information.
+
+        Example:
+            mol_data = Mol(mols=42, isotope="C-14", element="Carbon")
+            mols_info = MolsInfo(mol_data)
+        """
         self.mols = mol_data.Mols
         self.isotope = mol_data.Isotope
         self.element = mol_data.Element
 
     def __str__(self):
+        """
+        Return a string representation of the MolsInfo object.
+
+        Returns:
+            str: A formatted string containing molecular information.
+
+        Example:
+            print(mols_info)
+            # Output: "Mols: 42, Isotopes: C-14, Elements: Carbon"
+        """
         return f"Mols: {self.mols}, Isotopes: {self.isotope}, Elements: {self.element}"
 
     def get_mols(self):
+        """
+        Get the mols associated with the molecular data.
+
+        Returns:
+            int: The quantity of mols.
+
+        Example:
+            print(mols_info.get_mols())
+            # Output: 42
+        """
         return self.mols
 
     def get_isotope(self):
+        """
+        Get the isotope associated with the molecular data.
+
+        Returns:
+            str: The isotope information.
+
+        Example:
+            print(mols_info.get_isotope())
+            # Output: "C-14"
+        """
         return self.isotope
 
     def get_element(self):
+        """
+        Get the element associated with the molecular data.
+
+        Returns:
+            str: The element information.
+
+        Example:
+            print(mols_info.get_element())
+            # Output: "Carbon"
+        """
         return self.element
 
 
 class IsotopeInfo:
     def __init__(self, isotope_data: Isotope):
+        """
+        Initialize an IsotopeInfo object with isotope data.
+
+        Parameters:
+            isotope_data (Isotope): An instance of the Isotope class containing various isotope information.
+
+        Example:
+            isotope_data = Isotope(
+                WeightPercent=0.011, Isotope="C-12", WeightFraction_whole=12.0, IsotopicWeightFraction_whole=13.0,
+                WeightFraction=0.012, Abundance=98.9, IsotopicAtomDensity=0.013, AtomicNumber_whole=6,
+                ZAID="12000", AtomFraction=0.014, AtomicNumber=6, IsotopicWeightFraction=0.015,
+                RelativeAtomicMass=12.01, RelativeAtomicMass_whole=12.0, IsotopicAtomFraction=0.016,
+                Abundance_whole=99.0, IsotopicAtomFraction_whole=16.0, AtomFraction_whole=14.0,
+                IsotopicAtomDensity_whole=13.0
+            )
+            isotope_info = IsotopeInfo(isotope_data)
+        """
         self.weight_percent = isotope_data.WeightPercent
         self.isotope = isotope_data.Isotope
         self.weight_fraction_whole = isotope_data.WeightFraction_whole
@@ -74,9 +193,21 @@ class IsotopeInfo:
         self.isotopic_atom_density_whole = isotope_data.IsotopicAtomDensity_whole
 
     def __str__(self):
+        """
+        Return a string representation of the IsotopeInfo object.
+
+        Returns:
+            str: A formatted string containing isotope information.
+        """
         return f"Isotope: {self.isotope}, Weight Percent: {self.weight_percent}, ZAID: {self.zaid}"
 
     def get_all(self):
+        """
+        Get all available isotope information in a formatted string.
+
+        Returns:
+            str: A formatted string containing all available isotope information.
+        """
         return (
             f"Isotope: {self.isotope} \n"
             + f" ZAID: {self.zaid} \n"
@@ -102,6 +233,30 @@ class IsotopeInfo:
 
 class ElementInfo:
     def __init__(self, element_data: Element):
+        """
+        Initialize an ElementInfo object with element data.
+
+        Parameters:
+            element_data (Element): An instance of the Element class containing various element information.
+
+        Example:
+            element_data = Element(
+                WeightFraction_whole=12.0, NonIsotopic=False, Element="C",
+                WeightFraction=0.012, AtomicMass=12.01, ZAID="12000", AtomFraction=0.014,
+                AtomDensity_whole=1.0, AtomFraction_whole=14.0, id="42",
+                Isotopes=[
+                    Isotope(
+                WeightPercent=0.011, Isotope="C-12", WeightFraction_whole=12.0, IsotopicWeightFraction_whole=13.0,
+                WeightFraction=0.012, Abundance=98.9, IsotopicAtomDensity=0.013, AtomicNumber_whole=6,
+                ZAID="12000", AtomFraction=0.014, AtomicNumber=6, IsotopicWeightFraction=0.015,
+                RelativeAtomicMass=12.01, RelativeAtomicMass_whole=12.0, IsotopicAtomFraction=0.016,
+                Abundance_whole=99.0, IsotopicAtomFraction_whole=16.0, AtomFraction_whole=14.0,
+                IsotopicAtomDensity_whole=13.0
+                ),],
+                AtomDensity=1.5, AtomicMass_whole=12, Abundances="98.9"
+            )
+            element_info = ElementInfo(element_data)
+        """
         self.weight_fraction_whole = element_data.WeightFraction_whole
         self.non_isotopic = element_data.NonIsotopic
         self.element = element_data.Element
@@ -120,9 +275,41 @@ class ElementInfo:
         self.abundances = element_data.Abundances
 
     def __str__(self):
+        """
+        Return a string representation of the ElementInfo object.
+
+        Returns:
+            str: A formatted string containing element information.
+
+        Example:
+            print(element_info)
+            # Output: "Element: Carbon \n ZAID: 12000 \n Isotopes: C-12, C-13, ..."
+        """
         return f"Element: {self.element} \n ZAID: {self.zaid} \n Isotopes:{', '.join([isotope.isotope for isotope in self.isotopes])}"
 
     def get_all(self):
+        """
+        Get all available element information in a formatted string.
+
+        Returns:
+            str: A formatted string containing all available element information.
+
+        Example:
+            print(element_info.get_all())
+            # Output: "Element: Carbon
+            #  Id: 42
+            #  ZAID: 12000
+            #  Atomic Mass: 12.01
+            #  Atom Density: 1.5
+            #  Atomic Mass (Whole): 12
+            #  Atom Fraction: 0.014
+            #  Weight Fraction: 0.012
+            #  Atom Fraction (Whole): 14
+            #  Weight Fraction (Whole): 12
+            #  Non Isotopic: False
+            #  Isotopes: C-12, C-13, ...
+            #  Abundances: 98.9"
+        """
         return (
             f"Element: {self.element} \n"
             + f" Id: {self.id} \n"
@@ -139,37 +326,147 @@ class ElementInfo:
             + f" Abundances:{self.abundances}"
         )
 
+    # Methods for accessing specific attributes
+
     def get_weight_fraction(self):
+        """
+        Get the weight fraction associated with the element.
+
+        Returns:
+            float: The weight fraction.
+
+        Example:
+            print(element_info.get_weight_fraction())
+            # Output: 0.012
+        """
         return self.weight_fraction
 
     def get_weight_fraction_whole(self):
+        """
+        Get the whole number weight fraction associated with the element.
+
+        Returns:
+            float: The whole number weight fraction.
+
+        Example:
+            print(element_info.get_weight_fraction_whole())
+            # Output: 12.0
+        """
         return self.weight_fraction_whole
 
     def get_non_isotopic(self):
+        """
+        Get the non-isotopic information associated with the element.
+
+        Returns:
+            bool: The non-isotopic information.
+
+        Example:
+            print(element_info.get_non_isotopic())
+            # Output: False
+        """
         return self.non_isotopic
 
     def get_element(self):
+        """
+        Get the name of the element.
+
+        Returns:
+            str: The name of the element.
+
+        Example:
+            # Output: "C"
+        """
         return self.element
 
     def get_atomic_mass(self):
+        """
+        Get the atomic mass associated with the element.
+
+        Returns:
+            float: The atomic mass.
+
+        Example:
+            # Output: 12.01
+        """
         return self.atomic_mass
 
     def get_zaid(self):
+        """
+        Get the ZAID (unique identifier) associated with the element.
+
+        Returns:
+            str: The ZAID.
+
+        Example:
+            # Output: "12000"
+        """
         return self.zaid
 
     def get_atom_fraction(self):
+        """
+        Get the atom fraction associated with the element.
+
+        Returns:
+            float: The atom fraction.
+
+        Example:
+            print(element_info.get_atom_fraction())
+            # Output: 0.014
+        """
         return self.atom_fraction
 
     def get_atom_density_whole(self):
+        """
+        Get the whole number atom density associated with the element.
+
+        Returns:
+            float: The whole number atom density.
+
+        Example:
+            print(element_info.get_atom_density_whole())
+            # Output: 1.0
+        """
         return self.atom_density_whole
 
     def get_atom_fraction_whole(self):
+        """
+        Get the whole number atom fraction associated with the element.
+
+        Returns:
+            float: The whole number atom fraction.
+
+        Example:
+            print(element_info.get_atom_fraction_whole())
+            # Output: 14
+        """
         return self.atom_fraction_whole
 
     def get_id(self):
+        """
+        Get the identifier associated with the element.
+
+        Returns:
+            str: The element identifier.
+
+        Example:
+            print(element_info.get_id())
+            # Output: "42"
+        """
         return self.id
 
     def get_isotopes(self):
+        """
+        Get information about isotopes associated with the element.
+
+        Returns:
+            str: A formatted string containing information about isotopes.
+
+        Example:
+            print(element_info.get_isotopes())
+            # Output: "Index: 0 \n Isotope: C-12, Weight Percent: 0.011, ZAID: 12000 \n
+            #          Index: 1 \n Isotope: C-13, Weight Percent: ..., ZAID: ..."
+        """
         return "\n".join(
             [
                 f"Index: {index} \n {isotope}"
@@ -178,12 +475,42 @@ class ElementInfo:
         )
 
     def get_atom_density(self):
+        """
+        Get the atom density associated with the element.
+
+        Returns:
+            float: The atom density.
+
+        Example:
+            print(element_info.get_atom_density())
+            # Output: 1.5
+        """
         return self.atom_density
 
     def get_atomic_mass_whole(self):
+        """
+        Get the whole number atomic mass associated with the element.
+
+        Returns:
+            float: The whole number atomic mass.
+
+        Example:
+            print(element_info.get_atomic_mass_whole())
+            # Output: 12.0
+        """
         return self.atomic_mass_whole
 
     def get_abundances(self):
+        """
+        Get the abundances associated with the element.
+
+        Returns:
+            str: A formatted string containing the abundances.
+
+        Example:
+            print(element_info.get_abundances())
+            # Output: "98.9"
+        """
         return self.abundances
 
 
