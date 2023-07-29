@@ -516,6 +516,17 @@ class ElementInfo:
 
 class Material:
     def __init__(self, datum: Datum):
+        """
+        Initialize a Material object with material data.
+
+        Parameters:
+            datum (Datum): An instance of the Datum class containing various material information.
+
+        Example:
+            datum = Datum(Name="Sample Material", Formula="H2O", ...)
+            material = Material(datum) #or
+            material = Material(MaterialsCompendium[0])
+        """
         self.comment = datum.Comment
         self.density = datum.Density
         self.acronym = datum.Acronym
@@ -532,6 +543,16 @@ class Material:
         self.formula = datum.Formula
 
     def __str__(self):
+        """
+        Return a string representation of the Material object.
+
+        Returns:
+            str: A formatted string containing material information.
+
+        Example:
+            print(material)
+            # Output: "Material Name: Sample Material \n Formula: H2O \n Density: 1.0"
+        """
         return (
             f"Material Name: {self.name} \n"
             + f"Formula: {self.formula} \n"
@@ -539,12 +560,41 @@ class Material:
         )
 
     def get_all(self):
+        """
+        Get all available material information in a formatted string.
+
+        Returns:
+            str: A formatted string containing all available material information.
+
+        Example:
+            print(material.get_all())
+            # Output: "Material Name: Sample Material
+            #  Acronym: ...
+            #  Formula: H2O
+            #  Density: 1.0
+            #  Material Atom Density: ...
+            #  Elements: ...
+            #  Mat Num: ...
+            #  Material Weight: ...
+            #  Comments:
+            #  ...
+            #  Source: ...
+            #  Verification Notes: ...
+            #  References: ...
+            #  Contact:
+            #   Name: ...
+            #   Phone: ...
+            #   Email: ..."
+        """
         element_data = []
         for element in self.elements:
             element_data.append(element.element)
         elements_str = ", ".join(element_data)
-        comments = "\n ".join(self.comment)
-        acronym = ", ".join(self.acronym)
+        comments = "\n ".join(self.comment) if self.comment else ""
+        acronym = ", ".join(self.acronym) if self.acronym else ""
+        verification_notes = (
+            "\n ".join(self.verification_notes) if self.verification_notes else ""
+        )
         contact = f"Contact:\n Name: {self.contact.name} \n Phone: {self.contact.phone} \n Email: {self.contact.email}"
         references = "\n ".join(self.references)
         return (
@@ -558,21 +608,67 @@ class Material:
             + f"Material Weight: {self.material_weight} \n"
             + f"Comments:\n {comments} \n"
             + f"Source: {self.source} \n"
-            + f"Verification Notes: {self.verification_notes} \n"
+            + f"Verification Notes: {verification_notes} \n"
             + f"References: {references} \n"
             + contact
         )
 
+    # Methods for accessing specific attributes
+
     def get_comment(self):
+        """
+        Get the comments associated with the material.
+
+        Returns:
+            list: A list of comments.
+
+        Example:
+            datum = Datum(Comment=["Comment 1", "Comment 2"])
+            material = Material(datum)
+            print(material.get_comment())
+            # Output: ["Comment 1", "Comment 2"]
+        """
         return self.comment
 
     def get_density(self):
+        """
+        Get the density associated with the material.
+
+        Returns:
+            float: The density.
+
+        Example:
+            datum = Datum(Density=1.0)
+            material = Material(datum)
+            print(material.get_density())
+            # Output: 1.0
+        """
         return self.density
 
     def get_acronym(self):
+        """
+        Get the acronym associated with the material.
+
+        Returns:
+            object: The acronym.
+
+        Example:
+            print(material.get_acronym())
+            # Output: ["ABC", "DEF"]
+        """
         return self.acronym
 
     def get_elements(self):
+        """
+        Get information about elements associated with the material.
+
+        Returns:
+            str: A formatted string containing information about elements.
+
+        Example:
+            print(material.get_elements())
+            # Output: "Index: 0 \n Element: Carbon, ZAID: 12000, ..."
+        """
         return "\n".join(
             [
                 f"Index: {index} \n {element}"
@@ -581,38 +677,164 @@ class Material:
         )
 
     def get_source(self):
+        """
+        Get the source of the material.
+
+        Returns:
+            str: The source of the material.
+
+        Example:
+            print(material.get_source())
+            # Output: "Some source information"
+        """
         return self.source
 
     def get_references(self):
+        """
+        Get the references associated with the material.
+
+        Returns:
+            list: A list of references.
+
+        Example:
+            datum = Datum(References=["Ref 1", "Ref 2"])
+            material = Material(datum)
+            print(material.get_references())
+            # Output: ["Ref 1", "Ref 2"]
+        """
         return self.references
 
     def get_contact(self):
+        """
+        Get the contact information associated with the material.
+
+        Returns:
+            str: A formatted string containing the contact information.
+
+        Example:
+            print(material.get_contact())
+            # Output: "Contact:
+            #          Name: Ahnaf Tahmid Chowdhury
+            #          Phone: 1234567890
+            #          Email: tahmid.doe@example.com"
+        """
         contact = f"Contact:\n Name: {self.contact.name} \n Phone: {self.contact.phone} \n Email: {self.contact.email}"
         return contact
 
     def get_material_atom_density(self):
+        """
+        Get the material atom density.
+
+        Returns:
+            float: The material atom density.
+
+        Example:
+            print(material.get_material_atom_density())
+            # Output: 2.5
+        """
         return self.material_atom_density
 
     def get_mols(self):
-        return self.mols
+        """
+        Get information about mols associated with the material.
+
+        Returns:
+            str: A formatted string containing information about mols.
+
+        Example:
+            print(material.get_mols())
+            # Output: "Mols: 100, Isotopes: H1, C12, O16"
+        """
+        return "\n".join(
+            [
+                f"Mols: {mol.get_mols()}, Isotopes: {mol.get_isotope()}"
+                for mol in self.mols
+            ]
+        )
 
     def get_mat_num(self):
+        """
+        Get the material number.
+
+        Returns:
+            int: The material number.
+
+        Example:
+            print(material.get_mat_num())
+            # Output: 12
+        """
         return self.mat_num
 
     def get_material_weight(self):
+        """
+        Get the material weight.
+
+        Returns:
+            str: The material weight.
+
+        Example:
+            print(material.get_material_weight())
+            # Output: "10"
+        """
         return self.material_weight
 
     def get_name(self):
+        """
+        Get the name of the material.
+
+        Returns:
+            str: The name of the material.
+
+        Example:
+            print(material.get_name())
+            # Output: "Sample Material"
+        """
         return self.name
 
     def get_verification_notes(self):
+        """
+        Get the verification notes associated with the material.
+
+        Returns:
+            list: A list of verification notes.
+
+        Example:
+            print(material.get_verification_notes())
+            # Output: []"Some verification notes"]
+        """
         return self.verification_notes
 
     def get_formula(self):
+        """
+        Get the formula of the material.
+
+        Returns:
+            str: The formula of the material.
+
+        Example:
+            print(material.get_formula())
+            # Output: "H2O"
+        """
         return self.formula
 
     @classmethod
     def from_name(cls, material_name):
+        """
+        Create a Material object by searching for a material using its name.
+
+        Parameters:
+            material_name (str): The name of the material to search for.
+
+        Returns:
+            Material or None: The Material object if found, or None if not found.
+
+        Example:
+            material = Material.from_name("Sample Material")
+            if material:
+                print(material.get_all())
+            else:
+                print("Material not found.")
+        """
         matched_materials = []
         for datum in MaterialsCompendium:
             if datum.Name == material_name:
@@ -630,6 +852,22 @@ class Material:
 
     @classmethod
     def from_formula(cls, material_formula):
+        """
+        Create a Material object by searching for a material using its formula.
+
+        Parameters:
+            material_formula (str): The formula of the material to search for.
+
+        Returns:
+            Material or None: The Material object if found, or None if not found.
+
+        Example:
+            material = Material.from_formula("H2O")
+            if material:
+                print(material.get_all())
+            else:
+                print("Material not found.")
+        """
         matched_materials = []
 
         for datum in MaterialsCompendium:
@@ -656,6 +894,22 @@ class Material:
 
     @classmethod
     def from_acronym(cls, material_acronym):
+        """
+        Create a Material object by searching for a material using its acronym.
+
+        Parameters:
+            material_acronym (str): The acronym of the material to search for.
+
+        Returns:
+            Material or None: The Material object if found, or None if not found.
+
+        Example:
+            material = Material.from_acronym("ABC")
+            if material:
+                print(material.get_all())
+            else:
+                print("Material not found.")
+        """
         matched_materials = []
         for datum in MaterialsCompendium:
             if datum.Acronym is not None and datum.Acronym == material_acronym:
