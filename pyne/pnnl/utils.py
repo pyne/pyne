@@ -2,7 +2,6 @@
 Separate classes and functions to perform specific tasks
 to retrieve specific information from the Materials Compendium
 """
-import json
 from dataclasses import dataclass
 import difflib
 from .materials_compendium import MaterialsCompendium, Datum, Isotope, Element
@@ -56,7 +55,7 @@ class Elements:
         self.abundances = element_data.Abundances
 
     def __str__(self):
-        return f"Element: {self.element}, Weight Fraction Whole: {self.weight_fraction_whole}, ZAID: {self.zaid}"
+        return f"Element: {self.element} \n Weight Fraction Whole: {self.weight_fraction_whole} \n ZAID: {self.zaid} \n Isotopes:{', '.join([isotope.isotope for isotope in self.isotopes])}"
 
 
 @dataclass
@@ -78,13 +77,11 @@ class Material:
         self.formula = datum.Formula
 
     def __str__(self):
-        element_info = []
+        element_data = []
         for element in self.elements:
-            element_data = f" Element: {element.element} \n  Weight Fraction Whole: {element.weight_fraction_whole} \n  ZAID: {element.zaid} \n  Isotopes:{', '.join([isotope.isotope for isotope in element.isotopes])}"
-
-            element_info.append(element_data)
-        elements_str = "\n".join(element_info)
-        return f"Material Name: {self.name} \nAcronym: {self.acronym} \nFormula: {self.formula} \nDensity: {self.density} \nElements: \n{elements_str} \nSource: {self.source}"
+            element_data.append(element.element)
+        elements_str = ", ".join(element_data)
+        return f"Material Name: {self.name} \nAcronym: {self.acronym} \nFormula: {self.formula} \nDensity: {self.density} \nElements: {elements_str} \nSource: {self.source}"
 
     def get_comment(self):
         return self.comment
@@ -96,7 +93,7 @@ class Material:
         return self.acronym
 
     def get_elements(self):
-        return self.elements
+        return "\n".join([str(element) for element in self.elements])
 
     def get_source(self):
         return self.source

@@ -36,19 +36,19 @@ from dataclasses import dataclass
 import json
 
 
-# Data class for representing contact information
 @dataclass
 class Contact:
     """
     Represents a contact with phone, name, and email attributes.
     """
+
     Phone: str
     Name: str
     Email: str
 
     # Static method to create a Contact object from a dictionary
     @staticmethod
-    def from_dict(obj: Any) -> 'Contact':
+    def from_dict(obj: Any) -> "Contact":
         """
         Create a Contact object from a dictionary representation.
 
@@ -64,7 +64,6 @@ class Contact:
         return Contact(_Phone, _Name, _Email)
 
 
-# Data class for representing information about an isotope
 @dataclass
 class Isotope:
     """
@@ -91,11 +90,8 @@ class Isotope:
         IsotopicAtomFraction_whole (float): Isotopic atom fraction of the isotope as a whole number.
         AtomFraction_whole (float): Atom fraction of the isotope as a whole number.
         IsotopicAtomDensity_whole (float): Isotopic atom density of the isotope as a whole number.
-
-    Methods:
-        from_dict(obj: Any) -> 'Isotope':
-            Create an Isotope object from a dictionary representation.
     """
+
     WeightPercent: float
     Isotope: str
     WeightFraction_whole: float
@@ -117,7 +113,7 @@ class Isotope:
     IsotopicAtomDensity_whole: float
 
     @staticmethod
-    def from_dict(obj: Any) -> 'Isotope':
+    def from_dict(obj: Any) -> "Isotope":
         """
         Create an Isotope object from a dictionary representation.
 
@@ -125,14 +121,13 @@ class Isotope:
             obj (dict): A dictionary containing attributes of the Isotope.
 
         Returns:
-            Isotope: A new Isotope object with attributes initialized using the values 
+            Isotope: A new Isotope object with attributes initialized using the values
             from the dictionary.
         """
         _WeightPercent = float(obj.get("WeightPercent"))
         _Isotope = str(obj.get("Isotope"))
         _WeightFraction_whole = float(obj.get("WeightFraction_whole"))
-        _IsotopicWeightFraction_whole = float(
-            obj.get("IsotopicWeightFraction_whole"))
+        _IsotopicWeightFraction_whole = float(obj.get("IsotopicWeightFraction_whole"))
         _WeightFraction = float(obj.get("WeightFraction"))
         _Abundance = float(obj.get("Abundance"))
         _IsotopicAtomDensity = float(obj.get("IsotopicAtomDensity"))
@@ -145,21 +140,32 @@ class Isotope:
         _RelativeAtomicMass_whole = float(obj.get("RelativeAtomicMass_whole"))
         _IsotopicAtomFraction = float(obj.get("IsotopicAtomFraction"))
         _Abundance_whole = float(obj.get("Abundance_whole"))
-        _IsotopicAtomFraction_whole = float(
-            obj.get("IsotopicAtomFraction_whole"))
+        _IsotopicAtomFraction_whole = float(obj.get("IsotopicAtomFraction_whole"))
         _AtomFraction_whole = float(obj.get("AtomFraction_whole"))
-        _IsotopicAtomDensity_whole = float(
-            obj.get("IsotopicAtomDensity_whole"))
-        return Isotope(_WeightPercent, _Isotope, _WeightFraction_whole,
-                       _IsotopicWeightFraction_whole, _WeightFraction, _Abundance,
-                       _IsotopicAtomDensity, _AtomicNumber_whole, _ZAID, _AtomFraction,
-                       _AtomicNumber, _IsotopicWeightFraction, _RelativeAtomicMass,
-                       _RelativeAtomicMass_whole, _IsotopicAtomFraction, _Abundance_whole,
-                       _IsotopicAtomFraction_whole, _AtomFraction_whole,
-                       _IsotopicAtomDensity_whole)
+        _IsotopicAtomDensity_whole = float(obj.get("IsotopicAtomDensity_whole"))
+        return Isotope(
+            _WeightPercent,
+            _Isotope,
+            _WeightFraction_whole,
+            _IsotopicWeightFraction_whole,
+            _WeightFraction,
+            _Abundance,
+            _IsotopicAtomDensity,
+            _AtomicNumber_whole,
+            _ZAID,
+            _AtomFraction,
+            _AtomicNumber,
+            _IsotopicWeightFraction,
+            _RelativeAtomicMass,
+            _RelativeAtomicMass_whole,
+            _IsotopicAtomFraction,
+            _Abundance_whole,
+            _IsotopicAtomFraction_whole,
+            _AtomFraction_whole,
+            _IsotopicAtomDensity_whole,
+        )
 
 
-# Data class for representing an element
 @dataclass
 class Element:
     """
@@ -180,11 +186,8 @@ class Element:
         AtomDensity (float): Atom density of the element.
         AtomicMass_whole (float): Atomic mass of the element as a whole number.
         Abundances (str): Abundances of the element.
-
-    Methods:
-        from_dict(obj: Any) -> 'Element':
-            Create an Element object from a dictionary representation.
     """
+
     WeightFraction_whole: float
     NonIsotopic: bool
     Element: str
@@ -201,7 +204,7 @@ class Element:
     Abundances: str
 
     @staticmethod
-    def from_dict(obj: Any) -> 'Element':
+    def from_dict(obj: Any) -> "Element":
         """
         Create an Element object from a dictionary representation.
 
@@ -225,13 +228,24 @@ class Element:
         _AtomDensity = float(obj.get("AtomDensity"))
         _AtomicMass_whole = float(obj.get("AtomicMass_whole"))
         _Abundances = str(obj.get("Abundances"))
-        return Element(_WeightFraction_whole, _NonIsotopic, _Element, _WeightFraction,
-                       _AtomicMass, _ZAID, _AtomFraction, _AtomDensity_whole,
-                       _AtomFraction_whole, _id, _Isotopes, _AtomDensity,
-                       _AtomicMass_whole, _Abundances)
+        return Element(
+            _WeightFraction_whole,
+            _NonIsotopic,
+            _Element,
+            _WeightFraction,
+            _AtomicMass,
+            _ZAID,
+            _AtomFraction,
+            _AtomDensity_whole,
+            _AtomFraction_whole,
+            _id,
+            _Isotopes,
+            _AtomDensity,
+            _AtomicMass_whole,
+            _Abundances,
+        )
 
 
-# Data class for representing a molecul
 @dataclass
 class Mol:
     """
@@ -241,17 +255,14 @@ class Mol:
         Mols (int): The number of moles of the molecular entity.
         Element (str): The name or identifier of the element in the molecular entity.
         Isotope (str): The name or identifier of the isotope in the molecular entity.
-
-    Methods:
-        from_dict(obj: Any) -> 'Mol':
-            Create a Mol object from a dictionary representation.
     """
+
     Mols: int
     Element: str
     Isotope: str
 
     @staticmethod
-    def from_dict(obj: Any) -> 'Mol':
+    def from_dict(obj: Any) -> "Mol":
         """
         Create a Mol object from a dictionary representation.
 
@@ -267,7 +278,6 @@ class Mol:
         return Mol(_Mols, _Element, _Isotope)
 
 
-# Data class for representing data associated with a material
 @dataclass
 class Datum:
     """
@@ -288,11 +298,8 @@ class Datum:
         Name (str): The name of the data entry.
         Verification_Notes (List[str]): List of verification notes related to the data entry.
         Formula (str): The formula associated with the data entry.
-
-    Methods:
-        from_dict(obj: Any) -> 'Datum':
-            Create a Datum object from a dictionary representation.
     """
+
     Comment: List[str]
     Density: float
     Acronym: object
@@ -309,7 +316,7 @@ class Datum:
     Formula: str
 
     @staticmethod
-    def from_dict(obj: Any) -> 'Datum':
+    def from_dict(obj: Any) -> "Datum":
         """
         Create a Datum object from a dictionary representation.
 
@@ -333,9 +340,22 @@ class Datum:
         _Name = str(obj.get("Name"))
         _Verification_Notes = obj.get("Verification Notes")
         _Formula = str(obj.get("Formula"))
-        return Datum(_Comment, _Density, _Acronym, _Elements, _Source, _References,
-                     _Contact, _MaterialAtomDensity, _Mols, _MatNum, _MaterialWeight,
-                     _Name, _Verification_Notes, _Formula)
+        return Datum(
+            _Comment,
+            _Density,
+            _Acronym,
+            _Elements,
+            _Source,
+            _References,
+            _Contact,
+            _MaterialAtomDensity,
+            _Mols,
+            _MatNum,
+            _MaterialWeight,
+            _Name,
+            _Verification_Notes,
+            _Formula,
+        )
 
 
 # Data class for representing the root of the JSON data
@@ -347,16 +367,13 @@ class Root:
     Attributes:
         siteVersion (str): The site version associated with the root object.
         data (List[Datum]): List of Datum objects representing the data entries.
-
-    Methods:
-        from_dict(obj: Any) -> 'Root':
-            Create a Root object from a dictionary representation.
     """
+
     siteVersion: str
     data: List[Datum]
 
     @staticmethod
-    def from_dict(obj: Any) -> 'Root':
+    def from_dict(obj: Any) -> "Root":
         """
         Create a Root object from a dictionary representation.
 
