@@ -134,3 +134,23 @@ def test_isotope_from_dict(sample_data):
     assert isotope1.WeightPercent == 0.184267
     assert isotope2.Isotope == "B11"
     assert isotope2.WeightPercent == 0.815504
+
+
+def test_contact_from_dict(sample_data):
+    contact_dict = sample_data["data"][0]["Contact"]
+    contact = Contact.from_dict(contact_dict)
+    assert contact.Name == "Rebecca Detwiler"
+    assert contact.Phone == "352-484-4040"
+
+
+def test_mol_from_dict(sample_data):
+    mol_dict1 = sample_data["data"][0]["Mols"][0]
+    mol_dict2 = sample_data["data"][0]["Mols"][1]
+    mol1 = Mol.from_dict(mol_dict1)
+    mol2 = Mol.from_dict(mol_dict2)
+    assert mol1.Element == "B"
+    assert mol1.Mols == 4
+    assert mol1.Isotope == "B4"
+    assert mol2.Element == "C"
+    assert mol2.Mols == 1
+    assert mol2.Isotope == "C"
