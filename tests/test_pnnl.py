@@ -116,3 +116,10 @@ def test_datum_from_dict(sample_data):
     assert datum.Density == 2.52
     assert len(datum.Elements) == 1
 
+
+def test_element_from_dict(sample_data):
+    element_dict = sample_data["data"][0]["Elements"][0]
+    element = Element.from_dict(element_dict)
+    assert element.Element == "B"
+    assert element.NonIsotopic is True
+    assert len(element.Isotopes) == 2
