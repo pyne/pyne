@@ -323,7 +323,7 @@ class ElementInfo:
             + f" Weight Fraction (Whole): {self.weight_fraction_whole} \n"
             + f" Non Isotopic: {self.non_isotopic} \n"
             + f" Isotopes: {', '.join([isotope.isotope for isotope in self.isotopes])} \n"
-            + f" Abundances:{self.abundances}"
+            + f" Abundances: {self.abundances}"
         )
 
     # Methods for accessing specific attributes
