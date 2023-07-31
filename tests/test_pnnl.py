@@ -107,3 +107,12 @@ def test_root_from_dict(sample_data):
     root = Root.from_dict(sample_data)
     assert root.siteVersion == "0.1.1"
     assert len(root.data) == 1
+
+
+def test_datum_from_dict(sample_data):
+    datum_dict = sample_data["data"][0]
+    datum = Datum.from_dict(datum_dict)
+    assert datum.Name == "Boron Carbide"
+    assert datum.Density == 2.52
+    assert len(datum.Elements) == 1
+
