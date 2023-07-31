@@ -334,3 +334,61 @@ def test_isotope_info():
         " Isotopic Atom Density (Whole): 13.0 \n"
     )
 
+
+# Test ElementInfo class
+def test_element_info():
+    isotope_data = Isotope(
+        WeightPercent=0.011,
+        Isotope="C-12",
+        WeightFraction_whole=12.0,
+        IsotopicWeightFraction_whole=13.0,
+        WeightFraction=0.012,
+        Abundance=98.9,
+        IsotopicAtomDensity=0.013,
+        AtomicNumber_whole=6,
+        ZAID="12000",
+        AtomFraction=0.014,
+        AtomicNumber=6,
+        IsotopicWeightFraction=0.015,
+        RelativeAtomicMass=12.01,
+        RelativeAtomicMass_whole=12.0,
+        IsotopicAtomFraction=0.016,
+        Abundance_whole=99.0,
+        IsotopicAtomFraction_whole=16.0,
+        AtomFraction_whole=14.0,
+        IsotopicAtomDensity_whole=13.0,
+    )
+    element_data = Element(
+        WeightFraction_whole=12.0,
+        NonIsotopic=False,
+        Element="C",
+        WeightFraction=0.012,
+        AtomicMass=12.01,
+        ZAID="12000",
+        AtomFraction=0.014,
+        AtomDensity_whole=1.0,
+        AtomFraction_whole=14.0,
+        id="42",
+        Isotopes=[isotope_data],
+        AtomDensity=1.5,
+        AtomicMass_whole=12,
+        Abundances="98.9",
+    )
+    element_info = ElementInfo(element_data)
+
+    assert element_info.get_all() == (
+        "Element: C \n"
+        " Id: 42 \n"
+        " ZAID: 12000 \n"
+        " Atomic Mass: 12.01 \n"
+        " Atom Density: 1.5 \n"
+        " Atomic Mass (Whole): 12 \n"
+        " Atom Fraction: 0.014 \n"
+        " Weight Fraction: 0.012 \n"
+        " Atom Fraction (Whole): 14.0 \n"
+        " Weight Fraction (Whole): 12.0 \n"
+        " Non Isotopic: False \n"
+        " Isotopes: C-12 \n"
+        " Abundances: 98.9"
+    )
+
