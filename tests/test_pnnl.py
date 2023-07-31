@@ -154,3 +154,40 @@ def test_mol_from_dict(sample_data):
     assert mol2.Element == "C"
     assert mol2.Mols == 1
     assert mol2.Isotope == "C"
+
+
+def test_dataclass_equality():
+    # Test the equality of two dataclass objects
+    element1 = Element(
+        0.782671,
+        True,
+        "B",
+        0.782671,
+        10.8135,
+        "5000",
+        0.8,
+        0.109841,
+        0.8,
+        "B",
+        [],
+        0.109841,
+        10.8135,
+        "0.0",
+    )
+    element2 = Element(
+        0.782671,
+        True,
+        "B",
+        0.782671,
+        10.8135,
+        "5000",
+        0.8,
+        0.109841,
+        0.8,
+        "B",
+        [],
+        0.109841,
+        10.8135,
+        "0.0",
+    )
+    assert element1 == element2
