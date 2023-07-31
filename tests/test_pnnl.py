@@ -104,12 +104,20 @@ def sample_data():
 
 
 def test_root_from_dict(sample_data):
+    """
+    Test the 'from_dict' method of the 'Root' class to ensure it correctly converts
+    a sample data dictionary into a 'Root' object and checks basic attributes.
+    """
     root = Root.from_dict(sample_data)
     assert root.siteVersion == "0.1.1"
     assert len(root.data) == 1
 
 
 def test_datum_from_dict(sample_data):
+    """
+    Test the 'from_dict' method of the 'Datum' class to ensure it correctly converts
+    a sample data dictionary into a 'Datum' object and checks basic attributes.
+    """
     datum_dict = sample_data["data"][0]
     datum = Datum.from_dict(datum_dict)
     assert datum.Name == "Boron Carbide"
@@ -118,6 +126,10 @@ def test_datum_from_dict(sample_data):
 
 
 def test_element_from_dict(sample_data):
+    """
+    Test the 'from_dict' method of the 'Element' class to ensure it correctly converts
+    a sample data dictionary into an 'Element' object and checks basic attributes.
+    """
     element_dict = sample_data["data"][0]["Elements"][0]
     element = Element.from_dict(element_dict)
     assert element.Element == "B"
@@ -126,6 +138,10 @@ def test_element_from_dict(sample_data):
 
 
 def test_isotope_from_dict(sample_data):
+    """
+    Test the 'from_dict' method of the 'Isotope' class to ensure it correctly converts
+    a sample data dictionary into an 'Isotope' object and checks basic attributes.
+    """
     isotope_dict1 = sample_data["data"][0]["Elements"][0]["Isotopes"][0]
     isotope_dict2 = sample_data["data"][0]["Elements"][0]["Isotopes"][1]
     isotope1 = Isotope.from_dict(isotope_dict1)
@@ -137,6 +153,10 @@ def test_isotope_from_dict(sample_data):
 
 
 def test_contact_from_dict(sample_data):
+    """
+    Test the 'from_dict' method of the 'Contact' class to ensure it correctly converts
+    a sample data dictionary into a 'Contact' object and checks basic attributes.
+    """
     contact_dict = sample_data["data"][0]["Contact"]
     contact = Contact.from_dict(contact_dict)
     assert contact.Name == "Rebecca Detwiler"
@@ -144,6 +164,10 @@ def test_contact_from_dict(sample_data):
 
 
 def test_mol_from_dict(sample_data):
+    """
+    Test the 'from_dict' method of the 'Mol' class to ensure it correctly converts
+    a sample data dictionary into a 'Mol' object and checks basic attributes.
+    """
     mol_dict1 = sample_data["data"][0]["Mols"][0]
     mol_dict2 = sample_data["data"][0]["Mols"][1]
     mol1 = Mol.from_dict(mol_dict1)
@@ -157,7 +181,9 @@ def test_mol_from_dict(sample_data):
 
 
 def test_dataclass_equality():
-    # Test the equality of two dataclass objects
+    """
+    Test the equality of two dataclass objects of the 'Element' class.
+    """
     element1 = Element(
         0.782671,
         True,
@@ -194,7 +220,9 @@ def test_dataclass_equality():
 
 
 def test_dataclass_not_equality():
-    # Test the inequality of two dataclass objects
+    """
+    Test the inequality of two dataclass objects of the 'Element' class.
+    """
     element1 = Element(
         0.782671,
         True,
