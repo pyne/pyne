@@ -191,3 +191,40 @@ def test_dataclass_equality():
         "0.0",
     )
     assert element1 == element2
+
+
+def test_dataclass_not_equality():
+    # Test the inequality of two dataclass objects
+    element1 = Element(
+        0.782671,
+        True,
+        "B",
+        0.782671,
+        10.8135,
+        "5000",
+        0.8,
+        0.109841,
+        0.8,
+        "B",
+        [],
+        0.109841,
+        10.8135,
+        "0.0",
+    )
+    element2 = Element(
+        0.782671,
+        False,
+        "B",
+        0.782671,
+        10.8135,
+        "5000",
+        0.8,
+        0.109841,
+        0.8,
+        "B",
+        [],
+        0.109841,
+        10.8135,
+        "0.0",
+    )
+    assert element1 != element2
