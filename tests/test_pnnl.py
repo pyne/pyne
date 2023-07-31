@@ -1,5 +1,12 @@
 import pytest
 from pyne.pnnl.materials_compendium import Root, Datum, Element, Isotope, Contact, Mol
+from pyne.pnnl.utils import (
+    ContactInfo,
+    MolsInfo,
+    IsotopeInfo,
+    ElementInfo,
+    Material,
+)
 
 
 @pytest.fixture
@@ -256,3 +263,25 @@ def test_dataclass_not_equality():
         "0.0",
     )
     assert element1 != element2
+
+
+# Test ContactInfo class
+def test_contact_info():
+    contact_data = Contact(
+        Name="Ahnaf Tahmid Chowdhury", Phone="123-456-7890", Email="tahmid@example.com"
+    )
+    contact_info = ContactInfo(contact_data)
+
+    assert contact_info.get_name() == "Ahnaf Tahmid Chowdhury"
+    assert contact_info.get_phone() == "123-456-7890"
+    assert contact_info.get_email() == "tahmid@example.com"
+
+
+# Test MolsInfo class
+def test_mols_info():
+    mol_data = Mol(Mols=42, Isotope="C-14", Element="Carbon")
+    mols_info = MolsInfo(mol_data)
+
+    assert mols_info.get_mols() == 42
+    assert mols_info.get_isotope() == "C-14"
+    assert mols_info.get_element() == "Carbon"
