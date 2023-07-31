@@ -392,3 +392,69 @@ def test_element_info():
         " Abundances: 98.9"
     )
 
+
+# Test Material class
+def test_material():
+    datum = Datum(
+        Name="Sample Material",
+        Formula="H2O",
+        Comment=["Comment 1", "Comment 2"],
+        Density=1.0,
+        Acronym=["ABC", "DEF"],
+        Elements=[
+            Element(
+                WeightFraction_whole=12.0,
+                NonIsotopic=False,
+                Element="C",
+                WeightFraction=0.012,
+                AtomicMass=12.01,
+                ZAID="12000",
+                AtomFraction=0.014,
+                AtomDensity_whole=1.0,
+                AtomFraction_whole=14.0,
+                id="42",
+                Isotopes=[
+                    Isotope(
+                        WeightPercent=0.011,
+                        Isotope="C-12",
+                        WeightFraction_whole=12.0,
+                        IsotopicWeightFraction_whole=13.0,
+                        WeightFraction=0.012,
+                        Abundance=98.9,
+                        IsotopicAtomDensity=0.013,
+                        AtomicNumber_whole=6,
+                        ZAID="12000",
+                        AtomFraction=0.014,
+                        AtomicNumber=6,
+                        IsotopicWeightFraction=0.015,
+                        RelativeAtomicMass=12.01,
+                        RelativeAtomicMass_whole=12.0,
+                        IsotopicAtomFraction=0.016,
+                        Abundance_whole=99.0,
+                        IsotopicAtomFraction_whole=16.0,
+                        AtomFraction_whole=14.0,
+                        IsotopicAtomDensity_whole=13.0,
+                    )
+                ],
+                AtomDensity=1.5,
+                AtomicMass_whole=12,
+                Abundances="98.9",
+            )
+        ],
+        Source="Some source information",
+        References=["Ref 1", "Ref 2"],
+        Contact={
+            "Name": "Ahnaf Tahmid Chowdhury",
+            "Phone": "123-456-7890",
+            "Email": "tahmid@example.com",
+        },
+        MaterialAtomDensity=2.5,
+        Mols=[Mol(Mols=42, Isotope="C12", Element="Carbon")],
+        MatNum=12,
+        MaterialWeight="10",
+        Verification_Notes=["Some verification notes"],
+    )
+    material = Material(datum)
+
+    assert material.get_name() == "Sample Material"
+    assert material.get_formula() == "H2O"
