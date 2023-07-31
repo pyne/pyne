@@ -101,3 +101,9 @@ def sample_data():
         ],
     }
     return data
+
+
+def test_root_from_dict(sample_data):
+    root = Root.from_dict(sample_data)
+    assert root.siteVersion == "0.1.1"
+    assert len(root.data) == 1
