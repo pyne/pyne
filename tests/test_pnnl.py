@@ -123,3 +123,14 @@ def test_element_from_dict(sample_data):
     assert element.Element == "B"
     assert element.NonIsotopic is True
     assert len(element.Isotopes) == 2
+
+
+def test_isotope_from_dict(sample_data):
+    isotope_dict1 = sample_data["data"][0]["Elements"][0]["Isotopes"][0]
+    isotope_dict2 = sample_data["data"][0]["Elements"][0]["Isotopes"][1]
+    isotope1 = Isotope.from_dict(isotope_dict1)
+    isotope2 = Isotope.from_dict(isotope_dict2)
+    assert isotope1.Isotope == "B10"
+    assert isotope1.WeightPercent == 0.184267
+    assert isotope2.Isotope == "B11"
+    assert isotope2.WeightPercent == 0.815504
