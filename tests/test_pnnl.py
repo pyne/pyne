@@ -285,3 +285,52 @@ def test_mols_info():
     assert mols_info.get_mols() == 42
     assert mols_info.get_isotope() == "C-14"
     assert mols_info.get_element() == "Carbon"
+
+
+# Test IsotopeInfo class
+def test_isotope_info():
+    isotope_data = Isotope(
+        WeightPercent=0.011,
+        Isotope="C-12",
+        WeightFraction_whole=12.0,
+        IsotopicWeightFraction_whole=13.0,
+        WeightFraction=0.012,
+        Abundance=98.9,
+        IsotopicAtomDensity=0.013,
+        AtomicNumber_whole=6,
+        ZAID="12000",
+        AtomFraction=0.014,
+        AtomicNumber=6,
+        IsotopicWeightFraction=0.015,
+        RelativeAtomicMass=12.01,
+        RelativeAtomicMass_whole=12.0,
+        IsotopicAtomFraction=0.016,
+        Abundance_whole=99.0,
+        IsotopicAtomFraction_whole=16.0,
+        AtomFraction_whole=14.0,
+        IsotopicAtomDensity_whole=13.0,
+    )
+    isotope_info = IsotopeInfo(isotope_data)
+
+    assert isotope_info.get_all() == (
+        "Isotope: C-12 \n"
+        " ZAID: 12000 \n"
+        " Weight Percent: 0.011 \n"
+        " Weight Fraction (Whole): 12.0 \n"
+        " Isotopic Weight Fraction (Whole): 13.0 \n"
+        " Weight Fraction: 0.012 \n"
+        " Abundance: 98.9 \n"
+        " Isotopic Atom Density: 0.013 \n"
+        " Atomic Number (Whole): 6 \n"
+        " Atom Fraction: 0.014 \n"
+        " Atomic Number: 6 \n"
+        " Isotopic Weight Fraction: 0.015 \n"
+        " Relative Atomic Mass: 12.01 \n"
+        " Relative Atomic Mass (Whole): 12.0 \n"
+        " Isotopic Atom Fraction: 0.016 \n"
+        " Abundance (Whole): 99.0 \n"
+        " Isotopic Atom Fraction (Whole): 16.0 \n"
+        " Atom Fraction (Whole): 14.0 \n"
+        " Isotopic Atom Density (Whole): 13.0 \n"
+    )
+
