@@ -1,0 +1,8 @@
+.. _tutorial-12:
+
+Outroduction
+============
+
+Download the :download:`full notebook <../../tutorial/12-outro.ipynb>`.
+
+.. notebook:: ../../tutorial/12-outro.ipynb
