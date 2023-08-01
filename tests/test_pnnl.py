@@ -265,8 +265,10 @@ def test_dataclass_not_equality():
     assert element1 != element2
 
 
-# Test ContactInfo class
 def test_contact_info():
+    """
+    Test the ContactInfo class to ensure it returns the correct contact information.
+    """
     contact_data = Contact(
         Name="Ahnaf Tahmid Chowdhury", Phone="123-456-7890", Email="tahmid@example.com"
     )
@@ -277,8 +279,10 @@ def test_contact_info():
     assert contact_info.get_email() == "tahmid@example.com"
 
 
-# Test MolsInfo class
 def test_mols_info():
+    """
+    Test the MolsInfo class to ensure it returns the correct molecular information.
+    """
     mol_data = Mol(Mols=42, Isotope="C-14", Element="Carbon")
     mols_info = MolsInfo(mol_data)
 
@@ -287,8 +291,10 @@ def test_mols_info():
     assert mols_info.get_element() == "Carbon"
 
 
-# Test IsotopeInfo class
 def test_isotope_info():
+    """
+    Test the IsotopeInfo class to ensure it returns the correct isotope information.
+    """
     isotope_data = Isotope(
         WeightPercent=0.011,
         Isotope="C-12",
@@ -335,8 +341,10 @@ def test_isotope_info():
     )
 
 
-# Test ElementInfo class
 def test_element_info():
+    """
+    Test the ElementInfo class to ensure it returns the correct element information.
+    """
     isotope_data = Isotope(
         WeightPercent=0.011,
         Isotope="C-12",
@@ -393,8 +401,10 @@ def test_element_info():
     )
 
 
-# Test Material class
 def test_material():
+    """
+    Test the Material class to ensure it returns the correct material information.
+    """
     datum = Datum(
         Name="Sample Material",
         Formula="H2O",
