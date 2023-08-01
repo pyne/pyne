@@ -338,7 +338,7 @@ class Datum:
         _Elements = [Element.from_dict(y) for y in obj.get("Elements")]
         _Source = str(obj.get("Source"))
         _References = obj.get("References")
-        _Contact = obj.get("Contact")
+        _Contact = Contact.from_dict(obj.get("Contact"))
         _MaterialAtomDensity = float(obj.get("MaterialAtomDensity"))
         _Mols = [Mol.from_dict(y) for y in obj.get("Mols")]
         _MatNum = int(obj.get("MatNum"))

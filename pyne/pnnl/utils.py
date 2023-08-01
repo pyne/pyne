@@ -533,7 +533,7 @@ class Material:
         self.elements = [ElementInfo(element_data) for element_data in datum.Elements]
         self.source = datum.Source
         self.references = datum.References
-        self.contact = ContactInfo(Contact.from_dict(datum.Contact))
+        self.contact = ContactInfo(datum.Contact)
         self.material_atom_density = datum.MaterialAtomDensity
         self.mols = [MolsInfo(mol_data) for mol_data in datum.Mols]
         self.mat_num = datum.MatNum
