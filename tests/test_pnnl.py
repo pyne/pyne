@@ -1,5 +1,5 @@
 import pytest
-from pyne.pnnl.materials_compendium import Root, Datum, Element, Isotope, Contact, Mol
+from pyne.pnnl.materials_compendium import Root, Datum, Element, Isotope, Contact, Mol, MaterialsCompendium
 from pyne.pnnl.utils import (
     ContactInfo,
     MolsInfo,
@@ -468,3 +468,33 @@ def test_material():
 
     assert material.get_name() == "Sample Material"
     assert material.get_formula() == "H2O"
+
+
+def test_material_from_name():
+    """
+    Test the Material class to ensure it returns the correct material information.
+    """
+    datum = MaterialsCompendium[0]
+    material = Material.from_name(MaterialsCompendium[0].Name)
+
+    assert material.get_all() == Material(datum).get_all()
+
+
+def test_material_from_formula():
+    """
+    Test the Material class to ensure it returns the correct material information.
+    """
+    datum = MaterialsCompendium[0]
+    material = Material.from_formula(MaterialsCompendium[0].Formula)
+
+    assert material.get_all() == Material(datum).get_all()
+
+
+def test_material_from_acronym():
+    """
+    Test the Material class to ensure it returns the correct material information.
+    """
+    datum = MaterialsCompendium[0]
+    material = Material.from_acronym(MaterialsCompendium[0].Acronym)
+
+    assert material.get_all() == Material(datum).get_all()
