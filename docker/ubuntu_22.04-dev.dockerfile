@@ -28,7 +28,6 @@ RUN apt-get update \
     pip install --upgrade pip; \
     pip install numpy==1.23 \
             scipy \
-            cython==2.* \
             nose \
             pytest \
             tables \
@@ -36,7 +35,8 @@ RUN apt-get update \
             jinja2 \
             setuptools \
             future \
-            progress
+            progress \
+    pip install cython<3.0
 
 # make starting directory
 RUN mkdir -p $HOME/opt
