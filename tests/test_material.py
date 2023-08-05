@@ -2201,7 +2201,7 @@ def test_decay_u235_h3():
     obs = mat.decay(365.25 * 24.0 * 3600.0)
     if len(obs) < 4:
         # full decay is not installed
-        raise SkipTest
+        raise pytest.skip("full decay is not installed")
     exp = Material(
         {
             10030000: 0.472645829730143,
