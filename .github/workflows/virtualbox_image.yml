@@ -81,7 +81,15 @@ jobs:
       - name: Build VirtualBox image using d2vm
         run: |
           sudo apt-get update
-          sudo apt-get install qemu-utils
+          sudo apt-get install -y --fix-missing \
+            util-linux \
+            udev \
+            parted \
+            e2fsprogs \
+            mount \
+            tar \
+            extlinux \
+            qemu-utils            
           curl -sL "https://github.com/linka-cloud/d2vm/releases/download/v0.2.0/d2vm_v0.2.0_linux_amd64.tar.gz" | tar -xvz d2vm
           sudo mv d2vm /usr/local/bin/
           echo "make worked"
