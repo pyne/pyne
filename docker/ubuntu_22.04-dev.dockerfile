@@ -28,7 +28,7 @@ RUN apt-get update \
     pip install --upgrade pip; \
     pip install numpy==1.23 \
             scipy \
-            cython<3.0 \
+            cython==2.* \
             nose \
             pytest \
             tables \
