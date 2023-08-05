@@ -36,7 +36,7 @@ RUN apt-get update \
             setuptools \
             future \
             progress \
-    pip install cython<3.0
+    pip install Cython<3.0
 
 # make starting directory
 RUN mkdir -p $HOME/opt
