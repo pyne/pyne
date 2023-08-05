@@ -46,7 +46,7 @@ def main():
         "pyne.gui",
         "pyne.cli",
         "pyne.fortranformat",
-        "pyne.pnnl"
+        "pyne.pnnl",
     ]
     pack_dir = {
         "pyne": "pyne",
@@ -57,7 +57,7 @@ def main():
         "pyne.apigen": "pyne/apigen",
         "pyne.transmute": "pyne/transmute",
         "pyne.fortranformat": "pyne/fortranformat",
-        "pyne.pnnl": "pyne/pnnl"
+        "pyne.pnnl": "pyne/pnnl",
     }
     extpttn = ["*.dll", "*.so", "*.dylib", "*.pyd", "*.pyo"]
     pack_data = {
@@ -75,7 +75,7 @@ def main():
         "pyne.xs": ["*.pxd"] + extpttn,
         "pyne.gui": ["*.pyw"],
         "pyne.dbgen": ["*.html", "*.csv", "abundances.txt", "mass.mas16", "*.dat"],
-        "pyne.pnnl": ["MaterialsCompendium.json"],
+        "pyne.pnnl": ["*.json"],
     }
     setup_kwargs = {
         "name": "pyne",
