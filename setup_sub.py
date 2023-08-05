@@ -75,7 +75,7 @@ def main():
         "pyne.xs": ["*.pxd"] + extpttn,
         "pyne.gui": ["*.pyw"],
         "pyne.dbgen": ["*.html", "*.csv", "abundances.txt", "mass.mas16", "*.dat"],
-        "pyne.pnnl": ["*MaterialsCompendium.json"],
+        "pyne.pnnl": ["MaterialsCompendium.json"],
     }
     setup_kwargs = {
         "name": "pyne",
