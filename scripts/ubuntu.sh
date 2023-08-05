@@ -20,7 +20,7 @@ apt_package_list="software-properties-common \
 # list of python package required for PyNE and its depedencies (installed using pip3 python package manager)
 pip_package_list="numpy==1.23 \
                   scipy \
-                  Cython<3.0 \
+                  cython==0.* \
                   nose \
                   pytest \
                   tables \
