@@ -5,7 +5,7 @@ PyNE Change Log
 Next Version
 ============
 **Change**
-   * move tests from nose to pytest (#1478)
+   * move tests from nose to pytest (#1478 #1493)
    * update MOAB dead link and add PyNE logo to readme file (#1481)
 
 **Fix**
@@ -22,6 +22,7 @@ Next Version
    * avoid use of deprecated numpy.bool alias (#1485)
    * Review Tutorial and Bug Fixes (#1486 #1497)
    * add composite action for BuildTest job in workflows (#1489)
+   * update run conditions for workflows (#1494)
 
 
 v0.7.7
