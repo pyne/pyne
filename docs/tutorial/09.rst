@@ -1,7 +1,7 @@
 .. _tutorial-09:
 
-Outroduction
-============
+Materials Compendium
+====================
 
 Download the :download:`full notebook <../../tutorial/09-materials-compendium.ipynb>`.
 
