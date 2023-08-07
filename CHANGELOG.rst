@@ -26,6 +26,7 @@ Next Version
    * avoid use of deprecated numpy.bool alias (#1485)
    * Review Tutorial and Bug Fixes (#1486)
    * add composite action for BuildTest job in workflows (#1489)
+   * update run conditions for workflows (#1494)
 
 
 v0.7.7
