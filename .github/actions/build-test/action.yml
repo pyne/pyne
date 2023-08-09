@@ -9,6 +9,10 @@ inputs:
     description: Information about which version of HDF5 will be used for testing.
     required: true
     default: ''
+  build_pyne:
+    description: Condition which enables or disables the Building PyNE step.
+    required: false
+    default: 'NO'
 runs:
   using: "composite"
   steps: 
@@ -29,6 +33,7 @@ runs:
         echo "ADD_FLAG=${ADD_FLAG}" >> $GITHUB_ENV
         
     - name: Building PyNE
+      if: inputs.build_pyne == 'NO'
       shell: bash -l {0}
       run: |
         cd $GITHUB_WORKSPACE
