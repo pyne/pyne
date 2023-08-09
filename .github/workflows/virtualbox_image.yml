@@ -89,7 +89,7 @@ jobs:
           dst: ${{ env.DOCKER_IMAGE_BASENAME }}/pyne:latest
 
   virtualbox_image_build:
-    needs: [BuildTest]
+    needs: [pushing_test_stable_img]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
