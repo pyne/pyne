@@ -131,8 +131,8 @@ RUN if [ "$build_hdf5" != "NO" ]; then \
     && git checkout tags/v0.13.0 \
     && pip install .
 
-# Build/Install PyNE
-FROM openmc AS pyne
+# Build/Install PyNE from develop branch
+FROM openmc AS pyne-dev
 ARG build_hdf5
 
 RUN export PYNE_HDF5_ARGS="" ;\
@@ -150,4 +150,26 @@ ENV PATH $HOME/.local/bin:$PATH
 RUN if [ "$build_pyne" = "YES" ]; then \
         cd $HOME \
         && nuc_data_make ; \
-    fi
+    fi \
+    ./ci-run-tests.sh python3
+
+# Build/Install PyNE from release branch
+FROM openmc AS pyne
+ARG build_hdf5
+
+RUN export PYNE_HDF5_ARGS="" ;\
+    if [ "$build_hdf5" != "NO" ]; then \
+            export PYNE_HDF5_ARGS="--hdf5 $HDF5_INSTALL_PATH" ; \
+    fi;
+COPY . $HOME/opt/pyne
+RUN cd $HOME/opt/pyne \
+    && python setup.py install --user \
+                                --moab $HOME/opt/moab --dagmc $HOME/opt/dagmc \
+                                $PYNE_HDF5_ARGS \
+                                --clean -j 3;
+ENV PATH $HOME/.local/bin:$PATH
+RUN if [ "$build_pyne" = "YES" ]; then \
+        cd $HOME \
+        && nuc_data_make ; \
+    fi \
+    ./ci-run-tests.sh python3

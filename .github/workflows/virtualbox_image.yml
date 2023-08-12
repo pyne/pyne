@@ -48,23 +48,6 @@ jobs:
         run: |
           echo "image_tag=$DOCKER_IMAGE_TAG" >> $GITHUB_OUTPUT
 
-  BuildTest:
-    needs: [pyne_image_build]
-    runs-on: ubuntu-latest
-
-    container:
-      image: ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_22.04_py3/pyne${{ needs.pyne_image_build.outputs.image_tag }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: use BuildTest composite action
-        uses: ./.github/actions/build-test
-        with:
-          stage: ''
-          hdf5: ''
-          build_pyne: 'YES'
-
   pushing_test_stable_img:
     needs: [BuildTest]
     runs-on: ubuntu-latest
