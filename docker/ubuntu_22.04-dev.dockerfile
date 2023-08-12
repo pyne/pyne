@@ -151,7 +151,7 @@ RUN if [ "$build_pyne" = "YES" ]; then \
         cd $HOME \
         && nuc_data_make ; \
     fi \
-    ./ci-run-tests.sh python3
+    && ./ci-run-tests.sh python3
 
 # Build/Install PyNE from release branch
 FROM openmc AS pyne
@@ -172,4 +172,4 @@ RUN if [ "$build_pyne" = "YES" ]; then \
         cd $HOME \
         && nuc_data_make ; \
     fi \
-    ./ci-run-tests.sh python3
+    && ./ci-run-tests.sh python3
