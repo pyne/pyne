@@ -1,4 +1,5 @@
 ARG build_hdf5="NO"
+ARG build_pyne="NO"
 ARG ubuntu_version=22.04
 
 FROM ubuntu:${ubuntu_version} AS base_python
@@ -134,6 +135,7 @@ RUN if [ "$build_hdf5" != "NO" ]; then \
 # Build/Install PyNE from develop branch
 FROM openmc AS pyne-dev
 ARG build_hdf5
+ARG build_pyne
 
 RUN export PYNE_HDF5_ARGS="" ;\
     if [ "$build_hdf5" != "NO" ]; then \
@@ -157,6 +159,7 @@ RUN if [ "$build_pyne" = "YES" ]; then \
 # Build/Install PyNE from release branch
 FROM openmc AS pyne
 ARG build_hdf5
+ARG build_pyne
 
 RUN export PYNE_HDF5_ARGS="" ;\
     if [ "$build_hdf5" != "NO" ]; then \
