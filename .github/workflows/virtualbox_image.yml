@@ -49,7 +49,7 @@ jobs:
           echo "image_tag=$DOCKER_IMAGE_TAG" >> $GITHUB_OUTPUT
 
   pushing_test_stable_img:
-    needs: [BuildTest]
+    needs: [pyne_image_build]
     runs-on: ubuntu-latest
     steps:
       - name: Log in to the Container registry
