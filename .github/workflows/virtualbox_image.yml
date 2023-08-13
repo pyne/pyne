@@ -43,7 +43,7 @@ jobs:
           quiet: false
           tag-latest-on-default: false
           dockerfile: docker/ubuntu_22.04-dev.dockerfile
-          build-args: build_hdf5=hdf5-1_12_0, build_pyne=YES
+          build-args: build_pyne=YES
 
       - id: output_tag
         run: |
