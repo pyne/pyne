@@ -16,7 +16,6 @@ on:
 
 env:
   DOCKER_IMAGE_BASENAME: ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_22.04_py3
-  DOCKER_IMAGE_TAG: :refs_heads_${{ github.ref_name }}-bk0
 
 jobs:
 
@@ -25,8 +24,6 @@ jobs:
   # to be built upon by the subsequent stage.
   multistage_image_build:
     runs-on: ubuntu-latest
-    outputs:
-      image_tag: ${{ steps.output_tag.outputs.image_tag }}
 
     steps:
       - name: Checkout repository
@@ -47,7 +44,7 @@ jobs:
           stages: base_python, moab, dagmc
           server-stage: openmc
           quiet: false
-          tag-latest-on-default: false
+          tag-latest-on-default: true
           dockerfile: docker/ubuntu_22.04-dev.dockerfile
 
       # build HDF5 using multistage docker build action 
@@ -58,17 +55,9 @@ jobs:
           stages: base_python, moab
           server-stage: dagmc
           quiet: false
-          tag-latest-on-default: false
+          tag-latest-on-default: true
           dockerfile: docker/ubuntu_22.04-dev.dockerfile
           build-args: build_hdf5=hdf5-1_12_0
-
-      - name: Check event for DOCKER_IMAGE_TAG change
-        if: github.event_name == 'pull_request'
-        run: echo "DOCKER_IMAGE_TAG=:refs_heads_${GITHUB_HEAD_REF}-bk0" >> $GITHUB_ENV
-
-      - id: output_tag
-        run: |
-          echo "image_tag=$DOCKER_IMAGE_TAG" >> $GITHUB_OUTPUT
 
   # Downloads the images uploaded to ghcr in previous stages and runs pyne
   # tests to check that they work.
@@ -86,7 +75,7 @@ jobs:
       fail-fast: false
 
     container:
-      image: ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_22.04_py3${{ matrix.hdf5 }}/${{ matrix.stage }}${{ needs.multistage_image_build.outputs.image_tag }}
+      image: ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_22.04_py3${{ matrix.hdf5 }}/${{ matrix.stage }}:latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -121,19 +110,9 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-          
-      - name: Check event for DOCKER_IMAGE_TAG change
-        if: github.event_name == 'pull_request'
-        run: echo "DOCKER_IMAGE_TAG=:refs_heads_${GITHUB_HEAD_REF}-bk0" >> $GITHUB_ENV
 
       - name: Push Image to stable img
         uses: akhilerm/tag-push-action@v2.1.0
         with:
-          src: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}/${{ matrix.stage }}${{ env.DOCKER_IMAGE_TAG }}
+          src: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}/${{ matrix.stage }}:latest
           dst: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}/${{ matrix.stage }}:stable
-
-      - name: Push Image to latest img
-        uses: akhilerm/tag-push-action@v2.1.0
-        with:
-          src: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}/${{ matrix.stage }}${{ env.DOCKER_IMAGE_TAG }}
-          dst: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}/${{ matrix.stage }}:latest
