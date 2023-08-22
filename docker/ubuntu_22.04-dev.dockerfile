@@ -1,5 +1,6 @@
 ARG build_hdf5="NO"
 ARG build_pyne="NO"
+ARG pyne_test_base=openmc
 ARG ubuntu_version=22.04
 
 FROM ubuntu:${ubuntu_version} AS base_python
@@ -133,7 +134,7 @@ RUN if [ "$build_hdf5" != "NO" ]; then \
     && pip install .
 
 # Build/Install PyNE from develop branch
-FROM openmc AS pyne-dev
+FROM ${pyne_test_base} AS pyne-dev
 ARG build_hdf5
 ARG build_pyne
 
@@ -157,7 +158,7 @@ RUN if [ "$build_pyne" = "YES" ]; then \
     && ./ci-run-tests.sh python3
 
 # Build/Install PyNE from release branch
-FROM openmc AS pyne
+FROM ${pyne_test_base} AS pyne
 ARG build_hdf5
 ARG build_pyne
 

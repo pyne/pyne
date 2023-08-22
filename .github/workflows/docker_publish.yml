@@ -24,7 +24,19 @@ jobs:
   # to be built upon by the subsequent stage.
   multistage_image_build:
     runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ steps.output_tag.outputs.image_tag }}
 
+    strategy:
+      matrix: 
+        pyne_test_base: [base_python, moab, dagmc, openmc]
+        hdf5: ['']
+        hdf5_build_arg: ['']
+        include:
+          - stage: dagmc
+            hdf5: _hdf5
+            hdf5_build_arg: hdf5-1_12_0
+      fail-fast: false
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -35,84 +47,116 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: modify DOCKER_IMAGE_BASENAME if _hdf5 will be built
+        if: matrix.hdf5 != ''
+        run: echo "DOCKER_IMAGE_BASENAME=${env.DOCKER_IMAGE_BASENAME}${matrix.hdf5}" >> $GITHUB_ENV
 
       # build base python, moab, dagmc, openmc using multistage docker build action
       - uses: firehed/multistage-docker-build-action@v1
-        id: build_all_stages
+        id: multistage_build_and_test
         with:
           repository: ${{ env.DOCKER_IMAGE_BASENAME }}
-          stages: base_python, moab, dagmc
-          server-stage: openmc
+          stages: ${{ matrix.pyne_test_base }}
+          testenv-stage: ${{ matrix.pyne_test_base }}
+          server-stage: pyne
           quiet: false
-          tag-latest-on-default: true
+          tag-latest-on-default: false
           dockerfile: docker/ubuntu_22.04-dev.dockerfile
-
-      # build HDF5 using multistage docker build action 
-      - uses: firehed/multistage-docker-build-action@v1
-        id: build_dagmc_with_hdf5
-        with:
-          repository: ${{ env.DOCKER_IMAGE_BASENAME }}_hdf5
-          stages: base_python, moab
-          server-stage: dagmc
-          quiet: false
-          tag-latest-on-default: true
-          dockerfile: docker/ubuntu_22.04-dev.dockerfile
-          build-args: build_hdf5=hdf5-1_12_0
-
-  # Downloads the images uploaded to ghcr in previous stages and runs pyne
-  # tests to check that they work.
-  BuildTest:
-    needs: [multistage_image_build]
-    runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        stage: [base_python, moab, dagmc, openmc]
-        hdf5: ['']
-        include:
-          - stage: dagmc
-            hdf5: _hdf5
-      fail-fast: false
-
-    container:
-      image: ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_22.04_py3${{ matrix.hdf5 }}/${{ matrix.stage }}:latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: use BuildTest composite action
-        uses: ./.github/actions/build-test
-        with:
-          stage: ${{ matrix.stage }}
-          hdf5: ${{ matrix.hdf5 }}
-
-  # if the previous step that tests the docker images passes then the images
-  # can be copied from the ghcr where they are saved using :ci_testing tags to
-  # :latest and :stable tags.
-  pushing_test_stable_img:
-    if: ${{ github.repository_owner == 'pyne' }}
-    needs: [BuildTest]
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        stage: [base_python, moab, dagmc, openmc]
-        hdf5: ['']
-        include:
-          - stage: dagmc
-            hdf5: _hdf5
-
-    name: "ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_22.04_py3${{ matrix.hdf5 }}/${{ matrix.stage }}: latest -> stable"
-
-    steps:
-      - name: Log in to the Container registry
-        uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          build-args: build_hdf5=${{ matrix.hdf5_build_arg }}, pyne_test_base=${{ env.pyne_test_base }}
 
       - name: Push Image to stable img
+        if: github.repository_owner == 'pyne'
         uses: akhilerm/tag-push-action@v2.1.0
         with:
-          src: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}/${{ matrix.stage }}:latest
+          src: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}/${{ matrix.stage }}${{ steps.multistage_build_and_test.outputs.testenv-tag }}
           dst: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}/${{ matrix.stage }}:stable
+
+
+  #     # build HDF5 using multistage docker build action 
+  #     - uses: firehed/multistage-docker-build-action@v1
+  #       id: build_dagmc_with_hdf5
+  #       with:
+  #         repository: ${{ env.DOCKER_IMAGE_BASENAME }}_hdf5
+  #         stages: base_python, moab
+  #         server-stage: dagmc
+  #         quiet: false
+  #         tag-latest-on-default: false
+  #         dockerfile: docker/ubuntu_22.04-dev.dockerfile
+  #         build-args: build_hdf5=hdf5-1_12_0
+
+  #     - name: Check event for DOCKER_IMAGE_TAG change
+  #       if: github.event_name == 'pull_request'
+  #       run: echo "DOCKER_IMAGE_TAG=:refs_heads_${GITHUB_HEAD_REF}-bk0" >> $GITHUB_ENV
+
+  #     - id: output_tag
+  #       run: |
+  #         echo "image_tag=$DOCKER_IMAGE_TAG" >> $GITHUB_OUTPUT
+
+  # # Downloads the images uploaded to ghcr in previous stages and runs pyne
+  # # tests to check that they work.
+  # BuildTest:
+  #   needs: [multistage_image_build]
+  #   runs-on: ubuntu-latest
+
+  #   strategy:
+  #     matrix:
+  #       stage: [base_python, moab, dagmc, openmc]
+  #       hdf5: ['']
+  #       include:
+  #         - stage: dagmc
+  #           hdf5: _hdf5
+  #     fail-fast: false
+
+  #   container:
+  #     image: ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_22.04_py3${{ matrix.hdf5 }}/${{ matrix.stage }}${{ needs.multistage_image_build.outputs.image_tag }}
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v3
+
+  #     - name: use BuildTest composite action
+  #       uses: ./.github/actions/build-test
+  #       with:
+  #         stage: ${{ matrix.stage }}
+  #         hdf5: ${{ matrix.hdf5 }}
+
+  # # if the previous step that tests the docker images passes then the images
+  # # can be copied from the ghcr where they are saved using :ci_testing tags to
+  # # :latest and :stable tags.
+  # pushing_test_stable_img:
+  #   if: ${{ github.repository_owner == 'pyne' }}
+  #   needs: [BuildTest]
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       stage: [base_python, moab, dagmc, openmc]
+  #       hdf5: ['']
+  #       include:
+  #         - stage: dagmc
+  #           hdf5: _hdf5
+
+  #   name: "ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_22.04_py3${{ matrix.hdf5 }}/${{ matrix.stage }}: latest -> stable"
+
+  #   steps:
+  #     - name: Log in to the Container registry
+  #       uses: docker/login-action@v2
+  #       with:
+  #         registry: ghcr.io
+  #         username: ${{ github.repository_owner }}
+  #         password: ${{ secrets.GITHUB_TOKEN }}
+          
+  #     - name: Check event for DOCKER_IMAGE_TAG change
+  #       if: github.event_name == 'pull_request'
+  #       run: echo "DOCKER_IMAGE_TAG=:refs_heads_${GITHUB_HEAD_REF}-bk0" >> $GITHUB_ENV
+
+  #     - name: Push Image to stable img
+  #       uses: akhilerm/tag-push-action@v2.1.0
+  #       with:
+  #         src: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}/${{ matrix.stage }}${{ env.DOCKER_IMAGE_TAG }}
+  #         dst: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}/${{ matrix.stage }}:stable
+
+  #     - name: Push Image to latest img
+  #       uses: akhilerm/tag-push-action@v2.1.0
+  #       with:
+  #         src: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}/${{ matrix.stage }}${{ env.DOCKER_IMAGE_TAG }}
+  #         dst: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}/${{ matrix.stage }}:latest
