@@ -62,6 +62,7 @@ jobs:
           server-stage: pyne
           quiet: false
           tag-latest-on-default: false
+          parallel: true
           dockerfile: docker/ubuntu_22.04-dev.dockerfile
           build-args: build_hdf5=${{ matrix.hdf5_build_arg }}, pyne_test_base=${{ env.pyne_test_base }}
 
