@@ -134,6 +134,7 @@ RUN if [ "$build_hdf5" != "NO" ]; then \
     && pip install .
 
 # Build/Install PyNE from develop branch
+ARG pyne_test_base
 FROM ${pyne_test_base} AS pyne-dev
 ARG build_hdf5
 ARG build_pyne
@@ -158,6 +159,7 @@ RUN if [ "$build_pyne" = "YES" ]; then \
     && ./ci-run-tests.sh python3
 
 # Build/Install PyNE from release branch
+ARG pyne_test_base
 FROM ${pyne_test_base} AS pyne
 ARG build_hdf5
 ARG build_pyne
