@@ -77,9 +77,9 @@ jobs:
       matrix: 
         pyne_test_base: [base_python, moab, dagmc, openmc]
         hdf5: ['']
-        hdf5_build_arg: ['']
+        hdf5_build_arg: ['NO']
         include:
-          - stage: dagmc
+          - pyne_test_base: dagmc
             hdf5: _hdf5
             hdf5_build_arg: hdf5-1_12_0
       fail-fast: false
