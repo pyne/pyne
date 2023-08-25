@@ -1,0 +1,13 @@
+[build-system]
+requires = [
+    "setuptools",
+    "scikit-build",
+    "cmake",
+    "ninja",
+    "jinja2",
+    "numpy",
+    "cython",
+    "future",
+    "progress"
+]
+build-backend = "setuptools.build_meta"

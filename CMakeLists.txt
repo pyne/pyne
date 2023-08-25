@@ -58,7 +58,6 @@ MESSAGE("-- Dependency Binary Hints (DEPS_BIN_HINTS): ${DEPS_BIN_HINTS}")
 MESSAGE("-- Dependency Library Hints (DEPS_LIB_HINTS): ${DEPS_LIB_HINTS}")
 MESSAGE("-- Dependency Include Hints (DEPS_INCLUDE_HINTS): ${DEPS_INCLUDE_HINTS}")
 
-
 #
 # Find Libraries
 #
@@ -96,43 +95,40 @@ if(NOT (${HDF5_VERSION} VERSION_LESS 1.12.0))
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DH5Oget_info_by_idx_vers=1 -DH5O_info_t_vers=1 -DH5Oget_info_by_name_vers=1")
 endif()
 
-# Look for MOAB if requested
-if(WITH_MOAB)
-  # user may have set a search path
-  if(NOT MOAB_ROOT)
-    set(MOAB_ROOT "${DEPS_ROOT_DIR}")
-  endif()
-  find_package(MOAB REQUIRED)
-  message(STATUS "MOAB Library Version: ${MOAB_VERSION}")
-  message(STATUS "MOAB Include Directory: ${MOAB_INCLUDE_DIRS}")
-  message(STATUS "MOAB Library Directories: ${MOAB_LIBRARY_DIRS}")
-  message(STATUS "MOAB Libraries: ${MOAB_LIBRARIES}")
+# user may have set a search path
+MESSAGE("-- MOAB Root: ${MOAB_ROOT}")
+find_package(MOAB)
+message("-- MOAB Found: ${MOAB_FOUND}")
+if(${MOAB_FOUND})
   include_directories(${MOAB_INCLUDE_DIRS})
-  link_directories(${MOAB_LIBRARY_DIRS})
-endif()
+  get_filename_component(MOAB_LIBRARY_DIRS ${MOAB_LIBRARY} PATH)
+  if(APPLE)
+    link_directories(${MOAB_LIBRARY_DIRS})
+  else(APPLE)
+    link_directories(${MOAB_LIBRARY_DIRS})
+  endif(APPLE)
+endif(${MOAB_FOUND})
 
 # Look for DAGMC if requested
-if(WITH_DAGMC)
-  if(MOAB_FOUND)
-    # Always look for DAGMC library
-    if(NOT DAGMC_ROOT)
-      set(DAGMC_ROOT "${DEPS_ROOT_DIR}")
-    endif()
-    find_package(DAGMC REQUIRED)
-    message(STATUS "DAGMC Library Version: ${DAGMC_VERSION}")
-    message(STATUS "DAGMC Include Directory: ${DAGMC_INCLUDE_DIRS}")
-    message(STATUS "DAGMC Library Directories: ${DAGMC_LIBRARY_DIRS}")
-    message(STATUS "DAGMC Libraries: ${DAGMC_LIBRARIES}")
+if(${MOAB_FOUND})
+  # Always look for DAGMC library
+  if(NOT DAGMC_ROOT)
+    set(DAGMC_ROOT "${DEPS_ROOT_DIR}")
+  endif()
+  MESSAGE("-- DAGMC Root: ${DAGMC_ROOT}")
+  find_package(DAGMC)
+  message("-- DAGMC Found: ${DAGMC_FOUND}")
+  if(${DAGMC_FOUND})
     include_directories(${DAGMC_INCLUDE_DIRS})
     link_directories(${DAGMC_LIBRARY_DIRS})
-  else()
-    message(WARNING "DAGMC: Not searching because MOAB was not found.")
-  endif()
-endif()
+  endif(${DAGMC_FOUND})
+else(${MOAB_FOUND})
+  message("-- DAGMC: Not searching because MOAB was not found.")
+endif(${MOAB_FOUND})
 
 # Find Python
-find_package(PythonInterp REQUIRED)
-find_package(PythonLibs REQUIRED)
+cmake_policy(SET CMP0054 NEW)
+find_package(Python3 COMPONENTS Interpreter Development)
 if(PYTHON_VERSION_MAJOR EQUAL 2)
   set(SITE_PACKAGES_CODE
       "import site; print site.getusersitepackages().replace(site.USER_BASE, '${CMAKE_INSTALL_PREFIX}', 1)")
@@ -170,6 +166,7 @@ ENDIF(BUILD_SPATIAL_SOLVER)
 
 # Include the CMake script UseCython.cmake.  This defines add_cython_module().
 # Instruction for use can be found at the top of cmake/UseCython.cmake.
+find_package(Cython REQUIRED)
 include(UseCython)
 INCLUDE_DIRECTORIES("${CMAKE_CURRENT_BINARY_DIR}/pyne")
 
