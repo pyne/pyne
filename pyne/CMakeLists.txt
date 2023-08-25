@@ -1,6 +1,9 @@
 # Python extension modules
 include_directories(${PYNE_INCLUDE_DIRS})
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
+find_package(Cython REQUIRED)
+include(UseCython)
 # Print include dir
 get_property(inc_dirs DIRECTORY PROPERTY INCLUDE_DIRECTORIES)
 message("-- Include paths for ${CMAKE_CURRENT_SOURCE_DIR}: ${inc_dirs}")
