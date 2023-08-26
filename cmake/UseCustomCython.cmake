@@ -61,7 +61,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #=============================================================================
-
+message( STATUS "\n\n\n\n\n\n\n\n\n\nWorking\n\n\n\n" )
 # Configuration options.
 set( CYTHON_ANNOTATE OFF
   CACHE BOOL "Create an annotated .html file when compiling *.pyx." )

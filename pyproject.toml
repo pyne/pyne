@@ -6,8 +6,7 @@ requires = [
     "ninja",
     "jinja2",
     "numpy",
-    "cython",
-    "future",
-    "progress"
+    "cython<3",
+    "wheel",
 ]
 build-backend = "setuptools.build_meta"
