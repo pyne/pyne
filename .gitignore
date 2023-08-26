@@ -2,6 +2,8 @@
 docs/_build/
 build/
 build-*
+_skbuild/
+dist/
 *egg-info/
 build_nuc_data/
 pyne/include/
