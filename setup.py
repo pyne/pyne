@@ -1,10 +1,9 @@
+#!/usr/bin/env python
 import os
 import re
 import sys
-import ssl
 import shutil
 import platform
-import subprocess
 from glob import glob
 from distutils import sysconfig
 from contextlib import contextmanager
@@ -49,15 +48,6 @@ def cleanpypath(path):
     sys.path = [p for p in sys.path if p != path]
     yield
     sys.path = orig
-
-
-def ssl_context():
-    # this is compitble for both Python 2 & 3
-    # on Python 3, you can do just ssl.SSLContext()
-    ctx = ssl.create_default_context()
-    ctx.check_hostname = False
-    ctx.verify_mode = ssl.CERT_NONE
-    return ctx
 
 
 DECAY_H = os.path.join("src", "decay.h")
@@ -166,17 +156,18 @@ def ensure_nuc_data():
         bdir = os.path.join(os.getcwd(), "build", build_dir)
         nuc_data_make.main(args=["-b", bdir])
 
+# Cmake args
+cmake_args = [
+        "-DPYTHON_EXECUTABLE:FILEPATH=" + sys.executable,
+        "-DCMAKE_BUILD_TYPE:STRING=Release",
+    ]
+if "DAGMC_ROOT" in os.environ:
+        cmake_args.append("-DDAGMC_ROOT:FILEPATH=" + os.environ["DAGMC_ROOT"])
+if "MOAB_ROOT" in os.environ:
+        cmake_args.append("-DMOAB_ROOT:FILEPATH=" + os.environ["MOAB_ROOT"])
 
 
-def update_other_args(ns):
-    if ns.hdf5 is not None:
-        os.environ["HDF5_ROOT"] = ns.hdf5
-    if ns.moab is not None:
-        os.environ["MOAB_ROOT"] = ns.moab
-    if ns.dagmc is not None:
-        os.environ["DAGMC_ROOT"] = ns.dagmc
-
-ensure_atomic()
+# Setup configuration
 setup(
     name="PyNE",
     version="1.0",
@@ -184,9 +175,6 @@ setup(
     author="Your Name",
     author_email="your@email.com",
     packages=["pyne"],
-    cmake_args=[
-        "-DPYTHON_EXECUTABLE:FILEPATH=" + sys.executable,
-        "-DCMAKE_BUILD_TYPE:STRING=Release",
-    ],
+    cmake_args=cmake_args,
     cmake_install_dir=".",
 )
