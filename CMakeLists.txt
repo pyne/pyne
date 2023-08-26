@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.0.0)
 
 if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.12.0")
   cmake_policy(SET CMP0074 NEW)
+  cmake_policy(SET CMP0054 NEW)
 endif()
 # Make the scripts available in the 'cmake' directory available for the
 # 'include()' command, 'find_package()' command.
@@ -127,7 +128,6 @@ else(${MOAB_FOUND})
 endif(${MOAB_FOUND})
 
 # Find Python
-cmake_policy(SET CMP0054 NEW)
 find_package(Python3 COMPONENTS Interpreter Development)
 if(PYTHON_VERSION_MAJOR EQUAL 2)
   set(SITE_PACKAGES_CODE
@@ -166,8 +166,7 @@ ENDIF(BUILD_SPATIAL_SOLVER)
 
 # Include the CMake script UseCython.cmake.  This defines add_cython_module().
 # Instruction for use can be found at the top of cmake/UseCython.cmake.
-find_package(Cython REQUIRED)
-include(UseCython)
+include(UseCustomCython)
 INCLUDE_DIRECTORIES("${CMAKE_CURRENT_BINARY_DIR}/pyne")
 
 # Add JsonCpp Flag
