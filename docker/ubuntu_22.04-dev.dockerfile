@@ -151,7 +151,7 @@ RUN export PYNE_HDF5_ARGS="" ;\
                                 --clean -j 3;
 ENV PATH $HOME/.local/bin:$PATH
 RUN cd $HOME \
-    && nuc_data_make ; \
+    && nuc_data_make \
     && cd $HOME/opt/pyne/tests \
     && ./ci-run-tests.sh python3
 
@@ -171,6 +171,6 @@ RUN cd $HOME/opt/pyne \
                                 --clean -j 3;
 ENV PATH $HOME/.local/bin:$PATH
 RUN cd $HOME \
-    && nuc_data_make ; \
+    && nuc_data_make \
     && cd $HOME/opt/pyne/tests \
     && ./ci-run-tests.sh python3
