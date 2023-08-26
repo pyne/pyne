@@ -183,7 +183,7 @@ setup(
     description="Your project description",
     author="Your Name",
     author_email="your@email.com",
-    # packages=["pyne"],  # Add your package(s) here
+    packages=["pyne"],
     cmake_args=[
         "-DPYTHON_EXECUTABLE:FILEPATH=" + sys.executable,
         "-DCMAKE_BUILD_TYPE:STRING=Release",
