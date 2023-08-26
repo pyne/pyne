@@ -24,8 +24,14 @@ jobs:
   # to be built upon by the subsequent stage.
   multistage_image_build:
     runs-on: ubuntu-latest
-    outputs:
-      image_tag: ${{ steps.output_tag.outputs.image_tag }}
+    strategy:
+      matrix: 
+        hdf5: ['']
+        hdf5_build_arg: ['NO']
+        include:
+          - hdf5: _hdf5
+            hdf5_build_arg: hdf5-1_12_0
+      fail-fast: false
 
     steps:
       - name: Checkout repository
@@ -46,26 +52,14 @@ jobs:
       - uses: firehed/multistage-docker-build-action@v1
         id: build_all_stages
         with:
-          repository: ${{ env.DOCKER_IMAGE_BASENAME }}
+          repository: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}
           stages: base_python, moab, dagmc
           server-stage: openmc
           quiet: false
           parallel: true
           tag-latest-on-default: ${{ env.USE_LATEST_TAG }}
           dockerfile: docker/ubuntu_22.04-dev.dockerfile
-
-      # build HDF5 using multistage docker build action 
-      - uses: firehed/multistage-docker-build-action@v1
-        id: build_dagmc_with_hdf5
-        with:
-          repository: ${{ env.DOCKER_IMAGE_BASENAME }}_hdf5
-          stages: base_python, moab
-          server-stage: dagmc
-          quiet: false
-          parallel: true
-          tag-latest-on-default: ${{ env.USE_LATEST_TAG }}
-          dockerfile: docker/ubuntu_22.04-dev.dockerfile
-          build-args: build_hdf5=hdf5-1_12_0
+          build-args: build_hdf5=${{ matrix.hdf5_build_arg }}, pyne_test_base=openmc
 
   # Downloads the images uploaded to ghcr in previous stages and runs pyne
   # tests to check that they work.
@@ -110,7 +104,7 @@ jobs:
           parallel: true
           tag-latest-on-default: ${{ env.USE_LATEST_TAG }}
           dockerfile: docker/ubuntu_22.04-dev.dockerfile
-          build-args: build_hdf5=${{ matrix.hdf5_build_arg }}, pyne_test_base=${{ matrix.pyne_test_base }}, build_pyne=YES
+          build-args: build_hdf5=${{ matrix.hdf5_build_arg }}, pyne_test_base=${{ matrix.pyne_test_base }}
 
   # if the previous step that tests the docker images passes then the images
   # can be copied from the ghcr where they are saved using :ci_testing tags to

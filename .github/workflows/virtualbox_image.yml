@@ -14,7 +14,7 @@ on:
 env:
   VM_PASSWORD: temppwd
   DOCKER_IMAGE_BASENAME: ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_22.04_py3
-  DOCKER_IMAGE_TAG: :refs_heads_${{ github.ref_name }}-bk0
+
 
 jobs:
   pyne_image_build:
@@ -33,21 +33,17 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # before merging, change tag-latest-on-default to true
       - name: Build PyNE docker image
         uses: firehed/multistage-docker-build-action@v1
         id: build_pyne
         with:
           repository: ${{ env.DOCKER_IMAGE_BASENAME }}
-          stages: base_python, moab, dagmc, openmc
+          stages: openmc
           server-stage: pyne
           quiet: false
           tag-latest-on-default: false
           dockerfile: docker/ubuntu_22.04-dev.dockerfile
-          build-args: build_pyne=YES
-
-      - id: output_tag
-        run: |
-          echo "image_tag=$DOCKER_IMAGE_TAG" >> $GITHUB_OUTPUT
 
   pushing_test_stable_img:
     needs: [pyne_image_build]
@@ -63,14 +59,8 @@ jobs:
       - name: Push Image to stable img
         uses: akhilerm/tag-push-action@v2.1.0
         with:
-          src: ${{ env.DOCKER_IMAGE_BASENAME }}/pyne${{ env.DOCKER_IMAGE_TAG }}
+          src: ${{ env.DOCKER_IMAGE_BASENAME }}/pyne:latest
           dst: ${{ env.DOCKER_IMAGE_BASENAME }}/pyne:stable
-
-      - name: Push Image to latest img
-        uses: akhilerm/tag-push-action@v2.1.0
-        with:
-          src: ${{ env.DOCKER_IMAGE_BASENAME }}/pyne${{ env.DOCKER_IMAGE_TAG }}
-          dst: ${{ env.DOCKER_IMAGE_BASENAME }}/pyne:latest
 
   virtualbox_image_build:
     needs: [pushing_test_stable_img]
