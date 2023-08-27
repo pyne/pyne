@@ -5,24 +5,26 @@ PyNE Change Log
 Next Version
 ============
 **Change**
-   * move tests from nose to pytest (#1478 #1493)
-   * update MOAB dead link and add PyNE logo to readme file (#1481)
+   * Move tests from nose to pytest (#1478 #1493)
+   * Update MOAB dead link and add PyNE logo to readme file (#1481)
 
 **Fix**
    * Add missing rxname offsets (#1482)
-   * move install script to main repo(#1477)
-   * use multistage docker build action in docker_publish.yml(#1470 #1471 #1473 #1475)
-   * remove setup-QEMU step from composite action(#1461)
-   * add composite actions to github workflows(#1459)
-   * fixing typos in user warning message (#1456)
-   * fix reorder error in member variables (#1466)
-   * remove unusable C-linkage with std::vector (#1468)
-   * fixed compatibility issue with Python 3.10 in endf.py (#1472)
-   * avoid use of deprecated numpy.int alias (#1479)
-   * avoid use of deprecated numpy.bool alias (#1485)
+   * Move install script to main repo(#1477)
+   * Use multistage docker build action in docker_publish.yml(#1470 #1471 #1473 #1475)
+   * Remove setup-QEMU step from composite action(#1461)
+   * Add composite actions to github workflows(#1459)
+   * Fixing typos in user warning message (#1456)
+   * Fix reorder error in member variables (#1466)
+   * Remove unusable C-linkage with std::vector (#1468)
+   * Fixed compatibility issue with Python 3.10 in endf.py (#1472)
+   * Avoid use of deprecated numpy.int alias (#1479)
+   * Avoid use of deprecated numpy.bool alias (#1485)
    * Review Tutorial and Bug Fixes (#1486)
-   * add composite action for BuildTest job in workflows (#1489)
-   * update run conditions for workflows (#1494)
+   * Add composite action for BuildTest job in workflows (#1489)
+   * Update run conditions for workflows (#1494)
+   * Fix gamma intensity calculation (#1496)
+
 
 
 v0.7.7
