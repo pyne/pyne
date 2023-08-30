@@ -6,10 +6,6 @@ on:
   release:
     types:
       - published
-  push:
-    paths:
-      - 'docker/*'
-      - '.github/workflows/virtualbox_image.yml'
 
 env:
   VM_PASSWORD: temppwd
@@ -19,8 +15,6 @@ env:
 jobs:
   pyne_image_build:
     runs-on: ubuntu-latest
-    outputs:
-      image_tag: ${{ steps.output_tag.outputs.image_tag }}
 
     steps:
       - name: Checkout repository
@@ -42,7 +36,7 @@ jobs:
           stages: openmc
           server-stage: pyne
           quiet: false
-          tag-latest-on-default: false
+          tag-latest-on-default: true
           dockerfile: docker/ubuntu_22.04-dev.dockerfile
 
   pushing_test_stable_img:
@@ -60,7 +54,7 @@ jobs:
         uses: akhilerm/tag-push-action@v2.1.0
         with:
           src: ${{ env.DOCKER_IMAGE_BASENAME }}/pyne:latest
-          dst: ${{ env.DOCKER_IMAGE_BASENAME }}/pyne:stable
+          dst: ${{ env.DOCKER_IMAGE_BASENAME }}/pyne:stable_${{ github.ref }}
 
   virtualbox_image_build:
     needs: [pushing_test_stable_img]
@@ -90,7 +84,7 @@ jobs:
             qemu-utils            
           curl -sL "https://github.com/linka-cloud/d2vm/releases/download/v0.2.0/d2vm_v0.2.0_linux_amd64.tar.gz" | tar -xvz d2vm
           sudo mv d2vm /usr/local/bin/
-          sudo d2vm convert ghcr.io/${{ github.repository_owner  }}/pyne_ubuntu_22.04_py3/pyne:latest -p ${{ env.VM_PASSWORD }} -o pyne.vdi
+          sudo d2vm convert ghcr.io/${{ github.repository_owner  }}/pyne_ubuntu_22.04_py3/pyne:stable_${{ github.ref }} -p ${{ env.VM_PASSWORD }} -o pyne_${{ github.ref }}.vdi
 
       - name: Upload VirtualBox image as artifact
         uses: actions/upload-artifact@v3
