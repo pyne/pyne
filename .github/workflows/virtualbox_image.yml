@@ -54,7 +54,13 @@ jobs:
         uses: akhilerm/tag-push-action@v2.1.0
         with:
           src: ${{ env.DOCKER_IMAGE_BASENAME }}/pyne:latest
-          dst: ${{ env.DOCKER_IMAGE_BASENAME }}/pyne:stable_${{ github.ref }}
+          dst: ${{ env.DOCKER_IMAGE_BASENAME }}/pyne:stable
+
+      - name: Push Image to release tag img
+        uses: akhilerm/tag-push-action@v2.1.0
+        with:
+          src: ${{ env.DOCKER_IMAGE_BASENAME }}/pyne:latest
+          dst: ${{ env.DOCKER_IMAGE_BASENAME }}/pyne:${{ github.ref }}
 
   virtualbox_image_build:
     needs: [pushing_test_stable_img]
@@ -90,5 +96,5 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: virtualbox_image
-          path: pyne.vdi
+          path: pyne_${{ github.ref }}.vdi
           
