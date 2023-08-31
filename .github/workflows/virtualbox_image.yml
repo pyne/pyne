@@ -5,7 +5,8 @@ on:
   workflow_dispatch:
   release:
     types:
-      - published
+      - created
+      - edited
 
 env:
   VM_PASSWORD: temppwd
@@ -60,7 +61,7 @@ jobs:
         uses: akhilerm/tag-push-action@v2.1.0
         with:
           src: ${{ env.DOCKER_IMAGE_BASENAME }}/pyne:latest
-          dst: ${{ env.DOCKER_IMAGE_BASENAME }}/pyne:${{ github.ref }}
+          dst: ${{ env.DOCKER_IMAGE_BASENAME }}/pyne:${{ github.ref_name }}
 
   virtualbox_image_build:
     needs: [pushing_test_stable_img]
@@ -90,11 +91,11 @@ jobs:
             qemu-utils            
           curl -sL "https://github.com/linka-cloud/d2vm/releases/download/v0.2.0/d2vm_v0.2.0_linux_amd64.tar.gz" | tar -xvz d2vm
           sudo mv d2vm /usr/local/bin/
-          sudo d2vm convert ghcr.io/${{ github.repository_owner  }}/pyne_ubuntu_22.04_py3/pyne:stable_${{ github.ref }} -p ${{ env.VM_PASSWORD }} -o pyne_${{ github.ref }}.vdi
+          sudo d2vm convert ghcr.io/${{ github.repository_owner  }}/pyne_ubuntu_22.04_py3/pyne:stable_${{ github.ref_name }} -p ${{ env.VM_PASSWORD }} -o pyne_${{ github.ref_name }}.vdi
 
       - name: Upload VirtualBox image as artifact
         uses: actions/upload-artifact@v3
         with:
           name: virtualbox_image
-          path: pyne_${{ github.ref }}.vdi
+          path: pyne_${{ github.ref_name }}.vdi
           
