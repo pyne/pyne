@@ -12,9 +12,9 @@ src/atomic_data.h
 src/*.tar.gz
 *.s
 
-# Ignore environment
+# Ignore Python environment
+env
 .env
-.venv
 
 # Ignore temp files
 *.pyc
