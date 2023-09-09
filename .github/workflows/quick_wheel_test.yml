@@ -79,6 +79,7 @@ jobs:
           # cmake, build and install
           cmake ../ -DENABLE_HDF5=ON \
             -DHDF5_ROOT=$GITHUB_WORKSPACE \
+            -DHDF5_INCLUDE_DIR=$GITHUB_WORKSPACE/include \
             -DBUILD_SHARED_LIBS=ON \
             -DENABLE_PYMOAB=ON \
             -DENABLE_BLASLAPACK=OFF \
