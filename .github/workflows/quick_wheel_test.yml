@@ -36,6 +36,13 @@ jobs:
           sudo apt-get install -y gfortran libblas-dev liblapack-dev libeigen3-dev libhdf5-dev hdf5-tools
         if: matrix.os == 'ubuntu-latest'
 
+      - name: Install Miniconda Windows
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-activate-base: true
+          activate-environment: ""
+        if: matrix.os == 'windows-latest'
+
       - name: Install hdf5 Windows
         run: |
           conda install curl eigen
@@ -54,7 +61,7 @@ jobs:
       - name: Install MOAB
         run: |
           cd $GITHUB_WORKSPACE
-          python -m pip install "cython<3"
+          python -m pip install "cython<3" numpy
           # make a new temporary directory
           mkdir -p .tmp
           cd .tmp
