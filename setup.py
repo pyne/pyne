@@ -171,11 +171,6 @@ if "MOAB_ROOT" in os.environ:
 
 # Setup configuration
 setup(
-    name="PyNE",
-    version="1.0",
-    description="Your project description",
-    author="Your Name",
-    author_email="your@email.com",
     packages=["pyne"],
     cmake_args=cmake_args,
     cmake_install_dir=".",
