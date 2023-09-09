@@ -9,6 +9,7 @@ from distutils import sysconfig
 from contextlib import contextmanager
 from skbuild import setup
 
+IS_NT = os.name == "nt"
 
 # import src into pythonpath - needed to actually run decaygen/atomicgen
 if "." not in sys.path:
@@ -81,7 +82,7 @@ local_ensdf_tools = [
     ["ensdf_processing/RADD/ELE.in", "ELE.in"],
 ]
 
-
+# TODO: Remove this?
 def copy_ensdf_executables(exe_dest):
     print("Copying ENSDF Executables to install directory")
     # Hack for copying the executables the first time PyNE is installed, before
@@ -145,6 +146,10 @@ def ensure_atomic():
         shutil.copy(ATOMIC_CPP_UNDER, ATOMIC_CPP)
 
 
+ensure_atomic()
+
+
+# TODO: Do we need this?
 def ensure_nuc_data():
     import tempfile
 
@@ -163,15 +168,49 @@ cmake_args = [
     "-DCMAKE_BUILD_TYPE:STRING=Release",
 ]
 
+# Check for DAGMC_ROOT and MOAB_ROOT
 if "DAGMC_ROOT" in os.environ:
     cmake_args.append("-DDAGMC_ROOT:FILEPATH=" + os.environ["DAGMC_ROOT"])
 if "MOAB_ROOT" in os.environ:
     cmake_args.append("-DMOAB_ROOT:FILEPATH=" + os.environ["MOAB_ROOT"])
 
+# Collect scripts
+scripts = [os.path.join("scripts", f) for f in os.listdir("scripts")]
+scripts = [
+    s
+    for s in scripts
+    if (os.name == "nt" and s.endswith(".bat"))
+    or (os.name != "nt" and not s.endswith(".bat"))
+]
+
+# Collect extension
+extension = ["*.dll", "*.so", "*.dylib", "*.pyd", "*.pyo"]
 
 # Setup configuration
 setup(
-    packages=["pyne"],
+    packages=[
+        "pyne",
+        "pyne.dbgen",
+        "pyne.apigen",
+        "pyne.xs",
+        "pyne.transmute",
+        "pyne.gui",
+        "pyne.cli",
+        "pyne.fortranformat",
+    ],
+    package_data={
+        "lib": extension,
+        "pyne": [
+            "*.pxd",
+            "*.json",
+            "*.inp",
+        ]
+        + extension,
+        "pyne.xs": ["*.pxd"] + extension,
+        "pyne.gui": ["*.pyw"],
+        "pyne.dbgen": ["*.html", "*.csv", "abundances.txt", "mass.mas16", "*.dat"],
+    },
+    scripts=scripts,
     cmake_args=cmake_args,
     cmake_install_dir=".",
 )
