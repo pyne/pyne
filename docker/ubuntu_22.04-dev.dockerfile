@@ -1,4 +1,5 @@
 ARG build_hdf5="NO"
+ARG pyne_test_base=openmc
 ARG ubuntu_version=22.04
 
 FROM ubuntu:${ubuntu_version} AS base_python
@@ -98,6 +99,7 @@ RUN export MOAB_HDF5_ARGS=""; \
 # put MOAB on the path
 ENV LD_LIBRARY_PATH $HOME/opt/moab/lib:$LD_LIBRARY_PATH
 ENV LIBRARY_PATH $HOME/opt/moab/lib:$LIBRARY_PATH
+ENV PYNE_MOAB_ARGS "--moab $HOME/opt/moab"
 
 FROM moab AS dagmc
 # build/install DAGMC
@@ -119,6 +121,7 @@ RUN cd /root \
     && make install \
     && cd ../.. \
     && rm -rf DAGMC
+ENV PYNE_DAGMC_ARGS "--dagmc $HOME/opt/dagmc"
 
 FROM dagmc AS openmc
 ARG build_hdf5
@@ -131,8 +134,8 @@ RUN if [ "$build_hdf5" != "NO" ]; then \
     && git checkout tags/v0.13.0 \
     && pip install .
 
-# Build/Install PyNE
-FROM openmc AS pyne
+# Build/Install PyNE from develop branch
+FROM ${pyne_test_base} AS pyne-dev
 ARG build_hdf5
 
 RUN export PYNE_HDF5_ARGS="" ;\
@@ -143,11 +146,31 @@ RUN export PYNE_HDF5_ARGS="" ;\
     && git clone -b develop --single-branch https://github.com/pyne/pyne.git \
     && cd pyne \
     && python setup.py install --user \
-                                --moab $HOME/opt/moab --dagmc $HOME/opt/dagmc \
+                                $PYNE_MOAB_ARGS $PYNE_DAGMC_ARGS \
                                 $PYNE_HDF5_ARGS \
                                 --clean -j 3;
 ENV PATH $HOME/.local/bin:$PATH
-RUN if [ "$build_pyne" = "YES" ]; then \
-        cd $HOME \
-        && nuc_data_make ; \
-    fi
+RUN cd $HOME \
+    && nuc_data_make \
+    && cd $HOME/opt/pyne/tests \
+    && ./ci-run-tests.sh python3
+
+# Build/Install PyNE from release branch
+FROM ${pyne_test_base} AS pyne
+ARG build_hdf5
+
+RUN export PYNE_HDF5_ARGS="" ;\
+    if [ "$build_hdf5" != "NO" ]; then \
+            export PYNE_HDF5_ARGS="--hdf5 $HDF5_INSTALL_PATH" ; \
+    fi;
+COPY . $HOME/opt/pyne
+RUN cd $HOME/opt/pyne \
+    && python setup.py install --user \
+                                $PYNE_MOAB_ARGS $PYNE_DAGMC_ARGS \
+                                $PYNE_HDF5_ARGS \
+                                --clean -j 3;
+ENV PATH $HOME/.local/bin:$PATH
+RUN cd $HOME \
+    && nuc_data_make \
+    && cd $HOME/opt/pyne/tests \
+    && ./ci-run-tests.sh python3
