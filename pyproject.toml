@@ -1,6 +1,7 @@
 [build-system]
 requires = [
     "setuptools",
+    "setuptools_scm[toml]>=6.0",
     "scikit-build",
     "cmake",
     "ninja",
@@ -8,3 +9,43 @@ requires = [
     "cython<3",
 ]
 build-backend = "setuptools.build_meta"
+
+# Project Metadata
+[project]
+name = "pyne-toolkit"
+dynamic = ["version"]
+authors = [{ name = "PyNE Team", email = "pyne-dev@googlegroups.com" }]
+license = { file = "license.txt" }
+description = "PyNE: The Nuclear Engineering Toolkit"
+readme = "readme.rst"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: End Users/Desktop",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: BSD License",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
+requires-python = ">=3.8"
+dependencies = []
+
+
+# Optional Dependencies
+[project.optional-dependencies]
+test = ["pytest"]
+docs = ["sphinx"]
+
+# Project URLs
+[project.urls]
+"Bug Tracker" = "https://github.com/pyne/pyne/issues"
+"Source Code" = "https://github.com/pyne/pyne"
+
+# Setuptools SCM Configuration
+[tool.setuptools_scm]
