@@ -156,15 +156,17 @@ def ensure_nuc_data():
         bdir = os.path.join(os.getcwd(), "build", build_dir)
         nuc_data_make.main(args=["-b", bdir])
 
+
 # Cmake args
 cmake_args = [
-        "-DPYTHON_EXECUTABLE:FILEPATH=" + sys.executable,
-        "-DCMAKE_BUILD_TYPE:STRING=Release",
-    ]
+    "-DPYTHON_EXECUTABLE:FILEPATH=" + sys.executable,
+    "-DCMAKE_BUILD_TYPE:STRING=Release",
+]
+
 if "DAGMC_ROOT" in os.environ:
-        cmake_args.append("-DDAGMC_ROOT:FILEPATH=" + os.environ["DAGMC_ROOT"])
+    cmake_args.append("-DDAGMC_ROOT:FILEPATH=" + os.environ["DAGMC_ROOT"])
 if "MOAB_ROOT" in os.environ:
-        cmake_args.append("-DMOAB_ROOT:FILEPATH=" + os.environ["MOAB_ROOT"])
+    cmake_args.append("-DMOAB_ROOT:FILEPATH=" + os.environ["MOAB_ROOT"])
 
 
 # Setup configuration
