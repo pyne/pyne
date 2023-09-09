@@ -33,7 +33,7 @@ jobs:
       - name: Install hdf5 Ubuntu
         run: |
           sudo apt-get update
-          sudo apt-get install -y libhdf5-dev hdf5-tools
+          sudo apt-get install -y gfortran libblas-dev liblapack-dev libeigen3-dev libhdf5-dev hdf5-tools 
         if: matrix.os == 'ubuntu-latest'
 
       - name: Install hdf5 Windows
@@ -47,7 +47,7 @@ jobs:
 
       - name: Install hdf5 MacOS
         run: |
-          brew install hdf5
+          brew install hdf5 eigen
           echo "HOME=$GITHUB_WORKSPACE/.." >> $GITHUB_ENV
         if: matrix.os == 'macos-latest'
 
