@@ -191,7 +191,3 @@ add_subdirectory(src)
 add_subdirectory(pyne)
 add_subdirectory(pyne/xs)
 
-# install python package
-set(pyinstallscript "${CMAKE_CURRENT_BINARY_DIR}/cmake/SetupSubPyInstall.cmake")
-configure_file(cmake/SetupSubPyInstall.cmake.in ${pyinstallscript} @ONLY)
-install(SCRIPT ${pyinstallscript})
