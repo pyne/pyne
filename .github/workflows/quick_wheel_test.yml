@@ -34,6 +34,14 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y gfortran libblas-dev liblapack-dev libeigen3-dev libhdf5-dev hdf5-tools
+          # hdf5 std directory
+          hdf5_libdir=/usr/lib/x86_64-linux-gnu/hdf5/serial
+          # need to put libhdf5.so on LD_LIBRARY_PATH
+          if [ -z $LD_LIBRARY_PATH ]; then
+            export LD_LIBRARY_PATH="${hdf5_libdir}:$GITHUB_WORKSPACE/lib"
+          else
+            export LD_LIBRARY_PATH="${hdf5_libdir}:$GITHUB_WORKSPACE/lib:$LD_LIBRARY_PATH"
+          fi
         if: matrix.os == 'ubuntu-latest'
 
       - name: Install Miniconda Windows
@@ -61,10 +69,8 @@ jobs:
       - name: Install MOAB
         run: |
           cd $GITHUB_WORKSPACE
-          python -m pip install "cython<3" numpy
+          python -m pip install numpy "cython<3"
           # make a new temporary directory
-          mkdir -p .tmp
-          cd .tmp
           # clone and version
           git clone --branch release/v5.4.1 --single-branch https://bitbucket.org/fathomteam/moab moab-repo
           cd moab-repo
@@ -72,7 +78,7 @@ jobs:
           cd build
           # cmake, build and install
           cmake ../ -DENABLE_HDF5=ON \
-            -DHDF5_ROOT=${hdf5_libdir} \
+            -DHDF5_ROOT=$GITHUB_WORKSPACE \
             -DBUILD_SHARED_LIBS=ON \
             -DENABLE_PYMOAB=ON \
             -DENABLE_BLASLAPACK=OFF \
@@ -82,15 +88,13 @@ jobs:
           make install
           cd $GITHUB_WORKSPACE
           # Remove the temporary directory
-          rm -rf $GITHUB_WORKSPACE/.tmp
+          rm -rf $GITHUB_WORKSPACE/moab-repo
           echo "MOAB installed"
 
       - name: Install DAGMC
         run: |
           cd $GITHUB_WORKSPACE
           # make a new temporary directory
-          mkdir -p .tmp
-          cd .tmp
           # clone the repository
           git clone https://github.com/ahnaf-tahmid-chowdhury/DAGMC.git dagmc-repo
           cd dagmc-repo
@@ -106,7 +110,7 @@ jobs:
           make install
           cd $GITHUB_WORKSPACE
           # Remove the temporary directory
-          rm -rf "$GITHUB_WORKSPACE/.tmp"
+          rm -rf "$GITHUB_WORKSPACE/dagmc-repo"
           echo "DAGMC installed"
 
       - name: Checkout code
@@ -114,6 +118,8 @@ jobs:
 
       - name: Build wheels
         run: |
+          export MOAB_ROOT=$GITHUB_WORKSPACE
+          export DAGMC_ROOT=$GITHUB_WORKSPACE
           python setup.py bdist_wheel
 
       - name: Install PyNE
