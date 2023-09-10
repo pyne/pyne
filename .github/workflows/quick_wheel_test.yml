@@ -58,12 +58,14 @@ jobs:
           conda remove -y yaml-cpp
           echo "HOME_PATH=$GITHUB_WORKSPACE/.." >> $GITHUB_ENV
           echo "CONDA_LOC=C:/Miniconda/Library" >> $GITHUB_ENV
+          hdf5_libdir=$CONDA_LOC
         if: matrix.os == 'windows-latest'
 
       - name: Install hdf5 MacOS
         run: |
           brew install hdf5 eigen
           echo "HOME=$GITHUB_WORKSPACE/.." >> $GITHUB_ENV
+          hdf5_libdir=$HDF5_PATH
         if: matrix.os == 'macos-latest'
 
       - name: Install MOAB
@@ -71,7 +73,6 @@ jobs:
           cd $GITHUB_WORKSPACE
           python -m pip install "cython<3"
           python -m pip install numpy 
-          which python
           # clone and version
           git clone --branch release/v5.4.1 --single-branch https://bitbucket.org/fathomteam/moab moab-repo
           cd moab-repo
@@ -91,7 +92,6 @@ jobs:
             -DENABLE_FORTRAN=OFF \
             -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE
           make
-          which python
           make install
           cd $GITHUB_WORKSPACE
           # Remove the temporary directory
