@@ -132,6 +132,7 @@ jobs:
           export MOAB_ROOT=$GITHUB_WORKSPACE
           export DAGMC_ROOT=$GITHUB_WORKSPACE
           python -m build --wheel
+          rm -rf pyne
 
       - name: Install PyNE
         shell: bash -l {0}
