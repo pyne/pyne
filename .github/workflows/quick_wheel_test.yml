@@ -66,6 +66,9 @@ jobs:
           brew install hdf5 eigen
           echo "HOME=$GITHUB_WORKSPACE/.." >> $GITHUB_ENV
           hdf5_libdir=$HDF5_PATH
+          xcode-select --install
+          _sdk_root=`xcrun --sdk macosx --show-sdk-path`
+          export LIBRARY_PATH=\"${_sdk_root}/usr/lib\"
         if: matrix.os == 'macos-latest'
 
       - name: Install MOAB
