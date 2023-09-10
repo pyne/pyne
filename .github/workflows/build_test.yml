@@ -13,6 +13,7 @@ on:
       - './*.rst'
       - 'license.txt'
       - 'PULL_REQUEST_TEMPLATE.md'
+      - '.github/workflows/quick_wheel_test.yml'
   push:
     paths-ignore:
       - 'docs/*'
@@ -23,6 +24,8 @@ on:
       - './*.rst'
       - 'license.txt'
       - 'PULL_REQUEST_TEMPLATE.md'
+      - '.github/workflows/quick_wheel_test.yml'
+
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
