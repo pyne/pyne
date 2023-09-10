@@ -78,11 +78,6 @@ jobs:
           cd moab-repo
           mkdir -p build
           cd build
-          if [ {{ matrix.os }} == "windows-latest" ]; then
-            hdf5_libdir = $CONDA_LOC
-          elif [ {{ matrix.os }} == "macos-latest" ]; then
-            hdf5_libdir = $HDF5_PATH
-          fi
           # cmake, build and install
           cmake ../ -DENABLE_HDF5=ON \
             -DHDF5_ROOT=$hdf5_libdir \
