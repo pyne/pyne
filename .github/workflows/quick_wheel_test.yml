@@ -70,16 +70,19 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE
           python -m pip install numpy "cython<3"
-          # make a new temporary directory
           # clone and version
           git clone --branch release/v5.4.1 --single-branch https://bitbucket.org/fathomteam/moab moab-repo
           cd moab-repo
           mkdir -p build
           cd build
+          if [ {{ matrix.os }} == "windows-latest" ]; then
+            hdf5_libdir = $CONDA_LOC
+          elif [ {{ matrix.os }} == "macos-latest" ]; then
+            hdf5_libdir = $HDF5_PATH
+          fi
           # cmake, build and install
           cmake ../ -DENABLE_HDF5=ON \
-            -DHDF5_ROOT=$GITHUB_WORKSPACE \
-            -DHDF5_INCLUDE_DIR=$GITHUB_WORKSPACE/include \
+            -DHDF5_ROOT=$hdf5_libdir \
             -DBUILD_SHARED_LIBS=ON \
             -DENABLE_PYMOAB=ON \
             -DENABLE_BLASLAPACK=OFF \
