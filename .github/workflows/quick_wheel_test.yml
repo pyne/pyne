@@ -33,7 +33,7 @@ jobs:
       - name: Install hdf5 Ubuntu
         run: |
           sudo apt-get update
-          sudo apt-get install -y gfortran libblas-dev liblapack-dev libeigen3-dev libhdf5-dev hdf5-tools python3-numpy
+          sudo apt-get install -y gfortran libblas-dev liblapack-dev libeigen3-dev libhdf5-dev hdf5-tools
           # hdf5 std directory
           hdf5_libdir=/usr/lib/x86_64-linux-gnu/hdf5/serial
           # need to put libhdf5.so on LD_LIBRARY_PATH
@@ -73,7 +73,7 @@ jobs:
           cd $GITHUB_WORKSPACE
           python -m pip install "cython<3" numpy
           # clone and version
-          git clone --branch release/v5.4.1 --single-branch https://bitbucket.org/fathomteam/moab moab-repo
+          git clone --depth 1 https://bitbucket.org/fathomteam/moab -b 5.3.0 moab-repo
           cd moab-repo
           mkdir -p build
           cd build
