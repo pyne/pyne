@@ -62,7 +62,7 @@ jobs:
           conda remove -y yaml-cpp
           echo "HOME_PATH=$GITHUB_WORKSPACE/.." >> $GITHUB_ENV
           echo "CONDA_LOC=C:/Miniconda/Library" >> $GITHUB_ENV
-          hdf5_libdir="C:/Miniconda/Library"
+          echo "hdf5_libdir=C:/Miniconda/Library" >> $GITHUB_ENV
         if: matrix.os == 'windows-latest'
 
       - name: Install hdf5 MacOS
@@ -73,6 +73,7 @@ jobs:
         if: matrix.os == 'macos-latest'
 
       - name: Install MOAB
+        shell: bash
         run: |
           cd $GITHUB_WORKSPACE
           # clone and version
@@ -96,6 +97,7 @@ jobs:
           echo "MOAB installed"
 
       - name: Install DAGMC
+        shell: bash
         run: |
           cd $GITHUB_WORKSPACE
           # make a new temporary directory
