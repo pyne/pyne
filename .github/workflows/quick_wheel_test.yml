@@ -71,8 +71,7 @@ jobs:
       - name: Install MOAB
         run: |
           cd $GITHUB_WORKSPACE
-          python -m pip install "cython<3"
-          python -m pip install numpy==1.23
+          python -m pip install "cython<3" numpy
           # clone and version
           git clone --branch release/v5.4.1 --single-branch https://bitbucket.org/fathomteam/moab moab-repo
           cd moab-repo
