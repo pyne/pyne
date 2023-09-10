@@ -73,6 +73,7 @@ jobs:
           cd $GITHUB_WORKSPACE
           python -m pip install "cython<3"
           python -m pip install numpy 
+          which python
           # clone and version
           git clone --branch release/v5.4.1 --single-branch https://bitbucket.org/fathomteam/moab moab-repo
           cd moab-repo
@@ -87,6 +88,7 @@ jobs:
             -DENABLE_FORTRAN=OFF \
             -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE
           make
+          which python
           make install
           cd $GITHUB_WORKSPACE
           # Remove the temporary directory
