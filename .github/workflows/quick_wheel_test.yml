@@ -63,7 +63,7 @@ jobs:
           conda remove -y yaml-cpp
           echo "HOME_PATH=$GITHUB_WORKSPACE/.." >> $GITHUB_ENV
           echo "CONDA_LOC=C:/Miniconda/Library" >> $GITHUB_ENV
-          $hdf5_libdir="C:/Miniconda/Library"
+          hdf5_libdir="C:/Miniconda/Library"
         if: matrix.os == 'windows-latest'
 
       - name: Install hdf5 MacOS
