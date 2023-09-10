@@ -33,7 +33,7 @@ jobs:
       - name: Install hdf5 Ubuntu
         run: |
           sudo apt-get update
-          sudo apt-get install -y gfortran libblas-dev liblapack-dev libeigen3-dev libhdf5-dev hdf5-tools
+          sudo apt-get install -y gfortran libblas-dev liblapack-dev libeigen3-dev libhdf5-dev hdf5-tools python3-numpy
           # hdf5 std directory
           hdf5_libdir=/usr/lib/x86_64-linux-gnu/hdf5/serial
           # need to put libhdf5.so on LD_LIBRARY_PATH
