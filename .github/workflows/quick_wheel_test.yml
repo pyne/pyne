@@ -65,6 +65,7 @@ jobs:
           echo "HOME_PATH=$GITHUB_WORKSPACE/.." >> $GITHUB_ENV
           echo "CONDA_LOC=C:/Miniconda/Library" >> $GITHUB_ENV
           echo "hdf5_libdir=C:/Miniconda/Library" >> $GITHUB_ENV
+          echo "EIGEN3_DIR=C:/Miniconda/Library/" >> $GITHUB_ENV
         if: matrix.os == 'windows-latest'
 
       - name: Install hdf5 MacOS
@@ -138,5 +139,5 @@ jobs:
           python -m pip install dist/pyne*.whl
 
       - name: Test PyNE
-        shell: bash -l {0}
+        shell: bash -l {0}  
         run: python -m pytest -ra tests
