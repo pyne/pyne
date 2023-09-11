@@ -86,31 +86,71 @@ jobs:
           mkdir -p build
           cd build
           # cmake, build and install
-          cmake ../ -DENABLE_HDF5=ON \
-            -DHDF5_ROOT=$hdf5_libdir \
-            -DBUILD_SHARED_LIBS=ON \
-            -DENABLE_PYMOAB=ON \
-            -DENABLE_BLASLAPACK=OFF \
-            -DENABLE_FORTRAN=OFF \
-            -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE
+          if [ $matrix.os == 'windows-latest' ]; then
+            cmake ../ -DENABLE_BLASLAPACK=OFF \
+              -DENABLE_FORTRAN=OFF \
+              -DENABLE_IMESH=OFF \
+              -DENABLE_TESTING=OFF \
+              -DENABLE_HDF5=ON \
+              -DBUILD_SHARED_LIBS=ON \
+              -G"Visual Studio 16 2019"  \
+              -DCMAKE_INSTALL_PREFIX=../install_dir/ \
+              -DHDF5_ROOT="${CONDA_LOC}" \
+              -DHDF5_hdf5_LIBRARY_RELEASE="${CONDA_LOC}/lib/libhdf5_hl.lib;${CONDA_LOC}/lib/libhdf5.lib;${CONDA_LOC}/lib/zlib.lib;${CONDA_LOC}/lib/libhdf5_cpp.lib" \
+              -DCMAKE_EXE_LINKER_FLAGS="/std:c++latest -DH5_BUILT_AS_DYNAMIC_LIB" \
+              -DCMAKE_MODULE_LINKER_FLAGS="/std:c++latest" \
+              -DCMAKE_SHARED_LINKER_FLAGS="/std:c++latest" \
+              -DCMAKE_STATIC_LINKER_FLAGS="" \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DCMAKE_C_COMPILER="C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.27.29110/bin/Hostx64/x64/cl.exe" \
+              -DCMAKE_CXX_COMPILER="C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.27.29110/bin/Hostx64/x64/cl.exe"
+          else
+            cmake ../ -DENABLE_HDF5=ON \
+              -DHDF5_ROOT=$hdf5_libdir \
+              -DBUILD_SHARED_LIBS=ON \
+              -DENABLE_PYMOAB=ON \
+              -DENABLE_BLASLAPACK=OFF \
+              -DENABLE_FORTRAN=OFF \
+              -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE
+          fi
           make
           make install
           cd $GITHUB_WORKSPACE
           # Remove the temporary directory
           rm -rf $GITHUB_WORKSPACE/moab-repo
           echo "MOAB installed"
-
       - name: Install DAGMC
         shell: bash -l {0}
         run: |
           cd $GITHUB_WORKSPACE
-          # make a new temporary directory
           # clone the repository
           git clone https://github.com/ahnaf-tahmid-chowdhury/DAGMC.git dagmc-repo
           cd dagmc-repo
           mkdir -p build
           cd build
           # cmake, build and install
+          if [ $matrix.os == 'windows-latest' ]; then
+          cmake ../ -G"Visual Studio 16 2019" \
+            -DBUILD_EXE=ON \
+            -DBUILD_STATIC_EXE=ON \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DBUILD_STATIC_LIBS=ON \
+            -DBUILD_TALLY=OFF \
+            -DBUILD_BUILD_OBB=OFF \
+            -DBUILD_UWUW=ON \
+            -DBUILD_MAKE_WATERTIGHT=ON \
+            -DBUILD_OVERLAP_CHECK=OFF \
+            -DBUILD_TESTS=ON \
+            -DMOAB_DIR=../install_dir \
+            -DHDF5_ROOT="${CONDA_LOC}" \
+            -DHDF5_hdf5_LIBRARY_RELEASE="${CONDA_LOC}/lib/libhdf5_hl.lib;${CONDA_LOC}/lib/libhdf5.lib;${CONDA_LOC}/lib/zlib.lib;${CONDA_LOC}/lib/libhdf5_cpp.lib" \
+            -DCMAKE_INSTALL_PREFIX=../install_dir/ \
+            -DCMAKE_EXE_LINKER_FLAGS="" \
+            -DCMAKE_MODULE_LINKER_FLAGS="" \
+            -DCMAKE_SHARED_LINKER_FLAGS="" \
+            -DCMAKE_STATIC_LINKER_FLAGS="" \
+            -DCMAKE_BUILD_TYPE=Release
+          else
           cmake ../ -DMOAB_CMAKE_CONFIG=$GITHUB_WORKSPACE/lib/cmake/MOAB \
             -DMOAB_DIR=$GITHUB_WORKSPACE \
             -DBUILD_STATIC_LIBS=OFF \
