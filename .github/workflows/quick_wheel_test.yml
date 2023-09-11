@@ -156,6 +156,7 @@ jobs:
             -DBUILD_STATIC_LIBS=OFF \
             -DBUILD_TALLY=ON \
             -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE
+          fi
           make
           make install
           cd $GITHUB_WORKSPACE
