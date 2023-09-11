@@ -81,20 +81,20 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE
           # clone and version
-          git clone --depth 1 https://bitbucket.org/fathomteam/moab -b 5.3.0 moab-repo
-          cd moab-repo
+          git clone --depth 1 https://bitbucket.org/fathomteam/moab -b 5.3.0
+          cd moab
           mkdir -p build
           cd build
           # cmake, build and install
           if [ $matrix.os == 'windows-latest' ]; then
-            cmake ../ -DENABLE_BLASLAPACK=OFF \
+            cmake ../moab -DENABLE_BLASLAPACK=OFF \
               -DENABLE_FORTRAN=OFF \
               -DENABLE_IMESH=OFF \
               -DENABLE_TESTING=OFF \
               -DENABLE_HDF5=ON \
               -DBUILD_SHARED_LIBS=ON \
               -G"Visual Studio 16 2019"  \
-              -DCMAKE_INSTALL_PREFIX=../install_dir/ \
+              -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE \
               -DHDF5_ROOT="${CONDA_LOC}" \
               -DHDF5_hdf5_LIBRARY_RELEASE="${CONDA_LOC}/lib/libhdf5_hl.lib;${CONDA_LOC}/lib/libhdf5.lib;${CONDA_LOC}/lib/zlib.lib;${CONDA_LOC}/lib/libhdf5_cpp.lib" \
               -DCMAKE_EXE_LINKER_FLAGS="/std:c++latest -DH5_BUILT_AS_DYNAMIC_LIB" \
@@ -119,15 +119,15 @@ jobs:
           fi
           cd $GITHUB_WORKSPACE
           # Remove the temporary directory
-          rm -rf $GITHUB_WORKSPACE/moab-repo
+          rm -rf $GITHUB_WORKSPACE/moab
           echo "MOAB installed"
       - name: Install DAGMC
         shell: bash -l {0}
         run: |
           cd $GITHUB_WORKSPACE
           # clone the repository
-          git clone https://github.com/ahnaf-tahmid-chowdhury/DAGMC.git dagmc-repo
-          cd dagmc-repo
+          git clone https://github.com/ahnaf-tahmid-chowdhury/DAGMC.git
+          cd dagmc
           mkdir -p build
           cd build
           # cmake, build and install
@@ -165,7 +165,7 @@ jobs:
           fi
           cd $GITHUB_WORKSPACE
           # Remove the temporary directory
-          rm -rf "$GITHUB_WORKSPACE/dagmc-repo"
+          rm -rf "$GITHUB_WORKSPACE/dagmc"
           echo "DAGMC installed"
 
       - name: Checkout code
