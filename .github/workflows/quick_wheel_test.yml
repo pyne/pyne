@@ -104,6 +104,8 @@ jobs:
               -DCMAKE_BUILD_TYPE=Release \
               -DCMAKE_C_COMPILER="C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.27.29110/bin/Hostx64/x64/cl.exe" \
               -DCMAKE_CXX_COMPILER="C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.27.29110/bin/Hostx64/x64/cl.exe"
+            cmake --build . --config Release
+            cmake --install . --config Release
           else
             cmake ../ -DENABLE_HDF5=ON \
               -DHDF5_ROOT=$hdf5_libdir \
@@ -112,9 +114,9 @@ jobs:
               -DENABLE_BLASLAPACK=OFF \
               -DENABLE_FORTRAN=OFF \
               -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE
+            make
+            make install
           fi
-          make
-          make install
           cd $GITHUB_WORKSPACE
           # Remove the temporary directory
           rm -rf $GITHUB_WORKSPACE/moab-repo
@@ -130,35 +132,37 @@ jobs:
           cd build
           # cmake, build and install
           if [ $matrix.os == 'windows-latest' ]; then
-          cmake ../ -G"Visual Studio 16 2019" \
-            -DBUILD_EXE=ON \
-            -DBUILD_STATIC_EXE=ON \
-            -DBUILD_SHARED_LIBS=OFF \
-            -DBUILD_STATIC_LIBS=ON \
-            -DBUILD_TALLY=OFF \
-            -DBUILD_BUILD_OBB=OFF \
-            -DBUILD_UWUW=ON \
-            -DBUILD_MAKE_WATERTIGHT=ON \
-            -DBUILD_OVERLAP_CHECK=OFF \
-            -DBUILD_TESTS=ON \
-            -DMOAB_DIR=../install_dir \
-            -DHDF5_ROOT="${CONDA_LOC}" \
-            -DHDF5_hdf5_LIBRARY_RELEASE="${CONDA_LOC}/lib/libhdf5_hl.lib;${CONDA_LOC}/lib/libhdf5.lib;${CONDA_LOC}/lib/zlib.lib;${CONDA_LOC}/lib/libhdf5_cpp.lib" \
-            -DCMAKE_INSTALL_PREFIX=../install_dir/ \
-            -DCMAKE_EXE_LINKER_FLAGS="" \
-            -DCMAKE_MODULE_LINKER_FLAGS="" \
-            -DCMAKE_SHARED_LINKER_FLAGS="" \
-            -DCMAKE_STATIC_LINKER_FLAGS="" \
-            -DCMAKE_BUILD_TYPE=Release
+            cmake ../ -G"Visual Studio 16 2019" \
+              -DBUILD_EXE=ON \
+              -DBUILD_STATIC_EXE=ON \
+              -DBUILD_SHARED_LIBS=OFF \
+              -DBUILD_STATIC_LIBS=ON \
+              -DBUILD_TALLY=OFF \
+              -DBUILD_BUILD_OBB=OFF \
+              -DBUILD_UWUW=ON \
+              -DBUILD_MAKE_WATERTIGHT=ON \
+              -DBUILD_OVERLAP_CHECK=OFF \
+              -DBUILD_TESTS=ON \
+              -DMOAB_DIR=../install_dir \
+              -DHDF5_ROOT="${CONDA_LOC}" \
+              -DHDF5_hdf5_LIBRARY_RELEASE="${CONDA_LOC}/lib/libhdf5_hl.lib;${CONDA_LOC}/lib/libhdf5.lib;${CONDA_LOC}/lib/zlib.lib;${CONDA_LOC}/lib/libhdf5_cpp.lib" \
+              -DCMAKE_INSTALL_PREFIX=../install_dir/ \
+              -DCMAKE_EXE_LINKER_FLAGS="" \
+              -DCMAKE_MODULE_LINKER_FLAGS="" \
+              -DCMAKE_SHARED_LINKER_FLAGS="" \
+              -DCMAKE_STATIC_LINKER_FLAGS="" \
+              -DCMAKE_BUILD_TYPE=Release
+            cmake --build . --config Release
+            cmake --install . --config Release
           else
-          cmake ../ -DMOAB_CMAKE_CONFIG=$GITHUB_WORKSPACE/lib/cmake/MOAB \
-            -DMOAB_DIR=$GITHUB_WORKSPACE \
-            -DBUILD_STATIC_LIBS=OFF \
-            -DBUILD_TALLY=ON \
-            -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE
+            cmake ../ -DMOAB_CMAKE_CONFIG=$GITHUB_WORKSPACE/lib/cmake/MOAB \
+              -DMOAB_DIR=$GITHUB_WORKSPACE \
+              -DBUILD_STATIC_LIBS=OFF \
+              -DBUILD_TALLY=ON \
+              -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE
+            make
+            make install
           fi
-          make
-          make install
           cd $GITHUB_WORKSPACE
           # Remove the temporary directory
           rm -rf "$GITHUB_WORKSPACE/dagmc-repo"
@@ -173,8 +177,7 @@ jobs:
           export MOAB_ROOT=$GITHUB_WORKSPACE
           export DAGMC_ROOT=$GITHUB_WORKSPACE
           python -m build --wheel
-          rm -rf pyne
-
+          
       - name: Install PyNE
         shell: bash -l {0}
         run: |
@@ -182,4 +185,4 @@ jobs:
 
       - name: Test PyNE
         shell: bash -l {0}  
-        run: python -m pytest -ra tests
+        run: cd tests && ./ci-run-tests.sh
