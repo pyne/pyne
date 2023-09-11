@@ -34,7 +34,15 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
 ]
 requires-python = ">=3.8"
-dependencies = ["progress", "tables", "numpy", "scipy", "matplotlib", "future"]
+dependencies = [
+    "progress",
+    "tables",
+    "numpy",
+    "scipy",
+    "matplotlib",
+    "jinja2",
+    "future",
+]
 
 # Optional Dependencies
 [project.optional-dependencies]
