@@ -177,11 +177,12 @@ jobs:
           export MOAB_ROOT=$GITHUB_WORKSPACE
           export DAGMC_ROOT=$GITHUB_WORKSPACE
           python -m build --wheel
-          
+
       - name: Install PyNE
         shell: bash -l {0}
         run: |
           python -m pip install dist/pyne*.whl
+          nuc_data_make
 
       - name: Test PyNE
         shell: bash -l {0}  
