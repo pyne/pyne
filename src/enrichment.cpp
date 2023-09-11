@@ -426,8 +426,8 @@ pyne_enr::Cascade pyne_enr::multicomponent(pyne_enr::Cascade & orig_casc, \
 
   while (tolerance < fabs(curr_casc.l_t_per_feed - prev_casc.l_t_per_feed) / curr_casc.l_t_per_feed) {
     // Check that parameters are still well-formed
-    if (isnan(curr_casc.Mstar) || isnan(curr_casc.l_t_per_feed) || \
-        isnan(prev_casc.Mstar) || isnan(prev_casc.l_t_per_feed))
+    if (std::isnan(curr_casc.Mstar) || std::isnan(curr_casc.l_t_per_feed) || \
+        std::isnan(prev_casc.Mstar) || std::isnan(prev_casc.l_t_per_feed))
       throw EnrichmentIterationNaN();
 
     prev_casc = curr_casc;
