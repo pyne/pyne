@@ -57,6 +57,7 @@ jobs:
           python -m pip install "cython<3" numpy build pytest
 
       - name: Install hdf5 Windows
+        shell: bash -l {0}
         run: |
           conda install curl eigen
           conda install -c conda-forge hdf5
@@ -85,13 +86,13 @@ jobs:
           cd build
           # cmake, build and install
           cmake ../ -G"Visual Studio 17 2022" \
-            -DCMAKE_INSTALL_PREFIX="${GITHUB_WORKSPACE}" \
+            -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE" \
             -DCMAKE_EXE_LINKER_FLAGS="/std:c++latest -DH5_BUILT_AS_DYNAMIC_LIB" \
             -DCMAKE_MODULE_LINKER_FLAGS="/std:c++latest" \
             -DCMAKE_SHARED_LINKER_FLAGS="/std:c++latest" \
             -DCMAKE_STATIC_LINKER_FLAGS="" \
             -DENABLE_HDF5=ON \
-            -DHDF5_ROOT="${CONDA_LOC}" \
+            -DHDF5_ROOT=$CONDA_LOC \
             -DHDF5_hdf5_LIBRARY_RELEASE="${CONDA_LOC}/lib/libhdf5_hl.lib;${CONDA_LOC}/lib/libhdf5.lib;${CONDA_LOC}/lib/zlib.lib;${CONDA_LOC}/lib/libhdf5_cpp.lib" \
             -DBUILD_SHARED_LIBS=ON \
             -DENABLE_PYMOAB=ON \
