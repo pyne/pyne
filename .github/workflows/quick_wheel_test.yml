@@ -58,7 +58,6 @@ jobs:
           python -m pip install "cython<3" numpy build pytest
 
       - name: Install hdf5 Windows
-        shell: bash -l {0}
         run: |
           conda install curl eigen
           conda install -c conda-forge hdf5
@@ -78,7 +77,6 @@ jobs:
         if: matrix.os == 'macos-latest'
 
       - name: Install MOAB
-        shell: bash -l {0}
         run: |
           cd $GITHUB_WORKSPACE
           # clone and version
@@ -106,9 +104,8 @@ jobs:
           # Remove the temporary directory
           rm -rf $GITHUB_WORKSPACE/moab
           echo "MOAB installed"
-          
+
       - name: Install DAGMC
-        shell: bash -l {0}
         run: |
           cd $GITHUB_WORKSPACE
           # clone the repository
