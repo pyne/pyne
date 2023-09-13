@@ -57,14 +57,14 @@ jobs:
           python -m pip install "cython<3" numpy build pytest
 
       - name: Install hdf5 Windows
-        shell: bash -l {0}
+        shell: pwsh -l {0}
         run: |
           conda install curl eigen
           conda install -c conda-forge hdf5
           conda remove -y yaml-cpp
-          echo "HOME_PATH=$GITHUB_WORKSPACE/.." >> $GITHUB_ENV
-          echo "CONDA_LOC=C:/Miniconda/Library" >> $GITHUB_ENV
-          echo "EIGEN3_DIR=C:/Miniconda/Library/" >> $GITHUB_ENV
+          $Env:HOME_PATH = "$Env:GITHUB_WORKSPACE\.."
+          $Env:CONDA_LOC = "C:\Miniconda\Library"
+          $Env:EIGEN3_DIR = "C:\Miniconda\Library\"
         if: matrix.os == 'windows-latest'
 
       - name: Install hdf5 MacOS
@@ -75,8 +75,7 @@ jobs:
           echo "HDF5_ROOT=$HDF5_PATH" >> $GITHUB_ENV
         if: matrix.os == 'macos-latest'
 
-      - name: Install MOAB
-        shell: bash -l {0}
+      - name: Install MOAB Ubuntu
         run: |
           cd $GITHUB_WORKSPACE
           # clone and version
@@ -85,30 +84,79 @@ jobs:
           mkdir -p build
           cd build
           # cmake, build and install
-          cmake ../ -G"Visual Studio 17 2022" \
-            -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE" \
-            -DCMAKE_EXE_LINKER_FLAGS="/std:c++latest -DH5_BUILT_AS_DYNAMIC_LIB" \
-            -DCMAKE_MODULE_LINKER_FLAGS="/std:c++latest" \
-            -DCMAKE_SHARED_LINKER_FLAGS="/std:c++latest" \
-            -DCMAKE_STATIC_LINKER_FLAGS="" \
-            -DENABLE_HDF5=ON \
-            -DHDF5_ROOT=$CONDA_LOC \
-            -DHDF5_hdf5_LIBRARY_RELEASE="${CONDA_LOC}/lib/libhdf5_hl.lib;${CONDA_LOC}/lib/libhdf5.lib;${CONDA_LOC}/lib/zlib.lib;${CONDA_LOC}/lib/libhdf5_cpp.lib" \
-            -DBUILD_SHARED_LIBS=ON \
-            -DENABLE_PYMOAB=ON \
-            -DENABLE_IMESH=OFF \
-            -DENABLE_TESTING=OFF \
-            -DENABLE_BLASLAPACK=OFF \
-            -DENABLE_FORTRAN=OFF \
-            -DCMAKE_BUILD_TYPE=Release 
-          cmake --build . --config Release
-          cmake --install .
+            cmake ../ -DENABLE_HDF5=ON \
+              -DHDF5_ROOT=$HDF5_ROOT \
+              -DBUILD_SHARED_LIBS=ON \
+              -DENABLE_PYMOAB=ON \
+              -DENABLE_BLASLAPACK=OFF \
+              -DENABLE_FORTRAN=OFF \
+              -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE
+            make
+            make install
           cd $GITHUB_WORKSPACE
           rm -rf $GITHUB_WORKSPACE/moab
-          echo "MOAB installed"
+          export MOAB_ROOT=$GITHUB_WORKSPACE
+          echo "MOAB installed" 
+        if: matrix.os == 'ubuntu-latest'
 
-      - name: Install DAGMC
-        shell: bash -l {0}
+      - name: Install MOAB Windows
+        shell: pwsh -l {0}
+        run: |
+          Set-Location $Env:GITHUB_WORKSPACE
+          # clone and version
+          git clone --depth 1 https://bitbucket.org/fathomteam/moab -b 5.3.0
+          Set-Location moab
+          New-Item -ItemType Directory -Force -Path build
+          Set-Location build
+          # cmake, build, and install
+          cmake ../ -G "Visual Studio 17 2022" `
+            -DCMAKE_INSTALL_PREFIX="$Env:GITHUB_WORKSPACE" `
+            -DCMAKE_EXE_LINKER_FLAGS="/std:c++latest -DH5_BUILT_AS_DYNAMIC_LIB" `
+            -DCMAKE_MODULE_LINKER_FLAGS="/std:c++latest" `
+            -DCMAKE_SHARED_LINKER_FLAGS="/std:c++latest" `
+            -DCMAKE_STATIC_LINKER_FLAGS="" `
+            -DENABLE_HDF5=ON `
+            -DHDF5_ROOT=$Env:CONDA_LOC `
+            -DHDF5_hdf5_LIBRARY_RELEASE="$Env:CONDA_LOC\lib\libhdf5_hl.lib;$Env:CONDA_LOC\lib\libhdf5.lib;$Env:CONDA_LOC\lib\zlib.lib;$Env:CONDA_LOC\lib\libhdf5_cpp.lib" `
+            -DBUILD_SHARED_LIBS=ON `
+            -DENABLE_PYMOAB=ON `
+            -DENABLE_IMESH=OFF `
+            -DENABLE_TESTING=OFF `
+            -DENABLE_BLASLAPACK=OFF `
+            -DENABLE_FORTRAN=OFF `
+            -DCMAKE_BUILD_TYPE=Release
+          cmake --build . --config Release
+          cmake --install .
+          Set-Location $Env:GITHUB_WORKSPACE
+          Remove-Item -Force -Recurse moab
+          $Env:MOAB_ROOT = "$Env:GITHUB_WORKSPACE"
+          Write-Host "MOAB installed"
+        if: matrix.os == 'windows-latest'
+
+      - name: Install DAGMC Windows
+        shell: pwsh -l {0}
+        run: |
+          Set-Location $Env:GITHUB_WORKSPACE
+          # clone the repository
+          git clone https://github.com/ahnaf-tahmid-chowdhury/DAGMC.git dagmc
+          Set-Location dagmc
+          New-Item -ItemType Directory -Force -Path build
+          Set-Location build
+          # cmake, build, and install
+          cmake ../ -DMOAB_CMAKE_CONFIG=$Env:GITHUB_WORKSPACE\lib\cmake\MOAB `
+            -DMOAB_DIR=$Env:GITHUB_WORKSPACE `
+            -DBUILD_STATIC_LIBS=OFF `
+            -DBUILD_TALLY=ON `
+            -DCMAKE_INSTALL_PREFIX=$Env:GITHUB_WORKSPACE
+          cmake --build . --config Release
+          cmake --install .
+          Set-Location $Env:GITHUB_WORKSPACE
+          Remove-Item -Force -Recurse "dagmc"
+          $Env:DAGMC_ROOT = "$Env:GITHUB_WORKSPACE"
+          Write-Host "DAGMC installed"
+        if: matrix.os == 'windows-latest'
+      
+      - name: Install DAGMC Ubuntu
         run: |
           cd $GITHUB_WORKSPACE
           # clone the repository
@@ -122,20 +170,20 @@ jobs:
             -DBUILD_STATIC_LIBS=OFF \
             -DBUILD_TALLY=ON \
             -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE
-          cmake --build . --config Release
-          cmake --install .
+          make
+          make install
           cd $GITHUB_WORKSPACE
           rm -rf "$GITHUB_WORKSPACE/dagmc"
+          export DAGMC_ROOT=$GITHUB_WORKSPACE
           echo "DAGMC installed"
+        if: matrix.os == 'ubuntu-latest'
 
-      - name: Checkout code
+      - name: Checkout PyNE
         uses: actions/checkout@v3
 
       - name: Build wheels
         shell: bash -l {0}
         run: |
-          export MOAB_ROOT=$GITHUB_WORKSPACE
-          export DAGMC_ROOT=$GITHUB_WORKSPACE
           python -m build --wheel
 
       - name: Install PyNE
