@@ -20,7 +20,7 @@ jobs:
   main:
     strategy:
       matrix:
-        os: [windows-latest]
+        os: [linux-latest]
 
     runs-on: ${{ matrix.os }}
 
@@ -175,6 +175,8 @@ jobs:
 
       - name: Build wheels
         run: |
+          export MOAB_ROOT=${GITHUB_WORKSPACE}/
+          export DAGMC_ROOT=${GITHUB_WORKSPACE}/
           python -m build --wheel
 
       - name: Install PyNE
