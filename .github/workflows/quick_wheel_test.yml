@@ -82,7 +82,7 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE
           # clone and version
-          git clone --branch release/v5.4.1 --single-branch https://bitbucket.org/fathomteam/moab
+          git clone --depth 1 https://bitbucket.org/fathomteam/moab -b 5.3.0
           cd moab
           mkdir -p build
           cd build
