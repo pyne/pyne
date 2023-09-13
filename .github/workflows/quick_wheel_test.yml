@@ -87,7 +87,8 @@ jobs:
           mkdir -p build
           cd build
           # cmake, build and install
-            cmake ../ -DENABLE_HDF5=ON \
+            cmake ../ -G "Unix Makefiles" \
+              -DENABLE_HDF5=ON \
               -DHDF5_ROOT=$HDF5_ROOT \
               -DBUILD_SHARED_LIBS=ON \
               -DENABLE_PYMOAB=ON \
@@ -96,7 +97,6 @@ jobs:
               -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE
             ls -a
             make
-            echo "make done"
             make install
           cd $GITHUB_WORKSPACE
           # Remove the temporary directory
