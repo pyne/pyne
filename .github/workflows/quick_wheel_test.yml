@@ -20,7 +20,7 @@ jobs:
   main:
     strategy:
       matrix:
-        os: [linux-latest]
+        os: [windows-latest]
 
     runs-on: ${{ matrix.os }}
 
@@ -89,7 +89,7 @@ jobs:
             make install
           cd $GITHUB_WORKSPACE
           rm -rf $GITHUB_WORKSPACE/moab
-          export MOAB_ROOT=$GITHUB_WORKSPACE
+          echo "MOAB_ROOT=$GITHUB_WORKSPACE" >> $GITHUB_ENV
           echo "MOAB installed"
         if: matrix.os == 'ubuntu-latest'
 
@@ -122,7 +122,7 @@ jobs:
           cmake --install .
           Set-Location $Env:GITHUB_WORKSPACE
           Remove-Item -Force -Recurse moab
-          $Env:MOAB_ROOT = "$Env:GITHUB_WORKSPACE"
+          Add-Content -Path $env:GITHUB_ENV -Value "MOAB_ROOT=$env:GITHUB_WORKSPACE\"
           Write-Host "MOAB installed"
         if: matrix.os == 'windows-latest'
 
@@ -144,7 +144,7 @@ jobs:
           make install
           cd $GITHUB_WORKSPACE
           rm -rf "$GITHUB_WORKSPACE/dagmc"
-          export DAGMC_ROOT=$GITHUB_WORKSPACE
+          echo "DAGMC_ROOT=$GITHUB_WORKSPACE" >> $GITHUB_ENV
           echo "DAGMC installed"
         if: matrix.os == 'ubuntu-latest'
 
@@ -157,16 +157,16 @@ jobs:
           New-Item -ItemType Directory -Force -Path build
           Set-Location build
           # cmake, build, and install
-          cmake ../ -DMOAB_CMAKE_CONFIG=$Env:GITHUB_WORKSPACE\lib\cmake\MOAB `
-            -DMOAB_DIR=$Env:GITHUB_WORKSPACE `
+          cmake ../ -DMOAB_CMAKE_CONFIG="$Env:GITHUB_WORKSPACE\lib\cmake\MOAB" `
+            -DMOAB_DIR="$Env:GITHUB_WORKSPACE" `
             -DBUILD_STATIC_LIBS=OFF `
             -DBUILD_TALLY=ON `
-            -DCMAKE_INSTALL_PREFIX=$Env:GITHUB_WORKSPACE
+            -DCMAKE_INSTALL_PREFIX="$Env:GITHUB_WORKSPACE"
           cmake --build . --config Release
           cmake --install .
           Set-Location $Env:GITHUB_WORKSPACE
           Remove-Item -Force -Recurse "dagmc"
-          $Env:DAGMC_ROOT = "$Env:GITHUB_WORKSPACE"
+          Add-Content -Path $env:GITHUB_ENV -Value "DAGMC_ROOT=$env:GITHUB_WORKSPACE\"
           Write-Host "DAGMC installed"
         if: matrix.os == 'windows-latest'
 
@@ -175,8 +175,6 @@ jobs:
 
       - name: Build wheels
         run: |
-          export MOAB_ROOT=${GITHUB_WORKSPACE}/
-          export DAGMC_ROOT=${GITHUB_WORKSPACE}/
           python -m build --wheel
 
       - name: Install PyNE
