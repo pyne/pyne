@@ -52,7 +52,6 @@ jobs:
         if: matrix.os == 'windows-latest'
 
       - name: Install Python Packages
-        shell: bash -l {0}
         run: |
           python -m pip install wheel
           python -m pip install "cython<3" numpy build pytest
@@ -86,8 +85,8 @@ jobs:
           cd build
           # cmake, build and install
           cmake ../ -DENABLE_HDF5=ON \
-            -DHDF5_ROOT="${CONDA_LOC}" \
-            -DHDF5_hdf5_LIBRARY_RELEASE="${CONDA_LOC}/lib/libhdf5_hl.lib;${CONDA_LOC}/lib/libhdf5.lib;${CONDA_LOC}/lib/zlib.lib;${CONDA_LOC}/lib/libhdf5_cpp.lib" \
+            -DHDF5_ROOT="$CONDA_LOC" \
+            -DHDF5_hdf5_LIBRARY_RELEASE="$CONDA_LOC/lib/libhdf5_hl.lib;$CONDA_LOC/lib/libhdf5.lib;$CONDA_LOC/lib/zlib.lib;$CONDA_LOC/lib/libhdf5_cpp.lib" \
             -DCMAKE_EXE_LINKER_FLAGS="/std:c++latest -DH5_BUILT_AS_DYNAMIC_LIB" \
             -DCMAKE_MODULE_LINKER_FLAGS="/std:c++latest" \
             -DCMAKE_SHARED_LINKER_FLAGS="/std:c++latest" \
