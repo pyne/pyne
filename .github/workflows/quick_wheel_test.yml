@@ -20,7 +20,7 @@ jobs:
   main:
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [windows-latest]
 
     runs-on: ${{ matrix.os }}
 
@@ -109,8 +109,7 @@ jobs:
             -DCMAKE_SHARED_LINKER_FLAGS="/std:c++latest" `
             -DCMAKE_STATIC_LINKER_FLAGS="" `
             -DENABLE_HDF5=ON `
-            -DHDF5_ROOT=$Env:CONDA_LOC `
-            -DHDF5_INCLUDE_DIRS="$Env:CONDA_LOC\lib\libhdf5_hl.lib;$Env:CONDA_LOC\lib\libhdf5.lib;$Env:CONDA_LOC\lib\zlib.lib;$Env:CONDA_LOC\lib\libhdf5_cpp.lib" `
+            -DHDF5_ROOT="$Env:CONDA_LOC" `
             -DBUILD_SHARED_LIBS=ON `
             -DENABLE_PYMOAB=ON `
             -DENABLE_IMESH=OFF `
@@ -175,8 +174,6 @@ jobs:
 
       - name: Build wheels
         run: |
-          export DAGMC_ROOT=$GITHUB_WORKSPACE
-          export MOAB_ROOT=$GITHUB_WORKSPACE
           python -m build --wheel
 
       - name: Install PyNE
