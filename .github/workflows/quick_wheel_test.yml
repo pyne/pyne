@@ -20,7 +20,7 @@ jobs:
   main:
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [windows-latest]
 
     runs-on: ${{ matrix.os }}
 
@@ -82,7 +82,7 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE
           # clone and version
-          git clone --branch release/v5.4.1 --single-branch https://bitbucket.org/fathomteam/moab
+          git clone --depth 1 https://bitbucket.org/fathomteam/moab -b 5.4.1
           cd moab
           mkdir -p build
           cd build
@@ -94,6 +94,9 @@ jobs:
               -DENABLE_BLASLAPACK=OFF \
               -DENABLE_FORTRAN=OFF \
               -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE
+            echo "Cmake configured"
+            ls -a
+            cd ..
             make
             make install
           cd $GITHUB_WORKSPACE
