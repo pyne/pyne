@@ -20,7 +20,7 @@ jobs:
   main:
     strategy:
       matrix:
-        os: [windows-latest]
+        os: [ubuntu-latest]
 
     runs-on: ${{ matrix.os }}
 
@@ -35,13 +35,8 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y gfortran libblas-dev liblapack-dev libeigen3-dev libhdf5-dev hdf5-tools
           # hdf5 std directory
-          HDF5_ROOT=/usr/lib/x86_64-linux-gnu/hdf5/serial
-          # need to put libhdf5.so on LD_LIBRARY_PATH
-          if [ -z $LD_LIBRARY_PATH ]; then
-            export LD_LIBRARY_PATH="${HDF5_ROOT}:$GITHUB_WORKSPACE/lib"
-          else
-            export LD_LIBRARY_PATH="${HDF5_ROOT}:$GITHUB_WORKSPACE/lib:$LD_LIBRARY_PATH"
-          fi
+          export HDF5_ROOT=/usr/lib/x86_64-linux-gnu/hdf5/serial
+          export LD_LIBRARY_PATH="${HDF5_ROOT}:$GITHUB_WORKSPACE/lib"
         if: matrix.os == 'ubuntu-latest'
 
       - name: Install Miniconda Windows
@@ -57,7 +52,6 @@ jobs:
           python -m pip install "cython<3" numpy build pytest
 
       - name: Install hdf5 Windows
-        shell: pwsh -l {0}
         run: |
           conda install curl eigen
           conda install -c conda-forge hdf5
@@ -96,11 +90,10 @@ jobs:
           cd $GITHUB_WORKSPACE
           rm -rf $GITHUB_WORKSPACE/moab
           export MOAB_ROOT=$GITHUB_WORKSPACE
-          echo "MOAB installed" 
+          echo "MOAB installed"
         if: matrix.os == 'ubuntu-latest'
 
       - name: Install MOAB Windows
-        shell: pwsh -l {0}
         run: |
           Set-Location $Env:GITHUB_WORKSPACE
           # clone and version
@@ -133,29 +126,6 @@ jobs:
           Write-Host "MOAB installed"
         if: matrix.os == 'windows-latest'
 
-      - name: Install DAGMC Windows
-        shell: pwsh -l {0}
-        run: |
-          Set-Location $Env:GITHUB_WORKSPACE
-          # clone the repository
-          git clone https://github.com/ahnaf-tahmid-chowdhury/DAGMC.git dagmc
-          Set-Location dagmc
-          New-Item -ItemType Directory -Force -Path build
-          Set-Location build
-          # cmake, build, and install
-          cmake ../ -DMOAB_CMAKE_CONFIG=$Env:GITHUB_WORKSPACE\lib\cmake\MOAB `
-            -DMOAB_DIR=$Env:GITHUB_WORKSPACE `
-            -DBUILD_STATIC_LIBS=OFF `
-            -DBUILD_TALLY=ON `
-            -DCMAKE_INSTALL_PREFIX=$Env:GITHUB_WORKSPACE
-          cmake --build . --config Release
-          cmake --install .
-          Set-Location $Env:GITHUB_WORKSPACE
-          Remove-Item -Force -Recurse "dagmc"
-          $Env:DAGMC_ROOT = "$Env:GITHUB_WORKSPACE"
-          Write-Host "DAGMC installed"
-        if: matrix.os == 'windows-latest'
-      
       - name: Install DAGMC Ubuntu
         run: |
           cd $GITHUB_WORKSPACE
@@ -178,20 +148,41 @@ jobs:
           echo "DAGMC installed"
         if: matrix.os == 'ubuntu-latest'
 
+      - name: Install DAGMC Windows
+        run: |
+          Set-Location $Env:GITHUB_WORKSPACE
+          # clone the repository
+          git clone https://github.com/ahnaf-tahmid-chowdhury/DAGMC.git dagmc
+          Set-Location dagmc
+          New-Item -ItemType Directory -Force -Path build
+          Set-Location build
+          # cmake, build, and install
+          cmake ../ -DMOAB_CMAKE_CONFIG=$Env:GITHUB_WORKSPACE\lib\cmake\MOAB `
+            -DMOAB_DIR=$Env:GITHUB_WORKSPACE `
+            -DBUILD_STATIC_LIBS=OFF `
+            -DBUILD_TALLY=ON `
+            -DCMAKE_INSTALL_PREFIX=$Env:GITHUB_WORKSPACE
+          cmake --build . --config Release
+          cmake --install .
+          Set-Location $Env:GITHUB_WORKSPACE
+          Remove-Item -Force -Recurse "dagmc"
+          $Env:DAGMC_ROOT = "$Env:GITHUB_WORKSPACE"
+          Write-Host "DAGMC installed"
+        if: matrix.os == 'windows-latest'
+
       - name: Checkout PyNE
         uses: actions/checkout@v3
 
       - name: Build wheels
-        shell: bash -l {0}
         run: |
           python -m build --wheel
 
       - name: Install PyNE
-        shell: bash -l {0}
         run: |
           python -m pip install dist/pyne*.whl
           nuc_data_make
 
       - name: Test PyNE
-        shell: bash -l {0}  
-        run: cd tests && ./ci-run-tests.sh
+        run: |
+          cd tests
+          pytest -ra ../tests
