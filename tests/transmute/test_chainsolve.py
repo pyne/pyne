@@ -3,7 +3,7 @@ import os
 import pytest
 import warnings
 
-from numpy.testing import dec, assert_array_equal
+from numpy.testing import assert_array_equal
 
 import numpy as np
 import tables as tb
