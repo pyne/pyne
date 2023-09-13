@@ -94,10 +94,9 @@ jobs:
               -DENABLE_BLASLAPACK=OFF \
               -DENABLE_FORTRAN=OFF \
               -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE
-            echo "Cmake configured"
             ls -a
-            cd ..
             make
+            echo "make done"
             make install
           cd $GITHUB_WORKSPACE
           # Remove the temporary directory
