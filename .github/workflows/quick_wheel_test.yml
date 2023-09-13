@@ -88,19 +88,25 @@ jobs:
           cd build
           # cmake, build and install
           cmake ../ -DENABLE_HDF5=ON \
-            -DHDF5_ROOT=$HDF5_ROOT \
+            -DHDF5_ROOT="${CONDA_LOC}" \
+            -DHDF5_hdf5_LIBRARY_RELEASE="${CONDA_LOC}/lib/libhdf5_hl.lib;${CONDA_LOC}/lib/libhdf5.lib;${CONDA_LOC}/lib/zlib.lib;${CONDA_LOC}/lib/libhdf5_cpp.lib" \
+            -DCMAKE_EXE_LINKER_FLAGS="/std:c++latest -DH5_BUILT_AS_DYNAMIC_LIB" \
+            -DCMAKE_MODULE_LINKER_FLAGS="/std:c++latest" \
+            -DCMAKE_SHARED_LINKER_FLAGS="/std:c++latest" \
+            -DCMAKE_STATIC_LINKER_FLAGS="" \
+            -DCMAKE_BUILD_TYPE=Release \
             -DBUILD_SHARED_LIBS=ON \
             -DENABLE_PYMOAB=ON \
             -DENABLE_BLASLAPACK=OFF \
             -DENABLE_FORTRAN=OFF \
             -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE
-          ls -a
           cmake --build . --config Release
           cmake --install .
           cd $GITHUB_WORKSPACE
           # Remove the temporary directory
           rm -rf $GITHUB_WORKSPACE/moab
           echo "MOAB installed"
+          
       - name: Install DAGMC
         shell: bash -l {0}
         run: |
@@ -111,13 +117,13 @@ jobs:
           mkdir -p build
           cd build
           # cmake, build and install
-            cmake ../ -DMOAB_CMAKE_CONFIG=$GITHUB_WORKSPACE/lib/cmake/MOAB \
-              -DMOAB_DIR=$GITHUB_WORKSPACE \
-              -DBUILD_STATIC_LIBS=OFF \
-              -DBUILD_TALLY=ON \
-              -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE
-            make
-            make install
+          cmake ../ -DMOAB_CMAKE_CONFIG=$GITHUB_WORKSPACE/lib/cmake/MOAB \
+            -DMOAB_DIR=$GITHUB_WORKSPACE \
+            -DBUILD_STATIC_LIBS=OFF \
+            -DBUILD_TALLY=ON \
+            -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE
+          cmake --build . --config Release
+          cmake --install .
           cd $GITHUB_WORKSPACE
           # Remove the temporary directory
           rm -rf "$GITHUB_WORKSPACE/dagmc"
