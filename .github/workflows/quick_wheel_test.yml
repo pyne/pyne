@@ -20,7 +20,7 @@ jobs:
   main:
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [ windows-latest]
 
     runs-on: ${{ matrix.os }}
 
@@ -35,12 +35,12 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y gfortran libblas-dev liblapack-dev libeigen3-dev libhdf5-dev hdf5-tools
           # hdf5 std directory
-          hdf5_libdir=/usr/lib/x86_64-linux-gnu/hdf5/serial
+          HDF5_ROOT=/usr/lib/x86_64-linux-gnu/hdf5/serial
           # need to put libhdf5.so on LD_LIBRARY_PATH
           if [ -z $LD_LIBRARY_PATH ]; then
-            export LD_LIBRARY_PATH="${hdf5_libdir}:$GITHUB_WORKSPACE/lib"
+            export LD_LIBRARY_PATH="${HDF5_ROOT}:$GITHUB_WORKSPACE/lib"
           else
-            export LD_LIBRARY_PATH="${hdf5_libdir}:$GITHUB_WORKSPACE/lib:$LD_LIBRARY_PATH"
+            export LD_LIBRARY_PATH="${HDF5_ROOT}:$GITHUB_WORKSPACE/lib:$LD_LIBRARY_PATH"
           fi
         if: matrix.os == 'ubuntu-latest'
 
@@ -49,11 +49,12 @@ jobs:
         with:
           auto-activate-base: true
           activate-environment: ""
-        if: matrix.os == 'windows-2019'
+        if: matrix.os == 'windows-latest'
 
       - name: Install Python Packages
         shell: bash -l {0}
         run: |
+          python -m pip install wheel
           python -m pip install "cython<3" numpy build pytest
 
       - name: Install hdf5 Windows
@@ -64,16 +65,16 @@ jobs:
           conda remove -y yaml-cpp
           echo "HOME_PATH=$GITHUB_WORKSPACE/.." >> $GITHUB_ENV
           echo "CONDA_LOC=C:/Miniconda/Library" >> $GITHUB_ENV
-          echo "hdf5_libdir=C:/Miniconda/Library" >> $GITHUB_ENV
+          echo "HDF5_ROOT=C:/Miniconda/Library" >> $GITHUB_ENV
           echo "EIGEN3_DIR=C:/Miniconda/Library/" >> $GITHUB_ENV
-        if: matrix.os == 'windows-2019'
+        if: matrix.os == 'windows-latest'
 
       - name: Install hdf5 MacOS
         shell: bash -l {0}
         run: |
           brew install hdf5 eigen
           echo "HOME=$GITHUB_WORKSPACE/.." >> $GITHUB_ENV
-          hdf5_libdir=$HDF5_PATH
+          echo "HDF5_ROOT=$HDF5_PATH" >> $GITHUB_ENV
         if: matrix.os == 'macos-latest'
 
       - name: Install MOAB
@@ -86,29 +87,8 @@ jobs:
           mkdir -p build
           cd build
           # cmake, build and install
-          if [ $matrix.os == 'windows-2019' ]; then
-            cmake ../ -DENABLE_BLASLAPACK=OFF \
-              -DENABLE_FORTRAN=OFF \
-              -DENABLE_IMESH=OFF \
-              -DENABLE_TESTING=OFF \
-              -DENABLE_HDF5=ON \
-              -DBUILD_SHARED_LIBS=ON \
-              -G"Visual Studio 16 2019"  \
-              -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE \
-              -DHDF5_ROOT="${CONDA_LOC}" \
-              -DHDF5_hdf5_LIBRARY_RELEASE="${CONDA_LOC}/lib/libhdf5_hl.lib;${CONDA_LOC}/lib/libhdf5.lib;${CONDA_LOC}/lib/zlib.lib;${CONDA_LOC}/lib/libhdf5_cpp.lib" \
-              -DCMAKE_EXE_LINKER_FLAGS="/std:c++latest -DH5_BUILT_AS_DYNAMIC_LIB" \
-              -DCMAKE_MODULE_LINKER_FLAGS="/std:c++latest" \
-              -DCMAKE_SHARED_LINKER_FLAGS="/std:c++latest" \
-              -DCMAKE_STATIC_LINKER_FLAGS="" \
-              -DCMAKE_BUILD_TYPE=Release \
-              -DCMAKE_C_COMPILER="C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.27.29110/bin/Hostx64/x64/cl.exe" \
-              -DCMAKE_CXX_COMPILER="C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.27.29110/bin/Hostx64/x64/cl.exe"
-            cmake --build . --config Release
-            cmake --install . --config Release
-          else
             cmake ../ -DENABLE_HDF5=ON \
-              -DHDF5_ROOT=$hdf5_libdir \
+              -DHDF5_ROOT=$HDF5_ROOT \
               -DBUILD_SHARED_LIBS=ON \
               -DENABLE_PYMOAB=ON \
               -DENABLE_BLASLAPACK=OFF \
@@ -116,7 +96,6 @@ jobs:
               -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE
             make
             make install
-          fi
           cd $GITHUB_WORKSPACE
           # Remove the temporary directory
           rm -rf $GITHUB_WORKSPACE/moab
@@ -126,35 +105,11 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE
           # clone the repository
-          git clone https://github.com/ahnaf-tahmid-chowdhury/DAGMC.git
+          git clone https://github.com/ahnaf-tahmid-chowdhury/DAGMC.git dagmc
           cd dagmc
           mkdir -p build
           cd build
           # cmake, build and install
-          if [ $matrix.os == 'windows-2019' ]; then
-            cmake ../ -G"Visual Studio 16 2019" \
-              -DBUILD_EXE=ON \
-              -DBUILD_STATIC_EXE=ON \
-              -DBUILD_SHARED_LIBS=OFF \
-              -DBUILD_STATIC_LIBS=ON \
-              -DBUILD_TALLY=OFF \
-              -DBUILD_BUILD_OBB=OFF \
-              -DBUILD_UWUW=ON \
-              -DBUILD_MAKE_WATERTIGHT=ON \
-              -DBUILD_OVERLAP_CHECK=OFF \
-              -DBUILD_TESTS=ON \
-              -DMOAB_DIR=../install_dir \
-              -DHDF5_ROOT="${CONDA_LOC}" \
-              -DHDF5_hdf5_LIBRARY_RELEASE="${CONDA_LOC}/lib/libhdf5_hl.lib;${CONDA_LOC}/lib/libhdf5.lib;${CONDA_LOC}/lib/zlib.lib;${CONDA_LOC}/lib/libhdf5_cpp.lib" \
-              -DCMAKE_INSTALL_PREFIX=../install_dir/ \
-              -DCMAKE_EXE_LINKER_FLAGS="" \
-              -DCMAKE_MODULE_LINKER_FLAGS="" \
-              -DCMAKE_SHARED_LINKER_FLAGS="" \
-              -DCMAKE_STATIC_LINKER_FLAGS="" \
-              -DCMAKE_BUILD_TYPE=Release
-            cmake --build . --config Release
-            cmake --install . --config Release
-          else
             cmake ../ -DMOAB_CMAKE_CONFIG=$GITHUB_WORKSPACE/lib/cmake/MOAB \
               -DMOAB_DIR=$GITHUB_WORKSPACE \
               -DBUILD_STATIC_LIBS=OFF \
@@ -162,7 +117,6 @@ jobs:
               -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE
             make
             make install
-          fi
           cd $GITHUB_WORKSPACE
           # Remove the temporary directory
           rm -rf "$GITHUB_WORKSPACE/dagmc"
