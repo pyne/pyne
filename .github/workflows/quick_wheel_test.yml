@@ -20,7 +20,7 @@ jobs:
   main:
     strategy:
       matrix:
-        os: [windows-latest]
+        os: [ubuntu-latest]
 
     runs-on: ${{ matrix.os }}
 
@@ -95,8 +95,6 @@ jobs:
 
       - name: Install MOAB Windows
         run: |
-          Write-Host $Env:CONDA_LOC
-          Write-Host "$Env:CONDA_LOC\lib\libhdf5_hl.lib;$Env:CONDA_LOC\lib\libhdf5.lib;$Env:CONDA_LOC\lib\zlib.lib;$Env:CONDA_LOC\lib\libhdf5_cpp.lib"
           Set-Location $Env:GITHUB_WORKSPACE
           # clone and version
           git clone --depth 1 https://bitbucket.org/fathomteam/moab -b 5.3.0
@@ -177,6 +175,8 @@ jobs:
 
       - name: Build wheels
         run: |
+          export DAGMC_ROOT=$GITHUB_WORKSPACE
+          export MOAB_ROOT=$GITHUB_WORKSPACE
           python -m build --wheel
 
       - name: Install PyNE
