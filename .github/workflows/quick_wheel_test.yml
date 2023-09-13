@@ -76,6 +76,7 @@ jobs:
         if: matrix.os == 'macos-latest'
 
       - name: Install MOAB
+        shell: bash -l {0}
         run: |
           cd $GITHUB_WORKSPACE
           # clone and version
@@ -84,19 +85,22 @@ jobs:
           mkdir -p build
           cd build
           # cmake, build and install
-          cmake ../ -DENABLE_HDF5=ON \
-            -DHDF5_ROOT="$CONDA_LOC" \
-            -DHDF5_hdf5_LIBRARY_RELEASE="$CONDA_LOC/lib/libhdf5_hl.lib;$CONDA_LOC/lib/libhdf5.lib;$CONDA_LOC/lib/zlib.lib;$CONDA_LOC/lib/libhdf5_cpp.lib" \
+          cmake ../ -G"Visual Studio 17 2022" \
+            -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE \
             -DCMAKE_EXE_LINKER_FLAGS="/std:c++latest -DH5_BUILT_AS_DYNAMIC_LIB" \
             -DCMAKE_MODULE_LINKER_FLAGS="/std:c++latest" \
             -DCMAKE_SHARED_LINKER_FLAGS="/std:c++latest" \
             -DCMAKE_STATIC_LINKER_FLAGS="" \
-            -DCMAKE_BUILD_TYPE=Release \
+            -DENABLE_HDF5=ON \
+            -DHDF5_ROOT="$CONDA_LOC" \
+            -DHDF5_hdf5_LIBRARY_RELEASE="$CONDA_LOC/lib/libhdf5_hl.lib;$CONDA_LOC/lib/libhdf5.lib;$CONDA_LOC/lib/zlib.lib;$CONDA_LOC/lib/libhdf5_cpp.lib" \
             -DBUILD_SHARED_LIBS=ON \
             -DENABLE_PYMOAB=ON \
+            -DENABLE_IMESH=OFF \
+            -DENABLE_TESTING=OFF \
             -DENABLE_BLASLAPACK=OFF \
             -DENABLE_FORTRAN=OFF \
-            -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE
+            -DCMAKE_BUILD_TYPE=Release 
           cmake --build . --config Release
           cmake --install .
           cd $GITHUB_WORKSPACE
