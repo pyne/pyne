@@ -66,7 +66,7 @@ jobs:
           echo "CONDA_LOC=C:/Miniconda/Library" >> $GITHUB_ENV
           echo "hdf5_libdir=C:/Miniconda/Library" >> $GITHUB_ENV
           echo "EIGEN3_DIR=C:/Miniconda/Library/" >> $GITHUB_ENV
-        if: matrix.os == 'windows-latest'
+        if: matrix.os == 'windows-2019'
 
       - name: Install hdf5 MacOS
         shell: bash -l {0}
