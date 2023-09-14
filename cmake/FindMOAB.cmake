@@ -47,8 +47,6 @@ else (MOAB_LIBRARIES AND MOAB_INCLUDE_DIRS)
 
   set(MOAB_LIBRARIES
       ${MOAB_LIBRARY} CACHE STRING "Directories to be linked to use MOAB")
-endif()
-
 
   include(FindPackageHandleStandardArgs)
   # handle the QUIETLY and REQUIRED arguments and set MOAB_FOUND to TRUE
