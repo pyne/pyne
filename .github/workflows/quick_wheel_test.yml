@@ -20,7 +20,7 @@ jobs:
   main:
     strategy:
       matrix:
-        os: [windows-latest]
+        os: [ubuntu-latest]
 
     runs-on: ${{ matrix.os }}
 
@@ -32,13 +32,6 @@ jobs:
 
       - name: Checkout PyNE
         uses: actions/checkout@v3
-
-      - name: Install Venv Ubuntu and MacOS
-        shell: bash -l {0}
-        run: |
-          python -m venv $GITHUB_WORKSPACE/env
-          source $GITHUB_WORKSPACE/env/bin/activate
-        if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
 
       - name: Install Miniconda Windows
         uses: conda-incubator/setup-miniconda@v2
@@ -58,7 +51,7 @@ jobs:
           sudo apt-get install -y gfortran libblas-dev liblapack-dev libeigen3-dev libhdf5-dev hdf5-tools
           # hdf5 std directory
           export HDF5_ROOT=/usr/lib/x86_64-linux-gnu/hdf5/serial
-          export LD_LIBRARY_PATH="${HDF5_ROOT}:$GITHUB_WORKSPACE/env/lib"
+          export LD_LIBRARY_PATH="${HDF5_ROOT}:${LD_LIBRARY_PATH}"
         if: matrix.os == 'ubuntu-latest'
 
       - name: Install HDF5 and Eigen Windows
@@ -95,12 +88,12 @@ jobs:
               -DENABLE_PYMOAB=ON \
               -DENABLE_BLASLAPACK=OFF \
               -DENABLE_FORTRAN=OFF \
-              -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/env
+              -DCMAKE_INSTALL_PREFIX=$Python_ROOT_DIR
             make
             make install
           cd $GITHUB_WORKSPACE
           rm -rf $GITHUB_WORKSPACE/moab
-          echo "MOAB_ROOT=$GITHUB_WORKSPACE/env" >> $GITHUB_ENV
+          echo "MOAB_ROOT=$Python_ROOT_DIR" >> $GITHUB_ENV
           echo "MOAB installed"
         if: matrix.os == 'ubuntu-latest'
 
@@ -146,21 +139,20 @@ jobs:
           mkdir -p build
           cd build
           # cmake, build and install
-          cmake ../ -DMOAB_CMAKE_CONFIG=$GITHUB_WORKSPACE/env/lib/cmake/MOAB \
-            -DMOAB_DIR=$GITHUB_WORKSPACE/env \
+          cmake ../ -DMOAB_CMAKE_CONFIG=$Python_ROOT_DIR/lib/cmake/MOAB \
+            -DMOAB_DIR=$Python_ROOT_DIR \
             -DBUILD_STATIC_LIBS=OFF \
             -DBUILD_TALLY=ON \
-            -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/env
+            -DCMAKE_INSTALL_PREFIX=$Python_ROOT_DIR
           make
           make install
           cd $GITHUB_WORKSPACE
           rm -rf "$GITHUB_WORKSPACE/dagmc"
-          echo "DAGMC_ROOT=$GITHUB_WORKSPACE/env" >> $GITHUB_ENV
+          echo "DAGMC_ROOT=$Python_ROOT_DIR" >> $GITHUB_ENV
           echo "DAGMC installed"
         if: matrix.os == 'ubuntu-latest'
 
       - name: Install DAGMC Windows
-        shell: bash -l {0}
         run: |
           Set-Location $Env:GITHUB_WORKSPACE
           # clone the repository
@@ -202,31 +194,13 @@ jobs:
         run: |
           python -m build --wheel
 
-      - name: Install PyNE Ubuntu and MacOS
-        shell: bash -l {0}
-        run: |
-          source $GITHUB_WORKSPACE/env/bin/activate
-          python -m pip install dist/pyne*.whl
-        if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
-
-      - name: Install PyNE Windows
+      - name: Install PyNE
         shell: bash -l {0}
         run: |
           python -m pip install dist/pyne*.whl
-        if: matrix.os == 'windows-latest'
 
-      - name: Test PyNE Ubuntu and MacOS
-        shell: bash -l {0}
-        run: |
-          cd tests
-          source $GITHUB_WORKSPACE/env/bin/activate
-          nuc_data_make
-          pytest -ra ../tests
-        if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
-
-      - name: Test PyNE Windows
+      - name: Test PyNE 
         shell: bash -l {0}
         run: |
           cd tests
           pytest -ra ../tests
-        if: matrix.os == 'windows-latest'
