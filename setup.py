@@ -82,6 +82,7 @@ local_ensdf_tools = [
     ["ensdf_processing/RADD/ELE.in", "ELE.in"],
 ]
 
+
 # TODO: Remove this?
 def copy_ensdf_executables(exe_dest):
     print("Copying ENSDF Executables to install directory")
@@ -167,6 +168,16 @@ cmake_args = [
     "-DPYTHON_EXECUTABLE:FILEPATH=" + sys.executable,
     "-DCMAKE_BUILD_TYPE:STRING=Release",
 ]
+
+# Specify GCC as the compiler for Windows
+if os.name == IS_NT:
+    cmake_args.extend(
+        [
+            "-GNinja",
+            "-DCMAKE_C_COMPILER=gcc",
+            "-DCMAKE_CXX_COMPILER=g++",
+        ]
+    )
 
 # Check for DAGMC_ROOT and MOAB_ROOT
 if "DAGMC_ROOT" in os.environ:
