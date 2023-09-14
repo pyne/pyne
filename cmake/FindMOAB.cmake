@@ -18,26 +18,29 @@ if (MOAB_LIBRARIES AND MOAB_INCLUDE_DIRS)
   set(MOAB_FOUND TRUE)
 else (MOAB_LIBRARIES AND MOAB_INCLUDE_DIRS)
   find_path(MOAB_INCLUDE_DIR NAMES MBiMesh.hpp
-    HINTS ${MOAB_ROOT}\\\\include ${DEPS_INCLUDE_HINTS}
+    HINTS ${MOAB_ROOT}/include ${DEPS_INCLUDE_HINTS}
     PATHS $ENV{HOME}/.local/include
     PATH_SUFFIXES include Include
-    PATHS "${BASE_DIR}\\\\include" "${BASE_DIR}\\\\..\\\\install\\\\include"
+    PATHS "${BASE_DIR}/include" "${BASE_DIR}/../install/include"
     ENV MOAB_ROOT
     NO_DEFAULT_PATH
     )
   find_path(MOAB_INCLUDE_DIR NAMES MBiMesh.hpp
-            HINTS ${MOAB_ROOT}\\\\include ${DEPS_INCLUDE_HINTS})
+            HINTS ${MOAB_ROOT}/include ${DEPS_INCLUDE_HINTS})
 
   find_library(MOAB_LIBRARY NAMES MOAB
-    HINTS ${MOAB_ROOT}\\\\lib ${DEPS_LIB_HINTS}
+    HINTS ${MOAB_ROOT}/lib ${DEPS_LIB_HINTS}
     PATHS $ENV{HOME}/.local/lib
         PATH_SUFFIXES lib Lib
-    PATHS "${BASE_DIR_LIB}" "${BASE_DIR_LIB}\\\\..\\\\..\\\\install\\\\lib"
+    PATHS "${BASE_DIR_LIB}" "${BASE_DIR_LIB}/../../install/lib"
     ENV MOAB_ROOT
     NO_DEFAULT_PATH
     )
   find_library(MOAB_LIBRARY NAMES MOAB
-               HINTS ${MOAB_ROOT}\\\\lib ${DEPS_LIB_HINTS})
+               HINTS ${MOAB_ROOT}/lib ${DEPS_LIB_HINTS})
+
+  string(REPLACE "\\" "/" MOAB_INCLUDE_DIR ${MOAB_INCLUDE_DIR})
+  string(REPLACE "\\" "/" MOAB_LIBRARY ${MOAB_LIBRARY})
 
   set(MOAB_INCLUDE_DIRS
       ${MOAB_INCLUDE_DIR} CACHE PATH "Path to MOAB headers")
