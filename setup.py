@@ -160,6 +160,7 @@ def ensure_nuc_data():
         bdir = os.path.join(os.getcwd(), "build", build_dir)
         nuc_data_make.main(args=["-b", bdir])
 
+# Check for Windows
 IS_NT = os.name == "nt"
 
 # Cmake args
@@ -171,6 +172,7 @@ cmake_args = [
 # Specify GCC as the compiler for Windows
 if IS_NT:
     cmake_args.append("-DCMAKE_CXX_COMPILER:FILEPATH=g++")
+    cmake_args.append("-DPYNE_FAST_COMPILE:BOOL=OFF")
 
 # Check for DAGMC_ROOT and MOAB_ROOT
 if "DAGMC_ROOT" in os.environ:
