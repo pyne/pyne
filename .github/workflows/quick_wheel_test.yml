@@ -45,7 +45,7 @@ jobs:
           python -m pip install wheel
           python -m pip install "cython<3" numpy build pytest
 
-      - name: Install HDF5 Ubuntu
+      - name: Install HDF5 and Eigen Ubuntu
         run: |
           sudo apt-get update
           sudo apt-get install -y gfortran libblas-dev liblapack-dev libeigen3-dev libhdf5-dev hdf5-tools
@@ -60,9 +60,8 @@ jobs:
           conda install -c conda-forge hdf5
           conda remove -y yaml-cpp
           Add-Content -Path $env:GITHUB_ENV -Value "HOME_PATH=$env:GITHUB_WORKSPACE\.."
-          Add-Content -Path $env:GITHUB_ENV -Value "CONDA_LOC=C:\Miniconda\Library"
-          Add-Content -Path $env:GITHUB_ENV -Value "EIGEN3_DIR=C:\Miniconda\Library"
-          Add-Content -Path $env:GITHUB_ENV -Value "HDF5_DIR=C:/Miniconda/Library"
+          Add-Content -Path $env:GITHUB_ENV -Value "CONDA_LOC=C:\\Miniconda\\Library"
+          Add-Content -Path $env:GITHUB_ENV -Value "EIGEN3_DIR=C:\\Miniconda\\Library"
         if: matrix.os == 'windows-latest'
 
       - name: Install HDF5 and Eigen MacOS
@@ -114,7 +113,7 @@ jobs:
             -DCMAKE_STATIC_LINKER_FLAGS="" `
             -DENABLE_HDF5=ON `
             -DHDF5_ROOT="$Env:CONDA_LOC" `
-            -DHDF5_hdf5_LIBRARY_RELEASE="$Env:CONDA_LOC\lib\libhdf5_hl.lib;$Env:CONDA_LOC\lib\libhdf5.lib;$Env:CONDA_LOC\lib\zlib.lib;$Env:CONDA_LOC\lib\libhdf5_cpp.lib" `
+            -DHDF5_hdf5_LIBRARY_RELEASE="$Env:CONDA_LOC\\lib\\libhdf5_hl.lib;$Env:CONDA_LOC\\lib\\libhdf5.lib;$Env:CONDA_LOC\\lib\\zlib.lib;$Env:CONDA_LOC\\lib\\libhdf5_cpp.lib" `
             -DBUILD_SHARED_LIBS=ON `
             -DENABLE_PYMOAB=ON `
             -DENABLE_IMESH=OFF `
@@ -126,7 +125,7 @@ jobs:
           cmake --install .
           Set-Location $Env:GITHUB_WORKSPACE
           Remove-Item -Force -Recurse moab
-          Add-Content -Path $env:GITHUB_ENV -Value "MOAB_ROOT=C:/Miniconda/Library"
+          Add-Content -Path $env:GITHUB_ENV -Value "MOAB_ROOT=C:\\Miniconda\\Library"
           Write-Host "MOAB installed"
         if: matrix.os == 'windows-latest'
 
@@ -175,8 +174,7 @@ jobs:
             -DBUILD_TESTS=OFF `
             -DMOAB_DIR="$Env:CONDA_LOC" `
             -DHDF5_ROOT="$Env:CONDA_LOC" `
-            -DHDF5_DIR="$Env:HDF5_DIR" `
-            -DHDF5_hdf5_LIBRARY_RELEASE="$Env:CONDA_LOC\lib\libhdf5_hl.lib;$Env:CONDA_LOC\lib\libhdf5.lib;$Env:CONDA_LOC\lib\zlib.lib;$Env:CONDA_LOC\lib\libhdf5_cpp.lib" `
+            -DHDF5_hdf5_LIBRARY_RELEASE="$Env:CONDA_LOC\\lib\\libhdf5_hl.lib;$Env:CONDA_LOC\\lib\\libhdf5.lib;$Env:CONDA_LOC\\lib\\zlib.lib;$Env:CONDA_LOC\\lib\\libhdf5_cpp.lib" `
             -DCMAKE_EXE_LINKER_FLAGS="" `
             -DCMAKE_MODULE_LINKER_FLAGS="" `
             -DCMAKE_SHARED_LINKER_FLAGS="" `
@@ -186,17 +184,15 @@ jobs:
           cmake --install .
           Set-Location $Env:GITHUB_WORKSPACE
           Remove-Item -Force -Recurse "dagmc"
-          Add-Content -Path $env:GITHUB_ENV -Value "DAGMC_ROOT=C:/Miniconda/Library"
+          Add-Content -Path $env:GITHUB_ENV -Value "DAGMC_ROOT=C:\\Miniconda\\Library"
           Write-Host "DAGMC installed"
         if: matrix.os == 'windows-latest'
 
       - name: Build wheels
-        shell: bash -l {0}
         run: |
           python -m build --wheel
 
       - name: Install PyNE
-        shell: bash -l {0}
         run: |
           python -m pip install dist/pyne*.whl
           nuc_data_make
