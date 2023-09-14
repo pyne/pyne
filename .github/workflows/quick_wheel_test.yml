@@ -20,7 +20,7 @@ jobs:
   main:
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [windows-latest]
 
     runs-on: ${{ matrix.os }}
 
@@ -170,7 +170,7 @@ jobs:
             -DBUILD_OVERLAP_CHECK=OFF `
             -DBUILD_TESTS=OFF `
             -DMOAB_DIR="$Env:GITHUB_WORKSPACE" `
-            -DMOAB_CMAKE_CONFIG="$Env:GITHUB_WORKSPACE\lib\cmake\MOAB" `
+            -DMOAB_CMAKE_CONFIG="$Env:GITHUB_WORKSPACE/lib/cmake/MOAB" `
             -DHDF5_ROOT="$Env:CONDA_LOC" `
             -DHDF5_hdf5_LIBRARY_RELEASE="$Env:CONDA_LOC/lib/libhdf5_hl.lib;$Env:CONDA_LOC/lib/libhdf5.lib;$Env:CONDA_LOC/lib/zlib.lib;$Env:CONDA_LOC/lib/libhdf5_cpp.lib" `
             -DCMAKE_INSTALL_PREFIX="$Env:GITHUB_WORKSPACE" `
