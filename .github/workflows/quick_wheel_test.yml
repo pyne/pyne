@@ -133,7 +133,7 @@ jobs:
           cmake --install .
           Set-Location $Env:GITHUB_WORKSPACE
           Remove-Item -Force -Recurse moab
-          Add-Content -Path $env:GITHUB_ENV -Value "MOAB_ROOT=Env:CONDA_LOC_BASH"
+          Add-Content -Path $env:GITHUB_ENV -Value "MOAB_ROOT=Env:CONDA_LOC"
           Write-Host "MOAB installed"
         if: matrix.os == 'windows-latest'
 
@@ -162,40 +162,39 @@ jobs:
       - name: Install DAGMC Windows
         shell: bash -l {0}
         run: |
-          cd $GITHUB_WORKSPACE
+          Set-Location $Env:GITHUB_WORKSPACE
           # clone the repository
           git clone https://github.com/ahnaf-tahmid-chowdhury/DAGMC.git dagmc
-          cd dagmc
-          mkdir -p build
-          cd build
+          Set-Location dagmc
+          New-Item -ItemType Directory -Force -Path build
+          Set-Location build
           # cmake, build, and install
-          cmake ../  -G "Visual Studio 17 2022" \
-            -DCMAKE_INSTALL_PREFIX=$CONDA_LOC_BASH \
-            -DBUILD_EXE=ON \
-            -DBUILD_STATIC_EXE=ON \
-            -DBUILD_SHARED_LIBS=OFF \
-            -DBUILD_STATIC_LIBS=ON \
-            -DBUILD_TALLY=OFF \
-            -DBUILD_BUILD_OBB=OFF \
-            -DBUILD_UWUW=ON \
-            -DBUILD_MAKE_WATERTIGHT=ON \
-            -DBUILD_OVERLAP_CHECK=OFF \
-            -DBUILD_TESTS=OFF \
-            -DMOAB_DIR=$CONDA_LOC_BASH \
-            -DMOAB_CMAKE_CONFIG="${CONDA_LOC_BASH}/lib/cmake/MOAB" \
-            -DHDF5_ROOT=${CONDA_LOC_BASH} \
-            -DHDF5_hdf5_LIBRARY_RELEASE="${CONDA_LOC_BASH}/lib/libhdf5_hl.lib;${CONDA_LOC_BASH}/lib/libhdf5.lib;${CONDA_LOC_BASH}/lib/zlib.lib;${CONDA_LOC_BASH}/lib/libhdf5_cpp.lib" \
-            -DCMAKE_EXE_LINKER_FLAGS="" \
-            -DCMAKE_MODULE_LINKER_FLAGS="" \
-            -DCMAKE_SHARED_LINKER_FLAGS="" \
-            -DCMAKE_STATIC_LINKER_FLAGS="" \
+          cmake ../  -G "Visual Studio 17 2022" `
+            -DCMAKE_INSTALL_PREFIX="$Env:CONDA_LOC" `
+            -DBUILD_EXE=ON `
+            -DBUILD_STATIC_EXE=ON `
+            -DBUILD_SHARED_LIBS=OFF `
+            -DBUILD_STATIC_LIBS=ON `
+            -DBUILD_TALLY=OFF `
+            -DBUILD_BUILD_OBB=OFF `
+            -DBUILD_UWUW=ON `
+            -DBUILD_MAKE_WATERTIGHT=ON `
+            -DBUILD_OVERLAP_CHECK=OFF `
+            -DBUILD_TESTS=OFF `
+            -DMOAB_DIR="$Env:CONDA_LOC" `
+            -DHDF5_ROOT="$Env:CONDA_LOC" `
+            -DHDF5_hdf5_LIBRARY_RELEASE="$Env:CONDA_LOC\lib\libhdf5_hl.lib;$Env:CONDA_LOC\lib\libhdf5.lib;$Env:CONDA_LOC\lib\zlib.lib;$Env:CONDA_LOC\lib\libhdf5_cpp.lib" `
+            -DCMAKE_EXE_LINKER_FLAGS="" `
+            -DCMAKE_MODULE_LINKER_FLAGS="" `
+            -DCMAKE_SHARED_LINKER_FLAGS="" `
+            -DCMAKE_STATIC_LINKER_FLAGS="" `
             -DCMAKE_BUILD_TYPE=Release
           cmake --build . --config Release
           cmake --install .
-          cd $GITHUB_WORKSPACE
-          rm -rf "$GITHUB_WORKSPACE/dagmc"
-          echo "DAGMC_ROOT=$CONDA_LOC_BASH" >> $GITHUB_ENV
-          echo "DAGMC installed"
+          Set-Location $Env:GITHUB_WORKSPACE
+          Remove-Item -Force -Recurse "dagmc"
+          Add-Content -Path $env:GITHUB_ENV -Value "DAGMC_ROOT=$Env:CONDA_LOC"
+          Write-Host "DAGMC installed"
         if: matrix.os == 'windows-latest'
 
       - name: Build wheels
