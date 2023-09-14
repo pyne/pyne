@@ -20,7 +20,7 @@ jobs:
   main:
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [windows-latest]
 
     runs-on: ${{ matrix.os }}
 
