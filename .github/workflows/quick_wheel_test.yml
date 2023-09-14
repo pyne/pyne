@@ -179,7 +179,8 @@ jobs:
             -DBUILD_MAKE_WATERTIGHT=ON `
             -DBUILD_OVERLAP_CHECK=OFF `
             -DBUILD_TESTS=OFF `
-            -DMOAB_DIR="C:/Miniconda/Library/" `
+            -DMOAB_DIR="$Env:CONDA_LOC" `
+            -DMOAB_ROOT="C:/Miniconda/Library/" `
             -DMOAB_CMAKE_CONFIG="$Env:CONDA_LOC\lib\cmake\MOAB" `
             -DHDF5_ROOT="$Env:CONDA_LOC" `
             -DHDF5_hdf5_LIBRARY_RELEASE="$Env:CONDA_LOC\lib\libhdf5_hl.lib;$Env:CONDA_LOC\lib\libhdf5.lib;$Env:CONDA_LOC\lib\zlib.lib;$Env:CONDA_LOC\lib\libhdf5_cpp.lib" `
