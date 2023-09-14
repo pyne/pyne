@@ -20,7 +20,7 @@ jobs:
   main:
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [windows-latest]
 
     runs-on: ${{ matrix.os }}
 
@@ -61,7 +61,6 @@ jobs:
           conda remove -y yaml-cpp
           Add-Content -Path $env:GITHUB_ENV -Value "HOME_PATH=$env:GITHUB_WORKSPACE\.."
           Add-Content -Path $env:GITHUB_ENV -Value "CONDA_LOC=C:\Miniconda\Library"
-          Add-Content -Path $env:GITHUB_ENV -Value "CONDA_LOC_BASH=C:/Miniconda/Library"
           Add-Content -Path $env:GITHUB_ENV -Value "EIGEN3_DIR=C:\Miniconda\Library\"
         if: matrix.os == 'windows-latest'
 
@@ -126,7 +125,7 @@ jobs:
           cmake --install .
           Set-Location $Env:GITHUB_WORKSPACE
           Remove-Item -Force -Recurse moab
-          Add-Content -Path $env:GITHUB_ENV -Value "MOAB_ROOT=Env:CONDA_LOC"
+          Add-Content -Path $env:GITHUB_ENV -Value "MOAB_ROOT=C:/Miniconda/Library"
           Write-Host "MOAB installed"
         if: matrix.os == 'windows-latest'
 
@@ -185,7 +184,7 @@ jobs:
           cmake --install .
           Set-Location $Env:GITHUB_WORKSPACE
           Remove-Item -Force -Recurse "dagmc"
-          Add-Content -Path $env:GITHUB_ENV -Value "DAGMC_ROOT=$Env:CONDA_LOC"
+          Add-Content -Path $env:GITHUB_ENV -Value "DAGMC_ROOT=C:/Miniconda/Library"
           Write-Host "DAGMC installed"
         if: matrix.os == 'windows-latest'
 
