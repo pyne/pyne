@@ -224,7 +224,7 @@ macro(pyne_set_fast_compile)
 endmacro()
 
 macro(pyne_download_platform)
-if(NOT PYNE_FAST_COMPILE)
+if(PYNE_FAST_COMPILE)
   # Download bateman solver from PyNE data
   download_platform("http://raw.githubusercontent.com/pyne/data/master" "decay"
                       ".cpp" ".s")
