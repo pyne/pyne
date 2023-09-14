@@ -9,8 +9,6 @@ from distutils import sysconfig
 from contextlib import contextmanager
 from skbuild import setup
 
-IS_NT = os.name == "nt"
-
 # import src into pythonpath - needed to actually run decaygen/atomicgen
 if "." not in sys.path:
     sys.path.append(os.getcwd() + "/src")
@@ -169,15 +167,12 @@ cmake_args = [
     "-DCMAKE_BUILD_TYPE:STRING=Release",
 ]
 
+IS_NT = os.name == "nt"
+
 # Specify GCC as the compiler for Windows
-if os.name == IS_NT:
-    cmake_args.extend(
-        [
-            "-GNinja",
-            "-DCMAKE_C_COMPILER=gcc",
-            "-DCMAKE_CXX_COMPILER=g++",
-        ]
-    )
+if IS_NT:
+    os.environ["CC"] = "gcc"
+    os.environ["CXX"] = "g++"
 
 # Check for DAGMC_ROOT and MOAB_ROOT
 if "DAGMC_ROOT" in os.environ:
