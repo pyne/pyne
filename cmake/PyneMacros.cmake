@@ -216,16 +216,6 @@ macro(pyne_configure_rpath)
   MESSAGE("-- CMAKE_INSTALL_RPATH: ${CMAKE_INSTALL_RPATH}")
 endmacro()
 
-macro(pyne_download_platform)
-  # Download bateman solver from PyNE data
-  download_platform("http://raw.githubusercontent.com/pyne/data/master" "decay"
-                      ".cpp" ".s")
-
-  # Download CRAM solver from PyNE data
-  download_platform("http://raw.githubusercontent.com/pyne/data/master" "cram"
-                         ".c" ".s")
-endmacro()
-
 macro(pyne_set_fast_compile)
   if(NOT DEFINED PYNE_FAST_COMPILE)
     set(PYNE_FAST_COMPILE TRUE)
@@ -233,6 +223,17 @@ macro(pyne_set_fast_compile)
   message(STATUS "PyNE Fast Compile: ${PYNE_FAST_COMPILE}")
 endmacro()
 
+macro(pyne_download_platform)
+if(NOT PYNE_FAST_COMPILE)
+  # Download bateman solver from PyNE data
+  download_platform("http://raw.githubusercontent.com/pyne/data/master" "decay"
+                      ".cpp" ".s")
+
+  # Download CRAM solver from PyNE data
+  download_platform("http://raw.githubusercontent.com/pyne/data/master" "cram"
+                         ".c" ".s")
+endif()
+endmacro()
 
 # fast compile with assembly, if available.
 macro(fast_compile _srcname _gnuflags _clangflags _otherflags)
