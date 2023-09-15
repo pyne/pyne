@@ -106,6 +106,7 @@ if(NOT (${HDF5_VERSION} VERSION_LESS 1.12.0))
    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DH5Oget_info_by_idx_vers=1 -DH5O_info_t_vers=1 -DH5Oget_info_by_name_vers=1")
 endif()
 
+
 # Find MOAB
 MESSAGE("-- MOAB root: ${MOAB_ROOT}")
 find_package(MOAB)
@@ -119,6 +120,7 @@ if(${MOAB_FOUND})
     link_directories(${MOAB_LIBRARY_DIRS})
   endif(APPLE)
 endif(${MOAB_FOUND})
+
 
 # Look for DAGMC if requested
 if(${MOAB_FOUND})
@@ -136,6 +138,7 @@ if(${MOAB_FOUND})
 else(${MOAB_FOUND})
   message("-- DAGMC: Not searching because MOAB was not found.")
 endif(${MOAB_FOUND})
+
 
 # Find Python
 find_package(Python3 COMPONENTS Interpreter Development)
