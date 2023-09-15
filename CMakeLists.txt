@@ -156,12 +156,6 @@ set(LIBS ${LIBS} ${PYTHON_LIBRARIES})
 message("-- PYTHON_EXECUTABLE: ${PYTHON_EXECUTABLE}")
 message("-- PYTHON_SITE_PACKAGES: ${PYTHON_SITE_PACKAGES}")
 
-
-# Find NumPy
-find_package(Numpy REQUIRED)
-include_directories("${NUMPY_INCLUDE_DIR}")
-
-
 pyne_setup_fortran()
 
 # Find f2py, if building spatial solver
