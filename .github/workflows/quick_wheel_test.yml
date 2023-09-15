@@ -189,7 +189,6 @@ jobs:
         if: matrix.os == 'windows-latest'
 
       - name: Build wheels
-        shell: bash -l {0}
         run: |
           python -m build --wheel
 
