@@ -125,7 +125,7 @@ jobs:
           cmake --install .
           Set-Location $Env:GITHUB_WORKSPACE
           Remove-Item -Force -Recurse moab
-          Add-Content -Path $env:GITHUB_ENV -Value "MOAB_ROOT=C:\\Miniconda\\Library"
+          Add-Content -Path $env:GITHUB_ENV -Value "MOAB_ROOT=C:\Miniconda\Library"
           Write-Host "MOAB installed"
         if: matrix.os == 'windows-latest'
 
@@ -184,7 +184,7 @@ jobs:
           cmake --install .
           Set-Location $Env:GITHUB_WORKSPACE
           Remove-Item -Force -Recurse "dagmc"
-          Add-Content -Path $env:GITHUB_ENV -Value "DAGMC_ROOT=C:\\Miniconda\\Library"
+          Add-Content -Path $env:GITHUB_ENV -Value "DAGMC_ROOT=C:\Miniconda\Library"
           Write-Host "DAGMC installed"
         if: matrix.os == 'windows-latest'
 
