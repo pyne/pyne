@@ -19,7 +19,6 @@ if (MOAB_LIBRARIES AND MOAB_INCLUDE_DIRS)
 else (MOAB_LIBRARIES AND MOAB_INCLUDE_DIRS)
   find_path(MOAB_INCLUDE_DIR NAMES MBiMesh.hpp
     HINTS ${MOAB_ROOT}/include ${DEPS_INCLUDE_HINTS}
-    PATHS $ENV{HOME}/.local/include
     PATH_SUFFIXES include Include
     PATHS "${BASE_DIR}/include" "${BASE_DIR}/../install/include"
     ENV MOAB_ROOT
