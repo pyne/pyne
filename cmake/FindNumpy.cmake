@@ -23,19 +23,12 @@ if(PYTHONINTERP_FOUND)
         endif()
     endif()
 
-    find_package_handle_standard_args(Numpy REQUIRED_VARS NUMPY_INCLUDE_DIR VERSION_VAR NUMPY_VERSION_STRING)
+    find_package_handle_standard_args(NumPy REQUIRED_VARS NUMPY_INCLUDE_DIR VERSION_VAR NUMPY_VERSION_STRING)
 
-    if(NUMPY_FOUND AND NOT TARGET Numpy::Numpy)
-        add_library(Numpy::Numpy UNKNOWN IMPORTED)
-        set_target_properties(Numpy::Numpy PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${NUMPY_INCLUDE_DIR}")
+    if(NUMPY_FOUND AND NOT TARGET NumPy::NumPy)
+        add_library(NumPy::NumPy UNKNOWN IMPORTED)
+        set_target_properties(NumPy::NumPy PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${NUMPY_INCLUDE_DIR}")
     endif()
-endif()
-
-# Check for NumPy
-if (NUMPY_FOUND)
-    message(STATUS "Found NumPy at ${NUMPY_INCLUDE_DIR}")
-else()
-    message(STATUS "NumPy not found")
 endif()
 
 mark_as_advanced(NUMPY_INCLUDE_DIR NUMPY_VERSION_STRING)
