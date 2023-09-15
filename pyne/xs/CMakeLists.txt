@@ -7,5 +7,5 @@ message("-- Include paths for ${CMAKE_CURRENT_SOURCE_DIR}: ${inc_dirs}")
 set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/xs/models.pyx"
                             PROPERTIES CYTHON_IS_CXX TRUE)
 cython_add_module(models models.pyx)
-target_link_libraries(models pyne)
+target_link_libraries(models PRIVATE pyne)
 install(TARGETS models LIBRARY DESTINATION "${PYTHON_SITE_PACKAGES}/pyne/xs")
