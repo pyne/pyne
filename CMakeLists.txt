@@ -63,30 +63,44 @@ MESSAGE("-- Dependency Include Hints (DEPS_INCLUDE_HINTS): ${DEPS_INCLUDE_HINTS}
 # Find Libraries
 #
 
-# Find HDF5
-MESSAGE("-- HDF5 Root: ${HDF5_ROOT}")
-if(HDF5_ROOT)
-  FIND_PACKAGE(HDF5 REQUIRED)
-else()
-  FIND_PACKAGE(HDF5)
-endif()
-if(NOT HDF5_FOUND AND NOT HDF5_ROOT)
-  MESSAGE("--    HDF5 not found on empty HDF5_ROOT, "
-          "setting to DEPS_ROOT_DIR: ${DEPS_ROOT_DIR}")
+# Set the root directory for HDF5
+if(NOT DEFINED HDF5_ROOT)
+  message( STATUS "HDF5_ROOT not set. Setting to ${DEPS_ROOT_DIR}")
   set(HDF5_ROOT "${DEPS_ROOT_DIR}")
-  FIND_PACKAGE(HDF5 REQUIRED)
 endif()
-ADD_DEFINITIONS(${HDF5_DEFINITIONS})
-include_directories("${HDF5_INCLUDE_DIRS}")
-if(NOT HDF5_LIBRARY_DIRS STREQUAL "")
-  link_directories(${HDF5_LIBRARY_DIRS})
+
+# Find HDF5
+find_package(HDF5 REQUIRED)
+
+# Add the HDF5 definitions to the compiler command line
+add_definitions(${HDF5_DEFINITIONS})
+
+# Include the HDF5 include directories
+include_directories(${HDF5_INCLUDE_DIRS})
+
+# Link the HDF5 libraries
+set(LIBS ${LIBS} ${HDF5_LIBRARIES})
+
+# Print out some information about the HDF5 setup
+message(STATUS "HDF5 Root: ${HDF5_ROOT}")
+message(STATUS "HDF5 Include directory: ${HDF5_INCLUDE_DIRS}")
+message(STATUS "HDF5 Libraries: ${HDF5_LIBRARIES}")
+message(STATUS "HDF5 library version: ${HDF5_VERSION}")
+
+# Set up shared and static versions of the HDF5 libraries
+set(HDF5_LIBRARIES_SHARED ${HDF5_LIBRARIES})
+if(BUILD_STATIC_LIBS)
+  string(REPLACE ${CMAKE_SHARED_LIBRARY_SUFFIX} ${CMAKE_STATIC_LIBRARY_SUFFIX}
+         HDF5_LIBRARIES_STATIC "${HDF5_LIBRARIES_SHARED}")
 endif()
-set(LIBS_HDF5 ${HDF5_C_LIBRARIES})
-set(LIBS ${LIBS} ${HDF5_C_LIBRARIES})
-MESSAGE("--    HDF5 Include directory: ${HDF5_INCLUDE_DIRS}")
-MESSAGE("--    HDF5 Library directories: ${HDF5_LIBRARY_DIRS}")
-MESSAGE("--    HDF5 Libraries: ${HDF5_C_LIBRARIES}")
-MESSAGE("--    HDF5 library version: ${HDF5_VERSION}")
+if(NOT BUILD_SHARED_LIBS)
+  set(HDF5_LIBRARIES_SHARED)
+endif()
+
+# Print out some more information about the HDF5 setup
+message(STATUS "HDF5_LIBRARIES_SHARED: ${HDF5_LIBRARIES_SHARED}")
+message(STATUS "HDF5_LIBRARIES_STATIC: ${HDF5_LIBRARIES_STATIC}")
+
 
 # Version 1.12 of HDF5 deprecates the H5Oget_info_by_idx(),
 # H5O_info_t() and H5Oget_info_by_name() interfaces.
@@ -96,10 +110,12 @@ if(NOT (${HDF5_VERSION} VERSION_LESS 1.12.0))
    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DH5Oget_info_by_idx_vers=1 -DH5O_info_t_vers=1 -DH5Oget_info_by_name_vers=1")
 endif()
 
-# user may have set a search path
-MESSAGE("-- MOAB Root: ${MOAB_ROOT}")
-find_package(MOAB)
-message("-- MOAB Found: ${MOAB_FOUND}")
+# Find MOAB
+MESSAGE("-- MOAB ROOT: ${MOAB_ROOT}")
+if (NOT MOAB_ROOT)
+  find_package(MOAB)
+endif (NOT MOAB_ROOT)
+
 if(${MOAB_FOUND})
   include_directories(${MOAB_INCLUDE_DIRS})
   get_filename_component(MOAB_LIBRARY_DIRS ${MOAB_LIBRARY} PATH)

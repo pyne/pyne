@@ -1,59 +1,50 @@
-# - Try to find MOAB
-# Once done this will define
-#
-#  MOAB_FOUND - system has MOAB
-#  MOAB_INCLUDE_DIRS - the MOAB include directory
-#  MOAB_LIBRARIES - Link these to use MOAB
-#  MOAB_DEFINITIONS - Compiler switches required for using MOAB
-#
-#  Copyright (c) 2010 Roman Putanowicz <putanowr@l5.pk.edu.pl>
-#
-#  Redistribution and use is allowed according to the terms of the New
-#  BSD license.
-#  For details see the accompanying COPYING-CMAKE-SCRIPTS file.
-#
+# Find MOAB cmake config file
+# Only used to determine the location of the HDF5 with which MOAB was built
+set(MOAB_SEARCH_DIRS)
+file(GLOB MOAB_SEARCH_DIRS ${MOAB_SEARCH_DIRS} "${MOAB_ROOT}/lib*/cmake/MOAB")
+string(REPLACE "\n" ";" MOAB_SEARCH_DIRS "${MOAB_SEARCH_DIRS}")
+find_path(MOAB_CMAKE_CONFIG
+  NAMES MOABConfig.cmake
+  PATHS ${MOAB_SEARCH_DIRS}
+  NO_DEFAULT_PATH
+)
 
-if (MOAB_LIBRARIES AND MOAB_INCLUDE_DIRS)
-  # in cache already
-  set(MOAB_FOUND TRUE)
-else (MOAB_LIBRARIES AND MOAB_INCLUDE_DIRS)
-  find_path(MOAB_INCLUDE_DIR NAMES MBiMesh.hpp
-    HINTS ${MOAB_ROOT}/include ${DEPS_INCLUDE_HINTS}
-    PATHS $ENV{HOME}/.local/include
-    PATH_SUFFIXES include Include
-    PATHS "${BASE_DIR}/include" "${BASE_DIR}/../install/include"
-    ENV MOAB_ROOT
+include_directories(${HDF5_INCLUDE_DIRS})
+if(MSVC)
+    set(BUILD_STATIC_LIBS TRUE)
+    set(BUILD_SHARED_LIBS OFF)
+endif()
+
+# Find MOAB library (shared)
+if (BUILD_SHARED_LIBS)
+  set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_SHARED_LIBRARY_SUFFIX})
+  find_library(MOAB_LIBRARIES_SHARED
+    NAMES MOAB
+    HINTS ${MOAB_LIBRARY_DIRS}
     NO_DEFAULT_PATH
-    )
-  find_path(MOAB_INCLUDE_DIR NAMES MBiMesh.hpp
-            HINTS ${MOAB_ROOT}/include ${DEPS_INCLUDE_HINTS})
+  )
+  list(APPEND MOAB_LIBRARIES_SHARED)
+endif ()
 
-  find_library(MOAB_LIBRARY NAMES MOAB
-    HINTS ${MOAB_ROOT}/lib ${DEPS_LIB_HINTS}
-    PATHS $ENV{HOME}/.local/lib
-        PATH_SUFFIXES lib Lib
-    PATHS "${BASE_DIR_LIB}" "${BASE_DIR_LIB}/../../install/lib"
-    ENV MOAB_ROOT
+# Find MOAB library (static)
+if (BUILD_STATIC_LIBS)
+  set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_STATIC_LIBRARY_SUFFIX})
+  find_library(MOAB_LIBRARIES_STATIC
+    NAMES MOAB
+    HINTS ${MOAB_LIBRARY_DIRS}
     NO_DEFAULT_PATH
-    )
-  find_library(MOAB_LIBRARY NAMES MOAB
-               HINTS ${MOAB_ROOT}/lib ${DEPS_LIB_HINTS})
+  )
+  list(APPEND MOAB_LIBRARIES_STATIC)
+endif ()
 
-  set(MOAB_INCLUDE_DIRS
-      ${MOAB_INCLUDE_DIR} CACHE PATH "Path to MOAB headers")
+message(STATUS "MOAB_LIBRARY_DIRS: ${MOAB_LIBRARY_DIRS}")
+message(STATUS "MOAB_LIBRARIES_SHARED: ${MOAB_LIBRARIES_SHARED}")
+message(STATUS "MOAB_LIBRARIES_STATIC: ${MOAB_LIBRARIES_STATIC}")
 
-  set(MOAB_LIBRARIES
-      ${MOAB_LIBRARY} CACHE STRING "Directories to be linked to use MOAB")
-
-  include(FindPackageHandleStandardArgs)
-  # handle the QUIETLY and REQUIRED arguments and set MOAB_FOUND to TRUE
-  # if all listed variables are TRUE
-  find_package_handle_standard_args(MOAB  DEFAULT_MSG
-      MOAB_LIBRARY MOAB_INCLUDE_DIRS)
-  if (MOAB_FOUND)
-    message(STATUS "MOAB header files: ${MOAB_INCLUDE_DIRS}")
-    message(STATUS "MOAB library: ${MOAB_LIBRARY}")
-  endif (MOAB_FOUND)
-  mark_as_advanced(MOAB_INCLUDE_DIRS MOAB_LIBRARIES)
-endif (MOAB_LIBRARIES AND MOAB_INCLUDE_DIRS)
+if (MOAB_INCLUDE_DIRS AND (MOAB_LIBRARIES_SHARED OR NOT BUILD_SHARED_LIBS) AND
+    (MOAB_LIBRARIES_STATIC OR NOT BUILD_STATIC_LIBS))
+  message(STATUS "Found MOAB at ${MOAB_ROOT}")
+else ()
+  message(STATUS "MOAB not found")
+endif ()
 
