@@ -26,6 +26,7 @@ Next Version
    * Update run conditions for workflows (#1494)
    * Fix gamma intensity calculation (#1496)
    * Add workflow to build virtual machines based on Dockerfile (#1490)
+   * Replacing '#define isnan' with 'std::isnan' (#1502)
 
 v0.7.7
 ======

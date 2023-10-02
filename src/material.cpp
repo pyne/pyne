@@ -2000,10 +2000,10 @@ std::vector<std::pair<double, double> > pyne::Material::normalize_radioactivity(
   std::vector<std::pair<double, double> > normed;
   double sum = 0.0;
   for (int i = 0; i < unnormed.size(); ++i) {
-    if (!isnan(unnormed[i].second)) sum = sum + unnormed[i].second;
+    if (!std::isnan(unnormed[i].second)) sum = sum + unnormed[i].second;
   }
   for (int i = 0; i < unnormed.size(); ++i) {
-    if (!isnan(unnormed[i].second)) {
+    if (!std::isnan(unnormed[i].second)) {
       normed.push_back(
           std::make_pair(unnormed[i].first, (unnormed[i].second) / sum));
     }
