@@ -47,76 +47,12 @@ endmacro()
 # Fortran settings
 # FFLAGS depend on the compiler
 macro(pyne_setup_fortran)
-  # languages
-  enable_language(Fortran)
-
-  # Augment the Fortran implicit link libraries
-  message(STATUS "CMAKE_Fortran_IMPLICIT_LINK_DIRECTORIES: "
-          "${CMAKE_Fortran_IMPLICIT_LINK_DIRECTORIES}")
-  if (APPLE)
-    message(STATUS "CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES Before Fix: "
-            "${CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES}")
-    set(LIBGCC_S)
-    # The previous method found the gcc_s library by version,
-    # find_library(LIBGCC_S_PATH gcc_s.${gcc_s_ver}
-    # but this always found the library regardless of version, and then
-    # the name as set was different from what was found.  This new way
-    # ensures that the name is consistent with what was found.
-    set(LIBGCC_S_PATH)
-    foreach (gcc_s_ver 3 2 1)
-      find_library(LIBGCC_S_PATH gcc_s.${gcc_s_ver}
-        PATHS ${CMAKE_Fortran_IMPLICIT_LINK_DIRECTORIES}
-        NODEFAULTPATH
-        ${DEPS_LIB_HINTS}
-      )
-      if (LIBGCC_S_PATH)
-        break()
-      endif()
-    endforeach()
-    message(STATUS "LIBGCC_S_PATH = ${LIBGCC_S_PATH}.")
-    if(LIBGCC_S_PATH)
-      get_filename_component(LIBGCC_S ${LIBGCC_S_PATH} NAME)
-      # Pull off leading lib and trailing .dylib.
-      string(REGEX REPLACE "^lib" "" LIBGCC_S ${LIBGCC_S})
-      string(REGEX REPLACE "\\.dylib$" "" LIBGCC_S ${LIBGCC_S})
+    enable_language(Fortran)
+    if(NOT CMAKE_Fortran_COMPILER)
+        message(FATAL_ERROR "No Fortran compiler found")
     endif()
-    message(STATUS "LIBGCC_S = ${LIBGCC_S}.")
-    if(LIBGCC_S)
-      set(CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES
-          ${CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES} ${LIBGCC_S})
-    endif()
-  endif()
-  message(STATUS "CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES: "
-          "${CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES}")
-
-  get_filename_component(Fortran_COMPILER_NAME ${CMAKE_Fortran_COMPILER} NAME)
-
-  if(Fortran_COMPILER_NAME MATCHES "gfortran.*")
-    # gfortran
-    set(CMAKE_Fortran_FLAGS_RELEASE
-        "-funroll-all-loops -fpic -fdefault-real-8 -fdefault-double-8")
-    set(CMAKE_Fortran_FLAGS_DEBUG
-        "-fpic -fdefault-real-8 -fdefault-double-8")
-  elseif(Fortran_COMPILER_NAME MATCHES "ifort.*")
-    # ifort (untested)
-    set(CMAKE_Fortran_FLAGS_RELEASE "-f77rtl -O2 -r8")
-    set(CMAKE_Fortran_FLAGS_DEBUG   "-f77rtl -O0 -g -r8")
-  elseif (Fortran_COMPILER_NAME MATCHES "g77")
-    # g77
-    set(CMAKE_Fortran_FLAGS_RELEASE "-funroll-all-loops -fno-f2c -O2 -m32")
-    set(CMAKE_Fortran_FLAGS_DEBUG   "-fno-f2c -O0 -g -m32")
-  else(Fortran_COMPILER_NAME MATCHES "gfortran.*")
-    message("CMAKE_Fortran_COMPILER full path: " ${CMAKE_Fortran_COMPILER})
-    message("Fortran compiler: " ${Fortran_COMPILER_NAME})
-    message ("No optimized Fortran compiler flags are known, we just try -fpic...")
-    set(CMAKE_Fortran_FLAGS_RELEASE "-fpic")
-    set(CMAKE_Fortran_FLAGS_DEBUG   "-fpic")
-  endif(Fortran_COMPILER_NAME MATCHES "gfortran.*")
-
-  # add -fallow-argument-mismatch to fix build with gfortran 10+
-  # https://github.com/pyne/pyne/issues/1416
-  set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fallow-argument-mismatch")
-endmacro()
+    message(STATUS "Using Fortran compiler: ${CMAKE_Fortran_COMPILER}")
+endmacro(setup_fortran)
 
 
 #  add lib to pyne list
