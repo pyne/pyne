@@ -52,7 +52,7 @@ macro(pyne_setup_fortran)
         message(FATAL_ERROR "No Fortran compiler found")
     endif()
     message(STATUS "Using Fortran compiler: ${CMAKE_Fortran_COMPILER}")
-endmacro(setup_fortran)
+endmacro(pyne_setup_fortran)
 
 
 #  add lib to pyne list
