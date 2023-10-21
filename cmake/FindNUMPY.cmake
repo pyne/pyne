@@ -1,5 +1,5 @@
 # Once done this will define
-#  Numpy_FOUND        - system has NumPy
+#  NUMPY_FOUND        - system has NumPy
 #  NUMPY_INCLUDE_DIR  - the NumPy include directory
 #  NUMPY_VERSION      - the version of NumPy found
 
@@ -23,7 +23,7 @@ if(Python_Interpreter_FOUND)
 
     find_package_handle_standard_args(Numpy REQUIRED_VARS NUMPY_INCLUDE_DIR VERSION_VAR NUMPY_VERSION_STRING)
 
-    if(Numpy_FOUND AND NOT TARGET Numpy::Numpy)
+    if(NUMPY_FOUND AND NOT TARGET Numpy::Numpy)
         add_library(Numpy::Numpy UNKNOWN IMPORTED)
         set_target_properties(Numpy::Numpy PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${NUMPY_INCLUDE_DIR}")
     endif()
