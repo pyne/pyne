@@ -20,24 +20,7 @@ endmacro()
 
 # C++ settings
 macro(pyne_setup_cxx)
-  INCLUDE(CheckCXXCompilerFlag)
-  # Check for C++11 support in GCC/Clang
-  CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
-  if(COMPILER_SUPPORTS_CXX11)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-  endif()
-  # Check for C++11 support in MSVC
-  if(MSVC)
-    CHECK_CXX_COMPILER_FLAG("/std:c++11" MSVC_SUPPORTS_CXX11)
-    if(MSVC_SUPPORTS_CXX11)
-      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++11")
-    endif()
-  endif()
-  # If neither flag is supported, output a fatal error message
-  if(NOT COMPILER_SUPPORTS_CXX11 AND NOT MSVC_SUPPORTS_CXX11)
-    MESSAGE(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. "
-                        "Please use a different C++ compiler.")
-  endif()
+  set(CMAKE_CXX_STANDARD 11)
 endmacro()
 
 macro(pyne_set_asm_platform)
