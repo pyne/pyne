@@ -188,10 +188,11 @@ jobs:
           Write-Host "DAGMC installed"
         if: matrix.os == 'windows-latest'
 
+      - name: Setup GNU Fortran
+        uses: modflowpy/install-gfortran-action@v1
+
       - name: Build wheels
-        shell: bash -l {0}
         run: |
-          echo "FC=gfortran" >> $GITHUB_ENV
           python -m build --wheel
 
       - name: Install PyNE
