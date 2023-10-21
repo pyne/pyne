@@ -19,8 +19,9 @@ on:
 jobs:
   main:
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-latest, windows-latest]
 
     runs-on: ${{ matrix.os }}
 
@@ -193,6 +194,7 @@ jobs:
         if: matrix.os == 'windows-latest'
 
       - name: Build wheels
+        shell: bash -l {0}
         run: |
           python -m build --wheel
 
