@@ -154,8 +154,8 @@ message("-- PYTHON_SITE_PACKAGES: ${PYTHON_SITE_PACKAGES}")
 
 
 # Find NumPy
-find_package(Numpy REQUIRED)
-include_directories("${NUMPY_INCLUDE_DIR}")
+#find_package(Numpy REQUIRED)
+#include_directories("${NUMPY_INCLUDE_DIR}")
 
 
 pyne_setup_fortran()
