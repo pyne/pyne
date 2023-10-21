@@ -21,15 +21,6 @@ jobs:
     strategy:
       matrix:
         os: [windows-latest]
-        toolchain:
-          - {compiler: gcc, version: 11}
-          - {compiler: intel-classic, version: '2021.10'}
-        include:
-          - os: ubuntu-latest
-            toolchain: {compiler: intel, version: '2023.2'}
-        exclude:
-          - os: windows-latest
-            toolchain: {compiler: intel-classic, version: '2021.10'}
 
     runs-on: ${{ matrix.os }}
 
@@ -37,13 +28,13 @@ jobs:
       - uses: fortran-lang/setup-fortran@v1
         id: setup-fortran
         with:
-          compiler: ${{ matrix.toolchain.compiler }}
-          version: ${{ matrix.toolchain.version }}
+          compiler: gcc
+          version: 11
 
       - run: ${{ env.FC }} --version
         env:
           FC: ${{ steps.setup-fortran.outputs.fc }}
-          
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
