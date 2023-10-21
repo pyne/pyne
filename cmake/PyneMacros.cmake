@@ -18,6 +18,7 @@ macro(pyne_set_platform)
   message("-- Pyne platform defined as: ${PYNE_PLATFORM}")
 endmacro()
 
+"""
 # C++ settings
 macro(pyne_setup_cxx)
   INCLUDE(CheckCXXCompilerFlag)
@@ -29,6 +30,7 @@ macro(pyne_setup_cxx)
                         "Please use a different C++ compiler.")
   ENDIF()
 endmacro()
+"""
 
 macro(pyne_set_asm_platform)
   # first set OS
