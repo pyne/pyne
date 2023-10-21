@@ -1,5 +1,5 @@
 # Once done this will define
-#  NUMPY_FOUND        - system has NumPy
+#  Numpy_FOUND        - system has NumPy
 #  NUMPY_INCLUDE_DIR  - the NumPy include directory
 #  NUMPY_VERSION      - the version of NumPy found
 
@@ -13,30 +13,20 @@ if(Python_Interpreter_FOUND)
                         ERROR_VARIABLE _NUMPY_ERROR_VALUE
                         OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-        message(STATUS "NUMPY_SEARCH_SUCCESS: ${_NUMPY_SEARCH_SUCCESS}")
-        message(STATUS "NUMPY_VALUES_OUTPUT: ${_NUMPY_VALUES_OUTPUT}")
-        message(STATUS "NUMPY_ERROR_VALUE: ${_NUMPY_ERROR_VALUE}")
-
         # If numpy is found, set the include dir and version variables
         if(_NUMPY_SEARCH_SUCCESS EQUAL 0)
             string(REGEX REPLACE "\n" ";" _NUMPY_VALUES_LIST ${_NUMPY_VALUES_OUTPUT})
             list(GET _NUMPY_VALUES_LIST 0 NUMPY_INCLUDE_DIR)
             list(GET _NUMPY_VALUES_LIST 1 NUMPY_VERSION_STRING)
         endif()
-
-        message(STATUS "NUMPY_INCLUDE_DIR: ${NUMPY_INCLUDE_DIR}")
-        message(STATUS "NUMPY_VERSION_STRING: ${NUMPY_VERSION_STRING}")
-
     endif()
 
     find_package_handle_standard_args(Numpy REQUIRED_VARS NUMPY_INCLUDE_DIR VERSION_VAR NUMPY_VERSION_STRING)
 
-    if(NUMPY_FOUND AND NOT TARGET Numpy::Numpy)
+    if(Numpy_FOUND AND NOT TARGET Numpy::Numpy)
         add_library(Numpy::Numpy UNKNOWN IMPORTED)
         set_target_properties(Numpy::Numpy PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${NUMPY_INCLUDE_DIR}")
     endif()
-    message(STATUS "NUMPY_FOUND: ${NUMPY_FOUND}")
-    message(STATUS "NUMPY_INCLUDE_DIR: ${NUMPY_INCLUDE_DIR}")
 endif()
 
 mark_as_advanced(NUMPY_INCLUDE_DIR NUMPY_VERSION_STRING)
