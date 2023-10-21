@@ -21,10 +21,29 @@ jobs:
     strategy:
       matrix:
         os: [windows-latest]
+        toolchain:
+          - {compiler: gcc, version: 11}
+          - {compiler: intel-classic, version: '2021.10'}
+        include:
+          - os: ubuntu-latest
+            toolchain: {compiler: intel, version: '2023.2'}
+        exclude:
+          - os: windows-latest
+            toolchain: {compiler: intel-classic, version: '2021.10'}
 
     runs-on: ${{ matrix.os }}
 
     steps:
+      - uses: fortran-lang/setup-fortran@v1
+        id: setup-fortran
+        with:
+          compiler: ${{ matrix.toolchain.compiler }}
+          version: ${{ matrix.toolchain.version }}
+
+      - run: ${{ env.FC }} --version
+        env:
+          FC: ${{ steps.setup-fortran.outputs.fc }}
+          
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -187,9 +206,6 @@ jobs:
           Add-Content -Path $env:GITHUB_ENV -Value "DAGMC_ROOT=C:\Miniconda\Library"
           Write-Host "DAGMC installed"
         if: matrix.os == 'windows-latest'
-
-      - name: Setup GNU Fortran
-        uses: modflowpy/install-gfortran-action@v1
 
       - name: Build wheels
         run: |
