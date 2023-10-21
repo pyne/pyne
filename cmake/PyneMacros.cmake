@@ -212,14 +212,18 @@ macro(pyne_set_fast_compile)
   message(STATUS "PyNE Fast Compile: ${PYNE_FAST_COMPILE}")
 endmacro()
 
-macro(pyne_download_platform)
+macro(pyne_download_files)
   # Download bateman solver from PyNE data
-  download_platform("http://raw.githubusercontent.com/pyne/data/master" "decay"
-                      ".cpp" ".s")
-
+  download_platform("http://raw.githubusercontent.com/pyne/data/master" "decay" ".cpp")
   # Download CRAM solver from PyNE data
-  download_platform("http://raw.githubusercontent.com/pyne/data/master" "cram"
-                         ".c" ".s")
+  download_platform("http://raw.githubusercontent.com/pyne/data/master" "cram" ".c")
+
+  if (PYNE_FAST_COMPILE)
+    # Download bateman solver from PyNE data
+    download_platform("http://raw.githubusercontent.com/pyne/data/master" "decay" ".s")
+    # Download CRAM solver from PyNE data
+    download_platform("http://raw.githubusercontent.com/pyne/data/master" "cram" ".s")
+  endif()
 endmacro()
 
 # fast compile with assembly, if available.
