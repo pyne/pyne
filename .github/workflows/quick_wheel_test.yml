@@ -25,23 +25,10 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - uses: fortran-lang/setup-fortran@v1
-        id: setup-fortran
-        with:
-          compiler: gcc
-          version: 11
-        if : matrix.os == 'windows-latest'
-
-      - run: ${{ env.FC }} --version
-        env:
-          FC: ${{ steps.setup-fortran.outputs.fc }}
-        if : matrix.os == 'windows-latest'
-      
       - name: Find fortran compiler
         run: |
-          echo "FC=${{ steps.setup-fortran.outputs.fc }}"
           which gfortran
-          
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
