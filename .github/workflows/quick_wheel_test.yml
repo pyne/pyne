@@ -30,10 +30,12 @@ jobs:
         with:
           compiler: gcc
           version: 11
+        if : matrix.os == 'windows-latest'
 
       - run: ${{ env.FC }} --version
         env:
           FC: ${{ steps.setup-fortran.outputs.fc }}
+        if : matrix.os == 'windows-latest'
 
       - name: Set up Python
         uses: actions/setup-python@v4
