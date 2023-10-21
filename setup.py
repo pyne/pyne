@@ -173,7 +173,8 @@ cmake_args = [
 if IS_NT:
     cmake_args.append("-GVisual Studio 17 2022")
     cmake_args.append("-DCMAKE_CXX_COMPILER:FILEPATH=g++")
-    cmake_args.append("-DCMAKE_Fortran_COMPILER:FILEPATH=C:/mingw/bin/gfortran")
+    cmake_args.append("-DCMAKE_C_COMPILER:FILEPATH=gcc")
+    cmake_args.append("-DCMAKE_Fortran_COMPILER:FILEPATH=gfortran")
     cmake_args.append("-DPYNE_FAST_COMPILE:BOOL=OFF")
 
 # Check for DAGMC_ROOT and MOAB_ROOT
