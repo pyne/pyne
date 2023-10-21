@@ -172,9 +172,7 @@ cmake_args = [
 # Specify GCC as the compiler for Windows
 if IS_NT:
     #cmake_args.append("-DCMAKE_CXX_COMPILER:FILEPATH=g++")
-    cmake_args.append("-G MinGW Makefiles")
-    cmake_args.append("-DCMAKE_CXX_COMPILER:FILEPATH=mingw32-g++")
-    cmake_args.append("-DCMAKE_C_COMPILER:FILEPATH=mingw32-gcc")
+    cmake_args.append("-G Visual Studio 17 2022")
     cmake_args.append("-DPYNE_FAST_COMPILE:BOOL=OFF")
 
 # Check for DAGMC_ROOT and MOAB_ROOT
