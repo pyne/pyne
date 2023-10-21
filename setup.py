@@ -171,7 +171,7 @@ cmake_args = [
 
 # Specify GCC as the compiler for Windows
 if IS_NT:
-    cmake_args.append("-DCMAKE_CXX_COMPILER:FILEPATH=g++")
+    cmake_args.append("-DCMAKE_CXX_COMPILER:FILEPATH=mgw-w64-g++")
     cmake_args.append("-DCMAKE_GENERATOR_PLATFORM=x64")
     cmake_args.append("-DPYNE_FAST_COMPILE:BOOL=OFF")
 
