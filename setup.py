@@ -172,7 +172,6 @@ cmake_args = [
 # Specify GCC as the compiler for Windows
 if IS_NT:
     #cmake_args.append("-DCMAKE_CXX_COMPILER:FILEPATH=g++")
-    cmake_args.append("-DCMAKE_CXX_FLAGS:STRING=-std=c++11")
     cmake_args.append("-DPYNE_FAST_COMPILE:BOOL=OFF")
 
 # Check for DAGMC_ROOT and MOAB_ROOT
