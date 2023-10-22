@@ -26,11 +26,7 @@ if(Python_Interpreter_FOUND)
     if(Numpy_FOUND AND NOT TARGET Numpy::Numpy)
         add_library(Numpy::Numpy UNKNOWN IMPORTED)
         set_target_properties(Numpy::Numpy PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${NUMPY_INCLUDE_DIR}")
-        message(STATUS "Found Numpy: ${NUMPY_INCLUDE_DIR}")
     endif()
 endif()
-
-message(STATUS "NUMPY_INCLUDE_DIR: ${NUMPY_INCLUDE_DIR}")
-message(STATUS "NUMPY_VERSION_STRING: ${NUMPY_VERSION_STRING}")
 
 mark_as_advanced(NUMPY_INCLUDE_DIR NUMPY_VERSION_STRING)
