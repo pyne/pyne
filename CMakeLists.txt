@@ -146,7 +146,12 @@ message("-- PYTHON_SITE_PACKAGES: ${PYTHON_SITE_PACKAGES}")
 
 # Find NumPy
 find_package(Numpy REQUIRED)
-include_directories("${NUMPY_INCLUDE_DIR}")
+if(Numpy_FOUND)
+    include_directories(${NUMPY_INCLUDE_DIR})
+    message(STATUS "Found Numpy: ${NUMPY_INCLUDE_DIR} (found version ${NUMPY_VERSION_STRING})")
+else()
+    message(FATAL_ERROR "Numpy not found. Please ensure Numpy is installed and CMake can locate it.")
+endif()
 
 
 pyne_setup_fortran()
