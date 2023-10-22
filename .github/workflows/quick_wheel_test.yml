@@ -61,7 +61,7 @@ jobs:
 
       - name: Install HDF5 and Eigen Windows
         run: |
-          conda install curl eigen
+          conda install curl eigen setuptools
           conda install -c conda-forge hdf5
           conda remove -y yaml-cpp
           Add-Content -Path $env:GITHUB_ENV -Value "HOME_PATH=$env:GITHUB_WORKSPACE\.."
