@@ -173,9 +173,9 @@ cmake_args = [
 # Specify GCC as the compiler for Windows
 if IS_NT:
     cmake_args.append("-GMinGW Makefiles") #MinGW Makefiles Unix Makefiles
-    #cmake_args.append("-DCMAKE_CXX_COMPILER:FILEPATH=g++")
-    #cmake_args.append("-DCMAKE_C_COMPILER:FILEPATH=gcc")
-    #cmake_args.append("-DCMAKE_Fortran_COMPILER:FILEPATH=gfortran")
+    cmake_args.append("-DCMAKE_CXX_COMPILER:FILEPATH=i686-w64-mingw32-g++")
+    cmake_args.append("-DCMAKE_C_COMPILER:FILEPATH=i686-w64-mingw32-gcc")
+    cmake_args.append("-DCMAKE_Fortran_COMPILER:FILEPATH=gfortran")
 
 
 # Check for DAGMC_ROOT and MOAB_ROOT
