@@ -15,7 +15,7 @@
 #
 
 
-find_package(Numpy)
+find_package(NumPy)
 
 find_program(F2PY_EXECUTABLE f2py ${DEPS_BIN_HINTS})
 if(NOT F2PY_EXECUTABLE)
