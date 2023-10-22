@@ -13,7 +13,6 @@ set(PYNE_SRCS
   "data.cpp"
   "enrichment.cpp"
   "enrichment_cascade.cpp"
-  "enrichment_symbolic.cpp"
   "jsoncpp.cpp"
   "jsoncustomwriter.cpp"
   "material.cpp"
@@ -26,6 +25,7 @@ set(PYNE_SRCS
   "transmuters.cpp"
   "utils.cpp"
   "endftod.f90"
+  "enrichment_symbolic.cpp"
   )
 set(TRANSPORT_SPATIAL_METHODS_SRCS
   "transport_spatial_methods/3d/ahotn_kernel_module.f90"
