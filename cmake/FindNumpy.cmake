@@ -70,7 +70,7 @@ message("-- NUMPY_VERSION_STRING = ${NUMPY_VERSION_STRING}")
 
 # handle REQUIRED and QUIET options
 include ( FindPackageHandleStandardArgs )
-find_package_handle_standard_args ( Numpy DEFAULT_MSG
+find_package_handle_standard_args ( NumPy DEFAULT_MSG
   NUMPY_VERSION_STRING
   _NUMPY_VERSION_MATCH
   NUMPY_INCLUDE_DIR
