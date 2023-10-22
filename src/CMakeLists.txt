@@ -23,9 +23,9 @@ set(PYNE_SRCS
   "rxname.cpp"
   "tally.cpp"
   "transmuters.cpp"
-  "utils.cpp"
   "endftod.f90"
   "enrichment_symbolic.cpp"
+  "utils.cpp"
   )
 set(TRANSPORT_SPATIAL_METHODS_SRCS
   "transport_spatial_methods/3d/ahotn_kernel_module.f90"
