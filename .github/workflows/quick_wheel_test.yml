@@ -34,7 +34,7 @@ jobs:
       - name: Install Python Packages
         run: |
           python -m pip install wheel
-          python -m pip install "cython<3" numpy build pytest
+          python -m pip install "cython<3" numpy pytest setuptools
 
       - name: Checkout PyNE
         uses: actions/checkout@v3
@@ -42,7 +42,7 @@ jobs:
       - name: Install Miniconda Windows
         uses: conda-incubator/setup-miniconda@v2
         with:
-          auto-activate-base: false
+          auto-activate-base: true
           activate-environment: ""
         if: matrix.os == 'windows-latest'
 
@@ -192,6 +192,7 @@ jobs:
       - name: Build wheels
         shell: bash -l {0}
         run: |
+          python -m pip install build
           python -m build --wheel
 
       - name: Install PyNE
