@@ -192,8 +192,8 @@ jobs:
       - name: Build wheels
         shell: bash -l {0}
         run: |
-          ls -a $MOAB
-          ls -a $MOAB/include
+          ls -l $MOAB_ROOT
+          ls -a $MOAB_ROOT/include
           python -m pip install build
           python -m build --wheel
 
