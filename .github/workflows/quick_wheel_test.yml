@@ -95,7 +95,7 @@ jobs:
           rm -rf $GITHUB_WORKSPACE/moab
           echo "MOAB_ROOT=$Python_ROOT_DIR" >> $GITHUB_ENV
           echo "MOAB installed"
-        if: matrix.os == 'ubuntu-latest-skip'
+        if: matrix.os == 'ubuntu-latest'
 
       - name: Install MOAB Windows
         run: |
@@ -150,7 +150,7 @@ jobs:
           rm -rf "$GITHUB_WORKSPACE/dagmc"
           echo "DAGMC_ROOT=$Python_ROOT_DIR" >> $GITHUB_ENV
           echo "DAGMC installed"
-        if: matrix.os == 'ubuntu-latest-skip'
+        if: matrix.os == 'ubuntu-latest'
 
       - name: Install DAGMC Windows
         run: |
