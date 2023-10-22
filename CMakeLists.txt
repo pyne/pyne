@@ -1,6 +1,9 @@
 # Defines the CMake commands/policies
 cmake_minimum_required(VERSION 3.12.0)
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 # Make the scripts available in the 'cmake' directory available for the
 # 'include()' command, 'find_package()' command.
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
@@ -14,7 +17,7 @@ option ( ENABLE_ENSDF_PROCESSIONG   "Should build ENSDF processing tools?"      
 include(PyneMacros)
 pyne_print_logo()  # Beware of dragons
 pyne_set_platform()
-pyne_setup_cxx()
+#pyne_setup_cxx()
 pyne_set_asm_platform()
 pyne_set_build_spatial_solver()
 pyne_set_build_type()
