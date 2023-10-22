@@ -25,8 +25,13 @@ set(PYNE_SRCS
   "transmuters.cpp"
   "endftod.f90"
   "utils.cpp"
-  "enrichment_symbolic.cpp"
   )
+
+# FIx: enrichment_symbolic.cpp doesn't compile on Windows
+if(NOT WIN32)
+  list(APPEND PYNE_SRCS "enrichment_symbolic.cpp")
+endif()
+
 set(TRANSPORT_SPATIAL_METHODS_SRCS
   "transport_spatial_methods/3d/ahotn_kernel_module.f90"
   "transport_spatial_methods/3d/angle.f90"
