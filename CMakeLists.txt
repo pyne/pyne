@@ -128,7 +128,7 @@ endif(${MOAB_FOUND})
 
 
 # Find Python
-find_package(Python3 COMPONENTS Interpreter Development)
+find_package(Python3 COMPONENTS Interpreter Development NumPy)
 if(PYTHON_VERSION_MAJOR EQUAL 2)
   set(SITE_PACKAGES_CODE
       "import site; print site.getusersitepackages().replace(site.USER_BASE, '${CMAKE_INSTALL_PREFIX}', 1)")
@@ -145,12 +145,10 @@ message("-- PYTHON_SITE_PACKAGES: ${PYTHON_SITE_PACKAGES}")
 
 
 # Find NumPy
-find_package(Numpy REQUIRED)
-if(Numpy_FOUND)
-    include_directories(${NUMPY_INCLUDE_DIR})
-    message(STATUS "Found Numpy: ${NUMPY_INCLUDE_DIR} (found version ${NUMPY_VERSION_STRING})")
-else()
-    message(FATAL_ERROR "Numpy not found. Please ensure Numpy is installed and CMake can locate it.")
+if(Python_FOUND AND Python_NumPy_FOUND)
+    add_library(Numpy::Numpy UNKNOWN IMPORTED)
+    set_target_properties(Numpy::Numpy PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${Python_NumPy_INCLUDE_DIRS}")
+    include_directories(${Python_NumPy_INCLUDE_DIRS})
 endif()
 
 
