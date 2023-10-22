@@ -145,17 +145,22 @@ message("-- PYTHON_SITE_PACKAGES: ${PYTHON_SITE_PACKAGES}")
 
 
 # Find NumPy
-if(Python_FOUND AND Python_NumPy_FOUND)
+if(Python_NumPy_FOUND)
     add_library(Numpy::Numpy UNKNOWN IMPORTED)
     set_target_properties(Numpy::Numpy PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${Python_NumPy_INCLUDE_DIRS}")
     include_directories(${Python_NumPy_INCLUDE_DIRS})
-endif()
+    set(LIBS ${LIBS} ${Python_NumPy_LIBRARIES})
+    message("-- NumPy include dirs: ${Python_NumPy_INCLUDE_DIRS}")
+    message("-- NumPy libraries: ${Python_NumPy_LIBRARIES}")
+else()
+    message("-- NumPy: Not searching because NumPy was not found.")
+endif(Python_NumPy_FOUND)
 
 
 pyne_setup_fortran()
 
 # Find f2py, if building spatial solver
-IF(BUILD_SPATIAL_SOLVER)
+#IF(BUILD_SPATIAL_SOLVER)
   find_package(F2py REQUIRED)
   message("-- F2PY Executable: ${F2PY_EXECUTABLE}")
   message("-- F2PY Version: ${F2PY_VERSION}")
@@ -164,7 +169,7 @@ IF(BUILD_SPATIAL_SOLVER)
   MESSAGE("-- Found LAPACK Linker Flags: ${LAPACK_LINKER_FLAGS}")
   MESSAGE("-- Found LAPACK Libraries: ${LAPACK_LIBRARIES}")
   MESSAGE("-- Found BLAS Libraries: ${BLAS_LIBRARIES}")
-ENDIF(BUILD_SPATIAL_SOLVER)
+#ENDIF(BUILD_SPATIAL_SOLVER)
 
 
 # Include the CMake script UseCython.cmake.  This defines add_cython_module().
