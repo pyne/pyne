@@ -145,7 +145,7 @@ message("-- PYTHON_SITE_PACKAGES: ${PYTHON_SITE_PACKAGES}")
 
 
 # Find NumPy
-find_package(NUMPY REQUIRED)
+find_package(Numpy REQUIRED)
 include_directories("${NUMPY_INCLUDE_DIR}")
 
 
