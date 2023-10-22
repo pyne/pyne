@@ -61,7 +61,7 @@ jobs:
 
       - name: Install HDF5 and Eigen Windows
         run: |
-          conda install curl eigen setuptools
+          conda install curl eigen
           conda install -c conda-forge hdf5
           conda remove -y yaml-cpp
           Add-Content -Path $env:GITHUB_ENV -Value "HOME_PATH=$env:GITHUB_WORKSPACE\.."
@@ -81,7 +81,7 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE
           # clone and version
-          git clone --depth 1 https://bitbucket.org/fathomteam/moab -b 5.4.1
+          git clone --depth 1 https://bitbucket.org/fathomteam/moab -b 5.5.0
           cd moab
           mkdir -p build
           cd build
@@ -105,7 +105,7 @@ jobs:
         run: |
           Set-Location $Env:GITHUB_WORKSPACE
           # clone and version
-          git clone --depth 1 https://bitbucket.org/fathomteam/moab -b 5.4.1
+          git clone --depth 1 https://bitbucket.org/fathomteam/moab -b 5.5.0
           Set-Location moab
           New-Item -ItemType Directory -Force -Path build
           Set-Location build
