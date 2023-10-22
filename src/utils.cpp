@@ -4,9 +4,9 @@ extern "C" double endftod_(char *str, int len);
 #endif
 #include <iomanip>
 
-#ifdef _WIN32
+/* #ifdef _WIN32
   #include <filesystem>
-#endif
+#endif */
 
 
 #ifndef PYNE_IS_AMALGAMATED
