@@ -28,7 +28,7 @@ set(PYNE_SRCS
   )
 
 # FIx: enrichment_symbolic.cpp doesn't compile on Windows
-if( WIN32)
+if(NOT WIN32)
   list(APPEND PYNE_SRCS "enrichment_symbolic.cpp")
 endif()
 
@@ -146,4 +146,5 @@ INSTALL(FILES ${h_files} DESTINATION include/pyne COMPONENT headers)
 #
 # Install libpyne
 #
+
 INSTALL(TARGETS pyne LIBRARY DESTINATION lib COMPONENT pyne)
