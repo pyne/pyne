@@ -105,7 +105,7 @@ jobs:
         run: |
           Set-Location $Env:GITHUB_WORKSPACE
           # clone and version
-          git clone --depth 1 https://bitbucket.org/fathomteam/moab -b 5.3.0
+          git clone --depth 1 https://bitbucket.org/fathomteam/moab -b 5.4.1
           Set-Location moab
           New-Item -ItemType Directory -Force -Path build
           Set-Location build
@@ -130,9 +130,9 @@ jobs:
           cmake --install .
           Set-Location $Env:GITHUB_WORKSPACE
           Remove-Item -Force -Recurse moab
-          Add-Content -Path $env:GITHUB_ENV -Value "MOAB_ROOT=C:\Miniconda\Library"
+          Add-Content -Path $env:GITHUB_ENV -Value "MOAB_ROOT=/c/Miniconda/Library"
           Write-Host "MOAB installed"
-        if: matrix.os == 'windows-latest-skip'
+        if: matrix.os == 'windows-latest'
 
       - name: Install DAGMC Ubuntu
         run: |
@@ -189,9 +189,9 @@ jobs:
           cmake --install .
           Set-Location $Env:GITHUB_WORKSPACE
           Remove-Item -Force -Recurse "dagmc"
-          Add-Content -Path $env:GITHUB_ENV -Value "DAGMC_ROOT=C:\Miniconda\Library"
+          Add-Content -Path $env:GITHUB_ENV -Value "DAGMC_ROOT=/c/Miniconda/Library"
           Write-Host "DAGMC installed"
-        if: matrix.os == 'windows-latest-skip'
+        if: matrix.os == 'windows-latest'
 
       - name: Build wheels
         shell: bash -l {0}
