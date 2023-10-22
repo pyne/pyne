@@ -23,9 +23,9 @@ if(Python_Interpreter_FOUND)
 
     find_package_handle_standard_args(NumPy REQUIRED_VARS NUMPY_INCLUDE_DIR VERSION_VAR NUMPY_VERSION_STRING)
 
-    if(NUMPY_FOUND AND NOT TARGET NumPy::NumPy)
-        add_library(NumPy::NumPy UNKNOWN IMPORTED)
-        set_target_properties(NumPy::NumPy PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${NUMPY_INCLUDE_DIR}")
+    if(NUMPY_FOUND AND NOT TARGET Numpy::Numpy)
+        add_library(Numpy::Numpy UNKNOWN IMPORTED)
+        set_target_properties(Numpy::Numpy PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${NUMPY_INCLUDE_DIR}")
     endif()
 endif()
 
