@@ -167,15 +167,16 @@ IS_NT = os.name == "nt"
 cmake_args = [
     "-DPYTHON_EXECUTABLE:FILEPATH=" + sys.executable,
     "-DCMAKE_BUILD_TYPE:STRING=Release",
+    "-DPYNE_FAST_COMPILE:BOOL=OFF"
 ]
 
 # Specify GCC as the compiler for Windows
 if IS_NT:
-    cmake_args.append("-GMinGW Makefiles") #MinGW Makefiles Unix Makefiles Ninja
+    cmake_args.append("-GMinGW Makefiles") #MinGW Makefiles Unix Makefiles
     #cmake_args.append("-DCMAKE_CXX_COMPILER:FILEPATH=g++")
     #cmake_args.append("-DCMAKE_C_COMPILER:FILEPATH=gcc")
     #cmake_args.append("-DCMAKE_Fortran_COMPILER:FILEPATH=gfortran")
-    cmake_args.append("-DPYNE_FAST_COMPILE:BOOL=OFF")
+
 
 # Check for DAGMC_ROOT and MOAB_ROOT
 if "DAGMC_ROOT" in os.environ:
