@@ -28,7 +28,7 @@ set(PYNE_SRCS
   )
 
 # FIx: enrichment_symbolic.cpp doesn't compile on Windows
-if(NOT WIN32)
+if( WIN32)
   list(APPEND PYNE_SRCS "enrichment_symbolic.cpp")
 endif()
 
