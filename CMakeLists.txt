@@ -144,25 +144,15 @@ message("-- PYTHON_EXECUTABLE: ${PYTHON_EXECUTABLE}")
 message("-- PYTHON_SITE_PACKAGES: ${PYTHON_SITE_PACKAGES}")
 
 
-# Find NumPy
+# Include NumPy if found
 if(Python3_NumPy_FOUND)
     add_library(Numpy::Numpy UNKNOWN IMPORTED)
-    set_target_properties(Numpy::Numpy PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${Python_NumPy_INCLUDE_DIRS}")
-    include_directories(${Python_NumPy_INCLUDE_DIRS})
-    set(LIBS ${LIBS} ${Python_NumPy_LIBRARIES})
+    set_target_properties(Numpy::Numpy PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${Python3_NumPy_INCLUDE_DIRS}")
     message("-- NumPy include dirs: ${Python3_NumPy_INCLUDE_DIRS}")
-    message("-- NumPy libraries: ${Python3_NumPy_LIBRARIES}")
+    include_directories(${Python3_NumPy_INCLUDE_DIRS})
 else()
     message("-- NumPy: Not searching because NumPy was not found.")
-endif(Python_NumPy_FOUND)
-include_directories(${Python_NumPy_INCLUDE_DIRS})
-set(LIBS ${LIBS} ${Python_NumPy_LIBRARIES})
-message("-- NumPy include dirs: ${Python3_NumPy_INCLUDE_DIRS}")
-message("-- NumPy Found: ${Python3_NumPy_FOUND}")
-message("-- NumPy Found: ${Python_NumPy_FOUND}")
-message("-- NumPy: ${Python_NumPy}")
-message("-- NumPy include dirs: ${Python_NumPy_INCLUDE_DIRS}")
-message("-- NumPy libraries: ${Python_NumPy_LIBRARIES}")
+endif(Python3_NumPy_FOUND)
 
 pyne_setup_fortran()
 
