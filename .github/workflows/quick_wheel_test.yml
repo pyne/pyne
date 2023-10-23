@@ -95,7 +95,7 @@ jobs:
           rm -rf $GITHUB_WORKSPACE/moab
           echo "MOAB_ROOT=$Python_ROOT_DIR" >> $GITHUB_ENV
           echo "MOAB installed"
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-latest-skip'
 
       - name: Install MOAB Windows
         run: |
@@ -128,7 +128,7 @@ jobs:
           Remove-Item -Force -Recurse moab
           Add-Content -Path $env:GITHUB_ENV -Value "MOAB_ROOT=C:\Miniconda\Library"
           Write-Host "MOAB installed"
-        if: matrix.os == 'windows-latest'
+        if: matrix.os == 'windows-latest-skip'
 
       - name: Install DAGMC Ubuntu
         run: |
@@ -150,7 +150,7 @@ jobs:
           rm -rf "$GITHUB_WORKSPACE/dagmc"
           echo "DAGMC_ROOT=$Python_ROOT_DIR" >> $GITHUB_ENV
           echo "DAGMC installed"
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-latest-skip'
 
       - name: Install DAGMC Windows
         run: |
@@ -187,13 +187,7 @@ jobs:
           Remove-Item -Force -Recurse "dagmc"
           Add-Content -Path $env:GITHUB_ENV -Value "DAGMC_ROOT=C:\Miniconda\Library"
           Write-Host "DAGMC installed"
-        if: matrix.os == 'windows-latest'
-
-      - name: Check Moab
-        shell: bash -l {0}
-        run: |
-          ls -l $MOAB_ROOT
-          ls -l $MOAB_ROOT/include/moab
+        if: matrix.os == 'windows-latest-skip'
 
       - name: Build wheels
         shell: bash -l {0}

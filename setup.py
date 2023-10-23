@@ -166,7 +166,7 @@ IS_NT = os.name == "nt"
 # Cmake args
 cmake_args = [
     "-DPYTHON_EXECUTABLE:FILEPATH=" + sys.executable,
-    "-DCMAKE_BUILD_TYPE:STRING=Release",
+    "-DCMAKE_BUILD_TYPE:STRING=Debug",
     "-DPYNE_FAST_COMPILE:BOOL=OFF"
 ]
 
