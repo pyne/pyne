@@ -57,14 +57,12 @@ jobs:
 
       - name: Install HDF5 and Eigen Windows
         run: |
-          conda install curl eigen cmake
-          conda install -c conda-forge hdf5
+          conda install curl eigen
+          conda install -c conda-forge hdf5 libblas liblapack
           conda remove -y yaml-cpp
           Add-Content -Path $env:GITHUB_ENV -Value "HOME_PATH=$env:GITHUB_WORKSPACE\.."
           Add-Content -Path $env:GITHUB_ENV -Value "CONDA_LOC=C:\\Miniconda\\Library"
           Add-Content -Path $env:GITHUB_ENV -Value "EIGEN3_DIR=C:\\Miniconda\\Library"
-          Add-Content -Path $env:GITHUB_ENV -Value "HDF5_hdf5_LIBRARY_RELEASE=C:\\Miniconda\\Library\\lib\\libhdf5_hl.lib;C:\\Miniconda\\Library\\lib\\libhdf5.lib;C:\\Miniconda\\Library\\lib\\zlib.lib;C:\\Miniconda\\Library\\lib\\libhdf5_cpp.lib"
-          Add-Content -Path $env:GITHUB_ENV -Value "LD_LIBRARY_PATH=C:\\Miniconda\\Library"
         if: matrix.os == 'windows-latest'
 
       - name: Install HDF5 and Eigen MacOS
