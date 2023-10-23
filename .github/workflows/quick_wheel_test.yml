@@ -63,6 +63,9 @@ jobs:
           Add-Content -Path $env:GITHUB_ENV -Value "HOME_PATH=$env:GITHUB_WORKSPACE\.."
           Add-Content -Path $env:GITHUB_ENV -Value "CONDA_LOC=C:\\Miniconda\\Library"
           Add-Content -Path $env:GITHUB_ENV -Value "EIGEN3_DIR=C:\\Miniconda\\Library"
+          Add-Content -Path $env:GITHUB_ENV -Value "HDF5_hdf5_LIBRARY_RELEASE=$Env:CONDA_LOC\\lib\\libhdf5_hl.lib;$Env:CONDA_LOC\\lib\\libhdf5.lib;$Env:CONDA_LOC\\lib\\zlib.lib;$Env:CONDA_LOC\\lib\\libhdf5_cpp.lib"
+          Add-Content -Path $env:GITHUB_ENV -Value "HDF5_ROOT=$Env:CONDA_LOC"
+          Add-Content -Path $env:GITHUB_ENV -Value "LD_LIBRARY_PATH=$Env:CONDA_LOC"
         if: matrix.os == 'windows-latest'
 
       - name: Install HDF5 and Eigen MacOS
