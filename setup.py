@@ -166,8 +166,9 @@ IS_NT = os.name == "nt"
 # Cmake args
 cmake_args = [
     "-DPYTHON_EXECUTABLE:FILEPATH=" + sys.executable,
-    "-DCMAKE_BUILD_TYPE:STRING=Debug",
-    "-DPYNE_FAST_COMPILE:BOOL=OFF"
+    "-DCMAKE_BUILD_TYPE:STRING=Release",
+    "-DPYNE_FAST_COMPILE:BOOL=OFF",
+    "-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON"
 ]
 
 # Specify GCC as the compiler for Windows
