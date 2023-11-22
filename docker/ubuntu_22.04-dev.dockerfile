@@ -42,7 +42,8 @@ RUN apt-get update \
             progress
 
 FROM common_base AS conda_deps
-RUN apt-get install -y --fix-missing \
+RUN apt-get update \
+    && apt-get install -y --fix-missing \
         wget \
         bzip2 \
         ca-certificates \
