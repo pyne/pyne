@@ -1,13 +1,15 @@
+ARG pkg_mgr=apt
 ARG build_hdf5="NO"
 ARG pyne_test_base=openmc
 ARG ubuntu_version=22.04
 
-FROM ubuntu:${ubuntu_version} AS base_python
+FROM ubuntu:${ubuntu_version} AS common_base
 
 # Ubuntu Setup
 ENV TZ=America/Chicago
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
+FROM common_base AS apt_deps
 ENV HOME /root
 RUN apt-get update \
     && apt-get install -y --fix-missing \
@@ -39,6 +41,45 @@ RUN apt-get update \
             future \
             progress
 
+FROM common_base AS conda_deps
+RUN apt install -y \
+        wget \
+        bzip2 \
+        ca-certificates \
+    && apt clean -y all
+
+RUN echo 'export PATH=/opt/conda/bin:$PATH' > /etc/profile.d/conda.sh && \
+    wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh && \
+    /bin/bash ~/miniconda.sh -b -p /opt/conda && \
+    rm ~/miniconda.sh
+
+ENV PATH /opt/conda/bin:$
+
+RUN conda config --add channels conda-forge
+RUN conda update -n base -c defaults conda
+RUN conda install -y conda-libmamba-solver
+RUN conda config --set solver libmamba
+RUN conda install -y mamba
+RUN conda uninstall -y conda-libmamba-solver
+RUN conda config --set solver classic
+RUN conda update -y --all && \
+    mamba install -y \
+                cmake \
+                git \
+                libblas \
+                liblapack \
+                hdf5 \
+                setuptools \
+                pytest \
+                pytables \
+                jinja2 \
+                "cython<3" \
+                && \
+    mamba install -y --force-reinstall libsqlite && \
+    conda clean -y --all
+RUN mkdir -p `python -m site --user-site`
+
+FROM ${pkg_mgr}_deps AS base_python
 # make starting directory
 RUN mkdir -p $HOME/opt
 RUN echo "export PATH=$HOME/.local/bin:\$PATH" >> ~/.bashrc
@@ -61,6 +102,7 @@ RUN if [ "$build_hdf5" != "NO" ]; then \
 # put HDF5 on the path
 ENV LD_LIBRARY_PATH $HDF5_INSTALL_PATH/lib:$LD_LIBRARY_PATH
 ENV LIBRARY_PATH $HDF5_INSTALL_PATH/lib:$LIBRARY_PATH
+
 
 FROM base_python AS moab
 ARG build_hdf5

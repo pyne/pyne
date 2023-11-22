@@ -26,6 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix: 
+        pkg_mgr: ['apt', 'conda']
         hdf5: ['']
         hdf5_build_arg: ['NO']
         include:
@@ -52,14 +53,14 @@ jobs:
       - uses: firehed/multistage-docker-build-action@v1
         id: build_all_stages
         with:
-          repository: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}
-          stages: base_python, moab, dagmc
+          repository: ${{ env.DOCKER_IMAGE_BASENAME }}_${{ matrix.pkg_mgr }}${{ matrix.hdf5 }}
+          stages: common_base, ${{ matrix.pkg_mgr }}_deps, base_python, moab, dagmc
           server-stage: openmc
           quiet: false
           parallel: true
           tag-latest-on-default: ${{ env.USE_LATEST_TAG }}
           dockerfile: docker/ubuntu_22.04-dev.dockerfile
-          build-args: build_hdf5=${{ matrix.hdf5_build_arg }}, pyne_test_base=openmc
+          build-args: pkg_mgr = ${{ matrix.pkg_mgr }}, build_hdf5=${{ matrix.hdf5_build_arg }}, pyne_test_base=openmc
 
   # Downloads the images uploaded to ghcr in previous stages and runs pyne
   # tests to check that they work.
@@ -69,6 +70,7 @@ jobs:
     
     strategy:
       matrix: 
+        pkg_mgr: ['apt', 'conda']
         pyne_test_base: [base_python, moab, dagmc, openmc]
         hdf5: ['']
         hdf5_build_arg: ['NO']
@@ -97,14 +99,14 @@ jobs:
       - uses: firehed/multistage-docker-build-action@v1
         id: multistage_build_and_test
         with:
-          repository: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}
+          repository: ${{ env.DOCKER_IMAGE_BASENAME }}_${{ matrix.pkg_mgr }}${{ matrix.hdf5 }}
           stages: ${{ matrix.pyne_test_base }}
           server-stage: pyne-dev
           quiet: false
           parallel: true
           tag-latest-on-default: ${{ env.USE_LATEST_TAG }}
           dockerfile: docker/ubuntu_22.04-dev.dockerfile
-          build-args: build_hdf5=${{ matrix.hdf5_build_arg }}, pyne_test_base=${{ matrix.pyne_test_base }}
+          build-args: pkg_mgr = ${{ matrix.pkg_mgr }}, build_hdf5=${{ matrix.hdf5_build_arg }}, pyne_test_base=${{ matrix.pyne_test_base }}
 
   # if the previous step that tests the docker images passes then the images
   # can be copied from the ghcr where they are saved using :ci_testing tags to
@@ -115,13 +117,14 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
+        pkg_mgr: ['apt', 'conda']
         stage: [base_python, moab, dagmc, openmc]
         hdf5: ['']
         include:
           - stage: dagmc
             hdf5: _hdf5
 
-    name: "ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_22.04_py3${{ matrix.hdf5 }}/${{ matrix.stage }}: latest -> stable"
+    name: "ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_22.04_py3_${{ matrix.pkg_mgr }}${{ matrix.hdf5 }}/${{ matrix.stage }}: latest -> stable"
 
     steps:
       - name: Log in to the Container registry
@@ -134,5 +137,5 @@ jobs:
       - name: Push Image to stable img
         uses: akhilerm/tag-push-action@v2.1.0
         with:
-          src: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}/${{ matrix.stage }}:latest
-          dst: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}/${{ matrix.stage }}:stable
+          src: ${{ env.DOCKER_IMAGE_BASENAME }}_${{ matrix.pkg_mgr }}${{ matrix.hdf5 }}/${{ matrix.stage }}:latest
+          dst: ${{ env.DOCKER_IMAGE_BASENAME }}_${{ matrix.pkg_mgr }}${{ matrix.hdf5 }}/${{ matrix.stage }}:stable

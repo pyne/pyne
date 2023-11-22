@@ -31,6 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
+        pkg_mgr: ['apt', 'conda']
         stage: [base_python, moab, dagmc, openmc]
         hdf5: ['']
         include:
@@ -39,7 +40,7 @@ jobs:
       fail-fast: false
 
     container:
-      image: ghcr.io/pyne/pyne_ubuntu_22.04_py3${{ matrix.hdf5 }}/${{ matrix.stage }}:stable
+      image: ghcr.io/pyne/pyne_ubuntu_22.04_py3_${{ matrix.pkg_mgr }}${{ matrix.hdf5 }}/${{ matrix.stage }}:stable
 
     steps:
       - name: Checkout repository
