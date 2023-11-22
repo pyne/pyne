@@ -42,11 +42,11 @@ RUN apt-get update \
             progress
 
 FROM common_base AS conda_deps
-RUN apt install -y \
+RUN apt-get install -y --fix-missing \
         wget \
         bzip2 \
         ca-certificates \
-    && apt clean -y all
+    && apt-get clean -y
 
 RUN echo 'export PATH=/opt/conda/bin:$PATH' > /etc/profile.d/conda.sh && \
     wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh && \

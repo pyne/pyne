@@ -30,7 +30,11 @@ jobs:
         hdf5: ['']
         hdf5_build_arg: ['NO']
         include:
-          - hdf5: _hdf5
+          - pkg_mgr: 'apt'
+            hdf5: _hdf5
+            hdf5_build_arg: hdf5-1_12_0
+          - pkg_mgr: 'conda'
+            hdf5: _hdf5
             hdf5_build_arg: hdf5-1_12_0
       fail-fast: false
 
@@ -75,7 +79,12 @@ jobs:
         hdf5: ['']
         hdf5_build_arg: ['NO']
         include:
-          - pyne_test_base: dagmc
+          - pkg_mgr: 'apt'
+            pyne_test_base: dagmc
+            hdf5: _hdf5
+            hdf5_build_arg: hdf5-1_12_0
+          - pkg_mgr: 'conda'
+            pyne_test_base: dagmc
             hdf5: _hdf5
             hdf5_build_arg: hdf5-1_12_0
       fail-fast: false
@@ -121,7 +130,11 @@ jobs:
         stage: [base_python, moab, dagmc, openmc]
         hdf5: ['']
         include:
-          - stage: dagmc
+          - pkg_mgr: 'apt'
+            stage: dagmc
+            hdf5: _hdf5
+          - pkg_mgr: 'apt'
+            stage: dagmc
             hdf5: _hdf5
 
     name: "ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_22.04_py3_${{ matrix.pkg_mgr }}${{ matrix.hdf5 }}/${{ matrix.stage }}: latest -> stable"
