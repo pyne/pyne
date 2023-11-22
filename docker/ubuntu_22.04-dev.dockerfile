@@ -54,7 +54,7 @@ RUN echo 'export PATH=/opt/conda/bin:$PATH' > /etc/profile.d/conda.sh && \
     /bin/bash ~/miniconda.sh -b -p /opt/conda && \
     rm ~/miniconda.sh
 
-ENV PATH /opt/conda/bin:$
+ENV PATH /opt/conda/bin:$PATH
 
 RUN conda config --add channels conda-forge
 RUN conda update -n base -c defaults conda
