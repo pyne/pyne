@@ -35,7 +35,11 @@ jobs:
         stage: [base_python, moab, dagmc, openmc]
         hdf5: ['']
         include:
-          - stage: dagmc
+          - pkg_mgr: 'apt'
+            stage: dagmc
+            hdf5: _hdf5
+          - pkg_mgr: 'conda'
+            stage: dagmc
             hdf5: _hdf5
       fail-fast: false
 
