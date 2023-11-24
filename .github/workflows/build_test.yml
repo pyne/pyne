@@ -44,7 +44,7 @@ jobs:
       fail-fast: false
 
     container:
-      image: ghcr.io/pyne/pyne_ubuntu_22.04_py3_${{ matrix.pkg_mgr }}${{ matrix.hdf5 }}/${{ matrix.stage }}:stable
+      image: ghcr.io/pyne/pyne_ubuntu_22.04_py3${{ matrix.pkg_mgr }}${{ matrix.hdf5 }}/${{ matrix.stage }}:stable
 
     steps:
       - name: Checkout repository
