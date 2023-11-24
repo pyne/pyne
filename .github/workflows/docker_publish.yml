@@ -133,7 +133,7 @@ jobs:
           - pkg_mgr: 'apt'
             stage: dagmc
             hdf5: _hdf5
-          - pkg_mgr: 'apt'
+          - pkg_mgr: 'conda'
             stage: dagmc
             hdf5: _hdf5
 
