@@ -158,7 +158,9 @@ else()
     message("-- NumPy: Not searching because NumPy was not found.")
 endif(Python3_NumPy_FOUND)
 
-pyne_setup_fortran()
+IF(ENABLE_SPATIAL_SOLVERS OR ENABLE_ENSDF_PROCESSIONG)
+  pyne_setup_fortran()
+ENDIF(ENABLE_SPATIAL_SOLVERS OR ENABLE_ENSDF_PROCESSIONG)
 
 # Find f2py, if building spatial solver
 IF(BUILD_SPATIAL_SOLVER)
