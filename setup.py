@@ -173,7 +173,7 @@ cmake_args = [
 
 # Specify GCC as the compiler for Windows
 if IS_NT:
-    cmake_args.append("-GMinGW Makefiles") # MinGW Makefiles Unix Makefiles
+    cmake_args.append("-Unix Makefiles") # MinGW Makefiles Unix Makefiles
 
 
 # Check for DAGMC_ROOT and MOAB_ROOT
