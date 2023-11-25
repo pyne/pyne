@@ -26,7 +26,7 @@ set(PYNE_CYTHON_MODULES
     stlcontainers
     tally
     transmuters
-    utils
+    _utils
     )
 if(MOAB_FOUND)
   set(PYNE_CYTHON_MODULES ${PYNE_CYTHON_MODULES} source_sampling)
