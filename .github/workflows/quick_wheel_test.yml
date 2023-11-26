@@ -71,7 +71,7 @@ jobs:
       - name: Install HDF5 and Eigen MacOS
         shell: bash -l {0}
         run: |
-          brew install hdf5 eigen
+          brew install hdf5 eigen gcc
           echo "HOME=$GITHUB_WORKSPACE/.." >> $GITHUB_ENV
           echo "HDF5_ROOT=$HDF5_PATH" >> $GITHUB_ENV
           which gfortran
