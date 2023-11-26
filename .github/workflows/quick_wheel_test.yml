@@ -32,7 +32,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.11
+          python-version: 3.x
         if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
 
       - name: Install Miniconda Windows
@@ -133,7 +133,7 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE
           # clone the repository
-          git clone https://github.com/ahnaf-tahmid-chowdhury/DAGMC.git dagmc
+          git clone https://github.com/svalinn/DAGMC.git dagmc
           cd dagmc
           mkdir -p build
           cd build
@@ -156,13 +156,13 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE
           # clone the repository
-          git clone https://github.com/ahnaf-tahmid-chowdhury/DAGMC.git dagmc
+          git clone https://github.com/svalinn/DAGMC.git dagmc
           cd dagmc
           mkdir -p build
           cd build
           # cmake, build, and install
           cmake ../  -G "Visual Studio 17 2022" \
-            -DCMAKE_INSTALL_PREFIX="$CONDA_LOC" \
+            -DCMAKE_INSTALL_PREFIX=$CONDA_LOC \
             -DBUILD_EXE=ON \
             -DBUILD_STATIC_EXE=ON \
             -DBUILD_SHARED_LIBS=OFF \
@@ -173,8 +173,8 @@ jobs:
             -DBUILD_MAKE_WATERTIGHT=ON \
             -DBUILD_OVERLAP_CHECK=OFF \
             -DBUILD_TESTS=OFF \
-            -DMOAB_DIR="$CONDA_LOC" \
-            -DHDF5_ROOT="$CONDA_LOC" \
+            -DMOAB_DIR=$CONDA_LOC \
+            -DHDF5_ROOT=$CONDA_LOC \
             -DHDF5_hdf5_LIBRARY_RELEASE="${CONDA_LOC}/lib/libhdf5_hl.lib;${CONDA_LOC}/lib/libhdf5.lib;${CONDA_LOC}/lib/zlib.lib;${CONDA_LOC}/lib/libhdf5_cpp.lib" \
             -DCMAKE_EXE_LINKER_FLAGS="" \
             -DCMAKE_MODULE_LINKER_FLAGS="" \
