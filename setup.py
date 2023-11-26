@@ -180,7 +180,8 @@ if IS_NT:
 
 # Specify GCC as the compiler for Mac
 if IS_MAC:
-    cmake_args.append("-GUnix Makefiles")
+    cmake_args.append("-DCMAKE_C_COMPILER:FILEPATH=gcc")
+    cmake_args.append("-DCMAKE_CXX_COMPILER:FILEPATH=g++")
 
 # Check for DAGMC_ROOT and MOAB_ROOT
 if "DAGMC_ROOT" in os.environ:
