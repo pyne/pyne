@@ -186,7 +186,7 @@ jobs:
           cd $GITHUB_WORKSPACE
           rm -rf "$GITHUB_WORKSPACE/dagmc"
           echo "DAGMC_ROOT=$CONDA_LOC" >> $GITHUB_ENV
-          Write-Host "DAGMC installed"
+          echo "DAGMC installed"
         if: matrix.os == 'windows-latest'
 
       - name: Build wheels
