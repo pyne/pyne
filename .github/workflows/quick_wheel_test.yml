@@ -29,8 +29,10 @@ jobs:
       - name: Check gfortran
         shell: bash -l {0}
         run: |
-          gfortran --version
-          which gfortran
+          gcc --version
+          which gfortran-12
+          gfortran-12 --version
+          export FC=gfortran-12
 
       - name: Set up Python
         uses: actions/setup-python@v4
