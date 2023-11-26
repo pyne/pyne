@@ -5,6 +5,10 @@ import pytest
 from numpy.testing import assert_array_equal
 import multiprocessing
 import numpy as np
+try :
+    import importlib as imp
+except ImportError:
+    import imp
 
 from pyne.mesh import HAVE_PYMOAB
 
