@@ -163,6 +163,9 @@ def ensure_nuc_data():
 # Check for Windows
 IS_NT = os.name == "nt"
 
+# Check for Mac
+IS_MAC = sys.platform == "darwin"
+
 # Cmake args
 cmake_args = [
     "-DPYTHON_EXECUTABLE:FILEPATH=" + sys.executable,
@@ -173,8 +176,11 @@ cmake_args = [
 
 # Specify GCC as the compiler for Windows
 if IS_NT:
-    cmake_args.append("-GUnix Makefiles") # MinGW Makefiles Unix Makefiles
+    cmake_args.append("-GMinGW Makefiles") # MinGW Makefiles Unix Makefiles
 
+# Specify GCC as the compiler for Mac
+if IS_MAC:
+    cmake_args.append("-GUnix Makefiles")
 
 # Check for DAGMC_ROOT and MOAB_ROOT
 if "DAGMC_ROOT" in os.environ:
