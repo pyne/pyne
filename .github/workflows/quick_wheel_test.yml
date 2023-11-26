@@ -26,14 +26,6 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Check gfortran
-        shell: bash -l {0}
-        run: |
-          gcc --version
-          which gfortran-12
-          gfortran-12 --version
-          export FC=gfortran-12
-
       - name: Set up Python
         uses: actions/setup-python@v4
         with:

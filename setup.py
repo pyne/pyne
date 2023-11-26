@@ -178,10 +178,9 @@ cmake_args = [
 if IS_NT:
     cmake_args.append("-GMinGW Makefiles") # MinGW Makefiles Unix Makefiles
 
-# Specify GCC as the compiler for Mac
+# Specify gfortran-12 as the Fortran compiler for Mac
 if IS_MAC:
-    cmake_args.append("-DCMAKE_C_COMPILER:FILEPATH=gcc")
-    cmake_args.append("-DCMAKE_CXX_COMPILER:FILEPATH=g++")
+    cmake_args.append("-DCMAKE_Fortran_COMPILER:FILEPATH=gfortran-12")
 
 # Check for DAGMC_ROOT and MOAB_ROOT
 if "DAGMC_ROOT" in os.environ:
