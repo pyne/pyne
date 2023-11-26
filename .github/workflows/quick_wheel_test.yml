@@ -26,8 +26,11 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - name: Check gfortran
+        shell: bash -l {0}
+        run: |
+          gfortran --version
+          which gfortran
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -71,10 +74,9 @@ jobs:
       - name: Install HDF5 and Eigen MacOS
         shell: bash -l {0}
         run: |
-          brew install hdf5 eigen gcc
+          brew install hdf5 eigen
           echo "HOME=$GITHUB_WORKSPACE/.." >> $GITHUB_ENV
           echo "HDF5_ROOT=$HDF5_PATH" >> $GITHUB_ENV
-          which gfortran
         if: matrix.os == 'macos-latest'
 
       - name: Install MOAB Ubuntu
@@ -189,6 +191,9 @@ jobs:
           echo "DAGMC_ROOT=$CONDA_LOC" >> $GITHUB_ENV
           echo "DAGMC installed"
         if: matrix.os == 'windows-latest'
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
       - name: Build wheels
         shell: bash -l {0}
