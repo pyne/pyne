@@ -26,6 +26,12 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.x
+        if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
+
       - name: Install Miniconda Windows
         uses: conda-incubator/setup-miniconda@v2
         with:
