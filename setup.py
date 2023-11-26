@@ -168,6 +168,7 @@ IS_MAC = sys.platform == "darwin"
 
 # Cmake args
 cmake_args = [
+    "-GUnix Makefiles",
     "-DPYTHON_EXECUTABLE:FILEPATH=" + sys.executable,
     "-DCMAKE_BUILD_TYPE:STRING=Release",
     "-DPYNE_FAST_COMPILE:BOOL=OFF",
@@ -175,10 +176,10 @@ cmake_args = [
 ]
 
 # Specify GCC as the compiler for Windows
-if IS_NT:
+""" if IS_NT:
     cmake_args.append("-GMinGW Makefiles") # MinGW Makefiles Unix Makefiles
     cmake_args.append("-DCMAKE_C_COMPILER:FILEPATH=gcc")
-    cmake_args.append("-DCMAKE_CXX_COMPILER:FILEPATH=g++")
+    cmake_args.append("-DCMAKE_CXX_COMPILER:FILEPATH=g++") """
 
 # Specify gfortran-12 as the Fortran compiler for Mac
 if IS_MAC:
