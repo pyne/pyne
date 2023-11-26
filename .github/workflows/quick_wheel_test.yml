@@ -21,11 +21,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
 
     runs-on: ${{ matrix.os }}
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -40,10 +43,10 @@ jobs:
         if: matrix.os == 'windows-latest'
 
       - name: Install Python Packages
+        shell: bash -l {0}
         run: |
           python -m pip install wheel
           python -m pip install "cython<3" numpy pytest setuptools
-          which python
           echo "PYTHON_EXECUTABLE=$(which python)" >> $GITHUB_ENV
 
       - name: Install HDF5 and Eigen Ubuntu
@@ -186,9 +189,6 @@ jobs:
           Write-Host "DAGMC installed"
         if: matrix.os == 'windows-latest'
 
-      - name: Checkout PyNE
-        uses: actions/checkout@v3
-
       - name: Build wheels
         shell: bash -l {0}
         run: |
@@ -198,11 +198,11 @@ jobs:
       - name: Install PyNE
         shell: bash -l {0}
         run: |
-          cd dist
-          python -m pip install pyne*.whl
+          python -m pip install dist/pyne*.whl
           nuc_data_make
 
       - name: Test PyNE 
         shell: bash -l {0}
         run: |
+          cd tests
           pytest -ra ../tests
