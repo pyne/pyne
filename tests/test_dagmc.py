@@ -5,9 +5,12 @@ import os.path
 import warnings
 import pytest
 from numpy.testing import assert_array_equal
-import imp
 import multiprocessing
 import numpy as np
+try :
+    import importlib as imp
+except ImportError:
+    import imp
 
 from pyne.mesh import HAVE_PYMOAB
 
