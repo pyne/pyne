@@ -43,6 +43,7 @@ jobs:
         run: |
           python -m pip install wheel
           python -m pip install "cython<3" numpy pytest setuptools
+          which python
           echo "PYTHON_EXECUTABLE=$(which python)" >> $GITHUB_ENV
 
       - name: Install HDF5 and Eigen Ubuntu
@@ -76,7 +77,7 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE
           # clone and version
-          git clone --depth 1 https://bitbucket.org/fathomteam/moab -b 5.5.0
+          git clone https://ahnaf-tahmid@bitbucket.org/nuclear-engineering/moab.git 
           cd moab
           mkdir -p build
           cd build
@@ -100,7 +101,7 @@ jobs:
         shell: bash -l {0}
         run: |
           cd $GITHUB_WORKSPACE
-          git clone https://ahnaf-tahmid@bitbucket.org/nuclear-engineering/moab.git -b windows-fix
+          git clone https://ahnaf-tahmid@bitbucket.org/nuclear-engineering/moab.git 
           cd moab
           mkdir -p build
           cd build
@@ -197,11 +198,11 @@ jobs:
       - name: Install PyNE
         shell: bash -l {0}
         run: |
-          python -m pip install dist/pyne*.whl
+          cd dist
+          python -m pip install pyne*.whl
           nuc_data_make
 
       - name: Test PyNE 
         shell: bash -l {0}
         run: |
-          cd tests
           pytest -ra ../tests
