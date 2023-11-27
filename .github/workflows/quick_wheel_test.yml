@@ -194,18 +194,16 @@ jobs:
         run: |
           python3 -m pip install build
           python3 -m build --wheel
-        if: matrix.os == 'ubuntu-latest' || matrix.os == 'windows-latest'
 
       - name: Install PyNE
         shell: bash -l {0}
         run: |
           python3 -m pip install dist/pyne*.whl
-        if: matrix.os == 'ubuntu-latest' || matrix.os == 'windows-latest'
 
-      - name: Install PyNE MacOS
+      - name: Set PATH MacOS
         shell: bash -l {0}
         run: |
-          python3 -m pip install .
+          echo "PATH=/Library/Frameworks/Python.framework/Versions/3.12/lib/:$PATH" >> $GITHUB_ENV
         if: matrix.os == 'macos-latest'
 
       - name: Nuc data make
