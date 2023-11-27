@@ -200,6 +200,12 @@ jobs:
         run: |
           python3 -m pip install dist/pyne*.whl
 
+      - name: Add PyNE to path
+        shell: bash -l {0}
+        run: |
+          echo "PYTHONPATH=/Library/Frameworks/Python.framework/Versions/3.11/lib/:$PYTHONPATH" >> $GITHUB_ENV
+        if: matrix.os == 'macos-latest'
+        
       - name: Nuc data make
         shell: bash -l {0}
         run: |
