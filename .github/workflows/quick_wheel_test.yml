@@ -203,13 +203,8 @@ jobs:
       - name: Add PyNE to path
         shell: bash -l {0}
         run: |
-          echo "PYTHONPATH=/Library/Frameworks/Python.framework/Versions/3.11/lib/:$PYTHONPATH" >> $GITHUB_ENV
+          echo "PYTHONPATH=/Library/Frameworks/Python.framework/Versions/3.11/lib/:/System/Volumes/Data/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/site-packages/:$PYTHONPATH" >> $GITHUB_ENV
         if: matrix.os == 'macos-latest'
-
-      - name: Find pyne_config
-        shell: bash -l {0}
-        run: |
-          find / -type f -name pyne_config.*
 
       - name: Nuc data make
         shell: bash -l {0}
