@@ -172,7 +172,9 @@ cmake_args = [
     "-DPYTHON_EXECUTABLE:FILEPATH=" + sys.executable,
     "-DCMAKE_BUILD_TYPE:STRING=Release",
     "-DPYNE_FAST_COMPILE:BOOL=OFF",
-    "-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON"
+    "-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON",
+    "-DCMAKE_C_COMPILER=clang",
+    "-DCMAKE_CXX_COMPILER=clang++"
 ]
 
 # Specify GCC as the compiler for Windows
