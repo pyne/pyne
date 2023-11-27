@@ -26,18 +26,18 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Set up Python Ubuntu
+      - name: Set up Python Ubuntu and MacOS
         uses: actions/setup-python@v4
         with:
           python-version: 3.x
-        if: matrix.os == 'ubuntu-latest' 
+        if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
 
-      - name: Install Miniconda Windows and MacOS
+      - name: Install Miniconda Windows
         uses: conda-incubator/setup-miniconda@v2
         with:
           auto-activate-base: true
           activate-environment: ""
-        if: matrix.os == 'windows-latest' || matrix.os == 'macos-latest'
+        if: matrix.os == 'windows-latest'
 
       - name: Install Python Packages
         shell: bash -l {0}
@@ -77,7 +77,7 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE
           # clone and version
-          git clone https://ahnaf-tahmid@bitbucket.org/nuclear-engineering/moab.git
+          git clone https://ahnaf-tahmid@bitbucket.org/nuclear-engineering/moab.git 
           cd moab
           mkdir -p build
           cd build
@@ -194,11 +194,19 @@ jobs:
         run: |
           python3 -m pip install build
           python3 -m build --wheel
+        if: matrix.os == 'ubuntu-latest' || matrix.os == 'windows-latest'
 
       - name: Install PyNE
         shell: bash -l {0}
         run: |
           python3 -m pip install dist/pyne*.whl
+        if: matrix.os == 'ubuntu-latest' || matrix.os == 'windows-latest'
+
+      - name: Install PyNE MacOS
+        shell: bash -l {0}
+        run: |
+          python3 -m pip install .
+        if: matrix.os == 'macos-latest'
 
       - name: Nuc data make
         shell: bash -l {0}
