@@ -8,25 +8,25 @@ inputs:
 runs:
   using: "composite"
   steps: 
-    - name: setup
+    - name: Setup Environment Variables
       shell: bash -l {0}
       run: |
-        export ADD_FLAG=" "
         if [[ "${{ inputs.stage }}" == "moab" || "${{ inputs.stage }}" == "dagmc" ]]; then
-          export ADD_FLAG="${ADD_FLAG} --moab /root/opt/moab"
+          echo "MOAB_ROOT=/root/opt/moab" >> $GITHUB_ENV
         fi
         if [[ "${{ inputs.stage }}" == "dagmc" ]]; then
-          export ADD_FLAG="${ADD_FLAG} --dagmc /root/opt/dagmc"
+          echo "DAGMC_ROOT=/root/opt/dagmc" >> $GITHUB_ENV
         fi
-        export ADD_FLAG="${ADD_FLAG} "
-        echo "ADD_FLAG=${ADD_FLAG}" >> $GITHUB_ENV
-        
+        if [[ "${{ inputs.hdf5 }}" == "_hdf5" ]]; then
+          echo "HDF5_ROOT=/root/opt/hdf5/hdf5-1_12_0" >> $GITHUB_ENV
+          echo "LD_LIBRARY_PATH=\${HDF5_ROOT}:\${LD_LIBRARY_PATH}" >> $GITHUB_ENV
+        fi
+
     - name: Building PyNE
       shell: bash -l {0}
       run: |
         cd $GITHUB_WORKSPACE
-        python setup.py install --user --clean --hdf5 /root/opt/hdf5/hdf5-1_14_3 ${{ env.ADD_FLAG}}
-        export PATH="$PATH:/github/home/.local/bin"
+        pip3 install .
         cd ../
         nuc_data_make
 
