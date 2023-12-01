@@ -30,7 +30,8 @@ runs:
       shell: bash -l {0}
       run: |
         cd $GITHUB_WORKSPACE
-        pip3 install .
+        pip3 install . --user
+        export PATH="$PATH:/github/home/.local/bin"
         cd ../
         nuc_data_make
 
