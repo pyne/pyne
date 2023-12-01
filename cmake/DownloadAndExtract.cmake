@@ -24,15 +24,16 @@ macro(download_and_extract _url _checkfile)
   endif()
 endmacro()
 
-
-macro(download_platform _base_url _base_name _ext_src _ext_plat)
-  # first download the src file
+# download the src file
+macro(download_src _base_url _base_name _ext_src)
   set(_url "${_base_url}/${_base_name}.tar.gz")
   set(_checkfile "${_base_name}${_ext_src}")
   download_and_extract("${_url}" "${_checkfile}")
-  # now download the platform specific file
+endmacro()
+
+macro(download_platform _base_url _base_name _ext_plat)
+  # download the platform specific file
   set(_url "${_base_url}/${_base_name}-${PYNE_ASM_PLATFORM}.tar.gz")
   set(_checkfile "${_base_name}-${PYNE_ASM_PLATFORM}${_ext_plat}")
   download_and_extract("${_url}" "${_checkfile}")
 endmacro()
-

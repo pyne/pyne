@@ -18,18 +18,6 @@ macro(pyne_set_platform)
   message("-- Pyne platform defined as: ${PYNE_PLATFORM}")
 endmacro()
 
-# C++ settings
-macro(pyne_setup_cxx)
-  INCLUDE(CheckCXXCompilerFlag)
-  CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
-  IF(COMPILER_SUPPORTS_CXX11)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-  ELSE()
-    MESSAGE(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. "
-                        "Please use a different C++ compiler.")
-  ENDIF()
-endmacro()
-
 macro(pyne_set_asm_platform)
   # first set OS
   if (WIN32)
@@ -212,16 +200,6 @@ macro(pyne_configure_rpath)
   MESSAGE("-- CMAKE_INSTALL_RPATH: ${CMAKE_INSTALL_RPATH}")
 endmacro()
 
-macro(pyne_download_platform)
-  # Download bateman solver from PyNE data
-  download_platform("http://raw.githubusercontent.com/pyne/data/master" "decay"
-                      ".cpp" ".s")
-
-  # Download CRAM solver from PyNE data
-  download_platform("http://raw.githubusercontent.com/pyne/data/master" "cram"
-                         ".c" ".s")
-endmacro()
-
 macro(pyne_set_fast_compile)
   if(NOT DEFINED PYNE_FAST_COMPILE)
     set(PYNE_FAST_COMPILE TRUE)
@@ -229,6 +207,19 @@ macro(pyne_set_fast_compile)
   message(STATUS "PyNE Fast Compile: ${PYNE_FAST_COMPILE}")
 endmacro()
 
+macro(pyne_download_files)
+  # Download bateman solver from PyNE data
+  download_src("http://raw.githubusercontent.com/pyne/data/master" "decay" ".cpp")
+  # Download CRAM solver from PyNE data
+  download_src("http://raw.githubusercontent.com/pyne/data/master" "cram" ".c")
+
+  if (PYNE_FAST_COMPILE)
+    # Download bateman solver from PyNE data
+    download_platform("http://raw.githubusercontent.com/pyne/data/master" "decay" ".s")
+    # Download CRAM solver from PyNE data
+    download_platform("http://raw.githubusercontent.com/pyne/data/master" "cram" ".s")
+  endif()
+endmacro()
 
 # fast compile with assembly, if available.
 macro(fast_compile _srcname _gnuflags _clangflags _otherflags)

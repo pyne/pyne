@@ -5,12 +5,9 @@ import os.path
 import warnings
 import pytest
 from numpy.testing import assert_array_equal
-import imp
 import multiprocessing
 import numpy as np
-
 from pyne.mesh import HAVE_PYMOAB
-
 from pyne.utils import QAWarning
 
 warnings.simplefilter("ignore", QAWarning)
@@ -19,9 +16,18 @@ try:
     from pyne.mesh import Mesh
 
     # See if dagmc module exists but do not import it
-    pyne_info = imp.find_module("pyne")
-    pyne_mod = imp.load_module("pyne", *pyne_info)
-    imp.find_module("dagmc", pyne_mod.__path__)
+    try:
+        import importlib.util as imp_util
+        pyne_info = imp_util.find_spec("pyne")
+        if pyne_info is not None:
+            pyne_mod = pyne_info.loader.load_module()
+            if imp_util.find_spec("dagmc", pyne_mod.__path__) is None:
+                raise ImportError
+    except ImportError:
+        import imp
+        pyne_info = imp.find_module("pyne")
+        pyne_mod = imp.load_module("pyne", *pyne_info)
+        imp.find_module("dagmc", pyne_mod.__path__)
 except ImportError:
     raise pytest.skip(allow_module_level=True)
 

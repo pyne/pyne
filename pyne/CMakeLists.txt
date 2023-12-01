@@ -1,5 +1,9 @@
+set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
+
 # Python extension modules
 include_directories(${PYNE_INCLUDE_DIRS})
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 # Print include dir
 get_property(inc_dirs DIRECTORY PROPERTY INCLUDE_DIRECTORIES)
@@ -37,7 +41,7 @@ foreach(cymod ${PYNE_CYTHON_MODULES})
   set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/${cymod}.pyx"
                               PROPERTIES CYTHON_IS_CXX TRUE)
   cython_add_module(${cymod} ${cymod}.pyx)
-  target_link_libraries(${cymod} pyne)
+  target_link_libraries(${cymod} PRIVATE pyne)
   install(TARGETS ${cymod} LIBRARY DESTINATION "${PYTHON_SITE_PACKAGES}/pyne")
 endforeach()
 
@@ -45,7 +49,7 @@ endforeach()
 # Cram is actually a C, not C++ file
 #
 cython_add_module(cram cram.pyx)
-target_link_libraries(cram pyne)
+target_link_libraries(cram PRIVATE pyne)
 install(TARGETS cram LIBRARY DESTINATION "${PYTHON_SITE_PACKAGES}/pyne")
 
 #
@@ -55,7 +59,7 @@ if(DAGMC_FOUND)
   set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/dagmc.pyx"
                               PROPERTIES CYTHON_IS_CXX TRUE)
   cython_add_module(_dagmc dagmc.pyx "${PROJECT_SOURCE_DIR}/src/dagmc_bridge.cpp")
-  target_link_libraries(_dagmc dagmc MOAB pyne)
+  target_link_libraries(_dagmc PRIVATE dagmc MOAB pyne)
   set_target_properties(_dagmc PROPERTIES OUTPUT_NAME dagmc)
   install(TARGETS _dagmc LIBRARY DESTINATION "${PYTHON_SITE_PACKAGES}/pyne")
 endif(DAGMC_FOUND)

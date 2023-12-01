@@ -28,9 +28,9 @@
 
 # Use the Cython executable that lives next to the Python executable
 # if it is a local installation.
-find_package( PythonInterp )
-if( PYTHONINTERP_FOUND )
-  get_filename_component( _python_path ${PYTHON_EXECUTABLE} PATH )
+find_package( Python COMPONENTS Interpreter )
+if( Python_Interpreter_FOUND )
+  get_filename_component( _python_path ${Python_EXECUTABLE} PATH )
   find_program(CYTHON_EXECUTABLE
     NAMES cython cython.bat cython3 cython-2.7 cython-3.3 cython-3.4 cython-3.5 cython-3.6 cython-3.7
     HINTS ENV PATH ${_python_path}
@@ -52,7 +52,7 @@ else()
   execute_process(COMMAND "${CYTHON_EXECUTABLE}" "-V"
                   ERROR_VARIABLE CYTHON_VERSION_RTN
                   ERROR_STRIP_TRAILING_WHITESPACE)
-  string(REPLACE " " ";" CYTHON_VERSION_RTN_LIST ${CYTHON_VERSION_RTN})
+  set(CYTHON_VERSION_RTN_LIST ${CYTHON_VERSION_RTN})
   list(GET CYTHON_VERSION_RTN_LIST -1 CYTHON_VERSION)
   string(REPLACE "." ";" CYTHON_VERSION_LIST ${CYTHON_VERSION})
   list(LENGTH CYTHON_VERSION_LIST CYTHON_VERSION_N)

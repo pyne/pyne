@@ -1,9 +1,10 @@
 # Defines the CMake commands/policies
-cmake_minimum_required(VERSION 3.0.0)
+cmake_minimum_required(VERSION 3.12.0)
 
-if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.12.0")
-  cmake_policy(SET CMP0074 NEW)
-endif()
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
 # Make the scripts available in the 'cmake' directory available for the
 # 'include()' command, 'find_package()' command.
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
@@ -11,22 +12,13 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 # Setup the project
 project(pyne)
 
-# check for and enable c++11 support
-INCLUDE(CheckCXXCompilerFlag)
-CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
-IF(COMPILER_SUPPORTS_CXX11)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-ELSE()
-    MESSAGE(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
-ENDIF()
-
 option ( ENABLE_SPATIAL_SOLVERS     "Should build AHOT spatial solvers?"                 OFF )
 option ( ENABLE_ENSDF_PROCESSIONG   "Should build ENSDF processing tools?"               OFF )
 
 include(PyneMacros)
 pyne_print_logo()  # Beware of dragons
 pyne_set_platform()
-pyne_setup_cxx()
+#pyne_setup_cxx()
 pyne_set_asm_platform()
 pyne_set_build_spatial_solver()
 pyne_set_build_type()
@@ -38,7 +30,7 @@ enable_language(ASM)
 
 # This makes all the libraries build as SHARED
 set(BUILD_SHARED_LIBS true)
-message("-- CMake Install Prefix: ${CMAKE_INSTALL_PREFIX}")
+MESSAGE("-- CMake Install Prefix: ${CMAKE_INSTALL_PREFIX}")
 
 
 #
@@ -52,16 +44,11 @@ SET(DEPS_HINTS HINTS "${DEPS_ROOT_DIR}")
 SET(DEPS_BIN_HINTS ${DEPS_HINTS} "${DEPS_ROOT_DIR}/bin")
 SET(DEPS_LIB_HINTS ${DEPS_HINTS} "${DEPS_ROOT_DIR}/lib")
 SET(DEPS_INCLUDE_HINTS HINTS "${DEPS_ROOT_DIR}/include")
-MESSAGE("-- Dependency Root Dir (DEPS_ROOT_DIR): ${DEPS_ROOT_DIR}")
-MESSAGE("-- Dependency Hints (DEPS_HINTS): ${DEPS_HINTS}")
-MESSAGE("-- Dependency Binary Hints (DEPS_BIN_HINTS): ${DEPS_BIN_HINTS}")
-MESSAGE("-- Dependency Library Hints (DEPS_LIB_HINTS): ${DEPS_LIB_HINTS}")
-MESSAGE("-- Dependency Include Hints (DEPS_INCLUDE_HINTS): ${DEPS_INCLUDE_HINTS}")
-
-
-#
-# Find Libraries
-#
+MESSAGE("-- Dependency Root Dir: ${DEPS_ROOT_DIR}")
+MESSAGE("-- Dependency Hints: ${DEPS_HINTS}")
+MESSAGE("-- Dependency Binary Hints: ${DEPS_BIN_HINTS}")
+MESSAGE("-- Dependency Library Hints: ${DEPS_LIB_HINTS}")
+MESSAGE("-- Dependency Include Hints: ${DEPS_INCLUDE_HINTS}")
 
 # Find HDF5
 MESSAGE("-- HDF5 Root: ${HDF5_ROOT}")
@@ -71,8 +58,7 @@ else()
   FIND_PACKAGE(HDF5)
 endif()
 if(NOT HDF5_FOUND AND NOT HDF5_ROOT)
-  MESSAGE("--    HDF5 not found on empty HDF5_ROOT, "
-          "setting to DEPS_ROOT_DIR: ${DEPS_ROOT_DIR}")
+  MESSAGE(STATUS "-- HDF5 not found. Setting HDF5_ROOT to ${DEPS_ROOT_DIR}")
   set(HDF5_ROOT "${DEPS_ROOT_DIR}")
   FIND_PACKAGE(HDF5 REQUIRED)
 endif()
@@ -83,10 +69,25 @@ if(NOT HDF5_LIBRARY_DIRS STREQUAL "")
 endif()
 set(LIBS_HDF5 ${HDF5_C_LIBRARIES})
 set(LIBS ${LIBS} ${HDF5_C_LIBRARIES})
-MESSAGE("--    HDF5 Include directory: ${HDF5_INCLUDE_DIRS}")
-MESSAGE("--    HDF5 Library directories: ${HDF5_LIBRARY_DIRS}")
-MESSAGE("--    HDF5 Libraries: ${HDF5_C_LIBRARIES}")
-MESSAGE("--    HDF5 library version: ${HDF5_VERSION}")
+MESSAGE(STATUS "HDF5 include dirs: ${HDF5_INCLUDE_DIRS}")
+MESSAGE(STATUS "HDF5 library dirs: ${HDF5_LIBRARY_DIRS}")
+MESSAGE(STATUS "HDF5 Libraries: ${HDF5_C_LIBRARIES}")
+MESSAGE(STATUS "HDF5 library version: ${HDF5_VERSION}")
+
+# Set up shared and static versions of the HDF5 libraries
+set(HDF5_LIBRARIES_SHARED ${HDF5_LIBRARIES})
+if(BUILD_STATIC_LIBS)
+  string(REPLACE ${CMAKE_SHARED_LIBRARY_SUFFIX} ${CMAKE_STATIC_LIBRARY_SUFFIX}
+         HDF5_LIBRARIES_STATIC "${HDF5_LIBRARIES_SHARED}")
+endif()
+if(NOT BUILD_SHARED_LIBS)
+  set(HDF5_LIBRARIES_SHARED)
+endif()
+
+# Print out some more information about the HDF5 setup
+MESSAGE("-- HDF5 libraries shared: ${HDF5_LIBRARIES_SHARED}")
+MESSAGE("-- HDF5 libraries static: ${HDF5_LIBRARIES_STATIC}")
+
 
 # Version 1.12 of HDF5 deprecates the H5Oget_info_by_idx(),
 # H5O_info_t() and H5Oget_info_by_name() interfaces.
@@ -96,48 +97,42 @@ if(NOT (${HDF5_VERSION} VERSION_LESS 1.12.0))
    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DH5Oget_info_by_idx_vers=1 -DH5O_info_t_vers=1 -DH5Oget_info_by_name_vers=1")
 endif()
 
-# Look for MOAB if requested
-if(WITH_MOAB)
-  # user may have set a search path
-  if(NOT MOAB_ROOT)
-    set(MOAB_ROOT "${DEPS_ROOT_DIR}")
-  endif()
-  MESSAGE("-- MOAB Root: ${MOAB_ROOT}")
-  find_package(MOAB)
-  message("-- MOAB Found: ${MOAB_FOUND}")
-  if(${MOAB_FOUND})
-    include_directories(${MOAB_INCLUDE_DIRS})
-    get_filename_component(MOAB_LIBRARY_DIRS ${MOAB_LIBRARY} PATH)
-    if(APPLE)
-      link_directories(${MOAB_LIBRARY_DIRS})
-    else(APPLE)
-      link_directories(${MOAB_LIBRARY_DIRS})
-    endif(APPLE)
-  endif(${MOAB_FOUND})
-endif()
+
+# Find MOAB
+MESSAGE("-- MOAB root: ${MOAB_ROOT}")
+find_package(MOAB)
+
+if(${MOAB_FOUND})
+  include_directories(${MOAB_INCLUDE_DIRS})
+  get_filename_component(MOAB_LIBRARY_DIRS ${MOAB_LIBRARY} PATH)
+  if(APPLE)
+    link_directories(${MOAB_LIBRARY_DIRS})
+  else(APPLE)
+    link_directories(${MOAB_LIBRARY_DIRS})
+  endif(APPLE)
+endif(${MOAB_FOUND})
+
 
 # Look for DAGMC if requested
-if(WITH_DAGMC)
-  if(${MOAB_FOUND})
-    # Always look for DAGMC library
-    if(NOT DAGMC_ROOT)
-      set(DAGMC_ROOT "${DEPS_ROOT_DIR}")
-    endif()
-    MESSAGE("-- DAGMC Root: ${DAGMC_ROOT}")
-    find_package(DAGMC)
-    message("-- DAGMC Found: ${DAGMC_FOUND}")
-    if(${DAGMC_FOUND})
-      include_directories(${DAGMC_INCLUDE_DIRS})
-      link_directories(${DAGMC_LIBRARY_DIRS})
-    endif(${DAGMC_FOUND})
-  else(${MOAB_FOUND})
-    message("-- DAGMC: Not searching because MOAB was not found.")
-  endif(${MOAB_FOUND})
-endif()
+if(${MOAB_FOUND})
+  # Always look for DAGMC library
+  if(NOT DAGMC_ROOT)
+    set(DAGMC_ROOT "${DEPS_ROOT_DIR}")
+  endif()
+  MESSAGE("-- DAGMC Root: ${DAGMC_ROOT}")
+  find_package(DAGMC)
+  message("-- DAGMC Found: ${DAGMC_FOUND}")
+  if(${DAGMC_FOUND})
+    include_directories(${DAGMC_INCLUDE_DIRS})
+    link_directories(${DAGMC_LIBRARY_DIRS})
+  endif(${DAGMC_FOUND})
+else(${MOAB_FOUND})
+  message("-- DAGMC: Not searching because MOAB was not found.")
+endif(${MOAB_FOUND})
+
 
 # Find Python
-find_package(PythonInterp REQUIRED)
-find_package(PythonLibs REQUIRED)
+find_package(Python3 REQUIRED COMPONENTS Interpreter Development NumPy)
 if(PYTHON_VERSION_MAJOR EQUAL 2)
   set(SITE_PACKAGES_CODE
       "import site; print site.getusersitepackages().replace(site.USER_BASE, '${CMAKE_INSTALL_PREFIX}', 1)")
@@ -153,10 +148,15 @@ message("-- PYTHON_EXECUTABLE: ${PYTHON_EXECUTABLE}")
 message("-- PYTHON_SITE_PACKAGES: ${PYTHON_SITE_PACKAGES}")
 
 
-# Find NumPy
-find_package(Numpy REQUIRED)
-include_directories("${NUMPY_INCLUDE_DIR}")
-
+# Include NumPy if found
+if(Python3_NumPy_FOUND)
+    add_library(Numpy::Numpy UNKNOWN IMPORTED)
+    set_target_properties(Numpy::Numpy PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${Python3_NumPy_INCLUDE_DIRS}")
+    message("-- NumPy include dirs: ${Python3_NumPy_INCLUDE_DIRS}")
+    include_directories(${Python3_NumPy_INCLUDE_DIRS})
+else()
+    message("-- NumPy: Not searching because NumPy was not found.")
+endif(Python3_NumPy_FOUND)
 
 pyne_setup_fortran()
 
@@ -175,7 +175,7 @@ ENDIF(BUILD_SPATIAL_SOLVER)
 
 # Include the CMake script UseCython.cmake.  This defines add_cython_module().
 # Instruction for use can be found at the top of cmake/UseCython.cmake.
-include(UseCython)
+include(UseCustomCython)
 INCLUDE_DIRECTORIES("${CMAKE_CURRENT_BINARY_DIR}/pyne")
 
 # Add JsonCpp Flag
@@ -200,7 +200,3 @@ add_subdirectory(src)
 add_subdirectory(pyne)
 add_subdirectory(pyne/xs)
 
-# install python package
-set(pyinstallscript "${CMAKE_CURRENT_BINARY_DIR}/cmake/SetupSubPyInstall.cmake")
-configure_file(cmake/SetupSubPyInstall.cmake.in ${pyinstallscript} @ONLY)
-install(SCRIPT ${pyinstallscript})

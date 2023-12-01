@@ -1,0 +1,218 @@
+name: Quick Wheel test
+
+on:
+  # allows running workflows manually
+  workflow_dispatch:
+
+  pull_request:
+    branches:
+      - develop
+    paths-ignore:
+      - docs/**
+
+  push:
+    branches:
+      - scikit-build
+    paths-ignore:
+      - docs/**
+
+jobs:
+  main:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Set up Python Ubuntu and MacOS
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.x
+        if: matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest'
+
+      - name: Install Miniconda Windows
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-activate-base: true
+          activate-environment: ""
+        if: matrix.os == 'windows-latest'
+
+      - name: Install Python Packages
+        shell: bash -l {0}
+        run: |
+          python3 -m pip install wheel
+          python3 -m pip install "cython<3" numpy pytest setuptools
+          echo "PYTHON_EXECUTABLE=$(which python3)" >> $GITHUB_ENV
+
+      - name: Install HDF5 and Eigen Ubuntu
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gfortran libblas-dev liblapack-dev libeigen3-dev libhdf5-dev hdf5-tools
+          # hdf5 std directory
+          export HDF5_ROOT=/usr/lib/x86_64-linux-gnu/hdf5/serial
+          export LD_LIBRARY_PATH="${HDF5_ROOT}:${LD_LIBRARY_PATH}"
+        if: matrix.os == 'ubuntu-latest'
+
+      - name: Install HDF5 and Eigen Windows
+        shell: bash -l {0}
+        run: |
+          conda install curl eigen
+          conda install -c conda-forge hdf5
+          conda remove -y yaml-cpp
+          echo "HOME_PATH=$GITHUB_WORKSPACE/.." >> $GITHUB_ENV
+          echo "CONDA_LOC=C:/Miniconda/Library" >> $GITHUB_ENV
+        if: ${{ matrix.os == 'windows-latest' }}
+
+      - name: Install HDF5 and Eigen MacOS
+        shell: bash -l {0}
+        run: |
+          brew install hdf5 eigen
+          echo "HOME=$GITHUB_WORKSPACE/.." >> $GITHUB_ENV
+          echo "HDF5_ROOT=$HDF5_PATH" >> $GITHUB_ENV
+        if: matrix.os == 'macos-latest'
+
+      - name: Install MOAB Ubuntu
+        run: |
+          cd $GITHUB_WORKSPACE
+          # clone and version
+          git clone https://ahnaf-tahmid@bitbucket.org/nuclear-engineering/moab.git 
+          cd moab
+          mkdir -p build
+          cd build
+          # cmake, build and install
+            cmake ../ -DENABLE_HDF5=ON \
+              -DHDF5_ROOT=$HDF5_ROOT \
+              -DBUILD_SHARED_LIBS=ON \
+              -DENABLE_PYMOAB=ON \
+              -DENABLE_BLASLAPACK=OFF \
+              -DENABLE_FORTRAN=OFF \
+              -DCMAKE_INSTALL_PREFIX=$Python_ROOT_DIR
+            make
+            make install
+          cd $GITHUB_WORKSPACE
+          rm -rf $GITHUB_WORKSPACE/moab
+          echo "MOAB_ROOT=$Python_ROOT_DIR" >> $GITHUB_ENV
+          echo "MOAB installed"
+        if: matrix.os == 'ubuntu-latest'
+
+      - name: Install MOAB Windows
+        shell: bash -l {0}
+        run: |
+          cd $GITHUB_WORKSPACE
+          git clone https://ahnaf-tahmid@bitbucket.org/nuclear-engineering/moab.git 
+          cd moab
+          mkdir -p build
+          cd build
+          cmake ../ \
+                -G"Visual Studio 17 2022"  \
+                -DCMAKE_INSTALL_PREFIX="${CONDA_LOC}/" \
+                -DENABLE_BLASLAPACK=OFF \
+                -DENABLE_FORTRAN=OFF \
+                -DENABLE_PYMOAB=ON \
+                -DPYMOAB_INSTALL_PREFIX="${CONDA_LOC}/.." \
+                -DBUILD_SHARED_LIBS=ON \
+                -DPYTHON_EXECUTABLE=${PYTHON_EXECUTABLE} \
+                -DENABLE_HDF5=ON \
+                -DHDF5_ROOT="${CONDA_LOC}" \
+                -DHDF5_hdf5_LIBRARY_RELEASE="${CONDA_LOC}/lib/libhdf5_hl.lib;${CONDA_LOC}/lib/libhdf5.lib;${CONDA_LOC}/lib/zlib.lib;${CONDA_LOC}/lib/libhdf5_cpp.lib" \
+                -DCMAKE_BUILD_TYPE=Release 
+          cmake --build . --config Release
+          cmake --install . --config Release
+          cd $GITHUB_WORKSPACE
+          rm -rf $GITHUB_WORKSPACE/moab
+          echo "MOAB_ROOT=$CONDA_LOC" >> $GITHUB_ENV
+          echo "MOAB installed"
+        if: ${{ matrix.os == 'windows-latest' }}
+
+      - name: Install DAGMC Ubuntu
+        run: |
+          cd $GITHUB_WORKSPACE
+          # clone the repository
+          git clone https://github.com/svalinn/DAGMC.git dagmc
+          cd dagmc
+          mkdir -p build
+          cd build
+          # cmake, build and install
+          cmake ../ -DMOAB_CMAKE_CONFIG=$Python_ROOT_DIR/lib/cmake/MOAB \
+            -DMOAB_DIR=$Python_ROOT_DIR \
+            -DBUILD_STATIC_LIBS=OFF \
+            -DBUILD_TALLY=ON \
+            -DCMAKE_INSTALL_PREFIX=$Python_ROOT_DIR
+          make
+          make install
+          cd $GITHUB_WORKSPACE
+          rm -rf "$GITHUB_WORKSPACE/dagmc"
+          echo "DAGMC_ROOT=$Python_ROOT_DIR" >> $GITHUB_ENV
+          echo "DAGMC installed"
+        if: matrix.os == 'ubuntu-latest'
+
+      - name: Install DAGMC Windows
+        shell: bash -l {0}
+        run: |
+          cd $GITHUB_WORKSPACE
+          # clone the repository
+          git clone https://github.com/svalinn/DAGMC.git dagmc
+          cd dagmc
+          mkdir -p build
+          cd build
+          # cmake, build, and install
+          cmake ../  -G "Visual Studio 17 2022" \
+            -DCMAKE_INSTALL_PREFIX=$CONDA_LOC \
+            -DBUILD_EXE=ON \
+            -DBUILD_STATIC_EXE=ON \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DBUILD_STATIC_LIBS=ON \
+            -DBUILD_TALLY=OFF \
+            -DBUILD_BUILD_OBB=OFF \
+            -DBUILD_UWUW=ON \
+            -DBUILD_MAKE_WATERTIGHT=ON \
+            -DBUILD_OVERLAP_CHECK=OFF \
+            -DBUILD_TESTS=OFF \
+            -DMOAB_DIR=$CONDA_LOC \
+            -DHDF5_ROOT=$CONDA_LOC \
+            -DHDF5_hdf5_LIBRARY_RELEASE="${CONDA_LOC}/lib/libhdf5_hl.lib;${CONDA_LOC}/lib/libhdf5.lib;${CONDA_LOC}/lib/zlib.lib;${CONDA_LOC}/lib/libhdf5_cpp.lib" \
+            -DCMAKE_EXE_LINKER_FLAGS="" \
+            -DCMAKE_MODULE_LINKER_FLAGS="" \
+            -DCMAKE_SHARED_LINKER_FLAGS="" \
+            -DCMAKE_STATIC_LINKER_FLAGS="" \
+            -DCMAKE_BUILD_TYPE=Release
+          cmake --build . --config Release
+          cmake --install .
+          cd $GITHUB_WORKSPACE
+          rm -rf "$GITHUB_WORKSPACE/dagmc"
+          echo "DAGMC_ROOT=$CONDA_LOC" >> $GITHUB_ENV
+          echo "DAGMC installed"
+        if: matrix.os == 'windows-latest'
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Build wheels
+        shell: bash -l {0}
+        run: |
+          python3 -m pip install build
+          python3 -m build --wheel
+
+      - name: Install PyNE
+        shell: bash -l {0}
+        run: |
+          python3 -m pip install dist/pyne*.whl
+
+      - name: Set PATH MacOS
+        shell: bash -l {0}
+        run: |
+          echo "PATH=/Library/Frameworks/Python.framework/Versions/3.12/lib/:$PATH" >> $GITHUB_ENV
+        if: matrix.os == 'macos-latest'
+
+      - name: Nuc data make
+        shell: bash -l {0}
+        run: |
+          nuc_data_make
+
+      - name: Test PyNE 
+        shell: bash -l {0}
+        run: |
+          cd tests
+          pytest -ra ../tests
