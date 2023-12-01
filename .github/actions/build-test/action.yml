@@ -23,7 +23,6 @@ runs:
         fi
         if [[ "${{ inputs.hdf5 }}" == "_hdf5" ]]; then
           echo "HDF5_ROOT=/root/opt/hdf5/hdf5-1_12_0" >> $GITHUB_ENV
-          echo "LD_LIBRARY_PATH=/root/opt/hdf5/hdf5-1_12_0:${LD_LIBRARY_PATH}" >> $GITHUB_ENV
         fi
 
     - name: Building PyNE
@@ -32,10 +31,11 @@ runs:
         cd $GITHUB_WORKSPACE
         pip3 install . --user
         export PATH="$PATH:/github/home/.local/bin"
+        mkdir -p temp && cd temp
+        nuc_data_make
 
     - name: Testing PyNE
       shell: bash -l {0}
       run: |
         cd $GITHUB_WORKSPACE/tests
-        nuc_data_make
         ./ci-run-tests.sh python3
