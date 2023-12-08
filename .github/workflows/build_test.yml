@@ -1,0 +1,57 @@
+name: Standard Build and Test
+
+on:
+  # allows us to run workflows manually
+  workflow_dispatch:
+  pull_request:
+    paths-ignore:
+      - 'docs/*'
+      - 'examples/*'
+      - 'img/*'
+      - 'news/*'
+      - 'tutorial/*'
+      - './*.rst'
+      - 'license.txt'
+      - 'PULL_REQUEST_TEMPLATE.md'
+  push:
+    paths-ignore:
+      - 'docs/*'
+      - 'examples/*'
+      - 'img/*'
+      - 'news/*'
+      - 'tutorial/*'
+      - './*.rst'
+      - 'license.txt'
+      - 'PULL_REQUEST_TEMPLATE.md'
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  BuildTest:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        pkg_mgr: ['apt', 'conda']
+        stage: [base_python, moab, dagmc, openmc]
+        hdf5: ['']
+        include:
+          - pkg_mgr: 'apt'
+            stage: dagmc
+            hdf5: _hdf5
+          - pkg_mgr: 'conda'
+            stage: dagmc
+            hdf5: _hdf5
+      fail-fast: false
+
+    container:
+      image: ghcr.io/pyne/pyne_ubuntu_22.04_py3_${{ matrix.pkg_mgr }}${{ matrix.hdf5 }}/${{ matrix.stage }}:stable
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: use BuildTest composite action
+        uses: ./.github/actions/build-test
+        with:
+          stage: ${{ matrix.stage }}
+          hdf5: ${{ matrix.hdf5 }}

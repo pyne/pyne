@@ -63,4 +63,16 @@ tests/epdl97_eedl_Pb
 
 # Rever
 rever/
+
+# exceptions for test files
+!tests/files_test_activation_responses/activation_responses_examples/*.h5
+!tests/files_test_openmc/*.h5
+
 .vscode
+
+# ignore version file generated from pyne_version.py
+src/pyne_version.h
+
+# ignore amalgamated source
+pyne.cpp
+pyne.h

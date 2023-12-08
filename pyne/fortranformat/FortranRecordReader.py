@@ -1,17 +1,19 @@
 import sys
+
 IS_PYTHON3 = sys.version_info[0] >= 3
 
 if IS_PYTHON3:
-    exec('from ._input import input as _input')
-    exec('from ._parser import parser as _parser')
-    exec('from ._lexer import lexer as _lexer')
+    exec("from ._input import input as _input")
+    exec("from ._parser import parser as _parser")
+    exec("from ._lexer import lexer as _lexer")
 else:
-    exec('from _input import input as _input')
-    exec('from _parser import parser as _parser')
-    exec('from _lexer import lexer as _lexer')
+    exec("from _input import input as _input")
+    exec("from _parser import parser as _parser")
+    exec("from _lexer import lexer as _lexer")
+
 
 class FortranRecordReader(object):
-    '''
+    """
     Generate a reader object for FORTRAN format strings
 
     Typical use case ...
@@ -28,8 +30,8 @@ class FortranRecordReader(object):
     Note: it is best to create a new object for each format, changing the format
     causes the parser to reevalute the format string which is costly in terms of
     performance
-    '''
-    
+    """
+
     def __init__(self, format):
         self.format = format
         self._eds = []
@@ -51,23 +53,26 @@ class FortranRecordReader(object):
             return True
 
     def read(self, record):
-        '''
+        """
         Pass a string representing a FORTRAN record to obtain the relevent
         values
-        '''
+        """
         return _input(self._eds, self._rev_eds, record)
 
     def get_format(self):
         return self._format
+
     def set_format(self, format):
         self._format = format
         self._parse_format()
+
     format = property(get_format, set_format)
 
     def _parse_format(self):
         self._eds, self._rev_eds = _parser(_lexer(self.format))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import doctest
+
     doctest.testmod()

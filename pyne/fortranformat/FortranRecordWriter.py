@@ -1,17 +1,19 @@
 import sys
+
 IS_PYTHON3 = sys.version_info[0] >= 3
 
 if IS_PYTHON3:
-    exec('from ._output import output as _output')
-    exec('from ._lexer import lexer as _lexer')
-    exec('from ._parser import parser as _parser')
+    exec("from ._output import output as _output")
+    exec("from ._lexer import lexer as _lexer")
+    exec("from ._parser import parser as _parser")
 else:
-    exec('from _output import output as _output')
-    exec('from _lexer import lexer as _lexer')
-    exec('from _parser import parser as _parser')
+    exec("from _output import output as _output")
+    exec("from _lexer import lexer as _lexer")
+    exec("from _parser import parser as _parser")
+
 
 class FortranRecordWriter(object):
-    '''
+    """
     Generate a writer object for FORTRAN format strings
 
     Typical use case ...
@@ -28,7 +30,8 @@ class FortranRecordWriter(object):
     Note: it is best to create a new object for each format, changing the format
     causes the parser to reevalute the format string which is costly in terms of
     performance
-    '''
+    """
+
     def __init__(self, format):
         self._eds = []
         self._rev_eds = []
@@ -41,10 +44,10 @@ class FortranRecordWriter(object):
             return object.__eq__(self, other)
 
     def write(self, values):
-        '''
+        """
         Pass a list of values correspoding to the FORTRAN format specified
         to generate a string
-        '''
+        """
         return _output(self._eds, self._rev_eds, values)
 
     def get_format(self):
@@ -60,7 +63,7 @@ class FortranRecordWriter(object):
         self._eds, self._rev_eds = _parser(_lexer(self.format))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import doctest
-    doctest.testmod()
 
+    doctest.testmod()

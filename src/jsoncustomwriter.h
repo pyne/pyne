@@ -33,9 +33,9 @@ namespace Json {
    /** \brief Writes a Value in <a HREF="http://www.json.org">JSON</a> format with custom formatting.
     *
     * The JSON document is written according to the rules specified in the constructor. Objects and
-    * arrays are printed on a single line if they are below a certain length, otherwise they are 
+    * arrays are printed on a single line if they are below a certain length, otherwise they are
     * indented. It is possible to output invalid json if the customizable parameters are specified
-    * incorrectly. Set maxWidth to 0 to print output on a single line. 
+    * incorrectly. Set maxWidth to 0 to print output on a single line.
     *
     * \sa Reader, Value
     */
@@ -72,7 +72,7 @@ namespace Json {
       std::string indent_;
       int maxWidth_;
    };
-   
+
 }
 
 #endif

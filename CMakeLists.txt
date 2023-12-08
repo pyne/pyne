@@ -1,15 +1,32 @@
 # Defines the CMake commands/policies
 cmake_minimum_required(VERSION 3.0.0)
 
+if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.12.0")
+  cmake_policy(SET CMP0074 NEW)
+endif()
 # Make the scripts available in the 'cmake' directory available for the
 # 'include()' command, 'find_package()' command.
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 # Setup the project
 project(pyne)
+
+# check for and enable c++11 support
+INCLUDE(CheckCXXCompilerFlag)
+CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+IF(COMPILER_SUPPORTS_CXX11)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+ELSE()
+    MESSAGE(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
+ENDIF()
+
+option ( ENABLE_SPATIAL_SOLVERS     "Should build AHOT spatial solvers?"                 OFF )
+option ( ENABLE_ENSDF_PROCESSIONG   "Should build ENSDF processing tools?"               OFF )
+
 include(PyneMacros)
 pyne_print_logo()  # Beware of dragons
 pyne_set_platform()
+pyne_setup_cxx()
 pyne_set_asm_platform()
 pyne_set_build_spatial_solver()
 pyne_set_build_type()
@@ -72,25 +89,54 @@ set(LIBS ${LIBS} ${HDF5_C_LIBRARIES})
 MESSAGE("--    HDF5 Include directory: ${HDF5_INCLUDE_DIRS}")
 MESSAGE("--    HDF5 Library directories: ${HDF5_LIBRARY_DIRS}")
 MESSAGE("--    HDF5 Libraries: ${HDF5_C_LIBRARIES}")
+MESSAGE("--    HDF5 library version: ${HDF5_VERSION}")
 
-
-# Find MOAB library
-if(NOT MOAB_ROOT)
-  set(MOAB_ROOT "${DEPS_ROOT_DIR}")
+# Version 1.12 of HDF5 deprecates the H5Oget_info_by_idx(),
+# H5O_info_t() and H5Oget_info_by_name() interfaces.
+# Thus, we give these flags to allow usage of the old interface in newer
+# versions of HDF5.
+if(NOT (${HDF5_VERSION} VERSION_LESS 1.12.0))
+   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DH5Oget_info_by_idx_vers=1 -DH5O_info_t_vers=1 -DH5Oget_info_by_name_vers=1")
 endif()
-MESSAGE("-- MOAB Root: ${MOAB_ROOT}")
-find_package(MOAB)
-message("-- MOAB Found: ${MOAB_FOUND}")
-if(${MOAB_FOUND})
-  include_directories(${MOAB_INCLUDE_DIR})
-  get_filename_component(MOAB_LIBRARY_DIRS ${MOAB_LIBRARY} PATH)
-  if(APPLE)
-    link_directories(${MOAB_LIBRARY_DIRS}/lib)
-  else(APPLE)
-    link_directories(${MOAB_LIBRARY_DIRS})
-  endif(APPLE)
-endif(${MOAB_FOUND})
 
+# Look for MOAB if requested
+if(WITH_MOAB)
+  # user may have set a search path
+  if(NOT MOAB_ROOT)
+    set(MOAB_ROOT "${DEPS_ROOT_DIR}")
+  endif()
+  MESSAGE("-- MOAB Root: ${MOAB_ROOT}")
+  find_package(MOAB)
+  message("-- MOAB Found: ${MOAB_FOUND}")
+  if(${MOAB_FOUND})
+    include_directories(${MOAB_INCLUDE_DIRS})
+    get_filename_component(MOAB_LIBRARY_DIRS ${MOAB_LIBRARY} PATH)
+    if(APPLE)
+      link_directories(${MOAB_LIBRARY_DIRS})
+    else(APPLE)
+      link_directories(${MOAB_LIBRARY_DIRS})
+    endif(APPLE)
+  endif(${MOAB_FOUND})
+endif()
+
+# Look for DAGMC if requested
+if(WITH_DAGMC)
+  if(${MOAB_FOUND})
+    # Always look for DAGMC library
+    if(NOT DAGMC_ROOT)
+      set(DAGMC_ROOT "${DEPS_ROOT_DIR}")
+    endif()
+    MESSAGE("-- DAGMC Root: ${DAGMC_ROOT}")
+    find_package(DAGMC)
+    message("-- DAGMC Found: ${DAGMC_FOUND}")
+    if(${DAGMC_FOUND})
+      include_directories(${DAGMC_INCLUDE_DIRS})
+      link_directories(${DAGMC_LIBRARY_DIRS})
+    endif(${DAGMC_FOUND})
+  else(${MOAB_FOUND})
+    message("-- DAGMC: Not searching because MOAB was not found.")
+  endif(${MOAB_FOUND})
+endif()
 
 # Find Python
 find_package(PythonInterp REQUIRED)

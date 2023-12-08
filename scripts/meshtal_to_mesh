@@ -8,7 +8,8 @@ def main():
              'Reads an MCNP meshtal file and creates an h5m mesh file '
              'for each meshtally within the file. The output mesh files are '
              'named <filename>_tally_<tally_num>.h5m. Note that this script '
-             'only works for Cartesian meshes.'))
+             'only works for Cartesian meshes, and only with the default '
+             'setting for OUT=COL format.'))
     parser.add_argument('filename', help='Name of the MCNP meshtal file.')
     parser.add_argument('-o', dest='output', 
                         help=('Base name of the output files:  output files '
@@ -18,7 +19,7 @@ def main():
     m = Meshtal(args.filename)
     output = args.output if args.output is not None else args.filename
     for num, tal in m.tally.items():
-        tal.mesh.save("{0}_tally_{1}.h5m".format(output, num))
+        tal.write_hdf5("{0}_tally_{1}.h5m".format(output, num))
 
 if __name__ == '__main__':
     main()

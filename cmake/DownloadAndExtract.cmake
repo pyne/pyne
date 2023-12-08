@@ -11,7 +11,7 @@ macro(download_and_extract _url _checkfile)
     if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${_base}")
       message(STATUS "Downloading ${_url} -> ${_base}")
       file(DOWNLOAD "${_url}" "${CMAKE_CURRENT_SOURCE_DIR}/${_base}"
-           SHOW_PROGRESS STATUS _rtn TLS_VERIFY OFF)
+           SHOW_PROGRESS STATUS _rtn)
       list(GET _rtn 0 _rtncode)
       if(NOT 0 EQUAL _rtncode)
         message(FATAL_ERROR ${_rtn})

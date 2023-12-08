@@ -16,6 +16,7 @@
 #include <cctype>
 #include <stdlib.h>
 #include <iostream>
+#include <iomanip>
 #include <cmath>
 #include <exception>
 #include <sys/stat.h>
@@ -23,18 +24,6 @@
 #include <cstdlib>
 #include <vector>
 #include <algorithm>
-
-#if (__GNUC__ >= 4)
-  #include <cmath>
-  #define isnan(x) std::isnan(x)
-#else
-  #include <math.h>
-  #define isnan(x) __isnand((double)x)
-#endif
-
-#ifdef __WIN_MSVC__
-    #define isnan(x) ((x) != (x))
-#endif
 
 #ifndef JSON_IS_AMALGAMATION
   #define JSON_IS_AMALGAMATION
@@ -88,6 +77,10 @@ namespace pyne {
   /// Returns a capitalized copy of the string.
   std::string capitalize(std::string s);
 
+  /// Forms and returns the wrapped lines with a lenght up to line_lenght.
+  std::string comment_line_wrapping(std::string line, std::string comment_prefix = "",
+                                           int line_length = 79);
+
   /// Finds and returns the first white-space delimited token of a line.
   /// \param line a character array to take the first token from.
   /// \param max_l an upper bound to the length of the token.  Must be 11 or less.
@@ -121,6 +114,30 @@ namespace pyne {
   /// That is to say that the return value uses only word characters.
   std::string natural_naming(std::string name);
 
+  // split a string into a vector of string using a delimiter
+  std::vector<std::string> split_string(std::string lists, std::string delimiter = " ");
+
+  // join the vector element into a string, each values will be delimited ny the delimiter
+  template<typename T>
+  std::string join_to_string(std::vector<T> vect, std::string delimiter = " "){
+    std::stringstream out;
+    out << std::setiosflags(std::ios::fixed) << std::setprecision(6);
+
+    // ensure there is at least 1 element in the vector
+    if (vect.size() == 0)
+      return out.str();
+    // no delimiter needed before the first element
+    out << vect[0];
+    for( int i = 1; i < vect.size(); i++)
+      out << delimiter << vect[i];
+    return out.str();
+  };
+  template std::string join_to_string(std::vector<int> vect,
+                                      std::string delimiter);
+  template std::string join_to_string(std::vector<double> vect,
+                                      std::string delimiter);
+  template std::string join_to_string(std::vector<std::string> vect, std::string delimiter);
+
   /// Finds the slope of a line from the points (\a x1, \a y1) and (\a x2, \a y2).
   double slope (double x2, double y2, double x1, double y1);
 
@@ -135,6 +152,11 @@ namespace pyne {
   // File Helpers
   /// Returns true if the file can be found.
   bool file_exists(std::string strfilename);
+
+  // turns the filename string into the full file path
+  std::string get_full_filepath(char* filename);
+  // turns the filename string into the full file path
+  std::string get_full_filepath(std::string filename);
 
   // Message Helpers
   extern bool USE_WARNINGS;
@@ -159,21 +181,19 @@ namespace pyne {
     /// constructor with the filename \a fname.
     FileNotFound(std::string fname)
     {
-      filename = fname;
+      FNF_message = "File not found";
+      if (!fname.empty())
+        FNF_message += ": " + fname;
     };
 
     /// Creates a helpful error message.
     virtual const char* what() const throw()
     {
-      std::string FNFstr ("File not found: ");
-      if (!filename.empty())
-        FNFstr += filename;
-
-      return (const char *) FNFstr.c_str();
+      return FNF_message.c_str();
     };
 
   private:
-    std::string filename; ///< unfindable filename.
+    std::string FNF_message; /// Message for exception
   };
 
   /// Exception representing value errors of all kinds
@@ -190,20 +210,17 @@ namespace pyne {
     /// constructor with the filename \a fname.
     ValueError(std::string msg)
     {
-      message = msg;
+      message = "ValueError: " + msg;
     };
 
     /// Creates a helpful error message.
     virtual const char* what() const throw()
     {
-      std::string msgstr ("ValueError: ");
-      if (!message.empty())
-        msgstr += message;
-
-      return (const char *) msgstr.c_str();
+      const char* msgstr_rtn = message.c_str();
+      return msgstr_rtn;
     };
 
-  private:
+  protected:
     std::string message; ///< extra message for the user.
   };
 

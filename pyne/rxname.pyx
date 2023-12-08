@@ -120,13 +120,13 @@ following procedure will add a new reaction to the suite provided.
 5. In the ``_fill_maps()`` function in "rxname.cpp", add a docstring to
    the ``_docs`` array at the same index the name was added in step 2.
 
-Repeat this procedure as necessary.  
+Repeat this procedure as necessary.
 
 --------------------------
 
 .. [NNDC] http://www.nndc.bnl.gov/endfdocs/ENDF-102-2001.pdf
 .. [NEA] http://www.oecd-nea.org/dbdata/data/manual-endf/endf102_MT.pdf
-.. [T2] http://t2.lanl.gov/endf/mts.html
+.. [T2] http://t2.lanl.gov/nis/endf/mts.html
 .. [JAEA] http://wwwndc.jaea.go.jp/form/ENDF6/mt.html
 
 --------------------------
@@ -142,10 +142,9 @@ from cython.operator cimport dereference as deref
 from cython.operator cimport preincrement as inc
 from libcpp.string cimport string as std_string
 
-from warnings import warn
-from pyne.utils import QAWarning
+from pyne.utils import QA_warn
 
-# local imports 
+# local imports
 cimport extra_types
 cimport pyne.cpp_utils
 cimport pyne.pyne_config
@@ -157,7 +156,7 @@ import pyne.stlcontainers as conv
 
 
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+QA_warn(__name__)
 
 # names
 cdef conv._SetStr names_proxy = conv.SetStr(False)
@@ -214,7 +213,7 @@ def hash(s):
 def name(x, y=None, z="n"):
     """name(x, y=None, z="n")
 
-    Gives the unique reaction name.  Note that this name follows the 'natural naming' 
+    Gives the unique reaction name.  Note that this name follows the 'natural naming'
     convention and may be used as a variable in most languages.
 
     Parameters
@@ -307,7 +306,7 @@ def id(x, y=None, z="n"):
 def mt(x, y=None, z="n"):
     """mt(x, y=None, z="n")
 
-    Gives the reaction MT number. This may not be greater than 1000. 
+    Gives the reaction MT number. This may not be greater than 1000.
 
     Parameters
     ----------
@@ -440,8 +439,8 @@ def doc(x, y=None, z="n"):
     return d
 
 
-def child(nuc, rx, char * z="n"):
-    """child(nuc, rx, char * z="n")
+def child(nuc, rx, z="n"):
+    """child(nuc, rx, z="n")
 
     Gives the child nuclide that comes from a parent and a reaction.
 
@@ -459,30 +458,34 @@ def child(nuc, rx, char * z="n"):
     to_nuc : int
         a nuclide identifier.
     """
-    cdef std_string ptype #= std_string(<char *> z);
+    cdef std_string ptype
     cdef int to_nuc
     cdef bint nuc_is_str = isinstance(nuc, basestring)
+    cdef bint z_is_str = isinstance(z, basestring)
     cdef bint rx_is_str = isinstance(rx, basestring)
-    ptype = std_string(<char *> z);
+    # convert particle to std::string
+    z_bytes = z.encode() if z_is_str else z
+    ptype = std_string(<char *> z_bytes)
+    # call child function
     if nuc_is_str and rx_is_str:
         nuc_bytes = nuc.encode()
         rx_bytes = rx.encode()
-        to_nuc = cpp_rxname.child(std_string(<char *> nuc_bytes), 
+        to_nuc = cpp_rxname.child(std_string(<char *> nuc_bytes),
                                   std_string(<char *> rx_bytes), ptype)
     elif not nuc_is_str and rx_is_str:
         rx_bytes = rx.encode()
         to_nuc = cpp_rxname.child(<int> nuc, std_string(<char *> rx_bytes), ptype)
     elif nuc_is_str and not rx_is_str:
         nuc_bytes = nuc.encode()
-        to_nuc = cpp_rxname.child(std_string(<char *> nuc_bytes), 
+        to_nuc = cpp_rxname.child(std_string(<char *> nuc_bytes),
                                   <extra_types.uint32> long(rx), ptype)
     elif not nuc_is_str and not rx_is_str:
         to_nuc = cpp_rxname.child(<int> nuc, <extra_types.uint32> long(rx), ptype)
     return int(to_nuc)
 
 
-def parent(nuc, rx, char * z="n"):
-    """parent(nuc, rx, char * z="n")
+def parent(nuc, rx, z="n"):
+    """parent(nuc, rx, z="n")
 
     Gives the parent nuclide that produces a child from a reaction.
 
@@ -500,22 +503,26 @@ def parent(nuc, rx, char * z="n"):
     from_nuc : int
         a nuclide identifier.
     """
-    cdef std_string ptype #= std_string(<char *> z);
+    cdef std_string ptype
     cdef int from_nuc
     cdef bint nuc_is_str = isinstance(nuc, basestring)
+    cdef bint z_is_str = isinstance(z, basestring)
     cdef bint rx_is_str = isinstance(rx, basestring)
-    ptype = std_string(<char *> z);
+    # convert particle to std::string
+    z_bytes = z.encode() if z_is_str else z
+    ptype = std_string(<char *> z_bytes)
+    # call parent function
     if nuc_is_str and rx_is_str:
         nuc_bytes = nuc.encode()
         rx_bytes = rx.encode()
-        from_nuc = cpp_rxname.parent(std_string(<char *> nuc_bytes), 
+        from_nuc = cpp_rxname.parent(std_string(<char *> nuc_bytes),
                                     std_string(<char *> rx_bytes), ptype)
     elif not nuc_is_str and rx_is_str:
         rx_bytes = rx.encode()
         from_nuc = cpp_rxname.parent(<int> nuc, std_string(<char *> rx_bytes), ptype)
     elif nuc_is_str and not rx_is_str:
         nuc_bytes = nuc.encode()
-        from_nuc = cpp_rxname.parent(std_string(<char *> nuc_bytes), 
+        from_nuc = cpp_rxname.parent(std_string(<char *> nuc_bytes),
                                     <extra_types.uint32> long(rx), ptype)
     elif not nuc_is_str and not rx_is_str:
         from_nuc = cpp_rxname.parent(<int> nuc, <extra_types.uint32> long(rx), ptype)

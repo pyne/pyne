@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 from __future__ import print_function
 import pkgutil
-from warnings import warn
-from pyne.utils import QAWarning
+from pyne.utils import QA_warn
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+QA_warn(__name__)
 
 
 def get_isotopic_abundances():
@@ -23,7 +22,9 @@ def get_isotopic_abundances():
         isotope relative to all atoms of that element.
     """
 
-    abundance_file = pkgutil.get_data('pyne.dbgen', 'abundances.txt').decode().split('\n')
+    abundance_file = (
+        pkgutil.get_data("pyne.dbgen", "abundances.txt").decode().split("\n")
+    )
 
     # Create dictionary
     abundance = {}
@@ -31,7 +32,7 @@ def get_isotopic_abundances():
 
     # Read data
     for line in abundance_file:
-        if line.startswith('#') or not line:
+        if line.startswith("#") or not line:
             continue
         words = line.split()
         assert len(words) == 4
@@ -39,11 +40,11 @@ def get_isotopic_abundances():
         # Read atomic number and mass number
         Z = int(words[0])
         A = int(words[2])
-        nuc = (Z*1000 + A)*10000
-        name = '-'.join(words[1:3])
+        nuc = (Z * 1000 + A) * 10000
+        name = "-".join(words[1:3])
 
         # Read value and add to dictionary
-        val = 0.01*float(words[3])
+        val = 0.01 * float(words[3])
         abundance[nuc] = val
         abundance_by_Z[Z].append((name, val))
 

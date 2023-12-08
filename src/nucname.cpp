@@ -127,6 +127,10 @@ pyne::nucname::name_zz_t pyne::nucname::get_name_zz() {
   lzd["Cn"] = 112;
   lzd["Fl"] = 114;
   lzd["Lv"] = 116;
+  lzd["Nh"] = 113;
+  lzd["Mc"] = 115;
+  lzd["Ts"] = 117;
+  lzd["Og"] = 118;
 
   return lzd;
 }
@@ -967,6 +971,79 @@ int pyne::nucname::mcnp_to_id(const char * nuc) {
 
 int pyne::nucname::mcnp_to_id(std::string nuc) {
   return mcnp_to_id(pyne::to_int(nuc));
+}
+
+/************************/
+/*** openmc functions ***/
+/************************/
+std::string pyne::nucname::openmc(int nuc) {
+  std::string nucname = name(nuc);
+
+  // check aaa value
+  if (iselement(nuc)) {
+    nucname.append("0");
+  }
+
+  // format metadata
+  if ('M' == nucname.back()) {
+    nucname.back() = '_';
+    nucname.append("m");
+    int meta_id = snum(nuc);
+    std::string meta_str = std::to_string(meta_id);
+    nucname.append(meta_str);
+  }
+  return nucname;
+}
+
+std::string pyne::nucname::openmc(const char * nuc) {
+  std::string newnuc (nuc);
+  return openmc(newnuc);
+}
+
+std::string pyne::nucname::openmc(std::string nuc) {
+  return openmc(id(nuc));
+}
+
+//
+// OPENMC -> id
+//
+int pyne::nucname::openmc_to_id(const char * nuc) {
+  return openmc_to_id(std::string(nuc));
+}
+
+int pyne::nucname::openmc_to_id(std::string nuc) {
+  std::string nucname;
+  name_zz_t zznames = get_name_zz();
+
+  // first two characters
+  std::string::iterator aaa_start;
+  int zzz = 0;
+  if (zznames.count(nuc.substr(0,2)) == 1) {
+    aaa_start = nuc.begin() + 2;
+    zzz = zznames[nuc.substr(0,2)];
+  }
+  // then try only the first
+  else if (zznames.count(nuc.substr(0,1)) == 1) {
+    aaa_start = nuc.begin() + 1;
+    zzz = zznames[nuc.substr(0,1)];
+  } else {
+    throw NotANuclide(nuc, "Not in the OpenMC format");
+  }
+
+  // set aaa - stop on "-" if the character exists
+  std::string::iterator aaa_end = std::find(nuc.begin(), nuc.end(), '_');
+  int aaa = pyne::to_int(nuc.substr(aaa_start - nuc.begin(), aaa_end - aaa_start));
+
+  // check for metastable state
+  int m = 0;
+  if (aaa_end != nuc.end()) {
+    std::string::iterator m_start = aaa_end + 2; // move forward once to skip "_m" characters
+    m = pyne::to_int(nuc.substr(m_start - nuc.begin(), nuc.end() - m_start));
+  }
+
+  // form integer id and return
+  return (zzz * 10000000) + (aaa * 10000) + m;
+
 }
 
 

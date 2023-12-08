@@ -1325,7 +1325,7 @@ std::vector<std::pair<double, double> >
   double xka2 = 0;
   double xkb = 0;
   double xl = 0;
-  if (!isnan(k_conv)) {
+  if (!std::isnan(k_conv)) {
     xk = data_access<atomic> (z, offsetof(atomic, k_shell_fluor),
      atomic_data_map)*k_conv;
     xka = xk / (1.0 + data_access<atomic> (z, offsetof(atomic,
@@ -1334,12 +1334,12 @@ std::vector<std::pair<double, double> >
      ka2_to_ka1), atomic_data_map));
     xka2 = xka - xka1;
     xkb = xk - xka;
-    if (!isnan(l_conv)) {
+    if (!std::isnan(l_conv)) {
         xl = (l_conv + k_conv*data_access<atomic> (z, offsetof(atomic,
      prob), atomic_data_map))*data_access<atomic> (z, offsetof(atomic,
      l_shell_fluor), atomic_data_map);
     }
-  } else if (!isnan(l_conv)) {
+  } else if (!std::isnan(l_conv)) {
     xl = l_conv*data_access<atomic> (z, offsetof(atomic,
      l_shell_fluor), atomic_data_map);
   }
@@ -1446,7 +1446,7 @@ int pyne::id_from_level(int nuc, double level, std::string special) {
        it!=nuc_upper; ++it) {
     if ((std::abs(level - it->second.level) < minv) &&
     ((char)it->second.special == special.c_str()[0]) &&
-    !isnan(it->second.level)) {
+    !std::isnan(it->second.level)) {
       minv = std::abs(level - it->second.level);
       ret_id = it->second.nuc_id;
     }
@@ -1596,14 +1596,15 @@ double pyne::decay_const(std::string nuc) {
 // Half-life data
 //
 double pyne::half_life(int nuc) {
-    std::vector<double> result = data_access<double, level_data>(nuc, 0.0,
-    DBL_MAX, offsetof(level_data, half_life), level_data_lvl_map);
-    if (result.size() == 1) {
-        return result[0];
-    }
-    return 1.0/0.0;
+  std::vector<double> result = data_access<double, level_data>(
+      nuc, 0.0, DBL_MAX, offsetof(level_data, half_life), level_data_lvl_map);
+  if (result.size() == 1) {
+    return result[0];
+  }
+  double num = 1.0;
+  double den = 0.0;
+  return num / den;
 }
-
 
 double pyne::half_life(char * nuc) {
   int nuc_zz = nucname::id(nuc);
@@ -1881,7 +1882,7 @@ template<> void pyne::_load_data<pyne::gamma>() {
   status = H5Fclose(nuc_data_h5);
 
   for (int i = 0; i < gamma_length; ++i) {
-    if ((gamma_array[i].parent_nuc != 0) && !isnan(gamma_array[i].energy))
+    if ((gamma_array[i].parent_nuc != 0) && !std::isnan(gamma_array[i].energy))
       gamma_data[std::make_pair(gamma_array[i].parent_nuc,
         gamma_array[i].energy)] = gamma_array[i];
   }
@@ -2037,7 +2038,7 @@ std::vector<std::pair<double, double> > pyne::gamma_xrays(int parent) {
         temp = calculate_xray_data(nucname::znum(children[i]),
           k_list[i]*decay_br[j].first, l_list[i]*decay_br[j].first);
         for (int k = 0; k < temp.size(); ++k) {
-          if (!isnan(temp[k].second) && !isnan(temp[k].first)) {
+          if (!std::isnan(temp[k].second) && !std::isnan(temp[k].first)) {
             int found = 0;
             for (int l = 0; l < result.size(); ++l) {
               if (temp[k].first == result[l].first) {
@@ -2104,7 +2105,7 @@ template<> void pyne::_load_data<pyne::alpha>() {
   status = H5Fclose(nuc_data_h5);
 
   for (int i = 0; i < alpha_length; ++i) {
-    if ((alpha_array[i].from_nuc != 0) && !isnan(alpha_array[i].energy))
+    if ((alpha_array[i].from_nuc != 0) && !std::isnan(alpha_array[i].energy))
       alpha_data[std::make_pair(alpha_array[i].from_nuc, alpha_array[i].energy)]
         = alpha_array[i];
   }
@@ -2182,7 +2183,7 @@ template<> void pyne::_load_data<pyne::beta>() {
   status = H5Fclose(nuc_data_h5);
 
   for (int i = 0; i < beta_length; ++i) {
-    if ((beta_array[i].from_nuc != 0) && !isnan(beta_array[i].avg_energy))
+    if ((beta_array[i].from_nuc != 0) && !std::isnan(beta_array[i].avg_energy))
       beta_data[std::make_pair(beta_array[i].from_nuc, beta_array[i].avg_energy)]
         = beta_array[i];
   }
@@ -2274,7 +2275,7 @@ template<> void pyne::_load_data<pyne::ecbp>() {
   status = H5Fclose(nuc_data_h5);
 
   for (int i = 0; i < ecbp_length; ++i) {
-    if ((ecbp_array[i].from_nuc != 0) && !isnan(ecbp_array[i].avg_energy))
+    if ((ecbp_array[i].from_nuc != 0) && !std::isnan(ecbp_array[i].avg_energy))
       ecbp_data[std::make_pair(ecbp_array[i].from_nuc, ecbp_array[i].avg_energy)]
         = ecbp_array[i];
   }
@@ -2334,7 +2335,7 @@ std::vector<std::pair<double, double> > pyne::ecbp_xrays(int parent) {
         temp = calculate_xray_data(nucname::znum(children[i]),
           k_list[i]*decay_br[j].first, l_list[i]*decay_br[j].first);
         for (int k = 0; k < temp.size(); ++k) {
-          if (!isnan(temp[k].second) && !isnan(temp[k].first)) {
+          if (!std::isnan(temp[k].second) && !std::isnan(temp[k].first)) {
             int found = 0;
             for (int l = 0; l < result.size(); ++l) {
               if (temp[k].first == result[l].first) {
@@ -2439,7 +2440,7 @@ std::vector<std::pair<double, double> > pyne::xrays(int parent) {
         temp = calculate_xray_data(nucname::znum(children[i]),
           k_list[i]*decay_br[j].first, l_list[i]*decay_br[j].first);
         for (int k = 0; k < temp.size(); ++k) {
-          if (!isnan(temp[k].second) && !isnan(temp[k].first)) {
+          if (!std::isnan(temp[k].second) && !std::isnan(temp[k].first)) {
             int found = 0;
             for (int l = 0; l < result.size(); ++l) {
               if (temp[k].first == result[l].first) {
@@ -2471,7 +2472,7 @@ std::vector<std::pair<double, double> > pyne::xrays(int parent) {
         temp = calculate_xray_data(nucname::znum(gchildren[i]),
           gk_list[i]*decay_nrbr[j].first, gl_list[i]*decay_nrbr[j].first);
         for (int k = 0; k < temp.size(); ++k) {
-          if (!isnan(temp[k].second) && !isnan(temp[k].first)) {
+          if (!std::isnan(temp[k].second) && !std::isnan(temp[k].first)) {
             int found = 0;
             for (int l = 0; l < result.size(); ++l) {
               if (temp[k].first == result[l].first) {

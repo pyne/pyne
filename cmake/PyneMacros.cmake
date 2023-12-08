@@ -18,6 +18,18 @@ macro(pyne_set_platform)
   message("-- Pyne platform defined as: ${PYNE_PLATFORM}")
 endmacro()
 
+# C++ settings
+macro(pyne_setup_cxx)
+  INCLUDE(CheckCXXCompilerFlag)
+  CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+  IF(COMPILER_SUPPORTS_CXX11)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+  ELSE()
+    MESSAGE(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. "
+                        "Please use a different C++ compiler.")
+  ENDIF()
+endmacro()
+
 macro(pyne_set_asm_platform)
   # first set OS
   if (WIN32)
@@ -39,7 +51,6 @@ macro(pyne_set_asm_platform)
   set(PYNE_ASM_PLATFORM "${_plat}")
 endmacro()
 
-
 # Fortran settings
 # FFLAGS depend on the compiler
 macro(pyne_setup_fortran)
@@ -48,10 +59,10 @@ macro(pyne_setup_fortran)
 
   # Augment the Fortran implicit link libraries
   message(STATUS "CMAKE_Fortran_IMPLICIT_LINK_DIRECTORIES: "
-          ${CMAKE_Fortran_IMPLICIT_LINK_DIRECTORIES})
+          "${CMAKE_Fortran_IMPLICIT_LINK_DIRECTORIES}")
   if (APPLE)
     message(STATUS "CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES Before Fix: "
-            ${CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES})
+            "${CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES}")
     set(LIBGCC_S)
     # The previous method found the gcc_s library by version,
     # find_library(LIBGCC_S_PATH gcc_s.${gcc_s_ver}
@@ -83,16 +94,16 @@ macro(pyne_setup_fortran)
     endif()
   endif()
   message(STATUS "CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES: "
-          ${CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES})
+          "${CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES}")
 
   get_filename_component(Fortran_COMPILER_NAME ${CMAKE_Fortran_COMPILER} NAME)
 
   if(Fortran_COMPILER_NAME MATCHES "gfortran.*")
     # gfortran
     set(CMAKE_Fortran_FLAGS_RELEASE
-        "-funroll-all-loops -c -fpic -fdefault-real-8 -fdefault-double-8")
+        "-funroll-all-loops -fpic -fdefault-real-8 -fdefault-double-8")
     set(CMAKE_Fortran_FLAGS_DEBUG
-        "-c -fpic -fdefault-real-8 -fdefault-double-8")
+        "-fpic -fdefault-real-8 -fdefault-double-8")
   elseif(Fortran_COMPILER_NAME MATCHES "ifort.*")
     # ifort (untested)
     set(CMAKE_Fortran_FLAGS_RELEASE "-f77rtl -O2 -r8")
@@ -137,14 +148,22 @@ endmacro()
 
 # determine if spatial solver module should be built
 macro(pyne_set_build_spatial_solver)
-  IF(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    IF(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.6" AND
-       NOT APPLE AND NOT "$ENV{CONDA_BUILD}")
-      SET(BUILD_SPATIAL_SOLVER true)
-    ELSE()
-      SET(BUILD_SPATIAL_SOLVER false)
+  SET(BUILD_SPATIAL_SOLVER false)
+  IF ( ENABLE_SPATIAL_SOLVERS )
+    MESSAGE("-- Checking whether to build spatial solvers")
+    MESSAGE("-- -- Checking CMAKE_CXX_COMPILER_ID: ${CMAKE_CXX_COMPILER_ID}")
+    IF(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+      MESSAGE("-- -- -- Checking CMAKE_CXX_COMPILER_VERSION: ${CMAKE_CXX_COMPILER_VERSION}")
+      MESSAGE("-- -- -- Checking if APPLE: ${APPLE}")
+      IF(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.6" AND
+        NOT APPLE )
+        SET(BUILD_SPATIAL_SOLVER true)
+      ELSE()
+        SET(BUILD_SPATIAL_SOLVER false)
+      ENDIF()
     ENDIF()
-  ENDIF()
+  ENDIF( ENABLE_SPATIAL_SOLVERS)
+  MESSAGE("-- Build spatial solvers: ${BUILD_SPATIAL_SOLVER}")
 endmacro()
 
 
@@ -197,7 +216,7 @@ endmacro()
 
 macro(pyne_download_platform)
   # Download bateman solver from PyNE data
-  download_platform("https://raw.githubusercontent.com/pyne/data/master" "decay"
+  download_platform("http://raw.githubusercontent.com/pyne/data/master" "decay"
                       ".cpp" ".s")
   if(NOT WIN32)
     # Download CRAM solver from PyNE data

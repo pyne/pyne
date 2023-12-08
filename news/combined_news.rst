@@ -1,0 +1,1 @@
+* Combine all news in a readable way

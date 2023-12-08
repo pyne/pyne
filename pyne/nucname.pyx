@@ -9,9 +9,6 @@ from cython.operator cimport preincrement as inc
 #from cython cimport pointer
 from libcpp.string cimport string as std_string
 
-# Python imports
-#from collections import Iterable
-
 # local imports
 cimport pyne.cpp_utils
 cimport pyne.pyne_config
@@ -448,6 +445,49 @@ def mcnp_to_id(nuc):
         raise NucTypeError(nuc)
     return newnuc
 
+def openmc(nuc):
+    """Converts a nuclide to its OpenMC form (GND).
+
+    Parameters
+    ----------
+    nuc : int or str
+        Input nuclide.
+
+    Returns
+    -------
+    newnuc : str
+        Output nuclide in OpenMC form.
+
+
+    """
+
+    if isinstance(nuc, basestring):
+        nuc_bytes = nuc.encode()
+        newnuc = cpp_nucname.openmc(<char *> nuc_bytes)
+    elif isinstance(nuc, int):
+        newnuc = cpp_nucname.openmc(<int> nuc)
+    else:
+        raise NucTypeError(nuc)
+    return newnuc.decode()
+
+def openmc_to_id(nuc):
+    """Converts a nuclide directly from OpenMC form to
+    the canonical identifier form.
+
+    Parameters
+    ----------
+    nuc : str
+        Input nuclide in OpenMC form.
+
+    Returns
+    -------
+    newnuc : id
+        Output nuclide in identifier form.
+
+    """
+    nuc_bytes = nuc.encode()
+    newnuc = cpp_nucname.openmc_to_id(<char *> nuc_bytes)
+    return newnuc
 
 def fluka(nuc):
     """Converts a nuclide to its FLUKA name.

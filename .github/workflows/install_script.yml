@@ -1,0 +1,35 @@
+name: run install script
+
+on:
+  # allows us to run workflows manually
+  workflow_dispatch:
+  push:
+    branches:
+      - 'develop'
+    paths-ignore:
+      - 'docs/*'
+      - 'examples/*'
+      - 'img/*'
+      - 'news/*'
+      - 'tutorial/*'
+      - './*.rst'
+      - 'license.txt'
+      - 'PULL_REQUEST_TEMPLATE.md'
+
+jobs:
+  run_install_script:
+    runs-on: ubuntu-latest
+    strategy: 
+      matrix:
+        branch: ['develop', 'stable'] # 'develop' can be anything that's not 'stable'. This triggers an if statement in ubuntu.sh
+        build_hdf5: ['NO', 'hdf5-1_12_0']
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: run install script
+        shell: bash -l {0}
+        run: |
+          cd $GITHUB_WORKSPACE/scripts
+          chmod +x ubuntu.sh
+          ./ubuntu.sh ${{ matrix.branch }} ${{ matrix.build_hdf5 }}

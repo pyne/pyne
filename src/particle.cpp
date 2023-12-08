@@ -1,4 +1,6 @@
+#ifndef PYNE_IS_AMALGAMATED
 #include "particle.h"
+#endif
 
 std::string pyne::particle::_names[NUM_PARTICLES] = {
   // leptons
@@ -84,10 +86,10 @@ int pyne::particle::_pdcids[NUM_PARTICLES] = {
 };
 
 std::set<std::string> pyne::particle::names(pyne::particle::_names,
-					    pyne::particle::_names+NUM_PARTICLES);
+              pyne::particle::_names+NUM_PARTICLES);
 
 std::set<int> pyne::particle::pdc_nums(pyne::particle::_pdcids,
-					       pyne::particle::_pdcids+NUM_PARTICLES);
+                 pyne::particle::_pdcids+NUM_PARTICLES);
 
 std::map<std::string,int> pyne::particle::altnames;
 std::map<int,std::string> pyne::particle::id_name;
@@ -165,14 +167,14 @@ void * pyne::particle::_fill_maps() {
   altnames["Gamma"] = name_id["Photon"];
   altnames["X-Ray"] = name_id["Photon"];
 
-  part_to_mcnp["Neutron"]="N";
-  part_to_mcnp["Photon"]="P";
-  part_to_mcnp["Electron"]="E";
+  part_to_mcnp["Neutron"]="n";
+  part_to_mcnp["Photon"]="p";
+  part_to_mcnp["Electron"]="e";
 
-  part_to_mcnp6["Neutron"]="N";
-  part_to_mcnp6["Photon"]="P";
-  part_to_mcnp6["Electron"]="E";
-  part_to_mcnp6["Proton"]="H";
+  part_to_mcnp6["Neutron"]="n";
+  part_to_mcnp6["Photon"]="p";
+  part_to_mcnp6["Electron"]="e";
+  part_to_mcnp6["Proton"]="h";
 
   part_to_fluka["Electron"]="ELECTRON";
   part_to_fluka["Positron"]="POSITRON";
@@ -181,7 +183,7 @@ void * pyne::particle::_fill_maps() {
   part_to_fluka["Muon"]="MUON+";
   part_to_fluka["AntiMuon"]="MUON-";
   part_to_fluka["MuonNeutrino"]="NEUTRIM";
-  part_to_fluka["MuonAntiNeutrino"]="ANEUTRIM",
+  part_to_fluka["MuonAntiNeutrino"]="ANEUTRIM";
   part_to_fluka["Tauon"]="TAU+";
   part_to_fluka["Anti Tauon"]="TAU-";
   part_to_fluka["TauNeutrino"]="NEUTRIT";
@@ -219,7 +221,7 @@ void * pyne::particle::_fill_maps() {
   part_to_geant4["Muon"]="mu+";
   part_to_geant4["AntiMuon"]="mu-";
   part_to_geant4["MuonNeutrino"]="nu_mu";
-  part_to_geant4["MuonAntiNeutrino"]="anti_nu_mu",
+  part_to_geant4["MuonAntiNeutrino"]="anti_nu_mu";
   part_to_geant4["Tauon"]="tau+";
   part_to_geant4["Anti Tauon"]="tau-";
   part_to_geant4["TauNeutrino"]="nu_tau";
@@ -337,9 +339,9 @@ int pyne::particle::id(std::string s) {
   if(pyne::nucname::isnuclide(s))
     {
       if(pyne::particle::is_hydrogen(s))
-	return name_id["Proton"];
+  return name_id["Proton"];
       if( pyne::particle::is_heavy_ion(s) )
-	return 0;
+  return 0;
     }
 
   if (0 < pdc_nums.count(name_id[s]))
@@ -367,9 +369,9 @@ std::string pyne::particle::name(std::string s) {
   if(pyne::nucname::isnuclide(s))
     {
       if(pyne::particle::is_hydrogen(s))
-	return "Proton";
+        return "Proton";
       if( pyne::particle::is_heavy_ion(s) )
-	return s;
+        return s;
     }
   // check std name
   if(0 < names.count(s))
@@ -414,10 +416,7 @@ std::string pyne::particle::mcnp6(std::string s) {
   if(0 < part_to_mcnp6.count(pyne::particle::name(s)))
     return part_to_mcnp6[pyne::particle::name(s)];
   else
-    {
-      std::cout << "Not a valid MCNP6 particle" << std::endl;
       return "?";
-    }
 }
 
 // convert name to fluka id
@@ -479,9 +478,9 @@ std::string pyne::particle::describe(std::string s) {
   if (pyne::nucname::isnuclide(s))
     {
       if (pyne::particle::is_hydrogen(s))
-	return docs[pyne::particle::name(s)];
+  return docs[pyne::particle::name(s)];
       if (pyne::particle::is_heavy_ion(s))
-	return "Is a heavy ion";
+  return "Is a heavy ion";
     }
   // check std name
   if(0 < names.count(s))

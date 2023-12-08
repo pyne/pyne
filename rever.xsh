@@ -1,6 +1,6 @@
 $PROJECT = $GITHUB_ORG = $GITHUB_REPO = 'pyne'
 $ACTIVITIES = ['version_bump', 'changelog', 'nose', 'sphinx',
-               'tag', 'conda_forge', 'ghpages', 'ghrelease'
+               'tag', 'push_tag', 'conda_forge', 'ghpages', 'ghrelease'
                ]
 
 $VERSION_BUMP_PATTERNS = [
@@ -19,7 +19,7 @@ $DOCKER_APT_DEPS = ['libc6', 'libc6-i386', 'libc6-dev', 'libc-dev', 'gcc']
 $DOCKER_CONDA_DEPS = ['cmake', 'pkg-config', 'setuptools', 'gcc',
     'libgcc', 'libgfortran', 'make', 'scipy',
     'python', 'blas', 'openblas', 'boost-cpp',
-    'hdf5', 'bzip2', 'xz', 'moab', 'cython', 'numpy', 'pytables',
+    'hdf5', 'bzip2', 'xz', 'moab=4', 'cython', 'numpy', 'pytables',
     'jinja2', 'nose', 'sphinx', 'numpydoc', 'cloud_sptheme',
     'sphinxcontrib-bibtex', 'prettytable','nbconvert'
     ]
@@ -30,6 +30,6 @@ $DOCKER_GIT_EMAIL = 'pyne@pyne.io'
 
 $NOSE_ARGS = ['-w', 'tests']
 
-$TAG_REMOTE = 'git@github.com:pyne/pyne.git'
-$TAG_TARGET = 'master'
+$PUSH_TAG_REMOTE = 'git@github.com:pyne/pyne.git'
+$PUSH_TAG_TARGET = 'master'
 $GHPAGES_REPO = 'git@github.com:pyne/pyne.github.com.git'

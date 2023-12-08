@@ -13,9 +13,6 @@ from cpython.ref cimport PyTypeObject
 from cpython.type cimport PyType_Ready
 from cpython.object cimport Py_LT, Py_LE, Py_EQ, Py_NE, Py_GT, Py_GE
 
-# Python Imports
-import collections
-
 cimport numpy as np
 import numpy as np
 np.import_array()

@@ -16,10 +16,12 @@ set(PYNE_CYTHON_MODULES
     extra_types
     jsoncpp
     material
+    material_library
     nucname
     particle
     pyne_config
     rxname
+    source
     stlcontainers
     tally
     transmuters
@@ -51,14 +53,14 @@ endif()
 #
 # dagmc requires a rename and is only built if we have MOAB.
 #
-if(MOAB_FOUND)
+if(DAGMC_FOUND)
   set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/dagmc.pyx"
                               PROPERTIES CYTHON_IS_CXX TRUE)
   cython_add_module(_dagmc dagmc.pyx "${PROJECT_SOURCE_DIR}/src/dagmc_bridge.cpp")
   target_link_libraries(_dagmc dagmc MOAB pyne)
   set_target_properties(_dagmc PROPERTIES OUTPUT_NAME dagmc)
   install(TARGETS _dagmc LIBRARY DESTINATION "${PYTHON_SITE_PACKAGES}/pyne")
-endif(MOAB_FOUND)
+endif(DAGMC_FOUND)
 
 #
 # Spatial Solver

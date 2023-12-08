@@ -31,13 +31,13 @@ namespace extra_types
       /// \return T *
       T * defnew(){return new T();};
 
-      /// Creates a new instance of type T, using T's default 
+      /// Creates a new instance of type T, using T's default
       /// constructor, at a given location.
       /// \param void * ptr, location to create T instance
       /// \return value of ptr recast as T *
       T * renew(void * ptr){return new (ptr) T();};
 
-      /// Deallocates a location in memory using delete. 
+      /// Deallocates a location in memory using delete.
       /// \param T * ptr, location to remove
       void deall(T * ptr){delete ptr;};
   };

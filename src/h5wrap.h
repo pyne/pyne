@@ -60,7 +60,8 @@ namespace h5wrap
       if (!filename.empty())
         FNH5str += filename;
 
-      return (const char *) FNH5str.c_str();
+      const char* FNH5str_rtn = FNH5str.c_str();
+      return FNH5str_rtn;
     };
 
   private:
@@ -92,7 +93,8 @@ namespace h5wrap
       msg += groupname;
       msg += " not found in the file ";
       msg += filename;
-      return (const char *) msg.c_str();
+      const char* msg_rtn = msg.c_str();
+      return msg_rtn;
     };
 
   private:
@@ -125,7 +127,8 @@ namespace h5wrap
       msg += path;
       msg += " was not found in the HDF5 file ";
       msg += filename;
-      return (const char *) msg.c_str();
+      const char* msg_rtn = msg.c_str();
+      return msg_rtn;
     };
 
   private:
@@ -227,7 +230,7 @@ namespace h5wrap
     int arr_ndim = H5Sget_simple_extent_dims(arr_space, arr_dims, NULL);
 
     // Read in data from file to memory
-    T mem_arr [arr_dims[0]];
+    T* mem_arr = new T [arr_dims[0]];
     H5Dread(dset, dtype, H5S_ALL, H5S_ALL, H5P_DEFAULT, mem_arr);
 
     // Load new values into the vector

@@ -39,13 +39,14 @@ from pyne import nucname
 from pyne.api import nuc_data
 from pyne.dbgen.api import BASIC_FILTERS
 
+
 def read_row(row):
     """Returns a list for each nuclide. Form varies based on type of dose rate factor:
     1. External DF in Air: [int, float, float]
     2. External DF in Soil: [int, float, float, float]
     3. Ingestion DF: [int, float, float, float, float]
     4. Inhalation DF: [int, string, float, float, float]
-    
+
     Parameters
     ----------
     row : tuple
@@ -54,9 +55,9 @@ def read_row(row):
 
     # Create list
     entry = []
-    
+
     # Evaluate each component of the given row
-    if row[0].endswith('+D'):
+    if row[0].endswith("+D"):
         row[0] = row[0][:-2]
     nuclide = nucname.id(row[0])
 
@@ -90,13 +91,15 @@ def read_row(row):
         entry = [nuclide, genii, epa, doe, f1]
     return entry
 
+
 def grab_dose_factors():
-    """Parses data from dose factor csv files.
-    """
-    
+    """Parses data from dose factor csv files."""
+
     # Populates Dose Factor list with initial set of nuclides: opens first .csv file and parses it
     dose_factors = []
-    with open(os.path.join(os.path.dirname(__file__), 'dosefactors_external_air.csv'), 'r') as f:
+    with open(
+        os.path.join(os.path.dirname(__file__), "dosefactors_external_air.csv"), "r"
+    ) as f:
         reader = csv.reader(f)
         next(f)
         next(f)
@@ -105,10 +108,14 @@ def grab_dose_factors():
             dose_factors.append(entry)
 
     # Loops through remaining three files to add other dose factors to each nuclide
-    dose_files = ['dosefactors_external_soil.csv', 'dosefactors_ingest.csv', 'dosefactors_inhale.csv']
+    dose_files = [
+        "dosefactors_external_soil.csv",
+        "dosefactors_ingest.csv",
+        "dosefactors_inhale.csv",
+    ]
     for fname in dose_files:
         # Opens remaining .csv files and parses them
-        with open(os.path.join(os.path.dirname(__file__), fname), 'r') as f:
+        with open(os.path.join(os.path.dirname(__file__), fname), "r") as f:
             reader = csv.reader(f)
             next(f)
             next(f)
@@ -117,7 +124,7 @@ def grab_dose_factors():
                 # Adds info to nuclide's row
                 for nuclide in dose_factors:
                     if entry[0] == nuclide[0]:
-                        nuclide += entry[1:len(entry)]
+                        nuclide += entry[1 : len(entry)]
 
     # Create three dose factor lists with respect to source
     genii = []
@@ -127,13 +134,41 @@ def grab_dose_factors():
         for i, val in enumerate(nuclide):
             if val is None:
                 nuclide[i] = -1
-        genii_row = (nuclide[0], -1, -1, nuclide[3], nuclide[6], nuclide[9], nuclide[10], nuclide[13])
+        genii_row = (
+            nuclide[0],
+            -1,
+            -1,
+            nuclide[3],
+            nuclide[6],
+            nuclide[9],
+            nuclide[10],
+            nuclide[13],
+        )
         genii.append(genii_row)
-        epa_row = ((nuclide[0], nuclide[1], nuclide[2], nuclide[4], nuclide[7], nuclide[9], nuclide[11], nuclide[13]))
+        epa_row = (
+            nuclide[0],
+            nuclide[1],
+            nuclide[2],
+            nuclide[4],
+            nuclide[7],
+            nuclide[9],
+            nuclide[11],
+            nuclide[13],
+        )
         epa.append(epa_row)
-        doe_row = ((nuclide[0], -1, -1, nuclide[5], nuclide[8], nuclide[9], nuclide[12], nuclide[13]))
+        doe_row = (
+            nuclide[0],
+            -1,
+            -1,
+            nuclide[5],
+            nuclide[8],
+            nuclide[9],
+            nuclide[12],
+            nuclide[13],
+        )
         doe.append(doe_row)
     return genii, epa, doe
+
 
 def make_dose_tables(genii, epa, doe, nuc_data, build_dir=""):
     """Adds three dose factor tables to the nuc_data.h5 library.
@@ -151,18 +186,20 @@ def make_dose_tables(genii, epa, doe, nuc_data, build_dir=""):
     build_dir : str
         Directory to place q_value files in.
     """
-    
+
     # Define data types for all three cases
-    dose_dtype = np.dtype([
-        ('nuc', int),
-        ('ext_air_dose', float),
-        ('ratio', float),
-        ('ext_soil_dose', float),
-        ('ingest_dose', float),
-        ('fluid_frac', float),
-        ('inhale_dose', float),
-        ('lung_mod', 'S10'),
-        ])
+    dose_dtype = np.dtype(
+        [
+            ("nuc", int),
+            ("ext_air_dose", float),
+            ("ratio", float),
+            ("ext_soil_dose", float),
+            ("ingest_dose", float),
+            ("fluid_frac", float),
+            ("inhale_dose", float),
+            ("lung_mod", "S10"),
+        ]
+    )
 
     # Convert to numpy arrays
     genii_array = np.array(genii, dtype=dose_dtype)
@@ -170,15 +207,30 @@ def make_dose_tables(genii, epa, doe, nuc_data, build_dir=""):
     doe_array = np.array(doe, dtype=dose_dtype)
 
     # Open the hdf5 file
-    nuc_file = tb.open_file(nuc_data, 'a', filters=BASIC_FILTERS)
+    nuc_file = tb.open_file(nuc_data, "a", filters=BASIC_FILTERS)
 
     # Create a group for the tables
     dose_group = nuc_file.create_group("/", "dose_factors", "Dose Rate Factors")
 
     # Make three new tables
-    genii_table = nuc_file.create_table(dose_group, 'GENII', genii_array, 'Nuclide, External Air Dose Factor [mrem/h per Ci/m^3], Fraction of Ext Air Dose to Inhalation Dose, External Soil Dose Factor [mrem/h per Ci/m^2], Ingestion Dose Factor [mrem/pCi], Fraction of Activity in Body Fluids, Inhalation Dose Factor [mrem/pCi], Lung Model Used')
-    epa_table = nuc_file.create_table(dose_group, 'EPA', epa_array, 'Nuclide, External Air Dose Factor [mrem/h per Ci/m^3], Fraction of Ext Air Dose to Inhalation Dose, External Soil Dose Factor [mrem/h per Ci/m^2], Ingestion Dose Factor [mrem/pCi], Fraction of Activity in Body Fluids, Inhalation Dose Factor [mrem/pCi], Lung Model Used')    
-    doe_table = nuc_file.create_table(dose_group, 'DOE', doe_array, 'Nuclide, External Air Dose Factor [mrem/h per Ci/m^3], Fraction of Ext Air Dose to Inhalation Dose, External Soil Dose Factor [mrem/h per Ci/m^2], Ingestion Dose Factor [mrem/pCi], Fraction of Activity in Body Fluids, Inhalation Dose Factor [mrem/pCi], Lung Model Used')
+    genii_table = nuc_file.create_table(
+        dose_group,
+        "GENII",
+        genii_array,
+        "Nuclide, External Air Dose Factor [mrem/h per Ci/m^3], Fraction of Ext Air Dose to Inhalation Dose, External Soil Dose Factor [mrem/h per Ci/m^2], Ingestion Dose Factor [mrem/pCi], Fraction of Activity in Body Fluids, Inhalation Dose Factor [mrem/pCi], Lung Model Used",
+    )
+    epa_table = nuc_file.create_table(
+        dose_group,
+        "EPA",
+        epa_array,
+        "Nuclide, External Air Dose Factor [mrem/h per Ci/m^3], Fraction of Ext Air Dose to Inhalation Dose, External Soil Dose Factor [mrem/h per Ci/m^2], Ingestion Dose Factor [mrem/pCi], Fraction of Activity in Body Fluids, Inhalation Dose Factor [mrem/pCi], Lung Model Used",
+    )
+    doe_table = nuc_file.create_table(
+        dose_group,
+        "DOE",
+        doe_array,
+        "Nuclide, External Air Dose Factor [mrem/h per Ci/m^3], Fraction of Ext Air Dose to Inhalation Dose, External Soil Dose Factor [mrem/h per Ci/m^2], Ingestion Dose Factor [mrem/pCi], Fraction of Activity in Body Fluids, Inhalation Dose Factor [mrem/pCi], Lung Model Used",
+    )
 
     # Ensure that data was written to table
     genii_table.flush()
@@ -188,18 +240,19 @@ def make_dose_tables(genii, epa, doe, nuc_data, build_dir=""):
     # Close the hdf5 file
     nuc_file.close()
 
+
 def make_dose_factors(args):
     """Controller function for adding dose factors"""
 
     nuc_data, build_dir = args.nuc_data, args.build_dir
     if os.path.exists(nuc_data):
-        with tb.open_file(nuc_data, 'r') as f:
-            if '/dose_factors' in f:
+        with tb.open_file(nuc_data, "r") as f:
+            if "/dose_factors" in f:
                 print("skipping creation of dose factor tables; already exists.")
                 return
-    
+
     # Grab the dose factors from each file
-    print('Grabbing dose factors...')
+    print("Grabbing dose factors...")
     genii, epa, doe = grab_dose_factors()
 
     # Make the 3 dose factor tables and writes them to file

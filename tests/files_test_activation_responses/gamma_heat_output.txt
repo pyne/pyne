@@ -1,0 +1,36 @@
+ALARA 2.9.1rc
+Schedule 'my_schedule':
+	pulse: 3.5 d with 0 s delay pulsed with history my_pulse_history
+Zone output requested:
+	Response Units: Bq /cm3
+	Gamma Decay Heat [W/cm3]
+
+
+*** Gamma Decay Heat [W/cm3] ***
+
+Zone #1: zone_0
+	Relative Volume: 1000
+	Containing mixture: mix_0
+
+Total (All constituents) 
+	COMPACTED
+	Volume Fraction: 1	Relative Volume: 1000
+Gamma Decay Heat [W/cm3]
+isotope	 shutdown      1000 s        12 h         3 d   
+========================================================
+h-3 	9.5258e-18  9.5258e-18  9.5251e-18  9.5214e-18  
+n-16 	3.1588e-09  0.0000e+00  0.0000e+00  0.0000e+00  
+========================================================
+total	3.1588e-09  9.5258e-18  9.5251e-18  9.5214e-18  
+
+Totals for all zones.
+Gamma Decay Heat [W/cm3]
+zone	 shutdown      1000 s        12 h         3 d   
+========================================================
+1	3.1588e-09  9.5258e-18  9.5251e-18  9.5214e-18  	zone_0 (mix_0)
+========================================================
+
+
+
+
+
