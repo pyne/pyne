@@ -66,6 +66,7 @@ RUN conda config --set solver classic
 RUN conda update -y --all && \
     mamba install -y \
                 cmake \
+                build-essential \
                 git \
                 libblas \
                 liblapack \
