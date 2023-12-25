@@ -54,7 +54,7 @@ RUN echo 'export PATH=/opt/conda/bin:$PATH' > /etc/profile.d/conda.sh && \
     /bin/bash ~/miniconda.sh -b -p /opt/conda && \
     rm ~/miniconda.sh
 
-ENV PATH /opt/conda/bin:$PATH
+ENV CONDA_PATH /opt/conda/bin:$PATH
 
 RUN conda config --add channels conda-forge
 RUN conda update -n base -c defaults conda
@@ -84,6 +84,9 @@ FROM ${pkg_mgr}_deps AS base_python
 # make starting directory
 RUN mkdir -p $HOME/opt
 RUN echo "export PATH=$HOME/.local/bin:\$PATH" >> ~/.bashrc
+# printout for visibility (delete later)
+RUN echo "export PATH=$HOME/.local/bin:\$PATH"
+
 
 # build HDF5
 ARG build_hdf5="NO"
