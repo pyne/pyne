@@ -8,8 +8,6 @@ FROM ubuntu:${ubuntu_version} AS common_base
 # Ubuntu Setup
 ENV TZ=America/Chicago
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
-# save the path so we can reset it later
-ENV ORIGINAL_PATH $PATH
 
 FROM common_base AS apt_deps
 ENV HOME /root
@@ -81,14 +79,14 @@ RUN conda update -y --all && \
     mamba install -y --force-reinstall libsqlite && \
     conda clean -y --all
 RUN mkdir -p `python -m site --user-site`
+ENV CC /opt/conda/bin/x86_64-conda_cos6-linux-gnu-gcc
+ENV CXX /opt/conda/bin/x86_64-conda_cos6-linux-gnu-g++
+ENV CPP /opt/conda/bin/x86_64-conda_cos6-linux-gnu-cpp
 
 FROM ${pkg_mgr}_deps AS base_python
-# reset the path (in case conda_deps stage was used)
-ENV PATH $ORIGINAL_PATH
 # make starting directory
 RUN mkdir -p $HOME/opt
 RUN echo "export PATH=$HOME/.local/bin:\$PATH" >> ~/.bashrc
-
 
 # build HDF5
 ARG build_hdf5="NO"
