@@ -65,18 +65,23 @@ RUN conda uninstall -y conda-libmamba-solver
 RUN conda config --set solver classic
 RUN conda update -y --all && \
     mamba install -y \
-                cmake \
                 make \
                 gxx_linux-64 \
                 gcc_linux-64 \
                 git \
+                cmake \
+                gfortran \ 
                 libblas \
                 liblapack \
+                eigen \
                 hdf5 \
-                setuptools \
+                nose \
                 pytest \
                 pytables \
+                matplotlib \
                 jinja2 \
+                setuptools \
+                scipy \
                 "cython<3" \
                 && \
     mamba install -y --force-reinstall libsqlite && \
