@@ -56,6 +56,12 @@ RUN echo 'export PATH=/opt/conda/bin:$PATH' > /etc/profile.d/conda.sh && \
 
 ENV PATH /opt/conda/bin:$PATH
 
+# create python 3.10 environment in conda
+RUN conda update conda
+RUN conda create -n py310 python=3.10
+RUN conda activate py310
+RUN python --version
+
 RUN conda config --add channels conda-forge
 RUN conda update -n base -c defaults conda
 RUN conda install -y conda-libmamba-solver
