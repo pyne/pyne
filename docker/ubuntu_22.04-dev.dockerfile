@@ -67,6 +67,8 @@ RUN conda update -y --all && \
     mamba install -y \
                 cmake \
                 make \
+                gxx_linux-64 \
+                gcc_linux-64 \
                 git \
                 libblas \
                 liblapack \
