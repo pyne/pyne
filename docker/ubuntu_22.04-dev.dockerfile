@@ -8,6 +8,8 @@ FROM ubuntu:${ubuntu_version} AS common_base
 # Ubuntu Setup
 ENV TZ=America/Chicago
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+# save the path so we can reset it later
+ENV ORIGINAL_PATH $PATH
 
 FROM common_base AS apt_deps
 ENV HOME /root
@@ -81,9 +83,8 @@ RUN conda update -y --all && \
 RUN mkdir -p `python -m site --user-site`
 
 FROM ${pkg_mgr}_deps AS base_python
-# reset PATH (because conda_deps modifies it)
-RUN echo $PATH
-ENV PATH /root/.local/bin:$PATH
+# reset the path (in case conda_deps stage was used)
+ENV PATH $ORIGINAL_PATH
 # make starting directory
 RUN mkdir -p $HOME/opt
 RUN echo "export PATH=$HOME/.local/bin:\$PATH" >> ~/.bashrc
