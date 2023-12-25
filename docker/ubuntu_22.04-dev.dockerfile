@@ -75,14 +75,17 @@ RUN conda update -y --all && \
                 liblapack \
                 eigen \
                 hdf5 \
+                numpy==1.23 \
+                scipy \
+                "cython<3" \
                 nose \
                 pytest \
                 pytables \
                 matplotlib \
                 jinja2 \
                 setuptools \
-                scipy \
-                "cython<3" \
+                future \
+                progress \
                 && \
     mamba install -y --force-reinstall libsqlite && \
     conda clean -y --all
