@@ -76,6 +76,7 @@ RUN conda update -y --all && \
                 cmake \
                 gfortran \ 
                 libblas \
+                libcblas \
                 liblapack \
                 eigen \
                 hdf5 \
@@ -90,6 +91,7 @@ RUN conda update -y --all && \
                 setuptools \
                 future \
                 progress \
+                glib \
                 && \
     mamba install -y --force-reinstall libsqlite && \
     conda clean -y --all
