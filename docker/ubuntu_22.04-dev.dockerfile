@@ -92,6 +92,11 @@ RUN conda update -y --all && \
                 future \
                 progress \
                 glib \
+                xo \
+                bzip2 \
+                docker-pycreds \
+                python-json-logger \
+                pprintpp \
                 && \
     mamba install -y --force-reinstall libsqlite && \
     conda clean -y --all
