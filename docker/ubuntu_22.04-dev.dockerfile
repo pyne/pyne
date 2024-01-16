@@ -8,9 +8,9 @@ FROM ubuntu:${ubuntu_version} AS common_base
 # Ubuntu Setup
 ENV TZ=America/Chicago
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+ENV HOME /root
 
 FROM common_base AS apt_deps
-ENV HOME /root
 RUN apt-get update \
     && apt-get install -y --fix-missing \
             software-properties-common \
@@ -53,12 +53,6 @@ RUN echo 'export PATH=/opt/conda/bin:$PATH' > /etc/profile.d/conda.sh && \
     wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh && \
     /bin/bash ~/miniconda.sh -b -p /opt/conda && \
     rm ~/miniconda.sh
-
-ENV CMAKE_PLATFORM_FLAGS ${CMAKE_PLATFORM_FLAGS}(-DCMAKE_TOOLCHAIN_FILE="cmake/cross-linux.cmake")
-
-RUN cmake -DCMAKE_INSTALL_PREFIX=${PREFIX} \
-        ${CMAKE_PLATFORM_FLAGS} \
-        ${SRC_DIR}
 
 ENV PATH /opt/conda/bin:$PATH
 
@@ -158,6 +152,7 @@ RUN export MOAB_HDF5_ARGS=""; \
     && cmake .. \
             -DENABLE_PYMOAB=ON \
             -DCMAKE_INSTALL_PREFIX=$INSTALL_PATH \
+            -DCMAKE_TOOLCHAIN_FILE="${HOME}/cmake/cross-linux.cmake"
             -DENABLE_HDF5=ON $MOAB_HDF5_ARGS \
             -DBUILD_SHARED_LIBS=ON \
             -DENABLE_BLASLAPACK=OFF \
