@@ -136,7 +136,7 @@ ENV INSTALL_PATH=$HOME/opt/moab
 
 # build MOAB
 RUN mkdir ${HOME}/libnetcdf-feedstock
-RUN git clone git@github.com:AnacondaRecipes/libnetcdf-feedstock.git ${HOME}/libnetcdf-feedstock
+RUN git clone https://github.com/AnacondaRecipes/libnetcdf-feedstock.git ${HOME}/libnetcdf-feedstock
 
 RUN export MOAB_HDF5_ARGS=""; \
     if [ "$build_hdf5" != "NO" ] ; \
