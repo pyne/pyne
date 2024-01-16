@@ -10,6 +10,8 @@ ENV TZ=America/Chicago
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 ENV HOME /root
 
+RUN git clone git@github.com:AnacondaRecipes/libnetcdf-feedstock.git ${HOME}
+
 FROM common_base AS apt_deps
 RUN apt-get update \
     && apt-get install -y --fix-missing \
@@ -152,7 +154,7 @@ RUN export MOAB_HDF5_ARGS=""; \
     && cmake .. \
             -DENABLE_PYMOAB=ON \
             -DCMAKE_INSTALL_PREFIX=$INSTALL_PATH \
-            -DCMAKE_TOOLCHAIN_FILE="${HOME}/cmake/cross-linux.cmake" \
+            -DCMAKE_TOOLCHAIN_FILE="${HOME}/libnetcdf-feedstock/recipe/cross-linux.cmake" \
             -DENABLE_HDF5=ON $MOAB_HDF5_ARGS \
             -DBUILD_SHARED_LIBS=ON \
             -DENABLE_BLASLAPACK=OFF \
