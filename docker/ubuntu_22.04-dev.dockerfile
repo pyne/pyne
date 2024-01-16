@@ -72,6 +72,7 @@ RUN conda update -y --all && \
                 make \
                 gxx_linux-64 \
                 gcc_linux-64 \
+                cxx-compiler \
                 git \
                 cmake \
                 gfortran \ 
@@ -104,10 +105,6 @@ RUN mkdir -p `python -m site --user-site`
 ENV CC /opt/conda/bin/x86_64-conda_cos6-linux-gnu-gcc
 ENV CXX /opt/conda/bin/x86_64-conda_cos6-linux-gnu-g++
 ENV CPP /opt/conda/bin/x86_64-conda_cos6-linux-gnu-cpp
-
-# put conda libs on the path
-ENV LD_LIBRARY_PATH $HOME/opt/conda/lib:$LD_LIBRARY_PATH
-ENV LIBRARY_PATH $HOME/opt/conda/lib:$LIBRARY_PATH
 
 FROM ${pkg_mgr}_deps AS base_python
 # make starting directory
