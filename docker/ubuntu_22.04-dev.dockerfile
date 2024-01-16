@@ -105,6 +105,10 @@ ENV CC /opt/conda/bin/x86_64-conda_cos6-linux-gnu-gcc
 ENV CXX /opt/conda/bin/x86_64-conda_cos6-linux-gnu-g++
 ENV CPP /opt/conda/bin/x86_64-conda_cos6-linux-gnu-cpp
 
+# put conda libs on the path
+ENV LD_LIBRARY_PATH $HOME/opt/conda/lib:$LD_LIBRARY_PATH
+ENV LIBRARY_PATH $HOME/opt/conda/lib:$LIBRARY_PATH
+
 FROM ${pkg_mgr}_deps AS base_python
 # make starting directory
 RUN mkdir -p $HOME/opt
@@ -135,9 +139,6 @@ ARG build_hdf5
 ENV INSTALL_PATH=$HOME/opt/moab
 
 # build MOAB
-RUN mkdir ${HOME}/libnetcdf-feedstock
-RUN git clone https://github.com/AnacondaRecipes/libnetcdf-feedstock.git ${HOME}/libnetcdf-feedstock
-
 RUN export MOAB_HDF5_ARGS=""; \
     if [ "$build_hdf5" != "NO" ] ; \
     then \
@@ -155,7 +156,6 @@ RUN export MOAB_HDF5_ARGS=""; \
     && cmake .. \
             -DENABLE_PYMOAB=ON \
             -DCMAKE_INSTALL_PREFIX=$INSTALL_PATH \
-            -DCMAKE_TOOLCHAIN_FILE="${HOME}/libnetcdf-feedstock/recipe/cross-linux.cmake" \
             -DENABLE_HDF5=ON $MOAB_HDF5_ARGS \
             -DBUILD_SHARED_LIBS=ON \
             -DENABLE_BLASLAPACK=OFF \
