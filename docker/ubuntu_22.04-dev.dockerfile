@@ -10,8 +10,6 @@ ENV TZ=America/Chicago
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 ENV HOME /root
 
-RUN git clone git@github.com:AnacondaRecipes/libnetcdf-feedstock.git ${HOME}
-
 FROM common_base AS apt_deps
 RUN apt-get update \
     && apt-get install -y --fix-missing \
@@ -137,6 +135,8 @@ ARG build_hdf5
 ENV INSTALL_PATH=$HOME/opt/moab
 
 # build MOAB
+RUN git clone git@github.com:AnacondaRecipes/libnetcdf-feedstock.git ${HOME}
+
 RUN export MOAB_HDF5_ARGS=""; \
     if [ "$build_hdf5" != "NO" ] ; \
     then \
