@@ -54,6 +54,12 @@ RUN echo 'export PATH=/opt/conda/bin:$PATH' > /etc/profile.d/conda.sh && \
     /bin/bash ~/miniconda.sh -b -p /opt/conda && \
     rm ~/miniconda.sh
 
+ENV CMAKE_PLATFORM_FLAGS ${CMAKE_PLATFORM_FLAGS}(-DCMAKE_TOOLCHAIN_FILE="cmake/cross-linux.cmake")
+
+RUN cmake -DCMAKE_INSTALL_PREFIX=${PREFIX} \
+        ${CMAKE_PLATFORM_FLAGS[@]} \
+        ${SRC_DIR}
+
 ENV PATH /opt/conda/bin:$PATH
 
 # create python 3.10 environment in conda
