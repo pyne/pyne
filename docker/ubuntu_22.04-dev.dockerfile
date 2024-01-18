@@ -77,17 +77,13 @@ RUN conda update -y --all && \
                 make \
                 gxx_linux-64 \
                 gcc_linux-64 \
-                # libstdcxx-ng \
-                # cxx-compiler \
                 git \
                 cmake \
                 gfortran \ 
                 libblas \
-                # libcblas \
                 liblapack \
                 eigen \
                 hdf5 \
-                # h5py \
                 numpy==1.23 \
                 scipy \
                 "cython<3" \
@@ -99,7 +95,6 @@ RUN conda update -y --all && \
                 setuptools \
                 future \
                 progress \
-                glib \
                 && \
     mamba install -y --force-reinstall libsqlite && \
     conda clean -y --all
@@ -124,7 +119,7 @@ RUN echo "export PATH=$HOME/.local/bin:\$PATH" >> ~/.bashrc
 ARG build_hdf5="NO"
 ARG pkg_mgr=apt
 # don't build hdf5 if we use conda (we already installed it)
-RUN if [ "$build_hdf5" != "NO" ] && [ "$pkg_mgr" == "apt" ]; then \
+RUN if [ "$build_hdf5" != "NO" ] && [ "$pkg_mgr" = "apt" ]; then \
         cd $HOME/opt \
         && mkdir hdf5 \
         && cd hdf5 \
