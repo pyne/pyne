@@ -96,7 +96,6 @@ RUN conda update -y --all && \
                 && \
     mamba install -y --force-reinstall libsqlite && \
     conda clean -y --all
-RUN mamba list
 RUN mkdir -p `python -m site --user-site`
 ENV CC /opt/conda/bin/x86_64-conda_cos6-linux-gnu-gcc
 ENV CXX /opt/conda/bin/x86_64-conda_cos6-linux-gnu-g++
@@ -168,7 +167,7 @@ ENV LD_LIBRARY_PATH $HOME/opt/moab/lib:$LD_LIBRARY_PATH
 ENV LIBRARY_PATH $HOME/opt/moab/lib:$LIBRARY_PATH
 ENV PYNE_MOAB_ARGS "--moab $HOME/opt/moab"
 
-FROM base_python AS dagmc
+FROM moab AS dagmc
 # build/install DAGMC
 ENV INSTALL_PATH=$HOME/opt/dagmc
 RUN cd /root \
