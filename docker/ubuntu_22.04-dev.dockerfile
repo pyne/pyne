@@ -107,7 +107,7 @@ ENV CXX /opt/conda/bin/x86_64-conda_cos6-linux-gnu-g++
 ENV CPP /opt/conda/bin/x86_64-conda_cos6-linux-gnu-cpp
 
 ENV LD_LIBRARY_PATH /opt/conda/lib:$LD_LIBRARY_PATH
-ENV HDF5_INSTALL_PATH=/opt/conda/lib
+ENV HDF5_INSTALL_PATH=/opt/conda
 
 
 FROM ${pkg_mgr}_deps AS base_python
