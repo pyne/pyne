@@ -99,9 +99,10 @@ RUN conda update -y --all && \
     mamba install -y --force-reinstall libsqlite && \
     conda clean -y --all
 RUN mkdir -p `python -m site --user-site`
-# ENV CC /opt/conda/bin/x86_64-conda_cos6-linux-gnu-gcc
-# ENV CXX /opt/conda/bin/x86_64-conda_cos6-linux-gnu-g++
-# ENV CPP /opt/conda/bin/x86_64-conda_cos6-linux-gnu-cpp
+
+RUN export CC="/opt/conda/bin/x86_64-conda_cos6-linux-gnu-gcc"
+RUN export CXX="/opt/conda/bin/x86_64-conda_cos6-linux-gnu-g++"
+RUN export CPP="/opt/conda/bin/x86_64-conda_cos6-linux-gnu-cpp"
 
 RUN export LD_LIBRARY_PATH="/opt/conda/lib"
 
@@ -133,6 +134,11 @@ ENV LIBRARY_PATH $HDF5_INSTALL_PATH/lib:$LIBRARY_PATH
 FROM base_python AS moab
 ARG build_hdf5
 ENV INSTALL_PATH=$HOME/opt/moab
+
+RUN echo ${CC}
+RUN echo ${CXX}
+RUN echo ${CPP}
+RUN echo ${LD_LIBRARY_PATH}
 
 # build MOAB
 RUN export MOAB_HDF5_ARGS=""; \
