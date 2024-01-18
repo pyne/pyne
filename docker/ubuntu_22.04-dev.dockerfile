@@ -73,6 +73,7 @@ RUN conda update -y --all && \
                 gxx_linux-64 \
                 gcc_linux-64 \
                 libstdcxx-ng \
+                libgcc=5.2.0 \
                 cxx-compiler \
                 git \
                 cmake \
@@ -99,9 +100,9 @@ RUN conda update -y --all && \
     mamba install -y --force-reinstall libsqlite && \
     conda clean -y --all
 RUN mkdir -p `python -m site --user-site`
-ENV CC /opt/conda/bin/x86_64-conda_cos6-linux-gnu-gcc
-ENV CXX /opt/conda/bin/x86_64-conda_cos6-linux-gnu-g++
-ENV CPP /opt/conda/bin/x86_64-conda_cos6-linux-gnu-cpp
+# ENV CC /opt/conda/bin/x86_64-conda_cos6-linux-gnu-gcc
+# ENV CXX /opt/conda/bin/x86_64-conda_cos6-linux-gnu-g++
+# ENV CPP /opt/conda/bin/x86_64-conda_cos6-linux-gnu-cpp
 
 RUN export LD_LIBRARY_PATH="/opt/conda/lib"
 
