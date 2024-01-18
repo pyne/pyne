@@ -100,9 +100,9 @@ RUN conda update -y --all && \
     conda clean -y --all
 RUN mkdir -p `python -m site --user-site`
 
-RUN export CC="/opt/conda/bin/x86_64-conda_cos6-linux-gnu-gcc"
-RUN export CXX="/opt/conda/bin/x86_64-conda_cos6-linux-gnu-g++"
-RUN export CPP="/opt/conda/bin/x86_64-conda_cos6-linux-gnu-cpp"
+ENV CC /opt/conda/bin/x86_64-conda_cos6-linux-gnu-gcc
+ENV CXX /opt/conda/bin/x86_64-conda_cos6-linux-gnu-g++
+ENV CPP /opt/conda/bin/x86_64-conda_cos6-linux-gnu-cpp
 
 RUN export LD_LIBRARY_PATH="/opt/conda/lib"
 
