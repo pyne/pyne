@@ -11,6 +11,10 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 ENV HOME /root
 
 FROM common_base AS apt_deps
+# set HDF5 path for base_python stage
+ARG build_hdf5="NO"
+ENV HDF5_INSTALL_PATH=$HOME/opt/hdf5/$build_hdf5
+
 RUN apt-get update \
     && apt-get install -y --fix-missing \
             software-properties-common \
@@ -41,7 +45,6 @@ RUN apt-get update \
             future \
             progress
 
-ENV HDF5_INSTALL_PATH=$HOME/opt/hdf5/$build_hdf5
 
 FROM common_base AS conda_deps
 RUN apt-get update \
@@ -74,17 +77,17 @@ RUN conda update -y --all && \
                 make \
                 gxx_linux-64 \
                 gcc_linux-64 \
-                libstdcxx-ng \
-                cxx-compiler \
+                # libstdcxx-ng \
+                # cxx-compiler \
                 git \
                 cmake \
                 gfortran \ 
                 libblas \
-                libcblas \
+                # libcblas \
                 liblapack \
                 eigen \
                 hdf5 \
-                h5py \
+                # h5py \
                 numpy==1.23 \
                 scipy \
                 "cython<3" \
@@ -106,7 +109,9 @@ ENV CC /opt/conda/bin/x86_64-conda_cos6-linux-gnu-gcc
 ENV CXX /opt/conda/bin/x86_64-conda_cos6-linux-gnu-g++
 ENV CPP /opt/conda/bin/x86_64-conda_cos6-linux-gnu-cpp
 
+# put conda on the path
 ENV LD_LIBRARY_PATH /opt/conda/lib:$LD_LIBRARY_PATH
+# set HDF5 path for base_python stage
 ENV HDF5_INSTALL_PATH=/opt/conda
 
 
@@ -118,7 +123,7 @@ RUN echo "export PATH=$HOME/.local/bin:\$PATH" >> ~/.bashrc
 # build HDF5
 ARG build_hdf5="NO"
 ARG pkg_mgr=apt
-#ENV HDF5_INSTALL_PATH=$HOME/opt/hdf5/$build_hdf5
+# don't build hdf5 if we use conda (we already installed it)
 RUN if [ "$build_hdf5" != "NO" ] && [ "$pkg_mgr" == "apt" ]; then \
         cd $HOME/opt \
         && mkdir hdf5 \
@@ -139,11 +144,6 @@ ENV LIBRARY_PATH $HDF5_INSTALL_PATH/lib:$LIBRARY_PATH
 FROM base_python AS moab
 ARG build_hdf5
 ENV INSTALL_PATH=$HOME/opt/moab
-
-RUN echo ${CC}
-RUN echo ${CXX}
-RUN echo ${CPP}
-RUN echo ${LD_LIBRARY_PATH}
 
 # build MOAB
 RUN export MOAB_HDF5_ARGS=""; \
