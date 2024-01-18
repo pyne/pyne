@@ -41,6 +41,8 @@ RUN apt-get update \
             future \
             progress
 
+ENV HDF5_INSTALL_PATH=$HOME/opt/hdf5/$build_hdf5
+
 FROM common_base AS conda_deps
 RUN apt-get update \
     && apt-get install -y --fix-missing \
@@ -105,6 +107,7 @@ ENV CXX /opt/conda/bin/x86_64-conda_cos6-linux-gnu-g++
 ENV CPP /opt/conda/bin/x86_64-conda_cos6-linux-gnu-cpp
 
 ENV LD_LIBRARY_PATH /opt/conda/lib:$LD_LIBRARY_PATH
+ENV HDF5_INSTALL_PATH=/opt/conda/lib
 
 
 FROM ${pkg_mgr}_deps AS base_python
@@ -115,8 +118,8 @@ RUN echo "export PATH=$HOME/.local/bin:\$PATH" >> ~/.bashrc
 # build HDF5
 ARG build_hdf5="NO"
 ARG pkg_mgr=apt
-ENV HDF5_INSTALL_PATH=$HOME/opt/hdf5/$build_hdf5
-RUN if [ "$build_hdf5" != "NO" && "$pkg_mgr" == "apt"]; then \
+#ENV HDF5_INSTALL_PATH=$HOME/opt/hdf5/$build_hdf5
+RUN if [ "$build_hdf5" != "NO" ] && [ "$pkg_mgr" == "apt" ]; then \
         cd $HOME/opt \
         && mkdir hdf5 \
         && cd hdf5 \
