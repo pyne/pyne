@@ -72,6 +72,7 @@ RUN conda update -y --all && \
                 make \
                 gxx_linux-64 \
                 gcc_linux-64 \
+                libstdcxx-ng \
                 cxx-compiler \
                 git \
                 cmake \
@@ -81,6 +82,7 @@ RUN conda update -y --all && \
                 liblapack \
                 eigen \
                 hdf5 \
+                h5py \
                 numpy==1.23 \
                 scipy \
                 "cython<3" \
@@ -93,7 +95,6 @@ RUN conda update -y --all && \
                 future \
                 progress \
                 glib \
-                pip \
                 && \
     mamba install -y --force-reinstall libsqlite && \
     conda clean -y --all
