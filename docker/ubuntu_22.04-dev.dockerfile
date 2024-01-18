@@ -104,7 +104,8 @@ ENV CC /opt/conda/bin/x86_64-conda_cos6-linux-gnu-gcc
 ENV CXX /opt/conda/bin/x86_64-conda_cos6-linux-gnu-g++
 ENV CPP /opt/conda/bin/x86_64-conda_cos6-linux-gnu-cpp
 
-RUN export LD_LIBRARY_PATH="/opt/conda/lib"
+ENV LD_LIBRARY_PATH /opt/conda/lib:$LD_LIBRARY_PATH
+
 
 FROM ${pkg_mgr}_deps AS base_python
 # make starting directory
