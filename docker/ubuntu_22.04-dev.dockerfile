@@ -73,7 +73,6 @@ RUN conda update -y --all && \
                 gxx_linux-64 \
                 gcc_linux-64 \
                 libstdcxx-ng \
-                libgcc=5.2.0 \
                 cxx-compiler \
                 git \
                 cmake \
