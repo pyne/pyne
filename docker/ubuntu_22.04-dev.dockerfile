@@ -93,18 +93,16 @@ RUN conda update -y --all && \
                 future \
                 progress \
                 glib \
-                xo \
-                bzip2 \
-                docker-pycreds \
-                python-json-logger \
-                pprintpp \
                 && \
     mamba install -y --force-reinstall libsqlite && \
     conda clean -y --all
+RUN mamba list
 RUN mkdir -p `python -m site --user-site`
 ENV CC /opt/conda/bin/x86_64-conda_cos6-linux-gnu-gcc
 ENV CXX /opt/conda/bin/x86_64-conda_cos6-linux-gnu-g++
 ENV CPP /opt/conda/bin/x86_64-conda_cos6-linux-gnu-cpp
+
+RUN export LD_LIBRARY_PATH="opt/conda/lib"
 
 FROM ${pkg_mgr}_deps AS base_python
 # make starting directory
@@ -170,7 +168,7 @@ ENV LD_LIBRARY_PATH $HOME/opt/moab/lib:$LD_LIBRARY_PATH
 ENV LIBRARY_PATH $HOME/opt/moab/lib:$LIBRARY_PATH
 ENV PYNE_MOAB_ARGS "--moab $HOME/opt/moab"
 
-FROM moab AS dagmc
+FROM base_python AS dagmc
 # build/install DAGMC
 ENV INSTALL_PATH=$HOME/opt/dagmc
 RUN cd /root \
