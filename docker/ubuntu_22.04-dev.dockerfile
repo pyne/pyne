@@ -93,6 +93,7 @@ RUN conda update -y --all && \
                 future \
                 progress \
                 glib \
+                pip \
                 && \
     mamba install -y --force-reinstall libsqlite && \
     conda clean -y --all
