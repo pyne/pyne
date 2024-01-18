@@ -114,9 +114,9 @@ RUN echo "export PATH=$HOME/.local/bin:\$PATH" >> ~/.bashrc
 
 # build HDF5
 ARG build_hdf5="NO"
-#ENV HDF5_INSTALL_PATH=$HOME/opt/hdf5/$build_hdf5
-ENV HDF5_INSTALL_PATH=/opt/conda/lib
-RUN if [ "$build_hdf5" != "NO" ]; then \
+ARG pkg_mgr=apt
+ENV HDF5_INSTALL_PATH=$HOME/opt/hdf5/$build_hdf5
+RUN if [ "$build_hdf5" != "NO" && "$pkg_mgr" == "apt"]; then \
         cd $HOME/opt \
         && mkdir hdf5 \
         && cd hdf5 \
