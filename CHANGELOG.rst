@@ -4,7 +4,8 @@ PyNE Change Log
 
 Next Version
 ============
-
+**Fix**
+   * Fix Type Mismatch Error in PyNE's ENSDF Processing Module (#1519)
 
 v0.7.8
 ======
