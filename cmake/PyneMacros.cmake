@@ -122,7 +122,7 @@ macro(pyne_setup_fortran)
 
   # add -fallow-argument-mismatch to fix build with gfortran 10+
   # https://github.com/pyne/pyne/issues/1416
-  set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fallow-argument-mismatch")
+  #set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fallow-argument-mismatch")
 endmacro()
 
 
