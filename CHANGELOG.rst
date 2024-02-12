@@ -4,11 +4,16 @@ PyNE Change Log
 
 Next Version
 ============
+**Fix**
+   * Fix Type Mismatch Error in PyNE's ENSDF Processing Module (#1519)
+   * Redesign Build System for PyNE with Scikit-Build (#1500)
+
+v0.7.8
+======
 **Change**
    * Move tests from nose to pytest (#1478 #1493)
    * Update MOAB dead link and add PyNE logo to readme file (#1481)
    * Install packages with conda in Dockerfile (#1509 #1510 #1511)
-   * Redesign Build System for PyNE with Scikit-Build (#1500)
 
 
 **Fix**

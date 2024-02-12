@@ -107,6 +107,10 @@ macro(pyne_setup_fortran)
     set(CMAKE_Fortran_FLAGS_RELEASE "-fpic")
     set(CMAKE_Fortran_FLAGS_DEBUG   "-fpic")
   endif(Fortran_COMPILER_NAME MATCHES "gfortran.*")
+
+  # add -fallow-argument-mismatch to fix build with gfortran 10+
+  # https://github.com/pyne/pyne/issues/1416
+  set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fallow-argument-mismatch")
 endmacro()
 
 
