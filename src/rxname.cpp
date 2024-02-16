@@ -2399,8 +2399,15 @@ void * pyne::rxname::_fill_maps() {
   // offset_id mapping may be ambiquious so they must come before the id_offsets!
   // the following should be sorted by (dz, da, ds)
   // neutrons:
+  offset_id[make_pair("n", offset(-6, -12))] = name_id["n3a"];
+  offset_id[make_pair("n", offset(-6, -11))] = name_id["z_3a"];
+  offset_id[make_pair("n", offset(-5, -10))] = name_id["t2a"];
+  offset_id[make_pair("n", offset(-4, -9))] = name_id["z_2n2a"];
   offset_id[make_pair("n", offset(-4, -8))] = name_id["n2a"];
   offset_id[make_pair("n", offset(-4, -7))] = name_id["z_2a"];
+  offset_id[make_pair("n", offset(-3, -5))] = name_id["da"];
+  offset_id[make_pair("n", offset(-3, -4))] = name_id["pa"];
+  offset_id[make_pair("n", offset(-2, -6))] = name_id["z_3na"];
   offset_id[make_pair("n", offset(-2, -5))] = name_id["z_2na"];
   offset_id[make_pair("n", offset(-2, -4))] = name_id["na"];
   offset_id[make_pair("n", offset(-2, -4, 1))] = name_id["na_1"];
@@ -2544,10 +2551,16 @@ void * pyne::rxname::_fill_maps() {
     id_offset[make_pair(ioffid->first.first, ioffid->second)] = ioffid->first.second;
   }
   // neutrons:
+  id_offset[make_pair("n", name_id["npa"])] = offset(-3, -5);
+  id_offset[make_pair("n", name_id["pt"])] = offset(-2, -3);
   id_offset[make_pair("n", name_id["nHe3"])] = offset(-2, -3);
   id_offset[make_pair("n", name_id["nHe3_1"])] = offset(-2, -3, 2);
   id_offset[make_pair("n", name_id["nHe3_2"])] = offset(-2, -3, 2);
+  id_offset[make_pair("n", name_id["pd"])] = offset(-2, -2);
+  id_offset[make_pair("n", name_id["n2p"])] = offset(-2, -2);
   id_offset[make_pair("n", name_id["z_3np"])] = offset(-1, -3);
+  id_offset[make_pair("n", name_id["z_2nd"])] = offset(-1, -3);
+  id_offset[make_pair("n", name_id["z_2np"])] = offset(-1, -2);
   id_offset[make_pair("n", name_id["nd"])] = offset(-1, -2);
   id_offset[make_pair("n", name_id["nd_1"])] = offset(-1, -2, 1);
   id_offset[make_pair("n", name_id["nd_2"])] = offset(-1, -2, 2);

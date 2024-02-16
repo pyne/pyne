@@ -5,19 +5,36 @@ PyNE Change Log
 Next Version
 ============
 **Change**
-   * move tests from nose to pytest (#1478)
-   * update MOAB dead link and add PyNE logo to readme file (#1481)
+   * Test install script on multiple Ubuntu versions (#1484)
 
 **Fix**
-   * move install script to main repo and test on multiple Ubuntu versions (#1477, #1484)
-   * use multistage docker build action in docker_publish.yml(#1470 #1471 #1473 #1475)
-   * remove setup-QEMU step from composite action(#1461)
-   * add composite actions to github workflows(#1459)
-   * fixing typos in user warning message (#1456)
-   * fix reorder error in member variables (#1466)
-   * remove unusable C-linkage with std::vector (#1468)
-   * fixed compatibility issue with Python 3.10 in endf.py (#1472)
-   * avoid use of deprecated numpy.int alias (#1479)
+   * Fix Type Mismatch Error in PyNE's ENSDF Processing Module (#1519)
+
+v0.7.8
+======
+**Change**
+   * Move tests from nose to pytest (#1478 #1493)
+   * Update MOAB dead link and add PyNE logo to readme file (#1481)
+   * Install packages with conda in Dockerfile (#1509 #1510 #1511)
+
+**Fix**
+   * Add missing rxname offsets (#1482)
+   * Move install script to main repo(#1477)
+   * Use multistage docker build action in docker_publish.yml(#1470 #1471 #1473 #1475)
+   * Remove setup-QEMU step from composite action(#1461)
+   * Add composite actions to github workflows(#1459)
+   * Fixing typos in user warning message (#1456)
+   * Fix reorder error in member variables (#1466)
+   * Remove unusable C-linkage with std::vector (#1468)
+   * Fixed compatibility issue with Python 3.10 in endf.py (#1472)
+   * Avoid use of deprecated numpy.int alias (#1479)
+   * Avoid use of deprecated numpy.bool alias (#1485)
+   * Review Tutorial and Bug Fixes (#1486)
+   * Add composite action for BuildTest job in workflows (#1489)
+   * Update run conditions for workflows (#1494)
+   * Fix gamma intensity calculation (#1496)
+   * Add workflow to build virtual machines based on Dockerfile (#1490)
+   * Replacing '#define isnan' with 'std::isnan' (#1502)
 
 v0.7.7
 ======

@@ -1957,7 +1957,7 @@ std::vector<std::pair<double, double> > pyne::Material::gammas() {
     std::vector<std::pair<double, double> > raw_gammas = pyne::gammas(state_id);
     for (int i = 0; i < raw_gammas.size(); ++i) {
       result.push_back(std::make_pair(raw_gammas[i].first,
-        atom_fracs[ci->first]*raw_gammas[i].second));
+        atom_fracs[ci->first]*raw_gammas[i].second/100));
     }
   }
   return result;
@@ -2000,10 +2000,10 @@ std::vector<std::pair<double, double> > pyne::Material::normalize_radioactivity(
   std::vector<std::pair<double, double> > normed;
   double sum = 0.0;
   for (int i = 0; i < unnormed.size(); ++i) {
-    if (!isnan(unnormed[i].second)) sum = sum + unnormed[i].second;
+    if (!std::isnan(unnormed[i].second)) sum = sum + unnormed[i].second;
   }
   for (int i = 0; i < unnormed.size(); ++i) {
-    if (!isnan(unnormed[i].second)) {
+    if (!std::isnan(unnormed[i].second)) {
       normed.push_back(
           std::make_pair(unnormed[i].first, (unnormed[i].second) / sum));
     }

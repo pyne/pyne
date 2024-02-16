@@ -1,0 +1,44 @@
+name: BuildTest
+description: Builds and tests an installation of PyNE in a single docker image.  This action is used for bootstrap testing when building the docker images as well as testing of each PR using those docker images.
+inputs:
+  stage:
+    description: The docker stage that will be used as the docker image for testing.
+    required: true
+    default: ''
+  hdf5:
+    description: Information about which version of HDF5 will be used for testing.
+    required: true
+    default: ''
+runs:
+  using: "composite"
+  steps: 
+    - name: setup
+      shell: bash -l {0}
+      run: |
+        export ADD_FLAG=" "
+        if [[ "${{ inputs.stage }}" == "moab" || "${{ inputs.stage }}" == "dagmc" ]]; then
+          export ADD_FLAG="${ADD_FLAG} --moab /root/opt/moab"
+        fi
+        if [[ "${{ inputs.stage }}" == "dagmc" ]]; then
+          export ADD_FLAG="${ADD_FLAG} --dagmc /root/opt/dagmc"
+        fi
+        if [[ "${{ inputs.hdf5 }}" == "_hdf5" ]]; then
+          export ADD_FLAG="${ADD_FLAG} --hdf5 /root/opt/hdf5/hdf5-1_12_0"
+        fi
+        export ADD_FLAG="${ADD_FLAG} "
+        echo "ADD_FLAG=${ADD_FLAG}" >> $GITHUB_ENV
+        
+    - name: Building PyNE
+      shell: bash -l {0}
+      run: |
+        cd $GITHUB_WORKSPACE
+        python setup.py install --user --clean ${{ env.ADD_FLAG}}
+        export PATH="$PATH:/github/home/.local/bin"
+        cd ../
+        nuc_data_make
+
+    - name: Testing PyNE
+      shell: bash -l {0}
+      run: |
+        cd $GITHUB_WORKSPACE/tests
+        ./ci-run-tests.sh python3

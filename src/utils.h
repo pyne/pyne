@@ -25,18 +25,6 @@
 #include <vector>
 #include <algorithm>
 
-#if (__GNUC__ >= 4)
-  #include <cmath>
-  #define isnan(x) std::isnan(x)
-#else
-  #include <math.h>
-  #define isnan(x) __isnand((double)x)
-#endif
-
-#ifdef _WIN32
-#define isnan(x) ((x) != (x))
-#endif
-
 #ifndef JSON_IS_AMALGAMATION
   #define JSON_IS_AMALGAMATION
 #endif

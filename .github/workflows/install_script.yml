@@ -4,9 +4,17 @@ on:
   # allows us to run workflows manually
   workflow_dispatch:
   push:
-    paths:
-      - 'scripts/ubuntu.sh'
-      - '.github/workflows/install_script.yml'
+    branches:
+      - 'develop'
+    paths-ignore:
+      - 'docs/*'
+      - 'examples/*'
+      - 'img/*'
+      - 'news/*'
+      - 'tutorial/*'
+      - './*.rst'
+      - 'license.txt'
+      - 'PULL_REQUEST_TEMPLATE.md'
 
 jobs:
   run_install_script:
@@ -26,7 +34,3 @@ jobs:
           cd $GITHUB_WORKSPACE/scripts
           chmod +x ubuntu.sh
           ./ubuntu.sh ${{ matrix.branch }} ${{ matrix.build_hdf5 }}
-
-      # use matrix to have 2 jobs [develop, stable]
-      # ./ubuntu.sh stable
-

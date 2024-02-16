@@ -645,6 +645,7 @@ class EAFDataSource(DataSource):
     _USES_TEMP = False
 
     def __init__(self, **kwargs):
+        self._dst_group_struct = None
         super(EAFDataSource, self).__init__(**kwargs)
 
     def _load_group_structure(self):

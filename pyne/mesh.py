@@ -67,7 +67,8 @@ err__ops = {
     ),
 }
 
-_INTEGRAL_TYPES = (int, np.integer, np.bool_)
+_INTEGRAL_TYPES = (int, np.integer, bool, np.bool_)
+_BOOLEAN_TYPES = (bool, np.bool_)
 _SEQUENCE_TYPES = (Sequence, np.ndarray)
 
 
@@ -155,7 +156,7 @@ class MaterialPropertyTag(Tag):
             return getattr(mats[int(key)], name)
         elif isinstance(key, slice):
             return np.array([getattr(mats[i], name) for i in range(*key.indices(size))])
-        elif isinstance(key, np.ndarray) and key.dtype == np.bool:
+        elif isinstance(key, np.ndarray) and key.dtype in _BOOLEAN_TYPES:
             if len(key) != size:
                 raise KeyError("boolean mask must match the length of the mesh.")
             return np.array([getattr(mats[i], name) for i, b in enumerate(key) if b])
@@ -182,7 +183,7 @@ class MaterialPropertyTag(Tag):
             else:
                 for i in idx:
                     setattr(mats[i], name, value)
-        elif isinstance(key, np.ndarray) and key.dtype == np.bool:
+        elif isinstance(key, np.ndarray) and key.dtype in _BOOLEAN_TYPES:
             if len(key) != size:
                 raise KeyError("boolean mask must match " "the length of the mesh.")
             idx = np.where(key)[0]
@@ -234,7 +235,7 @@ class MaterialMethodTag(Tag):
             return np.array(
                 [getattr(mats[i], name)() for i in range(*key.indices(size))]
             )
-        elif isinstance(key, np.ndarray) and key.dtype == np.bool:
+        elif isinstance(key, np.ndarray) and key.dtype in _BOOLEAN_TYPES:
             if len(key) != size:
                 raise KeyError("boolean mask must match the " "length of the mesh.")
             return np.array([getattr(mats[i], name)() for i, b in enumerate(key) if b])
@@ -278,7 +279,7 @@ class MetadataTag(Tag):
             return mats[key].metadata[name]
         elif isinstance(key, slice):
             return [mats[i].metadata[name] for i in range(*key.indices(size))]
-        elif isinstance(key, np.ndarray) and key.dtype == np.bool:
+        elif isinstance(key, np.ndarray) and key.dtype in _BOOLEAN_TYPES:
             if len(key) != size:
                 raise KeyError("boolean mask must match the length " "of the mesh.")
             return [mats[i].metadata[name] for i, b in enumerate(key) if b]
@@ -305,7 +306,7 @@ class MetadataTag(Tag):
             else:
                 for i in idx:
                     mats[i].metadata[name] = value
-        elif isinstance(key, np.ndarray) and key.dtype == np.bool:
+        elif isinstance(key, np.ndarray) and key.dtype in _BOOLEAN_TYPES:
             if len(key) != size:
                 raise KeyError("boolean mask must match the length " "of the mesh.")
             idx = np.where(key)[0]
@@ -338,7 +339,7 @@ class MetadataTag(Tag):
         elif isinstance(key, slice):
             for i in range(*key.indices(size)):
                 del mats[i].metadata[name]
-        elif isinstance(key, np.ndarray) and key.dtype == np.bool:
+        elif isinstance(key, np.ndarray) and key.dtype in _BOOLEAN_TYPES:
             if len(key) != size:
                 raise KeyError("boolean mask must match the length " "of the mesh.")
             for i, b in enumerate(key):
@@ -495,7 +496,7 @@ class NativeMeshTag(Tag):
             ents = list(miter)[key]
             data = self.mesh.mesh.tag_get_data(self.tag, ents, flat=flat)
             return data
-        elif isinstance(key, np.ndarray) and key.dtype == np.bool:
+        elif isinstance(key, np.ndarray) and key.dtype in _BOOLEAN_TYPES:
             if len(key) != size:
                 raise KeyError("boolean mask must match the length " "of the mesh.")
             return self.mesh.mesh.tag_get_data(
@@ -542,7 +543,7 @@ class NativeMeshTag(Tag):
                 v.shape = (len(key),)
             v[...] = value
             self.mesh.mesh.tag_set_data(mtag, key, v)
-        elif isinstance(key, np.ndarray) and key.dtype == np.bool:
+        elif isinstance(key, np.ndarray) and key.dtype in _BOOLEAN_TYPES:
             if len(key) != msize:
                 raise KeyError("boolean mask must match the length " "of the mesh.")
             key = [ve for b, ve in zip(key, miter) if b]
@@ -584,7 +585,7 @@ class NativeMeshTag(Tag):
             self.mesh.mesh.tag_delete_data(mtag, i_ve[1])
         elif isinstance(key, slice):
             self.mesh.mesh.tag_delete_data(mtag, list(miter)[key])
-        elif isinstance(key, np.ndarray) and key.dtype == np.bool:
+        elif isinstance(key, np.ndarray) and key.dtype in _BOOLEAN_TYPES:
             if len(key) != size:
                 raise KeyError("boolean mask must match the " "length of the mesh.")
             self.mesh.mesh.tag_delete_data(mtag, [ve for b, ve in zip(key, miter) if b])
@@ -754,7 +755,7 @@ class ComputedTag(Tag):
             return f(m, key)
         elif isinstance(key, slice):
             return [f(m, i) for i in range(*key.indices(size))]
-        elif isinstance(key, np.ndarray) and key.dtype == np.bool:
+        elif isinstance(key, np.ndarray) and key.dtype in _BOOLEAN_TYPES:
             if len(key) != size:
                 raise KeyError("boolean mask must match the length " "of the mesh.")
             return [f(m, i) for i, b in enumerate(key) if b]
