@@ -18,7 +18,7 @@ The Python for Nuclear Engineering Team includes:
 * `Paul Romano`_
 * `Anthony Scopatz`_
 * Nick Touran
-* Paul Wilson
+* `Paul Wilson`_
 
 .. _Elliott Biondo: mailto:biondo@wisc.edu
 
@@ -41,6 +41,9 @@ The Python for Nuclear Engineering Team includes:
 .. _Paul Romano: mailto:romano7@gmail.com
 
 .. _Anthony Scopatz: http://www.scopatz.com/
+
+.. _Paul Wilson: https://cnerg.engr.wisc.edu/people/pphw.html
+
 
 Contact us via pyne-dev@googlegroups.com
 

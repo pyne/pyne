@@ -15,25 +15,25 @@
 
 namespace pyne
 {
-  /// main function to be called when you wish to load the nuclide data 
-  /// into memory 
+  /// main function to be called when you wish to load the nuclide data
+  /// into memory
   void _load_atomic_mass_map_memory();
   /// function to create mapping from nuclides in id form
   /// to their atomic masses
-  
+
   void _insert_atomic_mass_map();
-  
-  /// function to create mapping from nuclides in id form 
+
+  /// function to create mapping from nuclides in id form
   /// to their natural abundances
   void _insert_abund_map();
-  
+
   /// Mapping from nuclides in id form to their natural abundances
   extern std::map<int,double> natural_abund_map;
-  
+
   /// Mapping from nuclides in id form to their atomic masses.
   extern std::map<int,double> atomic_mass_map;
-  
-  /// Mapping from nuclides in id form to the associated error in 
-  /// abdundance 
+
+  /// Mapping from nuclides in id form to the associated error in
+  /// abdundance
   extern std::map<int,double> atomic_mass_error_map;
 } // namespace pyne

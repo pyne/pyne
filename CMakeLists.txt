@@ -1,6 +1,9 @@
 # Defines the CMake commands/policies
 cmake_minimum_required(VERSION 3.0.0)
 
+if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.12.0")
+  cmake_policy(SET CMP0074 NEW)
+endif()
 # Make the scripts available in the 'cmake' directory available for the
 # 'include()' command, 'find_package()' command.
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
@@ -16,6 +19,9 @@ IF(COMPILER_SUPPORTS_CXX11)
 ELSE()
     MESSAGE(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
 ENDIF()
+
+option ( ENABLE_SPATIAL_SOLVERS     "Should build AHOT spatial solvers?"                 OFF )
+option ( ENABLE_ENSDF_PROCESSIONG   "Should build ENSDF processing tools?"               ON )
 
 include(PyneMacros)
 pyne_print_logo()  # Beware of dragons
@@ -80,7 +86,15 @@ set(LIBS ${LIBS} ${HDF5_C_LIBRARIES})
 MESSAGE("--    HDF5 Include directory: ${HDF5_INCLUDE_DIRS}")
 MESSAGE("--    HDF5 Library directories: ${HDF5_LIBRARY_DIRS}")
 MESSAGE("--    HDF5 Libraries: ${HDF5_C_LIBRARIES}")
+MESSAGE("--    HDF5 library version: ${HDF5_VERSION}")
 
+# Version 1.12 of HDF5 deprecates the H5Oget_info_by_idx(),
+# H5O_info_t() and H5Oget_info_by_name() interfaces.
+# Thus, we give these flags to allow usage of the old interface in newer
+# versions of HDF5.
+if(NOT (${HDF5_VERSION} VERSION_LESS 1.12.0))
+   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DH5Oget_info_by_idx_vers=1 -DH5O_info_t_vers=1 -DH5Oget_info_by_name_vers=1")
+endif()
 
 # Look for MOAB if requested
 if(WITH_MOAB)
@@ -95,7 +109,7 @@ if(WITH_MOAB)
     include_directories(${MOAB_INCLUDE_DIRS})
     get_filename_component(MOAB_LIBRARY_DIRS ${MOAB_LIBRARY} PATH)
     if(APPLE)
-      link_directories(${MOAB_LIBRARY_DIRS}/lib)
+      link_directories(${MOAB_LIBRARY_DIRS})
     else(APPLE)
       link_directories(${MOAB_LIBRARY_DIRS})
     endif(APPLE)

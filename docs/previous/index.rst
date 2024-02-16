@@ -5,6 +5,7 @@ The following are notes for and links to previously released versions of PyNE:
 .. toctree::
     :maxdepth: 1
     
+    0.7_release_notes
     0.5_release_notes
     0.4_release_notes
     0.3_release_notes
@@ -14,6 +15,7 @@ The following are notes for and links to previously released versions of PyNE:
 ========= ========== ================ ================
 Version   Date       Zip              Tar
 ========= ========== ================ ================
+0.7       2020-08-19 `zip 0.7`_       `tar 0.7`_
 0.5       2015-04-16 `zip 0.5`_       `tar 0.5`_
 0.5.0-rc1 2015-03-03 `zip 0.5.0-rc1`_ `tar 0.5.0-rc1`_
 0.4       2014-05-12 `zip 0.4`_       `tar 0.4`_
@@ -24,6 +26,8 @@ Version   Date       Zip              Tar
 0.1-rc    2012-04-22 `zip 0.1-rc`_    `tar 0.1-rc`_
 ========= ========== ================ ================
 
+.. _zip 0.7: https://github.com/pyne/pyne/zipball/0.7.0
+.. _tar 0.7: https://github.com/pyne/pyne/tarball/0.7.0
 .. _zip 0.5: https://github.com/pyne/pyne/zipball/0.5.0
 .. _tar 0.5: https://github.com/pyne/pyne/tarball/0.5.0
 .. _zip 0.5.0-rc1: https://github.com/pyne/pyne/zipball/0.5.0-rc1

@@ -1,8 +1,7 @@
 """This module provides physical cross-section models and helper functions."""
 from __future__ import division
 
-from warnings import warn
-from pyne.utils import QAWarning
+from pyne.utils import QA_warn
 
 cimport numpy as np
 import numpy as np
@@ -17,7 +16,7 @@ from scipy.special import erf
 #from scipy import integrate
 #import metasci.mathematics.integrate as msmintegrate
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+QA_warn(__name__)
 
 # Bolzmann's constant in MeV/K
 k = constants.physical_constants['Boltzmann constant in eV/K'][0] * (1.0E-6)

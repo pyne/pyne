@@ -9,7 +9,7 @@ This module is mirror at the `PyJsonCpp project`_.
 
 .. currentmodule: pyne.jsoncpp
 
-.. _JsonCpp project: http://jsoncpp.sourceforge.net/
+.. _JsonCpp project: https://github.com/open-source-parsers/jsoncpp/
 
 .. _PyJsonCpp project: https://github.com/scopatz/pyjsoncpp
 

@@ -6,7 +6,7 @@ Conda Package Manager
 The first step is to make sure that you have 
 the conda package manager installed. 
 You can download and install either anaconda or miniconda from 
-`the Continuum downloads page <http://continuum.io/downloads>`_.
+`the downloads page <https://www.anaconda.com/distribution/#download-section>`_.
 Make sure that you follow the full instructions and that the 
 conda command line utility is on your PATH.  This is the default 
 option when installing conda.
@@ -14,35 +14,24 @@ option when installing conda.
 --------------------------
 Binary Package (For Users)
 --------------------------
-Binary distributions of the latest release for mac and linux (64-bit) 
+
+To list all of the versions of PyNE available on `conda-forge
+<https://conda-forge.github.io/>`_ channel, in your terminal window run::
+
+    conda search -c conda-forge pyne
+
+Binary distributions of the latest release for linux (64-bit) 
 using the conda package manager can be installed by running the command::
 
     conda install -c conda-forge pyne
 
-where VERSION should be replaced with the version number to be installed.
+If you want to install PyNE with the correct package specification, try
+``pkg_name=version=build_string``.
 
-A windows 32-bit binary is also available on conda via the same command but
-it is highly experimental and likely broken. Conda binaries do not have 
-moab/pymoab/mesh support (yet).
+For example, if you want to install ``pyne version=0.7.1`` with build option ``moab_openmc``, you would enter::
 
-----------------------------------
-Create a Package (For Developer)
-----------------------------------
-In a new shell, run the following::
+    conda install -c conda-forge pyne=0.7.1=moab_openmc*
 
-    conda install conda-build jinja2 nose setuptools pytables hdf5 scipy
+where version should be replaced with the version number to be installed.
 
-on linux you may also need to run::
-
-    conda install patchelf
-
-Then dowload the latest conda-recipes `here 
-<https://github.com/conda/conda-recipes/archive/master.zip>`_
-
-cd to the conda-recipes directory and run::
-
-    conda build pyne
-    conda install $(conda build --output pyne)
-    nuc_data_make
-
-You should now be able to update the conda package that lives on binstar.
+Conda binaries do not have moab/pymoab/mesh support (yet).

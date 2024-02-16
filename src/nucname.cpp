@@ -127,6 +127,10 @@ pyne::nucname::name_zz_t pyne::nucname::get_name_zz() {
   lzd["Cn"] = 112;
   lzd["Fl"] = 114;
   lzd["Lv"] = 116;
+  lzd["Nh"] = 113;
+  lzd["Mc"] = 115;
+  lzd["Ts"] = 117;
+  lzd["Og"] = 118;
 
   return lzd;
 }
@@ -974,7 +978,7 @@ int pyne::nucname::mcnp_to_id(std::string nuc) {
 /************************/
 std::string pyne::nucname::openmc(int nuc) {
   std::string nucname = name(nuc);
-  
+
   // check aaa value
   if (iselement(nuc)) {
     nucname.append("0");
@@ -1039,7 +1043,7 @@ int pyne::nucname::openmc_to_id(std::string nuc) {
 
   // form integer id and return
   return (zzz * 10000000) + (aaa * 10000) + m;
-    
+
 }
 
 

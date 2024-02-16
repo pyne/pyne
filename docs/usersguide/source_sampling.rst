@@ -60,16 +60,17 @@ An object of the Sampler class is first instantiated using a constructor:
 :constructor:
     Sampler(std::string filename,
             std::map<std::string, std::string> tag_names,
-            std::vector<double> e_bounds,
             int mode)
 
 The "filename" is a MOAB mesh file (.h5m). The "tag_names" is a map that stores
-all the tag names need in the problem, such as the "src_tag_name" (required for
-all modes), "bias_tag_name" (required in mode 2 and 5), "cell_number_tag_name"
-(required for mode 3, 4, 5), "cell_fracs_tag_name" (required for mode 3, 4, 5).
+all the tag names need in the problem, such as the "src_tag_name" and
+"e_bounds_tag_name" (required for all modes), "bias_tag_name"
+(required in mode 2 and 5), "cell_number_tag_name" (required for mode 3, 4, 5),
+"cell_fracs_tag_name" (required for mode 3, 4, 5).
+
 The source density can be specified for an arbitrary number of energy groups,
-stored as a MOAB vector tag. The "e_bounds" parameter describes the upper and
-lower bounds of these energy groups. For example if the src_tag_name tag is a
+stored as a MOAB vector tag. The energy boundaries tag describes the lower and
+upper bounds of these energy groups. For example if the src_tag_name tag is a
 vector of length 24 (for 24 energy groups), e_bounds should be of length 25.
 The final parameter determins the source sampling mode.
 
@@ -79,7 +80,8 @@ This method takes a single argument: a vector of 6 pseudorandom number between
 position, y position, z position, energy, weight and cell number respectively.
 
 An example C++ program is supplied below. This program requires a mesh file
-named "source.h5m" with a tag named "source_density" of length 1.
+named "source.h5m" with a tag named "source_density" of length 1 and a tag
+named "e_bounds" with data of [0.0, 1.0].
 
 .. code-block:: cpp
 
@@ -93,11 +95,10 @@ named "source.h5m" with a tag named "source_density" of length 1.
     std::map<std::string, std::string> tag_names;
     tag_names.insert(std::pair<std::string, std::string>  ("src_tag_name",
     "source_density"));
-    std::vector<double> e_bounds;
-    e_bounds.push_back(0); // 1 energy group, lower bound of 0 upper bound of 1
-    e_bounds.push_back(1);
+    tag_names.insert(std::pair<std::string, std::string> ("e_bounds_tag_name",
+    "e_bounds"));
   
-    pyne::Sampler sampler(filename, tag_names, e_bounds, 0);
+    pyne::Sampler sampler(filename, tag_names, 0);
   
     std::vector<double> rands;
     int i;
@@ -135,8 +136,8 @@ with python.nose. It can be used in the same manner as the C++ class:
  from random import uniform
  from pyne.source_sampling import Sampler, SourceParticle
  
- tag_names = {"src_tag_name": "source_density"}
- sampler = Sampler("source.h5m", tag_names, np.array([0, 1]), 0)
+ tag_names = {"src_tag_name": "source_density", "e_bounds_tag": "e_bounds"}
+ sampler = Sampler("source.h5m", tag_names, 0)
  s = sampler.particle_birth([uniform(0, 1) for x in range(6)])
  
  print("x: {0}\ny: {1}\nz: {2}\ne: {3}\nw: {4}\nc: {5}".format(
@@ -154,9 +155,7 @@ a single argument: an integer representing the problem mode (0: DEFAULT_USER, 1:
 DEFAULT_UNIFORM, 2: DEFAULT_USER, 3: SUBVOXEL_ANALOG, 4: SUBVOXEL_UNIFORM,
 5: SUBVOXEL_USER). This function assumes the mesh file is "source.h5m" and
 that the tag names are "source_density", "biased_source_density",
-"cell_number_tag_name" and "cell_fracs_tag_name". In addition, this function
-assumes that a file "e_bounds" is present which is a plain text file containing
-the energy boundaries.
+"cell_number_tag_name", "cell_fracs_tag_name" and "e_bounds_tag_name".
 
 An example program using the Fortran interface is shown below:
 
@@ -202,18 +201,19 @@ source sampling within MCNP5. This file is found in pyne/share/source.F90.
 The simplest way to compile MCNP5 with the source subroutine is as follows:
 
   #. Obtain a copy of the MCNP5 source code.
-  #. Navigate to the folder MCNP5/Source/src.
-  #. Soft-link the following files into this folder:
+  #. Navigate to the folder MCNP5/Source/src: ``cd MCNP5/Source/src``
+  #. Symlink the following files into this folder:
 
-     a. pyne/src/source_sampling.cpp
-     b. pyne/src/source_sampling.h
-     c. pyne/src/measure.cpp
-     d. pyne/src/measure.h
+     a. ``ln -s /path/to/pyne/src/source_sampling.cpp .``
+     b. ``ln -s /path/to/pyne/src/source_sampling.h .``
+     c. ``ln -s /path/to/pyne/src/measure.cpp .``
+     d. ``ln -s /path/to/pyne/src/measure.h .``
 
   #. Remove the pre-existing empty source.F90 file.
-  #. Soft-link pyne/share/source.F90.
-  #. Open the file MCNP/Source/src/FILE.list.
-  #. Edit line 78 to include the additional source files. It should look like "CXX_SRC := measure.cpp source_sampling.cpp".
+  #. Symlink source.F90: ``ln -s /path/to/pyne/share/source.F90 .``
+  #. Open the file MCNP/Source/src/FILE.list and edit line 78 to include the
+     additional source files. It should look like
+     ``CXX_SRC := measure.cpp source_sampling.cpp``.
   #. Compile MCNP5 using the standard build method.
 
 Once MCNP5 is compiled, MCNP5 can be run normally. The file "source.h5m" and
@@ -225,12 +225,14 @@ groups used in the activation calculations. An "idum" card must be used
 in the MCNP5 input file. This card should have three arguments. The first is the
 sampling mode (0: DEFAULT_ANALOG, 1: DEFAULT_UNIFORM, 2: DEFAULT_USER,
 3: SUBVOXEL_ANALOG, 4: SUBVOXEL_UNIFORM, 5: SUBVOXEL_USER). The second is the
-resample limit for void and cell rejections. For a given particle, if a source
-position is selected in void (MCNP material 0) or in a cell that disagrees with the
-cell number, the source position is resampled within the selected mesh volume
-element until either a correct position is found, or this user-specified limit
-is researched. The third argument should specify the particle type: 1 for
-neutrons, 2 for photons.
+resample limit for void and cell rejections. If the second argument is set to
+be a postive integer, the void rejection will be applied, i.e., for a given
+particle, if a source position is selected in void (MCNP material 0) or in a
+cell that disagrees with the cell number, the source position is resampled
+within the selected mesh volume element until either a correct position is
+found, or this user-specified limit is researched. If the second argument is
+set to be 0, then the void rejection will be disabled. The third argument
+should specify the particle type: 1 for neutrons, 2 for photons.
 
 For example, this "idum" card specifies uniform sampling with a resample limit
 of 100 with source particles specified as photons:
@@ -239,3 +241,17 @@ of 100 with source particles specified as photons:
 
   idum 1 100 2
 
+************************
+Source Sampling in MCNP6
+************************
+
+Another version of the source.F90 file was produced for use with MCNP6. The
+instructions for how to use it are identical to those for the MCNP5 version
+except for one difference: the file that should be symlinked is called
+``pyne/share/source_mcnp6.F90`` instead. It should still be called
+``source.F90`` inside the MCNP source directory. For example:
+
+.. code-block:: bash
+
+  cd MCNP6/Source/src
+  ln -s /path/to/pyne/share/source_mcnp6.F90 source.F90

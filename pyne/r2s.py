@@ -1,18 +1,29 @@
 from os.path import isfile
-from warnings import warn
-from pyne.utils import QAWarning
+from pyne.utils import QA_warn
 import numpy as np
+import tables as tb
 
-from pyne.mesh import Mesh
+from pyne.mesh import Mesh, NativeMeshTag
 from pyne.mcnp import Meshtal
-from pyne.alara import mesh_to_fluxin, record_to_geom, photon_source_to_hdf5, \
-    photon_source_hdf5_to_mesh
+from pyne.alara import (
+    mesh_to_fluxin,
+    record_to_geom,
+    photon_source_to_hdf5,
+    photon_source_hdf5_to_mesh,
+    responses_output_zone,
+)
+from pyne import openmc_utils
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+QA_warn(__name__)
+
+# source file version is composed of pyne version and one more int number
+_SOURCE_FILE_VERSION = [0, 7, 3, 1]
+_SOURCE_VERSION_TAG_NAME = "r2s_source_file_version"
 
 
-def resolve_mesh(mesh_reference, tally_num=None, flux_tag="n_flux",
-                 output_material=False):
+def resolve_mesh(
+    mesh_reference, tally_num=None, flux_tag="n_flux", output_material=False
+):
     """This function creates a method that will consume many mesh-like objects
        (e.g. mesh, an h5m file, a meshtal file, etc) and returns a robust PyNE
        mesh object accordingly.
@@ -39,43 +50,81 @@ def resolve_mesh(mesh_reference, tally_num=None, flux_tag="n_flux",
         The PyNE mesh object of the flux data.
     """
 
+    # define tag_names according to the flux_tag
+    tag_names = (
+        flux_tag,
+        flux_tag + "_err",
+        flux_tag + "_total",
+        flux_tag + "_err_total",
+    )
     # mesh_reference is Mesh object
     if isinstance(mesh_reference, Mesh):
         m = mesh_reference
+    # mesh_reference is a file path
+    elif isinstance(mesh_reference, str) and not isfile(mesh_reference):
+        raise ValueError("File {0} not found!".format(mesh_reference))
     #  mesh_reference is unstructured mesh file
-    elif isinstance(mesh_reference, str) and isfile(mesh_reference) \
-            and mesh_reference.endswith(".h5m"):
+    elif (
+        isinstance(mesh_reference, str)
+        and isfile(mesh_reference)
+        and mesh_reference.endswith(".h5m")
+    ):
         m = Mesh(structured=False, mesh=mesh_reference)
+    # mesh_reference is a openmc statepoint file
+    elif (
+        isinstance(mesh_reference, str)
+        and isfile(mesh_reference)
+        and mesh_reference.endswith(".h5")
+    ):
+        m = openmc_utils.create_meshtally(
+            mesh_reference, tally_id=tally_num, tag_names=tag_names
+        )
     #  mesh_reference is Meshtal or meshtal file
     elif tally_num is not None:
         #  mesh_reference is meshtal file
         if isinstance(mesh_reference, str) and isfile(mesh_reference):
-            mesh_reference = Meshtal(mesh_reference,
-                                     {tally_num: (flux_tag, flux_tag + "_err",
-                                                  flux_tag + "_total",
-                                                  flux_tag + "_err_total")},
-                                     meshes_have_mats=output_material)
+            mesh_reference = Meshtal(
+                mesh_reference, {tally_num: tag_names}, meshes_have_mats=output_material
+            )
             m = mesh_reference.tally[tally_num]
         #  mesh_reference is Meshtal object
         elif isinstance(mesh_reference, Meshtal):
             m = mesh_reference.tally[tally_num]
         else:
-            raise ValueError("meshtal argument not a Mesh object, Meshtal"
-                             " object, MCNP meshtal file or meshtal.h5m file.")
-    # mesh_references is a Meshtal file but no tally_num provided
+            raise ValueError(
+                "meshtal argument not a Mesh object, Meshtal"
+                " object, MCNP meshtal file or meshtal.h5m file."
+            )
+    # mesh_references is a Meshtal or statepoint file but no tally_num provided
     else:
         raise ValueError(
-            "Need to provide a tally number when reading a Meshtal file")
+            "Need to provide a tally number when reading a Meshtal or"
+            " statepoint file"
+        )
 
     return m
 
 
-def irradiation_setup(flux_mesh, cell_mats, cell_fracs, alara_params,
-                      tally_num=4, num_rays=10, grid=False, flux_tag="n_flux",
-                      fluxin="alara_fluxin", reverse=False,
-                      alara_inp="alara_inp", alara_matlib="alara_matlib",
-                      output_mesh="r2s_step1.h5m", output_material=False,
-                      decay_times=None, sub_voxel=False):
+def irradiation_setup(
+    flux_mesh,
+    cell_mats,
+    cell_fracs,
+    alara_params,
+    tally_num=4,
+    num_rays=10,
+    grid=False,
+    flux_tag="n_flux",
+    fluxin="alara_fluxin",
+    reverse=False,
+    alara_inp="alara_inp",
+    alara_matlib="alara_matlib",
+    output_mesh="r2s_step1.h5m",
+    output_material=False,
+    decay_times=None,
+    sub_voxel=False,
+    responses=None,
+    wdr_file=None,
+):
     """This function is used to setup the irradiation inputs after the first
     R2S transport step.
 
@@ -126,6 +175,10 @@ def irradiation_setup(flux_mesh, cell_mats, cell_fracs, alara_params,
         List of the decay times. If no decay times given, use '1 s'.
     sub_voxel : bool, optional
         If true, sub-voxel r2s work flow  will be used.
+    responses : list of str, optional
+        The list of requested responses.
+    wdr_file : str
+        Path to the wdr file.
     """
 
     m = resolve_mesh(flux_mesh, tally_num, flux_tag, output_material)
@@ -133,27 +186,31 @@ def irradiation_setup(flux_mesh, cell_mats, cell_fracs, alara_params,
     if output_material:
         m.cell_fracs_to_mats(cell_fracs, cell_mats)
 
-    mesh_to_fluxin(m, flux_tag, fluxin, reverse,
-                   sub_voxel, cell_fracs, cell_mats)
-    record_to_geom(m, cell_fracs, cell_mats, alara_inp, alara_matlib,
-                   sub_voxel=sub_voxel)
+    mesh_to_fluxin(m, flux_tag, fluxin, reverse, sub_voxel, cell_fracs, cell_mats)
+    record_to_geom(
+        m, cell_fracs, cell_mats, alara_inp, alara_matlib, sub_voxel=sub_voxel
+    )
 
     # write decay times into alara_inp
     if decay_times is None:
-        decay_times = ['1 s']
-    decay_str = 'cooling\n'
+        decay_times = ["1 s"]
+    decay_str = "cooling\n"
     for dc in decay_times:
-        decay_str = ''.join([decay_str, '    ', dc, '\n'])
-    decay_str = ''.join([decay_str, 'end\n'])
-    with open(alara_inp, 'a') as f:
+        decay_str = "".join([decay_str, "    ", dc, "\n"])
+    decay_str = "".join([decay_str, "end\n"])
+    with open(alara_inp, "a") as f:
         f.write(decay_str)
 
     if isfile(alara_params):
-        with open(alara_params, 'r') as f:
+        with open(alara_params, "r") as f:
             alara_params = f.read()
 
-    with open(alara_inp, 'a') as f:
+    with open(alara_inp, "a") as f:
         f.write("\n" + alara_params)
+
+    # append responses output zone
+    with open(alara_inp, "a") as f:
+        f.write(responses_output_zone(responses, wdr_file, alara_params))
 
     m.write_hdf5(output_mesh)
 
@@ -166,7 +223,7 @@ def photon_sampling_setup(mesh, phtn_src, tags):
     Parameters
     ----------
     mesh : PyNE Mesh
-       The object containing the mesh instance to be tagged.
+        The object containing the mesh instance to be tagged.
     phtn_src : str
         The path of the ALARA phtn_file.
     tags: dict
@@ -193,10 +250,10 @@ def total_photon_source_intensity(m, tag_name, sub_voxel=False):
     Parameters
     ----------
     m : PyNE Mesh
-       The mesh-based photon emission density distribution in p/cm3/s.
+        The mesh instance to be tagged.
     tag_name : str
-       The name of the tag on the mesh with the photon emission density
-       information.
+        The name of the tag on the mesh with the photon emission density
+        information.
     sub_voxel: bool, optional
         If true, sub-voxel r2s work flow will be used.
 
@@ -214,11 +271,135 @@ def total_photon_source_intensity(m, tag_name, sub_voxel=False):
         # create a cell_fracs
         cell_fracs = np.ones(shape=(len(m), 1), dtype=float)
     max_num_cells = len(cell_fracs[0])
-    num_e_groups = len(sd_tag[list(m.iter_ve())[0]]) / max_num_cells
+    num_e_groups = len(sd_tag[list(m.iter_ve())[0]]) // max_num_cells
     for idx, _, ve in m:
         ve_data = sd_tag[ve]
         for svid in range(max_num_cells):
             vol = m.elem_volume(ve) * cell_fracs[idx][svid]
-            sv_data = ve_data[num_e_groups*svid:num_e_groups*(svid+1)]
+            sv_data = ve_data[num_e_groups * svid : num_e_groups * (svid + 1)]
             intensity += vol * np.sum(sv_data)
     return intensity
+
+
+def tag_e_bounds(m, e_bounds, tag_name="e_bounds"):
+    """This function tags the energy boundaries of photon source to the PyNE
+    mesh instance as a sparse tag for the purpose of photon source sampling.
+
+    Parameters
+    ----------
+    m : PyNE Mesh
+        The mesh instance to be tagged.
+    e_bounds: iterable of float
+        The energy boundaries of a photon source, eV.
+    tag_name : str, optional
+       The name of the energy boundaries tag.
+
+    Returns
+    -------
+    m : PyNE Mesh
+       The mesh with energy boundaries tag.
+    """
+
+    # do not provide value when init a sparse tag
+    m.tag(
+        name=tag_name,
+        doc=tag_name + " of the photon source",
+        tagtype=NativeMeshTag,
+        size=len(e_bounds),
+        dtype=float,
+        storage_type="sparse",
+    )
+    m.get_tag(tag_name)[m] = e_bounds
+    return m
+
+
+def tag_source_intensity(m, source_intensity, tag_name="source_intensity"):
+    """This function tags the source intensity of photon source to the PyMOAB
+    mesh instance as a sparse tag for the purpose of photon source sampling.
+
+    Parameters
+    ----------
+    m : PyNE Mesh
+        The object containing the mesh instance to be tagged.
+    source_intensity : float
+        The source intensity of a photon source, p/s.
+    tag_name : str, optional
+        The name of the energy boundaries tag.
+
+    Returns
+    -------
+    m : PyNE Mesh
+        The mesh with energy boundaries tag.
+    """
+
+    # do not provide value when initializing a sparse tag
+    m.tag(
+        name=tag_name,
+        doc=tag_name + " of the photon source",
+        tagtype=NativeMeshTag,
+        size=1,
+        dtype=float,
+        storage_type="sparse",
+    )
+    m.get_tag(tag_name)[m] = source_intensity
+    return m
+
+
+def tag_decay_time(m, decay_time, tag_name="decay_time"):
+    """This function tags the decay time of photon source to the PyMOAB
+    mesh instance as a sparse tag for the purpose of photon source sampling.
+
+    Parameters
+    ----------
+    m : PyNE Mesh
+        The object containing the mesh instance to be tagged.
+    decay_time : float
+        The decay time of a photon source, s.
+    tag_name : str, optional
+        The name of the decay time tag.
+
+    Returns
+    -------
+    m : PyNE Mesh
+        The mesh with decay time tag.
+    """
+
+    # do not provide value when init a sparse tag
+    m.tag(
+        name=tag_name,
+        doc=tag_name + " of the photon source",
+        tagtype=NativeMeshTag,
+        size=1,
+        dtype=float,
+        storage_type="sparse",
+    )
+    m.get_tag(tag_name)[m] = decay_time
+    return m
+
+
+def tag_version(m):
+    """This function tags the version of photon source to the PyMOAB
+    mesh instance as a sparse tag for the purpose of photon source sampling.
+
+    Parameters
+    ----------
+    m : PyNE Mesh
+        The object containing the mesh instance to be tagged.
+
+    Returns
+    -------
+    m : PyNE Mesh
+       The mesh with version tag.
+    """
+
+    # do not provide value when init a sparse tag
+    m.tag(
+        name=_SOURCE_VERSION_TAG_NAME,
+        doc="version of the photon source file",
+        tagtype=NativeMeshTag,
+        size=len(_SOURCE_FILE_VERSION),
+        dtype=int,
+        storage_type="sparse",
+    )
+    m.get_tag(_SOURCE_VERSION_TAG_NAME)[m] = _SOURCE_FILE_VERSION
+    return m

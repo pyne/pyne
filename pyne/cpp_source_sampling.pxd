@@ -36,7 +36,7 @@ cdef extern from "source_sampling.h" namespace "pyne":
     cdef cppclass SourceParticle:
         # constructors
         SourceParticle() except +
-        SourceParticle(double, double, double, double, double, int) except +
+        SourceParticle(double, double, double, double, double, cpp_vector[int]) except +
 
         # attributes
 
@@ -46,7 +46,7 @@ cdef extern from "source_sampling.h" namespace "pyne":
         double get_z() except +
         double get_e() except +
         double get_w() except +
-        int get_c() except +
+        cpp_vector[int] get_cell_list() except +
 
 
 cdef extern from "source_sampling.h" namespace "pyne":
@@ -59,6 +59,7 @@ cdef extern from "source_sampling.h" namespace "pyne":
         Sampler(std_string, std_string, cpp_vector[double]) except +
         Sampler(std_string, std_string, cpp_vector[double], std_string) except +
         Sampler(std_string, std_string, cpp_vector[double], cpp_bool) except +
+        Sampler(std_string, cpp_map[std_string, std_string], int) except +
         Sampler(std_string, cpp_map[std_string, std_string], cpp_vector[double], int) except +
 
         # attributes

@@ -22,6 +22,7 @@
 #endif
 
 #ifndef PYNE_IS_AMALGAMATED
+  #define PYNE_DECAY
 #include "json-forwards.h"
 #include "json.h"
 #include "h5wrap.h"
@@ -30,6 +31,8 @@
 #include "data.h"
 #include "decay.h"
 #endif
+
+#define DEFAULT_MAT_CHUNKSIZE 100
 
 namespace pyne
 {
@@ -43,6 +46,13 @@ namespace pyne
   }  // namespace decayers
   #endif
 
+  /// Looking for the nuclide list path in the nucpath attribute of the dataset.
+  /// This happens according to protocol 1.
+  /// \param dataset hid of the dataset.
+  /// \param nucpath address of the path to the nuclides list in the file
+  /// (update when nucpath is found).
+  /// \return true if the nucpath attribure is present in the dataset
+  bool detect_nuclidelist(hid_t dataset, std::string& nucpath);
 
   // These 37 strings are predefined FLUKA materials.
   // Materials not on this list requires a MATERIAL card.
@@ -127,6 +137,14 @@ namespace pyne
     /// \param row The index to read out, may be negative.
     void _load_comp_protocol1(hid_t db, std::string datapath, int row);
 
+    /// Loads the matrial composition from an HDF5 file according to the layout
+    /// defined by protocol 1.  This protocol should be used in favor of protocol 0.
+    /// \param db HDF5 id for the open HDF5 file.
+    /// \param datapath Path to the base node for the material in a db.
+    /// \param nucpath Path to the base node for nuclide list in a db.
+    /// \param row The index to read out, may be negative.
+    void _load_comp_protocol1(hid_t db, std::string datapath, std::string nucpath, int row);
+
     /// Loads a material from an HDF5 file into this object.
     /// \param filename Path on disk to the HDF5 file.
     /// \param datapath Path to the the material in the file.
@@ -139,37 +157,111 @@ namespace pyne
     /// \param datapath Path to the the material in the file.
     /// \param row The index to read out, may be negative.
     /// \param protocol Flag for layout of material on disk.
-    void from_hdf5(std::string filename, std::string datapath="/material",
+    void from_hdf5(std::string filename, std::string datapath="/mat_name",
                                                           int row=-1, int protocol=1);
 
-    /// Writes this material out to an HDF5 file.
-    /// This happens according to protocol 1.
-    /// \param filename Path on disk to the HDF5 file.
-    /// \param datapath Path to the the material in the file.
-    /// \param nucpath Path to the nuclides set in the file.
-    /// \param row The index to read out, may be negative. Also note that this is a
-    ///            float.  A value of -0.0 indicates that the material should be
-    ///            appended to the end of the dataset.
-    /// \param chunksize The chunksize for all material data on disk.
-    void write_hdf5(char * filename, char * datapath, char * nucpath, float row=-0.0,
-                                                                    int chunksize=100);
-    /// Writes this material out to an HDF5 file.
-    /// This happens according to protocol 1.
-    /// \param filename Path on disk to the HDF5 file.
-    /// \param datapath Path to the the material in the file.
-    /// \param nucpath Path to the nuclides set in the file.
-    /// \param row The index to read out, may be negative. Also note that this is a
-    ///            float.  A value of -0.0 indicates that the material should be
-    ///            appended to the end of the dataset.
-    /// \param chunksize The chunksize for all material data on disk.
-    void write_hdf5(std::string filename, std::string datapath="/material",
-                    std::string nucpath="/nucid", float row=-0.0, int chunksize=100);
+  private:
 
+    /// Detect the HDF5 file assuming protocol1.
+    /// \param db HDF5 id for the open HDF5 file.
+    /// \param datapath Path to look for the material in the file.
+    /// Return options are:
+    ///     -"-1": datapath and "/material" do not exist
+    ///     - "0": datapath and/or "/material" exist but either as a group or a dataset
+    ///     - "1": datapath exists as a dataset -> old layout
+    ///     - "2": "/material" exists as a group-> new layout
+    int detect_hdf5_layout(hid_t db, std::string datapath);
+
+    enum prot1_layout {path_donotexists=-1, unknown, old_layout, new_layout};
+
+  public:
+
+    /// Writes this material out to an HDF5 file.
+    /// This happens according to protocol 1.
+    /// \param filename Path on disk to the HDF5 file.
+    /// \param datapath Path to the the material in the file.
+    /// \param row The index to read out, may be negative. Also note that this is a
+    ///            float.  A value of -0.0 indicates that the material should be
+    ///            appended to the end of the dataset.
+    /// \param chunksize The chunksize for all material data on disk.
+    /// New write_hdf5 which fallback on the old one when required
+    void write_hdf5(std::string filename, std::string datapath="/mat_name",
+        float row=-0.0, int chunksize=DEFAULT_MAT_CHUNKSIZE);
+
+    /// Writes this nucpath to an HDF5 file.
+    /// This happens according to protocol 1.
+    /// \param db HDF5 id for the open HDF5 file.
+    /// \param nucpath Path to the nuclides list in the file.
+    /// \return list of nuclide writen in the file (or the existing list if the nuclides
+    /// list was already in the file
+    std::vector<int> write_hdf5_nucpath(hid_t db, std::string nucpath);
+
+    /// Writes this datapath to an HDF5 file.
+    /// This happens according to protocol 1.
+    /// \param db HDF5 id for the open HDF5 file.
+    /// \param datapath Path to the the material in the file.
+    /// \param nucpath Path to the nuclides list in the file.
+    /// \param row The index to read out, may be negative. Also note that this is a
+    ///            float.  A value of -0.0 indicates that the material should be
+    ///            appended to the end of the dataset.
+    /// \param chunksize The chunksize for all material data on disk.
+    /// Only the nuclides present in the nuclides list can be part of the composition
+    /// of the material, additional nuclides will be ignored, and a warning will be thrown
+    void write_hdf5_datapath(hid_t db, std::string datapath, float row, int chunksize,
+        std::vector<int> nuclides);
+    /// Writes this material out to an HDF5 file in the old data structure
+    /// format.
+    /// Now deprecated, as material data structure in HDF5 format has been
+    /// refactored. Only used when adding material in a file containing
+    /// old material data structure.
+    /// This happens according to protocol 1.
+    /// \param filename Path on disk to the HDF5 file.
+    /// \param datapath Path to the the material in the file.
+    /// \param nucpath Path to the nuclides set in the file.
+    /// \param row The index to read out, may be negative. Also note that this is a
+    ///            float.  A value of -0.0 indicates that the material should be
+    ///            appended to the end of the dataset.
+    /// \param chunksize The chunksize for all material data on disk.
+    void deprecated_write_hdf5(char * filename, char * datapath, char * nucpath, float row=-0.0,
+                                                                    int chunksize=DEFAULT_MAT_CHUNKSIZE);
+    /// Writes this material out to an HDF5 file in the old data structure
+    /// format.
+    /// Now deprecated, as material data structure in HDF5 format has been
+    /// refactored. Only used when adding material in a file containing
+    /// old material data structure.
+    /// This happens according to protocol 1.
+    /// \param db HDF5 id for the open HDF5 file.
+    /// \param datapath Path to the the material in the file.
+    /// \param nucpath Path to the nuclides set in the file.
+    /// \param row The index to read out, may be negative. Also note that this is a
+    ///            float.  A value of -0.0 indicates that the material should be
+    ///            appended to the end of the dataset.
+    /// \param chunksize The chunksize for all material data on disk.
+    void deprecated_write_hdf5(hid_t db, std::string datapath, std::string nucpath, float row=-0.0,
+                                                                    int chunksize=DEFAULT_MAT_CHUNKSIZE);
+    /// Writes this material out to an HDF5 file.
+    /// This happens according to protocol 1.
+    /// \param filename Path on disk to the HDF5 file.
+    /// \param datapath Path to the the material in the file.
+    /// \param nucpath Path to the nuclides list in the file.
+    /// \param row The index to read out, may be negative. Also note that this is a
+    ///            float.  A value of -0.0 indicates that the material should be
+    ///            appended to the end of the dataset.
+    /// \param chunksize The chunksize for all material data on disk.
+    void deprecated_write_hdf5(std::string filename, std::string datapath,
+                    std::string nucpath, float row=-0.0, int chunksize=DEFAULT_MAT_CHUNKSIZE);
     /// Return an openmc xml material element as a string
-    std::string openmc(std::string fact_type = "mass");
-    
+    std::string openmc(std::string frac_type = "mass", int indent_lvl=1);
+
     /// Return an mcnp input deck record as a string
-    std::string mcnp(std::string frac_type = "mass");
+    std::string mcnp(std::string frac_type = "mass", bool mult_den = true);
+    /// Return an phits input deck record as a string
+    std::string phits(std::string frac_type = "mass", bool mult_den = true);
+    /// return the compo fraction writen ala "mcnp"
+    std::string mcnp_frac(std::map<int, double> fracs, std::string frac_type = "");
+    ///
+    /// Return an uwuw name
+    std::string get_uwuw_name();
     ///
     /// Return a fluka input deck MATERIAL card as a string
     std::string fluka(int id, std::string frac_type = "mass");
@@ -265,6 +357,11 @@ namespace pyne
     /// current value of the density member variable.  You may also use / set the
     /// atoms per molecule (atoms_per_molecule) in this function using \a apm.
     double mass_density(double num_dens=-1.0, double apm=-1.0);
+    // void print_material( pyne::Material test_mat);
+    /// Computes, sets, and returns the mass density if \a mult_den is true
+    /// otherwise return mass fraction. Fraction density is returned per atom
+    /// (default) in atom per barn cm or as a mass density.
+    std::map<int, double> get_density_frac(std::string frac_type="atom", bool mult_den=true);
     /// Computes and returns the number density of the material using the
     /// mass density if \a mass_dens is greater than or equal to zero.  If
     /// \a mass_dens is negative, the denisty member variable is used instead.
@@ -343,9 +440,14 @@ namespace pyne
     /// so the sum of the intensities is one
     std::vector<std::pair<double, double> > normalize_radioactivity(
       std::vector<std::pair<double, double> > unnormed);
+    /// Sets the composition, mass, and atoms_per_molecule of this material to those
+    /// calculated from \a activities, a mapping of radionuclides to activities.
+    void from_activity(std::map<int, double> activities);
 
+#ifdef PYNE_DECAY
     /// Decays this material for a given amount of time in seconds
     Material decay(double t);
+#endif // PYNE_DECAY
 
     /// Transmutes the material via the CRAM method.
     /// \param A The transmutation matrix [unitless]

@@ -2,8 +2,7 @@
 This module is for spectrometry analysis
 will have functions for general spectrum processing
 """
-from warnings import warn
-from pyne.utils import QAWarning
+from pyne.utils import QA_warn
 
 
 import copy
@@ -13,14 +12,21 @@ import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 from scipy.interpolate import splrep, sproot
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+QA_warn(__name__)
 
 
 class PhSpectrum(object):
     """Pulse height spectrum class"""
 
-    def __init__(self, spec_name='', start_chan_num=0, num_channels=0,
-                 channels=None, ebin=None, counts=None):
+    def __init__(
+        self,
+        spec_name="",
+        start_chan_num=0,
+        num_channels=0,
+        channels=None,
+        ebin=None,
+        counts=None,
+    ):
         """Initialise Ph Spectrum variables"""
         self.channels = [] if channels is None else channels
         self.ebin = [] if ebin is None else ebin
@@ -28,6 +34,7 @@ class PhSpectrum(object):
         self.spec_name = spec_name
         self.start_chan_num = start_chan_num
         self.num_channels = num_channels
+
 
 def rect_smooth(spectrum, m):
     """Rectangular smoothing function.
@@ -45,13 +52,13 @@ def rect_smooth(spectrum, m):
 
     """
 
-    if(m < 3):
-        raise ValueError('Error:Smoothing width less than 3')
-    if(m % 2 == 0):
-        raise ValueError('Error:Smoothing width not odd')
+    if m < 3:
+        raise ValueError("Error:Smoothing width less than 3")
+    if m % 2 == 0:
+        raise ValueError("Error:Smoothing width not odd")
 
     smooth_spec = copy.deepcopy(spectrum)
-    smooth_spec.counts = [] #reset counts
+    smooth_spec.counts = []  # reset counts
 
     ext = int((m - 1.0) / 2.0)
 
@@ -68,14 +75,15 @@ def rect_smooth(spectrum, m):
         while j <= (i + ext):
             sum_m = sum_m + spectrum.counts[j]
             j = j + 1
-        smooth_spec.counts.append(sum_m/m)
+        smooth_spec.counts.append(sum_m / m)
         i = i + 1
     while i < (len(spectrum.counts)):
         smooth_spec.counts.append(spectrum.counts[i])
         i = i + 1
 
-    smooth_spec.spec_name = spectrum.spec_name + ' smoothed'
+    smooth_spec.spec_name = spectrum.spec_name + " smoothed"
     return smooth_spec
+
 
 def five_point_smooth(spec):
     """5 point smoothing function.
@@ -99,47 +107,54 @@ def five_point_smooth(spec):
     spec_len = len(spec.counts)
     i = 2
     while i < spec_len - 2:
-        val = (1.0 / 9.0) * (spec.counts[i - 2] +
-                             spec.counts[i + 2] + (2 * spec.counts[i + 1]) +
-                             (2 * spec.counts[i - 1]) + (3 * spec.counts[i]))
+        val = (1.0 / 9.0) * (
+            spec.counts[i - 2]
+            + spec.counts[i + 2]
+            + (2 * spec.counts[i + 1])
+            + (2 * spec.counts[i - 1])
+            + (3 * spec.counts[i])
+        )
         smooth_spec.counts.append(val)
         i = i + 1
     smooth_spec.counts.append(spec.counts[i])
     smooth_spec.counts.append(spec.counts[i + 1])
-    smooth_spec.spec_name = spec.spec_name + ' smoothed'
+    smooth_spec.spec_name = spec.spec_name + " smoothed"
     return smooth_spec
+
 
 def calc_bg(spec, c1, c2, m):
     """Returns background under a peak"""
 
     if c1 > c2:
-       raise ValueError('c1 must be less than c2')
+        raise ValueError("c1 must be less than c2")
     if c1 < 0:
-       raise ValueError('c1 must be positive number above 0')
+        raise ValueError("c1 must be positive number above 0")
     if c2 > max(spec.channels):
-       raise ValueError('c2 must be less than max number of channels')
+        raise ValueError("c2 must be less than max number of channels")
 
     if m == 1:
-        low_sum = sum(spec.counts[c1 - 2:c1])
-        high_sum = sum(spec.counts[c2:c2 + 2])
+        low_sum = sum(spec.counts[c1 - 2 : c1])
+        high_sum = sum(spec.counts[c2 : c2 + 2])
         bg = (low_sum + high_sum) * ((c2 - c1 + 1) / 6)
     else:
-        raise ValueError('m is not set to a valud method id')
+        raise ValueError("m is not set to a valud method id")
 
     return bg
+
 
 def gross_count(spec, c1, c2):
     """Returns total number of counts in a spectrum between two channels"""
 
     if c1 > c2:
-       raise ValueError('c1 must be less than c2')
+        raise ValueError("c1 must be less than c2")
     if c1 < 0:
-       raise ValueError('c1 must be positive number above 0')
+        raise ValueError("c1 must be positive number above 0")
     if c2 > max(spec.channels):
-       raise ValueError('c2 must be less than max number of channels')
+        raise ValueError("c2 must be less than max number of channels")
 
-    gc=sum(spec.counts[c1:c2])
+    gc = sum(spec.counts[c1:c2])
     return gc
+
 
 def net_counts(spec, c1, c2, m):
     """Calculates net counts between two channels"""
@@ -147,6 +162,7 @@ def net_counts(spec, c1, c2, m):
     gc = gross_count(spec, c1, c2)
     nc = gc - bg
     return nc
+
 
 def net_area(spec,c1,c2):
     """Calculates the net area under a peak by subtracting background from total

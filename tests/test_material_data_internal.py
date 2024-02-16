@@ -3,8 +3,6 @@ import os
 import math
 import warnings
 
-import nose
-from nose.tools import assert_equal, assert_in, assert_true, assert_almost_equal
 import numpy as np
 import numpy.testing as npt
 
@@ -23,28 +21,22 @@ from pyne.nucname import id
 if utils.use_warnings():
     utils.toggle_warnings()
 
-nucvec = {'H':  1.0,
-          'Fe': 60.0,
-          'Mn': 39.0
-          }
+nucvec = {"H": 1.0, "Fe": 60.0, "Mn": 39.0}
+
 
 def test_with_internal_data():
     orig = pyne_conf.NUC_DATA_PATH
-    pyne_conf.NUC_DATA_PATH = b'thisisanonsensedatapath'
+    pyne_conf.NUC_DATA_PATH = b"thisisanonsensedatapath"
 
-    mat = Material(nucvec,density=7.8)
+    mat = Material(nucvec, density=7.8)
     mat = mat.expand_elements()
-    assert_equal(id('He3') in mat.comp,False)
-    assert_equal(id('Co58') in mat.comp,False)
-    assert_equal(id('Ni58') in mat.comp,False)
+    assert (id("He3") in mat.comp) == False
+    assert (id("Co58") in mat.comp) == False
+    assert (id("Ni58") in mat.comp) == False
 
-    assert_equal(id('H1') in mat.comp,True)
-    assert_equal(id('Fe56') in mat.comp,True)
-    assert_equal(id('Mn55') in mat.comp,True)
-   
+    assert (id("H1") in mat.comp) == True
+    assert (id("Fe56") in mat.comp) == True
+    assert (id("Mn55") in mat.comp) == True
 
+    pyne_conf.NUC_DATA_PATH = orig
 
-# Run as script
-#
-if __name__ == "__main__":
-    nose.runmodule()

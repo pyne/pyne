@@ -8,8 +8,7 @@ q_value, and the percent of q coming from gammas. This data is from
 from __future__ import print_function
 import csv
 import os
-from warnings import warn
-from pyne.utils import QAWarning
+from pyne.utils import QA_warn
 
 import numpy as np
 import tables as tb
@@ -18,7 +17,7 @@ from pyne import nucname
 from pyne.api import nuc_data
 from pyne.dbgen.api import BASIC_FILTERS
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+QA_warn(__name__)
 
 # Parses data from .csv
 def grab_q_values(fname):
@@ -34,13 +33,14 @@ def grab_q_values(fname):
     all_q_values = []
 
     # Open .csv files and parses them
-    with open(os.path.join(os.path.dirname(__file__), fname), 'r') as f:
+    with open(os.path.join(os.path.dirname(__file__), fname), "r") as f:
         reader = csv.reader(f)
         for row in reader:
             entry = read_row(row)
             all_q_values.append(entry)
 
     return all_q_values
+
 
 # Grabs data row by row
 def read_row(row):
@@ -56,9 +56,9 @@ def read_row(row):
     entry = ()
 
     # Evaluate each component of the given row
-    if row[0] == 'Nuclide' or len(row[0].strip()) == 0:
+    if row[0] == "Nuclide" or len(row[0].strip()) == 0:
         return
-    nuclide = nucname.id(''.join(row[0:2]).replace(' ', ''))
+    nuclide = nucname.id("".join(row[0:2]).replace(" ", ""))
     if len(row[2]) == 0:
         q_val = 0.0
     else:
@@ -70,6 +70,7 @@ def read_row(row):
     entry = (nuclide, q_val, gamma_frac)
 
     return entry
+
 
 # Sorts and filters list of q_values
 def format_q_values(all_q_values):
@@ -94,6 +95,7 @@ def format_q_values(all_q_values):
 
     return distinct_all_q_values
 
+
 # Write q_value table to file
 def make_q_value_table(all_q_values, nuc_data, build_dir=""):
     """Adds q_value table to the nuc_data.h5 library.
@@ -112,24 +114,31 @@ def make_q_value_table(all_q_values, nuc_data, build_dir=""):
     distinct_all_q_values = format_q_values(all_q_values)
 
     # Define data type
-    qv_dtype = np.dtype([
-        ('nuc', np.int32),
-        ('q_val', np.float64),
-        ('gamma_frac', np.float64),
-        ])
+    qv_dtype = np.dtype(
+        [
+            ("nuc", np.int32),
+            ("q_val", np.float64),
+            ("gamma_frac", np.float64),
+        ]
+    )
 
     # Convert to numpy array
     q_value_array = np.array(distinct_all_q_values, dtype=qv_dtype)
 
     # Open the hdf5 file
-    nuc_file = tb.open_file(nuc_data, 'a', filters=BASIC_FILTERS)
+    nuc_file = tb.open_file(nuc_data, "a", filters=BASIC_FILTERS)
 
     # Make the group if it's not there
-    if not hasattr(nuc_file.root, 'decay'):
-        nuc_file.create_group('/', 'decay', 'ENSDF Decay data')
+    if not hasattr(nuc_file.root, "decay"):
+        nuc_file.create_group("/", "decay", "ENSDF Decay data")
 
     # Make a new table
-    q_value_table = nuc_file.create_table('/decay', 'q_values', q_value_array, 'Nuclide, Q_value [MeV per disintegration], Fraction of Q that comes from gammas')
+    q_value_table = nuc_file.create_table(
+        "/decay",
+        "q_values",
+        q_value_array,
+        "Nuclide, Q_value [MeV per disintegration], Fraction of Q that comes from gammas",
+    )
 
     # Ensure that data was written to table
     q_value_table.flush()
@@ -137,19 +146,23 @@ def make_q_value_table(all_q_values, nuc_data, build_dir=""):
     # Close the hdf5 file
     nuc_file.close()
 
+
 def make_q_value(args):
     """Controller function for adding q-values"""
     nuc_data, build_dir = args.nuc_data, args.build_dir
     if os.path.exists(nuc_data):
-        with tb.open_file(nuc_data, 'r') as f:
-            if '/decay/q_values' in f:
+        with tb.open_file(nuc_data, "r") as f:
+            if "/decay/q_values" in f:
                 print("skipping q_value table creation; already exists.")
                 return
 
     # Grab the q_values
-    print('Grabbing q_values...')
-    q_value_files = ['q_val_actinides.csv', 'q_val_fissionproducts.csv',
-                     'q_val_light.csv']
+    print("Grabbing q_values...")
+    q_value_files = [
+        "q_val_actinides.csv",
+        "q_val_fissionproducts.csv",
+        "q_val_light.csv",
+    ]
     all_q_values = []
     for fname in q_value_files:
         all_q_values += grab_q_values(fname)

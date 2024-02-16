@@ -5,11 +5,16 @@ Fortran formatted records.
 
 """
 import struct
-from collections import Iterable
-from warnings import warn
-from pyne.utils import QAWarning
 
-warn(__name__ + " is not yet QA compliant.", QAWarning)
+try:
+    from collections.abc import Iterable
+except ImportError:
+    from collections import Iterable
+
+from pyne.utils import QA_warn
+
+QA_warn(__name__)
+
 
 class _FortranRecord(object):
     """A single Fortran formatted record.
@@ -31,10 +36,10 @@ class _FortranRecord(object):
         self.num_bytes = num_bytes
 
         self.reset()
-        self.int_size = struct.calcsize('i')
-        self.long_size = struct.calcsize('q')
-        self.float_size = struct.calcsize('f')
-        self.double_size = struct.calcsize('d')
+        self.int_size = struct.calcsize("i")
+        self.long_size = struct.calcsize("q")
+        self.float_size = struct.calcsize("f")
+        self.double_size = struct.calcsize("d")
 
     def get_data(self, n, typeCode, item_size):
         """
@@ -44,11 +49,15 @@ class _FortranRecord(object):
         """
         if self.pos >= self.num_bytes:
             raise ValueError(
-                "All data read from record, pos=" + str(self.pos) +
-                " >= num_bytes=" + str(self.num_bytes))
+                "All data read from record, pos="
+                + str(self.pos)
+                + " >= num_bytes="
+                + str(self.num_bytes)
+            )
 
-        values = struct.unpack('{0}{1}'.format(n, typeCode),
-                               self.data[self.pos:self.pos+item_size*n])
+        values = struct.unpack(
+            "{0}{1}".format(n, typeCode), self.data[self.pos : self.pos + item_size * n]
+        )
         self.pos += item_size * n
         return list(values)
 
@@ -56,23 +65,23 @@ class _FortranRecord(object):
         """
         Returns one or more 4-byte integers.
         """
-        return self.get_data(n, 'i', self.int_size)
+        return self.get_data(n, "i", self.int_size)
 
     def get_long(self, n=1):
         """
         Returns one or more 8-byte integers.
         """
-        return self.get_data(n, 'q', self.long_size)
+        return self.get_data(n, "q", self.long_size)
 
     def get_float(self, n=1):
         """Returns one or more floats."""
-        return self.get_data(n, 'f', self.float_size)
+        return self.get_data(n, "f", self.float_size)
 
     def get_double(self, n=1):
         """
         Returns one or more double
         """
-        return self.get_data(n, 'd', self.double_size)
+        return self.get_data(n, "d", self.double_size)
 
     def get_string(self, length, n=1):
         """Returns a string of a specified length starting at the current
@@ -81,13 +90,16 @@ class _FortranRecord(object):
 
         if self.pos >= self.num_bytes:
             raise ValueError(
-                "All data read from record, pos=" + str(self.pos) +
-                " >= num_bytes=" + str(self.num_bytes))
+                "All data read from record, pos="
+                + str(self.pos)
+                + " >= num_bytes="
+                + str(self.num_bytes)
+            )
 
-        relevantData = self.data[self.pos:self.pos+length*n]
-        (s,) = struct.unpack('{0}s'.format(length*n), relevantData)
-        self.pos += length*n
-        return [s[i*length:(i+1)*length].decode() for i in range(n)]
+        relevantData = self.data[self.pos : self.pos + length * n]
+        (s,) = struct.unpack("{0}s".format(length * n), relevantData)
+        self.pos += length * n
+        return [s[i * length : (i + 1) * length].decode() for i in range(n)]
 
     def put_data(self, newdata, format, item_size):
         """
@@ -109,28 +121,27 @@ class _FortranRecord(object):
         """
         Pack a list of 4-byte integers.
         """
-        self.put_data(data, '1i', self.int_size)
+        self.put_data(data, "1i", self.int_size)
 
     def put_long(self, data):
         """
         Pack a list of 8-byte integers.
         """
-        self.put_data(data, '1q', self.long_size)
+        self.put_data(data, "1q", self.long_size)
 
     def put_float(self, data):
-        """Pack a list of floats
-        """
-        self.put_data(data, '1f', self.float_size)
+        """Pack a list of floats"""
+        self.put_data(data, "1f", self.float_size)
 
     def put_double(self, data):
         """Pack a list of doubles."""
-        self.put_data(data, '1d', self.double_size)
+        self.put_data(data, "1d", self.double_size)
 
     def put_string(self, data, length, n=1):
         """Packs a list of one or more double at the current
         position within the data list.
         """
-        self.put_data(data, '{0}s'.format(length), length)
+        self.put_data(data, "{0}s".format(length), length)
 
     def reset(self):
         self.pos = 0
@@ -146,20 +157,20 @@ class _BinaryReader(object):
     2001.
     """
 
-    def __init__(self, filename, mode='rb'):
-        self.int_size = struct.calcsize('i')
-        self.long_size = struct.calcsize('q')
+    def __init__(self, filename, mode="rb"):
+        self.int_size = struct.calcsize("i")
+        self.long_size = struct.calcsize("q")
         self.f = open(filename, mode)
 
     def close(self):
         self.f.close()
 
     def get_int(self):
-        (i, ) = struct.unpack('i', self.f.read(self.int_size))
+        (i,) = struct.unpack("i", self.f.read(self.int_size))
         return i
 
     def put_int(self, data):
-        self.f.write(struct.pack('i', data))
+        self.f.write(struct.pack("i", data))
 
     def put_fortran_record(self, record):
         """Fortran formatted records start with an integer and end with
@@ -188,8 +199,11 @@ class _BinaryReader(object):
         num_bytes2 = self.get_int()
         if num_bytes2 != num_bytes:
             raise ValueError(
-                "Fortran formatted record Mismatch" +
-                " in starting and matching integers, " +
-                str(self.num_bytes2) + " != " + str(self.num_bytes))
+                "Fortran formatted record Mismatch"
+                + " in starting and matching integers, "
+                + str(self.num_bytes2)
+                + " != "
+                + str(self.num_bytes)
+            )
 
         return _FortranRecord(data, num_bytes)

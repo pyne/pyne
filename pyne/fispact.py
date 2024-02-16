@@ -14,14 +14,15 @@ extracting data, processing the data
 import numpy as np
 
 
-class FispactOutput():
-    """ fispact output data"""
+class FispactOutput:
+    """fispact output data"""
+
     def __init__(self):
-        """ define data"""
+        """define data"""
         self.file_name = ""
         self.sumdat = []
         self.timestep_data = []
-        self.num_cool_step = 0   # number of steps after zero keyword
+        self.num_cool_step = 0  # number of steps after zero keyword
         self.num_irrad_step = 0  # number of steps with flux > 0
         self.version = ""
         self.isFisII = False
@@ -32,30 +33,31 @@ class FispactOutput():
         self.time_days = []
 
 
-class FispactTimeStep():
-    """ data for an individual time step can be heating or cooling """
+class FispactTimeStep:
+    """data for an individual time step can be heating or cooling"""
+
     def __init__(self):
         self.step_num = 1
         self.step_length = 0
         self.flux_amp = 0
         self.is_cooling = False
         self.num_nuclides = 0
-        self.alpha_act = 0     # bq
-        self.beta_act = 0      # bq
-        self.gamma_act = 0     # bq
-        self.total_act = 0     # bq
-        self.total_act_no_trit = 0   # bq
-        self.alpha_heat = 0    # kw
-        self.beta_heat = 0     # kw
-        self.gamma_heat = 0    # kw
-        self.total_heat = 0    # kw
-        self.total_heat_no_trit = 0   # kw
+        self.alpha_act = 0  # bq
+        self.beta_act = 0  # bq
+        self.gamma_act = 0  # bq
+        self.total_act = 0  # bq
+        self.total_act_no_trit = 0  # bq
+        self.alpha_heat = 0  # kw
+        self.beta_heat = 0  # kw
+        self.gamma_heat = 0  # kw
+        self.total_heat = 0  # kw
+        self.total_heat_no_trit = 0  # kw
         self.num_fissions = 0
-        self.neutron_flux = 0   # n/cm**2/s
-        self.initial_mass = 0   # kg
-        self.total_mass = 0     # kg
-        self.density = 0        # g/cc
-        self.actinide_burn = 0   # %
+        self.neutron_flux = 0  # n/cm**2/s
+        self.initial_mass = 0  # kg
+        self.total_mass = 0  # kg
+        self.density = 0  # g/cc
+        self.actinide_burn = 0  # %
         self.appm_h1 = 0
         self.appm_h2 = 0
         self.appm_h3 = 0
@@ -69,8 +71,8 @@ class FispactTimeStep():
 
 
 def read_fis_out(path):
-    """ parse a fispact output file
-        returns fo, a fispact output object
+    """parse a fispact output file
+    returns fo, a fispact output object
     """
 
     fo = FispactOutput()
@@ -102,19 +104,19 @@ def read_fis_out(path):
 
     # parse all time steps except setup step
     i = 1
-    while i < len(time_step_inds)-1:
-        data = lines[time_step_inds[i]:time_step_inds[i+1]]
+    while i < len(time_step_inds) - 1:
+        data = lines[time_step_inds[i] : time_step_inds[i + 1]]
         fo.timestep_data.append(read_time_step(data, i))
         i = i + 1
     # final timestep
-    data = lines[time_step_inds[-1]:]
+    data = lines[time_step_inds[-1] :]
     fo.timestep_data.append(read_time_step(data, i))
 
     return fo
 
 
 def read_time_step(lines, i):
-    """ reads a particular time step """
+    """reads a particular time step"""
     ts = FispactTimeStep()
     ts.step_num = i + 1
 
@@ -159,17 +161,17 @@ def read_time_step(lines, i):
         ind = find_ind(lines, "APPM OF He  4 ")
         ts.appm_he4 = lines[ind][23:33]
         if "E" in ts.appm_he4:
-            ts.appm_he4= float(ts.appm_he4)        
-        ts.appm_he3 = lines[ind+1][23:33]
+            ts.appm_he4 = float(ts.appm_he4)
+        ts.appm_he3 = lines[ind + 1][23:33]
         if "E" in ts.appm_he3:
             ts.appm_he3 = float(ts.appm_he3)
-        ts.appm_h3 = lines[ind+2][23:33]
+        ts.appm_h3 = lines[ind + 2][23:33]
         if "E" in ts.appm_h3:
             ts.appm_h3 = float(ts.appm_h3)
-        ts.appm_h2 = lines[ind+3][23:33]
+        ts.appm_h2 = lines[ind + 3][23:33]
         if "E" in ts.appm_h2:
             ts.appm_h2 = float(ts.appm_h2)
-        ts.appm_h1 = lines[ind+4][23:33]
+        ts.appm_h1 = lines[ind + 4][23:33]
         if "E" in ts.appm_h1:
             ts.appm_h1 = float(ts.appm_h1)
         ind = 1
@@ -183,11 +185,11 @@ def read_time_step(lines, i):
 
 
 def check_fisp_version(data):
-    """ Checks which version of fispact was used to produced data
+    """Checks which version of fispact was used to produced data
 
-        requires a list with each element being a line from the fispact output file
+    requires a list with each element being a line from the fispact output file
 
-        returns a string of the version name
+    returns a string of the version name
     """
 
     sub = "FISPACT VERSION 07.0/0"
@@ -200,7 +202,7 @@ def check_fisp_version(data):
 
 
 def isFisII(data):
-    """boolean check if file is fispact-ii output """
+    """boolean check if file is fispact-ii output"""
     v = check_fisp_version(data)
     if v == "FISPACT-II":
         return True
@@ -209,7 +211,7 @@ def isFisII(data):
 
 
 def read_summary_data(data):
-    """ Processes the summary block at the end of the file"""
+    """Processes the summary block at the end of the file"""
 
     if isFisII(data):
         cool_str = " -----Irradiation Phase-----"
@@ -218,7 +220,7 @@ def read_summary_data(data):
 
     start_ind = data.index(cool_str)
     end_ind = [i for i, line in enumerate(data) if "0 Mass" in line]
-    sum_lines = data[start_ind+1:end_ind[0]]
+    sum_lines = data[start_ind + 1 : end_ind[0]]
     sum_data = []
     time_yrs = []
     act = []
@@ -273,14 +275,14 @@ def read_summary_data(data):
 
 
 def parse_dominant(data):
-    """parse dominant nuclides section and return a list of lists """
+    """parse dominant nuclides section and return a list of lists"""
     p1_ind = find_ind(data, "DOMINANT NUCLIDES")
     data = data[p1_ind:]
     d1_ind = find_ind(data, "(Bq) ")
     d2_ind = find_ind(data, "GAMMA HEAT")
-    topset = data[d1_ind+2:d2_ind-1]
+    topset = data[d1_ind + 2 : d2_ind - 1]
     topset = np.array(topset)
-    lowerset = data[d2_ind+3:]
+    lowerset = data[d2_ind + 3 :]
 
     act_nuc = []
     act = []
@@ -338,13 +340,13 @@ def parse_dominant(data):
 
 
 def parse_composition(data):
-    """ parse compostions section
-        returns a list of 2 lists, one with name of element,
-        one with the number of atoms
+    """parse compostions section
+    returns a list of 2 lists, one with name of element,
+    one with the number of atoms
     """
     p1 = find_ind(data, "COMPOSITION  OF  MATERIAL  BY  ELEMENT")
     p2 = find_ind(data, "GAMMA SPECTRUM AND ENERGIES/SECOND")
-    data = data[p1+5:p2-3]
+    data = data[p1 + 5 : p2 - 3]
     ele_list = []
     atoms = []
 
@@ -360,12 +362,12 @@ def parse_composition(data):
 
 
 def parse_spectra(data):
-    """ reads gamma spectra data for each timestep
-        returns list of length 24 corresponding to 24 gamma energy groups
-        data is in gamma/s/cc
+    """reads gamma spectra data for each timestep
+    returns list of length 24 corresponding to 24 gamma energy groups
+    data is in gamma/s/cc
     """
     p1 = find_ind(data, "GAMMA SPECTRUM AND ENERGIES/SECOND")
-    data = data[p1+7:p1+31]
+    data = data[p1 + 7 : p1 + 31]
     spectra = []
     for l in data:
         spectra.append(float(l[130:141]))
@@ -373,33 +375,39 @@ def parse_spectra(data):
 
 
 def parse_inventory(data):
-    """ parse inventory data
-        returns a list of lists with all data from the inventory
-        section of the times step in order:
-        nuclide name,
-        # of atoms,
-        mass in grams,
-        activity in bq,
-        beta energy in kw
-        alpha energy in kw
-        gamma energy in kw
-        dose rate in Sv/hr
+    """parse inventory data
+    returns a list of lists with all data from the inventory
+    section of the times step in order:
+    nuclide name,
+    # of atoms,
+    mass in grams,
+    activity in bq,
+    beta energy in kw
+    alpha energy in kw
+    gamma energy in kw
+    dose rate in Sv/hr
     """
     inv = []
     p2 = find_ind(data, "0  TOTAL NUMBER OF NUCLIDES PRINTED IN INVENTORY")
     data = data[4:p2]
     for nuc in data:
-        nuc_data = [nuc[2:8].replace(" ", ""), float(nuc[14:25]), 
-                    float(nuc[28:37]), float(nuc[40:49]), 
-                    float(nuc[52:61]), float(nuc[64:72]),
-                    float(nuc[75:84]), float(nuc[87:96])]
+        nuc_data = [
+            nuc[2:8].replace(" ", ""),
+            float(nuc[14:25]),
+            float(nuc[28:37]),
+            float(nuc[40:49]),
+            float(nuc[52:61]),
+            float(nuc[64:72]),
+            float(nuc[75:84]),
+            float(nuc[87:96]),
+        ]
         inv.append(nuc_data)
 
     return np.array(inv)
 
 
 def find_ind(data, sub):
-    """ finds index in data whic contains sub string """
+    """finds index in data whic contains sub string"""
     for i, s in enumerate(data):
         if sub in s:
             ind = i
@@ -407,7 +415,7 @@ def find_ind(data, sub):
 
 
 def read_parameter(data, sub):
-    """ finds and cleans integral values in each timestep"""
+    """finds and cleans integral values in each timestep"""
     ind = find_ind(data, sub)
     line = data[ind]
     line = line.split("=")
@@ -415,4 +423,3 @@ def read_parameter(data, sub):
     line = line.split(" ")
     param = float(line[0])
     return param
-

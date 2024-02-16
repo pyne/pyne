@@ -38,8 +38,12 @@ cdef extern from "material.h" namespace "pyne":
 
         # Methods
         void norm_comp() except +
-        std_string openmc(std_string) except +
+        std_string openmc(std_string, int) except +
         std_string mcnp(std_string) except +
+        std_string mcnp(std_string, bool) except +
+        std_string get_uwuw_name() except +
+        std_string phits(std_string) except +
+        std_string phits(std_string, bool) except +
         std_string fluka(int, std_string) except +
         bool not_fluka_builtin(std_string) except +
         std_string fluka_material_str(int) except +
@@ -51,9 +55,8 @@ cdef extern from "material.h" namespace "pyne":
         void from_hdf5(char *, char *, int) except +
         void from_hdf5(char *, char *, int, int) except +
 
-        void write_hdf5(char *, char *, char *) except +
-        void write_hdf5(char *, char *, char *, float) except +
-        void write_hdf5(char *, char *, char *, float, int) except +
+        void deprecated_write_hdf5(char *, char *, char *, float, int) except +
+        void write_hdf5(char *, char *, float, int) except +
 
         void from_text(char *) except +
 
@@ -106,6 +109,7 @@ cdef extern from "material.h" namespace "pyne":
         vector[pair[double, double]] gammas() except +
         vector[pair[double, double]] xrays() except +
         vector[pair[double, double]] photons(bool) except +
+        void from_activity(map[int, double]) except +
 
         Material decay(double) except +
         Material cram(vector[double]) except +

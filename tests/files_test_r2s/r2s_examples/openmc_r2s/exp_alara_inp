@@ -1,0 +1,73 @@
+geometry rectangular
+
+volume
+     1.187424E+03    zone_0
+     1.187424E+03    zone_1
+     1.187424E+03    zone_2
+     1.187424E+03    zone_3
+     1.187424E+03    zone_4
+     1.187424E+03    zone_5
+     1.187424E+03    zone_6
+     1.187424E+03    zone_7
+end
+
+mat_loading
+    zone_0    mix_0
+    zone_1    mix_0
+    zone_2    mix_1
+    zone_3    mix_1
+    zone_4    mix_2
+    zone_5    mix_2
+    zone_6    mix_2
+    zone_7    mix_2
+end
+
+mixture mix_0
+    material mat:Lead/rho:11.35 1 0.9994989999999999
+    material mat:Air/rho:0.001205 1 0.000501
+end
+
+mixture mix_1
+    material mat:Air/rho:0.001205 1 0.799629
+    material mat:Lead/rho:11.35 1 0.200371
+end
+
+mixture mix_2
+    material mat:Lead/rho:11.35 1 0.799462
+    material mat:Air/rho:0.001205 1 0.200538
+end
+
+cooling
+    1E3 s
+end
+
+material_lib alara_matlib
+element_lib ../data/nuclib
+data_library alaralib ../data/fendl2.0bin
+
+output zone
+       integrate_energy
+       # Energy group upper bounds. The lower bound is always zero.
+       photon_source  ../data/fendl2.0bin  phtn_src 24 1.00E4 2.00E4 5.00E4 1.00E5
+       2.00E5 3.00E5 4.00E5 6.00E5 8.00E5 1.00E6 1.22E6 1.44E6 1.66E6
+       2.00E6 2.50E6 3.00E6 4.00E6 5.00E6 6.50E6 8.00E6 1.00E7 1.20E7
+       1.40E7 2.00E7
+end
+
+#     flux name    fluxin file   norm   shift   unused
+flux  my_flux     alara_fluxin  1e10     0      default
+
+# Specify the irradiation schedule below.
+# Syntax is found in the ALARA user manual
+# This example is for a single 3.5 h pulse
+schedule    my_schedule
+    3.5 d my_flux my_pulse_history 0  s
+end
+pulsehistory  my_pulse_history
+    1    0.0    s
+end
+
+# other parameters
+truncation 1e-12
+impurity 5e-6 1e-3
+dump_file dump.file
