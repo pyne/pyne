@@ -1,0 +1,32 @@
+name: auto_format_pep8
+
+on:
+  push:
+    paths:
+      - '**.py'
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  auto_format_pep8:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.head_ref }}
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+      - name: Install black
+        run: |
+          python -m pip install --upgrade pip
+          pip install black
+      - name: Run black
+        run: |
+          black .
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "[skip ci] Apply pep8 formatting changes"
