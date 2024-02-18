@@ -180,7 +180,7 @@ cdef class Cascade:
         def __set__(self, value):
             cdef pyne.material._Material value_proxy
             value_proxy = pyne.material.Material(value, free_mat=not isinstance(value, pyne.material._Material))
-            (<cpp_enrichment.Cascade *> self._inst).mat_feed = value_proxy.mat_pointer[0]
+            (<cpp_enrichment.Cascade *> self._inst).mat_feed = (<pyne.cpp_material.Material> value_proxy.mat_pointer[0])
             self._mat_feed = None
 
     property mat_prod:
@@ -197,7 +197,7 @@ cdef class Cascade:
         def __set__(self, value):
             cdef pyne.material._Material value_proxy
             value_proxy = pyne.material.Material(value, free_mat=not isinstance(value, pyne.material._Material))
-            (<cpp_enrichment.Cascade *> self._inst).mat_prod = value_proxy.mat_pointer[0]
+            (<cpp_enrichment.Cascade *> self._inst).mat_prod = (<pyne.cpp_material.Material> value_proxy.mat_pointer[0])
             self._mat_prod = None
 
     property mat_tail:
@@ -214,7 +214,7 @@ cdef class Cascade:
         def __set__(self, value):
             cdef pyne.material._Material value_proxy
             value_proxy = pyne.material.Material(value, free_mat=not isinstance(value, pyne.material._Material))
-            (<cpp_enrichment.Cascade *> self._inst).mat_tail = value_proxy.mat_pointer[0]
+            (<cpp_enrichment.Cascade *> self._inst).mat_tail = (<pyne.cpp_material.Material> value_proxy.mat_pointer[0])
             self._mat_tail = None
 
     property l_t_per_feed:
