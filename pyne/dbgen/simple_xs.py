@@ -30,7 +30,7 @@ def grab_kaeri_simple_xs(build_dir=""):
         Major directory to place html files in. 'KAERI/' will be appended.
     """
     zip_path = os.path.join(build_dir, 'kaeri.zip')
-    zip_url = 'http://raw.githubusercontent.com/pyne/data/master/kaeri.zip'
+    zip_url = 'https://raw.githubusercontent.com/pyne/data/master/kaeri.zip'
     if not os.path.exists(zip_path):
         print("  grabbing {0} and placing it in {1}".format(zip_url, zip_path))
         urllib.urlretrieve(zip_url, zip_path)
@@ -55,9 +55,7 @@ def grab_kaeri_simple_xs(build_dir=""):
     all_nuclides = set()
     for element in nucname.name_zz.keys():
         htmlfile = element.upper() + ".html"
-        if htmlfile not in already_grabbed:
-            pass
-        else:
+        if htmlfile in already_grabbed:
             all_nuclides = all_nuclides | parse_for_all_isotopes(os.path.join(build_dir, 
                                                                           htmlfile))
 
