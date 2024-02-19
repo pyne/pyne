@@ -2,6 +2,7 @@
 """This file generates a static C++ decayer function for use with PyNE.
 It is suppossed to be fast.
 """
+# TODO:  Is this working?
 import os
 import io
 import sys

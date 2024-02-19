@@ -3,7 +3,8 @@ set(PYNE_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}" ${PYNE_INCLUDE_DIRS}
 
 execute_process(COMMAND python "${CMAKE_CURRENT_LIST_DIR}/../pyne/pyne_version.py" WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
-pyne_download_platform()
+pyne_download_files()
+
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
 
 # setup source files
@@ -12,7 +13,6 @@ set(PYNE_SRCS
   "data.cpp"
   "enrichment.cpp"
   "enrichment_cascade.cpp"
-  "enrichment_symbolic.cpp"
   "jsoncpp.cpp"
   "jsoncustomwriter.cpp"
   "material.cpp"
@@ -23,9 +23,15 @@ set(PYNE_SRCS
   "rxname.cpp"
   "tally.cpp"
   "transmuters.cpp"
-  "utils.cpp"
   "endftod.f90"
+  "utils.cpp"
   )
+
+# FIx: enrichment_symbolic.cpp doesn't compile on Windows
+if(NOT WIN32)
+  list(APPEND PYNE_SRCS "enrichment_symbolic.cpp")
+endif()
+
 set(TRANSPORT_SPATIAL_METHODS_SRCS
   "transport_spatial_methods/3d/ahotn_kernel_module.f90"
   "transport_spatial_methods/3d/angle.f90"
@@ -89,18 +95,18 @@ fast_compile(cram.c
 # compile and link library
 add_library(pyne ${PYNE_SRCS})
 if("${LIBS_HDF5}" STREQUAL "")
-  target_link_libraries(pyne hdf5)
+  target_link_libraries(pyne PRIVATE hdf5)
 else()
-  target_link_libraries(pyne ${LIBS_HDF5})
+  target_link_libraries(pyne PRIVATE ${LIBS_HDF5})
 endif()
 IF(BUILD_SPATIAL_SOLVER)
-    target_link_libraries(pyne ${LIBS_HDF5} ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
+    target_link_libraries(pyne PRIVATE ${LIBS_HDF5} ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
 ENDIF(BUILD_SPATIAL_SOLVER)
 if(MOAB_FOUND)
-    target_link_libraries(pyne MOAB)
+    target_link_libraries(pyne PRIVATE MOAB)
 endif(MOAB_FOUND)
 if(DAGMC_FOUND)
-    target_link_libraries(pyne dagmc MOAB)
+    target_link_libraries(pyne PRIVATE dagmc MOAB)
 endif(DAGMC_FOUND)
 
 if(ENABLE_ENSDF_PROCESSIONG)
@@ -140,4 +146,5 @@ INSTALL(FILES ${h_files} DESTINATION include/pyne COMPONENT headers)
 #
 # Install libpyne
 #
+
 INSTALL(TARGETS pyne LIBRARY DESTINATION lib COMPONENT pyne)
