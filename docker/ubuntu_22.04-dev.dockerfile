@@ -149,7 +149,7 @@ RUN export MOAB_HDF5_ARGS=""; \
     && cd $HOME/opt \
     && mkdir moab \
     && cd moab \
-    && git clone --depth 1 --single-branch -b 5.3.0 https://bitbucket.org/fathomteam/moab \
+    && git clone --depth 1 --single-branch -b 5.5.1 https://bitbucket.org/fathomteam/moab \
     && cd moab \
     && mkdir build \
     && cd build \
