@@ -83,7 +83,7 @@ RUN conda update -y --all && \
                 libblas \
                 liblapack \
                 eigen \
-                hdf5 \
+                hdf5<1.14 \
                 numpy \
                 scipy \
                 "cython<3" \
@@ -118,8 +118,7 @@ RUN echo "export PATH=$HOME/.local/bin:\$PATH" >> ~/.bashrc
 # build HDF5
 ARG build_hdf5="NO"
 ARG pkg_mgr=apt
-# don't build hdf5 if we use conda (we already installed it)
-RUN if [ "$build_hdf5" != "NO" ] && [ "$pkg_mgr" = "apt" ]; then \
+RUN if [ "$build_hdf5" != "NO" ]; then \
         cd $HOME/opt \
         && mkdir hdf5 \
         && cd hdf5 \
