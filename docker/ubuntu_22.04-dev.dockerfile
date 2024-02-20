@@ -84,7 +84,7 @@ RUN conda update -y --all && \
                 liblapack \
                 eigen \
                 hdf5 \
-                numpy==1.23 \
+                numpy \
                 scipy \
                 "cython<3" \
                 nose \
