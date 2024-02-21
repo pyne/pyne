@@ -83,7 +83,7 @@ RUN conda update -y --all && \
                 libblas \
                 liblapack \
                 eigen \
-                hdf5<1.14 \
+                "hdf5<1.14" \
                 numpy \
                 scipy \
                 "cython<3" \
