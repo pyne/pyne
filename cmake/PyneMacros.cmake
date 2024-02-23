@@ -116,8 +116,10 @@ macro(pyne_setup_fortran)
     message("CMAKE_Fortran_COMPILER full path: " ${CMAKE_Fortran_COMPILER})
     message("Fortran compiler: " ${Fortran_COMPILER_NAME})
     message ("No optimized Fortran compiler flags are known, we just try -fpic...")
-    set(CMAKE_Fortran_FLAGS_RELEASE "-fpic")
-    set(CMAKE_Fortran_FLAGS_DEBUG   "-fpic")
+    if(NOT WIN32)
+      set(CMAKE_Fortran_FLAGS_RELEASE "-fpic")
+      set(CMAKE_Fortran_FLAGS_DEBUG   "-fpic")
+    endif()
   endif(Fortran_COMPILER_NAME MATCHES "gfortran.*")
 
   # add -fallow-argument-mismatch to fix build with gfortran 10+
@@ -220,10 +222,11 @@ macro(pyne_download_platform)
   # Download bateman solver from PyNE data
   download_platform("http://raw.githubusercontent.com/pyne/data/master" "decay"
                       ".cpp" ".s")
-
-  # Download CRAM solver from PyNE data
-  download_platform("http://raw.githubusercontent.com/pyne/data/master" "cram"
-                         ".c" ".s")
+  if(NOT WIN32)
+    # Download CRAM solver from PyNE data
+    download_platform("http://raw.githubusercontent.com/pyne/data/master" "cram"
+                      ".c" ".s")
+  endif()
 endmacro()
 
 macro(pyne_set_fast_compile)

@@ -7,7 +7,6 @@
 namespace pyne {
 namespace transmuters {
 
-
 /// Basic CRAM solver that takes a (flat) A matrix and an inital nuclide
 /// atom fraction composition map and returns the value.
 /// \param A The transmutation matrix [unitless]
@@ -17,7 +16,6 @@ namespace transmuters {
 std::map<int, double> cram(std::vector<double>& A,
                            const std::map<int, double>& n0,
                            const int order=14);
-
 } // namespace transmuters
 } // namespace pyne
 #endif // PYNE_DQKIQSJ4SNG7VAB5LX36BLIYMA

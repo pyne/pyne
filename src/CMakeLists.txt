@@ -79,12 +79,16 @@ if(MOAB_FOUND)
   set(PYNE_SRCS "${PYNE_SRCS}" "${MOAB_SRCS}")
 endif(MOAB_FOUND)
 
-# Fast compile decay and cram
+# Fast compile decay
 fast_compile(decay.cpp "-O0" "-O0" "-O0")
-fast_compile(cram.c
-  "-O0 -fcx-fortran-rules -fcx-limited-range -ftree-sra -ftree-ter -fexpensive-optimizations"
-  "-O0 -ffast-math"
-  "-O0")
+
+# fast compile cram, which doesn't work on Windows due to a lack of C99 support
+if(NOT WIN32)
+  fast_compile(cram.c
+    "-O0 -fcx-fortran-rules -fcx-limited-range -ftree-sra -ftree-ter -fexpensive-optimizations"
+    "-O0 -ffast-math"
+    "-O0")
+endif()
 
 # compile and link library
 add_library(pyne ${PYNE_SRCS})
@@ -140,4 +144,8 @@ INSTALL(FILES ${h_files} DESTINATION include/pyne COMPONENT headers)
 #
 # Install libpyne
 #
-INSTALL(TARGETS pyne LIBRARY DESTINATION lib COMPONENT pyne)
+INSTALL(TARGETS pyne
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+    COMPONENT pyne
+)
