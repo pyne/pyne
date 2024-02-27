@@ -13,6 +13,7 @@ Next Version
       * new download location for KAERI data archive
       * do not try to download missing (super heavy) data from KAERI
       * update material_library writing interface
+   * Update FindMOAB to use MOAB config file (#1526)
 
 v0.7.8
 ======
