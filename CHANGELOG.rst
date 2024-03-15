@@ -5,6 +5,18 @@ PyNE Change Log
 Next Version
 ============
 **Change**
+   * Test install script on multiple Ubuntu versions (#1484)
+
+**Fix**
+   * Fix Type Mismatch Error in PyNE's ENSDF Processing Module (#1519)
+   * Fixes for nuc_data_make (#1333)
+      * new download location for KAERI data archive
+      * do not try to download missing (super heavy) data from KAERI
+      * update material_library writing interface
+
+v0.7.8
+======
+**Change**
    * Move tests from nose to pytest (#1478 #1493)
    * Update MOAB dead link and add PyNE logo to readme file (#1481)
    * Install packages with conda in Dockerfile (#1509 #1510 #1511)
@@ -154,7 +166,7 @@ v0.7.1
 ======
 
 **New Capabilities**
-   * Adding unordered_map like API to MaterialLibrary pointing directly to the nested unordered_map
+   * Adding unordered_map like API to MaterialLibrary pointing directly to the nested unordered_map (#1330)
 
 **Maintenance**
 

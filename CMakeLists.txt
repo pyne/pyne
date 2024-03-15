@@ -13,7 +13,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 project(pyne)
 
 option ( ENABLE_SPATIAL_SOLVERS     "Should build AHOT spatial solvers?"                 OFF )
-option ( ENABLE_ENSDF_PROCESSIONG   "Should build ENSDF processing tools?"               OFF )
+option ( ENABLE_ENSDF_PROCESSIONG   "Should build ENSDF processing tools?"               ON )
 
 include(PyneMacros)
 pyne_print_logo()  # Beware of dragons
