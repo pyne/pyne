@@ -247,7 +247,7 @@ cdef class _MaterialLibrary:
         cdef cpp_pair[std_string, cpp_material.Material] item
         value_proxy = material.Material(
             value, free_mat=not isinstance(value, material._Material))
-        self._inst.add_material(ensure_material_key(key), deref(( < material._Material > value_proxy).mat_pointer))
+        self._inst.add_material(ensure_material_key(key), <cpp_material.Material> deref(( < material._Material > value_proxy).mat_pointer))
 
     def __getitem__(self, key):
         cdef shared_ptr[cpp_material.Material] c_mat

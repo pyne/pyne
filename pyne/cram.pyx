@@ -14,11 +14,11 @@ np.import_ufunc()
 cdef int i, j, idx
 N = c_cram.pyne_cram_transmute_info.n
 NNZ = c_cram.pyne_cram_transmute_info.nnz
-cpdef dict C_IJ = {}
+cdef dict C_IJ = {}
 for idx in range(c_cram.pyne_cram_transmute_info.nnz):
     C_IJ[c_cram.pyne_cram_transmute_info.i[idx], c_cram.pyne_cram_transmute_info.j[idx]] = idx
 IJ = C_IJ
-cpdef list C_NUCS = []
+cdef list C_NUCS = []
 for idx in range(c_cram.pyne_cram_transmute_info.n):
     b = c_cram.pyne_cram_transmute_info.nucs[idx]
     s = b.decode()
