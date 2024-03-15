@@ -19,7 +19,7 @@ v0.7.8
 **Change**
    * Move tests from nose to pytest (#1478 #1493)
    * Update MOAB dead link and add PyNE logo to readme file (#1481)
-   * Install packages with conda in Dockerfile (#1509 #1510 #1511 #1516)
+   * Install packages with conda in Dockerfile (#1509 #1510 #1511)
    * Support Cython3+ (#1525)
 
 **Fix**

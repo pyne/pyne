@@ -8,13 +8,9 @@ FROM ubuntu:${ubuntu_version} AS common_base
 # Ubuntu Setup
 ENV TZ=America/Chicago
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
-ENV HOME /root
 
 FROM common_base AS apt_deps
-# set HDF5 path for base_python stage
-ARG build_hdf5="NO"
-ENV HDF5_INSTALL_PATH=$HOME/opt/hdf5/$build_hdf5
-
+ENV HOME /root
 RUN apt-get update \
     && apt-get install -y --fix-missing \
             software-properties-common \
@@ -35,7 +31,7 @@ RUN apt-get update \
     pip install --upgrade pip; \
     pip install numpy==1.23 \
             scipy \
-            cython \
+            'cython<3' \
             nose \
             pytest \
             tables \
@@ -44,7 +40,6 @@ RUN apt-get update \
             setuptools \
             future \
             progress
-
 
 FROM common_base AS conda_deps
 RUN apt-get update \
@@ -61,10 +56,6 @@ RUN echo 'export PATH=/opt/conda/bin:$PATH' > /etc/profile.d/conda.sh && \
 
 ENV PATH /opt/conda/bin:$PATH
 
-# create python 3.10 environment in conda
-RUN conda update conda
-RUN conda install python=3.10
-
 RUN conda config --add channels conda-forge
 RUN conda update -n base -c defaults conda
 RUN conda install -y conda-libmamba-solver
@@ -74,41 +65,20 @@ RUN conda uninstall -y conda-libmamba-solver
 RUN conda config --set solver classic
 RUN conda update -y --all && \
     mamba install -y \
-                make \
-                gxx_linux-64 \
-                gcc_linux-64 \
-                git \
                 cmake \
-                gfortran \ 
+                git \
                 libblas \
                 liblapack \
-                eigen \
                 hdf5 \
-                numpy==1.23 \
-                scipy \
-                cython \
-                nose \
+                setuptools \
                 pytest \
                 pytables \
-                matplotlib \
                 jinja2 \
-                setuptools \
-                future \
-                progress \
+                "cython<3" \
                 && \
     mamba install -y --force-reinstall libsqlite && \
     conda clean -y --all
 RUN mkdir -p `python -m site --user-site`
-
-ENV CC /opt/conda/bin/x86_64-conda_cos6-linux-gnu-gcc
-ENV CXX /opt/conda/bin/x86_64-conda_cos6-linux-gnu-g++
-ENV CPP /opt/conda/bin/x86_64-conda_cos6-linux-gnu-cpp
-
-# put conda on the path
-ENV LD_LIBRARY_PATH /opt/conda/lib:$LD_LIBRARY_PATH
-# set HDF5 path for base_python stage
-ENV HDF5_INSTALL_PATH=/opt/conda
-
 
 FROM ${pkg_mgr}_deps AS base_python
 # make starting directory
@@ -117,9 +87,8 @@ RUN echo "export PATH=$HOME/.local/bin:\$PATH" >> ~/.bashrc
 
 # build HDF5
 ARG build_hdf5="NO"
-ARG pkg_mgr=apt
-# don't build hdf5 if we use conda (we already installed it)
-RUN if [ "$build_hdf5" != "NO" ] && [ "$pkg_mgr" = "apt" ]; then \
+ENV HDF5_INSTALL_PATH=$HOME/opt/hdf5/$build_hdf5
+RUN if [ "$build_hdf5" != "NO" ]; then \
         cd $HOME/opt \
         && mkdir hdf5 \
         && cd hdf5 \
@@ -149,7 +118,7 @@ RUN export MOAB_HDF5_ARGS=""; \
     && cd $HOME/opt \
     && mkdir moab \
     && cd moab \
-    && git clone --depth 1 --single-branch -b 5.5.1 https://bitbucket.org/fathomteam/moab \
+    && git clone --depth 1 --single-branch -b 5.3.0 https://bitbucket.org/fathomteam/moab \
     && cd moab \
     && mkdir build \
     && cd build \

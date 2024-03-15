@@ -64,7 +64,7 @@ jobs:
           parallel: true
           tag-latest-on-default: ${{ env.USE_LATEST_TAG }}
           dockerfile: docker/ubuntu_22.04-dev.dockerfile
-          build-args: pkg_mgr=${{ matrix.pkg_mgr }}, build_hdf5=${{ matrix.hdf5_build_arg }}, pyne_test_base=openmc
+          build-args: pkg_mgr = ${{ matrix.pkg_mgr }}, build_hdf5=${{ matrix.hdf5_build_arg }}, pyne_test_base=openmc
 
   # Downloads the images uploaded to ghcr in previous stages and runs pyne
   # tests to check that they work.
@@ -115,7 +115,7 @@ jobs:
           parallel: true
           tag-latest-on-default: ${{ env.USE_LATEST_TAG }}
           dockerfile: docker/ubuntu_22.04-dev.dockerfile
-          build-args: pkg_mgr=${{ matrix.pkg_mgr }}, build_hdf5=${{ matrix.hdf5_build_arg }}, pyne_test_base=${{ matrix.pyne_test_base }}
+          build-args: pkg_mgr = ${{ matrix.pkg_mgr }}, build_hdf5=${{ matrix.hdf5_build_arg }}, pyne_test_base=${{ matrix.pyne_test_base }}
 
   # if the previous step that tests the docker images passes then the images
   # can be copied from the ghcr where they are saved using :ci_testing tags to
