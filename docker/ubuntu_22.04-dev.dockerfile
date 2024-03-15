@@ -31,7 +31,7 @@ RUN apt-get update \
     pip install --upgrade pip; \
     pip install numpy==1.23 \
             scipy \
-            'cython<3' \
+            cython \
             nose \
             pytest \
             tables \
@@ -74,7 +74,7 @@ RUN conda update -y --all && \
                 pytest \
                 pytables \
                 jinja2 \
-                "cython<3" \
+                cython \
                 && \
     mamba install -y --force-reinstall libsqlite && \
     conda clean -y --all
