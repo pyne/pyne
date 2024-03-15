@@ -27,7 +27,7 @@ RUN apt-get update \
     update-alternatives --install /usr/bin/python python /usr/bin/python3 10; \
     update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 10; \
     pip install --upgrade pip; \
-    pip install numpy==1.23 \
+    pip install numpy \
             scipy \
             cython \
             nose \
