@@ -33,9 +33,6 @@ RUN conda update -y --all && \
     mamba install -y \
                 cmake \
                 git \
-                libblas \
-                liblapack \
-                hdf5 \
                 setuptools \
                 pytest \
                 pytables \
@@ -46,28 +43,16 @@ RUN conda update -y --all && \
     conda clean -y --all
 RUN mkdir -p `python -m site --user-site`
 
+ENV CC /opt/conda/bin/x86_64-conda_cos6-linux-gnu-gcc
+ENV CXX /opt/conda/bin/x86_64-conda_cos6-linux-gnu-g++
+ENV CPP /opt/conda/bin/x86_64-conda_cos6-linux-gnu-cpp
+
+# put conda on the path
+ENV LD_LIBRARY_PATH /opt/conda/lib:$LD_LIBRARY_PATH
+
 # make starting directory
 RUN mkdir -p $HOME/opt
 RUN echo "export PATH=$HOME/.local/bin:\$PATH" >> ~/.bashrc
-
-# build HDF5
-ARG build_hdf5="NO"
-ENV HDF5_INSTALL_PATH=$HOME/opt/hdf5/$build_hdf5
-RUN if [ "$build_hdf5" != "NO" ]; then \
-        cd $HOME/opt \
-        && mkdir hdf5 \
-        && cd hdf5 \
-        && git clone --single-branch --branch $build_hdf5 https://github.com/HDFGroup/hdf5.git \
-        && cd hdf5 \
-        && ./configure --prefix=$HDF5_INSTALL_PATH --enable-shared \
-        && make -j 3 \
-        && make install \
-        && cd .. \
-        && rm -rf hdf5; \
-    fi
-# put HDF5 on the path
-ENV LD_LIBRARY_PATH $HDF5_INSTALL_PATH/lib:$LD_LIBRARY_PATH
-ENV LIBRARY_PATH $HDF5_INSTALL_PATH/lib:$LIBRARY_PATH
 
 FROM base_conda AS moab
 RUN conda install conda-forge::moab
@@ -78,14 +63,19 @@ RUN conda install conda-forge::dagmc
 FROM dagmc AS openmc
 RUN conda install conda-forge::openmc
 
-# Build/Install PyNE from release branch
-FROM ${pyne_test_base} AS pyne
-RUN conda install conda-forge::pyne
+# Build/Install PyNE from develop branch
+FROM ${pyne_test_base} AS pyne-dev
 
+RUN export PYNE_HDF5_ARGS="" ;\
+    && cd $HOME/opt \
+    && git clone -b develop --single-branch https://github.com/pyne/pyne.git \
+    && cd pyne \
+    && python setup.py install --user \
+                                $PYNE_MOAB_ARGS $PYNE_DAGMC_ARGS \
+                                $PYNE_HDF5_ARGS \
+                                --clean -j 3;
 ENV PATH $HOME/.local/bin:$PATH
 RUN cd $HOME \
     && nuc_data_make \
     && cd $HOME/opt/pyne/tests \
     && ./ci-run-tests.sh python3
-
- 

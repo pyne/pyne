@@ -6,6 +6,7 @@ Next Version
 ============
 **Change**
    * Test install script on multiple Ubuntu versions (#1484)
+   * Add new workflow and dockerfile for conda build (#1527)
 
 **Fix**
    * Fix Type Mismatch Error in PyNE's ENSDF Processing Module (#1519)
