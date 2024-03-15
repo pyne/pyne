@@ -6,6 +6,7 @@ Next Version
 ============
 **Change**
    * Test install script on multiple Ubuntu versions (#1484)
+   * Support Cython3+ (#1528)
 
 **Fix**
    * Fix Type Mismatch Error in PyNE's ENSDF Processing Module (#1519)
