@@ -8,9 +8,8 @@ if os.name == "nt":
     os.environ["PATH"] = ";".join([lib] + p)
 
 try:
-    from .pyne_version import PYNE_VERSION
+    from ._version import __version__ 
 
-    __version__ = PYNE_VERSION
     from .pyne_config import *
 
 except ImportError:
