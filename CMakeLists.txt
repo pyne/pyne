@@ -173,9 +173,8 @@ IF(BUILD_SPATIAL_SOLVER)
 ENDIF(BUILD_SPATIAL_SOLVER)
 
 
-# Include the CMake script UseCython.cmake.  This defines add_cython_module().
-# Instruction for use can be found at the top of cmake/UseCython.cmake.
-include(UseCustomCython)
+find_package(PythonExtensions REQUIRED)
+find_package(Cython REQUIRED)
 INCLUDE_DIRECTORIES("${CMAKE_CURRENT_BINARY_DIR}/pyne")
 
 # Add JsonCpp Flag

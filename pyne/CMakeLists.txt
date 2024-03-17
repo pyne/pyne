@@ -40,16 +40,20 @@ message(STATUS "Modules to Cythonize: ${PYNE_CYTHON_MODULES}")
 foreach(cymod ${PYNE_CYTHON_MODULES})
   set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/${cymod}.pyx"
                               PROPERTIES CYTHON_IS_CXX TRUE)
-  cython_add_module(${cymod} ${cymod}.pyx)
-  target_link_libraries(${cymod} PRIVATE pyne)
+  add_cython_target(${cymod} CXX)
+  add_library(${cymod} MODULE ${cymod})
+  python_extension_module(${cymod})
+  target_link_libraries(${cymod} pyne)
   install(TARGETS ${cymod} LIBRARY DESTINATION "${PYTHON_SITE_PACKAGES}/pyne")
 endforeach()
 
 #
 # Cram is actually a C, not C++ file
 #
-cython_add_module(cram cram.pyx)
-target_link_libraries(cram PRIVATE pyne)
+add_cython_target(cram C)
+add_library(cram MODULE ${cram})
+python_extension_module(cram)
+target_link_libraries(cram pyne)
 install(TARGETS cram LIBRARY DESTINATION "${PYTHON_SITE_PACKAGES}/pyne")
 
 #
@@ -58,8 +62,10 @@ install(TARGETS cram LIBRARY DESTINATION "${PYTHON_SITE_PACKAGES}/pyne")
 if(DAGMC_FOUND)
   set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/dagmc.pyx"
                               PROPERTIES CYTHON_IS_CXX TRUE)
-  cython_add_module(_dagmc dagmc.pyx "${PROJECT_SOURCE_DIR}/src/dagmc_bridge.cpp")
-  target_link_libraries(_dagmc PRIVATE dagmc MOAB pyne)
+  add_cython_target(_dagmc CXX "${PROJECT_SOURCE_DIR}/src/dagmc_bridge.cpp")
+  add_library(_dagmc MODULE ${_dagmc})
+  python_extension_module(_dagmc)
+  target_link_libraries(_dagmc dagmc MOAB pyne)
   set_target_properties(_dagmc PROPERTIES OUTPUT_NAME dagmc)
   install(TARGETS _dagmc LIBRARY DESTINATION "${PYTHON_SITE_PACKAGES}/pyne")
 endif(DAGMC_FOUND)
