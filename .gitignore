@@ -2,7 +2,6 @@
 docs/_build/
 build/
 build-*
-_skbuild/
 dist/
 *egg-info/
 build_nuc_data/
@@ -76,7 +75,7 @@ rever/
 
 .vscode
 
-# ignore version file generated from pyne_version.py
+# ignore version file generated from cmake
 src/pyne_version.h
 
 # ignore amalgamated source

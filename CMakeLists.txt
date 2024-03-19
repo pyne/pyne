@@ -1,5 +1,5 @@
 # Defines the CMake commands/policies
-cmake_minimum_required(VERSION 3.12.0)
+cmake_minimum_required(VERSION 3.15)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -13,12 +13,11 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 project(pyne)
 
 option ( ENABLE_SPATIAL_SOLVERS     "Should build AHOT spatial solvers?"                 OFF )
-option ( ENABLE_ENSDF_PROCESSIONG   "Should build ENSDF processing tools?"               ON )
+option ( ENABLE_ENSDF_PROCESSING   "Should build ENSDF processing tools?"               ON )
 
 include(PyneMacros)
 pyne_print_logo()  # Beware of dragons
 pyne_set_platform()
-#pyne_setup_cxx()
 pyne_set_asm_platform()
 pyne_set_build_spatial_solver()
 pyne_set_build_type()
@@ -132,39 +131,23 @@ endif(${MOAB_FOUND})
 
 
 # Find Python
-find_package(Python3 REQUIRED COMPONENTS Interpreter Development NumPy)
-if(PYTHON_VERSION_MAJOR EQUAL 2)
-  set(SITE_PACKAGES_CODE
-      "import site; print site.getusersitepackages().replace(site.USER_BASE, '${CMAKE_INSTALL_PREFIX}', 1)")
-else(PYTHON_VERSION_MAJOR EQUAL 2)
-  set(SITE_PACKAGES_CODE
-      "import site; print(site.getsitepackages(['${CMAKE_INSTALL_PREFIX}'])[0])")
-endif(PYTHON_VERSION_MAJOR EQUAL 2)
-execute_process(COMMAND "${PYTHON_EXECUTABLE}" -c "${SITE_PACKAGES_CODE}"
-                OUTPUT_VARIABLE PYTHON_SITE_PACKAGES
-                OUTPUT_STRIP_TRAILING_WHITESPACE)
-set(LIBS ${LIBS} ${PYTHON_LIBRARIES})
-message("-- PYTHON_EXECUTABLE: ${PYTHON_EXECUTABLE}")
-message("-- PYTHON_SITE_PACKAGES: ${PYTHON_SITE_PACKAGES}")
-
-
-# Include NumPy if found
-if(Python3_NumPy_FOUND)
-    add_library(Numpy::Numpy UNKNOWN IMPORTED)
-    set_target_properties(Numpy::Numpy PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${Python3_NumPy_INCLUDE_DIRS}")
-    message("-- NumPy include dirs: ${Python3_NumPy_INCLUDE_DIRS}")
-    include_directories(${Python3_NumPy_INCLUDE_DIRS})
-else()
-    message("-- NumPy: Not searching because NumPy was not found.")
-endif(Python3_NumPy_FOUND)
+find_package(
+  Python 
+  COMPONENTS Interpreter Development.Module NumPy 
+  REQUIRED
+)
 
 pyne_setup_fortran()
 
 # Find f2py, if building spatial solver
 IF(BUILD_SPATIAL_SOLVER)
-  find_package(F2py REQUIRED)
-  message("-- F2PY Executable: ${F2PY_EXECUTABLE}")
-  message("-- F2PY Version: ${F2PY_VERSION}")
+  # Grab the variables from a local Python installation F2PY headers
+  execute_process(
+    COMMAND "${Python_EXECUTABLE}" -c
+            "import numpy.f2py; print(numpy.f2py.get_include())"
+    OUTPUT_VARIABLE F2PY_INCLUDE_DIR
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
 
   FIND_PACKAGE(LAPACK REQUIRED)
   MESSAGE("-- Found LAPACK Linker Flags: ${LAPACK_LINKER_FLAGS}")
@@ -173,10 +156,9 @@ IF(BUILD_SPATIAL_SOLVER)
 ENDIF(BUILD_SPATIAL_SOLVER)
 
 
-# Include the CMake script UseCython.cmake.  This defines add_cython_module().
-# Instruction for use can be found at the top of cmake/UseCython.cmake.
-include(UseCustomCython)
-INCLUDE_DIRECTORIES("${CMAKE_CURRENT_BINARY_DIR}/pyne")
+# Find Cython
+find_program(CYTHON "cython")
+include_directories("${CMAKE_CURRENT_BINARY_DIR}/pyne")
 
 # Add JsonCpp Flag
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DJSON_IS_AMALGAMATION")
@@ -185,15 +167,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DJSON_IS_AMALGAMATION")
 # Build and install!
 #
 message(STATUS "LIBS: ${LIBS}")
-# With CMake, a clean separation can be made between the source tree and the
-# build tree.  When all source is compiled, as with pure C/C++, the source is
-# no-longer needed in the build tree.  However, with pure *.py source, the
-# source is processed directly.  To handle this, we reproduce the availability
-# of the source files in the build tree.
-add_custom_target(ReplicatePythonSourceTree ALL "${CMAKE_COMMAND}" -P
-  "${CMAKE_CURRENT_SOURCE_DIR}/cmake/ReplicatePythonSourceTree.cmake"
-  "${CMAKE_CURRENT_BINARY_DIR}"
-  WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
 
 # add sub dirs
 add_subdirectory(src)

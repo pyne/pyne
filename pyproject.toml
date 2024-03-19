@@ -1,7 +1,7 @@
 [build-system]
 requires = [
     "scikit-build-core",
-    "cython",
+    "cython<3",
     "numpy",
 ]
 build-backend = "scikit_build_core.build"
@@ -57,7 +57,6 @@ cmake.verbose = true
 logging.level = "INFO"
 wheel.packages = ["pyne"]
 wheel.exclude = ["CMakeLists.txt", "*.pyx"]
-wheel.cmake = false
 
 # Get version from CMakeLists
 [tool.scikit-build.metadata.version]
@@ -75,6 +74,7 @@ __version__ = "${version}"
 # Add the version to the header
 [[tool.scikit-build.generate]]
 path = "src/pyne_version.h"
+location = "source"
 template = '''
 #ifndef PYNE_VERSION_HEADER
 #define PYNE_VERSION_HEADER

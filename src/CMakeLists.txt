@@ -107,7 +107,7 @@ if(DAGMC_FOUND)
     target_link_libraries(pyne PRIVATE dagmc MOAB)
 endif(DAGMC_FOUND)
 
-if(ENABLE_ENSDF_PROCESSIONG)
+if(ENABLE_ENSDF_PROCESSING)
   add_executable(alphad ${PROJECT_SOURCE_DIR}/src/ensdf_processing/ALPHAD/alphad.f
                         ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f)
   add_executable(delta ${PROJECT_SOURCE_DIR}/src/ensdf_processing/DELTA/delta.for)
@@ -125,7 +125,7 @@ if(ENABLE_ENSDF_PROCESSIONG)
   add_executable(radd ${PROJECT_SOURCE_DIR}/src/ensdf_processing/RADD/RadD.for)
   add_executable(ruler ${PROJECT_SOURCE_DIR}/src/ensdf_processing/RULER/ruler.f
                        ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f)
-endif(ENABLE_ENSDF_PROCESSIONG)
+endif(ENABLE_ENSDF_PROCESSING)
 
 # Print include dir
 get_property(inc_dirs DIRECTORY PROPERTY INCLUDE_DIRECTORIES)

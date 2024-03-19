@@ -1,13 +1,13 @@
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
 
-# Python extension modules
-include_directories(${PYNE_INCLUDE_DIRS})
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
-
-# Print include dir
-get_property(inc_dirs DIRECTORY PROPERTY INCLUDE_DIRECTORIES)
-message("-- Include paths for ${CMAKE_CURRENT_SOURCE_DIR}: ${inc_dirs}")
+# Include the source and build directories
+include_directories(
+    ${CMAKE_SOURCE_DIR}/src
+    ${CMAKE_BINARY_DIR}/src
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_BINARY_DIR}
+)
 
 # Build normal cython modules
 set(PYNE_CYTHON_MODULES
@@ -37,49 +37,146 @@ endif(MOAB_FOUND)
 
 message(STATUS "Modules to Cythonize: ${PYNE_CYTHON_MODULES}")
 
-foreach(cymod ${PYNE_CYTHON_MODULES})
-  set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/${cymod}.pyx"
-                              PROPERTIES CYTHON_IS_CXX TRUE)
-  cython_add_module(${cymod} ${cymod}.pyx)
-  target_link_libraries(${cymod} PRIVATE pyne)
-  install(TARGETS ${cymod} LIBRARY DESTINATION "${PYTHON_SITE_PACKAGES}/pyne")
+foreach(PYNE_CYTHON_MODULE ${PYNE_CYTHON_MODULES})
+
+    # Build C++ file
+    add_custom_command(
+        OUTPUT ${PYNE_CYTHON_MODULE}.cxx
+        DEPENDS ${PYNE_CYTHON_MODULE}.pyx
+        VERBATIM
+        COMMAND "${CYTHON}" --cplus 
+                -I ${CMAKE_SOURCE_DIR}/src 
+                -I ${CMAKE_BINARY_DIR}/src 
+                -I ${CMAKE_CURRENT_SOURCE_DIR} 
+                -I ${CMAKE_CURRENT_BINARY_DIR} 
+                "${CMAKE_CURRENT_SOURCE_DIR}/${PYNE_CYTHON_MODULE}.pyx" 
+                --output-file "${CMAKE_CURRENT_BINARY_DIR}/${PYNE_CYTHON_MODULE}.cxx"
+    )
+
+    # Creating a Python module
+    python_add_library(
+        ${PYNE_CYTHON_MODULE} MODULE "${CMAKE_CURRENT_BINARY_DIR}/${PYNE_CYTHON_MODULE}.cxx"
+        WITH_SOABI
+    )
+
+    # Add the pyne library as a dependency
+    add_dependencies(${PYNE_CYTHON_MODULE} ${CMAKE_PROJECT_NAME})
+
+    # Link the target with the pyne library
+    target_link_libraries(${PYNE_CYTHON_MODULE} PRIVATE ${CMAKE_PROJECT_NAME})
+
+    # Install the target in the pyne directory
+    install(TARGETS ${PYNE_CYTHON_MODULE} DESTINATION pyne)
 endforeach()
 
 #
 # Cram is actually a C, not C++ file
 #
-cython_add_module(cram cram.pyx)
-target_link_libraries(cram PRIVATE pyne)
-install(TARGETS cram LIBRARY DESTINATION "${PYTHON_SITE_PACKAGES}/pyne")
+
+# Build C file
+add_custom_command(
+    OUTPUT cram.c
+    DEPENDS cram.pyx
+    VERBATIM
+    COMMAND "${CYTHON}"
+            -I ${CMAKE_SOURCE_DIR}/src 
+            -I ${CMAKE_BINARY_DIR}/src 
+            -I ${CMAKE_CURRENT_SOURCE_DIR} 
+            -I ${CMAKE_CURRENT_BINARY_DIR} 
+            "${CMAKE_CURRENT_SOURCE_DIR}/cram.pyx" 
+            --output-file "${CMAKE_CURRENT_BINARY_DIR}/cram.c"
+)
+
+# Creating a Python module
+python_add_library(
+    cram MODULE "${CMAKE_CURRENT_BINARY_DIR}/cram.c"
+    WITH_SOABI
+)
+
+# Add the pyne library as a dependency
+add_dependencies(cram ${CMAKE_PROJECT_NAME})
+
+# Link the target with the pyne library
+target_link_libraries(cram PRIVATE ${CMAKE_PROJECT_NAME})
+
+# Install the target in the pyne directory
+install(TARGETS cram DESTINATION pyne)
 
 #
 # dagmc requires a rename and is only built if we have MOAB.
 #
 if(DAGMC_FOUND)
-  set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/dagmc.pyx"
-                              PROPERTIES CYTHON_IS_CXX TRUE)
-  cython_add_module(_dagmc dagmc.pyx "${PROJECT_SOURCE_DIR}/src/dagmc_bridge.cpp")
-  target_link_libraries(_dagmc PRIVATE dagmc MOAB pyne)
+  # Build C++ file
+  add_custom_command(
+    OUTPUT _dagmc.cxx
+    DEPENDS _dagmc.pyx
+    VERBATIM
+    COMMAND "${CYTHON}" --cplus 
+            -I ${CMAKE_SOURCE_DIR}/src 
+            -I ${CMAKE_BINARY_DIR}/src 
+            -I ${CMAKE_CURRENT_SOURCE_DIR} 
+            -I ${CMAKE_CURRENT_BINARY_DIR} 
+            "${CMAKE_CURRENT_SOURCE_DIR}/_dagmc.pyx" 
+            --output-file "${CMAKE_CURRENT_BINARY_DIR}/_dagmc.cxx"
+  )
+
+  # Creating a Python module
+  python_add_library(
+      ${PYNE_CYTHON_MODULE} MODULE "${CMAKE_CURRENT_BINARY_DIR}/_dagmc.cxx"
+      WITH_SOABI
+  )
+
+  # Add the MOAB library as a dependency
+  add_dependencies(${PYNE_CYTHON_MODULE} ${CMAKE_PROJECT_NAME})
+
+  # Link the target with the pyne library
+  target_link_libraries(${PYNE_CYTHON_MODULE} PRIVATE dagmc MOAB ${CMAKE_PROJECT_NAME})
+
+  # Rename the dagmc library
   set_target_properties(_dagmc PROPERTIES OUTPUT_NAME dagmc)
-  install(TARGETS _dagmc LIBRARY DESTINATION "${PYTHON_SITE_PACKAGES}/pyne")
+
+  # Install the target in the pyne directory
+  install(TARGETS _dagmc DESTINATION pyne)
+
 endif(DAGMC_FOUND)
 
 #
 # Spatial Solver
 #
-message("-- F2PY F90 FLAGS: ${F2PY_F90FLAGS}")
 
 if(BUILD_SPATIAL_SOLVER)
-  add_custom_target(transport_spatial_methods ALL
-                    DEPENDS transport_spatial_methods_so pyne)
-  add_custom_command(OUTPUT transport_spatial_methods_so
-    COMMAND ${F2PY_EXECUTABLE} -c -m transport_spatial_methods
-            -I${PROJECT_BINARY_DIR}/src -L${PROJECT_BINARY_DIR}/src
-            ${F2PY_F90FLAGS}
-            --f90flags="-fdefault-real-8"
-            --no-wrap-functions
-            -lpyne
-            ${PROJECT_SOURCE_DIR}/src/transport_spatial_methods/3d/main.f90
-    DEPENDS pyne
-    )
+
+  include_directories(${F2PY_INCLUDE_DIR})
+  # Common variables
+  set(f2py_module_name "transport_spatial_methods")
+  set(fortran_src_file "${PROJECT_SOURCE_DIR}/src/transport_spatial_methods/3d/precision_module.f90")
+  set(f2py_module_c "${f2py_module_name}module.c")
+
+  # Generate sources
+  add_custom_target(
+    genpyf
+    DEPENDS "${fortran_src_file}"
+  )
+  add_custom_command(
+    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${f2py_module_c}"
+    COMMAND ${Python_EXECUTABLE}  -m "numpy.f2py"
+            -I${PROJECT_BINARY_DIR}/src
+            "${fortran_src_file}"
+            -m "transport_spatial_methods"
+            --lower # Important
+    DEPENDS ${CMAKE_PROJECT_NAME}
+  )
+
+  # Set up target
+  python_add_library( ${f2py_module_name} MODULE WITH_SOABI
+    "${CMAKE_CURRENT_BINARY_DIR}/${f2py_module_c}" # Generated
+    "${F2PY_INCLUDE_DIR}/fortranobject.c" # From NumPy
+    "${fortran_src_file}" # Fortran source(s)
+  )
+
+  # Depend on sources
+  target_include_directories(${f2py_module_name} PRIVATE "${F2PY_INCLUDE_DIR}")
+  target_link_libraries(${f2py_module_name} PRIVATE Python::NumPy ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES} ${CMAKE_PROJECT_NAME})
+  add_dependencies(${f2py_module_name} genpyf)
+  install(TARGETS ${f2py_module_name} DESTINATION pyne)
 endif()
