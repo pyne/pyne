@@ -140,7 +140,7 @@ find_package(
 pyne_setup_fortran()
 
 # Find f2py, if building spatial solver
-IF(BUILD_SPATIAL_SOLVER)
+if (BUILD_SPATIAL_SOLVER)
   # Grab the variables from a local Python installation F2PY headers
   execute_process(
     COMMAND "${Python_EXECUTABLE}" -c
@@ -149,11 +149,10 @@ IF(BUILD_SPATIAL_SOLVER)
     OUTPUT_STRIP_TRAILING_WHITESPACE
   )
 
-  FIND_PACKAGE(LAPACK REQUIRED)
-  MESSAGE("-- Found LAPACK Linker Flags: ${LAPACK_LINKER_FLAGS}")
-  MESSAGE("-- Found LAPACK Libraries: ${LAPACK_LIBRARIES}")
-  MESSAGE("-- Found BLAS Libraries: ${BLAS_LIBRARIES}")
-ENDIF(BUILD_SPATIAL_SOLVER)
+  # Find LAPACK
+  find_package(LAPACK REQUIRED)
+
+endif()
 
 
 # Find Cython
@@ -173,3 +172,17 @@ add_subdirectory(src)
 add_subdirectory(pyne)
 add_subdirectory(pyne/xs)
 
+# Collect scripts
+file(GLOB SCRIPTS "${CMAKE_CURRENT_SOURCE_DIR}/scripts/*")
+
+# Filter scripts based on the OS
+if(WIN32)
+    list(FILTER SCRIPTS INCLUDE REGEX "\\.bat$")
+else()
+    list(FILTER SCRIPTS EXCLUDE REGEX "\\.bat$")
+endif()
+
+# Install scripts to SKBUILD_SCRIPTS_DIR
+if (SKBUILD_SCRIPTS_DIR)
+  install(FILES ${SCRIPTS} DESTINATION ${SKBUILD_SCRIPTS_DIR})
+endif()
