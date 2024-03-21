@@ -55,6 +55,7 @@ docs = ["sphinx"]
 [tool.scikit-build]
 cmake.verbose = true
 logging.level = "INFO"
+wheel.install-dir = "pyne/core"
 wheel.packages = ["pyne"]
 wheel.exclude = ["CMakeLists.txt", "*.pyx"]
 
