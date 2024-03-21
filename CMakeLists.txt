@@ -12,7 +12,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 # Setup the project
 project(pyne)
 
-option ( ENABLE_SPATIAL_SOLVERS     "Should build AHOT spatial solvers?"                 OFF )
+option ( ENABLE_SPATIAL_SOLVERS     "Should build AHOT spatial solvers?"                 ON )
 option ( ENABLE_ENSDF_PROCESSING   "Should build ENSDF processing tools?"               ON )
 
 include(PyneMacros)
@@ -29,7 +29,7 @@ enable_language(ASM)
 
 # This makes all the libraries build as SHARED
 set(BUILD_SHARED_LIBS true)
-MESSAGE("-- CMake Install Prefix: ${CMAKE_INSTALL_PREFIX}")
+message(STATUS "CMake Install Prefix: ${CMAKE_INSTALL_PREFIX}")
 
 
 #
@@ -39,45 +39,54 @@ if (NOT DEPS_ROOT_DIR)
   get_filename_component(compdir ${CMAKE_CXX_COMPILER} DIRECTORY)
   get_filename_component(DEPS_ROOT_DIR ${compdir} DIRECTORY)
 endif (NOT DEPS_ROOT_DIR)
-SET(DEPS_HINTS HINTS "${DEPS_ROOT_DIR}")
-SET(DEPS_BIN_HINTS ${DEPS_HINTS} "${DEPS_ROOT_DIR}/bin")
-SET(DEPS_LIB_HINTS ${DEPS_HINTS} "${DEPS_ROOT_DIR}/lib")
-SET(DEPS_INCLUDE_HINTS HINTS "${DEPS_ROOT_DIR}/include")
-MESSAGE("-- Dependency Root Dir: ${DEPS_ROOT_DIR}")
-MESSAGE("-- Dependency Hints: ${DEPS_HINTS}")
-MESSAGE("-- Dependency Binary Hints: ${DEPS_BIN_HINTS}")
-MESSAGE("-- Dependency Library Hints: ${DEPS_LIB_HINTS}")
-MESSAGE("-- Dependency Include Hints: ${DEPS_INCLUDE_HINTS}")
+set(DEPS_HINTS HINTS "${DEPS_ROOT_DIR}")
+set(DEPS_BIN_HINTS ${DEPS_HINTS} "${DEPS_ROOT_DIR}/bin")
+set(DEPS_LIB_HINTS ${DEPS_HINTS} "${DEPS_ROOT_DIR}/lib")
+set(DEPS_INCLUDE_HINTS HINTS "${DEPS_ROOT_DIR}/include")
+message(STATUS "Dependency Root Dir: ${DEPS_ROOT_DIR}")
+message(STATUS "Dependency Hints: ${DEPS_HINTS}")
+message(STATUS "Dependency Binary Hints: ${DEPS_BIN_HINTS}")
+message(STATUS "Dependency Library Hints: ${DEPS_LIB_HINTS}")
+message(STATUS "Dependency Include Hints: ${DEPS_INCLUDE_HINTS}")
 
 # Find HDF5
-MESSAGE("-- HDF5 Root: ${HDF5_ROOT}")
+include(ExternalProject)
+
 if(HDF5_ROOT)
-  FIND_PACKAGE(HDF5 REQUIRED)
+  find_package(HDF5 REQUIRED)
 else()
-  FIND_PACKAGE(HDF5)
+find_package(HDF5)
 endif()
+
 if(NOT HDF5_FOUND AND NOT HDF5_ROOT)
-  MESSAGE(STATUS "-- HDF5 not found. Setting HDF5_ROOT to ${DEPS_ROOT_DIR}")
-  set(HDF5_ROOT "${DEPS_ROOT_DIR}")
-  FIND_PACKAGE(HDF5 REQUIRED)
+  MESSAGE(STATUS "HDF5 not found. Attempting to download and install.")
+  set(HDF5_ROOT "${CMAKE_BINARY_DIR}/hdf5")
+  ExternalProject_Add(hdf5
+    PREFIX ${HDF5_ROOT}
+    URL https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.14/hdf5-1.14.3/src/hdf5-1.14.3.tar.gz
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+  )
+  find_package(HDF5 REQUIRED)
 endif()
-ADD_DEFINITIONS(${HDF5_DEFINITIONS})
+
+add_definitions(${HDF5_DEFINITIONS})
 include_directories("${HDF5_INCLUDE_DIRS}")
 if(NOT HDF5_LIBRARY_DIRS STREQUAL "")
   link_directories(${HDF5_LIBRARY_DIRS})
 endif()
 set(LIBS_HDF5 ${HDF5_C_LIBRARIES})
 set(LIBS ${LIBS} ${HDF5_C_LIBRARIES})
-MESSAGE(STATUS "HDF5 include dirs: ${HDF5_INCLUDE_DIRS}")
-MESSAGE(STATUS "HDF5 library dirs: ${HDF5_LIBRARY_DIRS}")
-MESSAGE(STATUS "HDF5 Libraries: ${HDF5_C_LIBRARIES}")
-MESSAGE(STATUS "HDF5 library version: ${HDF5_VERSION}")
+message(STATUS "HDF5 include dirs: ${HDF5_INCLUDE_DIRS}")
+message(STATUS "HDF5 library dirs: ${HDF5_LIBRARY_DIRS}")
+message(STATUS "HDF5 Libraries: ${HDF5_C_LIBRARIES}")
+message(STATUS "HDF5 library version: ${HDF5_VERSION}")
 
 # Set up shared and static versions of the HDF5 libraries
 set(HDF5_LIBRARIES_SHARED ${HDF5_LIBRARIES})
 if(BUILD_STATIC_LIBS)
   string(REPLACE ${CMAKE_SHARED_LIBRARY_SUFFIX} ${CMAKE_STATIC_LIBRARY_SUFFIX}
-         HDF5_LIBRARIES_STATIC "${HDF5_LIBRARIES_SHARED}")
+          HDF5_LIBRARIES_STATIC "${HDF5_LIBRARIES_SHARED}"
+  )
 endif()
 if(NOT BUILD_SHARED_LIBS)
   set(HDF5_LIBRARIES_SHARED)
@@ -86,16 +95,6 @@ endif()
 # Print out some more information about the HDF5 setup
 MESSAGE("-- HDF5 libraries shared: ${HDF5_LIBRARIES_SHARED}")
 MESSAGE("-- HDF5 libraries static: ${HDF5_LIBRARIES_STATIC}")
-
-
-# Version 1.12 of HDF5 deprecates the H5Oget_info_by_idx(),
-# H5O_info_t() and H5Oget_info_by_name() interfaces.
-# Thus, we give these flags to allow usage of the old interface in newer
-# versions of HDF5.
-if(NOT (${HDF5_VERSION} VERSION_LESS 1.12.0))
-   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DH5Oget_info_by_idx_vers=1 -DH5O_info_t_vers=1 -DH5Oget_info_by_name_vers=1")
-endif()
-
 
 # Find MOAB
 MESSAGE("-- MOAB root: ${MOAB_ROOT}")
