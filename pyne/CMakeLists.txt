@@ -7,6 +7,7 @@ include_directories(
     ${CMAKE_BINARY_DIR}/src
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
+    ${Python_NumPy_INCLUDE_DIRS}
 )
 
 # Build normal cython modules
@@ -49,6 +50,7 @@ foreach(PYNE_CYTHON_MODULE ${PYNE_CYTHON_MODULES})
                 -I ${CMAKE_BINARY_DIR}/src 
                 -I ${CMAKE_CURRENT_SOURCE_DIR} 
                 -I ${CMAKE_CURRENT_BINARY_DIR} 
+                -I ${Python_NumPy_INCLUDE_DIRS}
                 "${CMAKE_CURRENT_SOURCE_DIR}/${PYNE_CYTHON_MODULE}.pyx" 
                 --output-file "${CMAKE_CURRENT_BINARY_DIR}/${PYNE_CYTHON_MODULE}.cxx"
     )
@@ -82,7 +84,8 @@ add_custom_command(
             -I ${CMAKE_SOURCE_DIR}/src 
             -I ${CMAKE_BINARY_DIR}/src 
             -I ${CMAKE_CURRENT_SOURCE_DIR} 
-            -I ${CMAKE_CURRENT_BINARY_DIR} 
+            -I ${CMAKE_CURRENT_BINARY_DIR}
+            -I ${Python_NumPy_INCLUDE_DIRS}
             "${CMAKE_CURRENT_SOURCE_DIR}/cram.pyx" 
             --output-file "${CMAKE_CURRENT_BINARY_DIR}/cram.c"
 )
@@ -116,6 +119,7 @@ if(DAGMC_FOUND)
             -I ${CMAKE_BINARY_DIR}/src 
             -I ${CMAKE_CURRENT_SOURCE_DIR} 
             -I ${CMAKE_CURRENT_BINARY_DIR} 
+            -I ${Python_NumPy_INCLUDE_DIRS}
             "${CMAKE_CURRENT_SOURCE_DIR}/_dagmc.pyx" 
             --output-file "${CMAKE_CURRENT_BINARY_DIR}/_dagmc.cxx"
   )

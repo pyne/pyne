@@ -4,6 +4,7 @@ include_directories(
     ${CMAKE_BINARY_DIR}/src
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
+    ${Python_NumPy_INCLUDE_DIRS}
 )
 
 # Build C++ file
@@ -16,6 +17,7 @@ add_custom_command(
             -I ${CMAKE_BINARY_DIR}/src 
             -I ${CMAKE_CURRENT_SOURCE_DIR} 
             -I ${CMAKE_CURRENT_BINARY_DIR} 
+            -I ${Python_NumPy_INCLUDE_DIRS}
             "${CMAKE_CURRENT_SOURCE_DIR}/models.pyx" 
             --output-file "${CMAKE_CURRENT_BINARY_DIR}/models.cxx"
 )
