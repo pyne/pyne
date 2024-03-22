@@ -63,13 +63,18 @@ if(NOT HDF5_FOUND AND NOT HDF5_ROOT)
   set(HDF5_ROOT "${CMAKE_BINARY_DIR}/hdf5")
   ExternalProject_Add(hdf5
     PREFIX ${HDF5_ROOT}
-    URL https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.14/hdf5-1.14.3/src/hdf5-1.14.3.tar.gz
+    URL https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/hdf5-1.10.11/src/hdf5-1.10.11.tar.gz
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+    DOWNLOAD_EXTRACT_TIMESTAMP true
+    BUILD_BYPRODUCTS "${HDF5_ROOT}/lib/libhdf5.a"
   )
-  find_package(HDF5 REQUIRED)
+  set(HDF5_INCLUDE_DIRS "${HDF5_ROOT}/include")
+  set(HDF5_LIBRARY_DIRS "${HDF5_ROOT}/lib")
+  set(HDF5_LIBRARIES "${HDF5_ROOT}/lib/libhdf5${CMAKE_SHARED_LIBRARY_SUFFIX}")
+  set(HDF5_C_LIBRARIES "${HDF5_ROOT}/lib/libhdf5.a")
+  set(HDF5_H_LIBRARIES "${HDF5_ROOT}/lib/libhdf5_hl.a")
 endif()
 
-add_definitions(${HDF5_DEFINITIONS})
 include_directories("${HDF5_INCLUDE_DIRS}")
 if(NOT HDF5_LIBRARY_DIRS STREQUAL "")
   link_directories(${HDF5_LIBRARY_DIRS})
@@ -79,7 +84,6 @@ set(LIBS ${LIBS} ${HDF5_C_LIBRARIES})
 message(STATUS "HDF5 include dirs: ${HDF5_INCLUDE_DIRS}")
 message(STATUS "HDF5 library dirs: ${HDF5_LIBRARY_DIRS}")
 message(STATUS "HDF5 Libraries: ${HDF5_C_LIBRARIES}")
-message(STATUS "HDF5 library version: ${HDF5_VERSION}")
 
 # Set up shared and static versions of the HDF5 libraries
 set(HDF5_LIBRARIES_SHARED ${HDF5_LIBRARIES})
@@ -103,11 +107,7 @@ find_package(MOAB)
 if(${MOAB_FOUND})
   include_directories(${MOAB_INCLUDE_DIRS})
   get_filename_component(MOAB_LIBRARY_DIRS ${MOAB_LIBRARY} PATH)
-  if(APPLE)
-    link_directories(${MOAB_LIBRARY_DIRS})
-  else(APPLE)
-    link_directories(${MOAB_LIBRARY_DIRS})
-  endif(APPLE)
+  link_directories(${MOAB_LIBRARY_DIRS})
 endif(${MOAB_FOUND})
 
 
@@ -147,10 +147,35 @@ if (BUILD_SPATIAL_SOLVER)
     OUTPUT_VARIABLE F2PY_INCLUDE_DIR
     OUTPUT_STRIP_TRAILING_WHITESPACE
   )
-
-  # Find LAPACK
-  find_package(LAPACK REQUIRED)
-
+  find_package(LAPACK)
+  if(NOT BLAS_FOUND)
+    MESSAGE(STATUS "BLAS not found. Attempting to download and install.")
+    set(BLAS_ROOT "${CMAKE_BINARY_DIR}/blas")
+    ExternalProject_Add(blas
+      PREFIX ${BLAS_ROOT}
+      URL https://github.com/OpenMathLib/OpenBLAS/releases/download/v0.3.26/OpenBLAS-0.3.26.tar.gz
+      CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+      DOWNLOAD_EXTRACT_TIMESTAMP true
+      BUILD_BYPRODUCTS "${BLAS_ROOT}/lib/libopenblas.a"
+    )
+    set(BLAS_INCLUDE_DIRS "${BLAS_ROOT}/include")
+    set(BLAS_LIBRARY_DIRS "${BLAS_ROOT}/lib")
+    set(BLAS_LIBRARIES "${BLAS_ROOT}/lib/libopenblas.a")
+  endif()
+  if(NOT LAPACK_FOUND)
+    MESSAGE(STATUS "LAPACK not found. Attempting to download and install.")
+    set(LAPACK_ROOT "${CMAKE_BINARY_DIR}/lapack")
+    ExternalProject_Add(lapack
+      PREFIX ${LAPACK_ROOT}
+      URL https://github.com/Reference-LAPACK/lapack/archive/refs/tags/v3.12.0.tar.gz
+      CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+      DOWNLOAD_EXTRACT_TIMESTAMP true
+      BUILD_BYPRODUCTS "${LAPACK_ROOT}/lib/liblapack.a"
+    )
+    set(LAPACK_INCLUDE_DIRS "${LAPACK_ROOT}/include")
+    set(LAPACK_LIBRARY_DIRS "${LAPACK_ROOT}/lib")
+    set(LAPACK_LIBRARIES "${LAPACK_ROOT}/lib/liblapack.a")
+  endif()
 endif()
 
 

@@ -35,4 +35,4 @@ add_dependencies(models ${CMAKE_PROJECT_NAME})
 target_link_libraries(models PRIVATE ${CMAKE_PROJECT_NAME})
 
 # Install the target in the pyne directory
-install(TARGETS models DESTINATION pyne/xs)
+install(TARGETS models DESTINATION ../xs)

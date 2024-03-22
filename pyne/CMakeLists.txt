@@ -68,7 +68,7 @@ foreach(PYNE_CYTHON_MODULE ${PYNE_CYTHON_MODULES})
     target_link_libraries(${PYNE_CYTHON_MODULE} PRIVATE ${CMAKE_PROJECT_NAME})
 
     # Install the target in the pyne directory
-    install(TARGETS ${PYNE_CYTHON_MODULE} DESTINATION pyne)
+    install(TARGETS ${PYNE_CYTHON_MODULE} DESTINATION ../.)
 endforeach()
 
 #
@@ -103,7 +103,7 @@ add_dependencies(cram ${CMAKE_PROJECT_NAME})
 target_link_libraries(cram PRIVATE ${CMAKE_PROJECT_NAME})
 
 # Install the target in the pyne directory
-install(TARGETS cram DESTINATION pyne)
+install(TARGETS cram DESTINATION ../.)
 
 #
 # dagmc requires a rename and is only built if we have MOAB.
@@ -130,7 +130,7 @@ if(DAGMC_FOUND)
       WITH_SOABI
   )
 
-  # Add the MOAB library as a dependency
+  # Add the PyNE library as a dependency
   add_dependencies(${PYNE_CYTHON_MODULE} ${CMAKE_PROJECT_NAME})
 
   # Link the target with the pyne library
@@ -140,7 +140,7 @@ if(DAGMC_FOUND)
   set_target_properties(_dagmc PROPERTIES OUTPUT_NAME dagmc)
 
   # Install the target in the pyne directory
-  install(TARGETS _dagmc DESTINATION pyne)
+  install(TARGETS _dagmc DESTINATION ../.)
 
 endif(DAGMC_FOUND)
 
@@ -182,5 +182,5 @@ if(BUILD_SPATIAL_SOLVER)
   target_include_directories(${f2py_module_name} PRIVATE "${F2PY_INCLUDE_DIR}")
   target_link_libraries(${f2py_module_name} PRIVATE Python::NumPy ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES} ${CMAKE_PROJECT_NAME})
   add_dependencies(${f2py_module_name} genpyf)
-  install(TARGETS ${f2py_module_name} DESTINATION pyne)
+  install(TARGETS ${f2py_module_name} DESTINATION ../.)
 endif()
