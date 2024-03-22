@@ -99,7 +99,7 @@ jobs:
         with:
           repository: ${{ env.DOCKER_IMAGE_BASENAME }}${{ matrix.hdf5 }}
           stages: ${{ matrix.pyne_test_base }}
-          server-stage: pyne-dev
+          server-stage: pyne
           quiet: false
           parallel: true
           tag-latest-on-default: ${{ env.USE_LATEST_TAG }}
