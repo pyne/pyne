@@ -29,7 +29,7 @@ RUN apt-get update \
     pip install --upgrade pip; \
     pip install numpy \
             scipy \
-            cython \
+            "cython<3" \
             nose \
             pytest \
             tables \

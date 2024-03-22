@@ -37,7 +37,7 @@ RUN conda update -y --all && \
                 pytest \
                 pytables \
                 jinja2 \
-                cython \
+                "cython<3" \
                 && \
     mamba install -y --force-reinstall libsqlite && \
     conda clean -y --all
