@@ -1,6 +1,6 @@
-INCLUDE(DownloadAndExtract)
+include(DownloadAndExtract)
 
-# set platform preprocessor macro
+# Set platform preprocessor macro
 macro(pyne_set_platform)
   set(PYNE_PLATFORM "__${CMAKE_SYSTEM_NAME}__")
   if(APPLE)
@@ -15,9 +15,10 @@ macro(pyne_set_platform)
     set(PYNE_PLATFORM "__LINUX__")
   endif(APPLE)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D${PYNE_PLATFORM}")
-  message("-- Pyne platform defined as: ${PYNE_PLATFORM}")
+  message(STATUS "PyNE platform is defined as: ${PYNE_PLATFORM}")
 endmacro()
 
+# Set the platform for the assembler
 macro(pyne_set_asm_platform)
   # first set OS
   if (WIN32)
@@ -37,12 +38,17 @@ macro(pyne_set_asm_platform)
     set(_plat "${_plat}-NOTFOUND")
   endif()
   set(PYNE_ASM_PLATFORM "${_plat}")
+  message(STATUS "PyNE assembler platform is defined as: ${PYNE_ASM_PLATFORM}")
+  
+  # Enable assembly
+  enable_language(ASM)
 endmacro()
 
 # Fortran settings
 # FFLAGS depend on the compiler
 macro(pyne_setup_fortran)
-  # languages
+
+  # Enable Fortran
   enable_language(Fortran)
 
   # Augment the Fortran implicit link libraries
@@ -111,53 +117,51 @@ macro(pyne_setup_fortran)
   # add -fallow-argument-mismatch to fix build with gfortran 10+
   # https://github.com/pyne/pyne/issues/1416
   set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fallow-argument-mismatch")
+
+  # Set package properties
+  set_package_properties(Fortran PROPERTIES
+  DESCRIPTION "Fortran compiler"
+  TYPE REQUIRED
+  PURPOSE "Enables Fortran support"
+  )
 endmacro()
-
-
-#  add lib to pyne list
-macro(add_lib_to_pyne _name _source)
-  # add the library
-  add_library(${_name} ${_source})
-  # add it to the list of pyne libraries
-  set(PYNE_LIBRARIES ${PYNE_LIBRARIES} ${_name})
-endmacro()
-
 
 # Print pyne logo
-macro(pyne_print_logo)
+macro(print_pyne_logo)
   set(cat_prog cat)
   if(WIN32)
     set(cat_prog type)
   endif(WIN32)
   execute_process(COMMAND ${cat_prog}
                   ${PROJECT_SOURCE_DIR}/cmake/logo.txt
-                  OUTPUT_VARIABLE variable)
-  message("${variable}")
+                  OUTPUT_VARIABLE PYNE_LOGO)
+  message("${PYNE_LOGO}")
 endmacro()
 
 
-# determine if spatial solver module should be built
+# Set if spatial solver module should be built
 macro(pyne_set_build_spatial_solver)
-  SET(BUILD_SPATIAL_SOLVER false)
-  IF ( ENABLE_SPATIAL_SOLVERS )
-    MESSAGE("-- Checking whether to build spatial solvers")
-    MESSAGE("-- -- Checking CMAKE_CXX_COMPILER_ID: ${CMAKE_CXX_COMPILER_ID}")
-    IF(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-      MESSAGE("-- -- -- Checking CMAKE_CXX_COMPILER_VERSION: ${CMAKE_CXX_COMPILER_VERSION}")
-      MESSAGE("-- -- -- Checking if APPLE: ${APPLE}")
-      IF(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.6" AND
-        NOT APPLE )
-        SET(BUILD_SPATIAL_SOLVER true)
-      ELSE()
-        SET(BUILD_SPATIAL_SOLVER false)
-      ENDIF()
-    ENDIF()
-  ENDIF( ENABLE_SPATIAL_SOLVERS)
-  MESSAGE("-- Build spatial solvers: ${BUILD_SPATIAL_SOLVER}")
+  set(BUILD_SPATIAL_SOLVER OFF)
+  if ( ENABLE_SPATIAL_SOLVERS )
+    message(STATUS "Checking whether to build spatial solvers")
+    message(STATUS "Checking CMAKE_CXX_COMPILER_ID: ${CMAKE_CXX_COMPILER_ID}")
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+      message(STATUS "Checking CMAKE_CXX_COMPILER_VERSION: ${CMAKE_CXX_COMPILER_VERSION}")
+      message(STATUS "Checking if APPLE: ${APPLE}")
+      if(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.6" AND NOT APPLE)
+        message(STATUS "Building spatial solvers")
+        set(BUILD_SPATIAL_SOLVER ON)
+      else()
+        message(STATUS "Not building spatial solvers.")
+        set(BUILD_SPATIAL_SOLVER OFF)
+      endif()
+    endif()
+  endif()
+  message(STATUS "Build spatial solvers: ${BUILD_SPATIAL_SOLVER}")
 endmacro()
 
 
-# set build type
+# Set build type
 macro(pyne_set_build_type)
   # Default to release build type
   if(NOT CMAKE_BUILD_TYPE)
@@ -167,50 +171,14 @@ macro(pyne_set_build_type)
   # quiets fortify_source warnings when not compiling with optimizations
   # in linux distros where compilers were compiled with fortify_source enabled by
   # default (e.g. Arch linux).
-  STRING(TOLOWER "${CMAKE_BUILD_TYPE}" BUILD_TYPE)
-  IF(NOT ${BUILD_TYPE} STREQUAL "release")
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0")
-  ENDIF()
-  MESSAGE("-- Build type: ${CMAKE_BUILD_TYPE}")
-endmacro()
-
-
-# Setup the RPATH correctly
-macro(pyne_configure_rpath)
-  # use, i.e. don't skip the full RPATH for the build tree
-  SET(CMAKE_SKIP_BUILD_RPATH FALSE)
-
-  # when building, don't use the install RPATH already
-  # (but later on when installing)
-  SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
-
-  SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-
-  # add the automatically determined parts of the RPATH
-  # which point to directories outside the build tree to the install RPATH
-  SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-
-  # the RPATH to be used when installing, but only if it's not a system directory
-  LIST(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES
-       "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
-  IF("${isSystemDir}" STREQUAL "-1")
-    SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-    GET_FILENAME_COMPONENT(cxxCompilerRoot ${CMAKE_CXX_COMPILER} DIRECTORY)
-    GET_FILENAME_COMPONENT(cxxCompilerRoot ${cxxCompilerRoot} DIRECTORY)
-    IF(NOT "${CMAKE_INSTALL_RPATH}" STREQUAL "${cxxCompilerRoot}")
-      SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_RPATH}:${cxxCompilerRoot}/lib")
-    ENDIF (NOT "${CMAKE_INSTALL_RPATH}" STREQUAL "${cxxCompilerRoot}")
-  ENDIF("${isSystemDir}" STREQUAL "-1")
-  MESSAGE("-- CMAKE_INSTALL_RPATH: ${CMAKE_INSTALL_RPATH}")
-endmacro()
-
-macro(pyne_set_fast_compile)
-  if(NOT DEFINED PYNE_FAST_COMPILE)
-    set(PYNE_FAST_COMPILE TRUE)
+  string(TOLOWER "${CMAKE_BUILD_TYPE}" BUILD_TYPE)
+  if(NOT ${BUILD_TYPE} STREQUAL "release")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0")
   endif()
-  message(STATUS "PyNE Fast Compile: ${PYNE_FAST_COMPILE}")
+  message( STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 endmacro()
 
+# Download source files
 macro(pyne_download_files)
   # Download bateman solver from PyNE data
   download_src("http://raw.githubusercontent.com/pyne/data/master" "decay" ".cpp")
@@ -218,10 +186,15 @@ macro(pyne_download_files)
   download_src("http://raw.githubusercontent.com/pyne/data/master" "cram" ".c")
 
   if (PYNE_FAST_COMPILE)
-    # Download bateman solver from PyNE data
-    download_platform("http://raw.githubusercontent.com/pyne/data/master" "decay" ".s")
-    # Download CRAM solver from PyNE data
-    download_platform("http://raw.githubusercontent.com/pyne/data/master" "cram" ".s")
+    if (NOT WIN32)
+      # Download bateman solver from PyNE data
+      download_platform_specific("http://raw.githubusercontent.com/pyne/data/master" "decay" ".s")
+      # Download CRAM solver from PyNE data
+      download_platform_specific("http://raw.githubusercontent.com/pyne/data/master" "cram" ".s")
+    else()
+      message(WARNING "Not downloading compiled files on Windows.")
+      set(PYNE_FAST_COMPILE OFF)
+    endif()
   endif()
 endmacro()
 
