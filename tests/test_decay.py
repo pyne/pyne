@@ -192,6 +192,7 @@ def check_materr(row):
 
 
 def test_benchmark():
+    setup()
     nuc_keys = pivot_mat_keys()
     for row in mat_err_compare(nuc_keys):
         check_materr(row)
