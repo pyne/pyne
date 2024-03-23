@@ -34,5 +34,10 @@ add_dependencies(models ${CMAKE_PROJECT_NAME})
 # Link the target with the pyne library
 target_link_libraries(models PRIVATE ${CMAKE_PROJECT_NAME})
 
+# Configure the RPATH
+set_target_properties(models PROPERTIES
+    INSTALL_RPATH "$ORIGIN/../core/lib"
+)
+
 # Install the target in the pyne directory
 install(TARGETS models DESTINATION ../xs)

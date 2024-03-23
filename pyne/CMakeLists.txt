@@ -67,6 +67,11 @@ foreach(PYNE_CYTHON_MODULE ${PYNE_CYTHON_MODULES})
     # Link the target with the pyne library
     target_link_libraries(${PYNE_CYTHON_MODULE} PRIVATE ${CMAKE_PROJECT_NAME})
 
+    # Configure the RPATH
+    set_target_properties(${PYNE_CYTHON_MODULE} PROPERTIES
+      INSTALL_RPATH "$ORIGIN/core/lib"
+    )
+
     # Install the target in the pyne directory
     install(TARGETS ${PYNE_CYTHON_MODULE} DESTINATION ../.)
 endforeach()
@@ -102,6 +107,11 @@ add_dependencies(cram ${CMAKE_PROJECT_NAME})
 # Link the target with the pyne library
 target_link_libraries(cram PRIVATE ${CMAKE_PROJECT_NAME})
 
+# Configure the RPATH
+set_target_properties(cram PROPERTIES
+  INSTALL_RPATH "$ORIGIN/core/lib"
+)
+
 # Install the target in the pyne directory
 install(TARGETS cram DESTINATION ../.)
 
@@ -126,21 +136,26 @@ if(DAGMC_FOUND)
 
   # Creating a Python module
   python_add_library(
-      ${PYNE_CYTHON_MODULE} MODULE "${CMAKE_CURRENT_BINARY_DIR}/_dagmc.cxx"
+      _dagmc MODULE "${CMAKE_CURRENT_BINARY_DIR}/_dagmc.cxx"
       WITH_SOABI
   )
 
   # Add the PyNE library as a dependency
-  add_dependencies(${PYNE_CYTHON_MODULE} ${CMAKE_PROJECT_NAME})
+  add_dependencies(_dagmc ${CMAKE_PROJECT_NAME})
 
   # Link the target with the pyne library
-  target_link_libraries(${PYNE_CYTHON_MODULE} PRIVATE dagmc MOAB ${CMAKE_PROJECT_NAME})
+  target_link_libraries(_dagmc PRIVATE dagmc MOAB ${CMAKE_PROJECT_NAME})
 
   # Rename the dagmc library
   set_target_properties(_dagmc PROPERTIES OUTPUT_NAME dagmc)
 
+  # Configure the RPATH
+  set_target_properties(dagmc PROPERTIES
+    INSTALL_RPATH "$ORIGIN/core/lib"
+  )
+
   # Install the target in the pyne directory
-  install(TARGETS _dagmc DESTINATION ../.)
+  install(TARGETS dagmc DESTINATION ../.)
 
 endif(DAGMC_FOUND)
 
@@ -149,7 +164,6 @@ endif(DAGMC_FOUND)
 #
 
 if(BUILD_SPATIAL_SOLVER)
-
   include_directories(${F2PY_INCLUDE_DIR})
   # Common variables
   set(f2py_module_name "transport_spatial_methods")
