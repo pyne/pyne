@@ -11,7 +11,7 @@ macro(download_and_extract _url _checkfile)
     if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${_base}")
       message(STATUS "Downloading ${_url} -> ${_base}")
       file(DOWNLOAD "${_url}" "${CMAKE_CURRENT_SOURCE_DIR}/${_base}"
-           SHOW_PROGRESS STATUS _rtn)
+            SHOW_PROGRESS STATUS _rtn)
       list(GET _rtn 0 _rtncode)
       if(NOT 0 EQUAL _rtncode)
         message(FATAL_ERROR ${_rtn})
@@ -31,7 +31,7 @@ macro(download_src _base_url _base_name _ext_src)
   download_and_extract("${_url}" "${_checkfile}")
 endmacro()
 
-macro(download_platform _base_url _base_name _ext_plat)
+macro(download_platform_specific _base_url _base_name _ext_plat)
   # download the platform specific file
   set(_url "${_base_url}/${_base_name}-${PYNE_ASM_PLATFORM}.tar.gz")
   set(_checkfile "${_base_name}-${PYNE_ASM_PLATFORM}${_ext_plat}")
