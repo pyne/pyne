@@ -25,14 +25,6 @@ include(FeatureSummary)
 # This module handles downloading and building external projects
 include(ExternalProject)
 
-# Include PyneMacros file
-include(PyneMacros)
-print_pyne_logo()  # Beware of dragons
-pyne_set_platform()
-pyne_set_asm_platform()
-pyne_set_build_spatial_solver()
-pyne_set_build_type()
-
 # Set build options that can be toggled by the user
 option ( ENABLE_MOAB                "Should PyNE use MOAB?"                        ON )
 option ( ENABLE_DAGMC               "Should PyNE use DAGMC?"                       ON )
@@ -44,6 +36,14 @@ option ( PYNE_FAST_COMPILE          "Should PyNE fast compile?"                 
 add_feature_info(SpatialSolvers ENABLE_SPATIAL_SOLVERS "AHOT spatial solvers")
 add_feature_info(ENSDFProcessing ENABLE_ENSDF_PROCESSING "ENSDF processing tools")
 add_feature_info(PyneFastCompile PYNE_FAST_COMPILE "PyNE fast compile")
+
+# Include PyneMacros file
+include(PyneMacros)
+print_pyne_logo()  # Beware of dragons
+pyne_set_platform()
+pyne_set_asm_platform()
+pyne_set_build_spatial_solver()
+pyne_set_build_type()
 
 # This makes all the libraries build as SHARED
 set(BUILD_SHARED_LIBS ON CACHE BOOL "Build shared libraries")
