@@ -33,9 +33,9 @@ option ( ENABLE_ENSDF_PROCESSING    "Should build ENSDF processing tools?"      
 option ( PYNE_FAST_COMPILE          "Should PyNE fast compile?"                    ON )
 
 # Add feature info
-add_feature_info(SpatialSolvers ENABLE_SPATIAL_SOLVERS "AHOT spatial solvers")
-add_feature_info(ENSDFProcessing ENABLE_ENSDF_PROCESSING "ENSDF processing tools")
-add_feature_info(PyneFastCompile PYNE_FAST_COMPILE "PyNE fast compile")
+add_feature_info("AHOT" ENABLE_SPATIAL_SOLVERS "AHOT spatial solvers")
+add_feature_info("ENSDF" ENABLE_ENSDF_PROCESSING "ENSDF processing tools")
+add_feature_info("Fast Compile" PYNE_FAST_COMPILE "Use pre-compiled binaries")
 
 # Include PyneMacros file
 include(PyneMacros)
@@ -197,21 +197,8 @@ set_package_properties(Python PROPERTIES
   PURPOSE "Enables Python support"
 )
 
-# Set package properties
-set_package_properties(NumPy PROPERTIES
-  DESCRIPTION "NumPy"
-  TYPE REQUIRED
-  PURPOSE "Enables NumPy support"
-)
-
 find_program(CYTHON "cython")
 
-# Set package properties
-set_package_properties(Cython PROPERTIES
-  DESCRIPTION "Cython"
-  TYPE REQUIRED
-  PURPOSE "Enables Cython support"
-)
 
 ############################################################
 # Setup Fortran, f2py and LAPACK                           #
@@ -264,12 +251,6 @@ if (BUILD_SPATIAL_SOLVER)
   endif()
 endif()
 
-# Set package properties
-set_package_properties(F2PY PROPERTIES
-  DESCRIPTION "Utility that connects Python and Fortran code"
-  TYPE REQUIRED
-  PURPOSE "Enables f2py support"
-)
 set_package_properties(LAPACK PROPERTIES
   DESCRIPTION "LAPACK library"
   TYPE RECOMMENDED
@@ -309,10 +290,11 @@ if (SKBUILD_SCRIPTS_DIR)
   install(FILES ${SCRIPTS} DESTINATION ${SKBUILD_SCRIPTS_DIR})
 endif()
 
+# Write summary
 feature_summary(
-  WHAT ALL #ENABLED_FEATURES DISABLED_FEATURES PACKAGES_FOUND
+  WHAT ALL
   DESCRIPTION "PyNE Configuration Summary"
   INCLUDE_QUIET_PACKAGES
-  FILENAME ${CMAKE_BINARY_DIR}/summary.log
+  FILENAME ${CMAKE_SOURCE_DIR}/summary.log
 )
-message(STATUS "Summary log written to ${CMAKE_BINARY_DIR}/summary.log")
+message(STATUS "Summary log written to ${CMAKE_SOURCE_DIR}/summary.log")

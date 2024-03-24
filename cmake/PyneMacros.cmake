@@ -117,13 +117,6 @@ macro(pyne_setup_fortran)
   # add -fallow-argument-mismatch to fix build with gfortran 10+
   # https://github.com/pyne/pyne/issues/1416
   set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fallow-argument-mismatch")
-
-  # Set package properties
-  set_package_properties(Fortran PROPERTIES
-  DESCRIPTION "Fortran compiler"
-  TYPE REQUIRED
-  PURPOSE "Enables Fortran support"
-  )
 endmacro()
 
 # Print pyne logo
@@ -185,8 +178,8 @@ macro(pyne_download_files)
   # Download CRAM solver from PyNE data
   download_src("http://raw.githubusercontent.com/pyne/data/master" "cram" ".c")
 
-  if (PYNE_FAST_COMPILE)
-    if (NOT WIN32)
+  if(PYNE_FAST_COMPILE)
+    if(NOT WIN32)
       # Download bateman solver from PyNE data
       download_platform_specific("http://raw.githubusercontent.com/pyne/data/master" "decay" ".s")
       # Download CRAM solver from PyNE data
@@ -202,7 +195,7 @@ endmacro()
 macro(fast_compile _srcname _gnuflags _clangflags _otherflags)
   get_filename_component(_base "${_srcname}" NAME_WE)  # get the base name, without the extension
   # get the assembly file name
-  if (PYNE_ASM_PLATFORM)
+  if(PYNE_ASM_PLATFORM)
     set(_asmname "${_base}-${PYNE_ASM_PLATFORM}.s")
   else()
     set(_asmname "${_base}-NOTFOUND")
@@ -222,9 +215,9 @@ macro(fast_compile _srcname _gnuflags _clangflags _otherflags)
     set(PYNE_SRCS "${_filename}" "${PYNE_SRCS}")
 
   # set some compile flags for the selected file
-  if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     set_source_files_properties("${_filename}" PROPERTIES COMPILE_FLAGS "${_clangflags}")
-  elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+  elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     set_source_files_properties("${_filename}" PROPERTIES COMPILE_FLAGS "${_gnuflags}")
   else()
     set_source_files_properties("${_filename}" PROPERTIES COMPILE_FLAGS "${_otherflags}")
