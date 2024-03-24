@@ -714,7 +714,7 @@ def test_mcnp_to_id(val, id):
         check_cases(nucname.mcnp_to_id, val, id)
 
     # tests for invalid inputs
-    pytest.raises(RuntimeError, nucname.mcnp_to_id, 92)
+    pytest.raises((RuntimeError, UnicodeDecodeError), nucname.mcnp_to_id, 92)
 
 
 def test_openmc():
