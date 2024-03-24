@@ -48,13 +48,23 @@ message(STATUS "Modules to Cythonize: ${PYNE_CYTHON_MODULES}")
 
 foreach(PYNE_CYTHON_MODULE ${PYNE_CYTHON_MODULES})
     # Cram is actually a C, not C++ file
-    if (NOT "${PYNE_CYTHON_MODULE}" STREQUAL "cram")
+    if(NOT "${PYNE_CYTHON_MODULE}" STREQUAL "cram")
         set(PYNE_CYTHON_ARGS --cplus)
         set(PYNE_CYTHON_EXT cxx)
     else()
         set(PYNE_CYTHON_ARGS)
         set(PYNE_CYTHON_EXT c)
     endif()
+
+    # Add different libraries
+    if("${PYNE_CYTHON_MODULE}" STREQUAL "dagmc")
+      set(PYNE_CYTHON_LIBS ${CMAKE_PROJECT_NAME} MOAB dagmc)
+    elseif("${PYNE_CYTHON_MODULE}" STREQUAL "source_sampling")
+      set(PYNE_CYTHON_LIBS ${CMAKE_PROJECT_NAME} MOAB)
+    else()
+      set(PYNE_CYTHON_LIBS ${CMAKE_PROJECT_NAME})
+    endif()
+
     # Build C++/C file
     add_custom_command(
         OUTPUT ${PYNE_CYTHON_MODULE}.${PYNE_CYTHON_EXT}
@@ -79,12 +89,8 @@ foreach(PYNE_CYTHON_MODULE ${PYNE_CYTHON_MODULES})
     # Add the pyne library as a dependency
     add_dependencies(${PYNE_CYTHON_MODULE} ${CMAKE_PROJECT_NAME})
 
-    if (NOT "${PYNE_CYTHON_MODULE}" STREQUAL "dagmc")
-      # Link the target with the pyne library
-      target_link_libraries(${PYNE_CYTHON_MODULE} PRIVATE ${CMAKE_PROJECT_NAME})
-    else()
-      target_link_libraries(${PYNE_CYTHON_MODULE} PRIVATE dagmc MOAB ${CMAKE_PROJECT_NAME})
-    endif()
+    # Link the target with the pyne library
+    target_link_libraries(${PYNE_CYTHON_MODULE} PRIVATE ${PYNE_CYTHON_LIBS})
 
     # Configure the RPATH
     set_target_properties(${PYNE_CYTHON_MODULE} PROPERTIES
@@ -100,7 +106,7 @@ if(BUILD_SPATIAL_SOLVER)
   include_directories(${F2PY_INCLUDE_DIR})
   # Common variables
   set(f2py_module_name "transport_spatial_methods")
-  set(fortran_src_file "${PROJECT_SOURCE_DIR}/src/transport_spatial_methods/3d/precision_module.f90")
+  set(fortran_src_file "${PROJECT_SOURCE_DIR}/src/transport_spatial_methods/3d/main.f90")
   set(f2py_module_c "${f2py_module_name}module.c")
 
   # Generate sources
@@ -113,7 +119,7 @@ if(BUILD_SPATIAL_SOLVER)
     COMMAND ${Python_EXECUTABLE}  -m "numpy.f2py"
             -I${PROJECT_BINARY_DIR}/src
             "${fortran_src_file}"
-            -m "transport_spatial_methods"
+            -m "${f2py_module_name}"
             --lower # Important
     DEPENDS ${CMAKE_PROJECT_NAME}
   )
@@ -126,8 +132,8 @@ if(BUILD_SPATIAL_SOLVER)
   )
 
   # Depend on sources
-  target_include_directories(${f2py_module_name} PRIVATE "${F2PY_INCLUDE_DIR}")
-  target_link_libraries(${f2py_module_name} PRIVATE Python::NumPy ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES} ${CMAKE_PROJECT_NAME})
+  target_include_directories(${f2py_module_name} PUBLIC ${F2PY_INCLUDE_DIR})
+  target_link_libraries(${f2py_module_name} PUBLIC Python::NumPy ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES} ${CMAKE_PROJECT_NAME})
   
   # Configure the RPATH
   set_target_properties(${f2py_module_name} PROPERTIES
