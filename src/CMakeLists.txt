@@ -64,20 +64,14 @@ set(TRANSPORT_SPATIAL_METHODS_SRCS
   #"transport_spatial_methods/3d/main.f90"
   )
 set(MOAB_SRCS
-    "measure.cpp"
-    "source_sampling.cpp"
-    )
-
-
-#check operating system
-IF(NOT ${PYNE_PLATFORM} STREQUAL "__LINUX__")
-  set(BUILD_SPATIAL_SOLVER false)
-ENDIF()
+  "measure.cpp"
+  "source_sampling.cpp"
+  )
 
 # setup source files
-IF(BUILD_SPATIAL_SOLVER)
+if(BUILD_SPATIAL_SOLVER)
   set(PYNE_SRCS "${PYNE_SRCS}" "${TRANSPORT_SPATIAL_METHODS_SRCS}")
-ENDIF()
+endif()
 
 if(MOAB_FOUND)
   set(PYNE_SRCS "${PYNE_SRCS}" "${MOAB_SRCS}")
@@ -88,73 +82,101 @@ fast_compile(decay.cpp "-O0" "-O0" "-O0")
 fast_compile(cram.c
   "-O0 -fcx-fortran-rules -fcx-limited-range -ftree-sra -ftree-ter -fexpensive-optimizations"
   "-O0 -ffast-math"
-  "-O0")
+  "-O0"
+  )
 
 # compile and link library
-add_library(pyne ${PYNE_SRCS})
+add_library(${CMAKE_PROJECT_NAME} ${PYNE_SRCS})
 if(NOT HDF5_FOUND)
-  add_dependencies(pyne hdf5)
+  add_dependencies(${CMAKE_PROJECT_NAME} hdf5)
 endif()
 if("${LIBS_HDF5}" STREQUAL "")
-  target_link_libraries(pyne PRIVATE hdf5)
+  target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE hdf5)
 else()
-  target_link_libraries(pyne PRIVATE ${LIBS_HDF5})
+  target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE ${LIBS_HDF5})
 endif()
-IF(BUILD_SPATIAL_SOLVER)
+if(BUILD_SPATIAL_SOLVER)
     if (NOT BLAS_FOUND)
-    add_dependencies(pyne blas)
+    add_dependencies(${CMAKE_PROJECT_NAME} blas)
     endif()
     if (NOT LAPACK_FOUND)
-    add_dependencies(pyne lapack)
+    add_dependencies(${CMAKE_PROJECT_NAME} lapack)
     endif()
     if (NOT BLAS_FOUND AND NOT LAPACK_FOUND)
-      add_dependencies(lapack blas)
+      add_dependencies(${CMAKE_PROJECT_NAME} blas)
     endif()
-    target_link_libraries(pyne PRIVATE ${LIBS_HDF5} ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES})
-ENDIF(BUILD_SPATIAL_SOLVER)
+    target_link_libraries(${CMAKE_PROJECT_NAME} 
+      PRIVATE ${LIBS_HDF5} ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES}
+      )
+endif(BUILD_SPATIAL_SOLVER)
 if(MOAB_FOUND)
-    target_link_libraries(pyne PRIVATE MOAB)
+    target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE MOAB)
 endif(MOAB_FOUND)
 if(DAGMC_FOUND)
-    target_link_libraries(pyne PRIVATE dagmc MOAB)
+    target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE dagmc MOAB)
 endif(DAGMC_FOUND)
 
 if(ENABLE_ENSDF_PROCESSING)
-  add_executable(alphad ${PROJECT_SOURCE_DIR}/src/ensdf_processing/ALPHAD/alphad.f
-                        ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f)
-  add_executable(delta ${PROJECT_SOURCE_DIR}/src/ensdf_processing/DELTA/delta.for)
-  add_executable(gtol ${PROJECT_SOURCE_DIR}/src/ensdf_processing/GTOL/gtol.f
-                      ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f)
-  add_executable(bldhst ${PROJECT_SOURCE_DIR}/src/ensdf_processing/HSICC/bldhst.for)
-  add_executable(hsicc ${PROJECT_SOURCE_DIR}/src/ensdf_processing/HSICC/hsicc.for
-                       ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f)
-  add_executable(hsmrg ${PROJECT_SOURCE_DIR}/src/ensdf_processing/HSICC/hsmrg.for
-                       ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f)
-  add_executable(seqhst ${PROJECT_SOURCE_DIR}/src/ensdf_processing/HSICC/seqhst.for
-                        ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f)
-  add_executable(logft ${PROJECT_SOURCE_DIR}/src/ensdf_processing/LOGFT/logft.for
-                       ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f)
-  add_executable(radd ${PROJECT_SOURCE_DIR}/src/ensdf_processing/RADD/RadD.for)
-  add_executable(ruler ${PROJECT_SOURCE_DIR}/src/ensdf_processing/RULER/ruler.f
-                       ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f)
+  add_executable(alphad 
+    ${PROJECT_SOURCE_DIR}/src/ensdf_processing/ALPHAD/alphad.f
+    ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f
+    )
+  add_executable(delta 
+    ${PROJECT_SOURCE_DIR}/src/ensdf_processing/DELTA/delta.for
+    )
+  add_executable(gtol 
+    ${PROJECT_SOURCE_DIR}/src/ensdf_processing/GTOL/gtol.f
+    ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f
+    )
+  add_executable(bldhst 
+    ${PROJECT_SOURCE_DIR}/src/ensdf_processing/HSICC/bldhst.for
+    )
+  add_executable(hsicc 
+    ${PROJECT_SOURCE_DIR}/src/ensdf_processing/HSICC/hsicc.for
+    ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f
+    )
+  add_executable(hsmrg 
+    ${PROJECT_SOURCE_DIR}/src/ensdf_processing/HSICC/hsmrg.for
+    ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f
+    )
+  add_executable(seqhst 
+    ${PROJECT_SOURCE_DIR}/src/ensdf_processing/HSICC/seqhst.for
+    ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f
+    )
+  add_executable(logft 
+    ${PROJECT_SOURCE_DIR}/src/ensdf_processing/LOGFT/logft.for
+    ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f
+    )
+  add_executable(radd 
+    ${PROJECT_SOURCE_DIR}/src/ensdf_processing/RADD/RadD.for
+    )
+  add_executable(ruler 
+    ${PROJECT_SOURCE_DIR}/src/ensdf_processing/RULER/ruler.f
+    ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f
+    )
 endif(ENABLE_ENSDF_PROCESSING)
 
 # Print include dir
 get_property(inc_dirs DIRECTORY PROPERTY INCLUDE_DIRECTORIES)
-message("-- Include paths for ${CMAKE_CURRENT_SOURCE_DIR}: ${inc_dirs}")
+message(STATUS "Include paths for ${CMAKE_CURRENT_SOURCE_DIR}: ${inc_dirs}")
 
 
 #
 # Install header files
 #
-FILE(GLOB h_files "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
-FILE(GLOB hpp_files "${CMAKE_CURRENT_SOURCE_DIR}/*.hpp")
-SET(h_files ${h_files} ${hpp_files})
-INSTALL(FILES ${h_files} DESTINATION include/pyne COMPONENT headers)
+file(GLOB h_files "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
+file(GLOB hpp_files "${CMAKE_CURRENT_SOURCE_DIR}/*.hpp")
+set(h_files ${h_files} ${hpp_files})
+install(FILES ${h_files} 
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/pyne 
+  COMPONENT headers
+  )
 
 
 #
 # Install libpyne
 #
-
-INSTALL(TARGETS pyne LIBRARY DESTINATION lib COMPONENT pyne)
+install(TARGETS ${CMAKE_PROJECT_NAME} LIBRARY 
+  DESTINATION ${CMAKE_INSTALL_LIBDIR} 
+  COMPONENT ${CMAKE_PROJECT_NAME}
+)
