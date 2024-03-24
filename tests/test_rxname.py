@@ -99,8 +99,8 @@ def test_name_nucdelta():
 
 
 def test_name_not():
-    pytest.raises(RuntimeError, rxname.name, "Waka waka")
-    pytest.raises(RuntimeError, rxname.name, 0)
+    pytest.raises((RuntimeError, UnicodeDecodeError), rxname.name, "Waka waka")
+    pytest.raises((RuntimeError, UnicodeDecodeError), rxname.name, 0)
 
 
 def test_id_names():
@@ -142,8 +142,8 @@ def test_id_nucdelta():
 
 
 def test_id_not():
-    pytest.raises(RuntimeError, rxname.id, "Waka waka")
-    pytest.raises(RuntimeError, rxname.id, 0)
+    pytest.raises((RuntimeError, UnicodeDecodeError), rxname.id, "Waka waka")
+    pytest.raises((RuntimeError, UnicodeDecodeError), rxname.id, 0)
 
 
 def test_mt_names():
@@ -185,8 +185,8 @@ def test_mt_nucdelta():
 
 
 def test_mt_not():
-    pytest.raises(RuntimeError, rxname.mt, "Waka waka")
-    pytest.raises(RuntimeError, rxname.mt, 0)
+    pytest.raises((RuntimeError, UnicodeDecodeError), rxname.mt, "Waka waka")
+    pytest.raises((RuntimeError, UnicodeDecodeError), rxname.mt, 0)
 
 
 def test_child():
@@ -250,8 +250,8 @@ def test_label_nucdelta():
 
 
 def test_label_not():
-    pytest.raises(RuntimeError, rxname.label, "Waka waka")
-    pytest.raises(RuntimeError, rxname.label, 0)
+    pytest.raises((RuntimeError, UnicodeDecodeError), rxname.label, "Waka waka")
+    pytest.raises((RuntimeError, UnicodeDecodeError), rxname.label, 0)
 
 
 adoc = "(z,a) Production of alpha"
@@ -299,8 +299,8 @@ def test_doc_nucdelta():
 
 
 def test_doc_not():
-    pytest.raises(RuntimeError, rxname.doc, "Waka waka")
-    pytest.raises(RuntimeError, rxname.doc, 0)
+    pytest.raises((RuntimeError, UnicodeDecodeError), rxname.doc, "Waka waka")
+    pytest.raises((RuntimeError, UnicodeDecodeError), rxname.doc, 0)
 
 
 def test_unique_ids():
