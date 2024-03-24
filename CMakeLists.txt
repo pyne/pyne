@@ -285,9 +285,11 @@ else()
     list(FILTER SCRIPTS EXCLUDE REGEX "\\.bat$")
 endif()
 
-# Install scripts to SKBUILD_SCRIPTS_DIR
-if (SKBUILD_SCRIPTS_DIR)
-  install(FILES ${SCRIPTS} DESTINATION ${SKBUILD_SCRIPTS_DIR})
+# Install scripts to bin directory
+if(SKBUILD_SCRIPTS_DIR)
+  install(PROGRAMS ${SCRIPTS} DESTINATION ${SKBUILD_SCRIPTS_DIR})
+else()
+  install(PROGRAMS ${SCRIPTS} DESTINATION ${CMAKE_INSTALL_BINDIR})
 endif()
 
 # Write summary
