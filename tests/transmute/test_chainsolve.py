@@ -18,13 +18,7 @@ from pyne import data
 from pyne.material import Material
 from pyne.transmute.chainsolve import Transmuter
 
-tm = None
-
-
-def setup():
-    global tm
-    tm = Transmuter()
-
+tm = Transmuter()
 
 def teardown():
     global tm
