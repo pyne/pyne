@@ -3,7 +3,7 @@ import pytest
 try:
     from spatial_solvers import ahot_script
 except:
-     raise pytest.skip("No ahot_script available", allow_module_level=True)
+    pytest.skip("No module named pyne.transport_spatial_methods", allow_module_level=True)
 
 def test_ahotn_ln():
     ahot_script.test_ahotn_ln()

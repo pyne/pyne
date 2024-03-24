@@ -29,7 +29,7 @@ try:
         pyne_mod = imp.load_module("pyne", *pyne_info)
         imp.find_module("dagmc", pyne_mod.__path__)
 except ImportError:
-    raise pytest.skip(allow_module_level=True)
+    raise pytest.skip("No DAGMC. Skipping tests", allow_module_level=True)
 
 if sys.version_info[0] < 3:
     STRING_TYPES = (basestring, str, unicode)

@@ -16,7 +16,7 @@ def test_alphad():
     try:
         output_dict = ensdf_processing.alphad(input_dict)
     except OSError:
-        pytest.skip()
+        pytest.skip("Alphad not found", allow_module_level=True)
     exceptions = [[2, "DATE RUN"]]
     file_comp(
         input_dict["report_file"],
@@ -69,7 +69,7 @@ def test_bldhst():
     try:
         output_dict = ensdf_processing.bldhst(input_dict)
     except OSError:
-        pytest.skip()
+        pytest.skip("Bldhst not found", allow_module_level=True)
     ref_table = "ensdf_processing/bldhst/ref_icctbl.dat"
     ref_index = "ensdf_processing/bldhst/ref_iccndx.dat"
     d_table = file_comp(input_dict["output_table_file"], ref_table, [])
@@ -85,7 +85,7 @@ def test_delta():
     try:
         output_dict = ensdf_processing.delta(input_dict)
     except OSError:
-        pytest.skip()
+        pytest.skip("Delta not found", allow_module_level=True)
     # exceptions contain lines in the ouptut that can have a tolerable
     # precision difference
     exceptions = [
@@ -153,7 +153,7 @@ def test_gtol():
     try:
         output_dict = ensdf_processing.gtol(input_dict)
     except OSError:
-        pytest.skip()
+        pytest.skip("Gtol not found", allow_module_level=True)
     ref_output_report = "ensdf_processing/gtol/ref_gtol.rpt"
     exceptions = [[1, "DATE:"], [1, "INPUT-FILE name:"], [1, "TIME:"]]
     d_report = file_comp(input_dict["report_file"], ref_output_report, exceptions)
@@ -173,7 +173,7 @@ def test_hsicc():
     try:
         output_dict = ensdf_processing.hsicc(input_dict)
     except OSError:
-        pytest.skip()
+        pytest.skip("Hsicc not found", allow_module_level=True)
     ref_report = "ensdf_processing/hsicc/ref_hscalc.lst"
     ref_card_deck = "ensdf_processing/hsicc/ref_cards.new"
     ref_comparison_report = "ensdf_processing/hsicc/ref_compar.lst"
@@ -196,7 +196,7 @@ def test_hsmrg():
     try:
         output_dict = ensdf_processing.hsmrg(input_dict)
     except OSError:
-        pytest.skip()
+        pytest.skip("Hsmrg not found", allow_module_level=True)
     ref_deck = "ensdf_processing/hsmrg/ref_cards.mrg"
     d_report = file_comp(input_dict["merged_data_deck"], ref_deck, [])
     cleanup_tmp()
@@ -212,7 +212,7 @@ def test_seqhst():
     try:
         output_dict = ensdf_processing.seqhst(input_dict)
     except OSError:
-        pytest.skip()
+        pytest.skip("Seqhst not found", allow_module_level=True)
     ref_sequence = "ensdf_processing/seqhst/ref_iccseq.dat"
     d_report = file_comp(input_dict["sequential_output_file"], ref_sequence, [])
     cleanup_tmp()
@@ -228,7 +228,7 @@ def test_logft():
     try:
         output_dict = ensdf_processing.logft(input_dict)
     except OSError:
-        pytest.skip()
+        pytest.skip("Logft not found", allow_module_level=True)
     ref_output_data_set = "ensdf_processing/logft/ref_logft.new"
     d_data = file_comp(input_dict["output_data_set"], ref_output_data_set, [])
     cleanup_tmp()
@@ -243,7 +243,7 @@ def test_radd():
     try:
         ensdf_processing.radd(input_dict)
     except OSError:
-        pytest.skip()
+        pytest.skip("Radd not found", allow_module_level=True)
     ref_output = "ensdf_processing/radd/ref_output.out"
     d_report = file_comp(input_dict["output_file"], ref_output, [])
     cleanup_tmp()
@@ -295,7 +295,7 @@ def test_ruler():
     try:
         output_dict = ensdf_processing.ruler(input_dict)
     except OSError:
-        pytest.skip()
+        pytest.skip("Ruler not found", allow_module_level=True)
     ref_output = "ensdf_processing/ruler/ref_ruler.rpt"
     exceptions = [[1, "         INPUT FILE:"], [1, "RULER Version 3.2d [20-Jan-2009]"]]
     d_report = file_comp(input_dict["output_report_file"], ref_output, exceptions)

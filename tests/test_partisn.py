@@ -137,7 +137,7 @@ def test_get_coord_sys_1D():
     """Test the _get_coord_sys function for a 1D mesh."""
 
     if not HAVE_PYMOAB:
-        pytest.skip()
+        pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
 
     # Create mesh
     xvals = [0.0, 2.0]
@@ -162,7 +162,7 @@ def test_get_coord_sys_2D():
     """Test the _get_coord_sys function for a 2D mesh."""
 
     if not HAVE_PYMOAB:
-        pytest.skip()
+        pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
 
     # Create mesh
     xvals = [-1.0, 0.0, 2.0]
@@ -187,7 +187,7 @@ def test_get_coord_sys_3D():
     """Test the _get_coord_sys function for a 3D mesh."""
 
     if not HAVE_PYMOAB:
-        pytest.skip()
+        pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
 
     # Create mesh
     xvals = [-1.0, 0.0, 2.0]
@@ -269,10 +269,10 @@ def test_get_zones_no_void():
     try:
         from pyne import dagmc
     except:
-        raise pytest.skip()
+        raise pytest.skip("No DAGMC. Skipping tests", allow_module_level=True)
 
     if not HAVE_PYMOAB:
-        pytest.skip()
+        pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
     p = multiprocessing.Pool()
     r = p.apply_async(get_zones_no_void)
     p.close()
@@ -324,10 +324,10 @@ def test_get_zones_iteration_order():
     try:
         from pyne import dagmc
     except:
-        pytest.skip()
+        pytest.skip("No DAGMC. Skipping tests", allow_module_level=True)
 
     if not HAVE_PYMOAB:
-        pytest.skip()
+        pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
 
     p = multiprocessing.Pool()
     r = p.apply_async(get_zones_iteration_order)
@@ -394,10 +394,10 @@ def test_get_zones_with_void():
     try:
         from pyne import dagmc
     except:
-        pytest.skip()
+        pytest.skip("No DAGMC. Skipping tests", allow_module_level=True)
 
     if not HAVE_PYMOAB:
-        pytest.skip()
+        pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
 
     p = multiprocessing.Pool()
     r = p.apply_async(get_zones_with_void)
@@ -469,10 +469,10 @@ def test_write_partisn_input_1D():
     try:
         from pyne import dagmc
     except:
-        pytest.skip()
+        pytest.skip("No DAGMC. Skipping tests", allow_module_level=True)
 
     if not HAVE_PYMOAB:
-        pytest.skip()
+        pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
 
     p = multiprocessing.Pool()
     r = p.apply_async(write_partisn_input_1D)
@@ -526,10 +526,10 @@ def test_write_partisn_input_2D():
     try:
         from pyne import dagmc
     except:
-        pytest.skip()
+        pytest.skip("No DAGMC. Skipping tests", allow_module_level=True)
 
     if not HAVE_PYMOAB:
-        pytest.skip()
+        pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
 
     p = multiprocessing.Pool()
     r = p.apply_async(write_partisn_input_2D)
@@ -583,10 +583,10 @@ def test_write_partisn_input_3D():
     try:
         from pyne import dagmc
     except:
-        pytest.skip()
+        pytest.skip("No DAGMC. Skipping tests", allow_module_level=True)
 
     if not HAVE_PYMOAB:
-        pytest.skip()
+        pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
 
     p = multiprocessing.Pool()
     r = p.apply_async(write_partisn_input_3D)
@@ -647,10 +647,10 @@ def test_write_partisn_input_with_names_dict():
     try:
         from pyne import dagmc
     except:
-        pytest.skip()
+        pytest.skip("No DAGMC. Skipping tests", allow_module_level=True)
 
     if not HAVE_PYMOAB:
-        pytest.skip()
+        pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
 
     p = multiprocessing.Pool()
     r = p.apply_async(write_partisn_input_with_names_dict)
@@ -744,7 +744,7 @@ def test_write_partisn_input_options():
     """Test full input file creation for 1D case with a lot of key work args"""
 
     if not HAVE_PYMOAB:
-        pytest.skip()
+        pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
 
     p = multiprocessing.Pool()
     r = p.apply_async(write_partisn_input_options)
@@ -767,10 +767,10 @@ def test_mesh_to_isotropic_source():
     try:
         from pyne import dagmc
     except:
-        pytest.skip()
+        pytest.skip("No DAGMC. Skipping tests", allow_module_level=True)
 
     if not HAVE_PYMOAB:
-        pytest.skip()
+        pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
 
     m = Mesh(structured=True, structured_coords=[range(5), range(5), range(5)])
     m.src = NativeMeshTag(4, float)
@@ -863,10 +863,10 @@ def test_isotropic_vol_source():
     try:
         from pyne import dagmc
     except:
-        pytest.skip()
+        pytest.skip("No DAGMC. Skipping tests", allow_module_level=True)
 
     if not HAVE_PYMOAB:
-        pytest.skip()
+        pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
 
     sc = np.linspace(-25, 25, 6)
     m = Mesh(structured=True, structured_coords=[sc, sc, sc])

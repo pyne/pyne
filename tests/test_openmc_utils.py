@@ -158,11 +158,11 @@ def test_calc_structured_coords():
 
 def test_get_e_bounds_from_openmc_sp():
     if not HAVE_PYMOAB or sys.version_info[0] == 2:
-        pytest.skip()
+        pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
     try:
         import openmc
     except:
-        pytest.skip()
+        pytest.skip("No openmc. Skipping tests", allow_module_level=True)
     # energy bin: [0.0, 1.0, 20.0], 2bins
     # 6 volume elemenes
     filename = os.path.join(cwd, "files_test_openmc", "statepoint.10.ebin2.ves6.h5")
@@ -201,11 +201,11 @@ def test_flux_changes_order():
 
 def test_get_result_error_from_openmc_sp():
     if not HAVE_PYMOAB or sys.version_info[0] == 2:
-        pytest.skip()
+        pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
     try:
         import openmc
     except:
-        pytest.skip()
+        pytest.skip("No openmc. Skipping tests", allow_module_level=True)
     filename = os.path.join(
         os.getcwd(), "files_test_openmc", "statepoint.10.ebin2.ves6.h5"
     )
@@ -262,11 +262,11 @@ def test_get_result_error_from_openmc_sp():
 
 def test_create_meshtally():
     if not HAVE_PYMOAB or sys.version_info[0] == 2:
-        pytest.skip()
+        pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
     try:
         import openmc
     except:
-        pytest.skip()
+        pytest.skip("No openmc. Skipping tests", allow_module_level=True)
     # mesh read from openmc state point file
     # Parameters of the tally and mesh
     # mesh = openmc_utils.Mesh(mesh_id=1, name="n_flux")
