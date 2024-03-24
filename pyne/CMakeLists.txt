@@ -34,38 +34,57 @@ set(PYNE_CYTHON_MODULES
     )
 if(MOAB_FOUND)
   set(PYNE_CYTHON_MODULES ${PYNE_CYTHON_MODULES} source_sampling)
-endif(MOAB_FOUND)
+endif()
+
+if(DAGMC_FOUND)
+  set(PYNE_CYTHON_MODULES ${PYNE_CYTHON_MODULES} dagmc)
+endif()
+
+if(NOT WIN32)
+  set(PYNE_CYTHON_MODULES ${PYNE_CYTHON_MODULES} cram)
+endif()
 
 message(STATUS "Modules to Cythonize: ${PYNE_CYTHON_MODULES}")
 
 foreach(PYNE_CYTHON_MODULE ${PYNE_CYTHON_MODULES})
-
-    # Build C++ file
+    # Cram is actually a C, not C++ file
+    if (NOT "${PYNE_CYTHON_MODULE}" STREQUAL "cram")
+        set(PYNE_CYTHON_ARGS --cplus)
+        set(PYNE_CYTHON_EXT cxx)
+    else()
+        set(PYNE_CYTHON_ARGS)
+        set(PYNE_CYTHON_EXT c)
+    endif()
+    # Build C++/C file
     add_custom_command(
-        OUTPUT ${PYNE_CYTHON_MODULE}.cxx
+        OUTPUT ${PYNE_CYTHON_MODULE}.${PYNE_CYTHON_EXT}
         DEPENDS ${PYNE_CYTHON_MODULE}.pyx
         VERBATIM
-        COMMAND "${CYTHON}" --cplus 
+        COMMAND "${CYTHON}" ${PYNE_CYTHON_ARGS}
                 -I ${CMAKE_SOURCE_DIR}/src 
                 -I ${CMAKE_BINARY_DIR}/src 
                 -I ${CMAKE_CURRENT_SOURCE_DIR} 
                 -I ${CMAKE_CURRENT_BINARY_DIR} 
                 -I ${Python_NumPy_INCLUDE_DIRS}
                 "${CMAKE_CURRENT_SOURCE_DIR}/${PYNE_CYTHON_MODULE}.pyx" 
-                --output-file "${CMAKE_CURRENT_BINARY_DIR}/${PYNE_CYTHON_MODULE}.cxx"
+                --output-file "${CMAKE_CURRENT_BINARY_DIR}/${PYNE_CYTHON_MODULE}.${PYNE_CYTHON_EXT}"
     )
 
     # Creating a Python module
     python_add_library(
-        ${PYNE_CYTHON_MODULE} MODULE "${CMAKE_CURRENT_BINARY_DIR}/${PYNE_CYTHON_MODULE}.cxx"
+        ${PYNE_CYTHON_MODULE} MODULE "${CMAKE_CURRENT_BINARY_DIR}/${PYNE_CYTHON_MODULE}.${PYNE_CYTHON_EXT}"
         WITH_SOABI
     )
 
     # Add the pyne library as a dependency
     add_dependencies(${PYNE_CYTHON_MODULE} ${CMAKE_PROJECT_NAME})
 
-    # Link the target with the pyne library
-    target_link_libraries(${PYNE_CYTHON_MODULE} PRIVATE ${CMAKE_PROJECT_NAME})
+    if (NOT "${PYNE_CYTHON_MODULE}" STREQUAL "dagmc")
+      # Link the target with the pyne library
+      target_link_libraries(${PYNE_CYTHON_MODULE} PRIVATE ${CMAKE_PROJECT_NAME})
+    else()
+      target_link_libraries(${PYNE_CYTHON_MODULE} PRIVATE dagmc MOAB ${CMAKE_PROJECT_NAME})
+    endif()
 
     # Configure the RPATH
     set_target_properties(${PYNE_CYTHON_MODULE} PROPERTIES
@@ -76,92 +95,6 @@ foreach(PYNE_CYTHON_MODULE ${PYNE_CYTHON_MODULES})
     install(TARGETS ${PYNE_CYTHON_MODULE} DESTINATION ../.)
 endforeach()
 
-#
-# Cram is actually a C, not C++ file
-#
-
-# Build C file
-add_custom_command(
-    OUTPUT cram.c
-    DEPENDS cram.pyx
-    VERBATIM
-    COMMAND "${CYTHON}"
-            -I ${CMAKE_SOURCE_DIR}/src 
-            -I ${CMAKE_BINARY_DIR}/src 
-            -I ${CMAKE_CURRENT_SOURCE_DIR} 
-            -I ${CMAKE_CURRENT_BINARY_DIR}
-            -I ${Python_NumPy_INCLUDE_DIRS}
-            "${CMAKE_CURRENT_SOURCE_DIR}/cram.pyx" 
-            --output-file "${CMAKE_CURRENT_BINARY_DIR}/cram.c"
-)
-
-# Creating a Python module
-python_add_library(
-    cram MODULE "${CMAKE_CURRENT_BINARY_DIR}/cram.c"
-    WITH_SOABI
-)
-
-# Add the pyne library as a dependency
-add_dependencies(cram ${CMAKE_PROJECT_NAME})
-
-# Link the target with the pyne library
-target_link_libraries(cram PRIVATE ${CMAKE_PROJECT_NAME})
-
-# Configure the RPATH
-set_target_properties(cram PROPERTIES
-  INSTALL_RPATH "$ORIGIN/core/lib"
-)
-
-# Install the target in the pyne directory
-install(TARGETS cram DESTINATION ../.)
-
-#
-# dagmc requires a rename and is only built if we have MOAB.
-#
-if(DAGMC_FOUND)
-  # Build C++ file
-  add_custom_command(
-    OUTPUT _dagmc.cxx
-    DEPENDS _dagmc.pyx
-    VERBATIM
-    COMMAND "${CYTHON}" --cplus 
-            -I ${CMAKE_SOURCE_DIR}/src 
-            -I ${CMAKE_BINARY_DIR}/src 
-            -I ${CMAKE_CURRENT_SOURCE_DIR} 
-            -I ${CMAKE_CURRENT_BINARY_DIR} 
-            -I ${Python_NumPy_INCLUDE_DIRS}
-            "${CMAKE_CURRENT_SOURCE_DIR}/_dagmc.pyx" 
-            --output-file "${CMAKE_CURRENT_BINARY_DIR}/_dagmc.cxx"
-  )
-
-  # Creating a Python module
-  python_add_library(
-      _dagmc MODULE "${CMAKE_CURRENT_BINARY_DIR}/_dagmc.cxx"
-      WITH_SOABI
-  )
-
-  # Add the PyNE library as a dependency
-  add_dependencies(_dagmc ${CMAKE_PROJECT_NAME})
-
-  # Link the target with the pyne library
-  target_link_libraries(_dagmc PRIVATE dagmc MOAB ${CMAKE_PROJECT_NAME})
-
-  # Rename the dagmc library
-  set_target_properties(_dagmc PROPERTIES OUTPUT_NAME dagmc)
-
-  # Configure the RPATH
-  set_target_properties(dagmc PROPERTIES
-    INSTALL_RPATH "$ORIGIN/core/lib"
-  )
-
-  # Install the target in the pyne directory
-  install(TARGETS dagmc DESTINATION ../.)
-
-endif(DAGMC_FOUND)
-
-#
-# Spatial Solver
-#
 
 if(BUILD_SPATIAL_SOLVER)
   include_directories(${F2PY_INCLUDE_DIR})
@@ -195,6 +128,11 @@ if(BUILD_SPATIAL_SOLVER)
   # Depend on sources
   target_include_directories(${f2py_module_name} PRIVATE "${F2PY_INCLUDE_DIR}")
   target_link_libraries(${f2py_module_name} PRIVATE Python::NumPy ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES} ${CMAKE_PROJECT_NAME})
+  
+  # Configure the RPATH
+  set_target_properties(${f2py_module_name} PROPERTIES
+    INSTALL_RPATH "$ORIGIN/core/lib"
+  )
   add_dependencies(${f2py_module_name} genpyf)
   install(TARGETS ${f2py_module_name} DESTINATION ../.)
 endif()
