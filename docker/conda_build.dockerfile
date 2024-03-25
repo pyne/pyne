@@ -63,13 +63,16 @@ RUN conda install conda-forge::dagmc
 FROM dagmc AS openmc
 RUN conda install conda-forge::openmc
 
-# Build/Install PyNE from develop branch
-FROM ${pyne_test_base} AS pyne-dev
+# Build/Install PyNE from release branch
+FROM ${pyne_test_base} AS pyne
+ARG build_hdf5
 
 RUN export PYNE_HDF5_ARGS="" ;\
-    && cd $HOME/opt \
-    && git clone -b develop --single-branch https://github.com/pyne/pyne.git \
-    && cd pyne \
+    if [ "$build_hdf5" != "NO" ]; then \
+            export PYNE_HDF5_ARGS="--hdf5 $HDF5_INSTALL_PATH" ; \
+    fi;
+COPY . $HOME/opt/pyne
+RUN cd $HOME/opt/pyne \
     && python setup.py install --user \
                                 $PYNE_MOAB_ARGS $PYNE_DAGMC_ARGS \
                                 $PYNE_HDF5_ARGS \
@@ -79,3 +82,4 @@ RUN cd $HOME \
     && nuc_data_make \
     && cd $HOME/opt/pyne/tests \
     && ./ci-run-tests.sh python3
+    
