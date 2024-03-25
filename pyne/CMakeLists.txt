@@ -117,28 +117,27 @@ if(BUILD_SPATIAL_SOLVER)
   add_custom_command(
     OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${f2py_module_c}"
     COMMAND ${Python_EXECUTABLE}  -m "numpy.f2py"
-            -I${PROJECT_BINARY_DIR}/src
             "${fortran_src_file}"
-            -m "${f2py_module_name}"
+            -m ${f2py_module_name}
             --lower # Important
-    DEPENDS ${CMAKE_PROJECT_NAME}
+    DEPENDS ${fortran_src_file}
   )
 
   # Set up target
   python_add_library( ${f2py_module_name} MODULE WITH_SOABI
-    "${CMAKE_CURRENT_BINARY_DIR}/${f2py_module_c}" # Generated
+    "${f2py_module_c}" # Generated
     "${F2PY_INCLUDE_DIR}/fortranobject.c" # From NumPy
     "${fortran_src_file}" # Fortran source(s)
   )
 
   # Depend on sources
   target_include_directories(${f2py_module_name} PUBLIC ${F2PY_INCLUDE_DIR})
-  target_link_libraries(${f2py_module_name} PUBLIC Python::NumPy ${LAPACK_LIBRARIES} ${BLAS_LIBRARIES} ${CMAKE_PROJECT_NAME})
+  target_link_libraries(${f2py_module_name} PUBLIC Python::NumPy ${CMAKE_PROJECT_NAME})
   
   # Configure the RPATH
   set_target_properties(${f2py_module_name} PROPERTIES
     INSTALL_RPATH "$ORIGIN/core/lib"
   )
-  add_dependencies(${f2py_module_name} genpyf)
+  add_dependencies(${f2py_module_name} genpyf ${CMAKE_PROJECT_NAME})
   install(TARGETS ${f2py_module_name} DESTINATION ../.)
 endif()
