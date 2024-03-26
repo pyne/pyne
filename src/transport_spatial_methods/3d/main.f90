@@ -16,6 +16,9 @@
 !> @param nodes_z_in number of nodes in z direction
 !> @param num_groups_in number of groups of ?????????????
 !> @param num_materials_in number of materials
+!> @param dim_x dimension of grid in x direction
+!> @param dim_y dimension of grid in y direction
+!> @param dim_z dimension of grid in z direction
 !> @param x_cell_widths_in x node size
 !> @param y_cell_widths_in y node size
 !> @param z_cell_widths_in z node size
@@ -50,14 +53,14 @@
 SUBROUTINE main(qdfile, xsfile, srcfile, mtfile,inflow_file,phi_file, titlein,&
  solver_in, solver_type_in, spatial_order_in,&
  angular_quadrature_order_in, qdtypin, nodes_x_in, nodes_y_in, nodes_z_in,&
- num_groups_in, num_materials_in, x_cell_widths_in, y_cell_widths_in,&
- z_cell_widths_in, x_boundry_condition_1_in, x_boundry_condition_2_in,&
- y_boundry_condition_1_in, y_boundry_condition_2_in, z_boundry_condition_1_in,&
- z_boundry_condition_2_in, material_id_in, quadrature_file, xs_file_in,&
- source_input_file_in, bc_input_filein, flux_output_filein, &
- convergence_criterion_in, itmxin, moments_converged_in, converge_tolerence_in, &
- max_mom_printed_in, moment_sum_flag_in,&
- mom_at_a_pt_flag_in, quad_flux_print_flag_in,fluxout,error_code_out,&
+ num_groups_in, num_materials_in, dim_x, dim_y, dim_z, x_cell_widths_in, &
+ y_cell_widths_in, z_cell_widths_in, x_boundry_condition_1_in, &
+ x_boundry_condition_2_in, y_boundry_condition_1_in, y_boundry_condition_2_in, &
+ z_boundry_condition_1_in, z_boundry_condition_2_in, material_id_in, &
+ quadrature_file, xs_file_in, source_input_file_in, bc_input_filein, &
+ flux_output_filein, convergence_criterion_in, itmxin, moments_converged_in, &
+ converge_tolerence_in, max_mom_printed_in, moment_sum_flag_in, &
+ mom_at_a_pt_flag_in, quad_flux_print_flag_in,fluxout,error_code_out, &
  tsolve_out, ttosolve_out, tend_out) 
 
 !-------------------------------------------------------------
@@ -110,17 +113,18 @@ REAL*8 :: wtsum
 
 CHARACTER(80), INTENT(IN) :: titlein
 CHARACTER(30), INTENT(IN) :: solver_in, solver_type_in
-INTEGER, INTENT(IN) :: spatial_order_in, angular_quadrature_order_in,&
- qdtypin, nodes_x_in, nodes_y_in, nodes_z_in, num_groups_in, num_materials_in
+INTEGER, INTENT(IN) :: dim_x, dim_y, dim_z, spatial_order_in, &
+ angular_quadrature_order_in, qdtypin, nodes_x_in, nodes_y_in, &
+ nodes_z_in, num_groups_in, num_materials_in
 
-REAL*8, INTENT(IN), DIMENSION(:) :: x_cell_widths_in, y_cell_widths_in, z_cell_widths_in
+REAL*8, INTENT(IN), DIMENSION(dim_x) :: x_cell_widths_in, y_cell_widths_in, z_cell_widths_in
 
 INTEGER, INTENT(IN) :: x_boundry_condition_1_in, x_boundry_condition_2_in,&
  y_boundry_condition_1_in, y_boundry_condition_2_in, z_boundry_condition_1_in,&
  z_boundry_condition_2_in 
 
 ! Cell materials
-INTEGER, INTENT(IN), DIMENSION(:,:,:) :: material_id_in
+INTEGER, INTENT(IN), DIMENSION(dim_x, dim_y, dim_z) :: material_id_in
 
 CHARACTER(30), INTENT(IN) :: quadrature_file, xs_file_in, source_input_file_in,&
  bc_input_filein, flux_output_filein

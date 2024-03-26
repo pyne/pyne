@@ -120,7 +120,7 @@ if(BUILD_SPATIAL_SOLVER)
             "${fortran_src_file}"
             -m ${f2py_module_name}
             --lower # Important
-    DEPENDS ${fortran_src_file}
+    DEPENDS ${fortran_src_file} ${CMAKE_PROJECT_NAME}
   )
 
   # Set up target
