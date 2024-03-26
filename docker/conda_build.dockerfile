@@ -25,10 +25,8 @@ RUN echo 'export PATH=/opt/conda/bin:$PATH' > /etc/profile.d/conda.sh && \
 
 ENV PATH /opt/conda/bin:$PATH
 
-# install python 3.10 and set it as default
+# install python 3.10 so we have imp python module
 RUN conda install python=3.10
-RUN python -v
-
 RUN conda config --add channels conda-forge
 RUN conda update -n base -c defaults conda
 RUN conda install -y conda-libmamba-solver
@@ -38,7 +36,10 @@ RUN conda uninstall -y conda-libmamba-solver
 RUN conda config --set solver classic
 RUN conda update -y --all && \
     mamba install -y \
+                gxx_linux-64 \
+                gcc_linux-64 \
                 cmake \
+                make \
                 git \
                 setuptools \
                 pytest \
