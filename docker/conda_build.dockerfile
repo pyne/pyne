@@ -9,6 +9,9 @@ ENV TZ=America/Chicago
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 ENV HOME /root
 
+# set default python version to 3.10
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 10
+
 RUN apt-get update \
     && apt-get install -y --fix-missing \
         wget \
