@@ -7,6 +7,7 @@ FROM ubuntu:${ubuntu_version} AS base_conda
 # Ubuntu Setup
 ENV TZ=America/Chicago
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+ENV HOME /root
 
 RUN apt-get update \
     && apt-get install -y --fix-missing \
