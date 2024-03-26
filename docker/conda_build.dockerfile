@@ -27,7 +27,7 @@ ENV PATH /opt/conda/bin:$PATH
 
 # install python 3.10 and set it as default
 RUN conda install python=3.10
-RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 10
+RUN python -v
 
 RUN conda config --add channels conda-forge
 RUN conda update -n base -c defaults conda
