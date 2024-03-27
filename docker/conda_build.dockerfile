@@ -40,6 +40,14 @@ RUN conda update -y --all && \
                 gcc_linux-64 \
                 cmake \
                 make \
+                gfortran \
+                libblas \
+                liblapack \
+                eigen \
+                numpy \
+                scipy \
+                nose \
+                matplotlib \
                 git \
                 setuptools \
                 pytest \
