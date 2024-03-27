@@ -54,6 +54,8 @@ RUN conda update -y --all && \
                 pytables \
                 jinja2 \
                 "cython<3" \
+                future \
+                progress \
                 && \
     mamba install -y --force-reinstall libsqlite && \
     conda clean -y --all
