@@ -45,7 +45,6 @@ RUN conda update -y --all && \
                 numpy \
                 scipy \
                 nose \
-                "hdf5<1.14" \
                 matplotlib \
                 git \
                 setuptools \
