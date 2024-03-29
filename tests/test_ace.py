@@ -6,7 +6,7 @@ import pytest
 
 import pyne.ace
 
-
+@pytest.fixture(autouse=True)
 def setup_function():
     try:
         import urllib.request as urllib
