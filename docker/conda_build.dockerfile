@@ -71,7 +71,7 @@ RUN mkdir -p $HOME/opt
 RUN echo "export PATH=$HOME/.local/bin:\$PATH" >> ~/.bashrc
 
 FROM base_conda AS moab
-RUN conda install "conda-forge::moab==5.3.0"
+RUN conda install "conda-forge::moab=5.3.0"
 
 FROM moab AS dagmc
 RUN conda install conda-forge::dagmc

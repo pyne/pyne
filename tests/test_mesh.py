@@ -127,10 +127,11 @@ def test_ve_center():
 
 def test_structured_mesh_from_coords():
     sm = Mesh(
-        structured_coords=[list(range(1, 5)), list(range(1, 4)), list(range(1, 3))], structured=True
+        structured_coords=[range(1, 5), range(1, 4), range(1, 3)], structured=True
     )
     assert sm.dims == [0, 0, 0, 3, 2, 1]
-    assert_array_equal(sm.structured_coords, [list(range(1, 5)), list(range(1, 4)), list(range(1, 3))])
+    for obs, exp in zip(sm.structured_coords, [range(1, 5), range(1, 4), range(1, 3)]):
+        assert_array_equal(obs, exp)
     assert sm.structured_ordering == "xyz"
 
 
