@@ -7,7 +7,7 @@ import pytest
 import pyne.ace
 
 
-def setup():
+def setup_function():
     try:
         import urllib.request as urllib
     except ImportError:
@@ -102,6 +102,6 @@ def test_read_c12_binary():
     assert table.reactions[2].sigma[-1] == 1.00772
 
 
-def teardown():
+def teardown_function():
     if os.path.exists("C12-binary.ace"):
         os.remove("C12-binary.ace")
