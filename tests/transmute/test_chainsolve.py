@@ -21,12 +21,12 @@ from pyne.transmute.chainsolve import Transmuter
 tm = None
 
 
-def setup_function():
+def setup_module():
     global tm
     tm = Transmuter()
 
 
-def teardown_function():
+def teardown_module():
     global tm
     del tm
 
