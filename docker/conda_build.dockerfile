@@ -23,8 +23,8 @@ RUN echo 'export PATH=/opt/conda/bin:$PATH' > /etc/profile.d/conda.sh && \
 
 ENV PATH /opt/conda/bin:$PATH
 
-# install python 3.10 so we have imp python module
-RUN conda install python=3.10
+# install python 3.10 to match apt dockerfile
+RUN conda install python=3.10.0
 RUN conda config --add channels conda-forge
 RUN conda update -n base -c defaults conda
 RUN conda install -y conda-libmamba-solver

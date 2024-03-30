@@ -30,7 +30,7 @@ jobs:
         hdf5_build_arg: ['NO']
         include:
           - hdf5: _hdf5
-            hdf5_build_arg: hdf5-1_12_0
+            hdf5_build_arg: hdf5-1_10_7
       fail-fast: false
 
     steps:
@@ -75,7 +75,7 @@ jobs:
         include:
           - pyne_test_base: dagmc
             hdf5: _hdf5
-            hdf5_build_arg: hdf5-1_12_0
+            hdf5_build_arg: hdf5-1_10_7
       fail-fast: false
 
     steps:
