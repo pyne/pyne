@@ -75,6 +75,7 @@ FROM base_conda AS moab
 RUN conda install "conda-forge::moab=5.3.0"
 
 FROM moab AS dagmc
+RUN conda update -n base conda
 RUN conda install conda-forge::dagmc
 
 FROM dagmc AS openmc
