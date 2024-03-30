@@ -79,7 +79,7 @@ RUN conda update -n base conda
 RUN mamba install conda-forge::dagmc
 
 FROM dagmc AS openmc
-RUN conda install conda-forge::openmc
+RUN mamba install conda-forge::openmc
 
 # Build/Install PyNE from release branch
 FROM ${pyne_test_base} AS pyne
