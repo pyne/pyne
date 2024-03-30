@@ -96,19 +96,13 @@ else()
   target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE ${LIBS_HDF5})
 endif()
 if(BUILD_SPATIAL_SOLVER)
-    if (NOT BLAS_FOUND)
-    add_dependencies(${CMAKE_PROJECT_NAME} blas)
-    endif()
     if (NOT LAPACK_FOUND)
     add_dependencies(${CMAKE_PROJECT_NAME} lapack)
     endif()
-    if (NOT BLAS_FOUND AND NOT LAPACK_FOUND)
-      add_dependencies(${CMAKE_PROJECT_NAME} blas)
-    endif()
     target_link_libraries(${CMAKE_PROJECT_NAME} 
-      PRIVATE ${LIBS_HDF5} ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES}
+      PRIVATE ${LAPACK_LIBRARIES}
       )
-endif(BUILD_SPATIAL_SOLVER)
+endif()
 if(MOAB_FOUND)
     target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE MOAB)
 endif(MOAB_FOUND)
@@ -121,40 +115,50 @@ if(ENABLE_ENSDF_PROCESSING)
     ${PROJECT_SOURCE_DIR}/src/ensdf_processing/ALPHAD/alphad.f
     ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f
     )
+  install(TARGETS alphad RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
   add_executable(delta 
     ${PROJECT_SOURCE_DIR}/src/ensdf_processing/DELTA/delta.for
     )
+  install(TARGETS delta RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
   add_executable(gtol 
     ${PROJECT_SOURCE_DIR}/src/ensdf_processing/GTOL/gtol.f
     ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f
     )
+  install(TARGETS gtol RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
   add_executable(bldhst 
     ${PROJECT_SOURCE_DIR}/src/ensdf_processing/HSICC/bldhst.for
     )
+  install(TARGETS bldhst RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
   add_executable(hsicc 
     ${PROJECT_SOURCE_DIR}/src/ensdf_processing/HSICC/hsicc.for
     ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f
     )
+  install(TARGETS hsicc RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
   add_executable(hsmrg 
     ${PROJECT_SOURCE_DIR}/src/ensdf_processing/HSICC/hsmrg.for
     ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f
     )
+  install(TARGETS hsmrg RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
   add_executable(seqhst 
     ${PROJECT_SOURCE_DIR}/src/ensdf_processing/HSICC/seqhst.for
     ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f
     )
+  install(TARGETS seqhst RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
   add_executable(logft 
     ${PROJECT_SOURCE_DIR}/src/ensdf_processing/LOGFT/logft.for
     ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f
     )
+  install(TARGETS logft RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
   add_executable(radd 
     ${PROJECT_SOURCE_DIR}/src/ensdf_processing/RADD/RadD.for
     )
+  install(TARGETS radd RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
   add_executable(ruler 
     ${PROJECT_SOURCE_DIR}/src/ensdf_processing/RULER/ruler.f
     ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f
     )
-endif(ENABLE_ENSDF_PROCESSING)
+  install(TARGETS ruler RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+endif()
 
 # Print include dir
 get_property(inc_dirs DIRECTORY PROPERTY INCLUDE_DIRECTORIES)
@@ -180,3 +184,10 @@ install(TARGETS ${CMAKE_PROJECT_NAME} LIBRARY
   DESTINATION ${CMAKE_INSTALL_LIBDIR} 
   COMPONENT ${CMAKE_PROJECT_NAME}
 )
+
+if(RPATH)
+  # Configure the RPATH
+  set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES
+    INSTALL_RPATH ${RPATH}
+  )
+endif()

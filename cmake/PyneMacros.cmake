@@ -1,5 +1,26 @@
 include(DownloadAndExtract)
 
+# Configure scikit-build
+macro(pyne_configure_skbuild)
+  if(SKBUILD)
+    # Scikit-build installs files to ${SKBUILD_PLATLIB_DIR}/install-directory
+    # So, set bin directory to root environment (install prefix/bin)
+    set(CMAKE_INSTALL_BINDIR ${SKBUILD_SCRIPTS_DIR})
+  endif()
+endmacro()
+
+
+# Configure RPATH
+macro(pyne_configure_rpath)
+  if(APPLE)
+    set(RPATH "@loader_path")
+  elseif(UNIX)
+    set(RPATH "$ORIGIN")
+  else()
+    set(RPATH OFF) # Windows
+  endif()
+endmacro()
+
 # Set platform preprocessor macro
 macro(pyne_set_platform)
   set(PYNE_PLATFORM "__${CMAKE_SYSTEM_NAME}__")

@@ -75,8 +75,11 @@ rever/
 
 .vscode
 
-# ignore version file generated from cmake
+# ignore version file generated from pyproject.toml
 src/pyne_version.h
+
+# ignore summary file
+summary.log
 
 # ignore amalgamated source
 pyne.cpp

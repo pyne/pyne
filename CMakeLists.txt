@@ -39,7 +39,9 @@ add_feature_info("Fast Compile" PYNE_FAST_COMPILE "Use pre-compiled binaries")
 
 # Include PyneMacros file
 include(PyneMacros)
-print_pyne_logo()  # Beware of dragons
+print_pyne_logo()
+pyne_configure_skbuild()
+pyne_configure_rpath()
 pyne_set_platform()
 pyne_set_asm_platform()
 pyne_set_build_spatial_solver()
@@ -71,13 +73,13 @@ if(NOT HDF5_FOUND AND NOT HDF5_ROOT)
     URL https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/hdf5-1.10.11/src/hdf5-1.10.11.tar.gz
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
     DOWNLOAD_EXTRACT_TIMESTAMP true
-    BUILD_BYPRODUCTS "${HDF5_ROOT}/lib/libhdf5.a"
+    BUILD_BYPRODUCTS "${HDF5_ROOT}/lib/libhdf5${CMAKE_STATIC_LIBRARY_SUFFIX}"
   )
   set(HDF5_INCLUDE_DIRS "${HDF5_ROOT}/include")
   set(HDF5_LIBRARY_DIRS "${HDF5_ROOT}/lib")
   set(HDF5_LIBRARIES "${HDF5_ROOT}/lib/libhdf5${CMAKE_SHARED_LIBRARY_SUFFIX}")
-  set(HDF5_C_LIBRARIES "${HDF5_ROOT}/lib/libhdf5.a")
-  set(HDF5_H_LIBRARIES "${HDF5_ROOT}/lib/libhdf5_hl.a")
+  set(HDF5_C_LIBRARIES "${HDF5_ROOT}/lib/libhdf5${CMAKE_STATIC_LIBRARY_SUFFIX}")
+  set(HDF5_H_LIBRARIES "${HDF5_ROOT}/lib/libhdf5_hl${CMAKE_STATIC_LIBRARY_SUFFIX}")
 endif()
 
 # Include the HDF5 libraries
@@ -111,7 +113,7 @@ set_package_properties(HDF5 PROPERTIES
   DESCRIPTION "HDF5 library"
   TYPE REQUIRED
   PURPOSE "Enables HDF5 support"
-)
+  )
 
 ############################################################
 # Setup MOAB                                               #
@@ -143,7 +145,7 @@ set_package_properties(MOAB PROPERTIES
   DESCRIPTION "Mesh-Oriented datABase (MOAB)"
   TYPE RECOMMENDED
   PURPOSE "Enables MOAB support"
-)
+  )
 
 ############################################################
 # Setup DAGMC                                              #
@@ -177,7 +179,7 @@ set_package_properties(DAGMC PROPERTIES
   DESCRIPTION "Direct Accelerated Geometry Monte Carlo (DAGMC)"
   TYPE RECOMMENDED
   PURPOSE "Enables DAGMC support"
-)
+  )
 
 ############################################################
 # Setup Python, NumPy and Cython                           #
@@ -188,14 +190,14 @@ find_package(
   Python 
   COMPONENTS Interpreter Development.Module NumPy 
   REQUIRED
-)
+  )
 
 # Set package properties
 set_package_properties(Python PROPERTIES
   DESCRIPTION "Python interpreter"
   TYPE REQUIRED
   PURPOSE "Enables Python support"
-)
+  )
 
 find_program(CYTHON "cython")
 
@@ -214,40 +216,37 @@ if (BUILD_SPATIAL_SOLVER)
   execute_process(
     COMMAND "${Python_EXECUTABLE}" -c
             "import numpy.f2py; print(numpy.f2py.get_include())"
-    OUTPUT_VARIABLE F2PY_INCLUDE_DIR
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-  )
+            OUTPUT_VARIABLE F2PY_INCLUDE_DIR
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
 
   # Try to find LAPACK and BLAS
   # If not found, no warry, we'll try to download and build them
   find_package(LAPACK)
-  if(NOT BLAS_FOUND AND NOT LAPACK_FOUND)
-    message(STATUS "BLAS not found. Will attempt to download and build.")
-    set(BLAS_ROOT "${CMAKE_BINARY_DIR}/blas")
-    ExternalProject_Add(blas
-      PREFIX ${BLAS_ROOT}
-      URL https://github.com/OpenMathLib/OpenBLAS/releases/download/v0.3.26/OpenBLAS-0.3.26.tar.gz
-      CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
-      DOWNLOAD_EXTRACT_TIMESTAMP true
-      BUILD_BYPRODUCTS "${BLAS_ROOT}/lib/libopenblas.a"
-    )
-    set(BLAS_INCLUDE_DIRS "${BLAS_ROOT}/include")
-    set(BLAS_LIBRARY_DIRS "${BLAS_ROOT}/lib")
-    set(BLAS_LIBRARIES "${BLAS_ROOT}/lib/libopenblas.a")
-  endif()
+
   if(NOT LAPACK_FOUND)
     MESSAGE(STATUS "LAPACK not found. Will attempt to download and build.")
     set(LAPACK_ROOT "${CMAKE_BINARY_DIR}/lapack")
     ExternalProject_Add(lapack
       PREFIX ${LAPACK_ROOT}
       URL https://github.com/Reference-LAPACK/lapack/archive/refs/tags/v3.12.0.tar.gz
-      CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
       DOWNLOAD_EXTRACT_TIMESTAMP true
-      BUILD_BYPRODUCTS "${LAPACK_ROOT}/lib/liblapack.a"
-    )
+      CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR> 
+                -DBUILD_SHARED_LIBS:BOOL=ON 
+                -DUSE_OPTIMIZED_BLAS:BOOL=ON
+                -DCMAKE_INSTALL_RPATH:STRING="\${ORIGIN}"
+      BUILD_COMMAND make 
+      BUILD_BYPRODUCTS "${LAPACK_ROOT}/lib/liblapack${CMAKE_SHARED_LIBRARY_SUFFIX}"
+      )
     set(LAPACK_INCLUDE_DIRS "${LAPACK_ROOT}/include")
     set(LAPACK_LIBRARY_DIRS "${LAPACK_ROOT}/lib")
-    set(LAPACK_LIBRARIES "${LAPACK_ROOT}/lib/liblapack.a")
+    set(LAPACK_LIBRARIES "${LAPACK_ROOT}/lib/liblapack${CMAKE_SHARED_LIBRARY_SUFFIX}")
+
+    # LAPACK is a shared library, so we need to install it
+    install(DIRECTORY ${LAPACK_ROOT}/lib/ 
+      DESTINATION ${CMAKE_INSTALL_LIBDIR} 
+      FILES_MATCHING PATTERN "*${CMAKE_SHARED_LIBRARY_SUFFIX}*"
+      )
   endif()
 endif()
 
@@ -286,11 +285,7 @@ else()
 endif()
 
 # Install scripts to bin directory
-if(SKBUILD_SCRIPTS_DIR)
-  install(PROGRAMS ${SCRIPTS} DESTINATION ${SKBUILD_SCRIPTS_DIR})
-else()
-  install(PROGRAMS ${SCRIPTS} DESTINATION ${CMAKE_INSTALL_BINDIR})
-endif()
+install(PROGRAMS ${SCRIPTS} DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 # Write summary
 feature_summary(
