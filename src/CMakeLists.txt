@@ -73,9 +73,9 @@ if(BUILD_SPATIAL_SOLVER)
   set(PYNE_SRCS "${PYNE_SRCS}" "${TRANSPORT_SPATIAL_METHODS_SRCS}")
 endif()
 
-if(MOAB_FOUND)
+if(ENABLE_MOAB)
   set(PYNE_SRCS "${PYNE_SRCS}" "${MOAB_SRCS}")
-endif(MOAB_FOUND)
+endif()
 
 # Fast compile decay and cram
 fast_compile(decay.cpp "-O0" "-O0" "-O0")
@@ -85,31 +85,52 @@ fast_compile(cram.c
   "-O0"
   )
 
-# compile and link library
+# Create library
 add_library(${CMAKE_PROJECT_NAME} ${PYNE_SRCS})
+
+# Link HDF5
 if(NOT HDF5_FOUND)
-  add_dependencies(${CMAKE_PROJECT_NAME} hdf5)
+  add_dependencies(${CMAKE_PROJECT_NAME} hdf5-project)
 endif()
 if("${LIBS_HDF5}" STREQUAL "")
   target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE hdf5)
 else()
   target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE ${LIBS_HDF5})
 endif()
-if(BUILD_SPATIAL_SOLVER)
-    if (NOT LAPACK_FOUND)
-    add_dependencies(${CMAKE_PROJECT_NAME} lapack)
-    endif()
-    target_link_libraries(${CMAKE_PROJECT_NAME} 
-      PRIVATE ${LAPACK_LIBRARIES}
-      )
-endif()
-if(MOAB_FOUND)
-    target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE MOAB)
-endif(MOAB_FOUND)
-if(DAGMC_FOUND)
-    target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE dagmc MOAB)
-endif(DAGMC_FOUND)
 
+# Link MOAB library
+if(ENABLE_MOAB)
+if(NOT MOAB_FOUND)
+  add_dependencies(${CMAKE_PROJECT_NAME} moab-project)
+endif()
+if(NOT HDF5_FOUND)
+  add_dependencies(moab-project hdf5-project)
+endif()
+  target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE MOAB)
+endif()
+
+# Link DAGMC library
+if(ENABLE_DAGMC AND ENABLE_MOAB)
+  if(NOT DAGMC_FOUND)
+    add_dependencies(${CMAKE_PROJECT_NAME} dagmc-project)
+  endif()
+  if(NOT MOAB_FOUND)
+    add_dependencies(dagmc-project moab-project)
+  endif()
+  target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE dagmc MOAB)
+endif()
+
+# Link spatial solvers library
+if(BUILD_SPATIAL_SOLVER)
+  if (NOT LAPACK_FOUND)
+    add_dependencies(${CMAKE_PROJECT_NAME} lapack-project)
+  endif()
+  target_link_libraries(${CMAKE_PROJECT_NAME} 
+    PRIVATE ${LAPACK_LIBRARIES}
+    )
+endif()
+
+# Install ENSDF processing scripts
 if(ENABLE_ENSDF_PROCESSING)
   add_executable(alphad 
     ${PROJECT_SOURCE_DIR}/src/ensdf_processing/ALPHAD/alphad.f
@@ -165,29 +186,25 @@ get_property(inc_dirs DIRECTORY PROPERTY INCLUDE_DIRECTORIES)
 message(STATUS "Include paths for ${CMAKE_CURRENT_SOURCE_DIR}: ${inc_dirs}")
 
 
-#
 # Install header files
-#
 file(GLOB h_files "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
 file(GLOB hpp_files "${CMAKE_CURRENT_SOURCE_DIR}/*.hpp")
 set(h_files ${h_files} ${hpp_files})
 install(FILES ${h_files} 
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/pyne 
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
   COMPONENT headers
   )
 
 
-#
-# Install libpyne
-#
+# Install library
 install(TARGETS ${CMAKE_PROJECT_NAME} LIBRARY 
   DESTINATION ${CMAKE_INSTALL_LIBDIR} 
   COMPONENT ${CMAKE_PROJECT_NAME}
 )
 
+# Configure the RPATH
 if(RPATH)
-  # Configure the RPATH
   set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES
     INSTALL_RPATH ${RPATH}
-  )
+    )
 endif()
