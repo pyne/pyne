@@ -88,45 +88,33 @@ fast_compile(cram.c
 # Create library
 add_library(${CMAKE_PROJECT_NAME} ${PYNE_SRCS})
 
-# Link HDF5
+# Add HDF5 dependency
 if(NOT HDF5_FOUND)
   add_dependencies(${CMAKE_PROJECT_NAME} hdf5-project)
 endif()
-if("${LIBS_HDF5}" STREQUAL "")
-  target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE hdf5)
+
+# Link HDF5
+if(HDF5_C_LIBRARIES)
+  target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE ${HDF5_C_LIBRARIES})
 else()
-  target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE ${LIBS_HDF5})
+  target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE hdf5)
 endif()
 
 # Link MOAB library
 if(ENABLE_MOAB)
-if(NOT MOAB_FOUND)
-  add_dependencies(${CMAKE_PROJECT_NAME} moab-project)
-endif()
-if(NOT HDF5_FOUND)
-  add_dependencies(moab-project hdf5-project)
-endif()
+  if(NOT MOAB_FOUND)
+    add_dependencies(${CMAKE_PROJECT_NAME} moab-project)
+  endif()
   target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE MOAB)
 endif()
 
-# Link DAGMC library
-if(ENABLE_DAGMC AND ENABLE_MOAB)
-  if(NOT DAGMC_FOUND)
-    add_dependencies(${CMAKE_PROJECT_NAME} dagmc-project)
-  endif()
-  if(NOT MOAB_FOUND)
-    add_dependencies(dagmc-project moab-project)
-  endif()
-  target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE dagmc MOAB)
-endif()
-
-# Link spatial solvers library
-if(BUILD_SPATIAL_SOLVER)
+# Link LAPACK library
+if(ENABLE_LAPACK)
   if (NOT LAPACK_FOUND)
     add_dependencies(${CMAKE_PROJECT_NAME} lapack-project)
   endif()
   target_link_libraries(${CMAKE_PROJECT_NAME} 
-    PRIVATE ${LAPACK_LIBRARIES}
+    PRIVATE lapack
     )
 endif()
 

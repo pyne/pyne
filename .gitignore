@@ -24,6 +24,7 @@ env
 *.o
 *.mod
 *.so
+.cache/
 
 # Ignore Cython'd files
 pyne/*.c

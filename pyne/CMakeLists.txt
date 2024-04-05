@@ -32,12 +32,12 @@ set(PYNE_CYTHON_MODULES
     transmuters
     _utils
     )
-if(MOAB_FOUND)
+if(ENABLE_MOAB)
   set(PYNE_CYTHON_MODULES ${PYNE_CYTHON_MODULES} source_sampling)
 endif()
 
-if(DAGMC_FOUND)
-  set(PYNE_CYTHON_MODULES ${PYNE_CYTHON_MODULES} dagmc)
+if(ENABLE_DAGMC)
+  set(PYNE_CYTHON_MODULES ${PYNE_CYTHON_MODULES} _dagmc)
 endif()
 
 if(NOT WIN32)
@@ -47,58 +47,95 @@ endif()
 message(STATUS "Modules to Cythonize: ${PYNE_CYTHON_MODULES}")
 
 foreach(PYNE_CYTHON_MODULE ${PYNE_CYTHON_MODULES})
-    # Cram is actually a C, not C++ file
-    if(NOT "${PYNE_CYTHON_MODULE}" STREQUAL "cram")
-        set(PYNE_CYTHON_ARGS --cplus)
-        set(PYNE_CYTHON_EXT cxx)
-    else()
-        set(PYNE_CYTHON_ARGS)
-        set(PYNE_CYTHON_EXT c)
-    endif()
 
-    # Add different libraries
-    if("${PYNE_CYTHON_MODULE}" STREQUAL "dagmc")
-      set(PYNE_CYTHON_LIBS ${CMAKE_PROJECT_NAME} MOAB dagmc)
-    elseif("${PYNE_CYTHON_MODULE}" STREQUAL "source_sampling")
-      set(PYNE_CYTHON_LIBS ${CMAKE_PROJECT_NAME} MOAB)
-    else()
-      set(PYNE_CYTHON_LIBS ${CMAKE_PROJECT_NAME})
-    endif()
+  # _dagmc module needs Eigen
+  if(PYNE_CYTHON_MODULE STREQUAL "_dagmc")
+    set(PYNE_DAGMC_INCLUDES "-I${EIGEN3_INCLUDE_DIRS}")
+  else()
+    set(PYNE_DAGMC_INCLUDES)
+  endif()
 
-    # Build C++/C file
-    add_custom_command(
-        OUTPUT ${PYNE_CYTHON_MODULE}.${PYNE_CYTHON_EXT}
-        DEPENDS ${PYNE_CYTHON_MODULE}.pyx
-        VERBATIM
-        COMMAND "${CYTHON}" ${PYNE_CYTHON_ARGS}
-                -I ${CMAKE_SOURCE_DIR}/src 
-                -I ${CMAKE_BINARY_DIR}/src 
-                -I ${CMAKE_CURRENT_SOURCE_DIR} 
-                -I ${CMAKE_CURRENT_BINARY_DIR} 
-                -I ${Python_NumPy_INCLUDE_DIRS}
-                "${CMAKE_CURRENT_SOURCE_DIR}/${PYNE_CYTHON_MODULE}.pyx" 
-                --output-file "${CMAKE_CURRENT_BINARY_DIR}/${PYNE_CYTHON_MODULE}.${PYNE_CYTHON_EXT}"
+  # Cram is actually a C, not C++ file
+  if(NOT "${PYNE_CYTHON_MODULE}" STREQUAL "cram")
+      set(PYNE_CYTHON_ARGS --cplus)
+      set(PYNE_CYTHON_EXT cxx)
+  else()
+      set(PYNE_CYTHON_ARGS)
+      set(PYNE_CYTHON_EXT c)
+  endif()
+
+  # Build C++/C file
+  add_custom_command(
+    OUTPUT ${PYNE_CYTHON_MODULE}.${PYNE_CYTHON_EXT}
+    DEPENDS ${PYNE_CYTHON_MODULE}.pyx
+    VERBATIM
+    COMMAND "${CYTHON}" ${PYNE_CYTHON_ARGS}
+            -I ${CMAKE_SOURCE_DIR}/src 
+            -I ${CMAKE_BINARY_DIR}/src 
+            -I ${CMAKE_CURRENT_SOURCE_DIR} 
+            -I ${CMAKE_CURRENT_BINARY_DIR} 
+            -I ${Python_NumPy_INCLUDE_DIRS}
+            ${PYNE_DAGMC_INCLUDES}
+            "${CMAKE_CURRENT_SOURCE_DIR}/${PYNE_CYTHON_MODULE}.pyx" 
+            --output-file "${CMAKE_CURRENT_BINARY_DIR}/${PYNE_CYTHON_MODULE}.${PYNE_CYTHON_EXT}"
     )
 
-    # Creating a Python module
-    python_add_library(
-        ${PYNE_CYTHON_MODULE} MODULE "${CMAKE_CURRENT_BINARY_DIR}/${PYNE_CYTHON_MODULE}.${PYNE_CYTHON_EXT}"
-        WITH_SOABI
+  # Creating a Python module
+  python_add_library(
+    ${PYNE_CYTHON_MODULE} MODULE "${CMAKE_CURRENT_BINARY_DIR}/${PYNE_CYTHON_MODULE}.${PYNE_CYTHON_EXT}"
+    WITH_SOABI
     )
 
-    # Add the pyne library as a dependency
-    add_dependencies(${PYNE_CYTHON_MODULE} ${CMAKE_PROJECT_NAME})
+  # pyne needs to be built before the cython module
+  add_dependencies(${PYNE_CYTHON_MODULE} ${CMAKE_PROJECT_NAME})
 
-    # Link the target with the pyne library
-    target_link_libraries(${PYNE_CYTHON_MODULE} PRIVATE ${PYNE_CYTHON_LIBS})
+  # Link the target with the pyne library
+  target_link_libraries(${PYNE_CYTHON_MODULE} PRIVATE ${CMAKE_PROJECT_NAME})
 
-    # Configure the RPATH
+  # Configure the RPATH
+  set_target_properties(${PYNE_CYTHON_MODULE} PROPERTIES
+    INSTALL_RPATH "$ORIGIN:$ORIGIN/core/lib"
+    )
+
+  if(PYNE_CYTHON_MODULE STREQUAL "source_sampling")
+
+    # MOAB needs to be built before source_sampling
+    if (NOT MOAB_FOUND)
+      add_dependencies(${PYNE_CYTHON_MODULE} moab-project)
+    endif()
+
+    # Link MOAB library
+    target_link_libraries(${PYNE_CYTHON_MODULE} PRIVATE MOAB)
+  endif()
+
+  if(PYNE_CYTHON_MODULE STREQUAL "_dagmc")
+
+    # eigen3 needs to be built before _dagmc
+    if(NOT EIGEN3_FOUND)
+      add_dependencies(${PYNE_CYTHON_MODULE} eigen3-project)
+    endif()
+
+    # MOAB needs to be built before _dagmc
+    if(NOT MOAB_FOUND)
+      add_dependencies(${PYNE_CYTHON_MODULE} moab-project)
+    endif()
+
+    # dagmc needs to be built before _dagmc
+    if(NOT DAGMC_FOUND)
+      add_dependencies(${PYNE_CYTHON_MODULE} dagmc-project)
+    endif()
+
+    # Link MOAB and DAGMC library
+    target_link_libraries(${PYNE_CYTHON_MODULE} PRIVATE MOAB dagmc)
+
+    # Rename _dagmc to dagmc
     set_target_properties(${PYNE_CYTHON_MODULE} PROPERTIES
-      INSTALL_RPATH "$ORIGIN/core/lib"
-    )
+      OUTPUT_NAME dagmc
+      )
+  endif()
 
-    # Install the target in the pyne directory
-    install(TARGETS ${PYNE_CYTHON_MODULE} DESTINATION ../.)
+  # Install the target in the pyne directory
+  install(TARGETS ${PYNE_CYTHON_MODULE} DESTINATION ../.)
 endforeach()
 
 
@@ -113,7 +150,7 @@ if(BUILD_SPATIAL_SOLVER)
   add_custom_target(
     genpyf
     DEPENDS "${fortran_src_file}"
-  )
+    )
   add_custom_command(
     OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${f2py_module_c}"
     COMMAND ${Python_EXECUTABLE}  -m "numpy.f2py"
@@ -121,14 +158,14 @@ if(BUILD_SPATIAL_SOLVER)
             -m ${f2py_module_name}
             --lower # Important
     DEPENDS ${fortran_src_file} ${CMAKE_PROJECT_NAME}
-  )
+    )
 
   # Set up target
   python_add_library( ${f2py_module_name} MODULE WITH_SOABI
     "${f2py_module_c}" # Generated
     "${F2PY_INCLUDE_DIR}/fortranobject.c" # From NumPy
     "${fortran_src_file}" # Fortran source(s)
-  )
+    )
 
   # Depend on sources
   target_include_directories(${f2py_module_name} PUBLIC ${F2PY_INCLUDE_DIR})
@@ -137,7 +174,7 @@ if(BUILD_SPATIAL_SOLVER)
   # Configure the RPATH
   set_target_properties(${f2py_module_name} PROPERTIES
     INSTALL_RPATH "$ORIGIN/core/lib"
-  )
+    )
   add_dependencies(${f2py_module_name} genpyf ${CMAKE_PROJECT_NAME})
   install(TARGETS ${f2py_module_name} DESTINATION ../.)
 endif()

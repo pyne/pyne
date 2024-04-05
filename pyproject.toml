@@ -57,7 +57,7 @@ cmake.verbose = true
 logging.level = "INFO"
 wheel.install-dir = "pyne/core"
 wheel.packages = ["pyne"]
-wheel.exclude = ["CMakeLists.txt", "*.pyx"]
+wheel.exclude = ["CMakeLists.txt", "*.pyx", "*.pxd"]
 
 # Get version from Git
 [tool.scikit-build.metadata.version]
