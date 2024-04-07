@@ -88,12 +88,13 @@ fast_compile(cram.c
 # Create library
 add_library(${CMAKE_PROJECT_NAME} ${PYNE_SRCS})
 
-# Add HDF5 dependency
-if(NOT HDF5_FOUND)
+# HDF5 is needed to be built before pyne
+if(DOWNLOAD_HDF5)
   add_dependencies(${CMAKE_PROJECT_NAME} hdf5-project)
 endif()
 
-# Link HDF5
+# Link HDF5 library
+# Check for HDF5_C_LIBRARIES variable (Debian patch)
 if(HDF5_C_LIBRARIES)
   target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE ${HDF5_C_LIBRARIES})
 else()
@@ -102,7 +103,9 @@ endif()
 
 # Link MOAB library
 if(ENABLE_MOAB)
-  if(NOT MOAB_FOUND)
+
+  # MOAB needs to be built before pyne
+  if(DOWNLOAD_MOAB)
     add_dependencies(${CMAKE_PROJECT_NAME} moab-project)
   endif()
   target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE MOAB)
@@ -110,7 +113,9 @@ endif()
 
 # Link LAPACK library
 if(ENABLE_LAPACK)
-  if (NOT LAPACK_FOUND)
+
+  # LAPACK needs to be built before pyne
+  if(DOWNLOAD_LAPACK)
     add_dependencies(${CMAKE_PROJECT_NAME} lapack-project)
   endif()
   target_link_libraries(${CMAKE_PROJECT_NAME} 

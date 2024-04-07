@@ -199,7 +199,7 @@ macro(pyne_download_files)
   # Download CRAM solver from PyNE data
   download_src("http://raw.githubusercontent.com/pyne/data/master" "cram" ".c")
 
-  if(PYNE_FAST_COMPILE)
+  if(ENABLE_FAST_COMPILE)
     if(NOT WIN32)
       # Download bateman solver from PyNE data
       download_platform_specific("http://raw.githubusercontent.com/pyne/data/master" "decay" ".s")
@@ -207,7 +207,7 @@ macro(pyne_download_files)
       download_platform_specific("http://raw.githubusercontent.com/pyne/data/master" "cram" ".s")
     else()
       message(WARNING "Not downloading compiled files on Windows.")
-      set(PYNE_FAST_COMPILE OFF)
+      set(ENABLE_FAST_COMPILE OFF)
     endif()
   endif()
 endmacro()
@@ -223,7 +223,7 @@ macro(fast_compile _srcname _gnuflags _clangflags _otherflags)
   endif()
 
   # pick the filename to compile, either source or assembly
-  if(NOT PYNE_FAST_COMPILE)
+  if(NOT ENABLE_FAST_COMPILE)
     message(STATUS "Not fast compiling ${_srcname} since PyNE fast compile is disabled.")
     set(_filename "${_srcname}")
   elseif(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${_asmname}")

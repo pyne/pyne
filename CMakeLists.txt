@@ -29,22 +29,32 @@ include(FeatureSummary)
 include(ExternalProject)
 
 # Set build options that can be toggled by the user
-option ( ENABLE_EIGEN3              "Should PyNE use Eigen3?"                     ON  )
-option ( ENABLE_LAPACK              "Should PyNE use LAPACK?"                     ON  )
-option ( ENABLE_MOAB                "Should PyNE use MOAB?"                       ON  )
-option ( ENABLE_DAGMC               "Should PyNE use DAGMC?"                      ON  )
-option ( ENABLE_SPATIAL_SOLVERS     "Should build AHOT spatial solvers?"          ON  )
-option ( ENABLE_ENSDF_PROCESSING    "Should build ENSDF processing tools?"        ON  )
-option ( PYNE_FAST_COMPILE          "Should PyNE fast compile?"                   ON  )
+option ( DOWNLOAD_HDF5              "Should PyNE download HDF5?"                  ON )
+option ( ENABLE_EIGEN3              "Should PyNE use Eigen3?"                     ON )
+option ( DOWNLOAD_EIGEN3            "Should PyNE download Eigen3?"                ON )
+option ( ENABLE_LAPACK              "Should PyNE use LAPACK?"                     ON )
+option ( DOWNLOAD_LAPACK            "Should PyNE download LAPACK?"                ON )
+option ( ENABLE_MOAB                "Should PyNE use MOAB?"                       ON )
+option ( DOWNLOAD_MOAB              "Should PyNE download MOAB?"                  ON )
+option ( ENABLE_DAGMC               "Should PyNE use DAGMC?"                      ON )
+option ( DOWNLOAD_DAGMC             "Should PyNE download DAGMC?"                 ON )
+option ( ENABLE_SPATIAL_SOLVERS     "Should build AHOT spatial solvers?"          ON )
+option ( ENABLE_ENSDF_PROCESSING    "Should build ENSDF processing tools?"        ON )
+option ( ENABLE_FAST_COMPILE        "Should PyNE fast compile?"                   ON )
 
 # Add feature info
-add_feature_info("Eigen3" ENABLE_EIGEN3 "Use Eigen3")
-add_feature_info("LAPACK" ENABLE_LAPACK "Use LAPACK")
-add_feature_info("MOAB" ENABLE_MOAB "Use MOAB")
-add_feature_info("DAGMC" ENABLE_DAGMC "Use DAGMC")
+add_feature_info("Download HDF5" DOWNLOAD_HDF5 "Download HDF5")
+add_feature_info("Enable Eigen3" ENABLE_EIGEN3 "Use Eigen3")
+add_feature_info("Download Eigen3" DOWNLOAD_EIGEN3 "Download Eigen3")
+add_feature_info("Enable LAPACK" ENABLE_LAPACK "Use LAPACK")
+add_feature_info("Download LAPACK" DOWNLOAD_LAPACK "Download LAPACK")
+add_feature_info("Enable MOAB" ENABLE_MOAB "Use MOAB")
+add_feature_info("Download MOAB" DOWNLOAD_MOAB "Download MOAB")
+add_feature_info("Enable DAGMC" ENABLE_DAGMC "Use DAGMC")
+add_feature_info("Download DAGMC" DOWNLOAD_DAGMC "Download DAGMC")
 add_feature_info("AHOT" ENABLE_SPATIAL_SOLVERS "AHOT spatial solvers")
 add_feature_info("ENSDF" ENABLE_ENSDF_PROCESSING "ENSDF processing tools")
-add_feature_info("Fast Compile" PYNE_FAST_COMPILE "Use pre-compiled binaries")
+add_feature_info("Enable Fast Compile" ENABLE_FAST_COMPILE "Use pre-compiled binaries")
 
 # Include PyneMacros file
 include(PyneMacros)
@@ -67,20 +77,28 @@ set(BUILD_SHARED_LIBS ON CACHE BOOL "Build shared libraries")
 # If HDF5 is installed in a non-standard location, set HDF5_ROOT
 # to the root directory of the HDF5 installation.
 # For example: export HDF5_ROOT=/path/to/hdf5
-# If HDF5 is not installed, no warry, we will download and install it.
-if(HDF5_ROOT)
+# If HDF5 is not installed, set DOWNLOAD_HDF5 to ON.
+# PyNE will download and build HDF5 if DOWNLOAD_HDF5 is ON.
+if(NOT DOWNLOAD_HDF5)
   message(STATUS "HDF5 root: ${HDF5_ROOT}")
   find_package(HDF5 REQUIRED)
 else()
-  find_package(HDF5)
-endif()
+  message(STATUS "HDF5 will be downloaded and installed")
 
-if(NOT HDF5_FOUND AND NOT HDF5_ROOT)
-  message(STATUS "HDF5 not found. Will attempt to download and build.")
+  # Configure HDF5 
+  set(HDF5_VERSION "1.10.11")
+  
+  # Replace the dots with semicolons to create a list
+  string(REPLACE "." ";" HDF5_VERSION_LIST ${HDF5_VERSION})
+
+  # Convert the list into individual variables
+  list(GET HDF5_VERSION_LIST 0 HDF5_VERSION_MAJOR)
+  list(GET HDF5_VERSION_LIST 1 HDF5_VERSION_MINOR)
+  list(GET HDF5_VERSION_LIST 2 HDF5_VERSION_PATCH)
   set(HDF5_ROOT "${CMAKE_BINARY_DIR}/hdf5")
   ExternalProject_Add(hdf5-project
     PREFIX ${HDF5_ROOT}
-    URL https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/hdf5-1.10.11/src/hdf5-1.10.11.tar.gz
+    URL https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-${HDF5_VERSION_MAJOR}.${HDF5_VERSION_MINOR}/hdf5-${HDF5_VERSION}/src/hdf5-${HDF5_VERSION}.tar.gz
     CMAKE_ARGS
       -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
       -DBUILD_SHARED_LIBS:BOOL=ON
@@ -137,28 +155,29 @@ if(ENABLE_EIGEN3)
   # If Eigen3 is installed in a non-standard location, set EIGEN3_ROOT
   # to the root directory of the Eigen3 installation.
   # For example: export EIGEN3_ROOT=/path/to/eigen3
-  # If Eigen is not installed, no warry, we will download and install it.
-  if(EIGEN3_ROOT)
+  # If Eigen is not installed, set DOWNLOAD_EIGEN3 to ON.
+  # PyNE will download Eigen3 if DOWNLOAD_EIGEN3 is ON. (Recommended)
+  if(NOT DOWNLOAD_EIGEN3)
     find_package(Eigen3 REQUIRED)
   else()
-    find_package(Eigen3)
-  endif()
-  if(NOT EIGEN3_FOUND AND NOT EIGEN3_ROOT)
-    message(STATUS "Eigen not found. Will attempt to download.")
+    message(STATUS "Eigen3 will be downloaded")
+
+    # Configure Eigen3
+    set(EIGEN3_VERSION "3.4.0")
     set(EIGEN3_ROOT "${CMAKE_BINARY_DIR}/eigen3")
     ExternalProject_Add(eigen3-project
       PREFIX ${EIGEN3_ROOT}
-      URL https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.bz2
+      URL https://gitlab.com/libeigen/eigen/-/archive/${EIGEN3_VERSION}/eigen-${EIGEN3_VERSION}.tar.bz2
       CMAKE_ARGS
         -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
       DOWNLOAD_EXTRACT_TIMESTAMP true
     )
-    set(EIGEN3_INCLUDE_DIRS "${EIGEN3_ROOT}/include/eigen3")
+    set(EIGEN3_INCLUDE_DIRS "${EIGEN3_ROOT}/include/eigen3")  
   endif()
 
-  # Include the Eigen3 libraries
-  include_directories("${EIGEN3_INCLUDE_DIRS}")
-  message(STATUS "Eigen3 include dirs: ${EIGEN3_INCLUDE_DIRS}")
+    # Include the Eigen3 libraries
+    include_directories("${EIGEN3_INCLUDE_DIRS}")
+    message(STATUS "Eigen3 include dirs: ${EIGEN3_INCLUDE_DIRS}")
 endif()
 
 # Set package properties
@@ -181,19 +200,20 @@ if(ENABLE_MOAB)
   # If MOAB is installed in a non-standard location, set MOAB_ROOT
   # to the root directory of the MOAB installation.
   # For example: export MOAB_ROOT=/path/to/moab
-  # If MOAB is not installed, no warry, we will download and install it.
-  if(MOAB_ROOT)
+  # If MOAB is not installed, set DOWNLOAD_MOAB to ON.
+  # PyNE will download and build MOAB if DOWNLOAD_MOAB is ON. (Recommended)
+  if(NOT DOWNLOAD_MOAB)
     find_package(MOAB REQUIRED)
   else()
-    find_package(MOAB)
-  endif()
-  if(NOT MOAB_FOUND AND NOT MOAB_ROOT)
-    message(STATUS "MOAB not found. Will attempt to download and build.")
+    message(STATUS "MOAB will be downloaded and built")
+
+    # Configure MOAB version
+    set(MOAB_VERSION "5.5.1")
     set(MOAB_ROOT "${CMAKE_BINARY_DIR}/moab")
     ExternalProject_Add(moab-project
       PREFIX ${MOAB_ROOT}
       GIT_REPOSITORY https://bitbucket.org/fathomteam/moab.git
-      GIT_TAG 5.5.1
+      GIT_TAG ${MOAB_VERSION}
       CMAKE_ARGS 
         -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
         -DBUILD_SHARED_LIBS:BOOL=ON
@@ -209,12 +229,12 @@ if(ENABLE_MOAB)
     set(MOAB_LIBRARY_DIRS "${MOAB_ROOT}/${CMAKE_INSTALL_LIBDIR}")
 
     # HDF5 is needed to be build before MOAB
-    if(NOT HDF5_FOUND)
+    if(DOWNLOAD_HDF5)
       add_dependencies(moab-project hdf5-project)
     endif()
 
     # EIGEN3 is needed to be build before MOAB
-    if(NOT EIGEN3_FOUND)
+    if(DOWNLOAD_EIGEN3)
       add_dependencies(moab-project eigen3-project)
     endif()
 
@@ -253,19 +273,20 @@ if(ENABLE_DAGMC)
   # If DAGMC is installed in a non-standard location, set DAGMC_ROOT
   # to the root directory of the DAGMC installation.
   # For example: export DAGMC_ROOT=/path/to/dagmc
-  # If DAGMC is not installed, no warry, we will download and install it.
-  if(DAGMC_ROOT)
+  # If DAGMC is not installed, set DOWNLOAD_DAGMC to ON.
+  # PyNE will download and build DAGMC if DOWNLOAD_DAGMC is ON. (Recommended)
+  if(NOT DOWNLOAD_DAGMC)
     find_package(DAGMC REQUIRED)
   else()
-    find_package(DAGMC)
-  endif()
-  if(NOT DAGMC_FOUND AND NOT DAGMC_ROOT)
-    message(STATUS "DAGMC not found. Will attempt to download and build.")
+    message(STATUS "DAGMC will be downloaded and built")
+
+    # Configure DAGMC
+    set(DAGMC_VERSION "3.2.3")
     set(DAGMC_ROOT "${CMAKE_BINARY_DIR}/DAGMC")
     ExternalProject_Add(dagmc-project
       PREFIX ${DAGMC_ROOT}
       GIT_REPOSITORY https://github.com/svalinn/DAGMC.git
-      GIT_TAG v3.2.3
+      GIT_TAG v${DAGMC_VERSION}
       DOWNLOAD_EXTRACT_TIMESTAMP true
       CMAKE_ARGS 
         -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
@@ -282,7 +303,7 @@ if(ENABLE_DAGMC)
     set(DAGMC_LIBRARY_DIRS "${DAGMC_ROOT}/lib")
     
     # MOAB is needed to be build before DAGMC
-    if(NOT MOAB_FOUND)
+    if(DOWNLOAD_MOAB)
       add_dependencies(dagmc-project moab-project)
     endif()
 
@@ -292,6 +313,7 @@ if(ENABLE_DAGMC)
       FILES_MATCHING PATTERN "*${CMAKE_SHARED_LIBRARY_SUFFIX}*"
       )
   endif()
+
   include_directories(${DAGMC_INCLUDE_DIRS})
   link_directories(${DAGMC_LIBRARY_DIRS})
   message(STATUS "DAGMC include dirs: ${DAGMC_INCLUDE_DIRS}")
@@ -338,23 +360,24 @@ if(ENABLE_LAPACK)
   # If LAPACK is installed in a non-standard location, set LAPACK_ROOT
   # to the root directory of the LAPACK installation.
   # For example: export LAPACK_ROOT=/path/to/lapack
-  # If LAPACK is not installed, no warry, we will download and install it.
-  if(LAPACK_ROOT)
+  # If LAPACK is not installed, set LAPACK_ROOT to OFF.
+  # PyNE will download and build LAPACK if LAPACK_ROOT is ON. (Recommended)
+  if(NOT DOWNLOAD_LAPACK)
     find_package(LAPACK REQUIRED)
   else()
-    find_package(LAPACK)
-  endif()
-  if(NOT LAPACK_FOUND)
-    MESSAGE(STATUS "LAPACK not found. Will attempt to download and install it.")
+    message(STATUS "LAPACK will be downloaded and built")
+
+    # Configure LAPACK
+    set(LAPACK_VERSION "3.12.0")
     set(LAPACK_ROOT "${CMAKE_BINARY_DIR}/lapack")
     ExternalProject_Add(lapack-project
       PREFIX ${LAPACK_ROOT}
-      URL https://github.com/Reference-LAPACK/lapack/archive/refs/tags/v3.12.0.tar.gz
+      URL https://github.com/Reference-LAPACK/lapack/archive/refs/tags/v${LAPACK_VERSION}.tar.gz
       DOWNLOAD_EXTRACT_TIMESTAMP true
-      CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR> 
-                -DBUILD_SHARED_LIBS:BOOL=ON
-                -DUSE_OPTIMIZED_BLAS:BOOL=ON
-                -DCMAKE_INSTALL_RPATH:STRING="\${ORIGIN}"
+      CMAKE_ARGS
+        -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR> 
+        -DBUILD_SHARED_LIBS:BOOL=ON
+        -DUSE_OPTIMIZED_BLAS:BOOL=ON
       BUILD_BYPRODUCTS "${LAPACK_ROOT}/lib/liblapack${CMAKE_SHARED_LIBRARY_SUFFIX}"
       )
     set(LAPACK_INCLUDE_DIRS "${LAPACK_ROOT}/include")

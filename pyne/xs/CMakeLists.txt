@@ -1,12 +1,3 @@
-# Include the source and build directories
-include_directories(
-    ${CMAKE_SOURCE_DIR}/src
-    ${CMAKE_BINARY_DIR}/src
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_CURRENT_BINARY_DIR}
-    ${Python_NumPy_INCLUDE_DIRS}
-)
-
 # Build C++ file
 add_custom_command(
     OUTPUT models.cxx
@@ -36,7 +27,7 @@ target_link_libraries(models PRIVATE ${CMAKE_PROJECT_NAME})
 
 # Configure the RPATH
 set_target_properties(models PROPERTIES
-    INSTALL_RPATH "$ORIGIN/../core/lib"
+    INSTALL_RPATH "${RPATH}/../core/${CMAKE_INSTALL_LIBDIR}"
 )
 
 # Install the target in the pyne directory

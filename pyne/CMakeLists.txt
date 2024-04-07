@@ -94,13 +94,13 @@ foreach(PYNE_CYTHON_MODULE ${PYNE_CYTHON_MODULES})
 
   # Configure the RPATH
   set_target_properties(${PYNE_CYTHON_MODULE} PROPERTIES
-    INSTALL_RPATH "$ORIGIN:$ORIGIN/core/lib"
+    INSTALL_RPATH ${RPATH}/core/${CMAKE_INSTALL_LIBDIR}
     )
 
   if(PYNE_CYTHON_MODULE STREQUAL "source_sampling")
 
     # MOAB needs to be built before source_sampling
-    if (NOT MOAB_FOUND)
+    if(DOWNLOAD_MOAB)
       add_dependencies(${PYNE_CYTHON_MODULE} moab-project)
     endif()
 
@@ -111,17 +111,17 @@ foreach(PYNE_CYTHON_MODULE ${PYNE_CYTHON_MODULES})
   if(PYNE_CYTHON_MODULE STREQUAL "_dagmc")
 
     # eigen3 needs to be built before _dagmc
-    if(NOT EIGEN3_FOUND)
+    if(DOWNLOAD_EIGEN3)
       add_dependencies(${PYNE_CYTHON_MODULE} eigen3-project)
     endif()
 
     # MOAB needs to be built before _dagmc
-    if(NOT MOAB_FOUND)
+    if(DOWNLOAD_MOAB)
       add_dependencies(${PYNE_CYTHON_MODULE} moab-project)
     endif()
 
     # dagmc needs to be built before _dagmc
-    if(NOT DAGMC_FOUND)
+    if(DOWNLOAD_DAGMC)
       add_dependencies(${PYNE_CYTHON_MODULE} dagmc-project)
     endif()
 
@@ -173,7 +173,7 @@ if(BUILD_SPATIAL_SOLVER)
   
   # Configure the RPATH
   set_target_properties(${f2py_module_name} PROPERTIES
-    INSTALL_RPATH "$ORIGIN/core/lib"
+    INSTALL_RPATH "${RPATH}/core/${CMAKE_INSTALL_LIBDIR}"
     )
   add_dependencies(${f2py_module_name} genpyf ${CMAKE_PROJECT_NAME})
   install(TARGETS ${f2py_module_name} DESTINATION ../.)
