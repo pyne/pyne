@@ -1,3 +1,12 @@
+# Include the source and build directories
+include_directories(
+    ${CMAKE_SOURCE_DIR}/src
+    ${CMAKE_BINARY_DIR}/src
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_BINARY_DIR}
+    ${Python_NumPy_INCLUDE_DIRS}
+)
+
 # Build C++ file
 add_custom_command(
     OUTPUT models.cxx

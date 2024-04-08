@@ -287,7 +287,6 @@ if(ENABLE_DAGMC)
       PREFIX ${DAGMC_ROOT}
       GIT_REPOSITORY https://github.com/svalinn/DAGMC.git
       GIT_TAG v${DAGMC_VERSION}
-      DOWNLOAD_EXTRACT_TIMESTAMP true
       CMAKE_ARGS 
         -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
         -DMOAB_DIR:PATH=${MOAB_ROOT}
@@ -373,7 +372,6 @@ if(ENABLE_LAPACK)
     ExternalProject_Add(lapack-project
       PREFIX ${LAPACK_ROOT}
       URL https://github.com/Reference-LAPACK/lapack/archive/refs/tags/v${LAPACK_VERSION}.tar.gz
-      DOWNLOAD_EXTRACT_TIMESTAMP true
       CMAKE_ARGS
         -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR> 
         -DBUILD_SHARED_LIBS:BOOL=ON
