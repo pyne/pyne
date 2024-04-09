@@ -52,8 +52,8 @@ add_feature_info("Enable MOAB" ENABLE_MOAB "Use MOAB")
 add_feature_info("Download MOAB" DOWNLOAD_MOAB "Download MOAB")
 add_feature_info("Enable DAGMC" ENABLE_DAGMC "Use DAGMC")
 add_feature_info("Download DAGMC" DOWNLOAD_DAGMC "Download DAGMC")
-add_feature_info("AHOT" ENABLE_SPATIAL_SOLVERS "AHOT spatial solvers")
-add_feature_info("ENSDF" ENABLE_ENSDF_PROCESSING "ENSDF processing tools")
+add_feature_info("Enable AHOT" ENABLE_SPATIAL_SOLVERS "AHOT spatial solvers")
+add_feature_info("Enable ENSDF" ENABLE_ENSDF_PROCESSING "ENSDF processing tools")
 add_feature_info("Enable Fast Compile" ENABLE_FAST_COMPILE "Use pre-compiled binaries")
 
 # Include PyneMacros file
@@ -86,7 +86,9 @@ else()
   message(STATUS "HDF5 will be downloaded and installed")
 
   # Configure HDF5 
-  set(HDF5_VERSION "1.10.11")
+  if(NOT HDF5_VERSION)
+    set(HDF5_VERSION "1.10.11")
+  endif()
   
   # Replace the dots with semicolons to create a list
   string(REPLACE "." ";" HDF5_VERSION_LIST ${HDF5_VERSION})
@@ -163,7 +165,9 @@ if(ENABLE_EIGEN3)
     message(STATUS "Eigen3 will be downloaded")
 
     # Configure Eigen3
-    set(EIGEN3_VERSION "3.4.0")
+    if(NOT EIGEN3_VERSION)
+      set(EIGEN3_VERSION "3.4.0")
+    endif()
     set(EIGEN3_ROOT "${CMAKE_BINARY_DIR}/eigen3")
     ExternalProject_Add(eigen3-project
       PREFIX ${EIGEN3_ROOT}
@@ -207,8 +211,10 @@ if(ENABLE_MOAB)
   else()
     message(STATUS "MOAB will be downloaded and built")
 
-    # Configure MOAB version
-    set(MOAB_VERSION "5.5.1")
+    # Configure MOAB
+    if(NOT MOAB_VERSION)
+      set(MOAB_VERSION "5.5.1")
+    endif()
     set(MOAB_ROOT "${CMAKE_BINARY_DIR}/moab")
     ExternalProject_Add(moab-project
       PREFIX ${MOAB_ROOT}
@@ -281,7 +287,9 @@ if(ENABLE_DAGMC)
     message(STATUS "DAGMC will be downloaded and built")
 
     # Configure DAGMC
-    set(DAGMC_VERSION "3.2.3")
+    if(NOT DAGMC_VERSION)
+      set(DAGMC_VERSION "3.2.3")
+    endif()
     set(DAGMC_ROOT "${CMAKE_BINARY_DIR}/DAGMC")
     ExternalProject_Add(dagmc-project
       PREFIX ${DAGMC_ROOT}
@@ -367,7 +375,9 @@ if(ENABLE_LAPACK)
     message(STATUS "LAPACK will be downloaded and built")
 
     # Configure LAPACK
-    set(LAPACK_VERSION "3.12.0")
+    if(NOT LAPACK_VERSION)
+      set(LAPACK_VERSION "3.12.0")
+    endif()
     set(LAPACK_ROOT "${CMAKE_BINARY_DIR}/lapack")
     ExternalProject_Add(lapack-project
       PREFIX ${LAPACK_ROOT}
@@ -454,5 +464,5 @@ feature_summary(
   DESCRIPTION "PyNE Configuration Summary"
   INCLUDE_QUIET_PACKAGES
   FILENAME ${CMAKE_SOURCE_DIR}/summary.log
-)
+  )
 message(STATUS "Summary log written to ${CMAKE_SOURCE_DIR}/summary.log")
