@@ -5,7 +5,7 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
     ${Python_NumPy_INCLUDE_DIRS}
-)
+    )
 
 # Build C++ file
 add_custom_command(
@@ -20,13 +20,13 @@ add_custom_command(
             -I ${Python_NumPy_INCLUDE_DIRS}
             "${CMAKE_CURRENT_SOURCE_DIR}/models.pyx" 
             --output-file "${CMAKE_CURRENT_BINARY_DIR}/models.cxx"
-)
+    )
 
 # Creating a Python module
 python_add_library(
     models MODULE "${CMAKE_CURRENT_BINARY_DIR}/models.cxx"
     WITH_SOABI
-)
+    )
 
 # Add the pyne library as a dependency
 add_dependencies(models ${CMAKE_PROJECT_NAME})
@@ -37,7 +37,7 @@ target_link_libraries(models PRIVATE ${CMAKE_PROJECT_NAME})
 # Configure the RPATH
 set_target_properties(models PROPERTIES
     INSTALL_RPATH "${RPATH}/../core/${CMAKE_INSTALL_LIBDIR}"
-)
+    )
 
 # Install the target in the pyne directory
 install(TARGETS models DESTINATION ../xs)
