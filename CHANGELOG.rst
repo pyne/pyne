@@ -6,6 +6,7 @@ Next Version
 ============
 **Change**
    * Test install script on multiple Ubuntu versions (#1484)
+   * Update MOAB, OpenMC, hdf5 versions in apt build (#1529)
    * Support Cython3+ (#1528)
 
 **Fix**
