@@ -62,8 +62,7 @@ ARG build_hdf5
 ENV INSTALL_PATH=$HOME/opt/moab
 
 # build MOAB
-RUN export MOAB_HDF5_ARGS=""; \
-    export MOAB_HDF5_ARGS="-DHDF5_ROOT=$HDF5_INSTALL_PATH"; \
+RUN export MOAB_HDF5_ARGS="-DHDF5_ROOT=$HDF5_INSTALL_PATH"; \
     cd $HOME/opt \
     && mkdir moab \
     && cd moab \
@@ -128,8 +127,7 @@ RUN export HDF5_ROOT="$HDF5_INSTALL_PATH" ; \
 FROM ${pyne_test_base} AS pyne
 ARG build_hdf5
 
-RUN export PYNE_HDF5_ARGS="" ;\
-    export PYNE_HDF5_ARGS="--hdf5 $HDF5_INSTALL_PATH" ; \
+RUN export PYNE_HDF5_ARGS="--hdf5 $HDF5_INSTALL_PATH"
 COPY . $HOME/opt/pyne
 RUN cd $HOME/opt/pyne \
     && python setup.py install --user \
