@@ -128,9 +128,9 @@ RUN export HDF5_ROOT="$HDF5_INSTALL_PATH" ; \
 FROM ${pyne_test_base} AS pyne
 ARG build_hdf5
 
-RUN export PYNE_HDF5_ARGS="--hdf5 $HDF5_INSTALL_PATH"
 COPY . $HOME/opt/pyne
-RUN cd $HOME/opt/pyne \
+RUN export PYNE_HDF5_ARGS="--hdf5 $HDF5_INSTALL_PATH"; \
+    cd $HOME/opt/pyne \
     && python setup.py install --user \
                                 $PYNE_MOAB_ARGS $PYNE_DAGMC_ARGS \
                                 $PYNE_HDF5_ARGS \
