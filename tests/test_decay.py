@@ -42,7 +42,7 @@ MATS = None
 O2HLS = None  # Origen Half-lives
 
 
-def setup():
+def setup_module():
     global MATS, O2HLS
     o2benchurl = "https://github.com/pyne/data/raw/master/" + H5NAME
     if not os.path.exists(H5NAME):
