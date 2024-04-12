@@ -56,6 +56,7 @@ RUN cd $HOME/opt \
 # put HDF5 on the path
 ENV LD_LIBRARY_PATH $HDF5_INSTALL_PATH/lib:$LD_LIBRARY_PATH
 ENV LIBRARY_PATH $HDF5_INSTALL_PATH/lib:$LIBRARY_PATH
+RUN echo "export PATH=$PATH:$HDF5_INSTALL_PATH" >> ~/.bashrc
 
 FROM base_python AS moab
 ARG build_hdf5
