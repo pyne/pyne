@@ -651,8 +651,7 @@ class TestMaterialOperatorOverloading(TestCase):
     u238 = Material({922380000: 1.0})
 
     def test_add_num(self):
-        # mat = self.u235 + 30.0
-        mat = Material.__add__(self.u235, 30.0)
+        mat = self.u235 + 30.0
         assert mat.mass == 31.0
 
     def test_radd_num(self):
