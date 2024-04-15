@@ -67,7 +67,7 @@ RUN export MOAB_HDF5_ARGS="-DHDF5_ROOT=$HDF5_INSTALL_PATH"; \
     cd $HOME/opt \
     && mkdir moab \
     && cd moab \
-    && git clone --depth 1 --single-branch -b 5.5.0 https://bitbucket.org/fathomteam/moab \
+    && git clone --depth 1 --single-branch -b 5.5.1 https://bitbucket.org/fathomteam/moab \
     && cd moab \
     && mkdir build \
     && cd build \
