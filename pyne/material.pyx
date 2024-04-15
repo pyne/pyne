@@ -1429,7 +1429,7 @@ cdef class _Material:
         else:
             return NotImplemented
     
-    def __rmul__(x, y):
+    def __rmul__(self, y):
         if isinstance(y, float):
             return self.__mul_float__(y)
         elif isinstance(y, int):
