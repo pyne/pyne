@@ -1405,9 +1405,9 @@ cdef class _Material:
             return NotImplemented
 
     def __radd__(self, y):
-        if isinstance(self, float):
+        if isinstance(y, float):
             return self.__add_float__(y)
-        elif isinstance(self, int):
+        elif isinstance(y, int):
             return self.__add_float__(float(y))
         else:
             return NotImplemented
