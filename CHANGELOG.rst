@@ -39,7 +39,7 @@ v0.7.8
    * Fix gamma intensity calculation (#1496)
    * Add workflow to build virtual machines based on Dockerfile (#1490)
    * Replacing '#define isnan' with 'std::isnan' (#1502)
-   * Updated statepoint file in tests to work with latest version of openmc (#1532)
+   * Updated statepoint file in tests to work with latest version of openmc (#1533)
 
 v0.7.7
 ======
