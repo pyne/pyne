@@ -434,7 +434,7 @@ class NativeMeshTag(Tag):
             try: 
                 self.default = self.tag.get_default_value()
             except ValueError:
-                self.default = int
+                self.default = None
 
         except RuntimeError:
             self.tag = self.mesh.mesh.tag_get_handle(
