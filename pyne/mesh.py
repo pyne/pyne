@@ -431,7 +431,11 @@ class NativeMeshTag(Tag):
             self.size = self.tag.get_length()
             self.dtype = self.tag.get_dtype()
             self.pymbtype = types.pymoab_data_type(self.dtype)
-            self.default = self.tag.get_default_value()
+            try: 
+                self.default = self.tag.get_default_value()
+            except ValueError:
+                self.default = int
+
         except RuntimeError:
             self.tag = self.mesh.mesh.tag_get_handle(
                 self.name,
