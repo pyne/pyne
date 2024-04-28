@@ -46,7 +46,7 @@ ENV HDF5_INSTALL_PATH=$HOME/opt/hdf5/$build_hdf5
 RUN cd $HOME/opt \
     && mkdir hdf5 \
     && cd hdf5 \
-    && git clone --single-branch --branch hdf5-1_14_3 https://github.com/HDFGroup/hdf5.git \
+    && git clone --single-branch --branch $build_hdf5 https://github.com/HDFGroup/hdf5.git \
     && cd hdf5 \
     && ./configure --prefix=$HDF5_INSTALL_PATH --enable-shared \
     && make -j 3 \
@@ -59,7 +59,7 @@ ENV LIBRARY_PATH $HDF5_INSTALL_PATH/lib:$LIBRARY_PATH
 RUN echo "export PATH=$PATH:$HDF5_INSTALL_PATH" >> ~/.bashrc
 
 FROM base_python AS moab
-ARG build_hdf5
+ARG moab_version="5.5.1"
 ENV INSTALL_PATH=$HOME/opt/moab
 
 # build MOAB
@@ -67,7 +67,7 @@ RUN export MOAB_HDF5_ARGS="-DHDF5_ROOT=$HDF5_INSTALL_PATH"; \
     cd $HOME/opt \
     && mkdir moab \
     && cd moab \
-    && git clone --depth 1 --single-branch -b 5.5.1 https://bitbucket.org/fathomteam/moab \
+    && git clone --depth 1 --single-branch -b $moab_version https://bitbucket.org/fathomteam/moab \
     && cd moab \
     && mkdir build \
     && cd build \
@@ -116,17 +116,15 @@ RUN cd /root \
 ENV PYNE_DAGMC_ARGS "--dagmc $HOME/opt/dagmc"
 
 FROM dagmc AS openmc
-ARG build_hdf5
+ARG openmc_version="v0.14.0"
 # build/install OpenMC Python API
 RUN export HDF5_ROOT="$HDF5_INSTALL_PATH" ; \
-    git clone https://github.com/openmc-dev/openmc.git $HOME/opt/openmc \
+    git clone --depth 1 --branch $openmc_version https://github.com/openmc-dev/openmc.git $HOME/opt/openmc \
     && cd  $HOME/opt/openmc \
-    && git checkout tags/v0.14.0 \
     && pip install .
 
 # Build/Install PyNE from release branch
 FROM ${pyne_test_base} AS pyne
-ARG build_hdf5
 
 COPY . $HOME/opt/pyne
 RUN export PYNE_HDF5_ARGS="--hdf5 $HDF5_INSTALL_PATH"; \
