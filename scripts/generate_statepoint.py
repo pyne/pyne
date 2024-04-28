@@ -8,10 +8,10 @@ geometry = openmc.Geometry([box_cell])
 
 mesh = openmc.RegularMesh()
 mesh.lower_left = (-40, -12.5, -2.5)
-mesh.upper_right = (80, 25, 5)
+mesh.upper_right = (40, 12.5, 2.5)
 mesh.dimension = (3,2,1)
 
-energy_bins = [0.0, 1e6, 2e6]
+energy_bins = [0.0, 1e6, 2e7]
 
 energy_filter = openmc.EnergyFilter(energy_bins)
 mesh_filter = openmc.MeshFilter(mesh)
