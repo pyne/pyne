@@ -1,7 +1,7 @@
 import openmc
 import os
 
-box = openmc.model.RectangularParallelepiped(-40, 80, -12.5, 25, -2.5, 5,
+box = openmc.model.RectangularParallelepiped(-40, 40, -12.5, 12.5, -2.5, 2.5,
                                               boundary_type='vacuum')
 box_cell = openmc.Cell(region=-box)
 geometry = openmc.Geometry([box_cell])
