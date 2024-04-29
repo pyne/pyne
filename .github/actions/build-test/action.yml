@@ -23,7 +23,7 @@ runs:
           export ADD_FLAG="${ADD_FLAG} --dagmc /root/opt/dagmc"
         fi
         if [[ "${{ inputs.hdf5 }}" == "_hdf5" ]]; then
-          export ADD_FLAG="${ADD_FLAG} --hdf5 /root/opt/hdf5/hdf5-1_12_0"
+          export ADD_FLAG="${ADD_FLAG} --hdf5 /root/opt/hdf5/hdf5-1_14_3"
         fi
         export ADD_FLAG="${ADD_FLAG} "
         echo "ADD_FLAG=${ADD_FLAG}" >> $GITHUB_ENV
