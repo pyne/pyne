@@ -13,14 +13,12 @@ apt_package_list="software-properties-common \
                   gfortran \
                   libblas-dev \
                   liblapack-dev \
-                  libeigen3-dev \
-                  libhdf5-dev \
-                  hdf5-tools"
+                  libeigen3-dev"
 
 # list of python package required for PyNE and its depedencies (installed using pip3 python package manager)
 pip_package_list="numpy==1.23 \
                   scipy \
-                  \'cython<3\' \
+                  cython \
                   nose \
                   pytest \
                   tables \
@@ -60,8 +58,7 @@ echo "export PATH=$HOME/.local/bin:\$PATH" >> ~/.bashrc
 # build HDF5 if necessary
 build_hdf5=$2
 hdf5_libdir=$HOME/opt/hdf5/$build_hdf5
-if [ $build_hdf5 != "NO" ]; then \
-  cd $install_dir \
+cd $install_dir \
   && mkdir hdf5 \
   && cd hdf5 \
   && git clone --single-branch --branch $build_hdf5 https://github.com/HDFGroup/hdf5.git \
@@ -70,35 +67,26 @@ if [ $build_hdf5 != "NO" ]; then \
   && make -j 3 \
   && make install \
   && cd .. \
-  && rm -rf hdf5; \
-fi
+  && rm -rf hdf5;
 
 # put HDF5 on the path
 export LD_LIBRARY_PATH=$hdf5_libdir/lib:$LD_LIBRARY_PATH
 export LIBRARY_PATH=$hdf5_libdir/lib:$LIBRARY_PATH
-# # need to put libhdf5.so on LD_LIBRARY_PATH (Making sure that LD_LIBRARY_PATH is defined first)
-# if [ -z $LD_LIBRARY_PATH ]; then
-#   export LD_LIBRARY_PATH="${hdf5_libdir}"
-# else
-#   export LD_LIBRARY_PATH="${hdf5_libdir}:$LD_LIBRARY_PATH"
-# fi
-
+export PYNE_HDF5_ARGS="--hdf5 ${hdf5_libdir}"; \
 
 ############
 ### MOAB ###
 ############
 # pre-setup
-export MOAB_HDF5_ARGS=""
-if [ $build_hdf5 != "NO" ]; then \
-  export MOAB_HDF5_ARGS="-DHDF5_ROOT=$hdf5_libdir"; \
-fi
+export MOAB_HDF5_ARGS="-DHDF5_ROOT=$hdf5_libdir"
 cd ${install_dir}
 check_repo moab
 mkdir -p moab
 cd moab
 
 # clone and version
-git clone --depth 1 --single-branch -b 5.3.0 https://bitbucket.org/fathomteam/moab moab-repo
+export moab_version=5.5.1
+git clone --depth 1 --single-branch -b ${moab_version} https://bitbucket.org/fathomteam/moab moab-repo
 cd moab-repo
 mkdir -p build
 cd build
@@ -121,6 +109,7 @@ rm -rf moab-repo
 # Adding MOAB/lib to $LD_LIBRARY_PATH and $LIBRARY_PATH
 export LD_LIBRARY_PATH="${install_dir}/moab/lib:$LD_LIBRARY_PATH"
 export LIBRARY_PATH="${install_dir}/moab/lib:$LIBRARY_PATH"
+export PYNE_MOAB_ARGS="--moab $HOME/opt/moab"
 
 #############
 ### DAGMC ###
@@ -154,6 +143,7 @@ rm -rf dagmc-repo
 
 # Adding DAGMC/lib to $LD_LIBRARY_PATH and $LIBRARY_PATH
 export LD_LIBRARY_PATH="${install_dir}/dagmc/lib:$LD_LIBRARY_PATH"
+export PYNE_DAGMC_ARGS="--dagmc $HOME/opt/dagmc"
 
 # Adding dagmc/bin to $PATH
 export PATH="${install_dir}/dagmc/bin:$PATH"
@@ -161,13 +151,11 @@ export PATH="${install_dir}/dagmc/bin:$PATH"
 ####################
 ### OpenMC API #####
 ####################
-if [ $build_hdf5 != "NO" ]; then \
-  export HDF5_ROOT="$hdf5_libdir"; \
-fi
+export HDF5_ROOT="$hdf5_libdir"
+export openmc_version=v0.14.0
 cd ${install_dir}
-git clone https://github.com/openmc-dev/openmc.git
+git clone --depth 1 --branch ${openmc_version} https://github.com/openmc-dev/openmc.git
 cd openmc
-git checkout tags/v0.13.0
 pip install --user .
 
 ############
@@ -175,10 +163,6 @@ pip install --user .
 ############
 
 # pre-setup
-export PYNE_HDF5_ARGS=""
-if [ $build_hdf5 != "NO" ]; then \
-  export PYNE_HDF5_ARGS="--hdf5 ${hdf5_libdir}"; \
-fi
 cd ${install_dir}
 check_repo pyne
 mkdir -p pyne
@@ -192,8 +176,8 @@ if [ $1 == 'stable' ] ; then
 fi
 
 python setup.py install --user \
-                        --moab ${install_dir}/moab \
-                        --dagmc ${install_dir}/dagmc \
+                        ${PYNE_MOAB_ARGS} \
+                        ${PYNE_DAGMC_ARGS} \
                         ${PYNE_HDF5_ARGS} \
                         --clean -j 3
 
