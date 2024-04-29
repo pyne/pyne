@@ -45,4 +45,3 @@ jobs:
         uses: ./.github/actions/build-test
         with:
           stage: ${{ matrix.stage }}
-          hdf5: ${{ matrix.hdf5 }}
