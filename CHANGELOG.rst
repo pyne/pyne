@@ -15,6 +15,7 @@ Next Version
       * new download location for KAERI data archive
       * do not try to download missing (super heavy) data from KAERI
       * update material_library writing interface
+   * reference python_executable rather than assuming `python` exists ()
 
 v0.7.8
 ======
