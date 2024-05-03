@@ -165,7 +165,7 @@ def test_get_e_bounds_from_openmc_sp():
         pytest.skip("No openmc. Skipping tests", allow_module_level=True)
     # energy bin: [0.0, 1.0, 20.0], 2bins
     # 6 volume elemenes
-    filename = os.path.join(cwd, "files_test_openmc", "statepoint.10.ebin2.ves6.h5")
+    filename = os.path.join(cwd, "files_test_openmc", "statepoint.10.h5")
     # OpenMC energy unit is eV
     exp_e_bounds = np.array([0.0, 1.0, 20.0]) * 1e6
     e_bounds = openmc_utils.get_e_bounds_from_openmc_sp(filename, tally_id=1)
@@ -207,7 +207,7 @@ def test_get_result_error_from_openmc_sp():
     except:
         pytest.skip("No openmc. Skipping tests", allow_module_level=True)
     filename = os.path.join(
-        os.getcwd(), "files_test_openmc", "statepoint.10.ebin2.ves6.h5"
+        os.getcwd(), "files_test_openmc", "statepoint.10.h5"
     )
     tally_num = 1
     dims = np.array([3, 2, 1])
@@ -229,7 +229,7 @@ def test_get_result_error_from_openmc_sp():
         res_tot,
         rel_err_tot,
     ) = openmc_utils.get_result_error_from_openmc_sp(filename, m)
-    # read expected data from statepoint.10.ebin2.ves6.h5
+    # read expected data from statepoint.10.h5
     sp = openmc.StatePoint(filename)
     tally = sp.get_tally(id=1)
     flux = tally.get_slice(scores=["flux"])
@@ -275,7 +275,7 @@ def test_create_meshtally():
     # mesh.upper_right = (40.0, 12.5, 2.5)
     # energy_bins = np.array([0.0, 1.0, 20.0]) * 1e6
     filename = os.path.join(
-        os.getcwd(), "files_test_openmc", "statepoint.10.ebin2.ves6.h5"
+        os.getcwd(), "files_test_openmc", "statepoint.10.h5"
     )
     tally_num = 1
     dims = np.array([3, 2, 1])
@@ -299,7 +299,7 @@ def test_create_meshtally():
     )
     ve_vol = (80.0 / 3) * (25.0 / 2) * (5.0 / 1)
 
-    # read expected data from statepoint.10.ebin2.ves6.h5
+    # read expected data from statepoint.10.h5
     sp = openmc.StatePoint(filename)
     tally = sp.get_tally(id=1)
     flux = tally.get_slice(scores=["flux"])

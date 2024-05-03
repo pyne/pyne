@@ -1,7 +1,6 @@
 # Ignore possible build & documentation
 docs/_build/
 build/
-build-*
 dist/
 *egg-info/
 build_nuc_data/

@@ -1394,17 +1394,21 @@ cdef class _Material:
         return pymat
 
 
-    def __add__(x, y):
-        if isinstance(x, _Material) and isinstance(y, _Material):
-            return x.__add_material__(y)
+    def __add__(self, y):
+        if isinstance(y, _Material):
+            return self.__add_material__(y)
         elif isinstance(y, float):
-            return x.__add_float__(y)
-        elif isinstance(x, float):
-            return y.__add_float__(x)
+            return self.__add_float__(y)
         elif isinstance(y, int):
-            return x.__add_float__(float(y))
-        elif isinstance(x, int):
-            return y.__add_float__(float(x))
+            return self.__add_float__(float(y))
+        else:
+            return NotImplemented
+
+    def __radd__(self, y):
+        if isinstance(y, float):
+            return self.__add_float__(y)
+        elif isinstance(y, int):
+            return self.__add_float__(float(y))
         else:
             return NotImplemented
 
@@ -1417,15 +1421,19 @@ cdef class _Material:
         return pymat
 
 
-    def __mul__(x, y):
+    def __mul__(self, y):
         if isinstance(y, float):
-            return x.__mul_float__(y)
-        elif isinstance(x, float):
-            return y.__mul_float__(x)
+            return self.__mul_float__(y)
         elif isinstance(y, int):
-            return x.__mul_float__(float(y))
-        elif isinstance(x, int):
-            return y.__mul_float__(float(x))
+            return self.__mul_float__(float(y))
+        else:
+            return NotImplemented
+    
+    def __rmul__(self, y):
+        if isinstance(y, float):
+            return self.__mul_float__(y)
+        elif isinstance(y, int):
+            return self.__mul_float__(float(y))
         else:
             return NotImplemented
 

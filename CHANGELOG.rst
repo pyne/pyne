@@ -6,6 +6,8 @@ Next Version
 ============
 **Change**
    * Test install script on multiple Ubuntu versions (#1484)
+   * Update MOAB, OpenMC, hdf5 versions in apt build (#1529)
+   * Support Cython3+ (#1528)
 
 **Fix**
    * Fix Type Mismatch Error in PyNE's ENSDF Processing Module (#1519)
@@ -13,6 +15,7 @@ Next Version
       * new download location for KAERI data archive
       * do not try to download missing (super heavy) data from KAERI
       * update material_library writing interface
+   * reference python_executable rather than assuming `python` exists ()
 
 v0.7.8
 ======
