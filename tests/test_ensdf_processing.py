@@ -308,7 +308,7 @@ def create_tmp():
 
 
 def cleanup_tmp():
-    shutil.rmtree(tmp_path)
+    shutil.rmtree(tmp_path, ignore_errors=True)
 
 
 def file_comp(file_out, file_ref, exceptions):
