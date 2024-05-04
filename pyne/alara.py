@@ -1116,7 +1116,7 @@ def _make_response_dtype(response_name, data_length=1):
             ("idx", np.int64),
             ("nuc", "S6"),
             ("time", "S20"),
-            (response_name, np.float64, data_length),
+            (response_name, np.float64, (data_length,)),
         ]
     )
 
