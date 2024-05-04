@@ -27,10 +27,10 @@ jobs:
 
     steps:
       - name: Set environment variables
+        if: matrix.os == 'macos-latest'
         shell: bash -l {0}
         run: |
-          echo "FC=$(which gfortran)" >> $GITHUB_ENV
-          echo $(which gfortran)
+          echo "FC=$(which gfortran-13)" >> $GITHUB_ENV
           
       - name: Set up Python
         uses: actions/setup-python@v5
