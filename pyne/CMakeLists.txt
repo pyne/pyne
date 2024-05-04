@@ -127,11 +127,6 @@ foreach(PYNE_CYTHON_MODULE ${PYNE_CYTHON_MODULES})
 
     # Link MOAB and DAGMC library
     target_link_libraries(${PYNE_CYTHON_MODULE} PRIVATE MOAB dagmc)
-
-    # Rename _dagmc to dagmc
-    set_target_properties(${PYNE_CYTHON_MODULE} PROPERTIES
-      OUTPUT_NAME dagmc
-      )
   endif()
 
   # Install the target in the pyne directory
