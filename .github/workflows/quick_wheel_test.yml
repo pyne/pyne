@@ -29,8 +29,8 @@ jobs:
       - name: Set environment variables
         shell: bash -l {0}
         run: |
-          echo "FC=gfortran" >> $GITHUB_ENV
-          echo "CC=gcc" >> $GITHUB_ENV
+          echo "FC=$(which gfortran)" >> $GITHUB_ENV
+          echo $(which gfortran)
           
       - name: Set up Python
         uses: actions/setup-python@v5
