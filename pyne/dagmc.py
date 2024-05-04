@@ -14,7 +14,7 @@ For more information on installing PyNE with DAGMC, visit: https://pyne.io/insta
 from warnings import warn
 
 try:
-    from pyne import _dagmc
+    from pyne._dagmc import *
     HAVE_DAGMC = True
 except ImportError:
     warn(
