@@ -3,6 +3,12 @@ set(PYNE_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}" ${PYNE_INCLUDE_DIRS}
 
 pyne_download_files()
 
+# Generate atomic data
+execute_process(COMMAND 
+  ${Python_EXECUTABLE} atomicgen.py
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  )
+
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
 
 # setup source files
@@ -94,11 +100,6 @@ fast_compile(cram.c
   "-O0 -fcx-fortran-rules -fcx-limited-range -ftree-sra -ftree-ter -fexpensive-optimizations"
   "-O0 -ffast-math"
   "-O0"
-  )
-
-# Generate atomic data
-execute_process(COMMAND 
-  "${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/atomicgen.py"
   )
 
 # Create library
