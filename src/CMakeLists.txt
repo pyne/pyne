@@ -96,6 +96,11 @@ fast_compile(cram.c
   "-O0"
   )
 
+# Generate atomic data
+execute_process(COMMAND 
+  "${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/atomicgen.py"
+  )
+
 # Create library
 add_library(${CMAKE_PROJECT_NAME} ${PYNE_SRCS})
 

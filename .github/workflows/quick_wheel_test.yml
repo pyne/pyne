@@ -27,7 +27,7 @@ jobs:
 
     steps:
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: 3.x
 
@@ -37,13 +37,13 @@ jobs:
       - name: Build wheels
         shell: bash -l {0}
         run: |
-          python3 -m pip install build
-          python3 -m build --wheel
+          pip install build
+          python -m build --wheel
 
       - name: Install PyNE
         shell: bash -l {0}
         run: |
-          python3 -m pip install dist/pyne*.whl
+          pip install dist/pyne*.whl
 
       - name: Nuc data make
         shell: bash -l {0}
