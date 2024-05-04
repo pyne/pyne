@@ -26,12 +26,12 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Set up fortran on Mac
-        if: matrix.os == 'macos-latest'
+      - name: Set environment variables
         shell: bash -l {0}
         run: |
-          brew install gfortran
-
+          echo "FC=gfortran" >> $GITHUB_ENV
+          echo "CC=gcc" >> $GITHUB_ENV
+          
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
