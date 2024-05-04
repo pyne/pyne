@@ -63,18 +63,29 @@ set(TRANSPORT_SPATIAL_METHODS_SRCS
   "transport_spatial_methods/3d/version.f90"
   #"transport_spatial_methods/3d/main.f90"
   )
+
 set(MOAB_SRCS
   "measure.cpp"
   "source_sampling.cpp"
   )
 
-# setup source files
+set(DAGMC_SRCS
+  "dagmc_bridge.cpp"
+  )
+
+# Add spatial solvers source if requested
 if(BUILD_SPATIAL_SOLVER)
   set(PYNE_SRCS "${PYNE_SRCS}" "${TRANSPORT_SPATIAL_METHODS_SRCS}")
 endif()
 
+# Add MOAB source if requested
 if(ENABLE_MOAB)
   set(PYNE_SRCS "${PYNE_SRCS}" "${MOAB_SRCS}")
+endif()
+
+# Add DAGMC source if requested
+if(ENABLE_DAGMC)
+  set(PYNE_SRCS "${PYNE_SRCS}" "${DAGMC_SRCS}")
 endif()
 
 # Fast compile decay and cram
@@ -111,6 +122,16 @@ if(ENABLE_MOAB)
   target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE MOAB)
 endif()
 
+# Link DAGMC library
+if(ENABLE_DAGMC)
+
+  # DAGMC needs to be built before pyne
+  if(DOWNLOAD_DAGMC)
+    add_dependencies(${CMAKE_PROJECT_NAME} dagmc-project)
+  endif()
+  target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE dagmc)
+endif()
+
 # Link LAPACK library
 if(ENABLE_LAPACK)
 
@@ -129,49 +150,49 @@ if(ENABLE_ENSDF_PROCESSING)
     ${PROJECT_SOURCE_DIR}/src/ensdf_processing/ALPHAD/alphad.f
     ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f
     )
-  install(TARGETS alphad RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+  install(TARGETS alphad RUNTIME DESTINATION ../.)
   add_executable(delta 
     ${PROJECT_SOURCE_DIR}/src/ensdf_processing/DELTA/delta.for
     )
-  install(TARGETS delta RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+  install(TARGETS delta RUNTIME DESTINATION ../.)
   add_executable(gtol 
     ${PROJECT_SOURCE_DIR}/src/ensdf_processing/GTOL/gtol.f
     ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f
     )
-  install(TARGETS gtol RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+  install(TARGETS gtol RUNTIME DESTINATION ../.)
   add_executable(bldhst 
     ${PROJECT_SOURCE_DIR}/src/ensdf_processing/HSICC/bldhst.for
     )
-  install(TARGETS bldhst RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+  install(TARGETS bldhst RUNTIME DESTINATION ../.)
   add_executable(hsicc 
     ${PROJECT_SOURCE_DIR}/src/ensdf_processing/HSICC/hsicc.for
     ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f
     )
-  install(TARGETS hsicc RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+  install(TARGETS hsicc RUNTIME DESTINATION ../.)
   add_executable(hsmrg 
     ${PROJECT_SOURCE_DIR}/src/ensdf_processing/HSICC/hsmrg.for
     ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f
     )
-  install(TARGETS hsmrg RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+  install(TARGETS hsmrg RUNTIME DESTINATION ../.)
   add_executable(seqhst 
     ${PROJECT_SOURCE_DIR}/src/ensdf_processing/HSICC/seqhst.for
     ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f
     )
-  install(TARGETS seqhst RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+  install(TARGETS seqhst RUNTIME DESTINATION ../.)
   add_executable(logft 
     ${PROJECT_SOURCE_DIR}/src/ensdf_processing/LOGFT/logft.for
     ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f
     )
-  install(TARGETS logft RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+  install(TARGETS logft RUNTIME DESTINATION ../.)
   add_executable(radd 
     ${PROJECT_SOURCE_DIR}/src/ensdf_processing/RADD/RadD.for
     )
-  install(TARGETS radd RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+  install(TARGETS radd RUNTIME DESTINATION ../.)
   add_executable(ruler 
     ${PROJECT_SOURCE_DIR}/src/ensdf_processing/RULER/ruler.f
     ${PROJECT_SOURCE_DIR}/src/ensdf_processing/nsdflib95.f
     )
-  install(TARGETS ruler RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+  install(TARGETS ruler RUNTIME DESTINATION ../.)
 endif()
 
 # Print include dir
