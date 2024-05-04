@@ -210,7 +210,7 @@ def remove(path):
     if os.path.isfile(path):
         os.remove(path)
     elif os.path.isdir(path):
-        shutil.rmtree(path, verbose=False)
+        shutil.rmtree(path, ignore_errors=True)
     else:
         pass
 
