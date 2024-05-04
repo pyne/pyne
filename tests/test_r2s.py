@@ -696,7 +696,7 @@ def test_r2s_script_step_by_step():
     try:
         import openmc
     except:
-        pytest.skip()
+        pytest.skip("No openmc. Skipping tests", allow_module_level=True)
     r2s_run_dir = os.path.join(thisdir, "files_test_r2s", "r2s_examples", "openmc_r2s")
     _r2s_test_step1(r2s_run_dir, remove_step1_out)
     _r2s_test_step2(r2s_run_dir, remove_step1_out)
@@ -730,7 +730,7 @@ def test_r2s_script():
     try:
         import openmc
     except ImportError:
-        pytest.skip()
+        pytest.skip("No openmc. Skipping tests", allow_module_level=True)
     r2s_run_dir = os.path.join(thisdir, "files_test_r2s", "r2s_examples", "openmc_r2s")
     _r2s_test_step1(r2s_run_dir, remove_step1_out)
     _r2s_test_step2(r2s_run_dir, remove_step1_out)
