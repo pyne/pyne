@@ -26,12 +26,14 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Set environment variables
+      - name: Additional macOS settings
         if: matrix.os == 'macos-latest'
         shell: bash -l {0}
         run: |
           echo "FC=$(which gfortran-13)" >> $GITHUB_ENV
-          
+          # hdf5 is needed for building tables
+          brew install hdf5
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
