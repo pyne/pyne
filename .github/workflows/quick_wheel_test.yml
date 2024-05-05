@@ -53,15 +53,6 @@ jobs:
         run: |
           pip install dist/pyne*.whl
 
-
-      - name: Check RPATH info
-        if: matrix.os == 'macos-latest'
-        shell: bash -l {0}
-        run: |
-          otool -l /Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/pyne/pyne_config.cpython-312-darwin.so | grep -A2 LC_RPATH
-          cd /Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/pyne/core/lib/ && ls -l
-          otool -l /Library/Frameworks/Python.framework/Versions/3.12/lib/python3.12/site-packages/pyne/core/lib/libpyne.dylib
-
       - name: Nuc data make
         shell: bash -l {0}
         run: |

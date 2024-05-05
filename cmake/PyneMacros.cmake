@@ -13,6 +13,7 @@ endmacro()
 # Configure RPATH
 macro(pyne_configure_rpath)
   if(APPLE)
+    set(CMAKE_MACOSX_RPATH ON)
     set(RPATH "@loader_path")
   elseif(UNIX)
     set(RPATH "$ORIGIN")
