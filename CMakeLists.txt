@@ -39,7 +39,7 @@ option(  DOWNLOAD_MOAB              "Should PyNE download MOAB?"                
 option(  ENABLE_DAGMC               "Should PyNE use DAGMC?"                     ON  )
 option(  DOWNLOAD_DAGMC             "Should PyNE download DAGMC?"                ON  )
 option(  ENABLE_SPATIAL_SOLVERS     "Should build AHOT spatial solvers?"         ON  )
-option(  ENABLE_ENSDF_PROCESSING    "Should build ENSDF processing tools?"       ON  )
+option(  ENABLE_ENSDF_PROCESSING    "Should build ENSDF processing tools?"       OFF )
 option(  ENABLE_FAST_COMPILE        "Should PyNE fast compile?"                  OFF )
 
 # Add feature info
