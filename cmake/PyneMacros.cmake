@@ -12,12 +12,15 @@ endmacro()
 
 # Configure RPATH
 macro(pyne_configure_rpath)
+  set(CMAKE_BUILD_WITH_INSTALL_RPATH ON)
   if(APPLE)
-    set(RPATH "@rpath")
+    set(RPATH "@loader_path")
   elseif(UNIX)
     set(RPATH "$ORIGIN")
   else()
-    set(RPATH OFF) # Windows
+    # Windows
+    set(CMAKE_BUILD_WITH_INSTALL_RPATH OFF)
+    set(RPATH OFF)
   endif()
 endmacro()
 
