@@ -62,5 +62,5 @@ jobs:
         shell: bash -l {0}
         run: |
           cd tests
-          pip3 install pytest
+          pip install pytest
           pytest -ra
