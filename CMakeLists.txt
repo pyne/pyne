@@ -218,8 +218,11 @@ if(ENABLE_MOAB)
     set(MOAB_ROOT "${CMAKE_BINARY_DIR}/moab")
     ExternalProject_Add(moab-project
       PREFIX ${MOAB_ROOT}
-      GIT_REPOSITORY https://bitbucket.org/fathomteam/moab.git
-      GIT_TAG ${MOAB_VERSION}
+      # TODO: MOAB Current version is not compatible with MacOS
+      #GIT_REPOSITORY https://bitbucket.org/fathomteam/moab.git
+      #GIT_TAG ${MOAB_VERSION}
+      GIT_REPOSITORY https://bitbucket.org/ahnaf-tahmid-chowdhury/moab.git
+      GIT_TAG skbuild
       CMAKE_ARGS 
         -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
         -DBUILD_SHARED_LIBS:BOOL=ON
@@ -228,7 +231,7 @@ if(ENABLE_MOAB)
         -DEIGEN3_DIR:PATH=${EIGEN3_INCLUDE_DIRS}
         -DENABLE_BLASLAPACK:BOOL=OFF
         -DENABLE_FORTRAN:BOOL=OFF
-      #DOWNLOAD_EXTRACT_TIMESTAMP true
+      DOWNLOAD_EXTRACT_TIMESTAMP true
       BUILD_BYPRODUCTS "${MOAB_ROOT}/${CMAKE_INSTALL_LIBDIR}/libMOAB${CMAKE_SHARED_LIBRARY_SUFFIX}"
     )
     set(MOAB_INCLUDE_DIRS "${MOAB_ROOT}/include")
@@ -304,6 +307,7 @@ if(ENABLE_DAGMC)
         -DBUILD_MAKE_WATERTIGHT:BOOL=OFF
         -DBUILD_OVERLAP_CHECK:BOOL=OFF
         -DBUILD_TESTS:BOOL=OFF
+        -DBUILD_RPATH:BOOL=OFF
       BUILD_BYPRODUCTS "${DAGMC_ROOT}/lib/libdagmc${CMAKE_SHARED_LIBRARY_SUFFIX}"
     )
     set(DAGMC_INCLUDE_DIRS "${DAGMC_ROOT}/include")
