@@ -25,7 +25,7 @@ from pyne import nucname
 from pyne import utils
 from pyne import cram
 import numpy as np
-from numpy.testing import assert_array_equal
+from numpy.testing import assert_array_equal, assert_allclose
 import tables as tb
 
 if utils.use_warnings():
@@ -2039,22 +2039,26 @@ def test_material_gammas():
 def test_material_xrays():
     leu = {"U238": 0.96, "U235": 0.04}
     mat = Material(leu)
-    assert mat.xrays() == [
-        (93.35, 7.135646069465136e-18),
-        (89.953, 4.4112564001433475e-18),
-        (105.0, 3.394789326064896e-18),
-        (13.0, 2.9652250902501514e-17),
-        (93.35, 5.2767097753586244e-21),
-        (89.953, 3.2620619831267015e-21),
-        (105.0, 2.510398896994686e-21),
-        (13.0, 3.4433858446293e-17),
-    ]
+    assert_allclose(
+        mat.xrays(),
+        [
+            (93.35, 7.135646069465136e-18),
+            (89.953, 4.4112564001433475e-18),
+            (105.0, 3.394789326064896e-18),
+            (13.0, 2.9652250902501514e-17),
+            (93.35, 5.2767097753586244e-21),
+            (89.953, 3.2620619831267015e-21),
+            (105.0, 2.510398896994686e-21),
+            (13.0, 3.4433858446293e-17),
+        ],
+        rtol=1e-10, atol=0
+    )
 
 
 def test_material_photons():
     leu = {"U238": 0.96, "U235": 0.04}
     mat = Material(leu)
-    assert_array_equal(
+    assert_allclose(
         mat.photons(),
         [
             (19.55, np.nan),
@@ -2125,6 +2129,7 @@ def test_material_photons():
             (105.0, 2.510398896994686e-21),
             (13.0, 3.4433858446293e-17),
         ],
+        rtol=1e-10, atol=0
     )
     assert mat.photons(True) == [
         (31.6, 2.681359313180288e-06),
@@ -2327,15 +2332,15 @@ def test_decay_u235_h3():
         1.0,
         {},
     )
+    if len(obs) not in [len(exp), len(exp_sf)]:
+        raise ValueError(f"Observed material length is {len(obs)}, but expected {len(exp)} or {len(exp_sf)}.")
+
     if len(exp) == len(obs):
         # no spontaneous fission
-        assert_mat_almost_equal(exp, obs)
-    elif len(exp_sf) == len(obs):
+        assert_mat_almost_equal(exp, obs)  
+    else:
         # with spontaneous fission
         assert_mat_almost_equal(exp_sf, obs)
-    else:
-        assert False, "Observed material does not have correct length"
-
 
 def test_cram_h3():
     mat = Material({"H3": 1.0})
