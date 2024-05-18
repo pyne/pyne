@@ -122,25 +122,74 @@ macro(pyne_setup_fortran)
         "-funroll-all-loops -fpic -fdefault-real-8 -fdefault-double-8")
     set(CMAKE_Fortran_FLAGS_DEBUG
         "-fpic -fdefault-real-8 -fdefault-double-8")
+    
+    # add -fallow-argument-mismatch to fix build with gfortran 10+
+    # https://github.com/pyne/pyne/issues/1416
+    set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fallow-argument-mismatch")
   elseif(Fortran_COMPILER_NAME MATCHES "ifort.*")
     # ifort (untested)
     set(CMAKE_Fortran_FLAGS_RELEASE "-f77rtl -O2 -r8")
-    set(CMAKE_Fortran_FLAGS_DEBUG   "-f77rtl -O0 -g -r8")
+    set(CMAKE_Fortran_FLAGS_DEBUG "-f77rtl -O0 -g -r8")
   elseif (Fortran_COMPILER_NAME MATCHES "g77")
     # g77
     set(CMAKE_Fortran_FLAGS_RELEASE "-funroll-all-loops -fno-f2c -O2 -m32")
-    set(CMAKE_Fortran_FLAGS_DEBUG   "-fno-f2c -O0 -g -m32")
-  else(Fortran_COMPILER_NAME MATCHES "gfortran.*")
-    message("CMAKE_Fortran_COMPILER full path: " ${CMAKE_Fortran_COMPILER})
-    message("Fortran compiler: " ${Fortran_COMPILER_NAME})
-    message ("No optimized Fortran compiler flags are known, we just try -fpic...")
+    set(CMAKE_Fortran_FLAGS_DEBUG "-fno-f2c -O0 -g -m32")
+  else()
+    message (WARNING "No optimized Fortran compiler flags are known, we just try -fpic...")
     set(CMAKE_Fortran_FLAGS_RELEASE "-fpic")
-    set(CMAKE_Fortran_FLAGS_DEBUG   "-fpic")
-  endif(Fortran_COMPILER_NAME MATCHES "gfortran.*")
+    set(CMAKE_Fortran_FLAGS_DEBUG "-fpic")
+  endif()
+  message(STATUS "CMAKE_Fortran_COMPILER full path: ${CMAKE_Fortran_COMPILER}")
+  message(STATUS "Fortran compiler: ${Fortran_COMPILER_NAME}")
 
-  # add -fallow-argument-mismatch to fix build with gfortran 10+
-  # https://github.com/pyne/pyne/issues/1416
-  set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fallow-argument-mismatch")
+  # Install Fortran libraries if requested
+  if(INSTALL_FORTRAN_LIBS)
+    # Find the Fortran library
+    find_library(FORTRAN_LIB_PATH 
+      NAMES ${Fortran_COMPILER_NAME} 
+      PATHS ${CMAKE_Fortran_IMPLICIT_LINK_DIRECTORIES}
+      )
+    if(FORTRAN_LIB_PATH)
+      message(STATUS "Found Fortran library path: ${FORTRAN_LIB_PATH}")
+      if(APPLE)
+          # Resolve the symlink to find the actual file
+          execute_process(COMMAND readlink ${FORTRAN_LIB_PATH}
+            OUTPUT_VARIABLE FORTRAN_LIB_REAL_PATH
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+            )
+      elseif(UNIX)
+        # Resolve the symlink to find the actual file
+        execute_process(COMMAND readlink -f ${FORTRAN_LIB_PATH}
+          OUTPUT_VARIABLE FORTRAN_LIB_REAL_PATH
+          OUTPUT_STRIP_TRAILING_WHITESPACE
+          )
+      elseif(WIN32)
+        # On Windows, the Fortran library should be a static or dynamic library
+        set(FORTRAN_LIB_REAL_PATH ${FORTRAN_LIB_PATH})
+      else()
+        message(FATAL_ERROR "Unsupported platform")
+      endif()
+
+      # Extract the directory of the actual file
+      get_filename_component(FORTRAN_LIB_REAL_DIR ${FORTRAN_LIB_REAL_PATH} DIRECTORY)
+      message(STATUS "Resolved Fortran library real directory: ${FORTRAN_LIB_REAL_DIR}")
+
+      # Locate the actual library files in the resolved directory
+      file(GLOB FORTRAN_LIB_FILES "${FORTRAN_LIB_REAL_DIR}/*${Fortran_COMPILER_NAME}*")
+
+      if(FORTRAN_LIB_FILES)
+        foreach(LIB_FILE ${FORTRAN_LIB_FILES})
+          # Ensure the library gets installed to the specified directory
+          install(FILES ${LIB_FILE} DESTINATION ${CMAKE_INSTALL_LIBDIR})
+          message(STATUS "Installing Fortran library: ${LIB_FILE}")
+        endforeach()
+      else()
+        message(FATAL_ERROR "Fortran library files not found in directory: ${FORTRAN_LIB_REAL_DIR}")
+      endif()
+    else()
+      message(FATAL_ERROR "Fortran library not found.")
+    endif()
+  endif()
 endmacro()
 
 # Print pyne logo

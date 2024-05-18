@@ -29,6 +29,7 @@ include(FeatureSummary)
 include(ExternalProject)
 
 # Set build options that can be toggled by the user
+option(  INSTALL_FORTRAN_LIBS       "Should PyNE install Fortran libraries?"     ON  )
 option(  DOWNLOAD_HDF5              "Should PyNE download HDF5?"                 ON  )
 option(  ENABLE_EIGEN3              "Should PyNE use Eigen3?"                    ON  )
 option(  DOWNLOAD_EIGEN3            "Should PyNE download Eigen3?"               ON  )
@@ -43,6 +44,7 @@ option(  ENABLE_ENSDF_PROCESSING    "Should build ENSDF processing tools?"      
 option(  ENABLE_FAST_COMPILE        "Should PyNE fast compile?"                  OFF )
 
 # Add feature info
+add_feature_info("Install Fortran libraries" INSTALL_FORTRAN_LIBS "Install Fortran libraries")
 add_feature_info("Download HDF5" DOWNLOAD_HDF5 "Download HDF5")
 add_feature_info("Enable Eigen3" ENABLE_EIGEN3 "Use Eigen3")
 add_feature_info("Download Eigen3" DOWNLOAD_EIGEN3 "Download Eigen3")
