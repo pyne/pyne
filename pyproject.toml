@@ -1,7 +1,7 @@
 [build-system]
 requires = [
     "scikit-build-core",
-    "cython<3",
+    "cython",
     "numpy",
 ]
 build-backend = "scikit_build_core.build"
