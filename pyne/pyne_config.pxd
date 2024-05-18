@@ -8,4 +8,4 @@ from cython.operator cimport preincrement as inc
 from libcpp.string cimport string as std_string
 
 # local imports 
-cimport cpp_utils
+cimport pyne.cpp_utils
