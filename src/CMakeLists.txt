@@ -146,7 +146,7 @@ if(ENABLE_LAPACK)
     add_dependencies(${CMAKE_PROJECT_NAME} lapack-project)
   endif()
   target_link_libraries(${CMAKE_PROJECT_NAME} 
-    PRIVATE lapack
+    PRIVATE blas lapack
     )
 endif()
 
