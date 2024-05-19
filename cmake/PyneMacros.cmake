@@ -175,7 +175,7 @@ macro(pyne_setup_fortran)
       message(STATUS "Resolved Fortran library real directory: ${FORTRAN_LIB_REAL_DIR}")
 
       # Locate the actual library files in the resolved directory
-      file(GLOB FORTRAN_LIB_FILES "${FORTRAN_LIB_REAL_DIR}/*${Fortran_COMPILER_NAME}*")
+      file(GLOB FORTRAN_LIB_FILES "${FORTRAN_LIB_REAL_DIR}/*${CMAKE_SHARED_LIBRARY_SUFFIX}*")
 
       if(FORTRAN_LIB_FILES)
         foreach(LIB_FILE ${FORTRAN_LIB_FILES})
