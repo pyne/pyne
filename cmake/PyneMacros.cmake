@@ -151,13 +151,7 @@ macro(pyne_setup_fortran)
       )
     if(FORTRAN_LIB_PATH)
       message(STATUS "Found Fortran library path: ${FORTRAN_LIB_PATH}")
-      if(APPLE)
-          # Resolve the symlink to find the actual file
-          execute_process(COMMAND readlink ${FORTRAN_LIB_PATH}
-            OUTPUT_VARIABLE FORTRAN_LIB_REAL_PATH
-            OUTPUT_STRIP_TRAILING_WHITESPACE
-            )
-      elseif(UNIX)
+      if(UNIX)
         # Resolve the symlink to find the actual file
         execute_process(COMMAND readlink -f ${FORTRAN_LIB_PATH}
           OUTPUT_VARIABLE FORTRAN_LIB_REAL_PATH
