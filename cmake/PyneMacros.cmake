@@ -146,7 +146,7 @@ macro(pyne_setup_fortran)
   if(INSTALL_FORTRAN_LIBS)
     # Find the Fortran library
     find_library(FORTRAN_LIB_PATH 
-      NAMES ${Fortran_COMPILER_NAME} 
+      NAMES ${CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES} 
       PATHS ${CMAKE_Fortran_IMPLICIT_LINK_DIRECTORIES}
       )
     if(FORTRAN_LIB_PATH)
