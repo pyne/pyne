@@ -1,4 +1,4 @@
-name: Quick Wheel test
+name: Build wheels
 
 on:
   # allows running workflows manually
@@ -34,33 +34,19 @@ jobs:
           # hdf5 is needed for building tables
           brew install hdf5
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: 3.x
-
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Build wheels
-        shell: bash -l {0}
-        run: |
-          pip install build
-          python -m build --wheel
+        uses: pypa/cibuildwheel@v2.18.0
+        env:
+          CIBW_BUILD_VERBOSITY: 1
+        with:
+          package-dir: .
+          output-dir: wheelhouse
+          config-file: "{package}/pyproject.toml"
 
-      - name: Install PyNE
-        shell: bash -l {0}
-        run: |
-          pip install dist/pyne*.whl
-
-      - name: Nuc data make
-        shell: bash -l {0}
-        run: |
-          nuc_data_make
-
-      - name: Test PyNE 
-        shell: bash -l {0}
-        run: |
-          cd tests
-          pip install pytest
-          pytest -ra
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
+          path: ./wheelhouse/*.whl
