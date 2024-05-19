@@ -254,8 +254,8 @@ if(ENABLE_MOAB)
     endif()
 
     # MOAB is a shared library, so we need to install it
-    install(DIRECTORY ${MOAB_LIBRARY_DIRS}
-      DESTINATION .
+    install(DIRECTORY ${MOAB_LIBRARY_DIRS}/
+      DESTINATION ${CMAKE_INSTALL_LIBDIR}
       FILES_MATCHING PATTERN "*${CMAKE_SHARED_LIBRARY_SUFFIX}*"
       )
   endif()
@@ -325,8 +325,8 @@ if(ENABLE_DAGMC)
     endif()
 
     # DAGMC is a shared library, so we need to install it
-    install(DIRECTORY ${DAGMC_LIBRARY_DIRS}
-      DESTINATION .
+    install(DIRECTORY ${DAGMC_LIBRARY_DIRS}/
+      DESTINATION ${CMAKE_INSTALL_LIBDIR}
       FILES_MATCHING PATTERN "*${CMAKE_SHARED_LIBRARY_SUFFIX}*"
       )
   endif()
@@ -401,8 +401,8 @@ if(ENABLE_LAPACK)
     set(LAPACK_LIBRARY_DIRS "${LAPACK_ROOT}/${CMAKE_INSTALL_LIBDIR}")
 
     # LAPACK is a shared library, so we need to install it
-    install(DIRECTORY ${LAPACK_LIBRARY_DIRS}
-      DESTINATION .
+    install(DIRECTORY ${LAPACK_LIBRARY_DIRS}/
+      DESTINATION ${CMAKE_INSTALL_LIBDIR}
       FILES_MATCHING PATTERN "*${CMAKE_SHARED_LIBRARY_SUFFIX}*"
       )
   endif()
