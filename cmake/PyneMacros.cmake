@@ -163,23 +163,10 @@ macro(pyne_setup_fortran)
       else()
         message(FATAL_ERROR "Unsupported platform")
       endif()
-
-      # Extract the directory of the actual file
-      get_filename_component(FORTRAN_LIB_REAL_DIR ${FORTRAN_LIB_REAL_PATH} DIRECTORY)
-      message(STATUS "Resolved Fortran library real directory: ${FORTRAN_LIB_REAL_DIR}")
-
-      # Locate the actual library files in the resolved directory
-      file(GLOB FORTRAN_LIB_FILES "${FORTRAN_LIB_REAL_DIR}/*${CMAKE_SHARED_LIBRARY_SUFFIX}*")
-
-      if(FORTRAN_LIB_FILES)
-        foreach(LIB_FILE ${FORTRAN_LIB_FILES})
-          # Ensure the library gets installed to the specified directory
-          install(FILES ${LIB_FILE} DESTINATION ${CMAKE_INSTALL_LIBDIR})
-          message(STATUS "Installing Fortran library: ${LIB_FILE}")
-        endforeach()
-      else()
-        message(FATAL_ERROR "Fortran library files not found in directory: ${FORTRAN_LIB_REAL_DIR}")
-      endif()
+      message(STATUS "Fortran library real path: ${FORTRAN_LIB_REAL_PATH}")
+      
+      # Install the Fortran library
+      install(FILES ${FORTRAN_LIB_REAL_PATH} DESTINATION ${CMAKE_INSTALL_LIBDIR})
     else()
       message(FATAL_ERROR "Fortran library not found.")
     endif()
