@@ -116,7 +116,7 @@ else()
   # HDF5 is a shared library, so we need to install it
   install(DIRECTORY ${HDF5_LIBRARY_DIRS}
     DESTINATION .
-    FILES_MATCHING PATTERN "*${CMAKE_SHARED_LIBRARY_SUFFIX}*"
+    FILES_MATCHING PATTERN "*hdf5${CMAKE_SHARED_LIBRARY_SUFFIX}*"
     )
 endif()
 
