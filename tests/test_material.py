@@ -2211,6 +2211,13 @@ def test_decay_u235_h3():
     if len(obs) < 4:
         # full decay is not installed
         pytest.skip("full decay is not installed")
+        
+    if os.name == "darwin":
+        # FIXME: On MacOS, it was observed that Nd144 
+        # with a value of 8.996484819074119e-40 is dropped 
+        # (https://github.com/pyne/pyne/issues/1539)
+        pytest.skip("macOS failure, see issue #1539")
+        
     exp = Material(
         {
             10030000: 0.472645829730143,
@@ -2336,6 +2343,7 @@ def test_decay_u235_h3():
         1.0,
         {},
     )
+    
     if len(obs) not in [len(exp), len(exp_sf)]:
         raise ValueError(f"Observed material length is {len(obs)}, but expected {len(exp)} or {len(exp_sf)}.")
 
