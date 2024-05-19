@@ -27,7 +27,6 @@ jobs:
 
     steps:
       - name: Additional macOS settings
-        if: matrix.os == 'macos-latest'
         shell: bash -l {0}
         run: |
           echo "FC=$(which gfortran-13)" >> $GITHUB_ENV
