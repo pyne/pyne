@@ -1,5 +1,6 @@
 """Material tests"""
 import os
+import platform
 from copy import deepcopy
 import warnings
 
@@ -2212,7 +2213,7 @@ def test_decay_u235_h3():
         # full decay is not installed
         pytest.skip("full decay is not installed")
         
-    if os.name == "darwin":
+    if platform.system() == "Darwin":
         # FIXME: On MacOS, it was observed that Nd144 
         # with a value of 8.996484819074119e-40 is dropped 
         # (https://github.com/pyne/pyne/issues/1539)
