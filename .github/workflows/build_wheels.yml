@@ -41,7 +41,7 @@ jobs:
             CXX=g++-14
             CC=gcc-14
             FC=gfortran-14
-            LD_LIBRARY_PATH=/usr/local/Cellar/gcc/14.1.0/lib/gcc/current/:$LD_LIBRARY_PATH
+            DYLD_LIBRARY_PATH=/usr/local/Cellar/gcc/14.1.0/lib/gcc/current/:$DYLD_LIBRARY_PATH
           CIBW_BEFORE_BUILD_MACOS: |
             brew install hdf5 # needed for building tables
           CIBW_BUILD_FRONTEND: "build"
