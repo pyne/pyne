@@ -97,38 +97,6 @@ foreach(PYNE_CYTHON_MODULE ${PYNE_CYTHON_MODULES})
     INSTALL_RPATH ${RPATH}/core/${CMAKE_INSTALL_LIBDIR}
     )
 
-  if(PYNE_CYTHON_MODULE STREQUAL "source_sampling")
-
-    # MOAB needs to be built before source_sampling
-    if(DOWNLOAD_MOAB)
-      add_dependencies(${PYNE_CYTHON_MODULE} moab-project)
-    endif()
-
-    # Link MOAB library
-    target_link_libraries(${PYNE_CYTHON_MODULE} PRIVATE MOAB)
-  endif()
-
-  if(PYNE_CYTHON_MODULE STREQUAL "_dagmc")
-
-    # eigen3 needs to be built before _dagmc
-    if(DOWNLOAD_EIGEN3)
-      add_dependencies(${PYNE_CYTHON_MODULE} eigen3-project)
-    endif()
-
-    # MOAB needs to be built before _dagmc
-    if(DOWNLOAD_MOAB)
-      add_dependencies(${PYNE_CYTHON_MODULE} moab-project)
-    endif()
-
-    # dagmc needs to be built before _dagmc
-    if(DOWNLOAD_DAGMC)
-      add_dependencies(${PYNE_CYTHON_MODULE} dagmc-project)
-    endif()
-
-    # Link MOAB and DAGMC library
-    target_link_libraries(${PYNE_CYTHON_MODULE} PRIVATE MOAB dagmc)
-  endif()
-
   # Install the target in the pyne directory
   install(TARGETS ${PYNE_CYTHON_MODULE} DESTINATION ../.)
 endforeach()

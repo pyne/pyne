@@ -141,36 +141,6 @@ macro(pyne_setup_fortran)
   endif()
   message(STATUS "CMAKE_Fortran_COMPILER full path: ${CMAKE_Fortran_COMPILER}")
   message(STATUS "Fortran compiler: ${Fortran_COMPILER_NAME}")
-
-  # Install Fortran libraries if requested
-  if(INSTALL_FORTRAN_LIBS)
-    # Find the Fortran library
-    find_library(FORTRAN_LIB_PATH 
-      NAMES ${CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES} 
-      PATHS ${CMAKE_Fortran_IMPLICIT_LINK_DIRECTORIES}
-      )
-    if(FORTRAN_LIB_PATH)
-      message(STATUS "Found Fortran library path: ${FORTRAN_LIB_PATH}")
-      if(UNIX)
-        # Resolve the symlink to find the actual file
-        execute_process(COMMAND readlink -f ${FORTRAN_LIB_PATH}
-          OUTPUT_VARIABLE FORTRAN_LIB_REAL_PATH
-          OUTPUT_STRIP_TRAILING_WHITESPACE
-          )
-      elseif(WIN32)
-        # On Windows, the Fortran library should be a static or dynamic library
-        set(FORTRAN_LIB_REAL_PATH ${FORTRAN_LIB_PATH})
-      else()
-        message(FATAL_ERROR "Unsupported platform")
-      endif()
-      message(STATUS "Fortran library real path: ${FORTRAN_LIB_REAL_PATH}")
-      
-      # Install the Fortran library
-      install(FILES ${FORTRAN_LIB_REAL_PATH} DESTINATION ${CMAKE_INSTALL_LIBDIR})
-    else()
-      message(FATAL_ERROR "Fortran library not found.")
-    endif()
-  endif()
 endmacro()
 
 # Print pyne logo
@@ -247,7 +217,9 @@ endmacro()
 
 # fast compile with assembly, if available.
 macro(fast_compile _srcname _gnuflags _clangflags _otherflags)
-  get_filename_component(_base "${_srcname}" NAME_WE)  # get the base name, without the extension
+
+  # get the base name, without the extension
+  get_filename_component(_base "${_srcname}" NAME_WE)  
   # get the assembly file name
   if(PYNE_ASM_PLATFORM)
     set(_asmname "${_base}-${PYNE_ASM_PLATFORM}.s")
@@ -276,4 +248,33 @@ macro(fast_compile _srcname _gnuflags _clangflags _otherflags)
   else()
     set_source_files_properties("${_filename}" PROPERTIES COMPILE_FLAGS "${_otherflags}")
   endif()
+endmacro()
+
+# Install dependent library via ExternalProject
+macro(install_dependent_library _library _folder)
+  if(APPLE)
+    set(set_rpath `install_name_tool -add_rpath @loader_path`)
+    set(lib_identifier `otool -D "$$lib_file" | tail -n 1`)
+  else()
+    set(set_rpath `patchelf --set-rpath '$$ORIGIN/' "$$lib_file"`)
+    set(lib_identifier `objdump -p "$$lib_file" | grep SONAME | awk '{print $$2}'`)
+  endif()
+  if(UNIX)
+    add_custom_target(fix-${_library} ALL
+      COMMAND find ${_folder} -type l -delete
+      COMMAND for lib_file in *${CMAKE_SHARED_LIBRARY_SUFFIX}* \; do
+                set_rpath=${set_rpath} \;
+                identifier_file=${lib_identifier} \;
+                if [ "$$lib_file" != "$$identifier_file" ] \; then
+                  mv "$$lib_file" "$$identifier_file" \;
+                fi \;
+              done
+      WORKING_DIRECTORY ${_folder}
+      DEPENDS ${CMAKE_PROJECT_NAME}
+      )
+  endif()
+  install(DIRECTORY ${_folder}/
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    FILES_MATCHING PATTERN "*${CMAKE_SHARED_LIBRARY_SUFFIX}*"
+    )
 endmacro()

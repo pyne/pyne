@@ -115,7 +115,7 @@ endif()
 if(HDF5_C_LIBRARIES)
   target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE ${HDF5_C_LIBRARIES})
 else()
-  target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE hdf5)
+  target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE hdf5 hdf5_hl)
 endif()
 
 # Link MOAB library

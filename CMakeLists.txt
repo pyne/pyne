@@ -1,5 +1,5 @@
 # Defines the CMake commands/policies
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.18)
 
 # Set the C++ standard
 set(CMAKE_CXX_STANDARD 17)
@@ -29,7 +29,6 @@ include(FeatureSummary)
 include(ExternalProject)
 
 # Set build options that can be toggled by the user
-option(  INSTALL_FORTRAN_LIBS       "Should PyNE install Fortran libraries?"     ON  )
 option(  DOWNLOAD_HDF5              "Should PyNE download HDF5?"                 ON  )
 option(  ENABLE_EIGEN3              "Should PyNE use Eigen3?"                    ON  )
 option(  DOWNLOAD_EIGEN3            "Should PyNE download Eigen3?"               ON  )
@@ -100,6 +99,8 @@ else()
   list(GET HDF5_VERSION_LIST 1 HDF5_VERSION_MINOR)
   list(GET HDF5_VERSION_LIST 2 HDF5_VERSION_PATCH)
   set(HDF5_ROOT "${CMAKE_BINARY_DIR}/hdf5")
+  set(HDF5_INCLUDE_DIRS "${HDF5_ROOT}/include")
+  set(HDF5_LIBRARY_DIRS "${HDF5_ROOT}/lib")
   ExternalProject_Add(hdf5-project
     PREFIX ${HDF5_ROOT}
     URL https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-${HDF5_VERSION_MAJOR}.${HDF5_VERSION_MINOR}/hdf5-${HDF5_VERSION}/src/hdf5-${HDF5_VERSION}.tar.gz
@@ -109,18 +110,13 @@ else()
       -DBUILD_STATIC_LIBS:BOOL=OFF
       -DBUILD_TESTING:BOOL=OFF
       -DHDF5_BUILD_TOOLS:BOOL=OFF
-      -HDF5_BUILD_EXAMPLES:BOOL=OFF
+      -DHDF5_BUILD_EXAMPLES:BOOL=OFF
     DOWNLOAD_EXTRACT_TIMESTAMP true
-    BUILD_BYPRODUCTS "${HDF5_ROOT}/lib/libhdf5${CMAKE_SHARED_LIBRARY_SUFFIX}"
-  )
-  set(HDF5_INCLUDE_DIRS "${HDF5_ROOT}/include")
-  set(HDF5_LIBRARY_DIRS "${HDF5_ROOT}/lib")
+    BUILD_BYPRODUCTS "${HDF5_LIBRARY_DIRS}/*${CMAKE_SHARED_LIBRARY_SUFFIX}*"
+    )
 
   # HDF5 is a shared library, so we need to install it
-  install(DIRECTORY ${HDF5_LIBRARY_DIRS}/
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    FILES_MATCHING PATTERN "*${CMAKE_SHARED_LIBRARY_SUFFIX}*"
-    )
+  install_dependent_library(hdf5 ${HDF5_LIBRARY_DIRS}) 
 endif()
 
 # Include the HDF5 libraries
@@ -174,6 +170,7 @@ if(ENABLE_EIGEN3)
       set(EIGEN3_VERSION "3.4.0")
     endif()
     set(EIGEN3_ROOT "${CMAKE_BINARY_DIR}/eigen3")
+    set(EIGEN3_INCLUDE_DIRS "${EIGEN3_ROOT}/include/eigen3")
     ExternalProject_Add(eigen3-project
       PREFIX ${EIGEN3_ROOT}
       URL https://gitlab.com/libeigen/eigen/-/archive/${EIGEN3_VERSION}/eigen-${EIGEN3_VERSION}.tar.bz2
@@ -181,12 +178,11 @@ if(ENABLE_EIGEN3)
         -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
       DOWNLOAD_EXTRACT_TIMESTAMP true
     )
-    set(EIGEN3_INCLUDE_DIRS "${EIGEN3_ROOT}/include/eigen3")  
   endif()
 
-    # Include the Eigen3 libraries
-    include_directories("${EIGEN3_INCLUDE_DIRS}")
-    message(STATUS "Eigen3 include dirs: ${EIGEN3_INCLUDE_DIRS}")
+  # Include the Eigen3 libraries
+  include_directories("${EIGEN3_INCLUDE_DIRS}")
+  message(STATUS "Eigen3 include dirs: ${EIGEN3_INCLUDE_DIRS}")
 endif()
 
 # Set package properties
@@ -221,6 +217,8 @@ if(ENABLE_MOAB)
       set(MOAB_VERSION "5.5.1")
     endif()
     set(MOAB_ROOT "${CMAKE_BINARY_DIR}/moab")
+    set(MOAB_INCLUDE_DIRS "${MOAB_ROOT}/include")
+    set(MOAB_LIBRARY_DIRS "${MOAB_ROOT}/${CMAKE_INSTALL_LIBDIR}")
     ExternalProject_Add(moab-project
       PREFIX ${MOAB_ROOT}
       # TODO: MOAB Current version is not compatible with MacOS
@@ -238,10 +236,8 @@ if(ENABLE_MOAB)
         -DENABLE_FORTRAN:BOOL=OFF
         -DCMAKE_MACOSX_RPATH:BOOL=ON
       DOWNLOAD_EXTRACT_TIMESTAMP true
-      BUILD_BYPRODUCTS "${MOAB_ROOT}/${CMAKE_INSTALL_LIBDIR}/libMOAB${CMAKE_SHARED_LIBRARY_SUFFIX}"
+      BUILD_BYPRODUCTS "${MOAB_LIBRARY_DIRS}/*${CMAKE_SHARED_LIBRARY_SUFFIX}*"
     )
-    set(MOAB_INCLUDE_DIRS "${MOAB_ROOT}/include")
-    set(MOAB_LIBRARY_DIRS "${MOAB_ROOT}/${CMAKE_INSTALL_LIBDIR}")
 
     # HDF5 is needed to be build before MOAB
     if(DOWNLOAD_HDF5)
@@ -254,10 +250,7 @@ if(ENABLE_MOAB)
     endif()
 
     # MOAB is a shared library, so we need to install it
-    install(DIRECTORY ${MOAB_LIBRARY_DIRS}/
-      DESTINATION ${CMAKE_INSTALL_LIBDIR}
-      FILES_MATCHING PATTERN "*${CMAKE_SHARED_LIBRARY_SUFFIX}*"
-      )
+    install_dependent_library(MOAB ${MOAB_LIBRARY_DIRS})
   endif()
   include_directories(${MOAB_INCLUDE_DIRS})
   link_directories(${MOAB_LIBRARY_DIRS})
@@ -300,6 +293,8 @@ if(ENABLE_DAGMC)
       set(DAGMC_VERSION "3.2.3")
     endif()
     set(DAGMC_ROOT "${CMAKE_BINARY_DIR}/DAGMC")
+    set(DAGMC_INCLUDE_DIRS "${DAGMC_ROOT}/include")
+    set(DAGMC_LIBRARY_DIRS "${DAGMC_ROOT}/lib")
     ExternalProject_Add(dagmc-project
       PREFIX ${DAGMC_ROOT}
       GIT_REPOSITORY https://github.com/svalinn/DAGMC.git
@@ -314,10 +309,8 @@ if(ENABLE_DAGMC)
         -DBUILD_OVERLAP_CHECK:BOOL=OFF
         -DBUILD_TESTS:BOOL=OFF
         -DBUILD_RPATH:BOOL=OFF
-      BUILD_BYPRODUCTS "${DAGMC_ROOT}/lib/libdagmc${CMAKE_SHARED_LIBRARY_SUFFIX}"
+      BUILD_BYPRODUCTS "${DAGMC_LIBRARY_DIRS}/*${CMAKE_SHARED_LIBRARY_SUFFIX}*"
     )
-    set(DAGMC_INCLUDE_DIRS "${DAGMC_ROOT}/include")
-    set(DAGMC_LIBRARY_DIRS "${DAGMC_ROOT}/lib")
     
     # MOAB is needed to be build before DAGMC
     if(DOWNLOAD_MOAB)
@@ -325,10 +318,7 @@ if(ENABLE_DAGMC)
     endif()
 
     # DAGMC is a shared library, so we need to install it
-    install(DIRECTORY ${DAGMC_LIBRARY_DIRS}/
-      DESTINATION ${CMAKE_INSTALL_LIBDIR}
-      FILES_MATCHING PATTERN "*${CMAKE_SHARED_LIBRARY_SUFFIX}*"
-      )
+    install_dependent_library(dagmc ${DAGMC_LIBRARY_DIRS})
   endif()
 
   include_directories(${DAGMC_INCLUDE_DIRS})
@@ -389,6 +379,7 @@ if(ENABLE_LAPACK)
       set(LAPACK_VERSION "3.12.0")
     endif()
     set(LAPACK_ROOT "${CMAKE_BINARY_DIR}/lapack")
+    set(LAPACK_LIBRARY_DIRS "${LAPACK_ROOT}/${CMAKE_INSTALL_LIBDIR}")
     ExternalProject_Add(lapack-project
       PREFIX ${LAPACK_ROOT}
       URL https://github.com/Reference-LAPACK/lapack/archive/refs/tags/v${LAPACK_VERSION}.tar.gz
@@ -396,15 +387,11 @@ if(ENABLE_LAPACK)
         -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR> 
         -DBUILD_SHARED_LIBS:BOOL=ON
         -DUSE_OPTIMIZED_BLAS:BOOL=ON
-      BUILD_BYPRODUCTS "${LAPACK_ROOT}/${CMAKE_INSTALL_LIBDIR}/liblapack${CMAKE_SHARED_LIBRARY_SUFFIX}"
+      BUILD_BYPRODUCTS "${LAPACK_LIBRARY_DIRS}/*${CMAKE_SHARED_LIBRARY_SUFFIX}*"
       )
-    set(LAPACK_LIBRARY_DIRS "${LAPACK_ROOT}/${CMAKE_INSTALL_LIBDIR}")
 
     # LAPACK is a shared library, so we need to install it
-    install(DIRECTORY ${LAPACK_LIBRARY_DIRS}/
-      DESTINATION ${CMAKE_INSTALL_LIBDIR}
-      FILES_MATCHING PATTERN "*${CMAKE_SHARED_LIBRARY_SUFFIX}*"
-      )
+    install_dependent_library(lapack ${LAPACK_LIBRARY_DIRS})
   endif()
   include_directories(${LAPACK_INCLUDE_DIRS})
   link_directories(${LAPACK_LIBRARY_DIRS})
