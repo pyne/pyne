@@ -33,7 +33,7 @@ jobs:
           echo "CC=$(which gcc-14)" >> $GITHUB_ENV
           echo "FC=$(which gfortran-14)" >> $GITHUB_ENV
           # hdf5 is needed for building tables
-          brew install gcc@14 gfortran@14 hdf5
+          brew install hdf5
           # ISSUE: DYLD_LIBRARY_PATH for 14.1 on Intel macOS
           echo "DYLD_LIBRARY_PATH=/usr/local/Cellar/gcc/14.1.0/lib/gcc/current/:$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
 

@@ -37,7 +37,7 @@ jobs:
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
           CIBW_ARCHS_MACOS: "native"
           CIBW_BEFORE_BUILD_MACOS: |
-            brew install gcc@14 gfortran@14 hdf5
+            brew install hdf5
           CIBW_ENVIRONMENT_MACOS: >
             CC=$(which gcc-14)
             FC=$(which gfortran-14)
