@@ -27,12 +27,14 @@ jobs:
 
     steps:
       - name: Additional macOS settings
-        if: matrix.os == 'macos-13' || matrix.os == 'macos-14'
+        if: matrix.os == 'macos-*'
         shell: bash -l {0}
         run: |
-          echo "FC=$(which gfortran-13)" >> $GITHUB_ENV
+          echo "FC=$(which gfortran-14)" >> $GITHUB_ENV
           # hdf5 is needed for building tables
           brew install hdf5
+          # ISSUE: DYLD_LIBRARY_PATH for 14.1 on Intel macOS
+          echo "DYLD_LIBRARY_PATH=/usr/local/Cellar/gcc/14.1.0/lib/gcc/current/:$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -47,6 +49,15 @@ jobs:
         run: |
           pip install build
           python -m build --wheel
+
+      - name: Fix wheels
+        if : matrix.os == 'macos-*' 
+        shell: bash -l {0}
+        run: |
+          pip install delocate
+          for whl in dist/*.whl; do
+            delocate repair $whl
+          done
 
       - name: Install PyNE
         shell: bash -l {0}
@@ -64,3 +75,9 @@ jobs:
           cd tests
           pip install pytest
           pytest -ra
+
+      - name: Upload wheels
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheels for ${{ matrix.os }}
+          path: dist
