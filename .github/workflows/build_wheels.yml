@@ -36,12 +36,12 @@ jobs:
           CIBW_ARCHS_LINUX: "x86_64"
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
           CIBW_ARCHS_MACOS: "native"
-          CIBW_ENVIRONMENT_MACOS: >
-            FC=gfortran-14
-            DOWNLOAD_LAPACK=OFF
-            DYLD_LIBRARY_PATH=/usr/local/Cellar/gcc/14.1.0/lib/gcc/current/:$DYLD_LIBRARY_PATH
           CIBW_BEFORE_BUILD_MACOS: |
-            brew install hdf5 # needed for building tables
+            brew install gcc@14 gfortran@14 hdf5
+          CIBW_ENVIRONMENT_MACOS: >
+            CC=$(which gcc-14)
+            FC=$(which gfortran-14)
+            DYLD_LIBRARY_PATH=/usr/local/Cellar/gcc/14.1.0/lib/gcc/current/:$DYLD_LIBRARY_PATH
           CIBW_BUILD_FRONTEND: "build"
           CIBW_TEST_REQUIRES: "pytest"
           CIBW_TEST_COMMAND: "pytest {package}/tests"
