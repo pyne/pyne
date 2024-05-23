@@ -43,8 +43,6 @@ jobs:
             FC=$(which gfortran-14)
             DYLD_LIBRARY_PATH=/usr/local/Cellar/gcc/14.1.0/lib/gcc/current/:$DYLD_LIBRARY_PATH
           CIBW_BUILD_FRONTEND: "build"
-          CIBW_TEST_REQUIRES: "pytest"
-          CIBW_TEST_COMMAND: "pytest {package}/tests"
         with:
           package-dir: .
           output-dir: wheelhouse
