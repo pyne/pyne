@@ -33,18 +33,18 @@ jobs:
         uses: pypa/cibuildwheel@v2.18.0
         env:
           CIBW_BUILD: "cp*"
-          CIBW_ARCHS_LINUX: "x86_64 aarch64"
+          CIBW_ARCHS_LINUX: "x86_64"
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
-          CIBW_MANYLINUX_AARCH64_IMAGE: manylinux_2_28
           CIBW_ARCHS_MACOS: "native"
-          CIBW_ENVIRONMENT_MACOS: |
+          CIBW_ENVIRONMENT_MACOS: >
             FC=gfortran-14
-            DOWNLOAD_LAPACK=OFF # Available by default in macOS
+            DOWNLOAD_LAPACK=OFF
             DYLD_LIBRARY_PATH=/usr/local/Cellar/gcc/14.1.0/lib/gcc/current/:$DYLD_LIBRARY_PATH
           CIBW_BEFORE_BUILD_MACOS: |
             brew install hdf5 # needed for building tables
           CIBW_BUILD_FRONTEND: "build"
           CIBW_TEST_REQUIRES: "pytest"
+          CIBW_TEST_COMMAND: "pytest {package}/tests"
         with:
           package-dir: .
           output-dir: wheelhouse
