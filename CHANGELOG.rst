@@ -16,6 +16,7 @@ Next Version
       * do not try to download missing (super heavy) data from KAERI
       * update material_library writing interface
    * reference python_executable rather than assuming `python` exists ()
+   * Update FindMOAB to use MOAB config file (#1526)
 
 v0.7.8
 ======
