@@ -221,8 +221,11 @@ if(ENABLE_MOAB)
     set(MOAB_LIBRARY_DIRS "${MOAB_ROOT}/${CMAKE_INSTALL_LIBDIR}")
     ExternalProject_Add(moab-project
       PREFIX ${MOAB_ROOT}
-      GIT_REPOSITORY https://bitbucket.org/fathomteam/moab.git
-      GIT_TAG ${MOAB_VERSION}
+      # TODO: MOAB Current version is not compatible with MacOS
+      #GIT_REPOSITORY https://bitbucket.org/fathomteam/moab.git
+      #GIT_TAG ${MOAB_VERSION}
+      GIT_REPOSITORY https://bitbucket.org/ahnaf-tahmid-chowdhury/moab.git
+      GIT_TAG skbuild
       CMAKE_ARGS
         -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
         -DBUILD_SHARED_LIBS:BOOL=ON
