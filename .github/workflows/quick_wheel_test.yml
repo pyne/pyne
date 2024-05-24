@@ -50,8 +50,17 @@ jobs:
           pip install build
           python -m build --wheel
 
-      - name: Fix wheels
-        if : matrix.os == 'macos-*' 
+      - name: Fix wheels for Linux
+        if: matrix.os == 'ubuntu-latest'
+        shell: bash -l {0}
+        run: |
+          pip install auditwheel
+          for whl in dist/*.whl; do
+            auditwheel repair $whl
+          done
+
+      - name: Fix wheels for macOS
+        if: matrix.os == 'macos-13' || matrix.os == 'macos-14'
         shell: bash -l {0}
         run: |
           pip install delocate
