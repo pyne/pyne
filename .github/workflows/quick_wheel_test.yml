@@ -56,7 +56,7 @@ jobs:
         run: |
           pip install delocate
           for whl in dist/*.whl; do
-            delocate-wheel -v repair $whl
+            delocate-wheel -v $whl
           done
 
       - name: Install PyNE
