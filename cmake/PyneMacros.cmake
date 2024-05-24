@@ -253,12 +253,10 @@ endmacro()
 macro(install_dependent_library _library _folder)
   if(APPLE)
     set(set_rpath `install_name_tool -add_rpath @loader_path "$$lib_file"`)
-    set(lib_identifier `otool -D "$$lib_file"`)
     set(identifier_file `otool -D "$$lib_file" | sed -n 's/.*\\///p'`)
-    set(set_id `install_name_tool -id "@rpath/$$identifier_file" "$$lib_identifier"`)
+    set(set_id `install_name_tool -id "@rpath/$$identifier_file" "$$lib_file"`)
   else()
     set(set_rpath `patchelf --set-rpath '$$ORIGIN/' "$$lib_file"`)
-    set(lib_identifier "")
     set(identifier_file `objdump -p "$$lib_file" | grep SONAME | awk '{print $$2}'`)
     set(set_id "")
   endif()
@@ -267,7 +265,6 @@ macro(install_dependent_library _library _folder)
       COMMAND find ${_folder} -type l -delete
       COMMAND for lib_file in *${CMAKE_SHARED_LIBRARY_SUFFIX}* \; do
                 set_rpath=${set_rpath} \;
-                lib_identifier=${lib_identifier} \;
                 identifier_file=${identifier_file} \;
                 set_id=${set_id} \;
                 if [ "$$lib_file" != "$$identifier_file" ] \; then
