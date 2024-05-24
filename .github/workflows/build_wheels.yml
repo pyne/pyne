@@ -39,8 +39,8 @@ jobs:
           CIBW_BEFORE_BUILD_MACOS: |
             brew install hdf5
           CIBW_ENVIRONMENT_MACOS: >
+            DOWNLOAD_LAPACK=OFF
             CMAKE_Fortran_COMPILER=gfortran-14
-            CMAKE_C_COMPILER=gcc-14
             DYLD_LIBRARY_PATH=/usr/local/Cellar/gcc/14.1.0/lib/gcc/current/:$DYLD_LIBRARY_PATH
           CIBW_BUILD_FRONTEND: "build"
         with:

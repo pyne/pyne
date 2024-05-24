@@ -4,17 +4,6 @@ on:
   # allows us to run workflows manually
   workflow_dispatch:
 
-  push:
-    paths-ignore:
-      - 'docs/*'
-      - 'examples/*'
-      - 'img/*'
-      - 'news/*'
-      - 'tutorial/*'
-      - './*.rst'
-      - 'license.txt'
-      - 'PULL_REQUEST_TEMPLATE.md'
-
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

@@ -1,5 +1,8 @@
 name: BuildTest
-description: Builds and tests an installation of PyNE in a single docker image.  This action is used for bootstrap testing when building the docker images as well as testing of each PR using those docker images.
+description: > 
+  Builds and tests an installation of PyNE in a single docker image.
+  This action is used for bootstrap testing when building the docker
+  images as well as testing of each PR using those docker images.
 inputs:
   stage:
     description: The docker stage that will be used as the docker image for testing.
