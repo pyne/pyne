@@ -1,7 +1,6 @@
-ARG pyne_test_base=openmc
 ARG ubuntu_version=22.04
 
-FROM ubuntu:${ubuntu_version} AS base_conda
+FROM ubuntu:${ubuntu_version} AS openmc
 
 # Ubuntu Setup
 ENV TZ=America/Chicago
@@ -70,18 +69,20 @@ ENV LD_LIBRARY_PATH /opt/conda/lib:$LD_LIBRARY_PATH
 RUN mkdir -p $HOME/opt
 RUN echo "export PATH=$HOME/.local/bin:\$PATH" >> ~/.bashrc
 
-FROM base_conda AS moab
+# install MOAB
 RUN conda install "conda-forge::moab=5.5.1"
 
-FROM moab AS dagmc
+# install DAGMC
 RUN conda update -n base conda
 RUN mamba install conda-forge::dagmc
 
-FROM dagmc AS openmc
+# install OpenMC
 RUN mamba install "conda-forge::openmc=0.14.0"
 
 # Build/Install PyNE from release branch
-FROM ${pyne_test_base} AS pyne
+FROM openmc AS pyne
+ARG build_hdf5="hdf5-1_14_3"
+ENV HDF5_INSTALL_PATH=$HOME/opt/hdf5/$build_hdf5
 
 COPY . $HOME/opt/pyne
 RUN export PYNE_HDF5_ARGS="--hdf5 $HDF5_INSTALL_PATH" ; \
