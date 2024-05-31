@@ -81,15 +81,11 @@ RUN mamba install "conda-forge::openmc=0.14.0"
 
 # Build/Install PyNE from release branch
 FROM openmc AS pyne
-ARG build_hdf5="hdf5-1_14_3"
-ENV HDF5_INSTALL_PATH=$HOME/opt/hdf5/$build_hdf5
 
 COPY . $HOME/opt/pyne
-RUN export PYNE_HDF5_ARGS="--hdf5 $HDF5_INSTALL_PATH" ; \
-    cd $HOME/opt/pyne \
+RUN cd $HOME/opt/pyne \
     && python setup.py install --user \
                                 $PYNE_MOAB_ARGS $PYNE_DAGMC_ARGS \
-                                $PYNE_HDF5_ARGS \
                                 --clean -j 3;
 ENV PATH $HOME/.local/bin:$PATH
 RUN cd $HOME \
