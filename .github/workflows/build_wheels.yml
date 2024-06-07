@@ -23,7 +23,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-13, macos-14]
+        include:
+          - os: ubuntu-latest
+            arch: manylinux_x86_64
+          - os: macos-13
+            arch: macosx_x86_64
+          - os: macos-14
+            arch: macosx_arm64
 
     steps:
       - name: Checkout repository
@@ -32,7 +38,7 @@ jobs:
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.18.0
         env:
-          CIBW_BUILD: "cp*"
+          CIBW_BUILD: "cp*-${{ matrix.arch }}"
           CIBW_ARCHS_LINUX: "x86_64"
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
           CIBW_ARCHS_MACOS: "native"
@@ -41,7 +47,6 @@ jobs:
           CIBW_ENVIRONMENT_MACOS: >
             SKBUILD_DOWNLOAD_LAPACK=OFF
             CMAKE_Fortran_COMPILER=gfortran-14
-            DYLD_LIBRARY_PATH=/usr/local/Cellar/gcc/14.1.0/lib/gcc/current/:$DYLD_LIBRARY_PATH
           CIBW_BUILD_FRONTEND: "build"
         with:
           package-dir: .
