@@ -88,7 +88,7 @@ else()
 
   # Configure HDF5 
   if(NOT HDF5_VERSION)
-    set(HDF5_VERSION "1.10.11")
+    set(HDF5_VERSION "1.14.3")
   endif()
   
   # Replace the dots with semicolons to create a list

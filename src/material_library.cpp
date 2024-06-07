@@ -52,7 +52,7 @@ void pyne::MaterialLibrary::from_hdf5(const std::string& filename,
   herr_t status = H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
   hid_t matlib_group_id = db;
   H5O_info_t object_info;
-  status = H5Oget_info_by_name(db, datapath.c_str(), &object_info, H5P_DEFAULT);
+  status = H5Oget_info_by_name(db, datapath.c_str(), &object_info, H5O_INFO_BASIC, H5P_DEFAULT);
 
   // if datapath exist and is a dataset -> old hdf5 mat_lib format
   // else if datapath does not exist -> new hdf5 mat lib format
@@ -269,7 +269,7 @@ void pyne::MaterialLibrary::write_hdf5(const std::string& filename,
 
   // Check if root_path exist and what type it is
   status =
-      H5Oget_info_by_name(db, root_path.c_str(), &object_info, H5P_DEFAULT);
+      H5Oget_info_by_name(db, root_path.c_str(), &object_info, H5O_INFO_BASIC, H5P_DEFAULT);
   if (status == 0) {
     // "/material_library" not a group: fail!
     if (object_info.type != H5O_TYPE_GROUP) {
