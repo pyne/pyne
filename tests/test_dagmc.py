@@ -12,24 +12,11 @@ from pyne.utils import QAWarning
 
 warnings.simplefilter("ignore", QAWarning)
 
-try:
-    from pyne.mesh import Mesh
+from pyne.mesh import Mesh
+from pyne.dagmc import HAVE_DAGMC
 
-    # See if dagmc module exists but do not import it
-    try:
-        import importlib.util as imp_util
-        pyne_info = imp_util.find_spec("pyne")
-        if pyne_info is not None:
-            pyne_mod = pyne_info.loader.load_module()
-            if imp_util.find_spec("dagmc", pyne_mod.__path__) is None:
-                raise ImportError
-    except ImportError:
-        import imp
-        pyne_info = imp.find_module("pyne")
-        pyne_mod = imp.load_module("pyne", *pyne_info)
-        imp.find_module("dagmc", pyne_mod.__path__)
-except ImportError:
-    raise pytest.skip("No DAGMC. Skipping tests", allow_module_level=True)
+if not HAVE_DAGMC:
+    pytest.skip("No DAGMC. Skipping tests", allow_module_level=True)
 
 if sys.version_info[0] < 3:
     STRING_TYPES = (basestring, str, unicode)
