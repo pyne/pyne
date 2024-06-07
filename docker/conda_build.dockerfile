@@ -82,6 +82,9 @@ RUN mamba install "conda-forge::openmc=0.14.0"
 # Build/Install PyNE from release branch
 FROM openmc AS pyne
 
+ENV PYNE_MOAB_ARGS "--moab $HOME/opt/moab"
+ENV PYNE_DAGMC_ARGS "--dagmc $HOME/opt/dagmc"
+
 COPY . $HOME/opt/pyne
 RUN cd $HOME/opt/pyne \
     && python setup.py install --user \
