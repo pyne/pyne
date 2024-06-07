@@ -9,12 +9,34 @@ from __future__ import print_function, unicode_literals
 import os
 import sys
 import io
+import subprocess
 from argparse import ArgumentParser
 
-sys.path.append('pyne')
-import pyne_version as pv
+try:
+    # Fetch the current git version
+    version = subprocess.check_output(['git', 'describe', '--tags']).strip().decode('utf-8')
+except subprocess.CalledProcessError:
+    raise Exception("Could not get the Git version. Make sure you are in a Git repository and there are tags.")
 
-pv.write_cpp_header('src')
+def create_version_header(version, filepath):
+    content = f"""
+#ifndef PYNE_VERSION_HEADER
+#define PYNE_VERSION_HEADER
+
+#define PYNE_VERSION "{version}"
+
+#endif // PYNE_VERSION_HEADER
+"""
+    # Ensure the directory exists
+    os.makedirs(os.path.dirname(filepath), exist_ok=True)
+    
+    # Write the content to the file
+    with open(filepath, 'w') as file:
+        file.write(content)
+    
+    print(f"PyNE version header file created at {filepath}")
+
+create_version_header(version, 'src/pyne_version.h')
 
 CODE_EXTS = {".c", ".cpp", ".cxx", ".h", ".hpp", ".hxx"}
 CODE_EXTS |= {e.upper() for e in CODE_EXTS}
@@ -165,7 +187,9 @@ def main():
 
     # write both
     hdr.write()
+    print("PyNE amalgamated header file created at {0}".format(hdr.path))
     src.write()
+    print("PyNE amalgamated source file created at {0}".format(src.path))
 
 
 if __name__ == "__main__":
