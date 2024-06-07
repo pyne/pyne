@@ -21,9 +21,9 @@ RUN echo 'export PATH=/opt/conda/bin:$PATH' > /etc/profile.d/conda.sh && \
 
 ENV PATH /opt/conda/bin:$PATH
 
-# install python 3.11 because it has imp module
+# install python 3.10 because that's what apt uses
 RUN conda update conda
-RUN conda install "python=3.11"
+RUN conda install "python=3.10"
 RUN conda config --add channels conda-forge
 RUN conda update -n base -c defaults conda
 RUN conda install -y conda-libmamba-solver
