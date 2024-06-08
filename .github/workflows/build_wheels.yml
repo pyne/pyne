@@ -46,9 +46,8 @@ jobs:
             # hdf5 is needed for building tables
             brew install hdf5
             # ISSUE: DYLD_LIBRARY_PATH for gcc is not set on Intel macOS
-          CIBW_ENVIRONMENT_MACOS: >
-            MACOSX_DEPLOYMENT_TARGET=${{ matrix.os == 'macos-14' && '14.0' || '13.0' }}
-            DYLD_LIBRARY_PATH=$(echo /usr/local/Cellar/gcc/*/lib/gcc/current/)
+            echo "DYLD_LIBRARY_PATH=$(echo /usr/local/Cellar/gcc/*/lib/gcc/current/):$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
+            echo "MACOSX_DEPLOYMENT_TARGET=${{ matrix.os == 'macos-14' && '14.0' || '13.0' }}" >> $GITHUB_ENV
           CIBW_BUILD_FRONTEND: "build"
         with:
           package-dir: .
