@@ -32,6 +32,13 @@ jobs:
             arch: macosx_arm64
 
     steps:
+      - name: Setup gcc with gfortran
+        uses: fortran-lang/setup-fortran@v1.6.1
+        id: setup-fortran
+        with:
+          compiler: gcc
+          version: 13
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -46,7 +53,6 @@ jobs:
             brew install hdf5
           CIBW_ENVIRONMENT_MACOS: >
             SKBUILD_DOWNLOAD_LAPACK=OFF
-            CMAKE_Fortran_COMPILER=gfortran-14
           CIBW_BUILD_FRONTEND: "build"
         with:
           package-dir: .

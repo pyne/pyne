@@ -26,11 +26,17 @@ jobs:
         os: [ubuntu-latest, macos-13, macos-14]
 
     steps:
+      - name: Setup gcc with gfortran
+        uses: fortran-lang/setup-fortran@v1
+        id: setup-fortran
+        with:
+          compiler: gcc
+          version: 13
+
       - name: Additional macOS settings
         if: matrix.os == 'macos-13' || matrix.os == 'macos-14'
         shell: bash -l {0}
         run: |
-          echo "FC=$(which gfortran-14)" >> $GITHUB_ENV
           # hdf5 is needed for building tables
           brew install hdf5
 
