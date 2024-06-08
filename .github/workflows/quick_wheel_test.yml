@@ -30,11 +30,10 @@ jobs:
         if: matrix.os == 'macos-13' || matrix.os == 'macos-14'
         shell: bash -l {0}
         run: |
-          echo "FC=$(which gfortran-14)" >> $GITHUB_ENV
           # hdf5 is needed for building tables
           brew install hdf5
           # ISSUE: DYLD_LIBRARY_PATH for gcc is not set on Intel macOS
-          echo "DYLD_LIBRARY_PATH=/usr/local/Cellar/gcc/14*/lib/gcc/current/:$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
+          echo "DYLD_LIBRARY_PATH=$(echo /usr/local/Cellar/gcc/*/lib/gcc/current/):$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
 
       - name: Set up Python
         uses: actions/setup-python@v5

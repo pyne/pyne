@@ -45,8 +45,7 @@ jobs:
           CIBW_BEFORE_BUILD_MACOS: |
             brew install hdf5
           CIBW_ENVIRONMENT_MACOS: >
-            FC=gfortran-14
-            DYLD_LIBRARY_PATH=/usr/local/Cellar/gcc/14*/lib/gcc/current/:$DYLD_LIBRARY_PATH
+            DYLD_LIBRARY_PATH=$(echo /usr/local/Cellar/gcc/*/lib/gcc/current/):$DYLD_LIBRARY_PATH
           CIBW_BUILD_FRONTEND: "build"
         with:
           package-dir: .
