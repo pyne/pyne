@@ -46,7 +46,7 @@ jobs:
             # hdf5 is needed for building tables
             brew install hdf5
             # ISSUE: DYLD_LIBRARY_PATH for gcc is not set on Intel macOS
-            export DYLD_LIBRARY_PATH=$(echo /usr/local/Cellar/gcc/*/lib/gcc/current/):$DYLD_LIBRARY_PATH
+            echo "DYLD_LIBRARY_PATH=$(echo /usr/local/Cellar/gcc/*/lib/gcc/current/):$DYLD_LIBRARY_PATH" >> $CIBW_ENVIRONMENT_MACOS
           CIBW_BUILD_FRONTEND: "build"
         with:
           package-dir: .
