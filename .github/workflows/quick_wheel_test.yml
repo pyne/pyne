@@ -34,6 +34,7 @@ jobs:
           brew install hdf5
           # ISSUE: DYLD_LIBRARY_PATH for gcc is not set on Intel macOS
           echo "DYLD_LIBRARY_PATH=$(echo /usr/local/Cellar/gcc/*/lib/gcc/current/):$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
+          echo "MACOSX_DEPLOYMENT_TARGET=11.0" >> $GITHUB_ENV
 
       - name: Set up Python
         uses: actions/setup-python@v5
