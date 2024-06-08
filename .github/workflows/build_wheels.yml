@@ -43,9 +43,10 @@ jobs:
           CIBW_MANYLINUX_X86_64_IMAGE: manylinux_2_28
           CIBW_ARCHS_MACOS: "native"
           CIBW_BEFORE_BUILD_MACOS: |
+            # hdf5 is needed for building tables
             brew install hdf5
-          CIBW_ENVIRONMENT_MACOS: >
-            DYLD_LIBRARY_PATH=$(echo /usr/local/Cellar/gcc/*/lib/gcc/current/):$DYLD_LIBRARY_PATH
+            # ISSUE: DYLD_LIBRARY_PATH for gcc is not set on Intel macOS
+            export DYLD_LIBRARY_PATH=$(echo /usr/local/Cellar/gcc/*/lib/gcc/current/):$DYLD_LIBRARY_PATH
           CIBW_BUILD_FRONTEND: "build"
         with:
           package-dir: .
