@@ -61,7 +61,7 @@ jobs:
       - name: Install PyNE
         shell: bash -l {0}
         run: |
-          pip install dist/pyne*.whl
+          pip install -vvv dist/pyne*.whl
 
       - name: Nuc data make
         shell: bash -l {0}
