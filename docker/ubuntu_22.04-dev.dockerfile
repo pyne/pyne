@@ -27,7 +27,6 @@ RUN apt-get update \
     pip install numpy==1.23 \
             scipy \
             cython \
-            nose \
             pytest \
             tables \
             matplotlib \

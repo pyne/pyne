@@ -1,6 +1,6 @@
 ARG ubuntu_version=22.04
 
-FROM ubuntu:${ubuntu_version} AS openmc
+FROM ubuntu:${ubuntu_version} AS pyne-deps
 
 # Ubuntu Setup
 ENV TZ=America/Chicago
@@ -53,20 +53,12 @@ RUN conda update -y --all && \
                 future \
                 progress \
                 && \
-    mamba install -y --force-reinstall libsqlite && \
     conda clean -y --all
 RUN mkdir -p `python -m site --user-site`
 
 ENV CC /opt/conda/bin/x86_64-conda_cos6-linux-gnu-gcc
 ENV CXX /opt/conda/bin/x86_64-conda_cos6-linux-gnu-g++
 ENV CPP /opt/conda/bin/x86_64-conda_cos6-linux-gnu-cpp
-
-# put conda on the path
-ENV LD_LIBRARY_PATH /opt/conda/lib:$LD_LIBRARY_PATH
-
-# make starting directory
-RUN mkdir -p $HOME/opt
-RUN echo "export PATH=$HOME/.local/bin:\$PATH" >> ~/.bashrc
 
 # install MOAB
 RUN conda install "conda-forge::moab=5.5.1"
@@ -76,10 +68,17 @@ RUN conda update -n base conda
 RUN mamba install conda-forge::dagmc
 
 # install OpenMC
-RUN mamba install "conda-forge::openmc=0.14.0"
+RUN mamba install conda-forge::openmc
 
 # Build/Install PyNE from release branch
-FROM openmc AS pyne
+FROM pyne-deps AS pyne
+
+# put conda on the path
+ENV LD_LIBRARY_PATH /opt/conda/lib:$LD_LIBRARY_PATH
+
+# make starting directory
+RUN mkdir -p $HOME/opt
+RUN echo "export PATH=$HOME/.local/bin:\$PATH" >> ~/.bashrc
 
 ENV PYNE_MOAB_ARGS "--moab $HOME/opt/moab"
 ENV PYNE_DAGMC_ARGS "--dagmc $HOME/opt/dagmc"
