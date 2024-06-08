@@ -43,14 +43,13 @@ RUN conda update -y --all && \
                 eigen \
                 numpy \
                 scipy \
-                nose \
                 matplotlib \
                 git \
                 setuptools \
                 pytest \
                 pytables \
                 jinja2 \
-                "cython<3" \
+                cython \
                 future \
                 progress \
                 && \

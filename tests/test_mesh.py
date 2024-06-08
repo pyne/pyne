@@ -130,8 +130,7 @@ def test_structured_mesh_from_coords():
         structured_coords=[range(1, 5), range(1, 4), range(1, 3)], structured=True
     )
     assert sm.dims == [0, 0, 0, 3, 2, 1]
-    for obs, exp in zip(sm.structured_coords, [range(1, 5), range(1, 4), range(1, 3)]):
-        assert_array_equal(obs, exp)
+    assert sm.structured_coords == [range(1, 5), range(1, 4), range(1, 3)]
     assert sm.structured_ordering == "xyz"
 
 
