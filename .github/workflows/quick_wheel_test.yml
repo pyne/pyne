@@ -42,7 +42,9 @@ jobs:
           python-version: 3.x
 
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Build wheels
         shell: bash -l {0}
