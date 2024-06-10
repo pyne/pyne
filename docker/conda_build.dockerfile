@@ -80,8 +80,8 @@ ENV LD_LIBRARY_PATH /opt/conda/lib:$LD_LIBRARY_PATH
 RUN mkdir -p $HOME/opt
 RUN echo "export PATH=$HOME/.local/bin:\$PATH" >> ~/.bashrc
 
-ENV PYNE_MOAB_ARGS "--moab $HOME/opt/moab"
-ENV PYNE_DAGMC_ARGS "--dagmc $HOME/opt/dagmc"
+ENV PYNE_MOAB_ARGS "--moab"
+ENV PYNE_DAGMC_ARGS "--dagmc"
 
 COPY . $HOME/opt/pyne
 RUN cd $HOME/opt/pyne \
