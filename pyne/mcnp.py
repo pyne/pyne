@@ -1532,6 +1532,9 @@ def mat_from_inp_line(filename, mat_line, densities="None"):
                     # set metadata
         line_index += 1
         mds_line = linecache.getline(filename, mat_line - line_index)
+        # its possible this line is blank and will fail on the .split operation
+        if not mds_line: 
+            break
 
     # Check all the densities. If they are atom densities, convert them to mass
     # densities. If they are mass densities they willl be negative, so make
