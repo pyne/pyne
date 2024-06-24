@@ -13,11 +13,7 @@ try:
     from pyne.mesh import Mesh
 
     # see if the source sampling module exists but do not import it
-    import imp
-
-    pyne_info = imp.find_module("pyne")
-    pyne_mod = imp.load_module("pyne", *pyne_info)
-    imp.find_module("source_sampling", pyne_mod.__path__)
+    from pyne import source_sampling
 except ImportError:
     pytest.skip("Can't import mesh, skipping tests", allow_module_level=True)
 

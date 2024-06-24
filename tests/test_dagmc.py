@@ -3,7 +3,6 @@ import os.path
 import warnings
 import pytest
 from numpy.testing import assert_array_equal
-import imp
 import multiprocessing
 import numpy as np
 
@@ -17,9 +16,7 @@ try:
     from pyne.mesh import Mesh
 
     # See if dagmc module exists but do not import it
-    pyne_info = imp.find_module("pyne")
-    pyne_mod = imp.load_module("pyne", *pyne_info)
-    imp.find_module("dagmc", pyne_mod.__path__)
+    from pyne import dagmc
 except ImportError:
     raise pytest.skip(allow_module_level=True)
 

@@ -35,7 +35,6 @@ import io
 import os
 import re
 import sys
-import imp
 import ssl
 import shutil
 import tarfile
