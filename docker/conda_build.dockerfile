@@ -53,6 +53,7 @@ RUN conda update -y --all && \
                 future \
                 progress \
                 meson \
+                expat \
                 && \
     conda clean -y --all
 RUN mkdir -p `python -m site --user-site`
