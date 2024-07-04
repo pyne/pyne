@@ -33,6 +33,7 @@ RUN conda uninstall -y conda-libmamba-solver
 RUN conda config --set solver classic
 RUN conda update -y --all && \
     mamba install -y \
+                expat \
                 gxx_linux-64 \
                 gcc_linux-64 \
                 cmake \
@@ -53,7 +54,6 @@ RUN conda update -y --all && \
                 future \
                 progress \
                 meson \
-                expat \
                 && \
     conda clean -y --all
 RUN mkdir -p `python -m site --user-site`
