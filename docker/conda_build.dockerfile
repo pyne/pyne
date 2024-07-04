@@ -52,6 +52,7 @@ RUN conda update -y --all && \
                 cython \
                 future \
                 progress \
+                meson \
                 && \
     conda clean -y --all
 RUN mkdir -p `python -m site --user-site`
