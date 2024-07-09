@@ -34,10 +34,6 @@ try:
 except AttributeError:
     collectionsAbc = collections
 cimport numpy as np
-if sys.version_info[0] >= 3:
-    # Python2 basestring is now Python3 string
-    basestring = str
-
 
 # local imports
 cimport pyne.stlcontainers as conv
@@ -79,8 +75,7 @@ cdef class _MaterialLibrary:
         if lib != None:
             if sys.version_info[0] >= 3 and isinstance(lib, bytes):
                 lib = lib.decode()
-            if (isinstance(lib, basestring) or isinstance(lib, unicode)) \
-                    and not isinstance(lib, collectionsAbc.Mapping):
+            if (isinstance(lib, str)) and not isinstance(lib, collectionsAbc.Mapping):
                 # Python2: basestring = (std + unicode)
                 c_filename = lib.encode('UTF-8')
                 c_datapath = datapath.encode('UTF-8')
@@ -138,7 +133,7 @@ cdef class _MaterialLibrary:
         ----------
         mat_name : str Name of the material be removed from this material library
         """
-        if isinstance(mat_name, basestring):
+        if isinstance(mat_name, str):
             c_matname = mat_name.encode('UTF-8')
             self._inst.del_material(< std_string > c_matname)
         else:
@@ -284,7 +279,7 @@ class MaterialLibrary(_MaterialLibrary, collectionsAbc.MutableMapping):
 
 
 def ensure_material_key(key):
-    if isinstance(key, basestring):
+    if isinstance(key, str):
         key = key.encode('UTF-8')
     elif isinstance(key, _INTEGRAL_TYPES):
         key = str(key).encode('UTF-8')

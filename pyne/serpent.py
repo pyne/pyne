@@ -4,9 +4,6 @@ import numpy as np
 import pdb
 from pyne.utils import QA_warn
 
-if sys.version_info[0] > 2:
-    basestring = str
-
 QA_warn(__name__)
 
 _if_idx_str_serpent1 = (
@@ -138,7 +135,7 @@ def parse_res(resfile, write_py=False):
         a complete description of contents.
 
     """
-    if isinstance(resfile, basestring):
+    if isinstance(resfile, str):
         with open(resfile, "r") as mfile:
             f = mfile.read()
     else:
@@ -223,7 +220,7 @@ def parse_res(resfile, write_py=False):
 
     # Write the file out
     if write_py:
-        if isinstance(resfile, basestring):
+        if isinstance(resfile, str):
             new_filename = resfile.rpartition(".")[0] + ".py"
         else:
             new_filename = resfile.name.rpartition(".")[0] + ".py"
@@ -260,7 +257,7 @@ def parse_dep(depfile, write_py=False, make_mats=True):
         manual for a complete description of contents.
 
     """
-    if isinstance(depfile, basestring):
+    if isinstance(depfile, str):
         with open(depfile, "r") as mfile:
             f = mfile.read()
     else:
@@ -321,7 +318,7 @@ def parse_dep(depfile, write_py=False, make_mats=True):
 
     # Write the file out
     if write_py:
-        if isinstance(depfile, basestring):
+        if isinstance(depfile, str):
             new_filename = depfile.rpartition(".")[0] + ".py"
         else:
             new_filename = depfile.name.rpartition(".")[0] + ".py"
@@ -369,7 +366,7 @@ def parse_det(detfile, write_py=False):
         a complete description of contents.
 
     """
-    if isinstance(detfile, basestring):
+    if isinstance(detfile, str):
         with open(detfile, "r") as mfile:
             f = mfile.read()
     else:
@@ -424,7 +421,7 @@ def parse_det(detfile, write_py=False):
 
     # Write the file out
     if write_py:
-        if isinstance(detfile, basestring):
+        if isinstance(detfile, str):
             new_filename = detfile.rpartition(".")[0] + ".py"
         else:
             new_filename = detfile.name.rpartition(".")[0] + ".py"

@@ -15,10 +15,6 @@ from pyne import nucname
 
 QA_warn(__name__)
 
-if sys.version_info[0] > 2:
-    basestring = str
-
-
 def grab_kaeri_nuclide(nuc, build_dir="", n=None):
     """Grabs a nuclide file from KAERI from the web and places
     it a {nuc}.html file in the build directory.
@@ -33,7 +29,7 @@ def grab_kaeri_nuclide(nuc, build_dir="", n=None):
         Optional flag on data to grab.  None = basic data,
         2 = cross section summary, 3 = cross section graphs.
     """
-    if not isinstance(nuc, basestring):
+    if not isinstance(nuc, str):
         nuc = nucname.name(nuc).upper()
 
     if n is None:

@@ -37,9 +37,6 @@ except ImportError:
 
 _BOX_DIMS_TAG_NAME = "BOX_DIMS"
 
-if sys.version_info[0] > 2:
-    basestring = str
-
 # dictionary of lamba functions for mesh arithmetic
 _ops = {
     "+": lambda val_1, val_2: (val_1 + val_2),
@@ -873,7 +870,7 @@ class Mesh(object):
             )
         if mesh is None:
             self.mesh = mb_core.Core()
-        elif isinstance(mesh, basestring):
+        elif isinstance(mesh, str):
             self.mesh = mb_core.Core()
             self.mesh.load_file(mesh)
         else:
@@ -1000,7 +997,7 @@ class Mesh(object):
 
         # sets mats
         mats_in_mesh_file = False
-        if isinstance(mesh, basestring) and len(mats) == 0:
+        if isinstance(mesh, str) and len(mats) == 0:
             with tb.open_file(mesh) as h5f:
                 if "/mat_name" in h5f:
                     mats_in_mesh_file = True

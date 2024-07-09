@@ -9,9 +9,6 @@ try:
 except ImportError:
     import urllib2 as urllib
 
-if sys.version_info[0] > 2:
-    basestring = str
-
 QA_warn(__name__)
 
 

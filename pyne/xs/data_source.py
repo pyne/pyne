@@ -35,12 +35,6 @@ QA_warn(__name__)
 
 IO_TYPES = (io.IOBase, StringIO)
 
-py3k = False
-if sys.version_info[0] > 2:
-    basestring = str
-    py3k = True
-
-
 class DataSource(object):
     """Base cross section data source.
 
@@ -532,10 +526,7 @@ class CinderDataSource(DataSource):
 
         # Set query condition
         if rx in self._rx_avail:
-            if py3k:
-                cond = "(from_nuc == {0}) & (reaction_type == {1})"
-            else:
-                cond = "(from_nuc == {0}) & (reaction_type == '{1}')"
+            cond = "(from_nuc == {0}) & (reaction_type == {1})"
             cond = cond.format(nuc, self._rx_avail[rx].encode())
         elif rx == fissrx:
             cond = "nuc == {0}".format(nuc)
@@ -681,10 +672,7 @@ class EAFDataSource(DataSource):
         absrx = rxname.id("absorption")
 
         if rx in self._rx_avail:
-            if py3k is True:
-                cond = "(nuc_zz == {0}) & (rxnum == {1})"
-            else:
-                cond = "(nuc_zz == {0}) & (rxnum == '{1}')"
+            cond = "(nuc_zz == {0}) & (rxnum == {1})"
             cond = cond.format(nuc, self._rx_avail[rx])
         elif rx == absrx:
             cond = "(nuc_zz == {0})".format(nuc)
@@ -767,7 +755,7 @@ class ENDFDataSource(DataSource):
     @property
     def exists(self):
         if self._exists is None:
-            if isinstance(self.fh, basestring):
+            if isinstance(self.fh, str):
                 self._exists = os.path.isfile(self.fh)
             else:
                 self._exists = isinstance(self.fh, IO_TYPES)

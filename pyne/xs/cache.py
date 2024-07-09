@@ -21,10 +21,6 @@ from pyne.utils import QA_warn
 
 QA_warn(__name__)
 
-if sys.version_info[0] > 2:
-    basestring = str
-
-
 def _valid_group_struct(E_g):
     if E_g is None:
         return None
@@ -107,7 +103,7 @@ class XSCache(MutableMapping):
         """Key lookup by via custom loading from the nuc_data database file."""
         kw = dict(zip(["nuc", "rx", "temp"], key))
         scalar = self._scalars.get(kw["nuc"], None)
-        if (key not in self._cache) and not isinstance(key, basestring):
+        if (key not in self._cache) and not isinstance(key, str):
             E_g = self._cache["E_g"]
             if E_g is None:
                 for ds in self.data_sources:

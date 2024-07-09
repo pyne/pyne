@@ -14,9 +14,6 @@ import numpy as np
 
 from pyne import nucname, rxname, data
 
-if sys.version_info[0] > 2:
-    basestring = str
-
 QA_warn(__name__)
 
 _valexp = re.compile("([0-9.]*)([Ee][+-]?\d*)")

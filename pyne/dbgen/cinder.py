@@ -16,9 +16,6 @@ from .. import nucname
 from ..utils import warning
 from .api import BASIC_FILTERS
 
-if sys.version_info[0] > 2:
-    basestring = str
-
 QA_warn(__name__)
 
 
@@ -29,7 +26,7 @@ def grab_cinder_dat(build_dir="", datapath=""):
     if os.path.exists(build_filename):
         return True
 
-    if isinstance(datapath, basestring) and 0 < len(datapath):
+    if isinstance(datapath, str) and 0 < len(datapath):
         pass
     elif "DATAPATH" in os.environ:
         datapath = os.environ["DATAPATH"]
