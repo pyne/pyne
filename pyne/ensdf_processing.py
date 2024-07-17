@@ -1,6 +1,6 @@
 """This module accesses various ensdf processing tools"""
 
-import sys, os, shutil, subprocess, tarfile
+import os, subprocess, tarfile
 from warnings import warn
 from pyne.utils import QA_warn
 
@@ -8,9 +8,6 @@ try:
     import urllib.request as urllib
 except ImportError:
     import urllib2 as urllib
-
-if sys.version_info[0] > 2:
-    basestring = str
 
 QA_warn(__name__)
 

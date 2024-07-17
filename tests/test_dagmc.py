@@ -1,6 +1,4 @@
 from __future__ import print_function
-import sys
-import unittest
 import os.path
 import warnings
 import pytest
@@ -25,10 +23,7 @@ try:
 except ImportError:
     raise pytest.skip(allow_module_level=True)
 
-if sys.version_info[0] < 3:
-    STRING_TYPES = (basestring, str, unicode)
-else:
-    STRING_TYPES = (str,)
+STRING_TYPES = (str,)
 
 path = os.path.join(os.path.dirname(__file__), "unitbox.h5m")
 

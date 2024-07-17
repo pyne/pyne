@@ -40,9 +40,6 @@ from libcpp.string cimport string as std_string
 # Imports For Types
 import numpy as np
 
-if PY_MAJOR_VERSION >= 3:
-    basestring = str
-
 # Dirty ifdef, else, else preprocessor hack
 # see http://comments.gmane.org/gmane.comp.python.cython.user/4080
 cdef extern from *:
@@ -119,7 +116,7 @@ cdef class _SetStr:
     def __contains__(self, value):
         cdef std_string s
         cdef char * value_proxy
-        if isinstance(value, basestring):
+        if isinstance(value, str):
             value_bytes = value.encode()
             s = std_string(<char *> value_bytes)
         else:
@@ -381,7 +378,7 @@ cdef class _MapStrStr:
     def __contains__(self, key):
         cdef std_string k
         cdef char * key_proxy
-        if not isinstance(key, basestring):
+        if not isinstance(key, str):
             return False
         key_bytes = key.encode()
         k = std_string(<char *> key_bytes)
@@ -404,7 +401,7 @@ cdef class _MapStrStr:
         cdef std_string v
         cdef char * key_proxy
 
-        if not isinstance(key, basestring):
+        if not isinstance(key, str):
             raise TypeError("Only string keys are valid.")
         key_bytes = key.encode()
         k = std_string(<char *> key_bytes)
@@ -532,7 +529,7 @@ cdef class _MapStrInt:
     def __contains__(self, key):
         cdef std_string k
         cdef char * key_proxy
-        if not isinstance(key, basestring):
+        if not isinstance(key, str):
             return False
         key_bytes = key.encode()
         k = std_string(<char *> key_bytes)
@@ -555,7 +552,7 @@ cdef class _MapStrInt:
         cdef int v
         cdef char * key_proxy
 
-        if not isinstance(key, basestring):
+        if not isinstance(key, str):
             raise TypeError("Only string keys are valid.")
         key_bytes = key.encode()
         k = std_string(<char *> key_bytes)
@@ -834,7 +831,7 @@ cdef class _MapStrUInt:
     def __contains__(self, key):
         cdef std_string k
         cdef char * key_proxy
-        if not isinstance(key, basestring):
+        if not isinstance(key, str):
             return False
         key_bytes = key.encode()
         k = std_string(<char *> key_bytes)
@@ -857,7 +854,7 @@ cdef class _MapStrUInt:
         cdef extra_types.uint32 v
         cdef char * key_proxy
 
-        if not isinstance(key, basestring):
+        if not isinstance(key, str):
             raise TypeError("Only string keys are valid.")
         key_bytes = key.encode()
         k = std_string(<char *> key_bytes)
@@ -1136,7 +1133,7 @@ cdef class _MapStrDouble:
     def __contains__(self, key):
         cdef std_string k
         cdef char * key_proxy
-        if not isinstance(key, basestring):
+        if not isinstance(key, str):
             return False
         key_bytes = key.encode()
         k = std_string(<char *> key_bytes)
@@ -1159,7 +1156,7 @@ cdef class _MapStrDouble:
         cdef double v
         cdef char * key_proxy
 
-        if not isinstance(key, basestring):
+        if not isinstance(key, str):
             raise TypeError("Only string keys are valid.")
         key_bytes = key.encode()
         k = std_string(<char *> key_bytes)
@@ -2065,7 +2062,7 @@ cdef class _MapStrVectorDouble:
     def __contains__(self, key):
         cdef std_string k
         cdef char * key_proxy
-        if not isinstance(key, basestring):
+        if not isinstance(key, str):
             return False
         key_bytes = key.encode()
         k = std_string(<char *> key_bytes)
@@ -2089,7 +2086,7 @@ cdef class _MapStrVectorDouble:
         cdef char * key_proxy
         cdef np.ndarray v_proxy
         cdef np.npy_intp v_proxy_shape[1]
-        if not isinstance(key, basestring):
+        if not isinstance(key, str):
             raise TypeError("Only string keys are valid.")
         key_bytes = key.encode()
         k = std_string(<char *> key_bytes)

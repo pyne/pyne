@@ -23,11 +23,6 @@ cimport numpy as np
 import numpy as np
 from pyne.utils import QA_warn
 import os
-import sys
-if sys.version_info[0] >= 3:
-    #Python2 basestring is now Python3 string
-    basestring = str
-
 import tables as tb
 
 # local imports
@@ -80,7 +75,7 @@ cdef class _Material:
             comp = dict_to_comp(nucvec)
             self.mat_pointer = new cpp_material.Material(
                     comp, mass, density, atoms_per_molecule, deref(cmetadata._inst))
-        elif isinstance(nucvec, basestring):
+        elif isinstance(nucvec, str):
             # Material from file
             nucvec = nucvec.encode()
             self.mat_pointer = new cpp_material.Material(
@@ -1214,7 +1209,7 @@ cdef class _Material:
                 if 0 == af.count(key_zz):
                     af[key_zz] = 0.0
                 af[key_zz] = af[key_zz] + val
-            elif isinstance(key, basestring):
+            elif isinstance(key, str):
                 key_zz = nucname.id(key)
                 if 0 == af.count(key_zz):
                     af[key_zz] = 0.0
@@ -1268,7 +1263,7 @@ cdef class _Material:
             val = <double> value
             if isinstance(key, int):
                 key_zz = <int> nucname.id(key)
-            elif isinstance(key, basestring):
+            elif isinstance(key, str):
                 key_zz = nucname.id(key)
             else:
                 raise TypeError("Activity keys must be integers, "
@@ -1489,7 +1484,7 @@ cdef class _Material:
                 raise KeyError("key {0} not found".format(repr(key)))
 
         # Get single string-key
-        elif isinstance(key, basestring):
+        elif isinstance(key, str):
             key_zz = nucname.id(key)
             return self[key_zz]
 
@@ -1531,7 +1526,7 @@ cdef class _Material:
             self._comp = None
 
         # Set single string-key
-        elif isinstance(key, basestring):
+        elif isinstance(key, str):
             key_zz = nucname.id(key)
             self[key_zz] = value
 
@@ -1581,7 +1576,7 @@ cdef class _Material:
             self._comp = None
 
         # Remove single string-key
-        elif isinstance(key, basestring):
+        elif isinstance(key, str):
             key_zz = nucname.id(key)
             del self[key_zz]
 
@@ -2135,7 +2130,7 @@ cdef class _MapStrMaterial:
         cdef std_string s
         cdef _Material pymat
 
-        if isinstance(key, basestring):
+        if isinstance(key, str):
             key = key.encode()
             s = std_string(<char *> key)
         else:
@@ -2269,7 +2264,7 @@ def mats_latex_table(mats, labels=None, align=None, format=".5g"):
         align = '|l|' + 'c|'*len(mats)
     if labels is None:
         labels = []
-    if isinstance(format, basestring):
+    if isinstance(format, str):
         format = [format] * len(mats)
 
     nucs = set()

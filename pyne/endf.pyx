@@ -115,7 +115,7 @@ class Library(rxdata.RxLib):
             Returns a 1d float64 NumPy array.
         """
         opened_here = False
-        if isinstance(self.fh, basestring):
+        if isinstance(self.fh, str):
             fh = open(self.fh, 'r')
             opened_here = True
         else:
@@ -130,7 +130,7 @@ class Library(rxdata.RxLib):
     def _read_tpid(self):
         if self.chars_til_now == 0:
             opened_here = False
-            if isinstance(self.fh, basestring):
+            if isinstance(self.fh, str):
                 fh = open(self.fh, 'r')
                 opened_here = True
             else:
@@ -157,7 +157,7 @@ class Library(rxdata.RxLib):
         cdef int mat_id
         cdef double nucd
         opened_here = False
-        if isinstance(self.fh, basestring):
+        if isinstance(self.fh, str):
             fh = open(self.fh, 'r')
             opened_here = True
         else:
@@ -1065,7 +1065,7 @@ class Library(rxdata.RxLib):
             1d, float64 NumPy array containing the reaction data.
         """
         opened_here = False
-        if isinstance(self.fh, basestring):
+        if isinstance(self.fh, str):
             fh = open(self.fh, 'r')
             opened_here = True
         else:

@@ -173,7 +173,7 @@ class Library(object):
             Tables from the file to read in.  If None, reads in all of the
             tables. If str, reads in only the single table of a matching name.
         """
-        if isinstance(table_names, basestring):
+        if isinstance(table_names, str):
             table_names = [table_names]
 
         if table_names is not None:

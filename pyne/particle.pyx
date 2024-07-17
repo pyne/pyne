@@ -124,7 +124,7 @@ def name(x):
     -------
     n : str Unique particle name
     """
-    if isinstance(x, basestring):
+    if isinstance(x, str):
         x_bytes = x.encode()
         cn = cpp_particle.name(std_string(<char *> x_bytes))
     elif isinstance(x, int):
@@ -147,7 +147,7 @@ def mcnp(x):
     -------
     n : str Unique particle name
     """
-    if isinstance(x, basestring):
+    if isinstance(x, str):
         x_bytes = x.encode()
         cn = cpp_particle.mcnp(std_string(<char *> x_bytes))
     elif isinstance(x, int):
@@ -171,7 +171,7 @@ def mcnp6(x):
     -------
     n : str Unique particle name
     """
-    if isinstance(x, basestring):
+    if isinstance(x, str):
         x_bytes = x.encode()
         cn = cpp_particle.mcnp6(std_string(<char *> x_bytes))
     elif isinstance(x, int):
@@ -195,7 +195,7 @@ def fluka(x):
     -------
     n : str Unique particle name
     """
-    if isinstance(x, basestring):
+    if isinstance(x, str):
         x_bytes = x.encode()
         cn = cpp_particle.fluka(std_string(<char *> x_bytes))
     elif isinstance(x, int):
@@ -218,7 +218,7 @@ def geant4(x):
     -------
     n : str Unique particle name
     """
-    if isinstance(x, basestring):
+    if isinstance(x, str):
         x_bytes = x.encode()
         cn = cpp_particle.geant4(std_string(<char *> x_bytes))
     elif isinstance(x, int):
@@ -243,7 +243,7 @@ def describe(x):
     n : str Unique particle description
     """
 
-    if isinstance(x, basestring):
+    if isinstance(x, str):
         x_bytes = x.encode()
         cn = cpp_particle.describe(std_string(<char *> x_bytes))
     elif isinstance(x, int):
@@ -267,7 +267,7 @@ def id(x):
     n : int Unique PDC number
     """
 
-    if isinstance(x, basestring):
+    if isinstance(x, str):
         x_bytes = x.encode()
         cn = cpp_particle.id(std_string(<char *> x_bytes))
     elif isinstance(x, int):
@@ -291,7 +291,7 @@ def is_valid(x):
     n : bool true/false 
     """
 
-    if isinstance(x, basestring):
+    if isinstance(x, str):
         x_bytes = x.encode()
         cn = cpp_particle.is_valid(std_string(<char *> x_bytes))
     elif isinstance(x, int):
@@ -315,7 +315,7 @@ def is_heavy_ion(x):
     n : bool true/false 
     """
 
-    if isinstance(x, basestring):
+    if isinstance(x, str):
         x_bytes = x.encode()
         cn = cpp_particle.is_heavy_ion(std_string(<char *> x_bytes))
     elif isinstance(x, int):

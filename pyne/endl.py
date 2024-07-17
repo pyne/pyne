@@ -16,7 +16,6 @@ For more information, contact Davide Mancusi <davide.mancusi@cea.fr>.
 from __future__ import print_function, division, unicode_literals
 
 import re
-import sys
 
 try:
     from collections.abc import namedtuple, defaultdict
@@ -31,9 +30,6 @@ import pyne.utils as utils
 from pyne import nucname
 
 QA_warn(__name__)
-
-if sys.version_info[0] > 2:
-    basestring = str
 
 END_OF_TABLE_RE = re.compile(" {71}1")
 
@@ -71,7 +67,7 @@ class Library(rxdata.RxLib):
     def _read_headers(self):
         """Read all the table headers from an ENDL file."""
         opened_here = False
-        if isinstance(self.fh, basestring):
+        if isinstance(self.fh, str):
             fh = open(self.fh, "r")
             opened_here = True
         else:
@@ -324,7 +320,7 @@ class Library(rxdata.RxLib):
             raise e
 
         start, stop = data_tuple.limits
-        if isinstance(self.fh, basestring):
+        if isinstance(self.fh, str):
             fh = open(self.fh, "r")
             opened_here = True
         else:

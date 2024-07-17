@@ -42,11 +42,11 @@ cdef cpp_jsoncpp.Value * tocppval(object doc) except NULL:
     elif isinstance(doc, collectionsAbc.Mapping):
         cval = new cpp_jsoncpp.Value(<cpp_jsoncpp.ValueType> cpp_jsoncpp.objectValue)
         for k, v in doc.items():
-            if not isinstance(k, basestring):
+            if not isinstance(k, str):
                 raise KeyError('object keys must be strings, got {0}'.format(k))
             k_bytes = k.encode()
             cval[0][<const_char *> k_bytes].swap(deref(tocppval(v)))
-    elif isinstance(doc, basestring):
+    elif isinstance(doc, str):
         # string must come before other sequences
         doc_bytes = doc.encode()
         cval = new cpp_jsoncpp.Value(<char *> doc_bytes)
@@ -118,7 +118,7 @@ cdef class Value(object):
         cdef Value pyvalue = Value(view=True)
 
         # convert key and get value
-        if isinstance(pykey, basestring):
+        if isinstance(pykey, str):
             pykey_bytes = pykey.encode()
             cvalue = &self._inst[0][<const_char *> pykey_bytes]
         elif isinstance(pykey, bytes):
@@ -162,7 +162,7 @@ cdef class Value(object):
 
     def __setitem__(self, key, value):
         cdef cpp_jsoncpp.Value * ckey = NULL
-        if isinstance(key, basestring):
+        if isinstance(key, str):
             key_bytes = key.encode()
             ckey = &self._inst[0][<const_char *> key_bytes]
             ckey.swap(deref(tocppval(value)))
@@ -187,7 +187,7 @@ cdef class Value(object):
     def __delitem__(self, key):
         cdef int i, ikey, curr_size, end_size
         cdef cpp_jsoncpp.Value ctemp
-        if isinstance(key, basestring) and \
+        if isinstance(key, str) and \
            (self._inst.type() == cpp_jsoncpp.objectValue):
             key_bytes = key.encode()
             self._inst.removeMember(<const_char *> key_bytes)
@@ -217,7 +217,7 @@ cdef class Value(object):
 
     def __contains__(self, item):
         cdef int i, curr_size
-        if isinstance(item, basestring) and (self._inst.type() == cpp_jsoncpp.objectValue):
+        if isinstance(item, str) and (self._inst.type() == cpp_jsoncpp.objectValue):
             item_bytes = item.encode()
             return self._inst.isMember(<const_char *> item_bytes)
         elif (self._inst.type() == cpp_jsoncpp.arrayValue):
@@ -507,7 +507,7 @@ cdef class Reader(object):
         cdef Value root = Value()
         cdef char * cdocval
         cdef std_string cdoc
-        if isinstance(document, basestring):
+        if isinstance(document, str):
             document_bytes = document.encode()
             cdocval = document_bytes
         else:

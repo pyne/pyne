@@ -41,10 +41,6 @@ except:
         "Some aspects of the openmc module may be incomplete."
     )
 
-if sys.version_info[0] > 2:
-    basestring = str
-
-
 class AceTable(
     namedtuple(
         "_AceTable",

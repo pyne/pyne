@@ -98,9 +98,6 @@ except NameError:
     # for python < 2.4 compatibility (sets module is there since 2.3):
     from sets import Set as set
 
-if _sys.version_info[0] > 2:
-    basestring = str
-
 try:
     sorted
 except NameError:
@@ -1713,7 +1710,7 @@ class ArgumentParser(_AttributeHolder, _ActionsContainer):
                 if not hasattr(namespace, action.dest):
                     if action.default is not SUPPRESS:
                         default = action.default
-                        if isinstance(action.default, basestring):
+                        if isinstance(action.default, str):
                             default = self._get_value(action, default)
                         setattr(namespace, action.dest, default)
 
@@ -2194,7 +2191,7 @@ class ArgumentParser(_AttributeHolder, _ActionsContainer):
                 value = action.const
             else:
                 value = action.default
-            if isinstance(value, basestring):
+            if isinstance(value, str):
                 value = self._get_value(action, value)
                 self._check_value(action, value)
 
