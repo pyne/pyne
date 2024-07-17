@@ -4,7 +4,6 @@ from __future__ import division
 
 import os
 import io
-import sys
 from pyne.utils import QA_warn
 
 try:

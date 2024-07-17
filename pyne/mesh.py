@@ -2,7 +2,6 @@ from __future__ import print_function, division
 from future.utils import implements_iterator
 from pyne.material import Material, MultiMaterial
 from pyne.material_library import MaterialLibrary
-import sys
 import copy
 import itertools
 

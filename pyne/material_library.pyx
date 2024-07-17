@@ -8,7 +8,6 @@ import pyne.stlcontainers as conv
 from pyne cimport cpp_material_library
 from pyne cimport cpp_material
 import tables as tb
-import sys
 import os
 from pyne.utils import QA_warn
 import numpy as np
@@ -73,7 +72,7 @@ cdef class _MaterialLibrary:
             The path in the hierarchy to the nuclide array in an HDF5 file.
         """
         if lib != None:
-            if sys.version_info[0] >= 3 and isinstance(lib, bytes):
+            if isinstance(lib, bytes):
                 lib = lib.decode()
             if (isinstance(lib, str)) and not isinstance(lib, collectionsAbc.Mapping):
                 # Python2: basestring = (std + unicode)

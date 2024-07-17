@@ -5,7 +5,6 @@ for higher-level functionalities, including cross-section computation
 for materials, fission energy spectra, metastable ratios, and more.
 """
 from __future__ import division
-import sys
 import collections
 
 try:
@@ -25,7 +24,6 @@ from .. import rxname
 from ..material import Material
 from . import models
 from . import cache
-from .models import group_collapse
 
 QA_warn(__name__)
 

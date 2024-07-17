@@ -1,6 +1,6 @@
 """This module accesses various ensdf processing tools"""
 
-import sys, os, shutil, subprocess, tarfile
+import os, subprocess, tarfile
 from warnings import warn
 from pyne.utils import QA_warn
 

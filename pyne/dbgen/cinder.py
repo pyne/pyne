@@ -4,7 +4,6 @@ from __future__ import print_function
 import os
 import io
 import re
-import sys
 import shutil
 from glob import glob
 from pyne.utils import QA_warn

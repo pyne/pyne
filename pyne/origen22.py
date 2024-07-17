@@ -6,7 +6,6 @@ except ImportError:
     pass
 import os
 import re
-import sys
 from io import StringIO
 
 try:

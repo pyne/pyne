@@ -1,6 +1,4 @@
 from __future__ import print_function
-import sys
-import unittest
 import os.path
 import warnings
 import pytest

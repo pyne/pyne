@@ -1,7 +1,5 @@
 import re
-import sys
 import numpy as np
-import pdb
 from pyne.utils import QA_warn
 
 QA_warn(__name__)

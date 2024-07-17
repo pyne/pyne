@@ -16,7 +16,6 @@ For more information, contact Davide Mancusi <davide.mancusi@cea.fr>.
 from __future__ import print_function, division, unicode_literals
 
 import re
-import sys
 
 try:
     from collections.abc import namedtuple, defaultdict

@@ -1,7 +1,6 @@
 from __future__ import print_function
 import os
 import re
-import sys
 from pyne.utils import QA_warn
 
 try:

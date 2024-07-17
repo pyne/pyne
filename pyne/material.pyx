@@ -23,7 +23,6 @@ cimport numpy as np
 import numpy as np
 from pyne.utils import QA_warn
 import os
-import sys
 import tables as tb
 
 # local imports

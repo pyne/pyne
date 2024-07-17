@@ -1,9 +1,6 @@
 """This module offers a cross-section cache that automates the extraction of 
 cross-section data from supplied nuclear data sets."""
-import sys
 import inspect
-
-from itertools import product
 
 try:
     from collections.abc import MutableMapping
@@ -11,11 +8,8 @@ except ImportError:
     from collections import MutableMapping
 
 import numpy as np
-import tables as tb
 
-from pyne import nucname
-from pyne.pyne_config import pyne_conf
-from pyne.xs.models import partial_energy_matrix, phi_g, same_arr_or_none
+from pyne.xs.models import same_arr_or_none
 from pyne.xs import data_source
 from pyne.utils import QA_warn
 
