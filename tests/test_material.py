@@ -762,12 +762,14 @@ def test_getitem_int():
     assert mat[922380000] == 0.96
     pytest.raises(KeyError, lambda: mat[922340000])
 
+def test_id():
+    mat = Material(nucvec)
+    pytest.raises(RuntimeError, lambda: mat[-1])
 
 def test_getitem_str():
     mat = Material(nucvec)
     assert mat["U235"] == 1.0
-    with pytest.raises(RuntimeError):
-        mat["word"]
+    pytest.raises(RuntimeError, lambda: mat["word"])
 
     mat = Material(leu)
     assert mat["U235"] == 0.04
