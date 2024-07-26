@@ -764,7 +764,7 @@ def test_getitem_int():
 
 def test_id():
     mat = Material(nucvec)
-    pytest.raises(RuntimeError, lambda: mat[-1])
+    pytest.raises(RuntimeError, lambda: mat[""])
 
 def test_getitem_str():
     mat = Material(nucvec)
