@@ -206,7 +206,9 @@ namespace rxname
   public:
 
     /// default constructor
-    NotAReaction () {};
+    NotAReaction () {
+      narxstr = "";
+    };
 
     /// default destructor
     ~NotAReaction () throw () {};
@@ -217,6 +219,7 @@ namespace rxname
     {
        rxwas = wasptr;
        rxnow = nowptr;
+       setNarxstr();
     };
 
     /// Constructor using original reaction (\a wasptr) and the eventual state
@@ -225,6 +228,7 @@ namespace rxname
     {
       rxwas = wasptr;
       rxnow = pyne::to_str(nowptr);
+      setNarxstr();
     };
 
     /// Constructor using original reaction (\a wasptr) and the eventual state
@@ -233,6 +237,7 @@ namespace rxname
     {
       rxwas = pyne::to_str(wasptr);
       rxnow = nowptr;
+      setNarxstr();
     };
 
     /// Constructor using original reaction (\a wasptr) and the eventual state
@@ -241,6 +246,7 @@ namespace rxname
     {
       rxwas = pyne::to_str(wasptr);
       rxnow = pyne::to_str(nowptr);
+      setNarxstr();
     };
 
     /// Constructor using original reaction (\a wasptr) and the eventual state
@@ -249,6 +255,7 @@ namespace rxname
     {
       rxwas = wasptr;
       rxnow = pyne::to_str(nowptr);
+      setNarxstr();
     };
 
     /// Constructor using original reaction (\a wasptr) and the eventual state
@@ -257,6 +264,7 @@ namespace rxname
     {
       rxwas = pyne::to_str(wasptr);
       rxnow = nowptr;
+      setNarxstr();
     };
 
     /// Constructor using original reaction (\a wasptr) and the eventual state
@@ -265,12 +273,12 @@ namespace rxname
     {
       rxwas = pyne::to_str(wasptr);
       rxnow = pyne::to_str(nowptr);
+      setNarxstr();
     };
 
-    /// Returns a helpful error message containing prior and current reaction state.
-    virtual const char* what() const throw()
+    void setNarxstr() 
     {
-      std::string narxstr ("Not a reaction! ");
+      narxstr ="Not a reaction! ";
       if (!rxwas.empty())
         narxstr += rxwas;
 
@@ -279,13 +287,18 @@ namespace rxname
         narxstr += " --> ";
         narxstr += rxnow;
       }
-      const char* narxstr_rtn = narxstr.c_str();
-      return narxstr_rtn;
+    }
+
+    /// Returns a helpful error message containing prior and current reaction state.
+    virtual const char* what() const throw()
+    {
+      return narxstr.c_str();
     };
 
   private:
     std::string rxwas;  ///< previous reaction state
     std::string rxnow;  ///< current reaction state
+    std::string narxstr;
   };
 
 
