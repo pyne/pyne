@@ -206,9 +206,7 @@ namespace rxname
   public:
 
     /// default constructor
-    NotAReaction () {
-      narxstr = "";
-    };
+    NotAReaction () : narxstr("") {};
 
     /// default destructor
     ~NotAReaction () throw () {};

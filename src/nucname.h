@@ -84,10 +84,7 @@ namespace nucname
   {
   public:
     /// default constructor
-    NotANuclide () 
-    {
-      NaNEstr = "";
-    };
+    NotANuclide () : NaNEstr("") {};
 
     /// default destructor
     ~NotANuclide () throw () {};
