@@ -445,7 +445,7 @@ def chi(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None, eres=101)
         for g in range(G):
             E_space = np.logspace(np.log10(E_g[g]), np.log10(E_g[g + 1]), eres)
             dnumer = models.chi(E_space)
-            numer = scipy.integrate.trapz(dnumer, E_space)
+            numer = scipy.integrate.trapezoid(dnumer, E_space)
             denom = E_g[g + 1] - E_g[g]
             chi_g[g] = numer / denom
         # renormalize chi

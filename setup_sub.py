@@ -6,7 +6,6 @@ import io
 import os
 import re
 import sys
-import imp
 import shutil
 import tarfile
 import argparse

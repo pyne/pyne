@@ -84,7 +84,7 @@ namespace nucname
   {
   public:
     /// default constructor
-    NotANuclide () {};
+    NotANuclide () : NaNEstr("") {};
 
     /// default destructor
     ~NotANuclide () throw () {};
@@ -96,6 +96,7 @@ namespace nucname
     {
        nucwas = wasptr;
        nucnow = nowptr;
+       setNaNEstr();
     };
 
     /// Constructor given previous and current state of nulide name
@@ -105,6 +106,7 @@ namespace nucname
     {
       nucwas = wasptr;
       nucnow = pyne::to_str(nowptr);
+      setNaNEstr();
     };
 
     /// Constructor given previous and current state of nulide name
@@ -114,6 +116,7 @@ namespace nucname
     {
       nucwas = pyne::to_str(wasptr);
       nucnow = nowptr;
+      setNaNEstr();
     };
 
     /// Constructor given previous and current state of nulide name
@@ -123,13 +126,12 @@ namespace nucname
     {
       nucwas = pyne::to_str(wasptr);
       nucnow = pyne::to_str(nowptr);
+      setNaNEstr();
     };
 
-    /// Generates an informational message for the exception
-    /// \return The error string
-    virtual const char* what() const throw()
+    void setNaNEstr() 
     {
-      std::string NaNEstr ("Not a Nuclide! ");
+      NaNEstr = "Not a Nuclide! ";
       if (!nucwas.empty())
         NaNEstr += nucwas;
 
@@ -138,13 +140,19 @@ namespace nucname
         NaNEstr += " --> ";
         NaNEstr += nucnow;
       }
-      const char* NaNEstr_rtn = NaNEstr.c_str();
-      return NaNEstr_rtn;
+    };
+
+    /// Generates an informational message for the exception
+    /// \return The error string
+    virtual const char* what() const throw() 
+    {
+      return NaNEstr.c_str();     
     };
 
   private:
     std::string nucwas; ///< previous nuclide state
     std::string nucnow; ///< current nuclide state
+    std::string NaNEstr; 
   };
 
   /// Custom expection for declaring that a value represents one or more nuclides
