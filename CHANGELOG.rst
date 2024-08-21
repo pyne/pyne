@@ -7,7 +7,9 @@ Next Version
 **Change**
    * Test install script on multiple Ubuntu versions (#1484)
    * Update MOAB, OpenMC, hdf5 versions in apt build (#1529)
+   * Add dockerfile and workflow to build PyNE with Conda (#1540)
    * Support Cython3+ (#1528)
+   * Remove deprecated references to ``basestring`` (#1544)
 
 **Fix**
    * Fix Type Mismatch Error in PyNE's ENSDF Processing Module (#1519)
@@ -17,6 +19,7 @@ Next Version
       * update material_library writing interface
    * reference python_executable rather than assuming `python` exists ()
    * Update FindMOAB to use MOAB config file (#1526)
+   * Remove imp module from tests to support Python 3.12 (#1543)
 
 v0.7.8
 ======

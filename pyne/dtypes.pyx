@@ -27,9 +27,6 @@ cimport extra_types
 
 dtypes = {}
 
-if PY_MAJOR_VERSION >= 3:
-    basestring = str
-
 # Dirty ifdef, else, else preprocessor hack
 # see http://comments.gmane.org/gmane.comp.python.cython.user/4080
 cdef extern from *:

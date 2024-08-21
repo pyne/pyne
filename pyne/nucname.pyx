@@ -111,7 +111,7 @@ def isnuclide(nuc):
     flag : bool
 
     """
-    if isinstance(nuc, basestring):
+    if isinstance(nuc, str):
         nuc_bytes = nuc.encode()
         flag = cpp_nucname.isnuclide(<char *> nuc_bytes)
     elif isinstance(nuc, int) or isinstance(nuc, long):
@@ -134,7 +134,7 @@ def iselement(nuc):
     flag : bool
 
     """
-    if isinstance(nuc, basestring):
+    if isinstance(nuc, str):
         nuc_bytes = nuc.encode()
         flag = cpp_nucname.iselement(<char *> nuc_bytes)
     elif isinstance(nuc, int) or isinstance(nuc, long):
@@ -183,7 +183,7 @@ def id(nuc):
         Output nuclide id.
 
     """
-    if isinstance(nuc, basestring):
+    if isinstance(nuc, str):
         nuc = nuc.encode()
         newnuc = cpp_nucname.id(<char *> nuc)
     elif isinstance(nuc, int) or isinstance(nuc, long):
@@ -210,7 +210,7 @@ def name(nuc):
 
     """
     cdef std_string newnuc
-    if isinstance(nuc, basestring):
+    if isinstance(nuc, str):
         nuc_bytes = nuc.encode()
         newnuc = cpp_nucname.name(<char *> nuc_bytes)
     elif isinstance(nuc, int):
@@ -234,7 +234,7 @@ def znum(nuc):
         The number of protons in the nucleus.
 
     """
-    if isinstance(nuc, basestring):
+    if isinstance(nuc, str):
         nuc_bytes = nuc.encode()
         z = cpp_nucname.znum(<char *> nuc_bytes)
     elif isinstance(nuc, int) or isinstance(nuc, long):
@@ -258,7 +258,7 @@ def anum(nuc):
         The number of protons and neutrons in the nucleus.
 
     """
-    if isinstance(nuc, basestring):
+    if isinstance(nuc, str):
         nuc_bytes = nuc.encode()
         a = cpp_nucname.anum(<char *> nuc_bytes)
     elif isinstance(nuc, int) or isinstance(nuc, long):
@@ -282,7 +282,7 @@ def snum(nuc):
         The excitation level the nucleus.
 
     """
-    if isinstance(nuc, basestring):
+    if isinstance(nuc, str):
         nuc_bytes = nuc.encode()
         s = cpp_nucname.snum(<char *> nuc_bytes)
     elif isinstance(nuc, int) or isinstance(nuc, long):
@@ -306,7 +306,7 @@ def zzaaam(nuc):
         Output nuclide in zzaaam form.
 
     """
-    if isinstance(nuc, basestring):
+    if isinstance(nuc, str):
         nuc_bytes = nuc.encode()
         newnuc = cpp_nucname.zzaaam(<char *> nuc_bytes)
     elif isinstance(nuc, int) or isinstance(nuc, long):
@@ -331,7 +331,7 @@ def zzaaam_to_id(nuc):
         Output nuclide in identifier form.
 
     """
-    if isinstance(nuc, basestring):
+    if isinstance(nuc, str):
         nuc_bytes = nuc.encode()
         newnuc = cpp_nucname.zzaaam_to_id(<char *> nuc_bytes)
     elif isinstance(nuc, int) or isinstance(nuc, long):
@@ -355,7 +355,7 @@ def zzzaaa(nuc):
         Output nuclide in zzzaaa form.
 
     """
-    if isinstance(nuc, basestring):
+    if isinstance(nuc, str):
         nuc_bytes = nuc.encode()
         newnuc = cpp_nucname.zzzaaa(<char *> nuc_bytes)
     elif isinstance(nuc, int) or isinstance(nuc, long):
@@ -380,7 +380,7 @@ def zzzaaa_to_id(nuc):
         Output nuclide in identifier form.
 
     """
-    if isinstance(nuc, basestring):
+    if isinstance(nuc, str):
         newnuc = cpp_nucname.zzzaaa_to_id(<char *> nuc)
     elif isinstance(nuc, int) or isinstance(nuc, long):
         newnuc = cpp_nucname.zzzaaa_to_id(<int> nuc)
@@ -411,7 +411,7 @@ def mcnp(nuc):
 
     """
 
-    if isinstance(nuc, basestring):
+    if isinstance(nuc, str):
         nuc_bytes = nuc.encode()
         newnuc = cpp_nucname.mcnp(<char *> nuc_bytes)
     elif isinstance(nuc, int):
@@ -436,7 +436,7 @@ def mcnp_to_id(nuc):
         Output nuclide in identifier form.
 
     """
-    if isinstance(nuc, basestring):
+    if isinstance(nuc, str):
         nuc_bytes = nuc.encode()
         newnuc = cpp_nucname.mcnp_to_id(<char *> nuc_bytes)
     elif isinstance(nuc, int) or isinstance(nuc, long):
@@ -461,7 +461,7 @@ def openmc(nuc):
 
     """
 
-    if isinstance(nuc, basestring):
+    if isinstance(nuc, str):
         nuc_bytes = nuc.encode()
         newnuc = cpp_nucname.openmc(<char *> nuc_bytes)
     elif isinstance(nuc, int):
@@ -541,7 +541,7 @@ def zzllaaam(nuc):
         Output nuclide in zzllaaam form.
 
     """
-    if isinstance(nuc, basestring):
+    if isinstance(nuc, str):
         nuc_bytes = nuc.encode()
         newnuc = cpp_nucname.zzllaaam(<char *> nuc_bytes)
     elif isinstance(nuc, int) or isinstance(nuc, long):
@@ -566,7 +566,7 @@ def zzllaaam_to_id(nuc):
         Output nuclide in identifier form.
 
     """
-    if isinstance(nuc, basestring):
+    if isinstance(nuc, str):
         nuc_bytes = nuc.encode()
         newnuc = cpp_nucname.zzllaaam_to_id(<char *> nuc_bytes)
     else:
@@ -591,7 +591,7 @@ def serpent(nuc):
     """
     cdef std_string newnuc
 
-    if isinstance(nuc, basestring):
+    if isinstance(nuc, str):
         nuc_bytes = nuc.encode()
         newnuc = cpp_nucname.serpent(<char *> nuc_bytes)
     elif isinstance(nuc, int):
@@ -617,7 +617,7 @@ def serpent_to_id(nuc):
         Output nuclide in identifier form.
 
     """
-    if isinstance(nuc, basestring):
+    if isinstance(nuc, str):
         nuc_bytes = nuc.encode()
         newnuc = cpp_nucname.serpent_to_id(<char *> nuc_bytes)
     #elif isinstance(nuc, int) or isinstance(nuc, long):
@@ -643,7 +643,7 @@ def nist(nuc):
     """
     cdef std_string newnuc
 
-    if isinstance(nuc, basestring):
+    if isinstance(nuc, str):
         nuc_bytes = nuc.encode()
         newnuc = cpp_nucname.nist(<char *> nuc_bytes)
     elif isinstance(nuc, int):
@@ -669,7 +669,7 @@ def nist_to_id(nuc):
         Output nuclide in identifier form.
 
     """
-    if isinstance(nuc, basestring):
+    if isinstance(nuc, str):
         nuc_bytes = nuc.encode()
         newnuc = cpp_nucname.nist_to_id(<char *> nuc_bytes)
     #elif isinstance(nuc, int) or isinstance(nuc, long):
@@ -693,7 +693,7 @@ def cinder(nuc):
         Output nuclide in CINDER (aaazzzm) form.
 
     """
-    if isinstance(nuc, basestring):
+    if isinstance(nuc, str):
         nuc_bytes = nuc.encode()
         newnuc = cpp_nucname.cinder(<char *> nuc_bytes)
     elif isinstance(nuc, int):
@@ -718,7 +718,7 @@ def cinder_to_id(nuc):
         Output nuclide in identifier form.
 
     """
-    if isinstance(nuc, basestring):
+    if isinstance(nuc, str):
         newnuc = cpp_nucname.cinder_to_id(<char *> nuc)
     elif isinstance(nuc, int) or isinstance(nuc, long):
         newnuc = cpp_nucname.cinder_to_id(<int> nuc)
@@ -743,7 +743,7 @@ def alara(nuc):
     """
     cdef std_string newnuc
 
-    if isinstance(nuc, basestring):
+    if isinstance(nuc, str):
         nuc_bytes = nuc.encode()
         newnuc = cpp_nucname.alara(<char *> nuc_bytes)
     elif isinstance(nuc, int):
@@ -769,7 +769,7 @@ def alara_to_id(nuc):
         Output nuclide in identifier form.
 
     """
-    if isinstance(nuc, basestring):
+    if isinstance(nuc, str):
         nuc_bytes = nuc.encode()
         newnuc = cpp_nucname.alara_to_id(<char *> nuc_bytes)
     #elif isinstance(nuc, int) or isinstance(nuc, long):
@@ -793,7 +793,7 @@ def sza(nuc):
         Output nuclide in SZA form.
 
     """
-    if isinstance(nuc, basestring):
+    if isinstance(nuc, str):
         nuc_bytes = nuc.encode()
         newnuc = cpp_nucname.sza(<char *> nuc_bytes)
     elif isinstance(nuc, int) or isinstance(nuc, long):
@@ -818,7 +818,7 @@ def sza_to_id(nuc):
         Output nuclide in identifier form.
 
     """
-    if isinstance(nuc, basestring):
+    if isinstance(nuc, str):
         nuc_bytes = nuc.encode()
         newnuc = cpp_nucname.sza_to_id(<char *> nuc_bytes)
     elif isinstance(nuc, int) or isinstance(nuc, long):
@@ -842,7 +842,7 @@ def groundstate(nuc):
         Output nuclide in Groundstate form.
 
     """
-    if isinstance(nuc, basestring):
+    if isinstance(nuc, str):
         nuc_bytes = nuc.encode()
         newnuc = cpp_nucname.groundstate(<char *> nuc_bytes)
     elif isinstance(nuc, int) or isinstance(nuc, long):
@@ -917,7 +917,7 @@ def ensdf_to_id(nuc):
         Output nuclide in nuc_id form.
 
     """
-    if isinstance(nuc, basestring):
+    if isinstance(nuc, str):
         nuc_bytes = nuc.encode()
         return cpp_nucname.ensdf_to_id(<char *> nuc_bytes)
     else:

@@ -23,11 +23,6 @@ import re
 
 QA_warn(__name__)
 
-try:
-    basestring
-except NameError:
-    basestring = str
-
 if HAVE_PYMOAB:
     from pyne.mesh import mesh_iterate
 else:
@@ -705,7 +700,7 @@ def num_density_to_mesh(lines, time, m):
     m : PyNE Mesh
         Mesh object for which mats will be applied to.
     """
-    if isinstance(lines, basestring):
+    if isinstance(lines, str):
         with open(lines) as f:
             lines = f.readlines()
     elif not isinstance(lines, collectionsAbc.Sequence):
@@ -817,7 +812,7 @@ def irradiation_blocks(
     # Cooling times
     s += "cooling\n"
     if isinstance(cooling, collectionsAbc.Iterable) and not isinstance(
-        cooling, basestring
+        cooling, str
     ):
         for c in cooling:
             s += "    {0}\n".format(c)
@@ -839,7 +834,7 @@ def irradiation_blocks(
     # Output block
     s += "output zone\n    units Ci cm3\n"
     if isinstance(output, collectionsAbc.Iterable) and not isinstance(
-        output, basestring
+        output, str
     ):
         for out in output:
             s += "    {0}\n".format(out)

@@ -6,7 +6,6 @@ except ImportError:
     pass
 import os
 import re
-import sys
 from io import StringIO
 
 try:
@@ -24,10 +23,6 @@ from pyne import nucname
 from pyne.xs import cache
 from pyne import decay_tape9
 from pyne.material import Material, from_atom_frac
-
-if sys.version_info[0] > 2:
-    basestring = str
-    unicode = str
 
 QA_warn(__name__)
 
@@ -1890,7 +1885,7 @@ def write_tape4(mat, outfile="TAPE4.INP"):
 
     # Write to the file
     opened_here = False
-    if isinstance(outfile, basestring):
+    if isinstance(outfile, str):
         outfile = open(outfile, "w")
         opened_here = True
 
@@ -2064,7 +2059,7 @@ def write_tape5_irradiation(
     tape5 = _tape5_irradiation_template.format(**tape5_kw)
 
     opened_here = False
-    if isinstance(outfile, basestring):
+    if isinstance(outfile, str):
         outfile = open(outfile, "w")
         opened_here = True
 
@@ -2148,7 +2143,7 @@ def write_tape5_decay(
     tape5 = _tape5_decay_template.format(**tape5_kw)
 
     opened_here = False
-    if isinstance(outfile, basestring):
+    if isinstance(outfile, str):
         outfile = open(outfile, "w")
         opened_here = True
 
@@ -2284,7 +2279,7 @@ def parse_tape6(tape6="TAPE6.OUT"):
     """
     # Read the TAPE6 file
     opened_here = False
-    if isinstance(tape6, basestring):
+    if isinstance(tape6, str):
         tape6 = open(tape6, "r")
         opened_here = True
 
@@ -2699,7 +2694,7 @@ def parse_tape9(tape9="TAPE9.INP"):
     """
     # Read and strip lines
     opened_here = False
-    if isinstance(tape9, basestring):
+    if isinstance(tape9, str):
         tape9 = open(tape9, "r")
         opened_here = True
 
@@ -2749,7 +2744,7 @@ def loads_tape9(tape9):
     parsed : dict
         A dictionary of the data from the TAPE9 file.
     """
-    if isinstance(tape9, unicode):
+    if isinstance(tape9, str):
         t9 = StringIO(tape9)
     else:
         t9 = StringIO(tape9.decode())
@@ -3047,7 +3042,7 @@ def write_tape9(tape9, outfile="TAPE9.INP", precision=3):
         t9 += "  -1\n"
 
     opened_here = False
-    if isinstance(outfile, basestring):
+    if isinstance(outfile, str):
         outfile = open(outfile, "w")
         opened_here = True
 

@@ -1,6 +1,5 @@
 from __future__ import division
 import re
-import sys
 import copy
 
 try:
@@ -13,9 +12,6 @@ from pyne.utils import QA_warn, time_conv_dict
 import numpy as np
 
 from pyne import nucname, rxname, data
-
-if sys.version_info[0] > 2:
-    basestring = str
 
 QA_warn(__name__)
 

@@ -233,7 +233,7 @@ def name(x, y=None, z="n"):
     cdef std_string cn
     cdef int from_nuc, to_nuc
     if y is None:
-        if isinstance(x, basestring):
+        if isinstance(x, str):
             x_bytes = x.encode()
             cn = cpp_rxname.name(std_string(<char *> x_bytes))
         elif isinstance(x, int):
@@ -241,12 +241,12 @@ def name(x, y=None, z="n"):
         elif isinstance(x, long):
             cn = cpp_rxname.name(<extra_types.uint32> x)
     else:
-        if isinstance(x, basestring):
+        if isinstance(x, str):
             x_bytes = x.encode()
             from_nuc = cpp_nucname.id(std_string(<char *> x_bytes))
         elif isinstance(x, int):
             from_nuc = cpp_nucname.id(<int> x)
-        if isinstance(y, basestring):
+        if isinstance(y, str):
             y_bytes = y.encode()
             to_nuc = cpp_nucname.id(std_string(<char *> y_bytes))
         elif isinstance(y, int):
@@ -280,7 +280,7 @@ def id(x, y=None, z="n"):
     """
     cdef int from_nuc, to_nuc
     if y is None:
-        if isinstance(x, basestring):
+        if isinstance(x, str):
             x_bytes = x.encode()
             rxid = cpp_rxname.id(std_string(<char *> x_bytes))
         elif isinstance(x, int):
@@ -288,12 +288,12 @@ def id(x, y=None, z="n"):
         elif isinstance(x, long):
             rxid = cpp_rxname.id(<extra_types.uint32> x)
     else:
-        if isinstance(x, basestring):
+        if isinstance(x, str):
             x_bytes = x.encode()
             from_nuc = cpp_nucname.id(std_string(<char *> x_bytes))
         elif isinstance(x, int):
             from_nuc = cpp_nucname.id(<int> x)
-        if isinstance(y, basestring):
+        if isinstance(y, str):
             y_bytes = y.encode()
             to_nuc = cpp_nucname.id(std_string(<char *> y_bytes))
         elif isinstance(y, int):
@@ -324,7 +324,7 @@ def mt(x, y=None, z="n"):
     """
     cdef int from_nuc, to_nuc
     if y is None:
-        if isinstance(x, basestring):
+        if isinstance(x, str):
             x_bytes = x.encode()
             mtnum = cpp_rxname.mt(std_string(<char *> x_bytes))
         elif isinstance(x, int):
@@ -332,12 +332,12 @@ def mt(x, y=None, z="n"):
         elif isinstance(x, long):
             mtnum = cpp_rxname.mt(<extra_types.uint32> x)
     else:
-        if isinstance(x, basestring):
+        if isinstance(x, str):
             x_bytes = x.encode()
             from_nuc = cpp_nucname.id(std_string(<char *> x_bytes))
         elif isinstance(x, int):
             from_nuc = cpp_nucname.id(<int> x)
-        if isinstance(y, basestring):
+        if isinstance(y, str):
             y_bytes = y.encode()
             to_nuc = cpp_nucname.id(std_string(<char *> y_bytes))
         elif isinstance(y, int):
@@ -369,7 +369,7 @@ def label(x, y=None, z="n"):
     cdef std_string clab
     cdef int from_nuc, to_nuc
     if y is None:
-        if isinstance(x, basestring):
+        if isinstance(x, str):
             x_bytes = x.encode()
             clab = cpp_rxname.label(std_string(<char *> x_bytes))
         elif isinstance(x, int):
@@ -377,12 +377,12 @@ def label(x, y=None, z="n"):
         elif isinstance(x, long):
             clab = cpp_rxname.label(<extra_types.uint32> x)
     else:
-        if isinstance(x, basestring):
+        if isinstance(x, str):
             x_bytes = x.encode()
             from_nuc = cpp_nucname.id(std_string(<char *> x_bytes))
         elif isinstance(x, int):
             from_nuc = cpp_nucname.id(<int> x)
-        if isinstance(y, basestring):
+        if isinstance(y, str):
             y_bytes = y.encode()
             to_nuc = cpp_nucname.id(std_string(<char *> y_bytes))
         elif isinstance(y, int):
@@ -415,7 +415,7 @@ def doc(x, y=None, z="n"):
     cdef std_string cd
     cdef int from_nuc, to_nuc
     if y is None:
-        if isinstance(x, basestring):
+        if isinstance(x, str):
             x_bytes = x.encode()
             cd = cpp_rxname.doc(std_string(<char *> x_bytes))
         elif isinstance(x, int):
@@ -423,12 +423,12 @@ def doc(x, y=None, z="n"):
         elif isinstance(x, long):
             cd = cpp_rxname.doc(<extra_types.uint32> x)
     else:
-        if isinstance(x, basestring):
+        if isinstance(x, str):
             x_bytes = x.encode()
             from_nuc = cpp_nucname.id(std_string(<char *> x_bytes))
         elif isinstance(x, int):
             from_nuc = cpp_nucname.id(<int> x)
-        if isinstance(y, basestring):
+        if isinstance(y, str):
             y_bytes = y.encode()
             to_nuc = cpp_nucname.id(std_string(<char *> y_bytes))
         elif isinstance(y, int):
@@ -460,9 +460,9 @@ def child(nuc, rx, z="n"):
     """
     cdef std_string ptype
     cdef int to_nuc
-    cdef bint nuc_is_str = isinstance(nuc, basestring)
-    cdef bint z_is_str = isinstance(z, basestring)
-    cdef bint rx_is_str = isinstance(rx, basestring)
+    cdef bint nuc_is_str = isinstance(nuc, str)
+    cdef bint z_is_str = isinstance(z, str)
+    cdef bint rx_is_str = isinstance(rx, str)
     # convert particle to std::string
     z_bytes = z.encode() if z_is_str else z
     ptype = std_string(<char *> z_bytes)
@@ -505,9 +505,9 @@ def parent(nuc, rx, z="n"):
     """
     cdef std_string ptype
     cdef int from_nuc
-    cdef bint nuc_is_str = isinstance(nuc, basestring)
-    cdef bint z_is_str = isinstance(z, basestring)
-    cdef bint rx_is_str = isinstance(rx, basestring)
+    cdef bint nuc_is_str = isinstance(nuc, str)
+    cdef bint z_is_str = isinstance(z, str)
+    cdef bint rx_is_str = isinstance(rx, str)
     # convert particle to std::string
     z_bytes = z.encode() if z_is_str else z
     ptype = std_string(<char *> z_bytes)

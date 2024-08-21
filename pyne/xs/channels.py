@@ -5,7 +5,6 @@ for higher-level functionalities, including cross-section computation
 for materials, fission energy spectra, metastable ratios, and more.
 """
 from __future__ import division
-import sys
 import collections
 
 try:
@@ -25,12 +24,8 @@ from .. import rxname
 from ..material import Material
 from . import models
 from . import cache
-from .models import group_collapse
 
 QA_warn(__name__)
-
-if sys.version_info[0] > 2:
-    basestring = str
 
 np.seterr(all="ignore")
 
@@ -100,7 +95,7 @@ def sigma_f(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None):
     """
     xs_cache = cache.xs_cache if xs_cache is None else xs_cache
     _prep_cache(xs_cache, group_struct, phi_g)
-    if isinstance(nuc, collectionsAbc.Iterable) and not isinstance(nuc, basestring):
+    if isinstance(nuc, collectionsAbc.Iterable) and not isinstance(nuc, str):
         return _atom_mass_channel(sigma_f, nuc, temp=temp, xs_cache=xs_cache)
     nuc = nucname.id(nuc)
     key = (nuc, rxname.id("fission"), temp)
@@ -146,7 +141,7 @@ def sigma_s_gh(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None):
     """
     xs_cache = cache.xs_cache if xs_cache is None else xs_cache
     _prep_cache(xs_cache, group_struct, phi_g)
-    if isinstance(nuc, collectionsAbc.Iterable) and not isinstance(nuc, basestring):
+    if isinstance(nuc, collectionsAbc.Iterable) and not isinstance(nuc, str):
         return _atom_mass_channel(sigma_s_gh, nuc, temp=temp, xs_cache=xs_cache)
     nuc = nucname.id(nuc)
     key = (nuc, "s_gh", temp)
@@ -221,7 +216,7 @@ def sigma_s(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None):
     """
     xs_cache = cache.xs_cache if xs_cache is None else xs_cache
     _prep_cache(xs_cache, group_struct, phi_g)
-    if isinstance(nuc, collectionsAbc.Iterable) and not isinstance(nuc, basestring):
+    if isinstance(nuc, collectionsAbc.Iterable) and not isinstance(nuc, str):
         return _atom_mass_channel(sigma_s, nuc, temp=temp, xs_cache=xs_cache)
     nuc = nucname.id(nuc)
     key_g = (nuc, "s_g", temp)
@@ -281,7 +276,7 @@ def sigma_a_reaction(nuc, rx, temp=300.0, group_struct=None, phi_g=None, xs_cach
     rx = rxname.id(rx)
     xs_cache = cache.xs_cache if xs_cache is None else xs_cache
     _prep_cache(xs_cache, group_struct, phi_g)
-    if isinstance(nuc, collectionsAbc.Iterable) and not isinstance(nuc, basestring):
+    if isinstance(nuc, collectionsAbc.Iterable) and not isinstance(nuc, str):
         return _atom_mass_channel(
             sigma_a_reaction, nuc, rx=rx, temp=temp, xs_cache=xs_cache
         )
@@ -329,7 +324,7 @@ def metastable_ratio(nuc, rx, temp=300.0, group_struct=None, phi_g=None, xs_cach
     pyne.xs.data_source.RX_TYPES_MAP
 
     """
-    if isinstance(nuc, int) or isinstance(nuc, basestring):
+    if isinstance(nuc, int) or isinstance(nuc, str):
         xs_cache = cache.xs_cache if xs_cache is None else xs_cache
         _prep_cache(xs_cache, group_struct, phi_g)
         nuc = nucname.id(nuc)
@@ -382,7 +377,7 @@ def sigma_a(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None):
     """
     xs_cache = cache.xs_cache if xs_cache is None else xs_cache
     _prep_cache(xs_cache, group_struct, phi_g)
-    if isinstance(nuc, collectionsAbc.Iterable) and not isinstance(nuc, basestring):
+    if isinstance(nuc, collectionsAbc.Iterable) and not isinstance(nuc, str):
         return _atom_mass_channel(sigma_a, nuc, temp=temp, xs_cache=xs_cache)
     nuc = nucname.id(nuc)
     key = (nuc, rxname.id("absorption"), temp)
@@ -421,7 +416,7 @@ def chi(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None, eres=101)
     """
     xs_cache = cache.xs_cache if xs_cache is None else xs_cache
     _prep_cache(xs_cache, group_struct, phi_g)
-    if isinstance(nuc, collectionsAbc.Iterable) and not isinstance(nuc, basestring):
+    if isinstance(nuc, collectionsAbc.Iterable) and not isinstance(nuc, str):
         return _atom_mass_channel(chi, nuc, temp=temp, xs_cache=xs_cache, eres=eres)
     nuc = nucname.id(nuc)
     key = (nuc, "chi", temp)
@@ -450,7 +445,7 @@ def chi(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None, eres=101)
         for g in range(G):
             E_space = np.logspace(np.log10(E_g[g]), np.log10(E_g[g + 1]), eres)
             dnumer = models.chi(E_space)
-            numer = scipy.integrate.trapz(dnumer, E_space)
+            numer = scipy.integrate.trapezoid(dnumer, E_space)
             denom = E_g[g + 1] - E_g[g]
             chi_g[g] = numer / denom
         # renormalize chi
@@ -489,7 +484,7 @@ def sigma_t(nuc, temp=300.0, group_struct=None, phi_g=None, xs_cache=None):
     """
     xs_cache = cache.xs_cache if xs_cache is None else xs_cache
     _prep_cache(xs_cache, group_struct, phi_g)
-    if isinstance(nuc, collectionsAbc.Iterable) and not isinstance(nuc, basestring):
+    if isinstance(nuc, collectionsAbc.Iterable) and not isinstance(nuc, str):
         return _atom_mass_channel(sigma_t, nuc, temp=temp, xs_cache=xs_cache)
     nuc = nucname.id(nuc)
     key_a = (nuc, rxname.id("absorption"), temp)

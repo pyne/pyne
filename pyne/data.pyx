@@ -97,7 +97,7 @@ def atomic_mass(nuc):
     """
     if isinstance(nuc, int):
         mass = cpp_data.atomic_mass(<int> nuc)
-    elif isinstance(nuc, basestring):
+    elif isinstance(nuc, str):
         nuc_bytes = nuc.encode()
         mass = cpp_data.atomic_mass(<char *> nuc_bytes)
     elif isinstance(nuc, bytes):
@@ -140,7 +140,7 @@ def natural_abund(nuc):
     """
     if isinstance(nuc, int):
         abund = cpp_data.natural_abund(<int> pyne.nucname.id(nuc))
-    elif isinstance(nuc, basestring):
+    elif isinstance(nuc, str):
         nuc_bytes = nuc.encode()
         abund = cpp_data.natural_abund(<char *> nuc_bytes)
     elif isinstance(nuc, bytes):
@@ -176,7 +176,7 @@ def q_val(nuc):
     """
     if isinstance(nuc, int):
         q_val = cpp_data.q_val(<int> nuc)
-    elif isinstance(nuc, basestring):
+    elif isinstance(nuc, str):
         nuc_bytes = nuc.encode()
         q_val = cpp_data.q_val(<char *> nuc_bytes)
     elif isinstance(nuc, bytes):
@@ -212,7 +212,7 @@ def gamma_frac(nuc):
     """
     if isinstance(nuc, int):
         gamma_frac = cpp_data.gamma_frac(<int> nuc)
-    elif isinstance(nuc, basestring):
+    elif isinstance(nuc, str):
         nuc_bytes = nuc.encode()
         gamma_frac = cpp_data.gamma_frac(<char *> nuc_bytes)
     elif isinstance(nuc, bytes):
@@ -259,26 +259,26 @@ def simple_xs(nuc, rx, energy):
     if isinstance(rx, bytes):
         rx = rx.decode("utf-8")
 
-    if not isinstance(energy, basestring):
+    if not isinstance(energy, str):
         raise ValueError('energy must be string')
-    elif not isinstance(nuc, int) and not isinstance(nuc, basestring):
+    elif not isinstance(nuc, int) and not isinstance(nuc, str):
         raise ValueError('nuc must be int or string')
-    elif not isinstance(rx, int) and not isinstance(rx, basestring):
+    elif not isinstance(rx, int) and not isinstance(rx, str):
         raise ValueError('rx must be int or string')
 
     energy_bytes = energy.encode()
     if isinstance(nuc, int) and isinstance(rx, int):
         xs = cpp_data.simple_xs(<int> nuc, <int> rx,
                                 std_string(<char *> energy_bytes))
-    elif isinstance(nuc, int) and isinstance(rx, basestring):
+    elif isinstance(nuc, int) and isinstance(rx, str):
         rxin_bytes = rx.encode()
         xs = cpp_data.simple_xs(<int> nuc, std_string(<char *> rxin_bytes),
                                 std_string(<char *> energy_bytes))
-    elif isinstance(nuc, basestring) and isinstance(rx, int):
+    elif isinstance(nuc, str) and isinstance(rx, int):
         nucin_bytes = nuc.encode()
         xs = cpp_data.simple_xs(std_string(<char *> nucin_bytes),
                                 <int> rx, std_string(<char *> energy_bytes))
-    elif isinstance(nuc, basestring) and isinstance(rx, basestring):
+    elif isinstance(nuc, str) and isinstance(rx, str):
         rxin_bytes = rx.encode()
         nucin_bytes = nuc.encode()
         xs = cpp_data.simple_xs(std_string(<char *> nucin_bytes),
@@ -329,7 +329,7 @@ def ext_air_dose(nuc, source=0):
 
     if isinstance(nuc, int):
         ext_air_dose = cpp_data.ext_air_dose(<int> nuc, <int> source)
-    elif isinstance(nuc, basestring):
+    elif isinstance(nuc, str):
         nuc_bytes = nuc.encode()
         ext_air_dose = cpp_data.ext_air_dose(<char *> nuc_bytes, <int> source)
     else:
@@ -377,7 +377,7 @@ def dose_ratio(nuc, source=0):
 
     if isinstance(nuc, int):
         ratio = cpp_data.dose_ratio(<int> nuc, <int> source)
-    elif isinstance(nuc, basestring):
+    elif isinstance(nuc, str):
         nuc_bytes = nuc.encode()
         ratio = cpp_data.dose_ratio(<char *> nuc_bytes, <int> source)
     else:
@@ -424,7 +424,7 @@ def ext_soil_dose(nuc, source=0):
 
     if isinstance(nuc, int):
         ext_soil_dose = cpp_data.ext_soil_dose(<int> nuc, <int> source)
-    elif isinstance(nuc, basestring):
+    elif isinstance(nuc, str):
         nuc_bytes = nuc.encode()
         ext_soil_dose = cpp_data.ext_soil_dose(<char *> nuc_bytes, <int> source)
     else:
@@ -471,7 +471,7 @@ def ingest_dose(nuc, source=0):
 
     if isinstance(nuc, int):
         ingest_dose = cpp_data.ingest_dose(<int> nuc, <int> source)
-    elif isinstance(nuc, basestring):
+    elif isinstance(nuc, str):
         nuc_bytes = nuc.encode()
         ingest_dose = cpp_data.ingest_dose(<char *> nuc_bytes, <int> source)
     else:
@@ -518,7 +518,7 @@ def dose_fluid_frac(nuc, source=0):
 
     if isinstance(nuc, int):
         fluid_frac = cpp_data.dose_fluid_frac(<int> nuc, <int> source)
-    elif isinstance(nuc, basestring):
+    elif isinstance(nuc, str):
         nuc_bytes = nuc.encode()
         fluid_frac = cpp_data.dose_fluid_frac(<char *> nuc_bytes, <int> source)
     else:
@@ -565,7 +565,7 @@ def inhale_dose(nuc, source=0):
 
     if isinstance(nuc, int):
         inhale_dose = cpp_data.inhale_dose(<int> nuc, <int> source)
-    elif isinstance(nuc, basestring):
+    elif isinstance(nuc, str):
         nuc_bytes = nuc.encode()
         inhale_dose = cpp_data.inhale_dose(<char *> nuc_bytes, <int> source)
     else:
@@ -612,7 +612,7 @@ def dose_lung_model(nuc, source=0):
 
     if isinstance(nuc, int):
         lung_mod = cpp_data.dose_lung_model(<int> nuc, <int> source)
-    elif isinstance(nuc, basestring):
+    elif isinstance(nuc, str):
         nuc_bytes = nuc.encode()
         lung_mod = cpp_data.dose_lung_model(<char *> nuc_bytes, <int> source)
     else:
@@ -653,7 +653,7 @@ def b_coherent(nuc):
 
     if isinstance(nuc, int):
         value = cpp_data.b_coherent(<int> nuc)
-    elif isinstance(nuc, basestring):
+    elif isinstance(nuc, str):
         nuc_bytes = nuc.encode()
         value = cpp_data.b_coherent(<char *> nuc_bytes)
     elif isinstance(nuc, bytes):
@@ -693,7 +693,7 @@ def b_incoherent(nuc):
 
     if isinstance(nuc, int):
         value = cpp_data.b_incoherent(<int> nuc)
-    elif isinstance(nuc, basestring):
+    elif isinstance(nuc, str):
         nuc_bytes = nuc.encode()
         value = cpp_data.b_incoherent(<char *> nuc_bytes)
     elif isinstance(nuc, bytes):
@@ -739,7 +739,7 @@ def b(nuc):
     """
     if isinstance(nuc, int):
         value = cpp_data.b(<int> nuc)
-    elif isinstance(nuc, basestring):
+    elif isinstance(nuc, str):
         nuc_bytes = nuc.encode()
         value = cpp_data.b(<char *> nuc_bytes)
     elif isinstance(nuc, bytes):
@@ -791,7 +791,7 @@ def fpyield(from_nuc, to_nuc, source=0, get_errors=False):
         raise ValueError('Only ints or strings are accepted')
     if isinstance(from_nuc, int):
         fn = pyne.cpp_nucname.id(<int> from_nuc)
-    elif isinstance(from_nuc, basestring):
+    elif isinstance(from_nuc, str):
         from_nuc_bytes = from_nuc.encode()
         fn = pyne.cpp_nucname.id(std_string(<char *> from_nuc_bytes))
     elif isinstance(from_nuc, bytes):
@@ -801,7 +801,7 @@ def fpyield(from_nuc, to_nuc, source=0, get_errors=False):
 
     if isinstance(to_nuc, int):
         tn = pyne.cpp_nucname.id(<int> to_nuc)
-    elif isinstance(to_nuc, basestring):
+    elif isinstance(to_nuc, str):
         to_nuc_bytes = to_nuc.encode()
         tn = pyne.cpp_nucname.id(std_string(<char *> to_nuc_bytes))
     elif isinstance(to_nuc, bytes):
@@ -870,7 +870,7 @@ def half_life(nuc, use_metastable=True):
             return float('nan')  # nuclide doesn't exist
     if isinstance(nuc, int):
         hl = cpp_data.half_life(<int> nuc)
-    elif isinstance(nuc, basestring):
+    elif isinstance(nuc, str):
         nuc_bytes = nuc.encode()
         hl = cpp_data.half_life(<char *> nuc_bytes)
     else:
@@ -909,7 +909,7 @@ def decay_const(nuc, use_metastable=True):
             return 0.0  # nuclide doesn't exist, assume stable
     if isinstance(nuc, int):
         dc = cpp_data.decay_const(<int> nuc)
-    elif isinstance(nuc, basestring):
+    elif isinstance(nuc, str):
         nuc_bytes = nuc.encode()
         dc = cpp_data.decay_const(<char *> nuc_bytes)
     else:
@@ -954,7 +954,7 @@ def branch_ratio(from_nuc, to_nuc, use_metastable=True):
             return 0.0
     if isinstance(from_nuc, int):
         fn = pyne.cpp_nucname.id(<int> from_nuc)
-    elif isinstance(from_nuc, basestring):
+    elif isinstance(from_nuc, str):
         from_nuc_bytes = from_nuc.encode()
         fn = pyne.cpp_nucname.id(std_string(<char *> from_nuc_bytes))
     else:
@@ -962,7 +962,7 @@ def branch_ratio(from_nuc, to_nuc, use_metastable=True):
 
     if isinstance(to_nuc, int):
         tn = pyne.cpp_nucname.id(<int> to_nuc)
-    elif isinstance(to_nuc, basestring):
+    elif isinstance(to_nuc, str):
         to_nuc_bytes = to_nuc.encode()
         tn = pyne.cpp_nucname.id(std_string(<char *> to_nuc_bytes))
     else:
@@ -1000,7 +1000,7 @@ def state_energy(nuc, use_metastable=True):
             return 0.0  # nuclide doesn't exist, assume stable
     if isinstance(nuc, int):
         se = cpp_data.state_energy(<int> nuc)
-    elif isinstance(nuc, basestring):
+    elif isinstance(nuc, str):
         nuc_bytes = nuc.encode()
         se = cpp_data.state_energy(<char *> nuc_bytes)
     else:
@@ -1039,7 +1039,7 @@ def decay_children(nuc, use_metastable=True):
 
     if isinstance(nuc, int):
         dc.set_ptr[0] = cpp_data.decay_children(<int> nuc)
-    elif isinstance(nuc, basestring):
+    elif isinstance(nuc, str):
         nuc_bytes = nuc.encode()
         dc.set_ptr[0] = cpp_data.decay_children(<char *> nuc_bytes)
     elif isinstance(nuc, bytes):
