@@ -35,6 +35,7 @@ jobs:
           # ISSUE: DYLD_LIBRARY_PATH for gcc is not set on Intel macOS
           echo "DYLD_LIBRARY_PATH=/usr/local/opt/gcc/lib/gcc/current/:$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
           echo "MACOSX_DEPLOYMENT_TARGET=${{ matrix.os == 'macos-14' && '14.0' || '13.0' }}" >> $GITHUB_ENV
+          echo "FC=gfortran-14" >> $GITHUB_ENV
 
       - name: Set up Python
         uses: actions/setup-python@v5
