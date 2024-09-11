@@ -128,10 +128,10 @@ FROM ${pyne_test_base} AS pyne
 ENV SKBUILD_CMAKE_ARGS "-DDOWNLOAD_HDF5=OFF;-DDOWNLOAD_EIGEN3=OFF;-DDOWNLOAD_LAPACK=OFF;-DENABLE_MOAB=OFF;-DDOWNLOAD_MOAB=OFF;-DENABLE_DAGMC=OFF;-DDOWNLOAD_DAGMC=OFF;$PYNE_MOAB_ARGS;$PYNE_DAGMC_ARGS"
 
 COPY . $HOME/opt/pyne
-RUN cd $HOME/pyne \
+RUN cd $HOME/opt/pyne \
     && python -m pip -v install .
 ENV PATH $HOME/.local/bin:$PATH
 RUN cd $HOME \
     && nuc_data_make \
-    && cd $HOME/pyne/tests \
+    && cd $HOME/opt/pyne/tests \
     && pytest -ra
