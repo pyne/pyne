@@ -90,7 +90,7 @@ RUN export MOAB_HDF5_ARGS="-DHDF5_ROOT=$HDF5_INSTALL_PATH"; \
 # put MOAB on the path
 ENV LD_LIBRARY_PATH $HOME/opt/moab/lib:$LD_LIBRARY_PATH
 ENV LIBRARY_PATH $HOME/opt/moab/lib:$LIBRARY_PATH
-ENV PYNE_MOAB_ARGS "--moab $HOME/opt/moab"
+ENV PYNE_MOAB_ARGS "-DENABLE_MOAB=ON;-DMOAB_ROOT=$HOME/opt/moab"
 
 FROM moab AS dagmc
 # build/install DAGMC
@@ -112,7 +112,7 @@ RUN cd /root \
     && make install \
     && cd ../.. \
     && rm -rf DAGMC
-ENV PYNE_DAGMC_ARGS "--dagmc $HOME/opt/dagmc"
+ENV PYNE_DAGMC_ARGS "-DENABLE_DAGMC=ON;-DDAGMC_ROOT=$HOME/opt/dagmc"
 
 FROM dagmc AS openmc
 ARG openmc_version="v0.14.0"
@@ -125,15 +125,14 @@ RUN export HDF5_ROOT="$HDF5_INSTALL_PATH" ; \
 # Build/Install PyNE from release branch
 FROM ${pyne_test_base} AS pyne
 
+ENV SKBUILD_CMAKE_ARGS "-DDOWNLOAD_HDF5=OFF;-DDOWNLOAD_EIGEN3=OFF;-DDOWNLOAD_LAPACK=OFF;-DENABLE_MOAB=OFF;-DDOWNLOAD_MOAB=OFF;-DENABLE_DAGMC=OFF;-DDOWNLOAD_DAGMC=OFF"
+
 COPY . $HOME/opt/pyne
-RUN export PYNE_HDF5_ARGS="--hdf5 $HDF5_INSTALL_PATH"; \
-    cd $HOME/opt/pyne \
-    && python setup.py install --user \
-                                $PYNE_MOAB_ARGS $PYNE_DAGMC_ARGS \
-                                $PYNE_HDF5_ARGS \
-                                --clean -j 3;
+RUN export SKBUILD_CMAKE_ARGS="$SKBUILD_CMAKE_ARGS;-DHDF5_ROOT=$HDF5_INSTALL_PATH;$PYNE_MOAB_ARGS;$PYNE_DAGMC_ARGS"; \
+    cd $HOME/pyne \
+    && python -m pip -v install .
 ENV PATH $HOME/.local/bin:$PATH
 RUN cd $HOME \
     && nuc_data_make \
-    && cd $HOME/opt/pyne/tests \
+    && cd $HOME/pyne/tests \
     && ./ci-run-tests.sh python3
