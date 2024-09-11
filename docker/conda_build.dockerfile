@@ -86,5 +86,4 @@ ENV PATH $HOME/.local/bin:$PATH
 RUN cd $HOME \
     && nuc_data_make \
     && cd $HOME/pyne/tests \
-    && ./ci-run-tests.sh python3
-    
+    && pytest -ra
