@@ -130,7 +130,8 @@ ENV SKBUILD_CMAKE_ARGS "-DDOWNLOAD_HDF5=OFF;-DHDF5_ROOT=$HDF5_INSTALL_PATH;-DDOW
 COPY . $HOME/opt/pyne
 RUN cd $HOME/opt/pyne \
     && python -m pip -v install .
-ENV PATH $HOME/.local/bin:$PATH
+ENV PATH $HOME/.local/bin:$HDF5_INSTALL_PATH/bin:$HOME/opt/moab/bin:$HOME/opt/dagmc:$PATH
+ENV LD_LIBRARY_PATH $HDF5_INSTALL_PATH/lib:$HOME/opt/moab/lib:$HOME/opt/dagmc/lib:$LD_LIBRARY_PATH
 RUN cd $HOME \
     && nuc_data_make \
     && cd $HOME/opt/pyne/tests \
