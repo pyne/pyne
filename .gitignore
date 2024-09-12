@@ -42,6 +42,7 @@ examples/*.svg
 examples/*.png
 examples/*.h5m
 tests/test.file
+tests/log.txt
 tests/test.txt
 tests/U233.txt
 tests/U235.txt
