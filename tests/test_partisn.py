@@ -13,6 +13,7 @@ import unittest
 from pyne.mesh import Mesh, NativeMeshTag, HAVE_PYMOAB
 from pyne.utils import QAWarning
 from pyne import partisn
+from pyne.dagmc import HAVE_DAGMC
 
 warnings.simplefilter("ignore", QAWarning)
 
@@ -215,6 +216,8 @@ def test_get_coord_sys_3D():
 def get_zones_no_void():
     """Test the _get_zones function if no void is in the meshed area."""
 
+    if not HAVE_DAGMC:
+        pytest.skip("No DAGMC. Skipping tests", allow_module_level=True)
     from pyne import dagmc
     # hdf5 test file
     THIS_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -266,10 +269,8 @@ def get_zones_no_void():
 def test_get_zones_no_void():
     """Test the _get_zones function if no void is in the meshed area."""
 
-    try:
-        from pyne import dagmc
-    except:
-        raise pytest.skip("No DAGMC. Skipping tests", allow_module_level=True)
+    if not HAVE_DAGMC:
+        pytest.skip("No DAGMC. Skipping tests", allow_module_level=True)
 
     if not HAVE_PYMOAB:
         pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
@@ -321,9 +322,8 @@ def get_zones_iteration_order():
 
 def test_get_zones_iteration_order():
     """Test that _get_zones function gives results in zyx order."""
-    try:
-        from pyne import dagmc
-    except:
+
+    if not HAVE_DAGMC:
         pytest.skip("No DAGMC. Skipping tests", allow_module_level=True)
 
     if not HAVE_PYMOAB:
@@ -338,6 +338,9 @@ def test_get_zones_iteration_order():
 
 def get_zones_with_void():
     """Test the _get_zones function if a void is present."""
+
+    if not HAVE_DAGMC:
+        pytest.skip("No DAGMC. Skipping tests", allow_module_level=True)
 
     from pyne import dagmc
     # hdf5 test file
@@ -391,9 +394,8 @@ def get_zones_with_void():
 
 def test_get_zones_with_void():
     """Test the _get_zones function if a void is present."""
-    try:
-        from pyne import dagmc
-    except:
+
+    if not HAVE_DAGMC:
         pytest.skip("No DAGMC. Skipping tests", allow_module_level=True)
 
     if not HAVE_PYMOAB:
@@ -466,9 +468,8 @@ def write_partisn_input_1D():
 
 def test_write_partisn_input_1D():
     """Test full input file creation for 1D case"""
-    try:
-        from pyne import dagmc
-    except:
+
+    if not HAVE_DAGMC:
         pytest.skip("No DAGMC. Skipping tests", allow_module_level=True)
 
     if not HAVE_PYMOAB:
@@ -523,9 +524,8 @@ def write_partisn_input_2D():
 
 def test_write_partisn_input_2D():
     """Test full input file creation for 2D case"""
-    try:
-        from pyne import dagmc
-    except:
+
+    if not HAVE_DAGMC:
         pytest.skip("No DAGMC. Skipping tests", allow_module_level=True)
 
     if not HAVE_PYMOAB:
@@ -580,9 +580,8 @@ def write_partisn_input_3D():
 
 def test_write_partisn_input_3D():
     """Test full input file creation for 3D case"""
-    try:
-        from pyne import dagmc
-    except:
+
+    if not HAVE_DAGMC:
         pytest.skip("No DAGMC. Skipping tests", allow_module_level=True)
 
     if not HAVE_PYMOAB:
@@ -644,9 +643,8 @@ def write_partisn_input_with_names_dict():
 
 def test_write_partisn_input_with_names_dict():
     """Test full input file creation for 1D case with a names_dict provided"""
-    try:
-        from pyne import dagmc
-    except:
+
+    if not HAVE_DAGMC:
         pytest.skip("No DAGMC. Skipping tests", allow_module_level=True)
 
     if not HAVE_PYMOAB:
@@ -764,9 +762,8 @@ def test_format_repeated_vector():
 
 def test_mesh_to_isotropic_source():
     """Test isotropic SOURCF generation."""
-    try:
-        from pyne import dagmc
-    except:
+
+    if not HAVE_DAGMC:
         pytest.skip("No DAGMC. Skipping tests", allow_module_level=True)
 
     if not HAVE_PYMOAB:
@@ -860,9 +857,8 @@ def test_mesh_to_isotropic_source():
 
 def test_isotropic_vol_source():
     """Test isotropic volumetric source generation from DAGMC geometry."""
-    try:
-        from pyne import dagmc
-    except:
+
+    if not HAVE_DAGMC:
         pytest.skip("No DAGMC. Skipping tests", allow_module_level=True)
 
     if not HAVE_PYMOAB:
