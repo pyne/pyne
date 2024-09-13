@@ -257,18 +257,24 @@ endmacro()
 # Install dependent library via ExternalProject
 macro(install_dependent_library _library _folder)
   if(APPLE)
-    set(set_rpath `install_name_tool -add_rpath @loader_path "$$lib_file"`)
-    set(identifier_file `otool -D "$$lib_file" | sed -n 's/.*\\///p'`)
-  else()
-    set(set_rpath `patchelf --set-rpath '$$ORIGIN/' "$$lib_file"`)
-    set(identifier_file `objdump -p "$$lib_file" | grep SONAME | awk '{print $$2}'`)
-  endif()
-  if(UNIX)
     add_custom_target(fix-${_library} ALL
       COMMAND find ${_folder} -type l -delete
       COMMAND for lib_file in *${CMAKE_SHARED_LIBRARY_SUFFIX}* \; do
-                set_rpath=${set_rpath} \;
-                identifier_file=${identifier_file} \;
+                install_name_tool -add_rpath @loader_path "$$lib_file" \;
+                identifier_file=`otool -D "$$lib_file" | sed -n 's/.*\\///p'` \;
+                if [ "$$lib_file" != "$$identifier_file" ] \; then
+                  mv "$$lib_file" "$$identifier_file" \;
+                fi \;
+              done
+      WORKING_DIRECTORY ${_folder}
+      DEPENDS ${CMAKE_PROJECT_NAME}
+      )
+  elseif(UNIX)
+    add_custom_target(fix-${_library} ALL
+      COMMAND find ${_folder} -type l -delete
+      COMMAND for lib_file in *${CMAKE_SHARED_LIBRARY_SUFFIX}* \; do
+                patchelf --set-rpath '$$ORIGIN/' "$$lib_file" \;
+                identifier_file=`objdump -p "$$lib_file" | grep SONAME | awk '{print $$2}'` \;
                 if [ "$$lib_file" != "$$identifier_file" ] \; then
                   mv "$$lib_file" "$$identifier_file" \;
                 fi \;
