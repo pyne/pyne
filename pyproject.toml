@@ -53,7 +53,7 @@ docs = ["sphinx"]
 
 # Scikit-Build Configuration
 [tool.scikit-build]
-cmake.verbose = true
+build.verbose = true
 logging.level = "INFO"
 wheel.install-dir = "pyne/core"
 wheel.packages = ["pyne"]
