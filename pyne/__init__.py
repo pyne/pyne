@@ -1,5 +1,5 @@
 import os
-import importlib.metadata
+from importlib.metadata import version, PackageNotFoundError
 from warnings import warn
 
 
@@ -19,4 +19,7 @@ except ImportError:
     warn(msg, Warning)
     raise
 
-__version__ = importlib.metadata.version("pyne")
+try:
+    __version__ = version("pyne")
+except PackageNotFoundError:
+    __version__ = "unknown"
