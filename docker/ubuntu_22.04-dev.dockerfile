@@ -125,12 +125,21 @@ RUN export HDF5_ROOT="$HDF5_INSTALL_PATH" ; \
 # Build/Install PyNE from release branch
 FROM ${pyne_test_base} AS pyne
 
-ENV SKBUILD_CMAKE_ARGS "-DDOWNLOAD_HDF5=OFF;-DHDF5_ROOT=$HDF5_INSTALL_PATH;-DDOWNLOAD_EIGEN3=OFF;-DDOWNLOAD_LAPACK=OFF;-DENABLE_MOAB=OFF;-DDOWNLOAD_MOAB=OFF;-DENABLE_DAGMC=OFF;-DDOWNLOAD_DAGMC=OFF;$PYNE_MOAB_ARGS;$PYNE_DAGMC_ARGS"
+ENV SKBUILD_CMAKE_ARGS "-DDOWNLOAD_HDF5=OFF;\
+                        -DHDF5_ROOT=$HDF5_INSTALL_PATH;\
+                        -DDOWNLOAD_EIGEN3=OFF;\
+                        -DDOWNLOAD_LAPACK=OFF;\
+                        -DENABLE_MOAB=OFF;\
+                        -DDOWNLOAD_MOAB=OFF;\
+                        -DENABLE_DAGMC=OFF;\
+                        -DDOWNLOAD_DAGMC=OFF;\
+                        $PYNE_MOAB_ARGS;\
+                        $PYNE_DAGMC_ARGS"
 
 COPY . $HOME/opt/pyne
 RUN cd $HOME/opt/pyne \
     && python -m pip -v install .
-ENV PATH $HOME/.local/bin:$HDF5_INSTALL_PATH/bin:$HOME/opt/moab/bin:$HOME/opt/dagmc:$PATH
+ENV PATH $HOME/.local/bin:$HDF5_INSTALL_PATH/bin:$HOME/opt/moab/bin:$HOME/opt/dagmc/bin:$PATH
 ENV LD_LIBRARY_PATH $HDF5_INSTALL_PATH/lib:$HOME/opt/moab/lib:$HOME/opt/dagmc/lib:$LD_LIBRARY_PATH
 RUN cd $HOME \
     && nuc_data_make \
