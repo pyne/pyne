@@ -1,4 +1,5 @@
 import os
+import importlib.metadata
 from warnings import warn
 
 
@@ -8,10 +9,7 @@ if os.name == "nt":
     os.environ["PATH"] = ";".join([lib] + p)
 
 try:
-    from ._version import __version__ 
-
     from .pyne_config import *
-
 except ImportError:
     msg = (
         "Error importing PyNE: you should not try to import PyNE from "
@@ -20,3 +18,5 @@ except ImportError:
     )
     warn(msg, Warning)
     raise
+
+__version__ = importlib.metadata.version("pyne")
