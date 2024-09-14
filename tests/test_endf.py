@@ -114,9 +114,6 @@ def test_loadtape():
         [10010000, 30060000, 40090000, 50110000, 30070000, 60000000, 50100000]
     )
     obs_nuclides = set(map(int, testlib.structure.keys()))
-    print("+===============================================================")
-    print("exp_nuclides: " + str(exp_nuclides))
-    print("obs_nuclides: " + str(obs_nuclides))
     assert exp_nuclides == obs_nuclides
 
 
