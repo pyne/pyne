@@ -1,4 +1,4 @@
-name: Build & Publish manylinux docker image for PyNE-CI
+name: Build & Publish Manylinux Docker Image for PyNE-CI
 
 on:
   # allows us to run workflows manually
