@@ -5,16 +5,25 @@ on:
   workflow_dispatch:
 
   pull_request:
-    branches:
-      - develop
     paths-ignore:
-      - docs/**
-
+      - 'docs/*'
+      - 'examples/*'
+      - 'img/*'
+      - 'news/*'
+      - 'tutorial/*'
+      - './*.rst'
+      - 'license.txt'
+      - 'PULL_REQUEST_TEMPLATE.md'
   push:
-    branches:
-      - scikit-build-core
     paths-ignore:
-      - docs/**
+      - 'docs/*'
+      - 'examples/*'
+      - 'img/*'
+      - 'news/*'
+      - 'tutorial/*'
+      - './*.rst'
+      - 'license.txt'
+      - 'PULL_REQUEST_TEMPLATE.md'
 
 jobs:
   main:
