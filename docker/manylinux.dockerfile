@@ -108,7 +108,7 @@ RUN wget https://github.com/Reference-LAPACK/lapack/archive/refs/tags/v${LAPACK_
     rm -rf lapack-${LAPACK_VERSION} v${LAPACK_VERSION}.tar.gz
 
 # Add LAPACK to the system path
-ENV LD_LIBRARY_PATH="${LAPACK_ROOT}/lib:${LD_LIBRARY_PATH}"
+ENV LD_LIBRARY_PATH="${LAPACK_ROOT}/lib64:${LD_LIBRARY_PATH}"
 
 # Build MOAB stage
 FROM base AS moab
@@ -140,7 +140,7 @@ RUN git clone --depth 1 -b ${MOAB_VERSION} https://bitbucket.org/fathomteam/moab
 
 # Add MOAB to the system path
 ENV PATH="${MOAB_ROOT}/bin:${PATH}"
-ENV LD_LIBRARY_PATH="${MOAB_ROOT}/lib:${LD_LIBRARY_PATH}"
+ENV LD_LIBRARY_PATH="${MOAB_ROOT}/lib64:${LD_LIBRARY_PATH}"
 ENV PYNE_MOAB_ARGS "-DENABLE_MOAB=ON;-DMOAB_ROOT=${MOAB_ROOT}"
 
 
@@ -170,7 +170,7 @@ RUN git clone --depth 1 -b v${DAGMC_VERSION} https://github.com/svalinn/DAGMC.gi
 
 # Add DAGMC to the system path
 ENV PATH="${DAGMC_ROOT}/bin:${PATH}"
-ENV LD_LIBRARY_PATH="${DAGMC_ROOT}/lib:${LD_LIBRARY_PATH}"
+ENV LD_LIBRARY_PATH="${DAGMC_ROOT}/lib64:${LD_LIBRARY_PATH}"
 ENV PYNE_DAGMC_ARGS "-DENABLE_DAGMC=ON;-DDAGMC_ROOT=${DAGMC_ROOT}"
 
 
@@ -194,7 +194,7 @@ RUN git clone --depth 1 -b v${OpenMC_VERSION} https://github.com/openmc-dev/open
 
 # Add OpenMC to the system path
 ENV PATH="${OPENMC_ROOT}/bin:${PATH}"
-ENV LD_LIBRARY_PATH="${OPENMC_ROOT}/lib:${LD_LIBRARY_PATH}"
+ENV LD_LIBRARY_PATH="${OPENMC_ROOT}/lib64:${LD_LIBRARY_PATH}"
 
 
 # Build PyNE stage
@@ -204,15 +204,17 @@ FROM ${BUILD_STAGE} AS pyne
 COPY . /opt/pyne
 
 # Configure SKBUILD CMake arguments
-ENV SKBUILD_CMAKE_ARGS "-DDOWNLOAD_HDF5=OFF;\
-                        -DHDF5_ROOT=$HDF5_INSTALL_PATH;\
-                        -DDOWNLOAD_EIGEN3=OFF;\
-                        -DDOWNLOAD_LAPACK=OFF;\
-                        -DENABLE_MOAB=OFF;\
-                        -DDOWNLOAD_MOAB=OFF;\
-                        -DENABLE_DAGMC=OFF;\
-                        -DDOWNLOAD_DAGMC=OFF;\
-                        $PYNE_MOAB_ARGS;\
+ENV SKBUILD_CMAKE_ARGS "-DDOWNLOAD_HDF5=OFF; \
+                        -DHDF5_ROOT=${HDF5_ROOT}; \
+                        -DDOWNLOAD_EIGEN3=OFF; \
+                        -DEIGEN3_INCLUDE_DIRS=${EIGEN3_ROOT}/include/eigen3; \
+                        -DDOWNLOAD_LAPACK=OFF; \
+                        -DLAPACK_ROOT=${LAPACK_ROOT}; \
+                        -DENABLE_MOAB=OFF; \
+                        -DDOWNLOAD_MOAB=OFF; \
+                        -DENABLE_DAGMC=OFF; \
+                        -DDOWNLOAD_DAGMC=OFF; \
+                        $PYNE_MOAB_ARGS; \
                         $PYNE_DAGMC_ARGS"
 
 # Build and install PyNE
