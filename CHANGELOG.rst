@@ -10,6 +10,7 @@ Next Version
    * Add dockerfile and workflow to build PyNE with Conda (#1540)
    * Support Cython3+ (#1528)
    * Remove deprecated references to ``basestring`` (#1544)
+   * Automatically Generate pyne_version.h using Git Versions (#1550)
 
 **Fix**
    * Fix Type Mismatch Error in PyNE's ENSDF Processing Module (#1519)
