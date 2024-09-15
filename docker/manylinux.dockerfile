@@ -7,7 +7,7 @@ ARG EIGEN3_VERSION="3.4.0"
 ARG LAPACK_VERSION="3.12.0"
 ARG MOAB_VERSION="master"
 ARG DAGMC_VERSION="3.2.3"
-ARG OpenMC_VERSION="0.14.0"
+ARG OPENMC_VERSION="0.15.0"
 
 # Build base stage
 FROM quay.io/pypa/${MANYLINUX_IMAGE} AS base
@@ -78,7 +78,7 @@ RUN HDF5_MAJOR_VERSION=$(echo ${HDF5_VERSION} | cut -d'.' -f1) && \
 
 # Add HDF5 to the system path
 ENV PATH="${HDF5_ROOT}/bin:${PATH}"
-ENV LD_LIBRARY_PATH="${HDF5_ROOT}/lib:${LD_LIBRARY_PATH}"
+ENV LD_LIBRARY_PATH="${HDF5_ROOT}/lib:${HDF5_ROOT}/lib64:${LD_LIBRARY_PATH}"
 
 # Build and install Eigen3
 RUN wget https://gitlab.com/libeigen/eigen/-/archive/${EIGEN3_VERSION}/eigen-${EIGEN3_VERSION}.tar.bz2 && \
@@ -108,7 +108,7 @@ RUN wget https://github.com/Reference-LAPACK/lapack/archive/refs/tags/v${LAPACK_
     rm -rf lapack-${LAPACK_VERSION} v${LAPACK_VERSION}.tar.gz
 
 # Add LAPACK to the system path
-ENV LD_LIBRARY_PATH="${LAPACK_ROOT}/lib64:${LD_LIBRARY_PATH}"
+ENV LD_LIBRARY_PATH="${LAPACK_ROOT}/lib:${LAPACK_ROOT}/lib64:${LD_LIBRARY_PATH}"
 
 # Build MOAB stage
 FROM base AS moab
@@ -140,7 +140,7 @@ RUN git clone --depth 1 -b ${MOAB_VERSION} https://bitbucket.org/fathomteam/moab
 
 # Add MOAB to the system path
 ENV PATH="${MOAB_ROOT}/bin:${PATH}"
-ENV LD_LIBRARY_PATH="${MOAB_ROOT}/lib64:${LD_LIBRARY_PATH}"
+ENV LD_LIBRARY_PATH="${MOAB_ROOT}/lib:${MOAB_ROOT}/lib64:${LD_LIBRARY_PATH}"
 ENV PYNE_MOAB_ARGS "-DENABLE_MOAB=ON;-DMOAB_ROOT=${MOAB_ROOT}"
 
 
@@ -170,17 +170,17 @@ RUN git clone --depth 1 -b v${DAGMC_VERSION} https://github.com/svalinn/DAGMC.gi
 
 # Add DAGMC to the system path
 ENV PATH="${DAGMC_ROOT}/bin:${PATH}"
-ENV LD_LIBRARY_PATH="${DAGMC_ROOT}/lib64:${LD_LIBRARY_PATH}"
+ENV LD_LIBRARY_PATH="${DAGMC_ROOT}/lib:${DAGMC_ROOT}/lib64:${LD_LIBRARY_PATH}"
 ENV PYNE_DAGMC_ARGS "-DENABLE_DAGMC=ON;-DDAGMC_ROOT=${DAGMC_ROOT}"
 
 
 # Build OpenMC stage
 FROM dagmc AS openmc
 
-ARG OpenMC_VERSION
+ARG OPENMC_VERSION
 
 # Build and install OpenMC
-RUN git clone --depth 1 -b v${OpenMC_VERSION} https://github.com/openmc-dev/openmc.git openmc && \
+RUN git clone --depth 1 -b v${OPENMC_VERSION} https://github.com/openmc-dev/openmc.git openmc && \
     cd openmc && \
     mkdir -p build && cd build && \
     cmake .. \
@@ -194,7 +194,7 @@ RUN git clone --depth 1 -b v${OpenMC_VERSION} https://github.com/openmc-dev/open
 
 # Add OpenMC to the system path
 ENV PATH="${OPENMC_ROOT}/bin:${PATH}"
-ENV LD_LIBRARY_PATH="${OPENMC_ROOT}/lib64:${LD_LIBRARY_PATH}"
+ENV LD_LIBRARY_PATH="${OPENMC_ROOT}/lib:${OPENMC_ROOT}/lib64:${LD_LIBRARY_PATH}"
 
 
 # Build PyNE stage
