@@ -1,5 +1,5 @@
 # Setup base image
-ARG PyNE_STAGE=openmc
+ARG BUILD_STAGE=openmc
 ARG MANYLINUX_IMAGE=manylinux_2_28_x86_64
 ARG Python_ABI="cp312-cp312"
 ARG HDF5_VERSION="1.14.3"
@@ -198,7 +198,7 @@ ENV LD_LIBRARY_PATH="${OPENMC_ROOT}/lib:${LD_LIBRARY_PATH}"
 
 
 # Build PyNE stage
-FROM ${PyNE_STAGE} AS pyne
+FROM ${BUILD_STAGE} AS pyne
 
 # Copy PyNE sources
 COPY . /opt/pyne
