@@ -66,10 +66,7 @@ RUN HDF5_MAJOR_VERSION=$(echo ${HDF5_VERSION} | cut -d'.' -f1) && \
     mkdir -p build && cd build && \
     cmake .. \
         -DCMAKE_INSTALL_PREFIX=${HDF5_ROOT} \
-        -DBUILD_SHARED_LIBS=ON \
-        -DBUILD_STATIC_LIBS=OFF \
         -DBUILD_TESTING=OFF \
-        -DHDF5_BUILD_TOOLS=OFF \
         -DHDF5_BUILD_EXAMPLES=OFF && \
     make -j$(nproc) && \
     make install && \
