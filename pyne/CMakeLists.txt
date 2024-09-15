@@ -52,7 +52,7 @@ install(TARGETS cram LIBRARY DESTINATION "${PYTHON_SITE_PACKAGES}/pyne")
 # dagmc requires a rename and is only built if we have MOAB.
 #
 if(DAGMC_FOUND)
-  set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/dagmc.pyx"
+  set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/_dagmc.pyx"
                               PROPERTIES CYTHON_IS_CXX TRUE)
   cython_add_module(_dagmc _dagmc.pyx "${PROJECT_SOURCE_DIR}/src/dagmc_bridge.cpp")
   target_link_libraries(_dagmc dagmc MOAB pyne)
