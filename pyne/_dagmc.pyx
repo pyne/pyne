@@ -9,7 +9,7 @@ from pyne.utils import QA_warn
 cimport numpy as np
 import numpy as np
 
-from pyne cimport cpp_dagmc_bridge
+cimport cpp_dagmc_bridge
 from pyne.mesh import Mesh
 from numpy.linalg import norm
 from pyne.material import Material

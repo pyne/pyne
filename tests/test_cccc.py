@@ -83,7 +83,7 @@ def test_rtflux_basics():
 def test_rtflux_3D():
 
     if not HAVE_PYMOAB:
-        pytest.skip()
+        pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
     from pyne.mesh import Mesh, NativeMeshTag
 
     rt = Rtflux("files_test_cccc/rtflux_3D")
@@ -172,7 +172,7 @@ def test_rtflux_3D():
 
 def test_rtflux_2D():
     if not HAVE_PYMOAB:
-        pytest.skip()
+        pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
     from pyne.mesh import Mesh, NativeMeshTag
 
     rt = Rtflux("files_test_cccc/rtflux_2D")
@@ -221,7 +221,7 @@ def test_rtflux_2D():
 
 def test_rt_flux_1D():
     if not HAVE_PYMOAB:
-        pytest.skip()
+        pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
     from pyne.mesh import Mesh, NativeMeshTag
 
     rt = Rtflux("files_test_cccc/rtflux_1D")
@@ -244,7 +244,7 @@ def test_rt_flux_1D():
 
 def test_rtflux_raises():
     if not HAVE_PYMOAB:
-        pytest.skip()
+        pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
     from pyne.mesh import Mesh, NativeMeshTag
 
     rt = Rtflux("files_test_cccc/rtflux_1D")
@@ -262,7 +262,7 @@ def test_atflux_adjoint():
 def test_atflux_eng_order():
     """Ensure the energy order is read in reverse for atflux file."""
     if not HAVE_PYMOAB:
-        pytest.skip()
+        pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
     from pyne.mesh import Mesh, NativeMeshTag
 
     # This file is created with: source=1 174R 0 0 1 40R 0

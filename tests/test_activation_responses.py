@@ -14,6 +14,7 @@ from pyne.material import Material
 from pyne.utils import QAWarning, file_block_almost_same
 from pyne.alara import response_to_hdf5, response_hdf5_to_mesh, _make_response_dtype
 from pyne.mesh import Mesh, NativeMeshTag, HAVE_PYMOAB
+from pyne.dagmc import HAVE_DAGMC
 
 if not HAVE_PYMOAB:
     pytest.skip(allow_module_level=True)
@@ -136,7 +137,7 @@ def test_responses_to_hdf5_multiple():
     # skip test if h5diff not exist
     is_h5diff = os.system("which h5diff")
     if is_h5diff != 0:
-        pytest.skip()
+        pytest.skip("h5diff not found", allow_module_level=True)
 
     for response in responses:
         # read  output.txt and write h5 file
@@ -248,7 +249,7 @@ def _activation_responses_test_step2(activation_responses_run_dir):
     # skip test if h5diff not exist
     is_h5diff = os.system("which h5diff")
     if is_h5diff != 0:
-        raise pytest.skip()
+        raise pytest.skip("h5diff not found", allow_module_level=True)
 
     os.chdir(thisdir)
     # copy ../scripts/activation_responses.py to activation_responses_run_dir/activation_responses.py
@@ -313,10 +314,8 @@ def _activation_responses_test_step2(activation_responses_run_dir):
 
 def test_activation_responses_script():
     # skip test without dagmc
-    try:
-        from pyne import dagmc
-    except ImportError:
-        raise pytest.skip()
+    if not HAVE_DAGMC:
+        pytest.skip("No DAGMC. Skipping tests", allow_module_level=True)
 
     activation_responses_run_dir = os.path.join(
         thisdir, "files_test_activation_responses", "activation_responses_examples"

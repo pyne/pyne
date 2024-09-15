@@ -20,6 +20,7 @@ Next Version
    * reference python_executable rather than assuming `python` exists ()
    * Update FindMOAB to use MOAB config file (#1526)
    * Remove imp module from tests to support Python 3.12 (#1543)
+   * Resolve DAGMC Target Conflict and Improve Test Skips (#1551)
 
 v0.7.8
 ======

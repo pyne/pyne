@@ -14,7 +14,7 @@ def test_single_usrbin():
     """Test a usrbin file containing a single tally."""
 
     if not HAVE_PYMOAB:
-        pytest.skip()
+        pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
 
     thisdir = os.path.dirname(__file__)
     usrbin_file = os.path.join(thisdir, "fluka_usrbin_single.lis")
@@ -114,7 +114,7 @@ def test_multiple_usrbin():
     """Test a usrbin file containing multiple (two) tallies."""
 
     if not HAVE_PYMOAB:
-        pytest.skip()
+        pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
 
     thisdir = os.path.dirname(__file__)
     usrbin_file = os.path.join(thisdir, "fluka_usrbin_multiple.lis")
@@ -304,7 +304,7 @@ def test_degenerate_usrbin():
     """
 
     if not HAVE_PYMOAB:
-        pytest.skip()
+        pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
 
     thisdir = os.path.dirname(__file__)
     usrbin_file = os.path.join(thisdir, "fluka_usrbin_degenerate.lis")
@@ -455,7 +455,7 @@ def test_degenerate_usrbin():
 
 def test_mesh_write():
     if not HAVE_PYMOAB:
-        pytest.skip()
+        pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
 
     thisdir = os.path.dirname(__file__)
     usrbin_file = os.path.join(thisdir, "fluka_usrbin_single.lis")

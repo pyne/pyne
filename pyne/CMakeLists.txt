@@ -54,9 +54,8 @@ install(TARGETS cram LIBRARY DESTINATION "${PYTHON_SITE_PACKAGES}/pyne")
 if(DAGMC_FOUND)
   set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/dagmc.pyx"
                               PROPERTIES CYTHON_IS_CXX TRUE)
-  cython_add_module(_dagmc dagmc.pyx "${PROJECT_SOURCE_DIR}/src/dagmc_bridge.cpp")
+  cython_add_module(_dagmc _dagmc.pyx "${PROJECT_SOURCE_DIR}/src/dagmc_bridge.cpp")
   target_link_libraries(_dagmc dagmc MOAB pyne)
-  set_target_properties(_dagmc PROPERTIES OUTPUT_NAME dagmc)
   install(TARGETS _dagmc LIBRARY DESTINATION "${PYTHON_SITE_PACKAGES}/pyne")
 endif(DAGMC_FOUND)
 
