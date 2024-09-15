@@ -90,7 +90,7 @@ def test_response_to_hdf5():
     # skip test if h5diff not exist
     is_h5diff = os.system("which h5diff")
     if is_h5diff != 0:
-        pytest.skip()
+        pytest.skip("h5diff not found", allow_module_level=True)
 
     for response in responses:
         # read  output.txt and write h5 file
