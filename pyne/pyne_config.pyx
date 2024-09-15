@@ -19,7 +19,7 @@ import pyne.__init__
 
 pyne_dir = os.path.dirname(pyne.__init__.__file__)
 prefix = os.path.abspath(os.path.join(pyne_dir, '..', '..', '..', '..'))
-lib = os.path.join(pyne_dir, 'core', 'lib')
+lib = os.path.join(pyne_dir, 'core', 'lib*')
 includes = os.path.join(pyne_dir, 'core', 'include', 'pyne')
 nuc_data = os.path.join(pyne_dir, 'nuc_data.h5')
 
@@ -36,11 +36,6 @@ def pyne_start():
     # Specifiy the NUC_DATA_PATH
     if "NUC_DATA_PATH" not in os.environ:
         os.environ['NUC_DATA_PATH'] = nuc_data
-
-    libdll = 'dll' if os.name == 'nt' else 'lib'
-    ldpath = 'PATH' if os.name == 'nt' else 'LD_LIBRARY_PATH'
-    sepcha = ';' if os.name == 'nt' else ':'
-    os.environ["LD_LIBRARY_PATH"] = lib
 
     # Call the C-version of pyne_start
     cpp_utils.pyne_start()

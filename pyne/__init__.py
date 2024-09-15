@@ -5,7 +5,7 @@ from warnings import warn
 
 if os.name == "nt":
     p = os.environ["PATH"].split(";")
-    lib = os.path.join(os.path.split(__file__)[0], "core", "lib")
+    lib = os.path.join(os.path.split(__file__)[0], "core", "lib*")
     os.environ["PATH"] = ";".join([lib] + p)
 
 try:
