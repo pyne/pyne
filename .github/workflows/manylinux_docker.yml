@@ -3,10 +3,6 @@ name: Build & Publish manylinux docker image for PyNE-CI
 on:
   # allows us to run workflows manually
   workflow_dispatch:
-  pull_request:
-    paths:
-      - 'docker/manylinux.dockerfile'
-      - '.github/workflows/manylinux_docker.yml'
   push:
     paths:
       - 'docker/manylinux.dockerfile'

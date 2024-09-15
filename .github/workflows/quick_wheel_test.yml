@@ -3,17 +3,6 @@ name: Quick Wheel test
 on:
   # allows running workflows manually
   workflow_dispatch:
-
-  pull_request:
-    paths-ignore:
-      - 'docs/*'
-      - 'examples/*'
-      - 'img/*'
-      - 'news/*'
-      - 'tutorial/*'
-      - './*.rst'
-      - 'license.txt'
-      - 'PULL_REQUEST_TEMPLATE.md'
   push:
     paths-ignore:
       - 'docs/*'

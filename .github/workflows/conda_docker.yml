@@ -3,13 +3,9 @@ name: Build & Publish Conda docker image for PyNE-CI
 on:
   # allows us to run workflows manually
   workflow_dispatch:
-  pull_request:
-    paths:
-      - 'docker/*'
-      - '.github/workflows/conda_docker.yml'
   push:
     paths:
-      - 'docker/*'
+      - 'docker/conda_build.dockerfile'
       - '.github/workflows/conda_docker.yml'
 
 env:
