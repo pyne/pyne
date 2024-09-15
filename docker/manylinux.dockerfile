@@ -210,6 +210,7 @@ ENV SKBUILD_CMAKE_ARGS "-DDOWNLOAD_HDF5=OFF; \
                         -DEIGEN3_INCLUDE_DIRS=${EIGEN3_ROOT}/include/eigen3; \
                         -DDOWNLOAD_LAPACK=OFF; \
                         -DLAPACK_ROOT=${LAPACK_ROOT}; \
+                        -DLAPACK_LIBRARY_DIRS=${LAPACK_ROOT}/lib64; \
                         -DENABLE_MOAB=OFF; \
                         -DDOWNLOAD_MOAB=OFF; \
                         -DENABLE_DAGMC=OFF; \
