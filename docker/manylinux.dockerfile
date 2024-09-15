@@ -5,8 +5,8 @@ ARG Python_ABI="cp312-cp312"
 ARG HDF5_VERSION="1.14.3"
 ARG EIGEN3_VERSION="3.4.0"
 ARG LAPACK_VERSION="3.12.0"
-ARG MOAB_VERSION="5.5.1"
-ARG DAGMC_VERSION="2.6.0"
+ARG MOAB_VERSION="master"
+ARG DAGMC_VERSION="3.2.3"
 ARG OpenMC_VERSION="0.14.0"
 
 # Build base stage
@@ -33,6 +33,22 @@ RUN yum install -y \
 # Use Python from manylinux as the default Python
 ENV PATH="/opt/python/${Python_ABI}/bin:${PATH}"
 RUN ln -sf /opt/python/${Python_ABI}/bin/python3 /usr/bin/python
+
+# Install necessary Python packages
+RUN python -m pip install --upgrade \
+        scikit-build-core \
+        setuptools \    
+        numpy \
+        cython \
+        cmake \
+        ninja \
+        pytest \
+        progress \
+        tables \
+        scipy \
+        matplotlib \
+        jinja2 \
+        future
 
 # Set environment variables for installation paths
 ENV HDF5_ROOT=/opt/hdf5
@@ -110,10 +126,16 @@ RUN git clone --depth 1 -b ${MOAB_VERSION} https://bitbucket.org/fathomteam/moab
         -DHDF5_ROOT=${HDF5_ROOT} \
         -DEIGEN3_DIR=${EIGEN3_ROOT}/include/eigen3 \
         -DENABLE_BLASLAPACK=OFF \
-        -DENABLE_FORTRAN=OFF \
-        -DENABLE_PYMOAB=ON && \
+        -DENABLE_FORTRAN=OFF && \
     make -j$(nproc) && make install && \
-    cd ../.. && \
+    cd .. && \
+    export SKBUILD_CMAKE_ARGS="-DENABLE_HDF5=ON; \
+                                -DHDF5_ROOT=${HDF5_ROOT}; \
+                                -DEIGEN3_DIR=${EIGEN3_ROOT}/include/eigen3; \
+                                -DENABLE_BLASLAPACK=OFF; \
+                                -DENABLE_FORTRAN=OFF" && \
+    python -m pip install . && \
+    cd .. && \
     rm -rf moab
 
 # Add MOAB to the system path
