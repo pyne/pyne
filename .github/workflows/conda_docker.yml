@@ -1,4 +1,4 @@
-name: Build & Publish Conda docker image for PyNE-CI
+name: Build & Publish Conda Docker Image for PyNE-CI
 
 on:
   # allows us to run workflows manually
