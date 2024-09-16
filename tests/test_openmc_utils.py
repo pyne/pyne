@@ -261,7 +261,7 @@ def test_get_result_error_from_openmc_sp():
 
 
 def test_create_meshtally():
-    if not HAVE_PYMOAB or sys.version_info[0] == 2:
+    if not HAVE_PYMOAB:
         pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
     try:
         import openmc
