@@ -43,10 +43,8 @@ else:
         ImportWarning,
     )
 
-if sys.version_info[0] > 2:
-
-    def cmp(a, b):
-        return (a > b) - (a < b)
+def cmp(a, b):
+    return (a > b) - (a < b)
 
 
 class Mctal(object):

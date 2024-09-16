@@ -42,7 +42,7 @@ def test_write_fluxin_single():
     """
 
     if not HAVE_PYMOAB:
-        pytest.skip()
+        pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
 
     output_name = "fluxin.out"
     forward_fluxin = os.path.join(
@@ -77,7 +77,7 @@ def test_write_fluxin_single_without_bar():
     """
 
     if not HAVE_PYMOAB:
-        pytest.skip()
+        pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
 
     output_name = "fluxin.out"
     forward_fluxin = os.path.join(
@@ -112,7 +112,7 @@ def test_write_fluxin_multiple():
     """
 
     if not HAVE_PYMOAB:
-        pytest.skip()
+        pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
 
     output_name = "fluxin.out"
     forward_fluxin = os.path.join(
@@ -160,7 +160,7 @@ def test_write_fluxin_multiple_subvoxel():
     """
 
     if not HAVE_PYMOAB:
-        pytest.skip()
+        pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
 
     output_name = "fluxin_subvoxel.out"
     forward_fluxin = os.path.join(
@@ -267,7 +267,7 @@ def test_photon_source_hdf5_to_mesh():
     """Tests the function photon source_h5_to_mesh."""
 
     if not HAVE_PYMOAB:
-        pytest.skip()
+        pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
 
     filename = os.path.join(thisdir, "files_test_alara", "phtn_src")
     photon_source_to_hdf5(filename, chunkshape=(10,))
@@ -296,7 +296,7 @@ def test_photon_source_hdf5_to_mesh_subvoxel():
     under sub-voxel r2s condition."""
 
     if not HAVE_PYMOAB:
-        pytest.skip()
+        pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
 
     filename = os.path.join(thisdir, "files_test_alara", "phtn_src")
     photon_source_to_hdf5(filename, chunkshape=(10,))
@@ -361,7 +361,7 @@ def test_photon_source_hdf5_to_mesh_subvoxel_size1():
     under sub-voxel r2s condition."""
 
     if not HAVE_PYMOAB:
-        pytest.skip()
+        pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
 
     filename = os.path.join(thisdir, "files_test_alara", "phtn_src")
     photon_source_to_hdf5(filename, chunkshape=(10,))
@@ -423,7 +423,7 @@ def test_photon_source_hdf5_to_mesh_subvoxel_size1():
 def test_record_to_geom():
 
     if not HAVE_PYMOAB:
-        pytest.skip()
+        pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
 
     expected_geom = os.path.join(thisdir, "files_test_alara", "alara_record_geom.txt")
     expected_matlib = os.path.join(
@@ -487,7 +487,7 @@ def test_record_to_geom():
 def test_record_to_geom_subvoxel():
 
     if not HAVE_PYMOAB:
-        pytest.skip()
+        pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
 
     expected_geom = os.path.join(
         thisdir, "files_test_alara", "alara_record_geom_subvoxel.txt"
@@ -552,7 +552,7 @@ def test_record_to_geom_subvoxel():
 def test_mesh_to_geom():
 
     if not HAVE_PYMOAB:
-        pytest.skip()
+        pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
 
     expected_geom = os.path.join(thisdir, "files_test_alara", "alara_geom.txt")
     expected_matlib = os.path.join(thisdir, "files_test_alara", "alara_matlib.txt")
@@ -595,7 +595,7 @@ def test_mesh_to_geom():
 def test_num_den_to_mesh_shutdown():
 
     if not HAVE_PYMOAB:
-        pytest.skip()
+        pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
 
     filename = os.path.join(thisdir, "files_test_alara", "num_density_output.txt")
     m = Mesh(structured=True, structured_coords=[[0, 1], [0, 1], [0, 1, 2]])
@@ -642,7 +642,7 @@ def test_num_den_to_mesh_shutdown():
 def test_num_den_to_mesh_stdout():
 
     if not HAVE_PYMOAB:
-        pytest.skip()
+        pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
 
     filename = os.path.join(thisdir, "files_test_alara", "num_density_output.txt")
     m = Mesh(structured=True, structured_coords=[[0, 1], [0, 1], [0, 1, 2]])
@@ -692,7 +692,7 @@ def test_num_den_to_mesh_stdout():
 def test_num_den_to_mesh_1_y():
 
     if not HAVE_PYMOAB:
-        pytest.skip()
+        pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
 
     filename = os.path.join(thisdir, "files_test_alara", "num_density_output.txt")
     m = Mesh(structured=True, structured_coords=[[0, 1], [0, 1], [0, 1, 2]])
