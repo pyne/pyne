@@ -47,12 +47,9 @@ else:
         ImportWarning,
     )
 
-try:
-    from pyne import dagmc
+from pyne import dagmc
 
-    HAVE_DAGMC = True
-except:
-    HAVE_DAGMC = False
+HAVE_DAGMC = dagmc.HAVE_DAGMC
 
 
 def write_partisn_input(mesh, hdf5, ngroup, **kwargs):

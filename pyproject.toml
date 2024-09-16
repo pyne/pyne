@@ -1,0 +1,80 @@
+[build-system]
+requires = [
+    "scikit-build-core",
+    "cython",
+    "numpy",
+    "patchelf; platform_system == 'Linux'"
+]
+build-backend = "scikit_build_core.build"
+
+# Project Metadata
+[project]
+name = "pyne"
+dynamic = ["version"]
+authors = [{ name = "PyNE Team", email = "pyne-dev@googlegroups.com" }]
+license = { file = "license.txt" }
+description = "PyNE: The Nuclear Engineering Toolkit"
+readme = "readme.rst"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: End Users/Desktop",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: BSD License",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+requires-python = ">=3.10"
+dependencies = [
+    "progress",
+    "tables",
+    "numpy",
+    "scipy",
+    "matplotlib",
+    "jinja2",
+    "future",
+]
+
+# Optional Dependencies
+[project.optional-dependencies]
+test = ["pytest"]
+docs = ["sphinx"]
+
+# Project URLs
+[project.urls]
+"Homepage" = "https://pyne.io"
+"Bug Tracker" = "https://github.com/pyne/pyne/issues"
+"Source Code" = "https://github.com/pyne/pyne"
+
+# Scikit-Build Configuration
+[tool.scikit-build]
+build.verbose = true
+logging.level = "INFO"
+wheel.install-dir = "pyne/core"
+wheel.packages = ["pyne"]
+wheel.exclude = ["CMakeLists.txt", "*.pyx", "*.pxd"]
+
+# Get version from Git
+[tool.scikit-build.metadata.version]
+provider = "scikit_build_core.metadata.setuptools_scm"
+
+[tool.setuptools_scm]
+
+# Add the version to the header
+[[tool.scikit-build.generate]]
+path = "src/pyne_version.h"
+location = "source"
+template = '''
+#ifndef PYNE_VERSION_HEADER
+#define PYNE_VERSION_HEADER
+
+#define PYNE_VERSION "${version}"
+
+#endif // PYNE_VERSION_HEADER
+'''

@@ -1,9 +1,14 @@
 # Defines the CMake commands/policies
-cmake_minimum_required(VERSION 3.0.0)
+cmake_minimum_required(VERSION 3.18)
 
-if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.12.0")
-  cmake_policy(SET CMP0074 NEW)
-endif()
+# Set the C++ standard
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+# Add JsonCpp Flag
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DJSON_IS_AMALGAMATION")
+
 # Make the scripts available in the 'cmake' directory available for the
 # 'include()' command, 'find_package()' command.
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
@@ -11,191 +16,450 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 # Setup the project
 project(pyne)
 
-# check for and enable c++11 support
-INCLUDE(CheckCXXCompilerFlag)
-CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
-IF(COMPILER_SUPPORTS_CXX11)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-ELSE()
-    MESSAGE(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
-ENDIF()
+# Include the GNUInstallDirs module.
+# This module provides installation directories as per the GNU Coding Standards.
+include(GNUInstallDirs)
 
-option ( ENABLE_SPATIAL_SOLVERS     "Should build AHOT spatial solvers?"                 OFF )
-option ( ENABLE_ENSDF_PROCESSIONG   "Should build ENSDF processing tools?"               ON )
+# Include the FeatureSummary module.
+# This module handles the recording, reporting and display of enabled/disabled features.
+include(FeatureSummary)
 
+# Include the ExternalProject module
+# This module handles downloading and building external projects
+include(ExternalProject)
+
+# Set build options that can be toggled by the user
+option(  DOWNLOAD_HDF5              "Should PyNE download HDF5?"                 ON  )
+option(  ENABLE_EIGEN3              "Should PyNE use Eigen3?"                    ON  )
+option(  DOWNLOAD_EIGEN3            "Should PyNE download Eigen3?"               ON  )
+option(  ENABLE_LAPACK              "Should PyNE use LAPACK?"                    ON  )
+option(  DOWNLOAD_LAPACK            "Should PyNE download LAPACK?"               ON  )
+option(  ENABLE_MOAB                "Should PyNE use MOAB?"                      ON  )
+option(  DOWNLOAD_MOAB              "Should PyNE download MOAB?"                 ON  )
+option(  ENABLE_DAGMC               "Should PyNE use DAGMC?"                     ON  )
+option(  DOWNLOAD_DAGMC             "Should PyNE download DAGMC?"                ON  )
+option(  ENABLE_SPATIAL_SOLVERS     "Should build AHOT spatial solvers?"         ON  )
+option(  ENABLE_ENSDF_PROCESSING    "Should build ENSDF processing tools?"       OFF )
+option(  ENABLE_FAST_COMPILE        "Should PyNE fast compile?"                  OFF )
+
+# Add feature info
+add_feature_info("Install Fortran libraries" INSTALL_FORTRAN_LIBS "Install Fortran libraries")
+add_feature_info("Download HDF5" DOWNLOAD_HDF5 "Download HDF5")
+add_feature_info("Enable Eigen3" ENABLE_EIGEN3 "Use Eigen3")
+add_feature_info("Download Eigen3" DOWNLOAD_EIGEN3 "Download Eigen3")
+add_feature_info("Enable LAPACK" ENABLE_LAPACK "Use LAPACK")
+add_feature_info("Download LAPACK" DOWNLOAD_LAPACK "Download LAPACK")
+add_feature_info("Enable MOAB" ENABLE_MOAB "Use MOAB")
+add_feature_info("Download MOAB" DOWNLOAD_MOAB "Download MOAB")
+add_feature_info("Enable DAGMC" ENABLE_DAGMC "Use DAGMC")
+add_feature_info("Download DAGMC" DOWNLOAD_DAGMC "Download DAGMC")
+add_feature_info("Enable AHOT" ENABLE_SPATIAL_SOLVERS "AHOT spatial solvers")
+add_feature_info("Enable ENSDF" ENABLE_ENSDF_PROCESSING "ENSDF processing tools")
+add_feature_info("Enable Fast Compile" ENABLE_FAST_COMPILE "Use pre-compiled binaries")
+
+# Include PyneMacros file
 include(PyneMacros)
-pyne_print_logo()  # Beware of dragons
+print_pyne_logo()
+pyne_configure_skbuild()
+pyne_configure_rpath()
 pyne_set_platform()
-pyne_setup_cxx()
 pyne_set_asm_platform()
 pyne_set_build_spatial_solver()
 pyne_set_build_type()
-pyne_set_fast_compile()
-pyne_configure_rpath()
-
-# enable assembly
-enable_language(ASM)
 
 # This makes all the libraries build as SHARED
-set(BUILD_SHARED_LIBS true)
-message("-- CMake Install Prefix: ${CMAKE_INSTALL_PREFIX}")
+set(BUILD_SHARED_LIBS ON CACHE BOOL "Build shared libraries")
 
 
-#
-# Allow for dependnecies to exist in non-install location
-#
-if (NOT DEPS_ROOT_DIR)
-  get_filename_component(compdir ${CMAKE_CXX_COMPILER} DIRECTORY)
-  get_filename_component(DEPS_ROOT_DIR ${compdir} DIRECTORY)
-endif (NOT DEPS_ROOT_DIR)
-SET(DEPS_HINTS HINTS "${DEPS_ROOT_DIR}")
-SET(DEPS_BIN_HINTS ${DEPS_HINTS} "${DEPS_ROOT_DIR}/bin")
-SET(DEPS_LIB_HINTS ${DEPS_HINTS} "${DEPS_ROOT_DIR}/lib")
-SET(DEPS_INCLUDE_HINTS HINTS "${DEPS_ROOT_DIR}/include")
-MESSAGE("-- Dependency Root Dir (DEPS_ROOT_DIR): ${DEPS_ROOT_DIR}")
-MESSAGE("-- Dependency Hints (DEPS_HINTS): ${DEPS_HINTS}")
-MESSAGE("-- Dependency Binary Hints (DEPS_BIN_HINTS): ${DEPS_BIN_HINTS}")
-MESSAGE("-- Dependency Library Hints (DEPS_LIB_HINTS): ${DEPS_LIB_HINTS}")
-MESSAGE("-- Dependency Include Hints (DEPS_INCLUDE_HINTS): ${DEPS_INCLUDE_HINTS}")
+############################################################
+# Setup HDF5                                               #
+############################################################
 
-
-#
-# Find Libraries
-#
-
-# Find HDF5
-MESSAGE("-- HDF5 Root: ${HDF5_ROOT}")
-if(HDF5_ROOT)
-  FIND_PACKAGE(HDF5 REQUIRED)
+# If HDF5 is installed in a non-standard location, set HDF5_ROOT
+# to the root directory of the HDF5 installation.
+# For example: export HDF5_ROOT=/path/to/hdf5
+# If HDF5 is not installed, set DOWNLOAD_HDF5 to ON.
+# PyNE will download and build HDF5 if DOWNLOAD_HDF5 is ON.
+if(NOT DOWNLOAD_HDF5)
+  message(STATUS "HDF5 root: ${HDF5_ROOT}")
+  find_package(HDF5 REQUIRED)
 else()
-  FIND_PACKAGE(HDF5)
-endif()
-if(NOT HDF5_FOUND AND NOT HDF5_ROOT)
-  MESSAGE("--    HDF5 not found on empty HDF5_ROOT, "
-          "setting to DEPS_ROOT_DIR: ${DEPS_ROOT_DIR}")
-  set(HDF5_ROOT "${DEPS_ROOT_DIR}")
-  FIND_PACKAGE(HDF5 REQUIRED)
-endif()
-ADD_DEFINITIONS(${HDF5_DEFINITIONS})
-include_directories("${HDF5_INCLUDE_DIRS}")
-if(NOT HDF5_LIBRARY_DIRS STREQUAL "")
-  link_directories(${HDF5_LIBRARY_DIRS})
-endif()
-set(LIBS_HDF5 ${HDF5_C_LIBRARIES})
-set(LIBS ${LIBS} ${HDF5_C_LIBRARIES})
-MESSAGE("--    HDF5 Include directory: ${HDF5_INCLUDE_DIRS}")
-MESSAGE("--    HDF5 Library directories: ${HDF5_LIBRARY_DIRS}")
-MESSAGE("--    HDF5 Libraries: ${HDF5_C_LIBRARIES}")
-MESSAGE("--    HDF5 library version: ${HDF5_VERSION}")
+  message(STATUS "HDF5 will be downloaded and installed")
 
-# Version 1.12 of HDF5 deprecates the H5Oget_info_by_idx(),
-# H5O_info_t() and H5Oget_info_by_name() interfaces.
-# Thus, we give these flags to allow usage of the old interface in newer
-# versions of HDF5.
-if(NOT (${HDF5_VERSION} VERSION_LESS 1.12.0))
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DH5Oget_info_by_idx_vers=1 -DH5O_info_t_vers=1 -DH5Oget_info_by_name_vers=1")
-endif()
-
-# Look for MOAB if requested
-if(WITH_MOAB)
-  # user may have set a search path
-  if(NOT MOAB_ROOT)
-    set(MOAB_ROOT "${DEPS_ROOT_DIR}")
+  # Configure HDF5 
+  if(NOT HDF5_VERSION)
+    set(HDF5_VERSION "1.14.3")
   endif()
-  find_package(MOAB REQUIRED)
-  message(STATUS "MOAB Library Version: ${MOAB_VERSION}")
-  message(STATUS "MOAB Include Directory: ${MOAB_INCLUDE_DIRS}")
-  message(STATUS "MOAB Library Directories: ${MOAB_LIBRARY_DIRS}")
-  message(STATUS "MOAB Libraries: ${MOAB_LIBRARIES}")
+  
+  # Replace the dots with semicolons to create a list
+  string(REPLACE "." ";" HDF5_VERSION_LIST ${HDF5_VERSION})
+
+  # Convert the list into individual variables
+  list(GET HDF5_VERSION_LIST 0 HDF5_VERSION_MAJOR)
+  list(GET HDF5_VERSION_LIST 1 HDF5_VERSION_MINOR)
+  list(GET HDF5_VERSION_LIST 2 HDF5_VERSION_PATCH)
+  set(HDF5_ROOT "${CMAKE_BINARY_DIR}/hdf5")
+  set(HDF5_INCLUDE_DIRS "${HDF5_ROOT}/include")
+  set(HDF5_LIBRARY_DIRS "${HDF5_ROOT}/lib")
+  ExternalProject_Add(hdf5-project
+    PREFIX ${HDF5_ROOT}
+    URL https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-${HDF5_VERSION_MAJOR}.${HDF5_VERSION_MINOR}/hdf5-${HDF5_VERSION}/src/hdf5-${HDF5_VERSION}.tar.gz
+    CMAKE_ARGS
+      -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+      -DBUILD_SHARED_LIBS:BOOL=ON
+      -DBUILD_STATIC_LIBS:BOOL=OFF
+      -DBUILD_TESTING:BOOL=OFF
+      -DHDF5_BUILD_TOOLS:BOOL=OFF
+      -DHDF5_BUILD_EXAMPLES:BOOL=OFF
+    DOWNLOAD_EXTRACT_TIMESTAMP true
+    BUILD_BYPRODUCTS "${HDF5_LIBRARY_DIRS}/*${CMAKE_SHARED_LIBRARY_SUFFIX}*"
+    )
+
+  # HDF5 is a shared library, so we need to install it
+  install_dependent_library(hdf5 ${HDF5_LIBRARY_DIRS}) 
+endif()
+
+# Include the HDF5 libraries
+include_directories(${HDF5_INCLUDE_DIRS})
+message(STATUS "HDF5 include dirs: ${HDF5_INCLUDE_DIRS}")
+
+link_directories(${HDF5_LIBRARY_DIRS})
+message(STATUS "HDF5 library dirs: ${HDF5_LIBRARY_DIRS}")
+
+# Set up shared and static versions of the HDF5 libraries
+set(HDF5_LIBRARIES_SHARED ${HDF5_LIBRARIES})
+if(BUILD_STATIC_LIBS)
+  string(REPLACE ${CMAKE_SHARED_LIBRARY_SUFFIX} ${CMAKE_STATIC_LIBRARY_SUFFIX}
+          HDF5_LIBRARIES_STATIC "${HDF5_LIBRARIES_SHARED}"
+  )
+endif()
+if(NOT BUILD_SHARED_LIBS)
+  set(HDF5_LIBRARIES_SHARED)
+endif()
+
+# Print out some more information about the HDF5 setup
+message(STATUS "HDF5 libraries shared: ${HDF5_LIBRARIES_SHARED}")
+message(STATUS "HDF5 libraries static: ${HDF5_LIBRARIES_STATIC}")
+
+# Set package properties
+set_package_properties(HDF5 PROPERTIES
+  DESCRIPTION "HDF5 library"
+  TYPE REQUIRED
+  PURPOSE "Enables HDF5 support"
+  )
+
+
+############################################################
+# Setup Eigen3                                             #
+############################################################
+
+# Check if Eigen3 is requested by user
+if(ENABLE_EIGEN3)
+  # If Eigen3 is installed in a non-standard location, set EIGEN3_ROOT
+  # to the root directory of the Eigen3 installation.
+  # For example: export EIGEN3_ROOT=/path/to/eigen3
+  # If Eigen is not installed, set DOWNLOAD_EIGEN3 to ON.
+  # PyNE will download Eigen3 if DOWNLOAD_EIGEN3 is ON. (Recommended)
+  if(NOT DOWNLOAD_EIGEN3)
+    find_package(Eigen3 REQUIRED)
+  else()
+    message(STATUS "Eigen3 will be downloaded")
+
+    # Configure Eigen3
+    if(NOT EIGEN3_VERSION)
+      set(EIGEN3_VERSION "3.4.0")
+    endif()
+    set(EIGEN3_ROOT "${CMAKE_BINARY_DIR}/eigen3")
+    set(EIGEN3_INCLUDE_DIRS "${EIGEN3_ROOT}/include/eigen3")
+    ExternalProject_Add(eigen3-project
+      PREFIX ${EIGEN3_ROOT}
+      URL https://gitlab.com/libeigen/eigen/-/archive/${EIGEN3_VERSION}/eigen-${EIGEN3_VERSION}.tar.bz2
+      CMAKE_ARGS
+        -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+      DOWNLOAD_EXTRACT_TIMESTAMP true
+    )
+  endif()
+
+  # Include the Eigen3 libraries
+  include_directories("${EIGEN3_INCLUDE_DIRS}")
+  message(STATUS "Eigen3 include dirs: ${EIGEN3_INCLUDE_DIRS}")
+endif()
+
+# Set package properties
+set_package_properties(EIGEN3 PROPERTIES
+  DESCRIPTION "Eigen3 library"
+  TYPE REQUIRED
+  PURPOSE "Enables Eigen3 support"
+  )
+
+
+############################################################
+# Setup MOAB                                               #
+############################################################
+
+# Check if MOAB is requested by user
+if(ENABLE_MOAB)
+  if(NOT ENABLE_EIGEN3)
+    message(FATAL_ERROR "Eigen3 is required to build MOAB.")
+  endif()
+  # If MOAB is installed in a non-standard location, set MOAB_ROOT
+  # to the root directory of the MOAB installation.
+  # For example: export MOAB_ROOT=/path/to/moab
+  # If MOAB is not installed, set DOWNLOAD_MOAB to ON.
+  # PyNE will download and build MOAB if DOWNLOAD_MOAB is ON. (Recommended)
+  if(NOT DOWNLOAD_MOAB)
+    find_package(MOAB REQUIRED)
+  else()
+    message(STATUS "MOAB will be downloaded and built")
+
+    # Configure MOAB
+    if(NOT MOAB_VERSION)
+      set(MOAB_VERSION "5.5.1")
+    endif()
+    set(MOAB_ROOT "${CMAKE_BINARY_DIR}/moab")
+    set(MOAB_INCLUDE_DIRS "${MOAB_ROOT}/include")
+    set(MOAB_LIBRARY_DIRS "${MOAB_ROOT}/${CMAKE_INSTALL_LIBDIR}")
+    ExternalProject_Add(moab-project
+      PREFIX ${MOAB_ROOT}
+      # TODO: MOAB Current version is not compatible with MacOS
+      #GIT_REPOSITORY https://bitbucket.org/fathomteam/moab.git
+      #GIT_TAG ${MOAB_VERSION}
+      GIT_REPOSITORY https://bitbucket.org/ahnaf-tahmid-chowdhury/moab.git
+      GIT_TAG skbuild
+      CMAKE_ARGS
+        -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+        -DBUILD_SHARED_LIBS:BOOL=ON
+        -DENABLE_HDF5:BOOL=ON
+        -DHDF5_ROOT:PATH=${HDF5_ROOT}
+        -DEIGEN3_DIR:PATH=${EIGEN3_INCLUDE_DIRS}
+        -DENABLE_BLASLAPACK:BOOL=OFF
+        -DENABLE_FORTRAN:BOOL=OFF
+        -DCMAKE_MACOSX_RPATH:BOOL=ON
+      DOWNLOAD_EXTRACT_TIMESTAMP true
+      BUILD_BYPRODUCTS "${MOAB_LIBRARY_DIRS}/*${CMAKE_SHARED_LIBRARY_SUFFIX}*"
+    )
+
+    # HDF5 is needed to be build before MOAB
+    if(DOWNLOAD_HDF5)
+      add_dependencies(moab-project hdf5-project)
+    endif()
+
+    # EIGEN3 is needed to be build before MOAB
+    if(DOWNLOAD_EIGEN3)
+      add_dependencies(moab-project eigen3-project)
+    endif()
+
+    # MOAB is a shared library, so we need to install it
+    install_dependent_library(MOAB ${MOAB_LIBRARY_DIRS})
+  endif()
   include_directories(${MOAB_INCLUDE_DIRS})
   link_directories(${MOAB_LIBRARY_DIRS})
+  message(STATUS "MOAB include dirs: ${MOAB_INCLUDE_DIRS}")
+  message(STATUS "MOAB library dirs: ${MOAB_LIBRARY_DIRS}")
 endif()
 
-# Look for DAGMC if requested
-if(WITH_DAGMC)
-  if(MOAB_FOUND)
-    # Always look for DAGMC library
-    if(NOT DAGMC_ROOT)
-      set(DAGMC_ROOT "${DEPS_ROOT_DIR}")
-    endif()
-    find_package(DAGMC REQUIRED)
-    message(STATUS "DAGMC Library Version: ${DAGMC_VERSION}")
-    message(STATUS "DAGMC Include Directory: ${DAGMC_INCLUDE_DIRS}")
-    message(STATUS "DAGMC Library Directories: ${DAGMC_LIBRARY_DIRS}")
-    message(STATUS "DAGMC Libraries: ${DAGMC_LIBRARIES}")
-    include_directories(${DAGMC_INCLUDE_DIRS})
-    link_directories(${DAGMC_LIBRARY_DIRS})
-  else()
-    message(WARNING "DAGMC: Not searching because MOAB was not found.")
+# Set package properties
+set_package_properties(MOAB PROPERTIES
+  DESCRIPTION "Mesh-Oriented datABase (MOAB)"
+  TYPE RECOMMENDED
+  PURPOSE "Enables MOAB support"
+  )
+
+
+############################################################
+# Setup DAGMC                                              #
+############################################################
+
+# Check if DAGMC is requested by user
+if(ENABLE_DAGMC)
+  if(NOT ENABLE_EIGEN3)
+    message(FATAL_ERROR "Eigen3 is required to build DAGMC python module.")
   endif()
+  if(NOT ENABLE_MOAB)
+    message(FATAL_ERROR "MOAB is required to build DAGMC.")
+  endif()
+  # If DAGMC is installed in a non-standard location, set DAGMC_ROOT
+  # to the root directory of the DAGMC installation.
+  # For example: export DAGMC_ROOT=/path/to/dagmc
+  # If DAGMC is not installed, set DOWNLOAD_DAGMC to ON.
+  # PyNE will download and build DAGMC if DOWNLOAD_DAGMC is ON. (Recommended)
+  if(NOT DOWNLOAD_DAGMC)
+    find_package(DAGMC REQUIRED)
+  else()
+    message(STATUS "DAGMC will be downloaded and built")
+
+    # Configure DAGMC
+    if(NOT DAGMC_VERSION)
+      set(DAGMC_VERSION "3.2.3")
+    endif()
+    set(DAGMC_ROOT "${CMAKE_BINARY_DIR}/DAGMC")
+    set(DAGMC_INCLUDE_DIRS "${DAGMC_ROOT}/include")
+    set(DAGMC_LIBRARY_DIRS "${DAGMC_ROOT}/lib")
+    ExternalProject_Add(dagmc-project
+      PREFIX ${DAGMC_ROOT}
+      GIT_REPOSITORY https://github.com/svalinn/DAGMC.git
+      GIT_TAG v${DAGMC_VERSION}
+      CMAKE_ARGS 
+        -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+        -DMOAB_DIR:PATH=${MOAB_ROOT}
+        -DBUILD_STATIC_LIBS:BOOL=OFF
+        -DBUILD_UWUW:BOOL=OFF
+        -DBUILD_TALLY:BOOL=OFF
+        -DBUILD_MAKE_WATERTIGHT:BOOL=OFF
+        -DBUILD_OVERLAP_CHECK:BOOL=OFF
+        -DBUILD_TESTS:BOOL=OFF
+        -DBUILD_RPATH:BOOL=OFF
+      BUILD_BYPRODUCTS "${DAGMC_LIBRARY_DIRS}/*${CMAKE_SHARED_LIBRARY_SUFFIX}*"
+    )
+    
+    # MOAB is needed to be build before DAGMC
+    if(DOWNLOAD_MOAB)
+      add_dependencies(dagmc-project moab-project)
+    endif()
+
+    # DAGMC is a shared library, so we need to install it
+    install_dependent_library(dagmc ${DAGMC_LIBRARY_DIRS})
+  endif()
+
+  include_directories(${DAGMC_INCLUDE_DIRS})
+  link_directories(${DAGMC_LIBRARY_DIRS})
+  message(STATUS "DAGMC include dirs: ${DAGMC_INCLUDE_DIRS}")
+  message(STATUS "DAGMC library dirs: ${DAGMC_LIBRARY_DIRS}")
 endif()
 
-# Find Python
-find_package(PythonInterp REQUIRED)
-find_package(PythonLibs REQUIRED)
-if(PYTHON_VERSION_MAJOR EQUAL 2)
-  set(SITE_PACKAGES_CODE
-      "import site; print site.getusersitepackages().replace(site.USER_BASE, '${CMAKE_INSTALL_PREFIX}', 1)")
-else(PYTHON_VERSION_MAJOR EQUAL 2)
-  set(SITE_PACKAGES_CODE
-      "import site; print(site.getsitepackages(['${CMAKE_INSTALL_PREFIX}'])[0])")
-endif(PYTHON_VERSION_MAJOR EQUAL 2)
-execute_process(COMMAND "${PYTHON_EXECUTABLE}" -c "${SITE_PACKAGES_CODE}"
-                OUTPUT_VARIABLE PYTHON_SITE_PACKAGES
-                OUTPUT_STRIP_TRAILING_WHITESPACE)
-set(LIBS ${LIBS} ${PYTHON_LIBRARIES})
-message("-- PYTHON_EXECUTABLE: ${PYTHON_EXECUTABLE}")
-message("-- PYTHON_SITE_PACKAGES: ${PYTHON_SITE_PACKAGES}")
+# Set package properties
+set_package_properties(DAGMC PROPERTIES
+  DESCRIPTION "Direct Accelerated Geometry Monte Carlo (DAGMC)"
+  TYPE RECOMMENDED
+  PURPOSE "Enables DAGMC support"
+  )
 
 
-# Find NumPy
-find_package(Numpy REQUIRED)
-include_directories("${NUMPY_INCLUDE_DIR}")
+############################################################
+# Setup Python, NumPy and Cython                           #
+############################################################
+
+# Find Python and NumPy
+find_package(
+  Python 
+  COMPONENTS Interpreter Development.Module NumPy 
+  REQUIRED
+  )
+
+# Set package properties
+set_package_properties(Python PROPERTIES
+  DESCRIPTION "Python interpreter"
+  TYPE REQUIRED
+  PURPOSE "Enables Python support"
+  )
+
+find_program(CYTHON "cython")
 
 
+############################################################
+# Setup Fortran, LAPACK and f2py                           #
+############################################################
+
+# Call macro to setup Fortran
 pyne_setup_fortran()
 
-# Find f2py, if building spatial solver
-IF(BUILD_SPATIAL_SOLVER)
-  find_package(F2py REQUIRED)
-  message("-- F2PY Executable: ${F2PY_EXECUTABLE}")
-  message("-- F2PY Version: ${F2PY_VERSION}")
+if(ENABLE_LAPACK)
+  # If LAPACK is installed in a non-standard location, set LAPACK_ROOT
+  # to the root directory of the LAPACK installation.
+  # For example: export LAPACK_ROOT=/path/to/lapack
+  # If LAPACK is not installed, set LAPACK_ROOT to OFF.
+  # PyNE will download and build LAPACK if LAPACK_ROOT is ON. (Recommended)
+  if(NOT DOWNLOAD_LAPACK)
+    find_package(LAPACK REQUIRED)
+  else()
+    message(STATUS "LAPACK will be downloaded and built")
 
-  FIND_PACKAGE(LAPACK REQUIRED)
-  MESSAGE("-- Found LAPACK Linker Flags: ${LAPACK_LINKER_FLAGS}")
-  MESSAGE("-- Found LAPACK Libraries: ${LAPACK_LIBRARIES}")
-  MESSAGE("-- Found BLAS Libraries: ${BLAS_LIBRARIES}")
-ENDIF(BUILD_SPATIAL_SOLVER)
+    # Configure LAPACK
+    if(NOT LAPACK_VERSION)
+      set(LAPACK_VERSION "3.12.0")
+    endif()
+    set(LAPACK_ROOT "${CMAKE_BINARY_DIR}/lapack")
+    set(LAPACK_LIBRARY_DIRS "${LAPACK_ROOT}/${CMAKE_INSTALL_LIBDIR}")
+    ExternalProject_Add(lapack-project
+      PREFIX ${LAPACK_ROOT}
+      URL https://github.com/Reference-LAPACK/lapack/archive/refs/tags/v${LAPACK_VERSION}.tar.gz
+      CMAKE_ARGS
+        -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR> 
+        -DBUILD_SHARED_LIBS:BOOL=ON
+        -DUSE_OPTIMIZED_BLAS:BOOL=ON
+      DOWNLOAD_EXTRACT_TIMESTAMP true
+      BUILD_BYPRODUCTS "${LAPACK_LIBRARY_DIRS}/*${CMAKE_SHARED_LIBRARY_SUFFIX}*"
+      )
+
+    # LAPACK is a shared library, so we need to install it
+    install_dependent_library(lapack ${LAPACK_LIBRARY_DIRS})
+  endif()
+  include_directories(${LAPACK_INCLUDE_DIRS})
+  link_directories(${LAPACK_LIBRARY_DIRS})
+  message(STATUS "LAPACK include dirs: ${LAPACK_INCLUDE_DIRS}")
+  message(STATUS "LAPACK library dirs: ${LAPACK_LIBRARY_DIRS}")
+endif()
+
+set_package_properties(LAPACK PROPERTIES
+  DESCRIPTION "LAPACK library"
+  TYPE RECOMMENDED
+  PURPOSE "Enables LAPACK support"
+)
+
+# Check if spatial solver is requested by user
+if (BUILD_SPATIAL_SOLVER)
+  if( NOT ENABLE_LAPACK)
+    message(FATAL_ERROR "LAPACK is required to build spatial solvers.")
+  endif()
+
+  # Find f2py, if building spatial solver
+  # Grab the variables from a local Python installation F2PY headers
+  execute_process(
+    COMMAND "${Python_EXECUTABLE}" -c
+            "import numpy.f2py; print(numpy.f2py.get_include())"
+            OUTPUT_VARIABLE F2PY_INCLUDE_DIR
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+endif()
 
 
-# Include the CMake script UseCython.cmake.  This defines add_cython_module().
-# Instruction for use can be found at the top of cmake/UseCython.cmake.
-include(UseCython)
-INCLUDE_DIRECTORIES("${CMAKE_CURRENT_BINARY_DIR}/pyne")
+############################################################
+# Setup Scripts                                            #
+############################################################
 
-# Add JsonCpp Flag
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DJSON_IS_AMALGAMATION")
+# Collect scripts
+file(GLOB SCRIPTS "${CMAKE_CURRENT_SOURCE_DIR}/scripts/*")
 
-#
-# Build and install!
-#
-message(STATUS "LIBS: ${LIBS}")
-# With CMake, a clean separation can be made between the source tree and the
-# build tree.  When all source is compiled, as with pure C/C++, the source is
-# no-longer needed in the build tree.  However, with pure *.py source, the
-# source is processed directly.  To handle this, we reproduce the availability
-# of the source files in the build tree.
-add_custom_target(ReplicatePythonSourceTree ALL "${CMAKE_COMMAND}" -P
-  "${CMAKE_CURRENT_SOURCE_DIR}/cmake/ReplicatePythonSourceTree.cmake"
-  "${CMAKE_CURRENT_BINARY_DIR}"
-  WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
+# Filter scripts based on the OS
+if(WIN32)
+    list(FILTER SCRIPTS INCLUDE REGEX "\\.bat$")
+else()
+    list(FILTER SCRIPTS EXCLUDE REGEX "\\.bat$")
+endif()
+
+# Install scripts to bin directory
+install(PROGRAMS ${SCRIPTS} DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+
+############################################################
+# Add sub dirs                                             #
+############################################################
 
 # add sub dirs
 add_subdirectory(src)
 add_subdirectory(pyne)
 add_subdirectory(pyne/xs)
 
-# install python package
-set(pyinstallscript "${CMAKE_CURRENT_BINARY_DIR}/cmake/SetupSubPyInstall.cmake")
-configure_file(cmake/SetupSubPyInstall.cmake.in ${pyinstallscript} @ONLY)
-install(SCRIPT ${pyinstallscript})
+
+############################################################
+# Summary                                                  #
+############################################################
+
+# Write summary
+feature_summary(
+  WHAT ALL
+  DESCRIPTION "PyNE Configuration Summary"
+  INCLUDE_QUIET_PACKAGES
+  FILENAME ${CMAKE_SOURCE_DIR}/summary.log
+  )
+message(STATUS "Summary log written to ${CMAKE_SOURCE_DIR}/summary.log")

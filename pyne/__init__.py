@@ -1,18 +1,15 @@
 import os
+from importlib.metadata import version, PackageNotFoundError
 from warnings import warn
 
 
 if os.name == "nt":
     p = os.environ["PATH"].split(";")
-    lib = os.path.join(os.path.split(__file__)[0], "lib")
+    lib = os.path.join(os.path.split(__file__)[0], "core", "lib*")
     os.environ["PATH"] = ";".join([lib] + p)
 
 try:
-    from .pyne_version import PYNE_VERSION
-
-    __version__ = PYNE_VERSION
     from .pyne_config import *
-
 except ImportError:
     msg = (
         "Error importing PyNE: you should not try to import PyNE from "
@@ -21,3 +18,8 @@ except ImportError:
     )
     warn(msg, Warning)
     raise
+
+try:
+    __version__ = version("pyne")
+except PackageNotFoundError:
+    __version__ = "unknown"

@@ -3,7 +3,8 @@
    :width: 42px
 
 |image| PyNE: The Nuclear Engineering Toolkit
-=====================================
+=============================================
+
 The PyNE project aims to provide a common set of tools for nuclear
 science and engineering needs.
 

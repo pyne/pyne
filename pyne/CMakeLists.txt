@@ -1,9 +1,14 @@
-# Python extension modules
-include_directories(${PYNE_INCLUDE_DIRS})
+set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
 
-# Print include dir
-get_property(inc_dirs DIRECTORY PROPERTY INCLUDE_DIRECTORIES)
-message("-- Include paths for ${CMAKE_CURRENT_SOURCE_DIR}: ${inc_dirs}")
+# Include the source and build directories
+include_directories(
+    ${CMAKE_SOURCE_DIR}/src
+    ${CMAKE_BINARY_DIR}/src
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_BINARY_DIR}
+    ${Python_NumPy_INCLUDE_DIRS}
+)
 
 # Build normal cython modules
 set(PYNE_CYTHON_MODULES
@@ -27,55 +32,112 @@ set(PYNE_CYTHON_MODULES
     transmuters
     _utils
     )
-if(MOAB_FOUND)
+if(ENABLE_MOAB)
   set(PYNE_CYTHON_MODULES ${PYNE_CYTHON_MODULES} source_sampling)
-endif(MOAB_FOUND)
+endif()
+
+if(ENABLE_DAGMC)
+  set(PYNE_CYTHON_MODULES ${PYNE_CYTHON_MODULES} _dagmc)
+endif()
+
+if(NOT WIN32)
+  set(PYNE_CYTHON_MODULES ${PYNE_CYTHON_MODULES} cram)
+endif()
 
 message(STATUS "Modules to Cythonize: ${PYNE_CYTHON_MODULES}")
 
-foreach(cymod ${PYNE_CYTHON_MODULES})
-  set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/${cymod}.pyx"
-                              PROPERTIES CYTHON_IS_CXX TRUE)
-  cython_add_module(${cymod} ${cymod}.pyx)
-  target_link_libraries(${cymod} pyne)
-  install(TARGETS ${cymod} LIBRARY DESTINATION "${PYTHON_SITE_PACKAGES}/pyne")
+foreach(PYNE_CYTHON_MODULE ${PYNE_CYTHON_MODULES})
+
+  # _dagmc module needs Eigen
+  if(PYNE_CYTHON_MODULE STREQUAL "_dagmc")
+    set(PYNE_DAGMC_INCLUDES "-I${EIGEN3_INCLUDE_DIRS}")
+  else()
+    set(PYNE_DAGMC_INCLUDES)
+  endif()
+
+  # Cram is actually a C, not C++ file
+  if(NOT "${PYNE_CYTHON_MODULE}" STREQUAL "cram")
+      set(PYNE_CYTHON_ARGS --cplus)
+      set(PYNE_CYTHON_EXT cxx)
+  else()
+      set(PYNE_CYTHON_ARGS)
+      set(PYNE_CYTHON_EXT c)
+  endif()
+
+  # Build C++/C file
+  add_custom_command(
+    OUTPUT ${PYNE_CYTHON_MODULE}.${PYNE_CYTHON_EXT}
+    DEPENDS ${PYNE_CYTHON_MODULE}.pyx
+    VERBATIM
+    COMMAND "${CYTHON}" ${PYNE_CYTHON_ARGS}
+            -I ${CMAKE_SOURCE_DIR}/src 
+            -I ${CMAKE_BINARY_DIR}/src 
+            -I ${CMAKE_CURRENT_SOURCE_DIR} 
+            -I ${CMAKE_CURRENT_BINARY_DIR} 
+            -I ${Python_NumPy_INCLUDE_DIRS}
+            ${PYNE_DAGMC_INCLUDES}
+            "${CMAKE_CURRENT_SOURCE_DIR}/${PYNE_CYTHON_MODULE}.pyx" 
+            --output-file "${CMAKE_CURRENT_BINARY_DIR}/${PYNE_CYTHON_MODULE}.${PYNE_CYTHON_EXT}"
+    )
+
+  # Creating a Python module
+  python_add_library(
+    ${PYNE_CYTHON_MODULE} MODULE "${CMAKE_CURRENT_BINARY_DIR}/${PYNE_CYTHON_MODULE}.${PYNE_CYTHON_EXT}"
+    WITH_SOABI
+    )
+
+  # pyne needs to be built before the cython module
+  add_dependencies(${PYNE_CYTHON_MODULE} ${CMAKE_PROJECT_NAME})
+
+  # Link the target with the pyne library
+  target_link_libraries(${PYNE_CYTHON_MODULE} PRIVATE ${CMAKE_PROJECT_NAME})
+
+  # Configure the RPATH
+  set_target_properties(${PYNE_CYTHON_MODULE} PROPERTIES
+    INSTALL_RPATH ${RPATH}/core/${CMAKE_INSTALL_LIBDIR}
+    )
+
+  # Install the target in the pyne directory
+  install(TARGETS ${PYNE_CYTHON_MODULE} DESTINATION ../.)
 endforeach()
 
-#
-# Cram is actually a C, not C++ file
-#
-cython_add_module(cram cram.pyx)
-target_link_libraries(cram pyne)
-install(TARGETS cram LIBRARY DESTINATION "${PYTHON_SITE_PACKAGES}/pyne")
-
-#
-# dagmc requires a rename and is only built if we have MOAB.
-#
-if(DAGMC_FOUND)
-  set_source_files_properties("${PROJECT_SOURCE_DIR}/pyne/dagmc.pyx"
-                              PROPERTIES CYTHON_IS_CXX TRUE)
-  cython_add_module(_dagmc dagmc.pyx "${PROJECT_SOURCE_DIR}/src/dagmc_bridge.cpp")
-  target_link_libraries(_dagmc dagmc MOAB pyne)
-  set_target_properties(_dagmc PROPERTIES OUTPUT_NAME dagmc)
-  install(TARGETS _dagmc LIBRARY DESTINATION "${PYTHON_SITE_PACKAGES}/pyne")
-endif(DAGMC_FOUND)
-
-#
-# Spatial Solver
-#
-message("-- F2PY F90 FLAGS: ${F2PY_F90FLAGS}")
 
 if(BUILD_SPATIAL_SOLVER)
-  add_custom_target(transport_spatial_methods ALL
-                    DEPENDS transport_spatial_methods_so pyne)
-  add_custom_command(OUTPUT transport_spatial_methods_so
-    COMMAND ${F2PY_EXECUTABLE} -c -m transport_spatial_methods
-            -I${PROJECT_BINARY_DIR}/src -L${PROJECT_BINARY_DIR}/src
-            ${F2PY_F90FLAGS}
-            --f90flags="-fdefault-real-8"
-            --no-wrap-functions
-            -lpyne
-            ${PROJECT_SOURCE_DIR}/src/transport_spatial_methods/3d/main.f90
-    DEPENDS pyne
+  include_directories(${F2PY_INCLUDE_DIR})
+  # Common variables
+  set(f2py_module_name "transport_spatial_methods")
+  set(fortran_src_file "${PROJECT_SOURCE_DIR}/src/transport_spatial_methods/3d/main.f90")
+  set(f2py_module_c "${f2py_module_name}module.c")
+
+  # Generate sources
+  add_custom_target(
+    genpyf
+    DEPENDS "${fortran_src_file}"
     )
+  add_custom_command(
+    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${f2py_module_c}"
+    COMMAND ${Python_EXECUTABLE}  -m "numpy.f2py"
+            "${fortran_src_file}"
+            -m ${f2py_module_name}
+            --lower # Important
+    DEPENDS ${fortran_src_file} ${CMAKE_PROJECT_NAME}
+    )
+
+  # Set up target
+  python_add_library( ${f2py_module_name} MODULE WITH_SOABI
+    "${f2py_module_c}" # Generated
+    "${F2PY_INCLUDE_DIR}/fortranobject.c" # From NumPy
+    "${fortran_src_file}" # Fortran source(s)
+    )
+
+  # Depend on sources
+  target_include_directories(${f2py_module_name} PUBLIC ${F2PY_INCLUDE_DIR})
+  target_link_libraries(${f2py_module_name} PUBLIC Python::NumPy ${CMAKE_PROJECT_NAME})
+  
+  # Configure the RPATH
+  set_target_properties(${f2py_module_name} PROPERTIES
+    INSTALL_RPATH "${RPATH}/core/${CMAKE_INSTALL_LIBDIR}"
+    )
+  add_dependencies(${f2py_module_name} genpyf ${CMAKE_PROJECT_NAME})
+  install(TARGETS ${f2py_module_name} DESTINATION ../.)
 endif()

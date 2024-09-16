@@ -25,7 +25,7 @@ def try_download(url, target, sha):
     try:
         download_file(url, target, sha)
     except:
-        pytest.skip(url + " not available")
+        pytest.skip(url + " is broken or sha mismatched.")
 
 
 def ignore_future_warnings(func):
@@ -104,7 +104,7 @@ def test_endftod():
 
 def test_loadtape():
     try_download(
-        "http://www.nndc.bnl.gov/endf/b6.8/tapes/tape.100",
+        "https://www.nndc.bnl.gov/endf-b6.8/tapes/tape.100",
         "endftape.100",
         "b56dd0aee38bd006c58181e473232776",
     )
@@ -719,7 +719,6 @@ def test_int_linlin():
     obs = library.integrate_tab_range(2, exp_Eint, exp_xs)
     exp = (3 * 13.5 + 6 * 2.5 + 10 * 1.5) / 19.0
     assert_allclose(exp, obs, rtol=1e-12)
-    return exp
 
 
 def test_int_linlin_interpolation():
@@ -838,7 +837,7 @@ def test_discretize():
         import urllib
 
     try_download(
-        "http://t2.lanl.gov/nis/data/data/ENDFB-VII.1-neutron/Ni/59", "Ni59.txt", ""
+        "http://t2.lanl.gov/nis/data/data/ENDFB-VII.1-neutron/Ni/59", "Ni59.txt", "35414d113b6c17456fd3cf94b83fa091"
     )
 
     endfds = ENDFDataSource("Ni59.txt")
@@ -880,7 +879,7 @@ def test_discretize():
         724.64216445611373,
     ]
     assert_array_almost_equal(nonelastic_c, exp)
-    os.remove(Ni59.txt)
+    os.remove("Ni59.txt")
 
 
 def test_photoatomic():

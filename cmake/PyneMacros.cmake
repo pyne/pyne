@@ -1,6 +1,30 @@
-INCLUDE(DownloadAndExtract)
+include(DownloadAndExtract)
 
-# set platform preprocessor macro
+# Configure scikit-build
+macro(pyne_configure_skbuild)
+  if(SKBUILD)
+    # Scikit-build installs files to ${SKBUILD_PLATLIB_DIR}/install-directory
+    # So, set bin directory to root environment (install prefix/bin)
+    set(CMAKE_INSTALL_BINDIR ${SKBUILD_SCRIPTS_DIR})
+  endif()
+endmacro()
+
+
+# Configure RPATH
+macro(pyne_configure_rpath)
+  if(APPLE)
+    set(CMAKE_MACOSX_RPATH ON)
+    set(CMAKE_INSTALL_RPATH_USE_LINK_PATH ON)
+    set(RPATH "@loader_path")
+  elseif(UNIX)
+    set(RPATH "$ORIGIN")
+  else()
+    # Windows
+    set(RPATH OFF)
+  endif()
+endmacro()
+
+# Set platform preprocessor macro
 macro(pyne_set_platform)
   set(PYNE_PLATFORM "__${CMAKE_SYSTEM_NAME}__")
   if(APPLE)
@@ -15,21 +39,10 @@ macro(pyne_set_platform)
     set(PYNE_PLATFORM "__LINUX__")
   endif(APPLE)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D${PYNE_PLATFORM}")
-  message("-- Pyne platform defined as: ${PYNE_PLATFORM}")
+  message(STATUS "PyNE platform is defined as: ${PYNE_PLATFORM}")
 endmacro()
 
-# C++ settings
-macro(pyne_setup_cxx)
-  INCLUDE(CheckCXXCompilerFlag)
-  CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
-  IF(COMPILER_SUPPORTS_CXX11)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-  ELSE()
-    MESSAGE(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. "
-                        "Please use a different C++ compiler.")
-  ENDIF()
-endmacro()
-
+# Set the platform for the assembler
 macro(pyne_set_asm_platform)
   # first set OS
   if (WIN32)
@@ -49,12 +62,17 @@ macro(pyne_set_asm_platform)
     set(_plat "${_plat}-NOTFOUND")
   endif()
   set(PYNE_ASM_PLATFORM "${_plat}")
+  message(STATUS "PyNE assembler platform is defined as: ${PYNE_ASM_PLATFORM}")
+  
+  # Enable assembly
+  enable_language(ASM)
 endmacro()
 
 # Fortran settings
 # FFLAGS depend on the compiler
 macro(pyne_setup_fortran)
-  # languages
+
+  # Enable Fortran
   enable_language(Fortran)
 
   # Augment the Fortran implicit link libraries
@@ -104,72 +122,67 @@ macro(pyne_setup_fortran)
         "-funroll-all-loops -fpic -fdefault-real-8 -fdefault-double-8")
     set(CMAKE_Fortran_FLAGS_DEBUG
         "-fpic -fdefault-real-8 -fdefault-double-8")
+    
+    # add -fallow-argument-mismatch to fix build with gfortran 10+
+    # https://github.com/pyne/pyne/issues/1416
+    # Check if the gfortran version is 10 or higher
+    if(CMAKE_Fortran_COMPILER_VERSION VERSION_GREATER_EQUAL "10.0.0")
+      set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fallow-argument-mismatch")
+      message(STATUS "Using gfortran version 10 or higher, adding -fallow-argument-mismatch flag")
+    endif()
   elseif(Fortran_COMPILER_NAME MATCHES "ifort.*")
     # ifort (untested)
     set(CMAKE_Fortran_FLAGS_RELEASE "-f77rtl -O2 -r8")
-    set(CMAKE_Fortran_FLAGS_DEBUG   "-f77rtl -O0 -g -r8")
+    set(CMAKE_Fortran_FLAGS_DEBUG "-f77rtl -O0 -g -r8")
   elseif (Fortran_COMPILER_NAME MATCHES "g77")
     # g77
     set(CMAKE_Fortran_FLAGS_RELEASE "-funroll-all-loops -fno-f2c -O2 -m32")
-    set(CMAKE_Fortran_FLAGS_DEBUG   "-fno-f2c -O0 -g -m32")
-  else(Fortran_COMPILER_NAME MATCHES "gfortran.*")
-    message("CMAKE_Fortran_COMPILER full path: " ${CMAKE_Fortran_COMPILER})
-    message("Fortran compiler: " ${Fortran_COMPILER_NAME})
-    message ("No optimized Fortran compiler flags are known, we just try -fpic...")
+    set(CMAKE_Fortran_FLAGS_DEBUG "-fno-f2c -O0 -g -m32")
+  else()
+    message (WARNING "No optimized Fortran compiler flags are known, we just try -fpic...")
     set(CMAKE_Fortran_FLAGS_RELEASE "-fpic")
-    set(CMAKE_Fortran_FLAGS_DEBUG   "-fpic")
-  endif(Fortran_COMPILER_NAME MATCHES "gfortran.*")
-
-  # add -fallow-argument-mismatch to fix build with gfortran 10+
-  # https://github.com/pyne/pyne/issues/1416
-  set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -fallow-argument-mismatch")
+    set(CMAKE_Fortran_FLAGS_DEBUG "-fpic")
+  endif()
+  message(STATUS "CMAKE_Fortran_COMPILER full path: ${CMAKE_Fortran_COMPILER}")
+  message(STATUS "Fortran compiler: ${Fortran_COMPILER_NAME}")
 endmacro()
-
-
-#  add lib to pyne list
-macro(add_lib_to_pyne _name _source)
-  # add the library
-  add_library(${_name} ${_source})
-  # add it to the list of pyne libraries
-  set(PYNE_LIBRARIES ${PYNE_LIBRARIES} ${_name})
-endmacro()
-
 
 # Print pyne logo
-macro(pyne_print_logo)
+macro(print_pyne_logo)
   set(cat_prog cat)
   if(WIN32)
     set(cat_prog type)
   endif(WIN32)
   execute_process(COMMAND ${cat_prog}
                   ${PROJECT_SOURCE_DIR}/cmake/logo.txt
-                  OUTPUT_VARIABLE variable)
-  message("${variable}")
+                  OUTPUT_VARIABLE PYNE_LOGO)
+  message("${PYNE_LOGO}")
 endmacro()
 
 
-# determine if spatial solver module should be built
+# Set if spatial solver module should be built
 macro(pyne_set_build_spatial_solver)
-  SET(BUILD_SPATIAL_SOLVER false)
-  IF ( ENABLE_SPATIAL_SOLVERS )
-    MESSAGE("-- Checking whether to build spatial solvers")
-    MESSAGE("-- -- Checking CMAKE_CXX_COMPILER_ID: ${CMAKE_CXX_COMPILER_ID}")
-    IF(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-      MESSAGE("-- -- -- Checking CMAKE_CXX_COMPILER_VERSION: ${CMAKE_CXX_COMPILER_VERSION}")
-      MESSAGE("-- -- -- Checking if APPLE: ${APPLE}")
-      IF(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.6" AND
-        NOT APPLE )
-        SET(BUILD_SPATIAL_SOLVER true)
-      ELSE()
-        SET(BUILD_SPATIAL_SOLVER false)
-      ENDIF()
-    ENDIF()
-  ENDIF( ENABLE_SPATIAL_SOLVERS)
-  MESSAGE("-- Build spatial solvers: ${BUILD_SPATIAL_SOLVER}")
+  set(BUILD_SPATIAL_SOLVER OFF)
+  if ( ENABLE_SPATIAL_SOLVERS )
+    message(STATUS "Checking whether to build spatial solvers")
+    message(STATUS "Checking CMAKE_CXX_COMPILER_ID: ${CMAKE_CXX_COMPILER_ID}")
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+      message(STATUS "Checking CMAKE_CXX_COMPILER_VERSION: ${CMAKE_CXX_COMPILER_VERSION}")
+      message(STATUS "Checking if APPLE: ${APPLE}")
+      if(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.6" AND NOT APPLE)
+        message(STATUS "Building spatial solvers")
+        set(BUILD_SPATIAL_SOLVER ON)
+      else()
+        message(WARNING "Not building spatial solvers.")
+        set(BUILD_SPATIAL_SOLVER OFF)
+      endif()
+    endif()
+  endif()
+  message(STATUS "Build spatial solvers: ${BUILD_SPATIAL_SOLVER}")
 endmacro()
 
 
-# set build type
+# Set build type
 macro(pyne_set_build_type)
   # Default to release build type
   if(NOT CMAKE_BUILD_TYPE)
@@ -179,73 +192,47 @@ macro(pyne_set_build_type)
   # quiets fortify_source warnings when not compiling with optimizations
   # in linux distros where compilers were compiled with fortify_source enabled by
   # default (e.g. Arch linux).
-  STRING(TOLOWER "${CMAKE_BUILD_TYPE}" BUILD_TYPE)
-  IF(NOT ${BUILD_TYPE} STREQUAL "release")
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0")
-  ENDIF()
-  MESSAGE("-- Build type: ${CMAKE_BUILD_TYPE}")
-endmacro()
-
-
-# Setup the RPATH correctly
-macro(pyne_configure_rpath)
-  # use, i.e. don't skip the full RPATH for the build tree
-  SET(CMAKE_SKIP_BUILD_RPATH FALSE)
-
-  # when building, don't use the install RPATH already
-  # (but later on when installing)
-  SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
-
-  SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-
-  # add the automatically determined parts of the RPATH
-  # which point to directories outside the build tree to the install RPATH
-  SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-
-  # the RPATH to be used when installing, but only if it's not a system directory
-  LIST(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES
-       "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
-  IF("${isSystemDir}" STREQUAL "-1")
-    SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-    GET_FILENAME_COMPONENT(cxxCompilerRoot ${CMAKE_CXX_COMPILER} DIRECTORY)
-    GET_FILENAME_COMPONENT(cxxCompilerRoot ${cxxCompilerRoot} DIRECTORY)
-    IF(NOT "${CMAKE_INSTALL_RPATH}" STREQUAL "${cxxCompilerRoot}")
-      SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_RPATH}:${cxxCompilerRoot}/lib")
-    ENDIF (NOT "${CMAKE_INSTALL_RPATH}" STREQUAL "${cxxCompilerRoot}")
-  ENDIF("${isSystemDir}" STREQUAL "-1")
-  MESSAGE("-- CMAKE_INSTALL_RPATH: ${CMAKE_INSTALL_RPATH}")
-endmacro()
-
-macro(pyne_download_platform)
-  # Download bateman solver from PyNE data
-  download_platform("http://raw.githubusercontent.com/pyne/data/master" "decay"
-                      ".cpp" ".s")
-
-  # Download CRAM solver from PyNE data
-  download_platform("http://raw.githubusercontent.com/pyne/data/master" "cram"
-                         ".c" ".s")
-endmacro()
-
-macro(pyne_set_fast_compile)
-  if(NOT DEFINED PYNE_FAST_COMPILE)
-    set(PYNE_FAST_COMPILE TRUE)
+  string(TOLOWER "${CMAKE_BUILD_TYPE}" BUILD_TYPE)
+  if(NOT ${BUILD_TYPE} STREQUAL "release")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0")
   endif()
-  message(STATUS "PyNE Fast Compile: ${PYNE_FAST_COMPILE}")
+  message( STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 endmacro()
 
+# Download source files
+macro(pyne_download_files)
+  # Download bateman solver from PyNE data
+  download_src("http://raw.githubusercontent.com/pyne/data/master" "decay" ".cpp")
+  # Download CRAM solver from PyNE data
+  download_src("http://raw.githubusercontent.com/pyne/data/master" "cram" ".c")
+
+  if(ENABLE_FAST_COMPILE)
+    if(NOT WIN32)
+      # Download bateman solver from PyNE data
+      download_platform_specific("http://raw.githubusercontent.com/pyne/data/master" "decay" ".s")
+      # Download CRAM solver from PyNE data
+      download_platform_specific("http://raw.githubusercontent.com/pyne/data/master" "cram" ".s")
+    else()
+      message(WARNING "Not downloading compiled files on Windows.")
+      set(ENABLE_FAST_COMPILE OFF)
+    endif()
+  endif()
+endmacro()
 
 # fast compile with assembly, if available.
 macro(fast_compile _srcname _gnuflags _clangflags _otherflags)
-  get_filename_component(_base "${_srcname}" NAME_WE)  # get the base name, without the extension
+
+  # get the base name, without the extension
+  get_filename_component(_base "${_srcname}" NAME_WE)  
   # get the assembly file name
-  if (PYNE_ASM_PLATFORM)
+  if(PYNE_ASM_PLATFORM)
     set(_asmname "${_base}-${PYNE_ASM_PLATFORM}.s")
   else()
     set(_asmname "${_base}-NOTFOUND")
   endif()
 
   # pick the filename to compile, either source or assembly
-  if(NOT PYNE_FAST_COMPILE)
+  if(NOT ENABLE_FAST_COMPILE)
     message(STATUS "Not fast compiling ${_srcname} since PyNE fast compile is disabled.")
     set(_filename "${_srcname}")
   elseif(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${_asmname}")
@@ -258,11 +245,46 @@ macro(fast_compile _srcname _gnuflags _clangflags _otherflags)
     set(PYNE_SRCS "${_filename}" "${PYNE_SRCS}")
 
   # set some compile flags for the selected file
-  if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     set_source_files_properties("${_filename}" PROPERTIES COMPILE_FLAGS "${_clangflags}")
-  elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+  elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     set_source_files_properties("${_filename}" PROPERTIES COMPILE_FLAGS "${_gnuflags}")
   else()
     set_source_files_properties("${_filename}" PROPERTIES COMPILE_FLAGS "${_otherflags}")
   endif()
+endmacro()
+
+# Install dependent library via ExternalProject
+macro(install_dependent_library _library _folder)
+  if(APPLE)
+    add_custom_target(fix-${_library} ALL
+      COMMAND find ${_folder} -type l -delete
+      COMMAND for lib_file in *${CMAKE_SHARED_LIBRARY_SUFFIX}* \; do
+                install_name_tool -add_rpath @loader_path "$$lib_file" \;
+                identifier_file=`otool -D "$$lib_file" | sed -n 's/.*\\///p'` \;
+                if [ "$$lib_file" != "$$identifier_file" ] \; then
+                  mv "$$lib_file" "$$identifier_file" \;
+                fi \;
+              done
+      WORKING_DIRECTORY ${_folder}
+      DEPENDS ${CMAKE_PROJECT_NAME}
+      )
+  elseif(UNIX)
+    add_custom_target(fix-${_library} ALL
+      COMMAND find ${_folder} -type l -delete
+      COMMAND for lib_file in *${CMAKE_SHARED_LIBRARY_SUFFIX}* \; do
+                patchelf --set-rpath '$$ORIGIN/' "$$lib_file" \;
+                identifier_file=`objdump -p "$$lib_file" | grep SONAME | awk '{print $$2}'` \;
+                if [ "$$lib_file" != "$$identifier_file" ] \; then
+                  mv "$$lib_file" "$$identifier_file" \;
+                fi \;
+              done
+      WORKING_DIRECTORY ${_folder}
+      DEPENDS ${CMAKE_PROJECT_NAME}
+      )
+  endif()
+  install(DIRECTORY ${_folder}/
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    FILES_MATCHING PATTERN "*${CMAKE_SHARED_LIBRARY_SUFFIX}*"
+    )
 endmacro()

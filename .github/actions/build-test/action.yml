@@ -1,5 +1,8 @@
 name: BuildTest
-description: Builds and tests an installation of PyNE in a single docker image.  This action is used for bootstrap testing when building the docker images as well as testing of each PR using those docker images.
+description: > 
+  Builds and tests an installation of PyNE in a single docker image.
+  This action is used for bootstrap testing when building the docker
+  images as well as testing of each PR using those docker images.
 inputs:
   stage:
     description: The docker stage that will be used as the docker image for testing.
@@ -8,30 +11,35 @@ inputs:
 runs:
   using: "composite"
   steps: 
-    - name: setup
-      shell: bash -l {0}
-      run: |
-        export ADD_FLAG=" "
-        if [[ "${{ inputs.stage }}" == "moab" || "${{ inputs.stage }}" == "dagmc" ]]; then
-          export ADD_FLAG="${ADD_FLAG} --moab /root/opt/moab"
-        fi
-        if [[ "${{ inputs.stage }}" == "dagmc" ]]; then
-          export ADD_FLAG="${ADD_FLAG} --dagmc /root/opt/dagmc"
-        fi
-        export ADD_FLAG="${ADD_FLAG} "
-        echo "ADD_FLAG=${ADD_FLAG}" >> $GITHUB_ENV
-        
-    - name: Building PyNE
+    - name: Build and install PyNE
+      env:
+        SKBUILD_CMAKE_ARGS: >
+          "-DDOWNLOAD_HDF5=OFF;
+          -DHDF5_ROOT=${HDF5_ROOT};
+          -DDOWNLOAD_EIGEN3=OFF;
+          -DEIGEN3_INCLUDE_DIRS=${EIGEN3_ROOT}/include/eigen3;
+          -DDOWNLOAD_LAPACK=OFF;
+          -DLAPACK_ROOT=${LAPACK_ROOT};
+          -DLAPACK_LIBRARY_DIRS=${LAPACK_ROOT}/lib64;
+          -DENABLE_MOAB=OFF;
+          -DDOWNLOAD_MOAB=OFF;
+          -DENABLE_DAGMC=OFF;
+          -DDOWNLOAD_DAGMC=OFF;
+          $PYNE_MOAB_ARGS;
+          $PYNE_DAGMC_ARGS"
       shell: bash -l {0}
       run: |
         cd $GITHUB_WORKSPACE
-        python setup.py install --user --clean --hdf5 /root/opt/hdf5/hdf5-1_14_3 ${{ env.ADD_FLAG}}
+        python -m build -w 
+        cd dist 
+        auditwheel repair pyne*.whl
+        cd wheelhouse
+        python -m pip install pyne*.whl
         export PATH="$PATH:/github/home/.local/bin"
-        cd ../
         nuc_data_make
 
     - name: Testing PyNE
       shell: bash -l {0}
       run: |
         cd $GITHUB_WORKSPACE/tests
-        ./ci-run-tests.sh python3
+        pytest -ra

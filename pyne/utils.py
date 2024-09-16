@@ -3,7 +3,8 @@ import os
 
 from warnings import warn
 
-from distutils.dir_util import remove_tree
+import shutil
+
 import filecmp
 from io import open
 from progress.bar import Bar
@@ -209,7 +210,7 @@ def remove(path):
     if os.path.isfile(path):
         os.remove(path)
     elif os.path.isdir(path):
-        remove_tree(path, verbose=False)
+        shutil.rmtree(path, ignore_errors=True)
     else:
         pass
 

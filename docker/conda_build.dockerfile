@@ -76,17 +76,14 @@ ENV LD_LIBRARY_PATH /opt/conda/lib:$LD_LIBRARY_PATH
 RUN mkdir -p $HOME/opt
 RUN echo "export PATH=$HOME/.local/bin:\$PATH" >> ~/.bashrc
 
-ENV PYNE_MOAB_ARGS "--moab"
-ENV PYNE_DAGMC_ARGS "--dagmc"
+ENV SKBUILD_CMAKE_ARGS "-DDOWNLOAD_HDF5=OFF;-DDOWNLOAD_EIGEN3=OFF;-DDOWNLOAD_LAPACK=OFF;-DDOWNLOAD_MOAB=OFF;-DDOWNLOAD_DAGMC=OFF"
 
-COPY . $HOME/opt/pyne
-RUN cd $HOME/opt/pyne \
-    && python setup.py install --user \
-                                $PYNE_MOAB_ARGS $PYNE_DAGMC_ARGS \
-                                --clean -j 3;
+COPY . $HOME/pyne
+RUN cd $HOME/pyne \
+    && python -m pip -v install .
+
 ENV PATH $HOME/.local/bin:$PATH
 RUN cd $HOME \
     && nuc_data_make \
-    && cd $HOME/opt/pyne/tests \
-    && ./ci-run-tests.sh python3
-    
+    && cd $HOME/pyne/tests \
+    && pytest -ra

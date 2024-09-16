@@ -1,15 +1,11 @@
-name: Build & Publish docker image for PyNE-CI
+name: Build & Publish Ubuntu Docker Image for PyNE-CI
 
 on:
   # allows us to run workflows manually
   workflow_dispatch:
-  pull_request:
-    paths:
-      - 'docker/*'
-      - '.github/workflows/docker_publish.yml'
   push:
     paths:
-      - 'docker/*'
+      - 'docker/ubuntu_22.04-dev.dockerfile'
       - '.github/workflows/docker_publish.yml'
 
 env:

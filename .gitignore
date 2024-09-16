@@ -1,7 +1,7 @@
 # Ignore possible build & documentation
 docs/_build/
 build/
-build-*
+dist/
 *egg-info/
 build_nuc_data/
 pyne/include/
@@ -23,6 +23,7 @@ src/*.tar.gz
 *.o
 *.mod
 *.so
+.cache/
 
 # Ignore Cython'd files
 pyne/*.c
@@ -41,6 +42,7 @@ examples/*.svg
 examples/*.png
 examples/*.h5m
 tests/test.file
+tests/log.txt
 tests/test.txt
 tests/U233.txt
 tests/U235.txt
@@ -74,8 +76,11 @@ rever/
 
 .vscode
 
-# ignore version file generated from pyne_version.py
+# ignore version file generated from pyproject.toml
 src/pyne_version.h
+
+# ignore summary file
+summary.log
 
 # ignore amalgamated source
 pyne.cpp
