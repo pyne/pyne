@@ -9,7 +9,7 @@ from pyne.utils import QA_warn
 cimport numpy as np
 import numpy as np
 
-from pyne cimport cpp_dagmc_bridge
+cimport cpp_dagmc_bridge
 from pyne.mesh import Mesh
 from numpy.linalg import norm
 from pyne.material import Material
@@ -18,9 +18,6 @@ from pyne.material_library import MaterialLibrary
 np.import_array()
 
 QA_warn(__name__)
-
-if sys.version_info[0] >= 3:
-    unichr = chr
 
 # Mesh specific imports
 from pyne.mesh import HAVE_PYMOAB
@@ -720,7 +717,7 @@ def _tag_to_string(tag):
         # if the byte char code is non 0
         if (part != 0):
             # convert to ascii and join to string
-            a.append(str(unichr(part)))
+            a.append(str(chr(part)))
             string = ''.join(a)
     return string
 
