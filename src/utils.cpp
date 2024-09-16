@@ -13,7 +13,7 @@
 // PyNE Globals
 std::string pyne::PYNE_DATA = "";
 std::string pyne::NUC_DATA_PATH = "";
-std::string pyne::VERSION = PYNE_VERSION;
+std::string pyne::VERSION = PYNE_VERSION_STRING;
 
 void pyne::pyne_start() {
 #if defined _WIN32
