@@ -24,7 +24,6 @@ set(PYNE_SRCS
   "tally.cpp"
   "transmuters.cpp"
   "utils.cpp"
-  "endftod.f90"
   )
 set(TRANSPORT_SPATIAL_METHODS_SRCS
   "transport_spatial_methods/3d/ahotn_kernel_module.f90"

@@ -63,10 +63,9 @@ namespace pyne {
   /// Converts a string from ENDF format to a float. Only handles E-less format
   /// but is roughly 5 times faster than endftod.
   double endftod_cpp(char * s);
-  double endftod_f(char * s); ///< Converts a string from ENDF format to a float.
-  extern  double (*endftod)(char * s); ///< endftod function pointer. defaults to fortran
 
-  void use_fast_endftod();/// switches endftod to fast cpp version
+  // Set the function pointer to always use the C++ version.
+  extern double (*endftod)(char * s);
 
   /// Returns an all upper case copy of the string.
   std::string to_upper(std::string s);

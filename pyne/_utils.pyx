@@ -127,11 +127,6 @@ def endftod(s):
     return pyne.cpp_utils.endftod(cs)
 
 
-def use_fast_endftod():
-    """ Switches to fast ENDF string parser"""
-    pyne.cpp_utils.use_fast_endftod()
-
-
 def fromendf_tok(s):
     """A replacement for numpy.fromstring().
 
