@@ -47,6 +47,11 @@ nucvec = {
 
 leu = {922380000: 0.96, 922350000: 0.04}
 
+# Relative Tolerance
+rtol = 1e-10
+
+# Absolute Tolerance
+atol = 0
 
 def assert_mat_almost_equal(first, second, places=1e-7):
     assert first.mass == pytest.approx(second.mass, rel=places)
@@ -2055,7 +2060,7 @@ def test_material_xrays():
             (105.0, 2.510398896994686e-21),
             (13.0, 3.4433858446293e-17),
         ],
-        rtol=1e-10, atol=0
+        rtol=rtol, atol=atol
     )
 
 
@@ -2133,7 +2138,7 @@ def test_material_photons():
             (105.0, 2.510398896994686e-21),
             (13.0, 3.4433858446293e-17),
         ],
-        rtol=1e-10, atol=0
+        rtol=rtol, atol=atol
     )
     assert_allclose(
         mat.photons(True),
@@ -2196,7 +2201,7 @@ def test_material_photons():
             (105.0, 3.134307444166928e-05),
             (13.0, 0.42991693068703124),
         ],
-        rtol=1e-10, atol=0
+        rtol=rtol, atol=atol
     )
 
 
