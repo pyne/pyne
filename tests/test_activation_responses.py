@@ -19,11 +19,6 @@ from pyne.dagmc import HAVE_DAGMC
 if not HAVE_PYMOAB:
     pytest.skip(allow_module_level=True)
 
-if sys.version_info[0] > 2:
-    izip = zip
-else:
-    from itertools import izip
-
 warnings.simplefilter("ignore", QAWarning)
 
 thisdir = os.path.dirname(__file__)

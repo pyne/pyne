@@ -1,11 +1,6 @@
 import sys
 
-IS_PYTHON3 = sys.version_info[0] >= 3
-
-if IS_PYTHON3:
-    exec("from ._exceptions import *")
-else:
-    exec("from _exceptions import *")
+exec("from ._exceptions import *")
 
 
 def get_edit_descriptor_obj(name):

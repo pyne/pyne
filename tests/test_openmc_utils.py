@@ -157,7 +157,7 @@ def test_calc_structured_coords():
 
 
 def test_get_e_bounds_from_openmc_sp():
-    if not HAVE_PYMOAB or sys.version_info[0] == 2:
+    if not HAVE_PYMOAB:
         pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
     try:
         import openmc
@@ -200,7 +200,7 @@ def test_flux_changes_order():
 
 
 def test_get_result_error_from_openmc_sp():
-    if not HAVE_PYMOAB or sys.version_info[0] == 2:
+    if not HAVE_PYMOAB:
         pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
     try:
         import openmc

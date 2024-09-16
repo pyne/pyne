@@ -22,16 +22,10 @@ from pyne.r2s import (
 )
 from pyne.utils import QAWarning, file_almost_same, file_block_almost_same
 from pyne.mesh import Mesh, NativeMeshTag, HAVE_PYMOAB
+from pyne.dagmc import HAVE_DAGMC
 
 if not HAVE_PYMOAB:
     pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
-    
-from pyne.dagmc import HAVE_DAGMC
-
-if sys.version_info[0] > 2:
-    izip = zip
-else:
-    from itertools import izip
 
 warnings.simplefilter("ignore", QAWarning)
 
@@ -147,7 +141,7 @@ def irradiation_setup_structured(flux_tag="n_flux", meshtal_file="meshtal_2x2x1"
     tot_errs = [6.01522e-02, 6.13336e-02, 6.19920e-02, 5.98742e-02]
 
     i = 0
-    for nf, nfe, nft, nfte, comp, density in izip(
+    for nf, nfe, nft, nfte, comp, density in zip(
         n_flux, n_flux_err, n_flux_total, n_flux_err_total, comps, densities
     ):
         assert density == pytest.approx(1.962963e00)
@@ -346,7 +340,7 @@ def irradiation_setup_unstructured(flux_tag="n_flux"):
     tot_errs = [6.01522e-02, 6.13336e-02, 6.19920e-02, 5.98742e-02]
 
     i = 0
-    for nf, nfe, nft, nfte, comp, density in izip(
+    for nf, nfe, nft, nfte, comp, density in zip(
         n_flux, n_flux_err, n_flux_total, n_flux_err_total, comps, densities
     ):
         assert density == pytest.approx(2.0)
