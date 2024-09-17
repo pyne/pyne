@@ -48,7 +48,7 @@ nucvec = {
 leu = {922380000: 0.96, 922350000: 0.04}
 
 # Relative Tolerance
-rtol = 1e-10
+rtol = 1e-20
 
 # Absolute Tolerance
 atol = 0
