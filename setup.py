@@ -406,7 +406,6 @@ def parse_args():
         dest="spatial_solvers",
         help="Do NOT build spatial solvers",
     )
-
     ns = parser.parse_args(argv)
     update_setup_args(ns)
     update_cmake_args(ns)
@@ -430,6 +429,8 @@ def cmake_cli(cmake_args):
 def main_body(ns):
     assert_dep_versions()
     ensure_atomic()
+    if ns.only_download:
+        return
     if not os.path.exists(ns.build_dir):
         os.mkdir(ns.build_dir)
     cmake_cmd = cmake_cli(ns.cmake_args)

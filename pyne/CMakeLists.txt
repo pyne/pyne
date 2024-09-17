@@ -44,9 +44,11 @@ endforeach()
 #
 # Cram is actually a C, not C++ file
 #
-cython_add_module(cram cram.pyx)
-target_link_libraries(cram pyne)
-install(TARGETS cram LIBRARY DESTINATION "${PYTHON_SITE_PACKAGES}/pyne")
+if(NOT WIN32)
+  cython_add_module(cram cram.pyx)
+  target_link_libraries(cram pyne)
+  install(TARGETS cram LIBRARY DESTINATION "${PYTHON_SITE_PACKAGES}/pyne")
+endif()
 
 #
 # dagmc requires a rename and is only built if we have MOAB.

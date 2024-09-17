@@ -37,9 +37,12 @@ pyne_configure_rpath()
 enable_language(ASM)
 
 # This makes all the libraries build as SHARED
-set(BUILD_SHARED_LIBS true)
+IF(WIN32)
+  set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+else()
+  set(BUILD_SHARED_LIBS true)
+endif()
 message("-- CMake Install Prefix: ${CMAKE_INSTALL_PREFIX}")
-
 
 #
 # Allow for dependnecies to exist in non-install location
@@ -167,6 +170,10 @@ IF(BUILD_SPATIAL_SOLVER)
   MESSAGE("-- Found BLAS Libraries: ${BLAS_LIBRARIES}")
 ENDIF(BUILD_SPATIAL_SOLVER)
 
+
+if(WIN32)
+  find_package(Threads REQUIRED)
+endif()
 
 # Include the CMake script UseCython.cmake.  This defines add_cython_module().
 # Instruction for use can be found at the top of cmake/UseCython.cmake.

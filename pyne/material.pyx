@@ -1359,17 +1359,19 @@ cdef class _Material:
         -------
         A new material which has been transmuted.
         """
-        A = np.asarray(A, dtype=np.float64)
-        cdef int Alen = len(A)
-        cdef double* Aptr = <double*> np.PyArray_DATA(A)
-        cdef cpp_vector[double] cpp_A = cpp_vector[double]()
-        cpp_A.reserve(Alen)
-        cpp_A.assign(Aptr, Aptr + Alen)
-        # transmute and return
-        cdef _Material pymat = Material()
-        pymat.mat_pointer[0] = self.mat_pointer.cram(cpp_A, order)
-        return pymat
-
+        IF UNAME_SYSNAME == "Windows":
+            raise RuntimeError("cram not yet supported on Windows")
+        ELSE:
+            A = np.asarray(A, dtype=np.float64)
+            cdef int Alen = len(A)
+            cdef double* Aptr = <double*> np.PyArray_DATA(A)
+            cdef cpp_vector[double] cpp_A = cpp_vector[double]()
+            cpp_A.reserve(Alen)
+            cpp_A.assign(Aptr, Aptr + Alen)
+            # transmute and return
+            cdef _Material pymat = Material()
+            pymat.mat_pointer[0] = self.mat_pointer.cram(cpp_A, order)
+            return pymat
 
     #
     # Operator Overloads
