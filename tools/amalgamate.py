@@ -12,11 +12,19 @@ import io
 import subprocess
 from argparse import ArgumentParser
 
-try:
-    # Fetch the current git version
-    version = subprocess.check_output(['git', 'describe', '--tags']).strip().decode('utf-8')
-except subprocess.CalledProcessError:
-    raise Exception("Could not get the Git version. Make sure you are in a Git repository and there are tags.")
+def get_version():
+    try:
+        # Attempt to fetch the current git version
+        version = subprocess.check_output(['git', 'describe', '--tags']).strip().decode('utf-8')
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        # If git command fails or git is not installed, read from version.txt
+        tools_dir = os.path.join(os.path.dirname(__file__), 'version.txt')
+        if os.path.exists(tools_dir):
+            with open(tools_dir, 'r') as version_file:
+                version = version_file.read().strip()
+        else:
+            raise Exception("Neither git version nor version.txt is available.")
+    return version
 
 def create_version_header(version, filepath):
     content = f"""
@@ -27,16 +35,13 @@ def create_version_header(version, filepath):
 
 #endif // PYNE_VERSION_HEADER
 """
-    # Ensure the directory exists
-    os.makedirs(os.path.dirname(filepath), exist_ok=True)
-    
-    # Write the content to the file
+    # Write the content to the file (overwrite if it exists)
     with open(filepath, 'w') as file:
         file.write(content)
     
-    print(f"PyNE version header file created at {filepath}")
+    print(f"PyNE version header file created")
 
-create_version_header(version, 'src/pyne_version.h')
+create_version_header(get_version(), 'pyne_version.h')
 
 CODE_EXTS = {".c", ".cpp", ".cxx", ".h", ".hpp", ".hxx"}
 CODE_EXTS |= {e.upper() for e in CODE_EXTS}
@@ -47,7 +52,7 @@ HEADER_EXTS |= {e.upper() for e in HEADER_EXTS}
 
 DEFAULT_FILES = [
     "license.txt",
-    "src/pyne_version.h",
+    "tools/pyne_version.h",
     "src/utils.h",
     "src/utils.cpp",
     "src/extra_types.h",
@@ -81,6 +86,9 @@ DEFAULT_FILES = [
     "src/_decay.h",
     "src/_decay.cpp",
 ]
+
+# Prepend '../' to each file path
+DEFAULT_FILES = [f"../{file}" for file in DEFAULT_FILES]
 
 
 class AmalgamatedFile(object):
