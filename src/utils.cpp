@@ -1,23 +1,16 @@
 // General Library
-#ifndef PYNE_IS_AMALGAMATED
-extern "C" double endftod_(char *str, int len);
-#endif
 #include <iomanip>
 
 #ifdef _WIN32
   #include <filesystem>
 #endif
 
-
 #ifndef PYNE_IS_AMALGAMATED
 #include "utils.h"
 #include "pyne_version.h"
 #endif
 
-
-
 // PyNE Globals
-
 std::string pyne::PYNE_DATA = "";
 std::string pyne::NUC_DATA_PATH = "";
 std::string pyne::VERSION = PYNE_VERSION_STRING;
@@ -52,8 +45,6 @@ void pyne::pyne_start() {
   return;
 }
 
-
-
 // String Transformations
 std::string pyne::to_str(int t) {
   std::stringstream ss;
@@ -79,13 +70,12 @@ std::string pyne::to_str(bool t) {
   return ss.str();
 }
 
-
 int pyne::to_int(std::string s) {
-  return atoi( s.c_str() );
+  return atoi(s.c_str());
 }
 
 double pyne::to_dbl(std::string s) {
-  return strtod( s.c_str(), NULL );
+  return strtod(s.c_str(), NULL);
 }
 
 double pyne::endftod_cpp(char * s) {
@@ -102,59 +92,46 @@ double pyne::endftod_cpp(char * s) {
              100000 * s[3] + 1000000 * s[1] - 1111111 * '0';
       exp = s[10] - '0';
       // Make the right power of 10.
-      dbl_exp = exp & 01? 10.: 1;
-      dbl_exp *= (exp >>= 1) & 01? 100.: 1;
-      dbl_exp *= (exp >>= 1) & 01? 1.0e4: 1;
-      dbl_exp *= (exp >>= 1) & 01? 1.0e8: 1;
+      dbl_exp = exp & 01 ? 10. : 1;
+      dbl_exp *= (exp >>= 1) & 01 ? 100. : 1;
+      dbl_exp *= (exp >>= 1) & 01 ? 1.0e4 : 1;
+      dbl_exp *= (exp >>= 1) & 01 ? 1.0e8 : 1;
       // Adjust for powers of ten from treating mantissa as an integer.
-      dbl_exp = (s[9] == '-'? 1/dbl_exp: dbl_exp) * 1.0e-6;
+      dbl_exp = (s[9] == '-' ? 1 / dbl_exp : dbl_exp) * 1.0e-6;
       // Get mantissa sign, apply exponent.
-      v = mant * (s[0] == '-'? -1: 1) * dbl_exp;
+      v = mant * (s[0] == '-' ? -1 : 1) * dbl_exp;
     } else {
       mant = s[7] + 10 * s[6] + 100 * s[5] + 1000 * s[4] + 10000 * s[3] + \
              100000 * s[1] - 111111 * '0';
       exp = s[10] + 10 * s[9] - 11 * '0';
-      dbl_exp = exp & 01? 10.: 1;
-      dbl_exp *= (exp >>= 1) & 01? 100.: 1;
-      dbl_exp *= (exp >>= 1) & 01? 1.0e4: 1;
-      dbl_exp *= (exp >>= 1) & 01? 1.0e8: 1;
-      dbl_exp *= (exp >>= 1) & 01? 1.0e16: 1;
-      dbl_exp *= (exp >>= 1) & 01? 1.0e32: 1;
-      dbl_exp *= (exp >>= 1) & 01? 1.0e64: 1;
-      dbl_exp = (s[8] == '-'? 1/dbl_exp: dbl_exp) * 1.0e-5;
-      v = mant * (s[0] == '-'? -1: 1) * dbl_exp;
+      dbl_exp = exp & 01 ? 10. : 1;
+      dbl_exp *= (exp >>= 1) & 01 ? 100. : 1;
+      dbl_exp *= (exp >>= 1) & 01 ? 1.0e4 : 1;
+      dbl_exp *= (exp >>= 1) & 01 ? 1.0e8 : 1;
+      dbl_exp *= (exp >>= 1) & 01 ? 1.0e16 : 1;
+      dbl_exp *= (exp >>= 1) & 01 ? 1.0e32 : 1;
+      dbl_exp *= (exp >>= 1) & 01 ? 1.0e64 : 1;
+      dbl_exp = (s[8] == '-' ? 1 / dbl_exp : dbl_exp) * 1.0e-5;
+      v = mant * (s[0] == '-' ? -1 : 1) * dbl_exp;
     }
   }
-
-  // Convert an ENDF int to float; we start from the last char in the field and
-  // move forward until we hit a non-digit.
+  // Convert an ENDF int to float; start from the last char and move forward
   else {
     v = 0;
-    mant = 1; // Here we use mant for the place value about to be read in.
+    mant = 1; // Use mant for the place value
     pos = 10;
     while (s[pos] != '-' && s[pos] != '+' && s[pos] != ' ' && pos > 0) {
       v += mant * (s[pos] - '0');
       mant *= 10;
       pos--;
     }
-    v *= (s[pos] == '-'? -1: 1);
+    v *= (s[pos] == '-' ? -1 : 1);
   }
   return v;
 }
 
-double pyne::endftod_f(char * s) {
-#ifdef PYNE_IS_AMALGAMATED
-  return endftod_cpp(s);
-#else
-  return endftod_(s, 12);
-#endif
-}
-
-double (*pyne::endftod)(char * s) = &pyne::endftod_f;
-
-void pyne::use_fast_endftod() {
-  pyne::endftod = &pyne::endftod_cpp;
-}
+// Set the endftod function
+double (*pyne::endftod)(char * s) = &pyne::endftod_cpp;
 
 std::string pyne::to_upper(std::string s) {
   // change each element of the string to upper case.
