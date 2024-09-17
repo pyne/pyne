@@ -21,6 +21,7 @@ Next Version
    * Update FindMOAB to use MOAB config file (#1526)
    * Remove imp module from tests to support Python 3.12 (#1543)
    * Resolve DAGMC Target Conflict and Improve Test Skips (#1551)
+   * Fix material testing inaccuracies by using assert_allclose for value comparison (#1552)
 
 v0.7.8
 ======
