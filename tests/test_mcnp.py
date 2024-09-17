@@ -767,7 +767,7 @@ def test_write_to_hdf5():
 # and ouputs are easily strung together.
 def test_wwinp_n():
     if not HAVE_PYMOAB:
-        pytest.skip()
+        pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
 
     thisdir = os.path.dirname(__file__)
     wwinp_file = os.path.join(thisdir, "mcnp_wwinp_wwinp_n.txt")
@@ -930,7 +930,7 @@ def test_wwinp_n():
 
 def test_wwinp_p():
     if not HAVE_PYMOAB:
-        pytest.skip()
+        pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
 
     thisdir = os.path.dirname(__file__)
     wwinp_file = os.path.join(thisdir, "mcnp_wwinp_wwinp_p.txt")
@@ -1061,7 +1061,7 @@ def test_wwinp_p():
 
 def test_wwinp_np():
     if not HAVE_PYMOAB:
-        pytest.skip()
+        pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
 
     thisdir = os.path.dirname(__file__)
     wwinp_file = os.path.join(thisdir, "mcnp_wwinp_wwinp_np.txt")
@@ -1207,7 +1207,7 @@ def test_single_meshtally_meshtal():
     """Test a meshtal file containing a single mesh tally."""
 
     if not HAVE_PYMOAB:
-        pytest.skip()
+        pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
 
     thisdir = os.path.dirname(__file__)
     meshtal_file = os.path.join(thisdir, "mcnp_meshtal_single_meshtal.txt")
@@ -1279,7 +1279,7 @@ def test_multiple_meshtally_meshtal():
     """
 
     if not HAVE_PYMOAB:
-        pytest.skip()
+        pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
 
     thisdir = os.path.dirname(__file__)
     meshtal_file = os.path.join(thisdir, "mcnp_meshtal_multiple_meshtal.txt")
@@ -1409,7 +1409,7 @@ def test_multiple_meshtally_meshtal():
 
 def test_mesh_to_geom():
     if not HAVE_PYMOAB:
-        pytest.skip()
+        pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
 
     mats = {
         0: Material({"H1": 1.0, "K39": 1.0}, density=42.0),

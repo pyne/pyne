@@ -22,14 +22,10 @@ from pyne.r2s import (
 )
 from pyne.utils import QAWarning, file_almost_same, file_block_almost_same
 from pyne.mesh import Mesh, NativeMeshTag, HAVE_PYMOAB
+from pyne.dagmc import HAVE_DAGMC
 
 if not HAVE_PYMOAB:
     pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
-
-if sys.version_info[0] > 2:
-    izip = zip
-else:
-    from itertools import izip
 
 warnings.simplefilter("ignore", QAWarning)
 
@@ -145,7 +141,7 @@ def irradiation_setup_structured(flux_tag="n_flux", meshtal_file="meshtal_2x2x1"
     tot_errs = [6.01522e-02, 6.13336e-02, 6.19920e-02, 5.98742e-02]
 
     i = 0
-    for nf, nfe, nft, nfte, comp, density in izip(
+    for nf, nfe, nft, nfte, comp, density in zip(
         n_flux, n_flux_err, n_flux_total, n_flux_err_total, comps, densities
     ):
         assert density == pytest.approx(1.962963e00)
@@ -344,7 +340,7 @@ def irradiation_setup_unstructured(flux_tag="n_flux"):
     tot_errs = [6.01522e-02, 6.13336e-02, 6.19920e-02, 5.98742e-02]
 
     i = 0
-    for nf, nfe, nft, nfte, comp, density in izip(
+    for nf, nfe, nft, nfte, comp, density in zip(
         n_flux, n_flux_err, n_flux_total, n_flux_err_total, comps, densities
     ):
         assert density == pytest.approx(2.0)
@@ -671,10 +667,8 @@ def _r2s_test_step2(r2s_run_dir, remove_step1_out=True):
 
 def test_r2s_script_step_by_step():
     # skip test without dagmc
-    try:
-        from pyne import dagmc
-    except ImportError:
-        pytest.skip()
+    if not HAVE_DAGMC:
+        pytest.skip("No DAGMC. Skipping tests", allow_module_level=True)
 
     remove_step1_out = True
     r2s_run_dir = os.path.join(thisdir, "files_test_r2s", "r2s_examples", "r2s_run")
@@ -696,7 +690,7 @@ def test_r2s_script_step_by_step():
     try:
         import openmc
     except:
-        pytest.skip()
+        pytest.skip("No openmc. Skipping tests", allow_module_level=True)
     r2s_run_dir = os.path.join(thisdir, "files_test_r2s", "r2s_examples", "openmc_r2s")
     _r2s_test_step1(r2s_run_dir, remove_step1_out)
     _r2s_test_step2(r2s_run_dir, remove_step1_out)
@@ -704,10 +698,8 @@ def test_r2s_script_step_by_step():
 
 def test_r2s_script():
     # skip test without dagmc
-    try:
-        from pyne import dagmc
-    except ImportError:
-        pytest.skip()
+    if not HAVE_DAGMC:
+        pytest.skip("No DAGMC. Skipping tests", allow_module_level=True)
 
     remove_step1_out = False
     # test voxel r2s
@@ -730,7 +722,7 @@ def test_r2s_script():
     try:
         import openmc
     except ImportError:
-        pytest.skip()
+        pytest.skip("No openmc. Skipping tests", allow_module_level=True)
     r2s_run_dir = os.path.join(thisdir, "files_test_r2s", "r2s_examples", "openmc_r2s")
     _r2s_test_step1(r2s_run_dir, remove_step1_out)
     _r2s_test_step2(r2s_run_dir, remove_step1_out)

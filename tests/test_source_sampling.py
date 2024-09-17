@@ -18,7 +18,11 @@ except ImportError:
     pytest.skip("Can't import mesh, skipping tests", allow_module_level=True)
 
 from pyne.source_sampling import Sampler, AliasTable
-from pyne.mesh import Mesh, NativeMeshTag
+from pyne.mesh import Mesh, NativeMeshTag, HAVE_PYMOAB
+
+if not HAVE_PYMOAB:
+    pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
+
 from pyne.r2s import tag_e_bounds
 from pymoab import core as mb_core, types
 from pyne.utils import QAWarning

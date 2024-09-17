@@ -229,10 +229,7 @@ def _get_material_lib(hdf5, data_hdf5path, **kwargs):
     for mat_name in mats:
         mat_name = mat_name.decode("utf-8")
         fluka_name = mats[mat_name].metadata["fluka_name"]
-        if sys.version_info[0] > 2:
-            unique_names[mat_name] = str(fluka_name.encode(), "utf-8")
-        else:
-            unique_names[mat_name] = fluka_name.decode("utf-8")
+        unique_names[mat_name] = str(fluka_name.encode(), "utf-8")
 
         if collapse:
             mats_collapsed[fluka_name] = mats[mat_name].collapse_elements(mat_except)

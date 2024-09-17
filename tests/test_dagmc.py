@@ -5,20 +5,14 @@ import pytest
 from numpy.testing import assert_array_equal
 import multiprocessing
 import numpy as np
-
-from pyne.mesh import HAVE_PYMOAB
-
+from pyne.mesh import Mesh, HAVE_PYMOAB
 from pyne.utils import QAWarning
+from pyne.dagmc import HAVE_DAGMC
 
 warnings.simplefilter("ignore", QAWarning)
 
-try:
-    from pyne.mesh import Mesh
-
-    # See if dagmc module exists but do not import it
-    from pyne import dagmc
-except ImportError:
-    raise pytest.skip(allow_module_level=True)
+if not HAVE_DAGMC:
+    pytest.skip("No DAGMC. Skipping tests", allow_module_level=True)
 
 STRING_TYPES = (str,)
 
