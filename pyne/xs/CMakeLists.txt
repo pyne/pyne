@@ -42,4 +42,4 @@ if(PYNE_PYTHON_MODULE_RPATH)
 endif()
 
 # Install the target in the pyne directory
-install(TARGETS models DESTINATION ../xs)
+install(TARGETS models DESTINATION xs)

@@ -100,7 +100,7 @@ foreach(PYNE_CYTHON_MODULE ${PYNE_CYTHON_MODULES})
   endif()
 
   # Install the target in the pyne directory
-  install(TARGETS ${PYNE_CYTHON_MODULE} DESTINATION ../.)
+  install(TARGETS ${PYNE_CYTHON_MODULE} DESTINATION .)
 endforeach()
 
 
@@ -143,5 +143,5 @@ if(BUILD_SPATIAL_SOLVER)
       )
   endif()
   add_dependencies(${f2py_module_name} genpyf ${CMAKE_PROJECT_NAME})
-  install(TARGETS ${f2py_module_name} DESTINATION ../.)
+  install(TARGETS ${f2py_module_name} DESTINATION .)
 endif()
