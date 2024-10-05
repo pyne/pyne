@@ -16,6 +16,10 @@ FROM quay.io/pypa/${MANYLINUX_IMAGE} AS base
 ENV TZ=America/Chicago
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
+# Set up home directory
+ENV HOME /root
+WORKDIR $HOME
+
 # Install basic dependencies
 RUN yum install -y \ 
         wget \
@@ -99,12 +103,6 @@ RUN git clone --depth 1 -b ${MOAB_VERSION} https://bitbucket.org/fathomteam/moab
         -DENABLE_BLASLAPACK=OFF \
         -DENABLE_FORTRAN=OFF && \
     make -j$(nproc) && make install && \
-    cd .. && \
-    export SKBUILD_CMAKE_ARGS="-DENABLE_HDF5=ON; \
-                                -DHDF5_ROOT=${HDF5_ROOT}; \
-                                -DEIGEN3_DIR=${EIGEN3_ROOT}/include/eigen3; \
-                                -DENABLE_BLASLAPACK=OFF; \
-                                -DENABLE_FORTRAN=OFF" && \
     cd ../..
 
 # Add MOAB to the system path
@@ -190,7 +188,7 @@ RUN python -m pip install --upgrade \
         future
 
 # Copy PyNE sources
-COPY . /opt/pyne
+COPY . $HOME/pyne
 
 # Configure SKBUILD CMake arguments
 ENV SKBUILD_CMAKE_ARGS "-DDOWNLOAD_HDF5=OFF; \
@@ -208,31 +206,36 @@ ENV SKBUILD_CMAKE_ARGS "-DDOWNLOAD_HDF5=OFF; \
                         $PYNE_DAGMC_ARGS"
 
 # Build PyNE
-RUN cd /opt/pyne && python -m build -w
+RUN cd $HOME/pyne && python -m build -w
 
 # Repair PyNE with auditwheel
-RUN cd /opt/pyne && auditwheel repair dist/pyne-*.whl -w dist
+RUN cd $HOME/pyne && auditwheel repair dist/pyne-*.whl -w dist
 
 # Install PyNE
-RUN cd /opt/pyne/dist && python -m pip install *manylinux**.whl
+RUN cd $HOME/pyne/dist && python -m pip install *manylinux**.whl
 
 # Install Python packages of MOAB if it was built
 RUN if [ -d "${MOAB_ROOT}" ]; then \
-    cd ${MOAB_ROOT} && \
+    cd $HOME/moab && \
+    export SKBUILD_CMAKE_ARGS="-DENABLE_HDF5=ON; \
+        -DHDF5_ROOT=${HDF5_ROOT}; \
+        -DEIGEN3_DIR=${EIGEN3_ROOT}/include/eigen3; \
+        -DENABLE_BLASLAPACK=OFF; \
+        -DENABLE_FORTRAN=OFF" && \
     python -m pip install . && \
     cd .. && \
-    rm -rf ${MOAB_ROOT}; \
+    rm -rf $HOME/moab; \
     fi
 
 # Install Python packages of Openmc if it was built
 RUN if [ -d "${OPENMC_ROOT}" ]; then \
-    cd ${OPENMC_ROOT} && \
+    cd $HOME/openmc && \
     python -m pip install . && \
     cd .. && \
-    rm -rf ${OPENMC_ROOT}; \
+    rm -rf $HOME/openmc; \
     fi
 
 # Test PyNE
-RUN cd /opt/pyne/tests && \
+RUN cd $HOME/pyne/tests && \
     nuc_data_make && \
     pytest -ra
