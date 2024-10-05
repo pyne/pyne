@@ -35,9 +35,9 @@ add_dependencies(models ${CMAKE_PROJECT_NAME})
 target_link_libraries(models PRIVATE ${CMAKE_PROJECT_NAME})
 
 # Configure the RPATH
-if(PYNE_PYTHON_MODULE_RPATH)
+if(PYNE_PYTHON_MODULE_SUB_DIR_RPATH)
     set_target_properties(models PROPERTIES
-        INSTALL_RPATH ${PYNE_PYTHON_MODULE_RPATH}
+        INSTALL_RPATH ${PYNE_PYTHON_MODULE_SUB_DIR_RPATH}
         )
 endif()
 
