@@ -61,7 +61,6 @@ add_feature_info("Enable Fast Compile" ENABLE_FAST_COMPILE "Use pre-compiled bin
 include(PyneMacros)
 print_pyne_logo()
 pyne_configure_skbuild()
-pyne_configure_rpath()
 pyne_set_platform()
 pyne_set_asm_platform()
 pyne_set_build_spatial_solver()

@@ -12,7 +12,6 @@ ARG OPENMC_VERSION="0.15.0"
 # Build base stage
 FROM quay.io/pypa/${MANYLINUX_IMAGE} AS base
 
-ARG Python_ABI
 ARG HDF5_VERSION
 ARG EIGEN3_VERSION
 ARG LAPACK_VERSION
@@ -30,34 +29,8 @@ RUN yum install -y \
         make && \
     yum clean all
 
-# Use Python from manylinux as the default Python
-ENV PATH="/opt/python/${Python_ABI}/bin:${PATH}"
-RUN ln -sf /opt/python/${Python_ABI}/bin/python3 /usr/bin/python
-
-# Install necessary Python packages
-RUN python -m pip install --upgrade \
-        scikit-build-core \
-        setuptools \    
-        numpy \
-        cython \
-        cmake \
-        ninja \
-        pytest \
-        progress \
-        tables \
-        scipy \
-        matplotlib \
-        jinja2 \
-        future
-
-# Set environment variables for installation paths
-ENV HDF5_ROOT=/opt/hdf5
-ENV EIGEN3_ROOT=/opt/eigen3
-ENV MOAB_ROOT=/opt/moab
-ENV DAGMC_ROOT=/opt/dagmc
-ENV LAPACK_ROOT=/opt/lapack
-
 # Build and install HDF5
+ENV HDF5_ROOT=/opt/hdf5
 RUN HDF5_MAJOR_VERSION=$(echo ${HDF5_VERSION} | cut -d'.' -f1) && \
     HDF5_MINOR_VERSION=$(echo ${HDF5_VERSION} | cut -d'.' -f2) && \
     wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-${HDF5_MAJOR_VERSION}.${HDF5_MINOR_VERSION}/hdf5-${HDF5_VERSION}/src/hdf5-${HDF5_VERSION}.tar.gz && \
@@ -78,6 +51,7 @@ ENV PATH="${HDF5_ROOT}/bin:${PATH}"
 ENV LD_LIBRARY_PATH="${HDF5_ROOT}/lib:${HDF5_ROOT}/lib64:${LD_LIBRARY_PATH}"
 
 # Build and install Eigen3
+ENV EIGEN3_ROOT=/opt/eigen3
 RUN wget https://gitlab.com/libeigen/eigen/-/archive/${EIGEN3_VERSION}/eigen-${EIGEN3_VERSION}.tar.bz2 && \
     tar -xjf eigen-${EIGEN3_VERSION}.tar.bz2 && \
     cd eigen-${EIGEN3_VERSION} && \
@@ -92,6 +66,7 @@ RUN wget https://gitlab.com/libeigen/eigen/-/archive/${EIGEN3_VERSION}/eigen-${E
 ENV CPLUS_INCLUDE_PATH="${EIGEN3_ROOT}/include/eigen3:${CPLUS_INCLUDE_PATH}"
 
 # Build and install LAPACK
+ENV LAPACK_ROOT=/opt/lapack
 RUN wget https://github.com/Reference-LAPACK/lapack/archive/refs/tags/v${LAPACK_VERSION}.tar.gz && \
     tar -xzf v${LAPACK_VERSION}.tar.gz && \
     cd lapack-${LAPACK_VERSION} && \
@@ -113,6 +88,7 @@ FROM base AS moab
 ARG MOAB_VERSION
 
 # Build and install MOAB
+ENV MOAB_ROOT=/opt/moab
 RUN git clone --depth 1 -b ${MOAB_VERSION} https://bitbucket.org/fathomteam/moab.git moab && \
     cd moab && \
     mkdir build && cd build && \
@@ -147,6 +123,7 @@ FROM moab AS dagmc
 ARG DAGMC_VERSION
 
 # Build and install DAGMC
+ENV DAGMC_ROOT=/opt/dagmc
 RUN git clone --depth 1 -b v${DAGMC_VERSION} https://github.com/svalinn/DAGMC.git dagmc && \
     cd dagmc && \
     mkdir -p build && cd build && \
@@ -177,6 +154,7 @@ FROM dagmc AS openmc
 ARG OPENMC_VERSION
 
 # Build and install OpenMC
+ENV OPENMC_ROOT=/opt/openmc
 RUN git clone --depth 1 -b v${OPENMC_VERSION} https://github.com/openmc-dev/openmc.git openmc && \
     cd openmc && \
     mkdir -p build && cd build && \
@@ -184,10 +162,7 @@ RUN git clone --depth 1 -b v${OPENMC_VERSION} https://github.com/openmc-dev/open
         -DCMAKE_INSTALL_PREFIX=${OPENMC_ROOT} \
         -DHDF5_ROOT=${HDF5_ROOT} && \
     make -j$(nproc) && make install && \
-    cd .. && \
-    python -m pip install . && \
-    cd .. && \
-    rm -rf openmc
+    cd ../..
 
 # Add OpenMC to the system path
 ENV PATH="${OPENMC_ROOT}/bin:${PATH}"
@@ -196,6 +171,36 @@ ENV LD_LIBRARY_PATH="${OPENMC_ROOT}/lib:${OPENMC_ROOT}/lib64:${LD_LIBRARY_PATH}"
 
 # Build PyNE stage
 FROM ${BUILD_STAGE} AS pyne
+
+ARG Python_ABI
+
+# Use Python from manylinux as the default Python
+ENV PATH="/opt/python/${Python_ABI}/bin:${PATH}"
+RUN ln -sf /opt/python/${Python_ABI}/bin/python3 /usr/bin/python
+
+# Install necessary Python packages
+RUN python -m pip install --upgrade \
+        scikit-build-core \
+        setuptools \    
+        numpy \
+        cython \
+        cmake \
+        ninja \
+        pytest \
+        progress \
+        tables \
+        scipy \
+        matplotlib \
+        jinja2 \
+        future
+
+# Install Openmc if it was built
+RUN if [ -d "${OPENMC_ROOT}" ]; then \
+    cd ${OPENMC_ROOT} && \
+    python -m pip install . && \
+    cd .. && \
+    rm -rf ${OPENMC_ROOT}; \
+    fi
 
 # Copy PyNE sources
 COPY . /opt/pyne
@@ -215,8 +220,14 @@ ENV SKBUILD_CMAKE_ARGS "-DDOWNLOAD_HDF5=OFF; \
                         $PYNE_MOAB_ARGS; \
                         $PYNE_DAGMC_ARGS"
 
-# Build and install PyNE
-RUN cd /opt/pyne && python -m pip install .
+# Build PyNE
+RUN cd /opt/pyne && python -m build -w
+
+# Repair PyNE with auditwheel
+RUN cd /opt/pyne && auditwheel repair dist/pyne-*.whl -w dist
+
+# Install PyNE
+RUN cd /opt/pyne/dist && python -m pip install *manylinux**.whl
 
 # Test PyNE
 RUN cd /opt/pyne/tests && \

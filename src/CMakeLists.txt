@@ -211,7 +211,7 @@ file(GLOB h_files "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
 file(GLOB hpp_files "${CMAKE_CURRENT_SOURCE_DIR}/*.hpp")
 set(h_files ${h_files} ${hpp_files})
 install(FILES ${h_files} 
-  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${CMAKE_PROJECT_NAME}
   COMPONENT headers
   )
 
@@ -223,8 +223,8 @@ install(TARGETS ${CMAKE_PROJECT_NAME} LIBRARY
 )
 
 # Configure the RPATH
-if(RPATH)
+if(PYNE_LIBRARY_RPATH)
   set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES
-    INSTALL_RPATH ${RPATH}
+    INSTALL_RPATH ${PYNE_LIBRARY_RPATH}
     )
 endif()

@@ -3,24 +3,44 @@ include(DownloadAndExtract)
 # Configure scikit-build
 macro(pyne_configure_skbuild)
   if(SKBUILD)
+    # Find Python Interpreter
+    find_package(
+      Python
+      COMPONENTS Interpreter
+      REQUIRED
+      )
     # Scikit-build installs files to ${SKBUILD_PLATLIB_DIR}/install-directory
     # So, set bin directory to root environment (install prefix/bin)
     set(CMAKE_INSTALL_BINDIR ${SKBUILD_SCRIPTS_DIR})
-  endif()
-endmacro()
+    set(CMAKE_INSTALL_INCLUDEDIR ${SKBUILD_HEADERS_DIR})
+    set(CMAKE_INSTALL_DATADIR ${SKBUILD_DATA_DIR}/${CMAKE_INSTALL_DATADIR})
+    set(CMAKE_INSTALL_DOCDIR ${SKBUILD_DATA_DIR}/${CMAKE_INSTALL_DOCDIR})
+    set(CMAKE_INSTALL_INFODIR ${SKBUILD_DATA_DIR}/${CMAKE_INSTALL_INFODIR})
+    set(CMAKE_INSTALL_MANDIR ${SKBUILD_DATA_DIR}/${CMAKE_INSTALL_MANDIR})
+    set(CMAKE_INSTALL_LOCALEDIR ${SKBUILD_DATA_DIR}/${CMAKE_INSTALL_LOCALEDIR})
+    set(CMAKE_INSTALL_LOCALSTATEDIR ${SKBUILD_DATA_DIR}/${CMAKE_INSTALL_LOCALSTATEDIR})
+    set(CMAKE_INSTALL_RUNSTATEDIR ${SKBUILD_DATA_DIR}/${CMAKE_INSTALL_RUNSTATEDIR})
+    set(SKBUILD_LIB_DIR ${CMAKE_INSTALL_LIBDIR}/python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}/site-packages/pyne/${CMAKE_INSTALL_LIBDIR})
 
-
-# Configure RPATH
-macro(pyne_configure_rpath)
-  if(APPLE)
-    set(CMAKE_MACOSX_RPATH ON)
-    set(CMAKE_INSTALL_RPATH_USE_LINK_PATH ON)
-    set(RPATH "@loader_path")
-  elseif(UNIX)
-    set(RPATH "$ORIGIN")
-  else()
-    # Windows
-    set(RPATH OFF)
+    # Auditwheel and Delocate need this when repairing the wheel
+    # Since MOAB libs are installed in the pyne subdirectory
+    # Auditwheel and Delocate need this to find the PyNE libs for pyne.data
+    # It's a bit of a hack, but it works
+    set(SKBUILD_REPAIR_WHEEL_PATCH pyne/${CMAKE_INSTALL_LIBDIR})
+    if(APPLE)
+      set(CMAKE_MACOSX_RPATH ON)
+      set(PYNE_LIBRARY_RPATH "@loader_path")
+      set(PYNE_PYTHON_MODULE_RPATH "@loader_path/${CMAKE_INSTALL_LIBDIR}")
+      set(PYNE_BINARY_RPATH "@loader_path/../${SKBUILD_LIB_DIR};@loader_path/../../${SKBUILD_REPAIR_WHEEL_PATCH}")
+    elseif(UNIX)
+      set(PYNE_LIBRARY_RPATH "$ORIGIN")
+      set(PYNE_PYTHON_MODULE_RPATH "$ORIGIN/${CMAKE_INSTALL_LIBDIR}")
+      set(PYNE_BINARY_RPATH "$ORIGIN/../${SKBUILD_LIB_DIR};$ORIGIN/../${SKBUILD_REPAIR_WHEEL_PATCH};$ORIGIN/../../${SKBUILD_REPAIR_WHEEL_PATCH}")
+    else()
+      set(PYNE_LIBRARY_RPATH OFF)
+      set(PYNE_PYTHON_MODULE_RPATH OFF)
+      set(PYNE_BINARY_RPATH OFF)
+    endif()
   endif()
 endmacro()
 

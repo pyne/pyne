@@ -93,9 +93,11 @@ foreach(PYNE_CYTHON_MODULE ${PYNE_CYTHON_MODULES})
   target_link_libraries(${PYNE_CYTHON_MODULE} PRIVATE ${CMAKE_PROJECT_NAME})
 
   # Configure the RPATH
-  set_target_properties(${PYNE_CYTHON_MODULE} PROPERTIES
-    INSTALL_RPATH ${RPATH}/core/${CMAKE_INSTALL_LIBDIR}
-    )
+  if(PYNE_PYTHON_MODULE_RPATH)
+    set_target_properties(${PYNE_CYTHON_MODULE} PROPERTIES
+      INSTALL_RPATH ${PYNE_PYTHON_MODULE_RPATH}
+      )
+  endif()
 
   # Install the target in the pyne directory
   install(TARGETS ${PYNE_CYTHON_MODULE} DESTINATION ../.)
@@ -135,9 +137,11 @@ if(BUILD_SPATIAL_SOLVER)
   target_link_libraries(${f2py_module_name} PUBLIC Python::NumPy ${CMAKE_PROJECT_NAME})
   
   # Configure the RPATH
-  set_target_properties(${f2py_module_name} PROPERTIES
-    INSTALL_RPATH "${RPATH}/core/${CMAKE_INSTALL_LIBDIR}"
-    )
+  if(PYNE_PYTHON_MODULE_RPATH)
+    set_target_properties(${f2py_module_name} PROPERTIES
+      INSTALL_RPATH ${PYNE_PYTHON_MODULE_RPATH}
+      )
+  endif()
   add_dependencies(${f2py_module_name} genpyf ${CMAKE_PROJECT_NAME})
   install(TARGETS ${f2py_module_name} DESTINATION ../.)
 endif()
