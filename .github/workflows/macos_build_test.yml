@@ -79,7 +79,7 @@ jobs:
           export CXX=$CONDA_PREFIX/bin/clang++
           export CPP=$CONDA_PREFIX/bin/clang-cpp
           mkdir -p $(python3 -m site --user-site)
-          python3 setup.py install --user -j 3
+          python3 setup.py install --user -j 3 -DCMAKE_OSX_SYSROOT=$(xcrun --show-sdk-path)
           export PATH=$HOME/.local/bin:$PATH
           nuc_data_make
           cd tests && ./ci-run-tests.sh python3
