@@ -59,13 +59,11 @@ jobs:
         shell: bash -el {0}
         run: |
           mamba install -y \
-              expat \
               compilers \
               cmake \
               make \
               libblas \
               liblapack \
-              eigen \
               numpy \
               scipy \
               matplotlib \
@@ -76,8 +74,7 @@ jobs:
               jinja2 \
               cython \
               future \
-              progress \
-              meson
+              progress
           export CC=$CONDA_PREFIX/bin/clang
           export CXX=$CONDA_PREFIX/bin/clang++
           export CPP=$CONDA_PREFIX/bin/clang-cpp
