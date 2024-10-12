@@ -40,6 +40,11 @@ enable_language(ASM)
 set(BUILD_SHARED_LIBS true)
 message("-- CMake Install Prefix: ${CMAKE_INSTALL_PREFIX}")
 
+if(APPLE)
+  message("OSX_SYSROOT: ${CMAKE_OSX_SYSROOT}")
+  link_directories("${CMAKE_OSX_SYSROOT}/usr/lib")
+endif()
+
 
 #
 # Allow for dependnecies to exist in non-install location
