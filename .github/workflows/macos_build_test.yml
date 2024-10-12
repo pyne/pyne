@@ -30,7 +30,6 @@ jobs:
       fail-fast: false
       matrix:
         macos_versions: [
-            macos-12,
             macos-13,
             macos-14,
         ]
@@ -78,8 +77,9 @@ jobs:
           export CC=$CONDA_PREFIX/bin/clang
           export CXX=$CONDA_PREFIX/bin/clang++
           export CPP=$CONDA_PREFIX/bin/clang-cpp
+          export FC=$CONDA_PREFIX/bin/gfortran
           mkdir -p $(python3 -m site --user-site)
-          python3 setup.py install --user -j 3 -DCMAKE_OSX_SYSROOT=$(xcrun --show-sdk-path)
+          python3 setup.py install --user -j 3
           export PATH=$HOME/.local/bin:$PATH
           nuc_data_make
           cd tests && ./ci-run-tests.sh python3
