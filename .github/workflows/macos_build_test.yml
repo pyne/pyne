@@ -85,7 +85,7 @@ jobs:
           gfortran -v
           echo $PATH
           mkdir -p $(python3 -m site --user-site)
-          python3 setup.py install --user -j 3
+          python3 setup.py install --user -j 3 -DCMAKE_Fortran_FLAGS="-isysroot $(xcrun --show-sdk-path)"
           export PATH=$HOME/.local/bin:$PATH
           nuc_data_make
           cd tests && ./ci-run-tests.sh python3
