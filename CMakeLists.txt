@@ -10,6 +10,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 # Setup the project
 project(pyne)
+message("CMAKE_OSX_SYSROOT: ${CMAKE_OSX_SYSROOT}")
 
 # check for and enable c++11 support
 INCLUDE(CheckCXXCompilerFlag)

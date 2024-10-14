@@ -78,6 +78,12 @@ jobs:
           export CXX=$CONDA_PREFIX/bin/clang++
           export CPP=$CONDA_PREFIX/bin/clang-cpp
           export FC=$CONDA_PREFIX/bin/gfortran
+
+          sw_vers
+          xcode-select -p
+          xcrun --show-sdk-path
+          gfortran -v
+          echo $PATH
           mkdir -p $(python3 -m site --user-site)
           python3 setup.py install --user -j 3
           export PATH=$HOME/.local/bin:$PATH
