@@ -1,5 +1,8 @@
 """Python wrapper for isoname library."""
 from __future__ import unicode_literals
+import os
+import sys
+import glob
 
 # Cython imports
 from libcpp.map cimport map as cpp_map
@@ -10,19 +13,38 @@ from cython.operator cimport preincrement as inc
 from libc.stdlib cimport free
 from libcpp.string cimport string as std_string
 
-import os
-import json
-
 # local imports
+from pyne import __path__
 cimport cpp_utils
-import pyne.__init__
 
-pyne_dir = os.path.dirname(pyne.__init__.__file__)
-prefix = os.path.abspath(os.path.join(pyne_dir, '..', '..', '..', '..'))
-lib = os.path.join(prefix, 'lib')
-includes = os.path.join(prefix, 'include', 'pyne')
-nuc_data = os.path.join(pyne_dir, 'nuc_data.h5')
+def get_path(subdir, pattern="*"):
+    """Helper function to return paths that match a given pattern within a subdirectory."""
+    path = os.path.join(__path__[0], subdir)
+    return glob.glob(os.path.join(path, pattern)) if os.path.exists(path) else []
 
+def get_include_path():
+    """Return the include directory path for PyNE headers."""
+    return os.path.join(sys.prefix, "include", "pyne")
+
+def get_core_libraries():
+    """Return library paths and library directory paths."""
+    lib_paths = [os.path.join(sys.prefix, subdir) for subdir in ["lib", "lib64"]]
+    libs = [lib for subdir in lib_paths for lib in get_path(subdir)]
+    return libs, [path for path in lib_paths if os.path.exists(path)][0]
+
+def get_extra_libraries():
+    """List all the extra libraries of PyNE."""
+    libs_path = os.path.join(__path__[0], ".dylibs") if sys.platform == "darwin" else os.path.join(__path__[0], "..", "pyne.libs")
+    return (glob.glob(os.path.join(libs_path, "*")), libs_path) if os.path.exists(libs_path) else ([], [])
+
+# Setup variables
+include_path = get_include_path()
+lib, lib_path = get_core_libraries()
+extra_lib, extra_lib_path = get_extra_libraries()
+nuc_data = os.path.join(__path__[0], 'nuc_data.h5')
+
+# Export variables for easy access
+__all__ = ["include_path", "lib", "lib_path", "extra_lib", "extra_lib_path", "nuc_data"]
 
 ####################################
 ### pyne configuration namespace ###
@@ -31,7 +53,7 @@ nuc_data = os.path.join(pyne_dir, 'nuc_data.h5')
 # Expose the C-code start up routine
 def pyne_start():
     if "PYNE_DATA" not in os.environ:
-        os.environ['PYNE_DATA'] = pyne_dir
+        os.environ['PYNE_DATA'] = __path__[0]
 
     # Specifiy the NUC_DATA_PATH
     if "NUC_DATA_PATH" not in os.environ:
