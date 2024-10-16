@@ -131,8 +131,9 @@ RUN export PYNE_HDF5_ARGS="--hdf5 $HDF5_INSTALL_PATH"; \
     && python setup.py install --user \
                                 $PYNE_MOAB_ARGS $PYNE_DAGMC_ARGS \
                                 $PYNE_HDF5_ARGS \
-                                --clean -j 3;
+                                --clean -j 4;
 ENV PATH $HOME/.local/bin:$PATH
+ENV PyNE_DIR $HOME/.local/
 RUN cd $HOME \
     && nuc_data_make \
     && cd $HOME/opt/pyne/tests \
