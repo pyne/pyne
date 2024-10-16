@@ -69,24 +69,24 @@ set_target_properties(pyne PROPERTIES
 # Add the core library to the list of libraries
 set(PyNE_LIBRARIES ${PyNE_LIBRARY})
 
-find(HDF5 VERSION @HDF5_VERSION@ REQUIRED)
+find_package(HDF5 REQUIRED)
 set(PyNE_LIBRARIES ${PyNE_LIBRARIES} ${HDF5_LIBRARIES})
 
 # Add MOAB
 if(@MOAB_FOUND@)
-  find_package(MOAB VERSION @MOAB_VERSION@ REQUIRED)
+  find_package(MOAB REQUIRED)
   set(PyNE_LIBRARIES ${PyNE_LIBRARIES} ${MOAB_LIBRARIES})
 endif()
 
 # Add DAGMC
 if(@DAGMC_FOUND@)
-  find_package(DAGMC VERSION @DAGMC_VERSION@ REQUIRED)
+  find_package(DAGMC REQUIRED)
   set(PyNE_LIBRARIES ${PyNE_LIBRARIES} ${DAGMC_LIBRARIES})
 endif()
 
 # Add LAPACK
 if(@LAPACK_FOUND@)
-  find_package(LAPACK VERSION @LAPACK_VERSION@ REQUIRED)
+  find_package(LAPACK REQUIRED)
   set(PyNE_LIBRARIES ${PyNE_LIBRARIES} ${LAPACK_LIBRARIES})
 endif()
 
