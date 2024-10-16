@@ -134,6 +134,7 @@ RUN export PYNE_HDF5_ARGS="--hdf5 $HDF5_INSTALL_PATH"; \
                                 --clean -j 4;
 ENV PATH $HOME/.local/bin:$PATH
 ENV PyNE_DIR $HOME/.local/
+ENV HDF5_ROOT $HDF5_INSTALL_PATH
 RUN cd $HOME \
     && nuc_data_make \
     && cd $HOME/opt/pyne/tests \

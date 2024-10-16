@@ -35,7 +35,7 @@ def test_cmake_find_pyne(tmp_path):
     # Run CMake in the temporary build directory.
     try:
         subprocess.run(
-            ["cmake", str(tmp_path), "-DPyNE_DIR=$PyNE_DIR"],
+            ["cmake", str(tmp_path), "-DPyNE_DIR=$PyNE_DIR", "-DHDF5_ROOT=$HDF5_ROOT"],
             cwd=build_dir,
             capture_output=True,
             text=True,
