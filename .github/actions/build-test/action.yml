@@ -33,6 +33,7 @@ runs:
     - name: Testing PyNE
       shell: bash -l {0}
       run: |
+        export HDF5_DIR="/github/home/opt/hdf5/hdf5-1_14_3"
         export PyNE_DIR="/github/home/.local/"
         cd $GITHUB_WORKSPACE/tests
         ./ci-run-tests.sh python3
