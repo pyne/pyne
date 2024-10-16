@@ -24,9 +24,10 @@ def test_cmake_find_pyne(tmp_path):
     cmake_minimum_required(VERSION 3.15)
     project(TestPyNE)
     find_package(PyNE REQUIRED)
+    include_directories(${HDF5_INCLUDE_DIRS})
     include_directories(${PyNE_INCLUDE_DIRS})
     add_executable(test_pyne test.cpp)
-    target_link_libraries(test_pyne PUBLIC ${PyNE_LIBRARIES})
+    target_link_libraries(test_pyne PUBLIC pyne ${HDF5_LIBRARIES})
     """
     cmake_file = tmp_path / "CMakeLists.txt"
     cmake_file.write_text(cmake_content)
@@ -34,7 +35,7 @@ def test_cmake_find_pyne(tmp_path):
     # Run CMake in the temporary build directory.
     try:
         subprocess.run(
-            ["cmake", str(tmp_path)],
+            ["cmake", str(tmp_path), "-DPyNE_DIR=$PyNE_DIR"],
             cwd=build_dir,
             capture_output=True,
             text=True,
