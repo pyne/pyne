@@ -10,6 +10,7 @@
 # - PyNE version (PyNE_VERSION)
 # - PyNE include paths (PyNE_INCLUDE_DIRS)
 # - PyNE library paths (PyNE_LIBRARY_DIRS)
+# - PyNE library (PyNE_LIBRARY or pyne)
 # - PyNE libraries (PyNE_LIBRARIES)
 # - PyNE extra libraries (PyNE_EXTRA_LIBRARIES)
 
@@ -51,18 +52,49 @@ if(PyNE_EXTRA_LIBRARIES)
   )
 endif()
 
-# Find the library
-find_library(PyNE_LIBRARIES 
+# Find the core library
+find_library(PyNE_LIBRARY
   NAMES pyne 
   PATHS ${PyNE_LIBRARY_DIRS} 
   NO_DEFAULT_PATH
   )
+
+# Add the core library as an imported target
+add_library(pyne UNKNOWN IMPORTED)
+set_target_properties(pyne PROPERTIES
+    INTERFACE_INCLUDE_DIRECTORIES "${PyNE_INCLUDE_DIRS}"
+    IMPORTED_LOCATION "${PyNE_LIBRARY}"
+)
+
+# Add the core library to the list of libraries
+set(PyNE_LIBRARIES ${PyNE_LIBRARY})
+
+find(HDF5 VERSION @HDF5_VERSION@ REQUIRED)
+set(PyNE_LIBRARIES ${PyNE_LIBRARIES} ${HDF5_LIBRARIES})
+
+# Add MOAB
+if(@MOAB_FOUND@)
+  find_package(MOAB VERSION @MOAB_VERSION@ REQUIRED)
+  set(PyNE_LIBRARIES ${PyNE_LIBRARIES} ${MOAB_LIBRARIES})
+endif()
+
+# Add DAGMC
+if(@DAGMC_FOUND@)
+  find_package(DAGMC VERSION @DAGMC_VERSION@ REQUIRED)
+  set(PyNE_LIBRARIES ${PyNE_LIBRARIES} ${DAGMC_LIBRARIES})
+endif()
+
+# Add LAPACK
+if(@LAPACK_FOUND@)
+  find_package(LAPACK VERSION @LAPACK_VERSION@ REQUIRED)
+  set(PyNE_LIBRARIES ${PyNE_LIBRARIES} ${LAPACK_LIBRARIES})
+endif()
 
 # Include standard argument handling for finding packages
 include(FindPackageHandleStandardArgs)
 
 # Validates that the necessary variables (PyNE include paths and library) are set
 find_package_handle_standard_args(PyNE
-  REQUIRED_VARS PyNE_LIBRARIES PyNE_INCLUDE_DIRS
+  REQUIRED_VARS PyNE_LIBRARY PyNE_INCLUDE_DIRS
   VERSION_VAR PyNE_VERSION
   )

@@ -24,7 +24,7 @@ def get_path(subdir, pattern="*"):
 
 def get_include_path():
     """Return the include directory path for PyNE headers."""
-    return os.path.join(sys.prefix, "include", "pyne")
+    return os.path.join(sys.prefix, "include")
 
 def get_core_libraries():
     """Return library paths and library directory paths."""
