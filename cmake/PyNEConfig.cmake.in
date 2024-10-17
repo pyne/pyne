@@ -37,7 +37,7 @@ endfunction()
 # Extract PyNE version, include paths, library paths, and extra libraries
 run_python_command(PyNE_VERSION "import pyne; print(pyne.__version__)")
 run_python_command(PyNE_INCLUDE_DIRS "import pyne; print(pyne.include_path)")
-run_python_command(PyNE_LIBRARY_DIRS "import pyne; print(pyne.lib_path)")
+run_python_command(PyNE_LIBRARY_DIRS "import pyne; print(' '.join(pyne.lib_path))")
 run_python_command(PyNE_EXTRA_LIBRARIES "import pyne; print(' '.join(pyne.extra_lib))")
 
 # Check if the wheel was repaired using auditwheel or delocate

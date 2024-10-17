@@ -39,7 +39,7 @@ def get_core_libraries():
     # TODO: Temporary fix for old pyne
     lib_paths = get_path("lib")
     lib = get_path("lib", "*pyne*")
-    return lib, lib_paths[0]
+    return lib, lib_paths
 
 def get_extra_libraries():
     """List all the extra libraries of PyNE."""
