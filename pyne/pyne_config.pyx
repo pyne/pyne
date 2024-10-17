@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 import os
 import sys
 import glob
+import fnmatch
 
 # Cython imports
 from libcpp.map cimport map as cpp_map
@@ -31,8 +32,8 @@ def get_core_libraries():
     #lib_paths = [os.path.join(sys.prefix, subdir) for subdir in ["lib", "lib64"]]
     # TODO: Temporary fix for old pyne
     lib_paths = [os.path.join(__path__[0], '..', '..', '..', '..', "lib")]
-    libs = [lib for subdir in lib_paths for lib in get_path(subdir)]
-    return libs, [path for path in lib_paths if os.path.exists(path)][0]
+    lib = [lib for subdir in lib_paths for lib in get_path(subdir) if fnmatch.fnmatch(lib, "*pyne*")]
+    return lib, [path for path in lib_paths if os.path.exists(path)][0]
 
 def get_extra_libraries():
     """List all the extra libraries of PyNE."""
