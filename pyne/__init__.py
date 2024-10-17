@@ -1,7 +1,6 @@
 import os
 import sys
 import glob
-import fnmatch
 from warnings import warn
 
 
@@ -25,7 +24,7 @@ except ImportError:
     warn(msg, Warning)
     raise
 
-def get_path(subdir, pattern="*"):
+def get_path(subdir, pattern=""):
     """Helper function to return paths that match a given pattern within a subdirectory."""
     path = os.path.join(__path__[0], '..', '..', '..', '..', "..", subdir)
     return glob.glob(os.path.join(path, pattern)) if os.path.exists(path) else []
@@ -39,8 +38,8 @@ def get_core_libraries():
     #lib_paths = [os.path.join(sys.prefix, subdir) for subdir in ["lib", "lib64"]]
     # TODO: Temporary fix for old pyne
     lib_paths = get_path("lib")
-    lib = [lib for lib in lib_paths if fnmatch.fnmatch(lib, "*pyne*")]
-    return lib, [path for path in lib_paths if os.path.exists(path)][0]
+    lib = get_path("lib", "*pyne*")
+    return lib, lib_paths[0]
 
 def get_extra_libraries():
     """List all the extra libraries of PyNE."""
