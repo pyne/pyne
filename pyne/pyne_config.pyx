@@ -1,5 +1,6 @@
 """Python wrapper for isoname library."""
 from __future__ import unicode_literals
+import os
 
 # Cython imports
 from libcpp.map cimport map as cpp_map
@@ -10,19 +11,11 @@ from cython.operator cimport preincrement as inc
 from libc.stdlib cimport free
 from libcpp.string cimport string as std_string
 
-import os
-import json
-
 # local imports
+from pyne import __path__
 cimport cpp_utils
-import pyne.__init__
 
-pyne_dir = os.path.dirname(pyne.__init__.__file__)
-prefix = os.path.abspath(os.path.join(pyne_dir, '..', '..', '..', '..'))
-lib = os.path.join(prefix, 'lib')
-includes = os.path.join(prefix, 'include', 'pyne')
-nuc_data = os.path.join(pyne_dir, 'nuc_data.h5')
-
+nuc_data = os.path.join(__path__[0], 'nuc_data.h5')
 
 ####################################
 ### pyne configuration namespace ###
@@ -31,7 +24,7 @@ nuc_data = os.path.join(pyne_dir, 'nuc_data.h5')
 # Expose the C-code start up routine
 def pyne_start():
     if "PYNE_DATA" not in os.environ:
-        os.environ['PYNE_DATA'] = pyne_dir
+        os.environ['PYNE_DATA'] = __path__[0]
 
     # Specifiy the NUC_DATA_PATH
     if "NUC_DATA_PATH" not in os.environ:

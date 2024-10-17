@@ -199,3 +199,9 @@ add_subdirectory(pyne/xs)
 set(pyinstallscript "${CMAKE_CURRENT_BINARY_DIR}/cmake/SetupSubPyInstall.cmake")
 configure_file(cmake/SetupSubPyInstall.cmake.in ${pyinstallscript} @ONLY)
 install(SCRIPT ${pyinstallscript})
+
+# configure PyNEConfig.cmake file and install
+configure_file(cmake/PyNEConfig.cmake.in "${CMAKE_CURRENT_BINARY_DIR}/cmake/PyNEConfig.cmake" @ONLY)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cmake/PyNEConfig.cmake
+  DESTINATION lib/cmake/PyNE
+  )
