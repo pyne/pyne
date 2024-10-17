@@ -25,13 +25,13 @@ def get_path(subdir, pattern="*"):
 
 def get_include_path():
     """Return the include directory path for PyNE headers."""
-    return os.path.join(__path__[0], '..', '..', '..', '..', "include")
+    return os.path.join(__path__[0], '..', '..', '..', '..', "..", "include")
 
 def get_core_libraries():
     """Return library paths and library directory paths."""
     #lib_paths = [os.path.join(sys.prefix, subdir) for subdir in ["lib", "lib64"]]
     # TODO: Temporary fix for old pyne
-    lib_paths = [os.path.join(__path__[0], '..', '..', '..', '..', "lib")]
+    lib_paths = [os.path.join(__path__[0], '..', '..', '..', '..', "..", "lib")]
     lib = [lib for subdir in lib_paths for lib in get_path(subdir) if fnmatch.fnmatch(lib, "*pyne*")]
     return lib, [path for path in lib_paths if os.path.exists(path)][0]
 
