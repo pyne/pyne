@@ -28,7 +28,9 @@ def get_include_path():
 
 def get_core_libraries():
     """Return library paths and library directory paths."""
-    lib_paths = [os.path.join(sys.prefix, subdir) for subdir in ["lib", "lib64"]]
+    #lib_paths = [os.path.join(sys.prefix, subdir) for subdir in ["lib", "lib64"]]
+    # TODO: Temporary fix for old pyne
+    lib_paths = [os.path.join(__path__[0], '..', '..', '..', '..', "lib")]
     libs = [lib for subdir in lib_paths for lib in get_path(subdir)]
     return libs, [path for path in lib_paths if os.path.exists(path)][0]
 
