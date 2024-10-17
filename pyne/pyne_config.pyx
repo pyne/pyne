@@ -1,9 +1,6 @@
 """Python wrapper for isoname library."""
 from __future__ import unicode_literals
 import os
-import sys
-import glob
-import fnmatch
 
 # Cython imports
 from libcpp.map cimport map as cpp_map
@@ -18,36 +15,7 @@ from libcpp.string cimport string as std_string
 from pyne import __path__
 cimport cpp_utils
 
-def get_path(subdir, pattern="*"):
-    """Helper function to return paths that match a given pattern within a subdirectory."""
-    path = os.path.join(__path__[0], subdir)
-    return glob.glob(os.path.join(path, pattern)) if os.path.exists(path) else []
-
-def get_include_path():
-    """Return the include directory path for PyNE headers."""
-    return os.path.join(__path__[0], '..', '..', '..', '..', "..", "include")
-
-def get_core_libraries():
-    """Return library paths and library directory paths."""
-    #lib_paths = [os.path.join(sys.prefix, subdir) for subdir in ["lib", "lib64"]]
-    # TODO: Temporary fix for old pyne
-    lib_paths = [os.path.join(__path__[0], '..', '..', '..', '..', "..", "lib")]
-    lib = [lib for subdir in lib_paths for lib in get_path(subdir) if fnmatch.fnmatch(lib, "*pyne*")]
-    return lib, [path for path in lib_paths if os.path.exists(path)][0]
-
-def get_extra_libraries():
-    """List all the extra libraries of PyNE."""
-    libs_path = os.path.join(__path__[0], ".dylibs") if sys.platform == "darwin" else os.path.join(__path__[0], "..", "pyne.libs")
-    return (glob.glob(os.path.join(libs_path, "*")), libs_path) if os.path.exists(libs_path) else ([], [])
-
-# Setup variables
-include_path = get_include_path()
-lib, lib_path = get_core_libraries()
-extra_lib, extra_lib_path = get_extra_libraries()
 nuc_data = os.path.join(__path__[0], 'nuc_data.h5')
-
-# Export variables for easy access
-__all__ = ["include_path", "lib", "lib_path", "extra_lib", "extra_lib_path", "nuc_data"]
 
 ####################################
 ### pyne configuration namespace ###
