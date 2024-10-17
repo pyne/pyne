@@ -26,7 +26,7 @@ except ImportError:
 
 def get_path(subdir, pattern=""):
     """Helper function to return paths that match a given pattern within a subdirectory."""
-    path = os.path.join(__path__[0], '..', '..', '..', '..', "..", subdir)
+    path = os.path.normpath(os.path.join(__path__[0], '..', '..', '..', '..', "..", subdir))
     return glob.glob(os.path.join(path, pattern)) if os.path.exists(path) else []
 
 def get_include_path():
