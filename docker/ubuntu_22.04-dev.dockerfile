@@ -128,10 +128,10 @@ FROM ${pyne_test_base} AS pyne
 COPY . $HOME/opt/pyne
 RUN export PYNE_HDF5_ARGS="--hdf5 $HDF5_INSTALL_PATH"; \
     cd $HOME/opt/pyne \
-    && python setup.py install \
-                    $PYNE_MOAB_ARGS $PYNE_DAGMC_ARGS \
-                    $PYNE_HDF5_ARGS \
-                    --clean -j 4;
+    && python setup.py install --user \
+                                $PYNE_MOAB_ARGS $PYNE_DAGMC_ARGS \
+                                $PYNE_HDF5_ARGS \
+                                --clean -j 4;
 ENV PATH $HOME/.local/bin:$PATH
 ENV PyNE_DIR $HOME/.local/
 ENV HDF5_ROOT $HDF5_INSTALL_PATH

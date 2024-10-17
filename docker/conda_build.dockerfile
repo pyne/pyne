@@ -81,12 +81,12 @@ ENV PYNE_DAGMC_ARGS "--dagmc"
 
 COPY . $HOME/opt/pyne
 RUN cd $HOME/opt/pyne \
-    && python setup.py install \
+    && python setup.py install --user \
                                 $PYNE_MOAB_ARGS $PYNE_DAGMC_ARGS \
                                 --clean -j 4;
 ENV PATH $HOME/.local/bin:$PATH
+ENV PyNE_DIR $HOME/.local/
 RUN cd $HOME \
     && nuc_data_make \
     && cd $HOME/opt/pyne/tests \
     && ./ci-run-tests.sh python3
-    
