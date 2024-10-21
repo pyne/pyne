@@ -79,7 +79,7 @@ jobs:
           export CPP=$CONDA_PREFIX/bin/clang-cpp
           export FC=$CONDA_PREFIX/bin/gfortran
           mkdir -p $(python3 -m site --user-site)
-          python3 setup.py install --user -j 3 -DCMAKE_Fortran_FLAGS="-isysroot $(xcrun --show-sdk-path)"
+          python3 setup.py install --user -j 3
           export PATH=$HOME/.local/bin:$PATH
           nuc_data_make
           cd tests && ./ci-run-tests.sh python3

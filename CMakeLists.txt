@@ -10,7 +10,6 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 # Setup the project
 project(pyne)
-message("CMAKE_OSX_SYSROOT: ${CMAKE_OSX_SYSROOT}")
 
 # check for and enable c++11 support
 INCLUDE(CheckCXXCompilerFlag)
@@ -44,6 +43,7 @@ message("-- CMake Install Prefix: ${CMAKE_INSTALL_PREFIX}")
 if(APPLE)
   message("OSX_SYSROOT: ${CMAKE_OSX_SYSROOT}")
   link_directories("${CMAKE_OSX_SYSROOT}/usr/lib")
+  set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -isysroot ${CMAKE_OSX_SYSROOT}")
 endif()
 
 
