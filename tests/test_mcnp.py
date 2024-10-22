@@ -735,6 +735,7 @@ def test_write_to_hdf5():
         "mcnp_ptrac_i4_little.ptrac",
         "mcnp_ptrac_i8_little.ptrac",
         "mcnp6_ptrac_i4_little.ptrac",
+        "mcnp6_serial_ptrac_i4_little.ptrac",
     ]
 
     for test_file in test_files:
