@@ -40,6 +40,12 @@ enable_language(ASM)
 set(BUILD_SHARED_LIBS true)
 message("-- CMake Install Prefix: ${CMAKE_INSTALL_PREFIX}")
 
+if(APPLE)
+  message("OSX_SYSROOT: ${CMAKE_OSX_SYSROOT}")
+  link_directories("${CMAKE_OSX_SYSROOT}/usr/lib")
+  set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -isysroot ${CMAKE_OSX_SYSROOT}")
+endif()
+
 
 #
 # Allow for dependnecies to exist in non-install location
