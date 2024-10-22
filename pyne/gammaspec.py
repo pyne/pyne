@@ -6,7 +6,7 @@ for activity calculations.
 from pyne.utils import QA_warn
 
 import numpy as np
-
+import csv
 from pyne import spectanalysis
 
 QA_warn(__name__)
@@ -51,6 +51,37 @@ class GammaSpectrum(spectanalysis.PhSpectrum):
             + (self.calib_e_fit[2] * channels**2)
         )
 
+    def write_csv(self,output_filename):
+        """Writes energy, counts, and channel to csv file."""
+        with open(output_filename, 'w') as f:
+            w = csv.writer(f)
+            w.writerow(['Energy (keV)','Counts','Channel'])
+            for n, e, d in zip(self.energy_channel_fit,self.counts, self.channels):
+                w.writerow([n,e,d])
+                
+    def calc_energy_channel(self,max_energy_measured=1500):
+        """Calculate the energy value for each channel as some .spe files 
+            do not have proper calib_e_fit information.
+        """
+        channels = self.channels = np.asarray(self.channels, float)
+        self.energy_channel_fit = (max_energy_measured/len(channels))*channels
+        
+    def calc_energy_poly(self,c1,c2,c3,e1,e2,e3):
+        """Calculate the energy values from channels by solving linear equation 
+            relationship between three channels and their respective energy
+            value."""
+        channels = self.channels = np.asarray(self.channels, float)
+        mat = np.array(
+                [[c1**2,c1,1,e1],
+                 [c2**2,c2,1,e2],
+                 [c3**2,c3,1,e3]])
+        A = mat[0:3,:-1]
+        b = mat[0:3, -1]
+        x = np.linalg.solve(A, b)
+        self.epoly_fit = [x[0],x[1],x[2]]
+        self.epoly_eq =  (str(x[0]) +'x^2' +' + ' + str(x[1])+'x' +' + ' + str(x[2]))        
+        self.epoly = (x[0] * (channels ** 2 )) +(x[1] * channels) + x[2]
+        
     def __str__(self):
         """Print debug information"""
         print_string = (
@@ -135,7 +166,7 @@ def read_dollar_spe_file(spec_file_path):
     spectrum.dead_time = spectrum.real_time - spectrum.live_time
     spectrum.channels = np.arange(0, len(spectrum.counts))
     spectrum.calc_ebins()
-
+    spectrum.calc_energy_channel()
     return spectrum
 
 
@@ -217,6 +248,7 @@ def read_spe_file(spec_file_path):
     # calculate additional parameters based on .spe file
     spectrum.dead_time = spectrum.real_time - spectrum.live_time
     spectrum.calc_ebins()
+    spectrum.calc_energy_channel()
     return spectrum
 
 
@@ -264,3 +296,62 @@ def calc_e_eff(energy, eff_coeff, eff_fit=1):
         eff = 0
 
     return eff
+
+ 
+def read_spec_id_file(spec_file_path):
+    """Reads a .spe file with the $SPEC_ID format
+    """
+    with open(spec_file_path, "r") as spec_file:
+       full_file_text = spec_file.read()
+    file_split = full_file_text.splitlines()
+    spec_file.close()
+    spectrum = GammaSpectrum()
+    # descriptive variables
+    spectrum.file_name = spec_file_path
+    spectrum.spec_name = file_split[file_split.index("$SPEC_ID:") + 1]
+    spectrum.spec_name=spectrum.spec_name.strip()
+    tmp = file_split[file_split.index("$SPEC_REM:") + 1]
+    tmp = tmp.split(" ")
+    spectrum.det_id = tmp[1]
+    tmp = file_split[file_split.index("$SPEC_REM:") + 2]
+    tmp = tmp.split(" ")
+    spectrum.det_descp = tmp[1]
+    # time variables
+    tmp = file_split[file_split.index("$DATE_MEA:") + 1]
+    tmp = tmp.split(" ")
+    spectrum.start_date = tmp[0]
+    spectrum.start_time = tmp[1]
+    tmp = file_split[file_split.index("$MEAS_TIM:") + 1]
+    tmp = tmp.split(" ")
+    spectrum.real_time = float(tmp[1])
+    spectrum.live_time = float(tmp[0])
+    # pulse height
+    tmp = file_split[file_split.index("$DATA:") + 1]
+    tmp = tmp.split(" ")
+    spectrum.start_chan_num = int(tmp[0])
+    spectrum.num_channels = int(tmp[1])+1
+    tmp = file_split[file_split.index("$DATA:") + 2:
+                                 file_split.index("$DATA:") + 2
+                                 + int(spectrum.num_channels) ]
+    for c in tmp:
+        val=c.strip()
+        spectrum.counts.append(float(val))
+    
+    tmp = file_split[file_split.index("$MCA_CAL:") + 2]
+    tmp = tmp.split(" ")
+    spectrum.calib_e_fit.append(float(tmp[0]))
+    spectrum.calib_e_fit.append(float(tmp[1]))
+    spectrum.calib_e_fit.append(float(tmp[2]))
+    
+    tmp = file_split[file_split.index("$SHAPE_CAL:") + 2]
+    tmp = tmp.split(" ")
+    spectrum.calib_fwhm_fit.append(float(tmp[0]))
+    spectrum.calib_fwhm_fit.append(float(tmp[1]))
+    spectrum.calib_fwhm_fit.append(float(tmp[2]))
+    
+    # calculate additional parameters based on .spe file
+    spectrum.dead_time = spectrum.real_time - spectrum.live_time
+    spectrum.channels = np.arange(0, len(spectrum.counts))
+    spectrum.calc_ebins()
+    spectrum.calc_energy_channel()
+    return spectrum
