@@ -36,8 +36,8 @@ endfunction()
 
 # Extract PyNE version, include paths, library paths, and extra libraries
 run_python_command(PyNE_VERSION "import pyne; print(pyne.__version__)")
-run_python_command(PyNE_INCLUDE_DIRS "import pyne; print(pyne.include_path)")
-run_python_command(PyNE_LIBRARY_DIRS "import pyne; print(' '.join(pyne.lib_path))")
+run_python_command(PyNE_INCLUDE_DIRS "import pyne; print(pyne.include_path[0])")
+run_python_command(PyNE_LIBRARY_DIRS "import pyne; print(pyne.lib_path[0])")
 run_python_command(PyNE_EXTRA_LIBRARIES "import pyne; print(' '.join(pyne.extra_lib))")
 
 # Check if the wheel was repaired using auditwheel or delocate
@@ -52,42 +52,51 @@ if(PyNE_EXTRA_LIBRARIES)
   )
 endif()
 
-# Find the core library
-find_library(PyNE_LIBRARY
-  NAMES pyne 
-  PATHS ${PyNE_LIBRARY_DIRS} 
-  NO_DEFAULT_PATH
-  )
+# Add PyNE targets
+file(TO_CMAKE_PATH "${PyNE_LIBRARY_DIRS}/cmake/PyNE/PyNETargets.cmake" PyNE_TARGETS_FILE)
+include(${PyNE_TARGETS_FILE})
 
-# Add the core library as an imported target
-add_library(pyne UNKNOWN IMPORTED)
-set_target_properties(pyne PROPERTIES
-    INTERFACE_INCLUDE_DIRECTORIES "${PyNE_INCLUDE_DIRS}"
-    IMPORTED_LOCATION "${PyNE_LIBRARY}"
-)
-
-# Add the core library to the list of libraries
-set(PyNE_LIBRARIES ${PyNE_LIBRARY})
-
-find_package(HDF5 REQUIRED)
-set(PyNE_LIBRARIES ${PyNE_LIBRARIES} ${HDF5_LIBRARIES})
+# Add HDF5
+if(@HDF5_FOUND@)
+  if(@HDF5_ROOT@)
+    find_package(HDF5 REQUIRED HINTS @HDF5_ROOT@)
+  else()
+    find_package(HDF5 REQUIRED)
+  endif()
+  set(PyNE_INCLUDE_DIRS ${PyNE_INCLUDE_DIRS} @HDF5_INCLUDE_DIRS@)
+  set(PyNE_LIBRARIES pyne @HDF5_LIBRARIES@)
+endif()
 
 # Add MOAB
 if(@MOAB_FOUND@)
-  find_package(MOAB REQUIRED)
-  set(PyNE_LIBRARIES ${PyNE_LIBRARIES} ${MOAB_LIBRARIES})
+  if(@MOAB_ROOT@)
+    find_package(MOAB REQUIRED HINTS @MOAB_ROOT@)
+  else()
+    find_package(MOAB REQUIRED)
+  endif()
+  set(PyNE_INCLUDE_DIRS ${PyNE_INCLUDE_DIRS} @MOAB_INCLUDE_DIRS@)
+  set(PyNE_LIBRARIES ${PyNE_LIBRARIES} @MOAB_LIBRARIES@)
 endif()
 
 # Add DAGMC
 if(@DAGMC_FOUND@)
-  find_package(DAGMC REQUIRED)
-  set(PyNE_LIBRARIES ${PyNE_LIBRARIES} ${DAGMC_LIBRARIES})
+  if(@DAGMC_ROOT@)
+    find_package(DAGMC REQUIRED HINTS @DAGMC_ROOT@)
+  else()
+    find_package(DAGMC REQUIRED)
+  endif()
+  set(PyNE_INCLUDE_DIRS ${PyNE_INCLUDE_DIRS} @DAGMC_INCLUDE_DIRS@)
+  set(PyNE_LIBRARIES ${PyNE_LIBRARIES} @DAGMC_LIBRARIES@)
 endif()
 
 # Add LAPACK
 if(@LAPACK_FOUND@)
-  find_package(LAPACK REQUIRED)
-  set(PyNE_LIBRARIES ${PyNE_LIBRARIES} ${LAPACK_LIBRARIES})
+  if(@LAPACK_ROOT@)
+    find_package(LAPACK REQUIRED HINTS @LAPACK_ROOT@)
+  else()
+    find_package(LAPACK REQUIRED)
+  endif()
+  set(PyNE_LIBRARIES ${PyNE_LIBRARIES} @LAPACK_LIBRARIES@)
 endif()
 
 # Include standard argument handling for finding packages
@@ -95,6 +104,6 @@ include(FindPackageHandleStandardArgs)
 
 # Validates that the necessary variables (PyNE include paths and library) are set
 find_package_handle_standard_args(PyNE
-  REQUIRED_VARS PyNE_LIBRARY PyNE_INCLUDE_DIRS
+  REQUIRED_VARS PyNE_LIBRARIES PyNE_INCLUDE_DIRS
   VERSION_VAR PyNE_VERSION
   )

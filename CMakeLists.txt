@@ -205,3 +205,9 @@ configure_file(cmake/PyNEConfig.cmake.in "${CMAKE_CURRENT_BINARY_DIR}/cmake/PyNE
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cmake/PyNEConfig.cmake
   DESTINATION lib/cmake/PyNE
   )
+
+# install targets
+install(EXPORT PyNETargets
+  FILE PyNETargets.cmake
+  DESTINATION lib/cmake/PyNE
+)
