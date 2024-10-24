@@ -52,7 +52,7 @@ RUN cd $HOME/opt \
     && cmake .. \
         -DCMAKE_INSTALL_PREFIX=${HDF5_INSTALL_PATH} \
         -DBUILD_TESTING=OFF \
-        -DHDF5_BUILD_EXAMPLES=OFF && \
+        -DHDF5_BUILD_EXAMPLES=OFF \
     && make -j 3 \
     && make install \
     && cd .. \
