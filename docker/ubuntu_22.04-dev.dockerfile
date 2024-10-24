@@ -47,7 +47,12 @@ RUN cd $HOME/opt \
     && cd hdf5 \
     && git clone --single-branch --branch $build_hdf5 https://github.com/HDFGroup/hdf5.git \
     && cd hdf5 \
-    && ./configure --prefix=$HDF5_INSTALL_PATH --enable-shared \
+    && mkdir -p build \
+    && cd build  \
+    && cmake .. \
+        -DCMAKE_INSTALL_PREFIX=${HDF5_INSTALL_PATH} \
+        -DBUILD_TESTING=OFF \
+        -DHDF5_BUILD_EXAMPLES=OFF \
     && make -j 3 \
     && make install \
     && cd .. \
@@ -131,8 +136,10 @@ RUN export PYNE_HDF5_ARGS="--hdf5 $HDF5_INSTALL_PATH"; \
     && python setup.py install --user \
                                 $PYNE_MOAB_ARGS $PYNE_DAGMC_ARGS \
                                 $PYNE_HDF5_ARGS \
-                                --clean -j 3;
+                                --clean -j 4;
 ENV PATH $HOME/.local/bin:$PATH
+ENV PyNE_DIR $HOME/.local/
+ENV HDF5_ROOT $HDF5_INSTALL_PATH
 RUN cd $HOME \
     && nuc_data_make \
     && cd $HOME/opt/pyne/tests \

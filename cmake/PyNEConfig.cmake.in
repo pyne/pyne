@@ -1,0 +1,109 @@
+# PyNEConfig.cmake
+# 
+# Configuration file for integrating PyNE with CMake projects.
+# This script finds the Python interpreter, ensures its availability,
+# and retrieves necessary PyNE details such as version, include paths, 
+# and library paths. It also verifies that the Python environment is 
+# properly set up for PyNE and checks for potential compatibility issues.
+
+# This CMake script extracts the following PyNE details:
+# - PyNE version (PyNE_VERSION)
+# - PyNE include paths (PyNE_INCLUDE_DIRS)
+# - PyNE library paths (PyNE_LIBRARY_DIRS)
+# - PyNE library (PyNE_LIBRARY or pyne)
+# - PyNE libraries (PyNE_LIBRARIES)
+# - PyNE extra libraries (PyNE_EXTRA_LIBRARIES)
+
+# Find the Python interpreter and ensure it's available.
+find_package(Python COMPONENTS Interpreter REQUIRED)
+
+# Function to run Python commands and validate their execution.
+function(run_python_command output_var command)
+  execute_process(
+    COMMAND ${Python_EXECUTABLE} -c "${command}"
+    OUTPUT_VARIABLE ${output_var}
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    RESULT_VARIABLE result
+  )
+  # Check if the command was successful
+  if(NOT result EQUAL 0)
+    message(FATAL_ERROR "Failed to run Python command: ${command}")
+  else()
+    # Add the output variable to the parent scope
+    set(${output_var} "${${output_var}}" PARENT_SCOPE)
+  endif()
+endfunction()
+
+# Extract PyNE version, include paths, library paths, and extra libraries
+run_python_command(PyNE_VERSION "import pyne; print(pyne.__version__)")
+run_python_command(PyNE_INCLUDE_DIRS "import pyne; print(pyne.include_path[0])")
+run_python_command(PyNE_LIBRARY_DIRS "import pyne; print(pyne.lib_path[0])")
+run_python_command(PyNE_EXTRA_LIBRARIES "import pyne; print(' '.join(pyne.extra_lib))")
+
+# Check if the wheel was repaired using auditwheel or delocate
+if(PyNE_EXTRA_LIBRARIES)
+  message(FATAL_ERROR
+      "This build of PyNE is not supported. "
+      "It appears that the wheel was repaired using tools like auditwheel or delocate, "
+      "that modifies the shared libraries, which may cause problems.\n"
+      "PYNE_EXTRA_LIBRARIES is not empty: ${PyNE_EXTRA_LIBRARIES}.\n"
+      "To resolve this, please build PyNE from scratch. "
+      "For more information, visit: https://pyne.io\n"
+  )
+endif()
+
+# Add PyNE targets
+file(TO_CMAKE_PATH "${PyNE_LIBRARY_DIRS}/cmake/PyNE/PyNETargets.cmake" PyNE_TARGETS_FILE)
+include(${PyNE_TARGETS_FILE})
+
+# Add HDF5
+if(@HDF5_FOUND@)
+  if(@HDF5_ROOT@)
+    find_package(HDF5 REQUIRED HINTS @HDF5_ROOT@)
+  else()
+    find_package(HDF5 REQUIRED)
+  endif()
+  set(PyNE_INCLUDE_DIRS ${PyNE_INCLUDE_DIRS} @HDF5_INCLUDE_DIRS@)
+  set(PyNE_LIBRARIES pyne @HDF5_LIBRARIES@)
+endif()
+
+# Add MOAB
+if(@MOAB_FOUND@)
+  if(@MOAB_ROOT@)
+    find_package(MOAB REQUIRED HINTS @MOAB_ROOT@)
+  else()
+    find_package(MOAB REQUIRED)
+  endif()
+  set(PyNE_INCLUDE_DIRS ${PyNE_INCLUDE_DIRS} @MOAB_INCLUDE_DIRS@)
+  set(PyNE_LIBRARIES ${PyNE_LIBRARIES} @MOAB_LIBRARIES@)
+endif()
+
+# Add DAGMC
+if(@DAGMC_FOUND@)
+  if(@DAGMC_ROOT@)
+    find_package(DAGMC REQUIRED HINTS @DAGMC_ROOT@)
+  else()
+    find_package(DAGMC REQUIRED)
+  endif()
+  set(PyNE_INCLUDE_DIRS ${PyNE_INCLUDE_DIRS} @DAGMC_INCLUDE_DIRS@)
+  set(PyNE_LIBRARIES ${PyNE_LIBRARIES} @DAGMC_LIBRARIES@)
+endif()
+
+# Add LAPACK
+if(@LAPACK_FOUND@)
+  if(@LAPACK_ROOT@)
+    find_package(LAPACK REQUIRED HINTS @LAPACK_ROOT@)
+  else()
+    find_package(LAPACK REQUIRED)
+  endif()
+  set(PyNE_LIBRARIES ${PyNE_LIBRARIES} @LAPACK_LIBRARIES@)
+endif()
+
+# Include standard argument handling for finding packages
+include(FindPackageHandleStandardArgs)
+
+# Validates that the necessary variables (PyNE include paths and library) are set
+find_package_handle_standard_args(PyNE
+  REQUIRED_VARS PyNE_LIBRARIES PyNE_INCLUDE_DIRS
+  VERSION_VAR PyNE_VERSION
+  )

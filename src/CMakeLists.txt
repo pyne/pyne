@@ -140,4 +140,8 @@ INSTALL(FILES ${h_files} DESTINATION include/pyne COMPONENT headers)
 #
 # Install libpyne
 #
-INSTALL(TARGETS pyne LIBRARY DESTINATION lib COMPONENT pyne)
+INSTALL(TARGETS pyne
+    EXPORT PyNETargets
+    LIBRARY DESTINATION lib
+    INCLUDES DESTINATION include 
+    )
