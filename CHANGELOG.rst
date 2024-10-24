@@ -10,6 +10,7 @@ Next Version
    * Add dockerfile and workflow to build PyNE with Conda (#1540)
    * Support Cython3+ (#1528)
    * Remove deprecated references to ``basestring`` (#1544)
+   * Add CI for MacOS (#1557)
    * Refactor PyNE Configuration for CMake Integration (#1556)
 
 **Fix**
