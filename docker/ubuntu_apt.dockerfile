@@ -140,6 +140,7 @@ RUN export PYNE_HDF5_ARGS="--hdf5 $HDF5_INSTALL_PATH"; \
     && python setup.py install --user \
                                 $PYNE_MOAB_ARGS $PYNE_DAGMC_ARGS \
                                 $PYNE_HDF5_ARGS \
+                                --no_spatial_solvers \
                                 --clean -j ${make_cores};
 ENV PATH=$HOME/.local/bin:$PATH
 RUN cd $HOME \
