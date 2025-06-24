@@ -75,8 +75,8 @@ rever/
 
 .vscode
 
-# ignore version file generated from pyne_version.py
-src/pyne_version.h
+# ignore version file generated from cmake and amalgamate.py
+version.h
 
 # ignore amalgamated source
 pyne.cpp
