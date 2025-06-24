@@ -396,7 +396,7 @@ def parse_args():
     )
     other.add_argument(
         "--spatial_solvers",
-        default=True,
+        default=False,
         action="store_true",
         help="Build spatial solvers (Default)",
     )

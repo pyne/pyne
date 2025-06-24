@@ -1,5 +1,5 @@
 # Defines the CMake commands/policies
-cmake_minimum_required(VERSION 3.0.0)
+cmake_minimum_required(VERSION 3.5.0)
 
 if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.12.0")
   cmake_policy(SET CMP0074 NEW)
@@ -11,14 +11,14 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 # Setup the project
 project(pyne)
 
-# check for and enable c++11 support
-INCLUDE(CheckCXXCompilerFlag)
-CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
-IF(COMPILER_SUPPORTS_CXX11)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-ELSE()
-    MESSAGE(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
-ENDIF()
+# Get the version from Git
+include(GetVersionFromGit)
+
+# Output version information
+message(STATUS "PyNE version: ${PYNE_VERSION}")
+message(STATUS "PyNE dev state: ${PYNE_DEV_STATE}")
+message(STATUS "PyNE commit hash: ${PYNE_COMMIT_HASH}")
+message(STATUS "PyNE commit count: ${PYNE_COMMIT_COUNT}")
 
 option ( ENABLE_SPATIAL_SOLVERS     "Should build AHOT spatial solvers?"                 OFF )
 option ( ENABLE_ENSDF_PROCESSIONG   "Should build ENSDF processing tools?"               ON )

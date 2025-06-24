@@ -37,11 +37,6 @@ jobs:
     runs-on: ["${{ matrix.macos_versions }}"]
 
     steps:
-      - name: Setup XCode
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: latest
-
       - name: Checkout Pyne
         uses: actions/checkout@v4
 
@@ -59,7 +54,7 @@ jobs:
         run: |
           mamba install -y \
               compilers \
-              cmake \
+              "cmake<4.0.0" \
               make \
               libblas \
               liblapack \
@@ -78,8 +73,6 @@ jobs:
           export CXX=$CONDA_PREFIX/bin/clang++
           export CPP=$CONDA_PREFIX/bin/clang-cpp
           export FC=$CONDA_PREFIX/bin/gfortran
-          mkdir -p $(python3 -m site --user-site)
-          python3 setup.py install --user -j 3
-          export PATH=$HOME/.local/bin:$PATH
+          python3 setup.py install --prefix $CONDA_PREFIX -j 4
           nuc_data_make
           cd tests && ./ci-run-tests.sh python3

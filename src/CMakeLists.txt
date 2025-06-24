@@ -1,10 +1,13 @@
 set(PYNE_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}" ${PYNE_INCLUDE_DIRS}
     PARENT_SCOPE)
 
-execute_process(COMMAND "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_LIST_DIR}/../pyne/pyne_version.py" WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+# Generate version.h
+configure_file(version.h.in "${CMAKE_CURRENT_BINARY_DIR}/version.h" @ONLY)
 
 pyne_download_platform()
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}"
+                    "${CMAKE_CURRENT_BINARY_DIR}"
+                    )
 
 # setup source files
 set(PYNE_SRCS

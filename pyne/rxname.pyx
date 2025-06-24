@@ -218,7 +218,7 @@ def name(x, y=None, z="n"):
 
     Parameters
     ----------
-    x : str, int, or long
+    x : str, int
         name, abbreviation, id, MT number, or from nuclide.
     y : str, int, or None, optional
         to nuclide.
@@ -237,8 +237,6 @@ def name(x, y=None, z="n"):
             x_bytes = x.encode()
             cn = cpp_rxname.name(std_string(<char *> x_bytes))
         elif isinstance(x, int):
-            cn = cpp_rxname.name(<extra_types.uint32> long(x))
-        elif isinstance(x, long):
             cn = cpp_rxname.name(<extra_types.uint32> x)
     else:
         if isinstance(x, str):
@@ -266,7 +264,7 @@ def id(x, y=None, z="n"):
 
     Parameters
     ----------
-    x : str, int, or long
+    x : str, int
         name, abbreviation, id, MT number, or from nuclide.
     y : str, int, or None, optional
         to nuclide.
@@ -275,7 +273,7 @@ def id(x, y=None, z="n"):
 
     Returns
     -------
-    rxid : int or long
+    rxid : int
         a unique reaction identifier.
     """
     cdef int from_nuc, to_nuc
@@ -284,8 +282,6 @@ def id(x, y=None, z="n"):
             x_bytes = x.encode()
             rxid = cpp_rxname.id(std_string(<char *> x_bytes))
         elif isinstance(x, int):
-            rxid = cpp_rxname.id(<extra_types.uint32> long(x))
-        elif isinstance(x, long):
             rxid = cpp_rxname.id(<extra_types.uint32> x)
     else:
         if isinstance(x, str):
@@ -310,7 +306,7 @@ def mt(x, y=None, z="n"):
 
     Parameters
     ----------
-    x : str, int, or long
+    x : str, int
         name, abbreviation, id, MT number, or from nuclide.
     y : str, int, or None, optional
         to nuclide.
@@ -319,7 +315,7 @@ def mt(x, y=None, z="n"):
 
     Returns
     -------
-    mtnum : int or long
+    mtnum : int
         a unique MT number.
     """
     cdef int from_nuc, to_nuc
@@ -328,8 +324,6 @@ def mt(x, y=None, z="n"):
             x_bytes = x.encode()
             mtnum = cpp_rxname.mt(std_string(<char *> x_bytes))
         elif isinstance(x, int):
-            mtnum = cpp_rxname.mt(<extra_types.uint32> long(x))
-        elif isinstance(x, long):
             mtnum = cpp_rxname.mt(<extra_types.uint32> x)
     else:
         if isinstance(x, str):
@@ -354,7 +348,7 @@ def label(x, y=None, z="n"):
 
     Parameters
     ----------
-    x : str, int, or long
+    x : str, in
         name, abbreviation, id, MT number, or from nuclide.
     y : str, int, or None, optional
         to nuclide.
@@ -373,8 +367,6 @@ def label(x, y=None, z="n"):
             x_bytes = x.encode()
             clab = cpp_rxname.label(std_string(<char *> x_bytes))
         elif isinstance(x, int):
-            clab = cpp_rxname.label(<extra_types.uint32> long(x))
-        elif isinstance(x, long):
             clab = cpp_rxname.label(<extra_types.uint32> x)
     else:
         if isinstance(x, str):
@@ -400,7 +392,7 @@ def doc(x, y=None, z="n"):
 
     Parameters
     ----------
-    x : str, int, or long
+    x : str, int
         name, abbreviation, id, MT number, or from nuclide.
     y : str, int, or None, optional
         to nuclide.
@@ -419,8 +411,6 @@ def doc(x, y=None, z="n"):
             x_bytes = x.encode()
             cd = cpp_rxname.doc(std_string(<char *> x_bytes))
         elif isinstance(x, int):
-            cd = cpp_rxname.doc(<extra_types.uint32> long(x))
-        elif isinstance(x, long):
             cd = cpp_rxname.doc(<extra_types.uint32> x)
     else:
         if isinstance(x, str):
@@ -478,9 +468,9 @@ def child(nuc, rx, z="n"):
     elif nuc_is_str and not rx_is_str:
         nuc_bytes = nuc.encode()
         to_nuc = cpp_rxname.child(std_string(<char *> nuc_bytes),
-                                  <extra_types.uint32> long(rx), ptype)
+                                  <extra_types.uint32> rx, ptype)
     elif not nuc_is_str and not rx_is_str:
-        to_nuc = cpp_rxname.child(<int> nuc, <extra_types.uint32> long(rx), ptype)
+        to_nuc = cpp_rxname.child(<int> nuc, <extra_types.uint32> rx, ptype)
     return int(to_nuc)
 
 
@@ -523,8 +513,8 @@ def parent(nuc, rx, z="n"):
     elif nuc_is_str and not rx_is_str:
         nuc_bytes = nuc.encode()
         from_nuc = cpp_rxname.parent(std_string(<char *> nuc_bytes),
-                                    <extra_types.uint32> long(rx), ptype)
+                                    <extra_types.uint32> rx, ptype)
     elif not nuc_is_str and not rx_is_str:
-        from_nuc = cpp_rxname.parent(<int> nuc, <extra_types.uint32> long(rx), ptype)
+        from_nuc = cpp_rxname.parent(<int> nuc, <extra_types.uint32> rx, ptype)
     return int(from_nuc)
 

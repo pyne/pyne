@@ -22,8 +22,6 @@ else:
     from urllib.request import urlopen
 from distutils.core import setup
 
-from pyne.pyne_version import PYNE_VERSION
-
 
 IS_NT = os.name == "nt"
 
@@ -75,7 +73,7 @@ def main():
     }
     setup_kwargs = {
         "name": "pyne",
-        "version": PYNE_VERSION,
+        "version": "0.7.8-dev", # Will be updated by PR 1549
         "description": "The Nuclear Engineering Toolkit",
         "author": "PyNE Development Team",
         "author_email": "pyne-dev@googlegroups.com",

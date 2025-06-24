@@ -4,11 +4,16 @@ PyNE Change Log
 
 Next Version
 ============
+
+**New Capabilities**
+   * Support Cython3+ (#1528)
+   * Add CI for MacOS (#1557)
+   * Add Git versioning support (#1570)
+
 **Change**
    * Test install script on multiple Ubuntu versions (#1484)
    * Update MOAB, OpenMC, hdf5 versions in apt build (#1529)
    * Add dockerfile and workflow to build PyNE with Conda (#1540)
-   * Support Cython3+ (#1528)
    * Remove deprecated references to ``basestring`` (#1544)
    * Add CI for MacOS (#1557)
    * Refactor PyNE Configuration for CMake Integration (#1556)
@@ -24,6 +29,11 @@ Next Version
    * Remove imp module from tests to support Python 3.12 (#1543)
    * Resolve DAGMC Target Conflict and Improve Test Skips (#1551)
    * Fix material testing inaccuracies by using assert_allclose for value comparison (#1552)
+   * Fix mcnp version check for serial mcnp6 in PtracReader (#1558)
+   * Remove duplicate cmake code that checks for compiler compatibility (#1562)
+   * Fix in operator for MaterialLibrary (#1564) 
+   * Update Dockerfile syntax (#1566)
+   * Remove reference to Python `long` (#1566)
 
 v0.7.8
 ======

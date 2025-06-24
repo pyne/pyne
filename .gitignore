@@ -13,6 +13,7 @@ src/*.tar.gz
 # Ignore environment
 .env
 .venv
+.devcontainer
 
 # Ignore temp files
 *.pyc
