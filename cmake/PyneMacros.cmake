@@ -48,6 +48,10 @@ macro(pyne_set_asm_platform)
   else()
     set(_plat "${_plat}-NOTFOUND")
   endif()
+  # then set architecture
+  if (CMAKE_SYSTEM_PROCESSOR MATCHES "arm64")
+    set(_plat "${_plat}-arm64")
+  endif()
   set(PYNE_ASM_PLATFORM "${_plat}")
 endmacro()
 

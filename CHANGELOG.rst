@@ -10,6 +10,7 @@ Next Version
    * Add dockerfile and workflow to build PyNE with Conda (#1540)
    * Support Cython3+ (#1528)
    * Remove deprecated references to ``basestring`` (#1544)
+   * Add CI for MacOS (#1557)
    * Automatically Generate pyne_version.h using Git Versions (#1550)
 
 **Fix**
@@ -23,6 +24,11 @@ Next Version
    * Remove imp module from tests to support Python 3.12 (#1543)
    * Resolve DAGMC Target Conflict and Improve Test Skips (#1551)
    * Fix material testing inaccuracies by using assert_allclose for value comparison (#1552)
+   * Fix mcnp version check for serial mcnp6 in PtracReader (#1558)
+   * Remove duplicate cmake code that checks for compiler compatibility (#1562)
+   * Fix in operator for MaterialLibrary (#1564) 
+   * Update Dockerfile syntax (#1566)
+   * Remove reference to Python `long` (#1566)
 
 v0.7.8
 ======

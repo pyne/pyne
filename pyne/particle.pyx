@@ -128,7 +128,7 @@ def name(x):
         x_bytes = x.encode()
         cn = cpp_particle.name(std_string(<char *> x_bytes))
     elif isinstance(x, int):
-        cn = cpp_particle.name(<int> long(x))
+        cn = cpp_particle.name(<int> x)
 
     n = bytes(<char *> cn.c_str()).decode()
     
@@ -151,7 +151,7 @@ def mcnp(x):
         x_bytes = x.encode()
         cn = cpp_particle.mcnp(std_string(<char *> x_bytes))
     elif isinstance(x, int):
-        cn = cpp_particle.mcnp(<int> long(x))
+        cn = cpp_particle.mcnp(<int> x)
 
     n = bytes(<char *> cn.c_str()).decode()
     
@@ -175,7 +175,7 @@ def mcnp6(x):
         x_bytes = x.encode()
         cn = cpp_particle.mcnp6(std_string(<char *> x_bytes))
     elif isinstance(x, int):
-        cn = cpp_particle.mcnp6(<int> long(x))
+        cn = cpp_particle.mcnp6(<int> x)
 
     n = bytes(<char *> cn.c_str()).decode()
     
@@ -199,7 +199,7 @@ def fluka(x):
         x_bytes = x.encode()
         cn = cpp_particle.fluka(std_string(<char *> x_bytes))
     elif isinstance(x, int):
-        cn = cpp_particle.fluka(<int> long(x))
+        cn = cpp_particle.fluka(<int> x)
 
     n = bytes(<char *> cn.c_str()).decode()
     
@@ -222,7 +222,7 @@ def geant4(x):
         x_bytes = x.encode()
         cn = cpp_particle.geant4(std_string(<char *> x_bytes))
     elif isinstance(x, int):
-        cn = cpp_particle.geant4(<int> long(x))
+        cn = cpp_particle.geant4(<int> x)
 
     n = bytes(<char *> cn.c_str()).decode()
     
@@ -247,7 +247,7 @@ def describe(x):
         x_bytes = x.encode()
         cn = cpp_particle.describe(std_string(<char *> x_bytes))
     elif isinstance(x, int):
-        cn = cpp_particle.describe(<int> long(x))
+        cn = cpp_particle.describe(<int> x)
 
     n = bytes(<char *> cn.c_str()).decode()
     
@@ -271,7 +271,7 @@ def id(x):
         x_bytes = x.encode()
         cn = cpp_particle.id(std_string(<char *> x_bytes))
     elif isinstance(x, int):
-        cn = cpp_particle.id(<int> long(x))
+        cn = cpp_particle.id(<int> x)
 
     n = cn
     
@@ -295,7 +295,7 @@ def is_valid(x):
         x_bytes = x.encode()
         cn = cpp_particle.is_valid(std_string(<char *> x_bytes))
     elif isinstance(x, int):
-        cn = cpp_particle.is_valid(<int> long(x))
+        cn = cpp_particle.is_valid(<int> x)
 
     n = cn
     
@@ -319,7 +319,7 @@ def is_heavy_ion(x):
         x_bytes = x.encode()
         cn = cpp_particle.is_heavy_ion(std_string(<char *> x_bytes))
     elif isinstance(x, int):
-        cn = cpp_particle.is_heavy_ion(<int> long(x))
+        cn = cpp_particle.is_heavy_ion(<int> x)
 
     n = cn
     

@@ -1,5 +1,6 @@
 ARG pyne_test_base=openmc
 ARG ubuntu_version=22.04
+ARG make_cores=4
 
 FROM ubuntu:${ubuntu_version} AS base_python
 
@@ -7,7 +8,7 @@ FROM ubuntu:${ubuntu_version} AS base_python
 ENV TZ=America/Chicago
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-ENV HOME /root
+ENV HOME=/root
 RUN apt-get update \
     && apt-get install -y --fix-missing \
             software-properties-common \
@@ -24,7 +25,7 @@ RUN apt-get update \
     update-alternatives --install /usr/bin/python python /usr/bin/python3 10; \
     update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 10; \
     pip install --upgrade pip; \
-    pip install numpy==1.23 \
+    pip install numpy \
             scipy \
             cython \
             pytest \
@@ -40,7 +41,7 @@ RUN mkdir -p $HOME/opt
 RUN echo "export PATH=$HOME/.local/bin:\$PATH" >> ~/.bashrc
 
 # build HDF5
-ARG build_hdf5="hdf5-1_14_3"
+ARG build_hdf5="hdf5-1.14.6"
 ENV HDF5_INSTALL_PATH=$HOME/opt/hdf5/$build_hdf5
 RUN cd $HOME/opt \
     && mkdir hdf5 \
@@ -48,17 +49,19 @@ RUN cd $HOME/opt \
     && git clone --single-branch --branch $build_hdf5 https://github.com/HDFGroup/hdf5.git \
     && cd hdf5 \
     && ./configure --prefix=$HDF5_INSTALL_PATH --enable-shared \
-    && make -j 3 \
+    && make -j ${make_cores} \
     && make install \
     && cd .. \
     && rm -rf hdf5;
 # put HDF5 on the path
-ENV LD_LIBRARY_PATH $HDF5_INSTALL_PATH/lib:$LD_LIBRARY_PATH
-ENV LIBRARY_PATH $HDF5_INSTALL_PATH/lib:$LIBRARY_PATH
+ENV LD_LIBRARY_PATH=$HDF5_INSTALL_PATH/lib:$LD_LIBRARY_PATH
+ENV LIBRARY_PATH=$HDF5_INSTALL_PATH/lib:$LIBRARY_PATH
 RUN echo "export PATH=$PATH:$HDF5_INSTALL_PATH" >> ~/.bashrc
 
 FROM base_python AS moab
 ARG moab_version="5.5.1"
+ARG make_cores=4
+
 ENV INSTALL_PATH=$HOME/opt/moab
 
 # build MOAB
@@ -79,7 +82,7 @@ RUN export MOAB_HDF5_ARGS="-DHDF5_ROOT=$HDF5_INSTALL_PATH"; \
             -DBUILD_SHARED_LIBS=ON \
             -DENABLE_BLASLAPACK=OFF \
             -DENABLE_FORTRAN=OFF \
-    && make -j 3 \
+    && make -j ${make_cores} \
     && cd pymoab \
     && pip install . \
     && cd .. \
@@ -88,15 +91,18 @@ RUN export MOAB_HDF5_ARGS="-DHDF5_ROOT=$HDF5_INSTALL_PATH"; \
     && rm -rf moab ;
 
 # put MOAB on the path
-ENV LD_LIBRARY_PATH $HOME/opt/moab/lib:$LD_LIBRARY_PATH
-ENV LIBRARY_PATH $HOME/opt/moab/lib:$LIBRARY_PATH
-ENV PYNE_MOAB_ARGS "--moab $HOME/opt/moab"
+ENV LD_LIBRARY_PATH=$HOME/opt/moab/lib:$LD_LIBRARY_PATH
+ENV LIBRARY_PATH=$HOME/opt/moab/lib:$LIBRARY_PATH
+ENV PYNE_MOAB_ARGS="--moab $HOME/opt/moab"
 
 FROM moab AS dagmc
 # build/install DAGMC
 ENV INSTALL_PATH=$HOME/opt/dagmc
+ARG dagmc_version="v3.2.4"
+ARG make_cores=4
+
 RUN cd /root \
-    && git clone --depth 1 --branch stable https://github.com/svalinn/DAGMC.git \
+    && git clone --depth 1 --branch ${dagmc_version} https://github.com/svalinn/DAGMC.git \
     && cd DAGMC \
     && mkdir bld \
     && cd bld \
@@ -108,22 +114,24 @@ RUN cd /root \
                 -DBUILD_MAKE_WATERTIGHT=OFF \
                 -DBUILD_OVERLAP_CHECK=OFF \
                 -DBUILD_TESTS=OFF \
-    && make -j 3\
+    && make -j ${make_cores} \
     && make install \
     && cd ../.. \
     && rm -rf DAGMC
-ENV PYNE_DAGMC_ARGS "--dagmc $HOME/opt/dagmc"
+ENV PYNE_DAGMC_ARGS="--dagmc $HOME/opt/dagmc"
 
 FROM dagmc AS openmc
-ARG openmc_version="v0.14.0"
+# pinned at version 0.14 because Ubuntu 22.04 comes with Python 3.10 and 0.15.x requires Python 3.11+
+ARG openmc_version="v0.14.0"  
 # build/install OpenMC Python API
 RUN export HDF5_ROOT="$HDF5_INSTALL_PATH" ; \
     git clone --depth 1 --branch $openmc_version https://github.com/openmc-dev/openmc.git $HOME/opt/openmc \
     && cd  $HOME/opt/openmc \
-    && pip install .
+    && pip install --user .
 
 # Build/Install PyNE from release branch
 FROM ${pyne_test_base} AS pyne
+ARG make_cores=4
 
 COPY . $HOME/opt/pyne
 RUN export PYNE_HDF5_ARGS="--hdf5 $HDF5_INSTALL_PATH"; \
@@ -131,8 +139,8 @@ RUN export PYNE_HDF5_ARGS="--hdf5 $HDF5_INSTALL_PATH"; \
     && python setup.py install --user \
                                 $PYNE_MOAB_ARGS $PYNE_DAGMC_ARGS \
                                 $PYNE_HDF5_ARGS \
-                                --clean -j 3;
-ENV PATH $HOME/.local/bin:$PATH
+                                --clean -j ${make_cores};
+ENV PATH=$HOME/.local/bin:$PATH
 RUN cd $HOME \
     && nuc_data_make \
     && cd $HOME/opt/pyne/tests \

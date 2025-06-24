@@ -152,7 +152,7 @@ def fromendf_tok(s):
     cs = s
     cdef int i, num_entries
     cdef char entry[12]
-    cdef long pos = 0
+    cdef int pos = 0
     cdef np.ndarray[np.float64_t, ndim=1] cdata
     i = 0
     num_entries = len(cs)//81 * 6
@@ -185,7 +185,7 @@ def fromendl_tok(s, num_fields):
     cs = s
     cdef int i, num_entries, num_lines, line_length
     cdef char entry[12]
-    cdef long pos = 0
+    cdef int pos = 0
     cdef np.ndarray[np.float64_t, ndim=1] cdata
     i = 0
     line_length = num_fields*11+1
