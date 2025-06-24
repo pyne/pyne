@@ -11,6 +11,15 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 # Setup the project
 project(pyne)
 
+# Get the version from Git
+include(GetVersionFromGit)
+
+# Output version information
+message(STATUS "PyNE version: ${PYNE_VERSION}")
+message(STATUS "PyNE dev state: ${PYNE_DEV_STATE}")
+message(STATUS "PyNE commit hash: ${PYNE_COMMIT_HASH}")
+message(STATUS "PyNE commit count: ${PYNE_COMMIT_COUNT}")
+
 option ( ENABLE_SPATIAL_SOLVERS     "Should build AHOT spatial solvers?"                 OFF )
 option ( ENABLE_ENSDF_PROCESSIONG   "Should build ENSDF processing tools?"               ON )
 

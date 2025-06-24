@@ -1,5 +1,8 @@
 import os
 from warnings import warn
+import importlib.metadata
+
+__version__ = importlib.metadata.version("pyne")
 
 
 if os.name == "nt":
@@ -8,9 +11,6 @@ if os.name == "nt":
     os.environ["PATH"] = ";".join([lib] + p)
 
 try:
-    from .pyne_version import PYNE_VERSION
-
-    __version__ = PYNE_VERSION
     from .pyne_config import *
 
 except ImportError:
