@@ -15,7 +15,6 @@ Next Version
    * Update MOAB, OpenMC, hdf5 versions in apt build (#1529)
    * Add dockerfile and workflow to build PyNE with Conda (#1540)
    * Remove deprecated references to ``basestring`` (#1544)
-   * Add CI for MacOS (#1557)
    * Refactor PyNE Configuration for CMake Integration (#1556)
 
 **Fix**
