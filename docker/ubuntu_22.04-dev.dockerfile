@@ -54,7 +54,7 @@ RUN cd $HOME/opt \
         -DCMAKE_INSTALL_PREFIX=${HDF5_INSTALL_PATH} \
         -DBUILD_TESTING=OFF \
         -DHDF5_BUILD_EXAMPLES=OFF \
-    && make -j 3 \
+    && make -j ${make_cores} \
     && make install \
     && cd .. \
     && rm -rf hdf5;
