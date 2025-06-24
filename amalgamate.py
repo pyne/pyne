@@ -22,6 +22,9 @@ import subprocess
 from argparse import ArgumentParser
 
 # Configuration
+
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+
 CODE_EXTS = {".c", ".cpp", ".cxx", ".h", ".hpp", ".hxx"}
 CODE_EXTS |= {ext.upper() for ext in CODE_EXTS}
 
@@ -68,7 +71,7 @@ DEFAULT_FILES = [
     "src/_decay.cpp",
 ]
 
-DEFAULT_FILES = [os.path.join(".", f) for f in DEFAULT_FILES]
+DEFAULT_FILES = [os.path.join(SCRIPT_DIR, f) for f in DEFAULT_FILES]
 
 
 # Version Handling
@@ -102,7 +105,7 @@ def get_version():
                 "Hint: Ensure your repo has tags or fallback to .git_archival.txt."
             )
     else:
-        archival = os.path.join(os.path.dirname(__file__), ".git_archival.txt")
+        archival = os.path.join(SCRIPT_DIR, ".git_archival.txt")
         if os.path.exists(archival):
             with open(archival, "r", encoding="utf-8") as f:
                 for line in f:
