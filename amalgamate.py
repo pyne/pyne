@@ -33,7 +33,7 @@ HEADER_EXTS |= {ext.upper() for ext in HEADER_EXTS}
 
 DEFAULT_FILES = [
     "license.txt",
-    "tools/version.h",
+    "version.h",
     "src/utils.h",
     "src/utils.cpp",
     "src/extra_types.h",
@@ -68,36 +68,48 @@ DEFAULT_FILES = [
     "src/_decay.cpp",
 ]
 
-DEFAULT_FILES = [os.path.join("..", f) for f in DEFAULT_FILES]
+DEFAULT_FILES = [os.path.join(".", f) for f in DEFAULT_FILES]
 
 
 # Version Handling
 def get_version():
-    try:
-        version = (
+    def in_git_repo():
+        try:
             subprocess.check_output(
-                ["git", "describe", "--tags"], stderr=subprocess.STDOUT
+                ["git", "rev-parse", "--is-inside-work-tree"], stderr=subprocess.STDOUT
             )
-            .strip()
-            .decode("utf-8")
-        )
-        if not version:
-            raise Exception("Empty version string from git.")
-        return version
-    except subprocess.CalledProcessError as e:
-        raise RuntimeError(
-            f"Git describe failed. Output: {e.output.decode('utf-8').strip()}\n"
-            "Hint: Ensure your repo has tags or fallback to .git_archival.txt."
-        )
-    except FileNotFoundError:
-        archival = os.path.join(os.path.dirname(__file__), "..", ".git_archival.txt")
+            return True
+        except subprocess.CalledProcessError:
+            return False
+        except FileNotFoundError:
+            return False
+
+    if in_git_repo():
+        try:
+            version = (
+                subprocess.check_output(
+                    ["git", "describe", "--tags"], stderr=subprocess.STDOUT
+                )
+                .strip()
+                .decode("utf-8")
+            )
+            if not version:
+                raise RuntimeError("Empty version string from git.")
+            return version
+        except subprocess.CalledProcessError as e:
+            raise RuntimeError(
+                f"Git describe failed. Output: {e.output.decode('utf-8').strip()}\n"
+                "Hint: Ensure your repo has tags or fallback to .git_archival.txt."
+            )
+    else:
+        archival = os.path.join(os.path.dirname(__file__), ".git_archival.txt")
         if os.path.exists(archival):
             with open(archival, "r", encoding="utf-8") as f:
                 for line in f:
                     if line.startswith("describe-name:"):
                         return line.split(":", 1)[1].strip()
             raise RuntimeError("describe-name not found in .git_archival.txt")
-        raise RuntimeError("Git not available and .git_archival.txt is missing.")
+        raise RuntimeError("Not in a Git repo and .git_archival.txt is missing.")
 
 
 def create_version_header(version, output_path="version.h"):
