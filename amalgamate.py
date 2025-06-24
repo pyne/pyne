@@ -10,29 +10,21 @@ Inspired by the JsonCpp amalgamation tool:
     http://svn.code.sf.net/p/jsoncpp/code/trunk/jsoncpp/amalgamate.py
 
 Usage:
-    python amalgamate.py [-s OUTPUT.cpp] [-i OUTPUT.h] [-f file1.h file2.cpp ...]
-
-Default:
-    - Input files: See `DEFAULT_FILES`
-    - Output files: pyne.h, pyne.cpp
+    python amalgamate.py [-s OUTPUT.cpp] [-i OUTPUT.h] [-f file1.h file2.cpp ...] [-o OUTPUT_DIR]
 """
+
 from __future__ import print_function, unicode_literals
 import os
 import subprocess
 from argparse import ArgumentParser
 
 # Configuration
-
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 CODE_EXTS = {".c", ".cpp", ".cxx", ".h", ".hpp", ".hxx"}
 CODE_EXTS |= {ext.upper() for ext in CODE_EXTS}
-
-SOURCE_EXTS = {".c", ".cpp", ".cxx"}
-SOURCE_EXTS |= {ext.upper() for ext in SOURCE_EXTS}
-
-HEADER_EXTS = {".h", ".hpp", ".hxx"}
-HEADER_EXTS |= {ext.upper() for ext in HEADER_EXTS}
+SOURCE_EXTS = {".c", ".cpp", ".cxx"} | {ext.upper() for ext in [".c", ".cpp", ".cxx"]}
+HEADER_EXTS = {".h", ".hpp", ".hxx"} | {ext.upper() for ext in [".h", ".hpp", ".hxx"]}
 
 DEFAULT_FILES = [
     "license.txt",
@@ -82,9 +74,7 @@ def get_version():
                 ["git", "rev-parse", "--is-inside-work-tree"], stderr=subprocess.STDOUT
             )
             return True
-        except subprocess.CalledProcessError:
-            return False
-        except FileNotFoundError:
+        except (subprocess.CalledProcessError, FileNotFoundError):
             return False
 
     if in_git_repo():
@@ -186,10 +176,13 @@ class AmalgamatedFile:
 def main():
     parser = ArgumentParser(description="Amalgamate PyNE C++ code.")
     parser.add_argument(
-        "-s", dest="source_path", default="pyne.cpp", help="Output C++ source file."
+        "-s",
+        dest="source_name",
+        default="pyne.cpp",
+        help="Output C++ source file name.",
     )
     parser.add_argument(
-        "-i", dest="header_path", default="pyne.h", help="Output header file."
+        "-i", dest="header_name", default="pyne.h", help="Output header file name."
     )
     parser.add_argument(
         "-f",
@@ -198,13 +191,24 @@ def main():
         default=DEFAULT_FILES,
         help="Input files to amalgamate.",
     )
+    parser.add_argument(
+        "-o",
+        dest="output_dir",
+        default=".",
+        help="Output directory for generated files.",
+    )
+
     args = parser.parse_args()
+    output_dir = os.path.abspath(args.output_dir)
 
     version = get_version()
-    create_version_header(version, "version.h")
+    create_version_header(version)
+
+    header_path = os.path.join(output_dir, args.header_name)
+    source_path = os.path.join(output_dir, args.source_name)
 
     # Header generation
-    header = AmalgamatedFile(args.header_path)
+    header = AmalgamatedFile(header_path)
     header.append_line("// Amalgamated PyNE header - http://pyne.io/")
     header.append_line("#ifndef PYNE_AMALGAMATED_HEADER")
     header.append_line("#define PYNE_AMALGAMATED_HEADER\n")
@@ -218,9 +222,9 @@ def main():
     header.write()
 
     # Source generation
-    source = AmalgamatedFile(args.source_path)
+    source = AmalgamatedFile(source_path)
     source.append_line("// Amalgamated PyNE source - http://pyne.io/")
-    rel_header = os.path.relpath(args.header_path, os.path.dirname(args.source_path))
+    rel_header = os.path.relpath(header_path, os.path.dirname(source_path))
     source.append_line(f'#include "{rel_header}"\n')
 
     for file in args.files:
