@@ -247,5 +247,163 @@ class TestMainExecution(unittest.TestCase):
         self.assertIn("// " + self.files_map["license.txt"], source_content)
 
 
+class TestAmalgamationResult(unittest.TestCase):
+    """
+    An end-to-end integration test that checks if the amalgamated
+    output files can be compiled and used in a real C++ program.
+    """
+
+    def setUp(self):
+        # Create a top-level temporary directory for the test
+        self.test_dir = tempfile.mkdtemp()
+        self.output_dir = os.path.join(self.test_dir, "amalgamated_lib")
+        os.makedirs(self.output_dir)
+
+        # Patch BASE_DIR for the amalgamate script
+        self.base_dir_patcher = patch.object(amalgamate, "BASE_DIR", self.test_dir)
+        self.base_dir_patcher.start()
+
+    def tearDown(self):
+        self.base_dir_patcher.stop()
+        shutil.rmtree(self.test_dir)
+
+    @unittest.skipIf(
+        shutil.which("cmake") is None,
+        "CMake executable not found, skipping build test.",
+    )
+    def test_build_and_run_amalgamated_library(self):
+        """
+        Tests the full cycle: create sources -> amalgamate -> compile -> run.
+        """
+        # Create dummy source files for the library
+        src_dir = os.path.join(self.test_dir, "src")
+        os.makedirs(src_dir)
+
+        lib_header_path = os.path.join(src_dir, "functions.h")
+        lib_source_path = os.path.join(src_dir, "functions.cpp")
+        version_header_path = os.path.join(
+            self.test_dir, "version.h"
+        )  # Will be created by main()
+
+        with open(lib_header_path, "w") as f:
+            f.write(
+                "#include <string>\n" "namespace pyne { std::string get_greeting(); }"
+            )
+
+        with open(lib_source_path, "w") as f:
+            f.write(
+                '#include "functions.h"\n'
+                'namespace pyne { std::string get_greeting() { return "Hello from amalgamated PyNE!"; } }'
+            )
+
+        # Run the amalgamation script via its main() function
+        source_files_to_process = [
+            lib_header_path,
+            lib_source_path,
+            version_header_path,
+        ]
+
+        with patch(
+            "sys.argv",
+            ["amalgamate.py", "-o", self.output_dir, "-f", *source_files_to_process],
+        ):
+            with patch.object(amalgamate, "get_version", return_value="2.0-cmake-test"):
+                amalgamate.main()
+
+        # Create CMake and a C++ test program to use the library
+        main_test_cpp = os.path.join(self.output_dir, "main_test.cpp")
+        cmakelists_txt = os.path.join(self.output_dir, "CMakeLists.txt")
+
+        # This C++ program will fail if the library functions don't work
+        with open(main_test_cpp, "w") as f:
+            f.write(
+                """
+#include <iostream>
+#include <string>
+#include "pyne.h" // The amalgamated header
+
+int main() {
+    std::string greeting = pyne::get_greeting();
+    std::string version = pyne::pyne_version();
+
+    if (greeting != "Hello from amalgamated PyNE!") {
+        std::cerr << "FAIL: get_greeting() returned incorrect value." << std::endl;
+        return 1;
+    }
+
+    if (version.find("2.0-cmake-test") == std::string::npos) {
+        std::cerr << "FAIL: pyne_version() returned incorrect value." << std::endl;
+        return 1;
+    }
+
+    std::cout << "SUCCESS: Functional test passed." << std::endl;
+    std::cout << "Greeting: " << greeting << std::endl;
+    std::cout << "Version: " << version << std::endl;
+    return 0;
+}
+"""
+            )
+        # This CMake file builds the test program
+        with open(cmakelists_txt, "w") as f:
+            f.write(
+                """
+cmake_minimum_required(VERSION 3.10)
+project(AmalgamationFunctionTest CXX)
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Add our test program, which is composed of the test runner
+# and the amalgamated source file.
+add_executable(run_functional_test main_test.cpp pyne.cpp)
+"""
+            )
+
+        # Run CMake, build, and execute the test program
+        build_dir = os.path.join(self.output_dir, "build")
+        os.makedirs(build_dir)
+
+        try:
+            # Configure with CMake
+            subprocess.run(
+                ["cmake", ".."],
+                cwd=build_dir,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            # Build with CMake
+            subprocess.run(
+                ["cmake", "--build", "."],
+                cwd=build_dir,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            # Run the compiled executable
+            executable_name = "run_functional_test"
+            if os.name == "nt":
+                executable_name += ".exe"
+
+            result = subprocess.run(
+                [os.path.join(build_dir, executable_name)],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+        except subprocess.CalledProcessError as e:
+            # Provide detailed error output if any command fails
+            self.fail(
+                f"CMake build or run failed.\n"
+                f"STDOUT:\n{e.stdout}\n"
+                f"STDERR:\n{e.stderr}"
+            )
+
+        # Assert that the output from the C++ program is correct
+        print("Executable Output:\n---", result.stdout, "---")
+        self.assertIn("SUCCESS: Functional test passed.", result.stdout)
+        self.assertIn("Hello from amalgamated PyNE!", result.stdout)
+        self.assertIn("2.0-cmake-test (amalgamated)", result.stdout)
+
+
 if __name__ == "__main__":
     unittest.main(argv=["first-arg-is-ignored"], exit=False)
