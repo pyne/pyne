@@ -1,5 +1,12 @@
 import subprocess
+import pyne
 import pytest
+
+# Skip the test if the wheel was repaired
+pytestmark = pytest.mark.skipif(
+    pyne.extra_lib != [],
+    reason="The wheel was repaired using tools like auditwheel or delocate",
+)
 
 def test_cmake_find_pyne(tmp_path):
     """
