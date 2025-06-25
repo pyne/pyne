@@ -75,7 +75,12 @@ def get_version():
                 ["git", "rev-parse", "--is-inside-work-tree"], stderr=subprocess.STDOUT
             )
             return True
-        except (subprocess.CalledProcessError, FileNotFoundError):
+        except (subprocess.CalledProcessError, FileNotFoundError) as e:
+            if isinstance(e, subprocess.CalledProcessError) and b"fatal" in e.output:
+                raise RuntimeError(
+                    "Git command failed. Ensure you are in a valid Git repository.\n"
+                    f"Error: {e.output.decode('utf-8').strip()}"
+                )
             return False
 
     if in_git_repo():
@@ -94,7 +99,11 @@ def get_version():
         except subprocess.CalledProcessError as e:
             raise RuntimeError(
                 f"Git describe failed. Output: {e.output.decode('utf-8').strip()}\n"
-                "Hint: Ensure your repo has tags or fallback to .git_archival.txt."
+                "Hint: Ensure your repo has tags.\n"
+                "   git fetch --tags\n"
+                "If you are using forked repositories, ensure you have the correct upstream set.\n"
+                "   git remote add upstream https://github.com/pyne/pyne.git\n"
+                "   git fetch upstream --tags"
             )
     else:
         archival = os.path.join(BASE_DIR, ".git_archival.txt")
@@ -127,7 +136,6 @@ inline std::string pyne_version() {{
     output_path = os.path.join(BASE_DIR, file_name)
     with open(output_path, "w", encoding="utf-8") as f:
         f.write(content)
-
 
 
 # Amalgamation Logic
