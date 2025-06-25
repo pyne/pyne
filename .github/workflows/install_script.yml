@@ -12,6 +12,7 @@ on:
       - 'img/*'
       - 'news/*'
       - 'tutorial/*'
+      - 'tools/*'
       - './*.rst'
       - 'license.txt'
       - 'PULL_REQUEST_TEMPLATE.md'
