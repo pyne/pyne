@@ -9,6 +9,11 @@ from .. import amalgamate
 
 
 class TestVersionHandling(unittest.TestCase):
+    """
+    Tests the logic for extracting the version string from
+    Git or archival files.
+    """
+
     def setUp(self):
         # Create a temporary directory
         self.test_dir = tempfile.mkdtemp()
@@ -83,6 +88,10 @@ class TestVersionHandling(unittest.TestCase):
 
 
 class TestAmalgamatedFile(unittest.TestCase):
+    """
+    Tests the core class responsible for assembling the amalgamated
+    files, including file concatenation and include filtering.
+    """
 
     def setUp(self):
         self.test_dir = tempfile.mkdtemp()
@@ -164,6 +173,10 @@ class TestAmalgamatedFile(unittest.TestCase):
 
 
 class TestMainExecution(unittest.TestCase):
+    """
+    Tests the main script logic, argument parsing, and
+    overall file generation process using mock files.
+    """
 
     def setUp(self):
         self.original_cwd = os.getcwd()
