@@ -207,30 +207,32 @@ def main():
     header_path = os.path.join(output_dir, args.header_name)
     source_path = os.path.join(output_dir, args.source_name)
 
-    # Header generation
+    # Header and Source Generation
     header = AmalgamatedFile(header_path)
     header.append_line("// Amalgamated PyNE header - http://pyne.io/")
     header.append_line("#ifndef PYNE_AMALGAMATED_HEADER")
     header.append_line("#define PYNE_AMALGAMATED_HEADER\n")
     header.append_line("#define PYNE_IS_AMALGAMATED\n")
 
-    for file in args.files:
-        _, ext = os.path.splitext(file)
-        if ext in HEADER_EXTS:
-            header.append_file(file)
-    header.append_line("#endif  // PYNE_AMALGAMATED_HEADER")
-    header.write()
-
-    # Source generation
     source = AmalgamatedFile(source_path)
     source.append_line("// Amalgamated PyNE source - http://pyne.io/")
     rel_header = os.path.relpath(header_path, os.path.dirname(source_path))
     source.append_line(f'#include "{rel_header}"\n')
 
+    # Process all files in a single loop
     for file in args.files:
         _, ext = os.path.splitext(file)
-        if ext in SOURCE_EXTS:
+        if ext in HEADER_EXTS:
+            header.append_file(file)
+        elif ext in SOURCE_EXTS:
             source.append_file(file)
+        else:
+            # Assume non-code files (like license.txt) go in both
+            header.append_file(file)
+            source.append_file(file)
+
+    header.append_line("#endif  // PYNE_AMALGAMATED_HEADER")
+    header.write()
     source.write()
     os.remove("version.h")
 
