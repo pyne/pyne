@@ -16,10 +16,11 @@ Usage:
 from __future__ import print_function, unicode_literals
 import os
 import subprocess
+from pathlib import Path
 from argparse import ArgumentParser
 
 # Configuration
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 CODE_EXTS = {".c", ".cpp", ".cxx", ".h", ".hpp", ".hxx"}
 CODE_EXTS |= {ext.upper() for ext in CODE_EXTS}
@@ -88,6 +89,7 @@ def get_version():
             )
             if not version:
                 raise RuntimeError("Empty version string from git.")
+            print(f"[✓] Version from git: {version}")
             return version
         except subprocess.CalledProcessError as e:
             raise RuntimeError(
@@ -100,12 +102,14 @@ def get_version():
             with open(archival, "r", encoding="utf-8") as f:
                 for line in f:
                     if line.startswith("describe-name:"):
-                        return line.split(":", 1)[1].strip()
+                        version = line.split(":", 1)[1].strip()
+                        print(f"[✓] Version from .git_archival.txt: {version}")
+                        return version
             raise RuntimeError("describe-name not found in .git_archival.txt")
         raise RuntimeError("Not in a Git repo and .git_archival.txt is missing.")
 
 
-def create_version_header(version, output_path="version.h"):
+def create_version_header(version, file_name="version.h"):
     content = f"""\
 #ifndef PYNE_VERSION_HEADER
 #define PYNE_VERSION_HEADER
@@ -120,8 +124,10 @@ inline std::string pyne_version() {{
 
 #endif  // PYNE_VERSION_HEADER
 """
+    output_path = os.path.join(BASE_DIR, file_name)
     with open(output_path, "w", encoding="utf-8") as f:
         f.write(content)
+
 
 
 # Amalgamation Logic
@@ -234,7 +240,7 @@ def main():
     header.append_line("#endif  // PYNE_AMALGAMATED_HEADER")
     header.write()
     source.write()
-    os.remove("version.h")
+    os.remove(os.path.join(BASE_DIR, "version.h"))
 
 
 if __name__ == "__main__":
