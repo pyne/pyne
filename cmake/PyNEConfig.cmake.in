@@ -58,8 +58,8 @@ include(${PyNE_TARGETS_FILE})
 
 # Add HDF5
 if(@HDF5_FOUND@)
-  if(@HDF5_ROOT@)
-    find_package(HDF5 REQUIRED HINTS @HDF5_ROOT@)
+  if(@HDF5_DIR@)
+    find_package(HDF5 REQUIRED HINTS @HDF5_DIR@)
   else()
     find_package(HDF5 REQUIRED)
   endif()
@@ -69,8 +69,8 @@ endif()
 
 # Add MOAB
 if(@MOAB_FOUND@)
-  if(@MOAB_ROOT@)
-    find_package(MOAB REQUIRED HINTS @MOAB_ROOT@)
+  if(@MOAB_DIR@)
+    find_package(MOAB REQUIRED HINTS @MOAB_DIR@)
   else()
     find_package(MOAB REQUIRED)
   endif()
@@ -80,8 +80,8 @@ endif()
 
 # Add DAGMC
 if(@DAGMC_FOUND@)
-  if(@DAGMC_ROOT@)
-    find_package(DAGMC REQUIRED HINTS @DAGMC_ROOT@)
+  if(@DAGMC_DIR@)
+    find_package(DAGMC REQUIRED HINTS @DAGMC_DIR@)
   else()
     find_package(DAGMC REQUIRED)
   endif()
@@ -91,8 +91,8 @@ endif()
 
 # Add LAPACK
 if(@LAPACK_FOUND@)
-  if(@LAPACK_ROOT@)
-    find_package(LAPACK REQUIRED HINTS @LAPACK_ROOT@)
+  if(@LAPACK_DIR@)
+    find_package(LAPACK REQUIRED HINTS @LAPACK_DIR@)
   else()
     find_package(LAPACK REQUIRED)
   endif()
