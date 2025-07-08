@@ -6,6 +6,7 @@ __version__ = importlib.metadata.version("pyne")
 
 try:
     from .pyne_config import *
+    from .paths import *
 except ImportError:
     warnings.warn(
         "It seems that PyNE is being run from its source directory. "
