@@ -83,9 +83,13 @@ def fromstring_token(s, sep=" ", bint inplace=False, int maxsize=-1):
     csep = sep_bytes
 
     if inplace:
+        # Note: This is still unsafe as it modifies an immutable bytes object.
         cs = s_bytes
     else:
-        cs = <char *> malloc(I * sizeof(char))
+        # The +1 is critical to prevent a buffer overflow with strcpy
+        cs = <char *> malloc((I + 1) * sizeof(char))
+        if cs == NULL:
+            raise MemoryError("Failed to allocate memory for string copy")
         strcpy(cs, s_bytes)
 
     if maxsize < 0:
@@ -97,6 +101,12 @@ def fromstring_token(s, sep=" ", bint inplace=False, int maxsize=-1):
     i = 0
     cstring = strtok(cs, csep)
     while cstring != NULL:
+        # Check for buffer overflow on the data array before writing
+        if i >= maxsize:
+            # to prevent a crash if a small maxsize is provided.
+            maxsize *= 2
+            data.resize(maxsize, refcheck=False)
+            cdata = data
         cdata[i] = atof(cstring)
         cstring = strtok(NULL, csep)
         i += 1
@@ -104,8 +114,8 @@ def fromstring_token(s, sep=" ", bint inplace=False, int maxsize=-1):
     if not inplace:
         free(cs)
 
-    data = data[:i].copy()
-    return data
+    # Use a view and copy to avoid resizing and creating a new array unnecessarily
+    return data[:i].copy()
 
 
 def endftod(s):
@@ -125,11 +135,6 @@ def endftod(s):
         s = s.encode()
     cs = s
     return pyne.cpp_utils.endftod(cs)
-
-
-def use_fast_endftod():
-    """ Switches to fast ENDF string parser"""
-    pyne.cpp_utils.use_fast_endftod()
 
 
 def fromendf_tok(s):
@@ -155,8 +160,12 @@ def fromendf_tok(s):
     cdef int pos = 0
     cdef np.ndarray[np.float64_t, ndim=1] cdata
     i = 0
+    # ensure no division by zero for empty string
+    if not cs:
+        return np.array([], dtype=np.float64)
     num_entries = len(cs)//81 * 6
     cdata = np.empty(num_entries, dtype=np.float64)
+    entry[11] = b'\0' # Ensure null termination for safety
     while i < num_entries:
         pos = i*11 + i//6 * 15
         strncpy(entry, cs+pos, 11)
@@ -188,10 +197,16 @@ def fromendl_tok(s, num_fields):
     cdef int pos = 0
     cdef np.ndarray[np.float64_t, ndim=1] cdata
     i = 0
+    if num_fields <= 0:
+        return np.array([[]], dtype=np.float64)
     line_length = num_fields*11+1
+    # ensure no division by zero
+    if line_length == 0 or not cs:
+        return np.array([[] for _ in range(num_fields)], dtype=np.float64).reshape(0, num_fields)
     num_lines = len(cs)//line_length
     num_entries = num_fields*num_lines
     cdata = np.empty(num_entries, dtype=np.float64)
+    entry[11] = b'\0' # Ensure null termination for safety
     while i < num_entries:
         pos = (i%num_fields)*11 + i//num_fields * line_length
         strncpy(entry, cs+pos, 11)
@@ -208,4 +223,3 @@ def toggle_warnings():
     """Toggles warnings on and off
     """
     return pyne.cpp_utils.toggle_warnings()
-   

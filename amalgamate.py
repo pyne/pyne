@@ -1,31 +1,36 @@
 #!/usr/bin/env python
-
-"""Amalgate pyne C++ library sources into a single source and a single header file.
-This makes the C++ portion of pyne more portable to other projects.
-
-Originally inspired by JsonCpp: http://svn.code.sf.net/p/jsoncpp/code/trunk/jsoncpp/amalgamate.py
 """
+Amalgamate PyNE's C++ library sources into a single header and source file.
+
+This script consolidates selected C++ components of the PyNE library into:
+    - pyne.h   : Self-contained header
+    - pyne.cpp : Self-contained source
+
+Inspired by the JsonCpp amalgamation tool:
+    http://svn.code.sf.net/p/jsoncpp/code/trunk/jsoncpp/amalgamate.py
+
+Usage:
+    python amalgamate.py [-s OUTPUT.cpp] [-i OUTPUT.h] [-f file1.h file2.cpp ...] [-o OUTPUT_DIR]
+"""
+
 from __future__ import print_function, unicode_literals
 import os
+import subprocess
+from pathlib import Path
+from argparse import ArgumentParser
 import sys
 import io
-from argparse import ArgumentParser
 
-sys.path.append('pyne')
-import pyne_version as pv
+# Configuration
+BASE_DIR = Path(__file__).resolve().parent
 
-pv.write_cpp_header('src')
-
-CODE_EXTS = {".c", ".cpp", ".cxx", ".h", ".hpp", ".hxx"}
-CODE_EXTS |= {e.upper() for e in CODE_EXTS}
-SOURCE_EXTS = {".c", ".cpp", ".cxx"}
-SOURCE_EXTS |= {e.upper() for e in SOURCE_EXTS}
-HEADER_EXTS = {".h", ".hpp", ".hxx"}
-HEADER_EXTS |= {e.upper() for e in HEADER_EXTS}
+SOURCE_EXTS = {".c", ".cpp", ".cxx"} | {ext.upper() for ext in [".c", ".cpp", ".cxx"]}
+HEADER_EXTS = {".h", ".hpp", ".hxx"} | {ext.upper() for ext in [".h", ".hpp", ".hxx"]}
+CODE_EXTS = SOURCE_EXTS | HEADER_EXTS
 
 DEFAULT_FILES = [
     "license.txt",
-    "src/pyne_version.h",
+    "version.h",
     "src/utils.h",
     "src/utils.cpp",
     "src/extra_types.h",
@@ -60,6 +65,78 @@ DEFAULT_FILES = [
     "src/_decay.cpp",
 ]
 
+DEFAULT_FILES = [os.path.join(BASE_DIR, f) for f in DEFAULT_FILES]
+
+
+# Version Handling
+def get_version():
+    def in_git_repo():
+        try:
+            subprocess.check_output(
+                ["git", "rev-parse", "--is-inside-work-tree"], stderr=subprocess.STDOUT
+            )
+            return True
+        except (subprocess.CalledProcessError, FileNotFoundError) as e:
+            if isinstance(e, subprocess.CalledProcessError) and b"fatal" in e.output:
+                raise RuntimeError(
+                    "Git command failed. Ensure you are in a valid Git repository.\n"
+                    f"Error: {e.output.decode('utf-8').strip()}"
+                )
+            return False
+
+    if in_git_repo():
+        try:
+            version = (
+                subprocess.check_output(
+                    ["git", "describe", "--tags"], stderr=subprocess.STDOUT
+                )
+                .strip()
+                .decode("utf-8")
+            )
+            if not version:
+                raise RuntimeError("Empty version string from git.")
+            print(f"[✓] Version from git: {version}")
+            return version
+        except subprocess.CalledProcessError as e:
+            raise RuntimeError(
+                f"Git describe failed. Output: {e.output.decode('utf-8').strip()}\n"
+                "Hint: Ensure your repo has tags.\n"
+                "   git fetch --tags\n"
+                "If you are using forked repositories, ensure you have the correct upstream set.\n"
+                "   git remote add upstream https://github.com/pyne/pyne.git\n"
+                "   git fetch upstream --tags"
+            )
+    else:
+        archival = os.path.join(BASE_DIR, ".git_archival.txt")
+        if os.path.exists(archival):
+            with open(archival, "r", encoding="utf-8") as f:
+                for line in f:
+                    if line.startswith("describe-name:"):
+                        version = line.split(":", 1)[1].strip()
+                        print(f"[✓] Version from .git_archival.txt: {version}")
+                        return version
+            raise RuntimeError("describe-name not found in .git_archival.txt")
+        raise RuntimeError("Not in a Git repo and .git_archival.txt is missing.")
+
+
+def create_version_header(version, file_name="version.h"):
+    content = f"""\
+#ifndef PYNE_VERSION_HEADER
+#define PYNE_VERSION_HEADER
+
+#include <string>
+
+namespace pyne {{
+inline std::string pyne_version() {{
+    return "{version} (amalgamated)";
+}}
+}}  // namespace pyne
+
+#endif  // PYNE_VERSION_HEADER
+"""
+    output_path = os.path.join(BASE_DIR, file_name)
+    with open(output_path, "w", encoding="utf-8") as f:
+        f.write(content)
 
 class AmalgamatedFile(object):
     def __init__(self, path):
@@ -132,7 +209,8 @@ def main():
         default=DEFAULT_FILES,
     )
     ns = parser.parse_args()
-
+    version = get_version()
+    create_version_header(version)
     # header file
     hdr = AmalgamatedFile(ns.header_path)
     hdr.append_line("// PyNE amalgated header http://pyne.io/")

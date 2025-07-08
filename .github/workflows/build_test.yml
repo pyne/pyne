@@ -39,11 +39,11 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: use BuildTest composite action
+      - name: BuildTest composite action
         uses: ./.github/actions/build-test
         with:
           stage: ${{ matrix.stage }}

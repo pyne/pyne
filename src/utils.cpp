@@ -1,8 +1,9 @@
 // General Library
-#ifndef PYNE_IS_AMALGAMATED
-extern "C" double endftod_(char *str, int len);
-#endif
 #include <iomanip>
+#include <cstdio>
+#include <cctype>
+#include <cstring>
+#include <cstdlib>
 
 #ifdef _WIN32
   #include <filesystem>
@@ -48,8 +49,6 @@ void pyne::pyne_start() {
   return;
 }
 
-
-
 // String Transformations
 std::string pyne::to_str(int t) {
   std::stringstream ss;
@@ -75,81 +74,50 @@ std::string pyne::to_str(bool t) {
   return ss.str();
 }
 
-
 int pyne::to_int(std::string s) {
-  return atoi( s.c_str() );
+  return atoi(s.c_str());
 }
 
 double pyne::to_dbl(std::string s) {
-  return strtod( s.c_str(), NULL );
+  return strtod(s.c_str(), NULL);
 }
 
-double pyne::endftod_cpp(char * s) {
-  // Converts string from ENDF only handles "E-less" format but is 5x faster
-  int pos, mant, exp;
-  double v, dbl_exp;
+double pyne::endftod(char* s_char)
+{
+  if (s_char == NULL) return 0.0;
 
-  mant = exp = 0;
-  if (s[2] == '.') {
-    // Convert an ENDF float
-    if (s[9] == '+' || s[9] == '-') {
-      // All these factors of ten are from place values.
-      mant = s[8] + 10 * s[7] + 100 * s[6] + 1000 * s[5] + 10000 * s[4] + \
-             100000 * s[3] + 1000000 * s[1] - 1111111 * '0';
-      exp = s[10] - '0';
-      // Make the right power of 10.
-      dbl_exp = exp & 01? 10.: 1;
-      dbl_exp *= (exp >>= 1) & 01? 100.: 1;
-      dbl_exp *= (exp >>= 1) & 01? 1.0e4: 1;
-      dbl_exp *= (exp >>= 1) & 01? 1.0e8: 1;
-      // Adjust for powers of ten from treating mantissa as an integer.
-      dbl_exp = (s[9] == '-'? 1/dbl_exp: dbl_exp) * 1.0e-6;
-      // Get mantissa sign, apply exponent.
-      v = mant * (s[0] == '-'? -1: 1) * dbl_exp;
-    } else {
-      mant = s[7] + 10 * s[6] + 100 * s[5] + 1000 * s[4] + 10000 * s[3] + \
-             100000 * s[1] - 111111 * '0';
-      exp = s[10] + 10 * s[9] - 11 * '0';
-      dbl_exp = exp & 01? 10.: 1;
-      dbl_exp *= (exp >>= 1) & 01? 100.: 1;
-      dbl_exp *= (exp >>= 1) & 01? 1.0e4: 1;
-      dbl_exp *= (exp >>= 1) & 01? 1.0e8: 1;
-      dbl_exp *= (exp >>= 1) & 01? 1.0e16: 1;
-      dbl_exp *= (exp >>= 1) & 01? 1.0e32: 1;
-      dbl_exp *= (exp >>= 1) & 01? 1.0e64: 1;
-      dbl_exp = (s[8] == '-'? 1/dbl_exp: dbl_exp) * 1.0e-5;
-      v = mant * (s[0] == '-'? -1: 1) * dbl_exp;
-    }
+  // Create a mutable string from the input C-style string slice.
+  char temp_c_str[12];
+  strncpy(temp_c_str, s_char, 11);
+  temp_c_str[11] = '\0';
+  std::string temp_str(temp_c_str);
+
+  // Remove all whitespace characters from the string.
+  temp_str.erase(std::remove_if(temp_str.begin(), temp_str.end(), ::isspace), temp_str.end());
+
+  if (temp_str.empty()) {
+    return 0.0;
   }
 
-  // Convert an ENDF int to float; we start from the last char in the field and
-  // move forward until we hit a non-digit.
-  else {
-    v = 0;
-    mant = 1; // Here we use mant for the place value about to be read in.
-    pos = 10;
-    while (s[pos] != '-' && s[pos] != '+' && s[pos] != ' ' && pos > 0) {
-      v += mant * (s[pos] - '0');
-      mant *= 10;
-      pos--;
+  // Check for an explicit exponent. Replace 'D' with 'E' for strtod compatibility.
+  size_t exp_pos = temp_str.find_first_of("EeDd");
+  if (exp_pos != std::string::npos) {
+    if (temp_str[exp_pos] == 'D' || temp_str[exp_pos] == 'd') {
+      temp_str[exp_pos] = 'E';
     }
-    v *= (s[pos] == '-'? -1: 1);
+    return strtod(temp_str.c_str(), NULL);
   }
-  return v;
-}
 
-double pyne::endftod_f(char * s) {
-#ifdef PYNE_IS_AMALGAMATED
-  return endftod_cpp(s);
-#else
-  return endftod_(s, 12);
-#endif
-}
+  // Check for an implicit exponent (E-less format, e.g., "1.23-45").
+  // Find the last sign (+ or -) that is not at the beginning of the string.
+  size_t sign_pos = temp_str.find_last_of("+-");
+  if (sign_pos != std::string::npos && sign_pos > 0) {
+    temp_str.insert(sign_pos, "E");
+    return strtod(temp_str.c_str(), NULL);
+  }
 
-double (*pyne::endftod)(char * s) = &pyne::endftod_f;
-
-void pyne::use_fast_endftod() {
-  pyne::endftod = &pyne::endftod_cpp;
+  // If no exponent is found, parse as a simple number.
+  return strtod(temp_str.c_str(), NULL);
 }
 
 std::string pyne::to_upper(std::string s) {

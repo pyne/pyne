@@ -1167,7 +1167,7 @@ def test_evaluation_electroatomic():
     assert_array_almost_equal(brem.xs(E), xs)
 
     # Check bremsstrahlung secondary distributions
-    assert brem.products[0]["za"] == 11  # electrons
+    assert brem.products[0]["za"] == 11.0  # electrons
     E = np.logspace(1, 11)
     assert np.all(brem.products[0]["yield"](E) == 1.0)
     eout = np.array(
