@@ -1,5 +1,5 @@
 # Defines the CMake commands/policies
-cmake_minimum_required(VERSION 3.5.0)
+cmake_minimum_required(VERSION 3.22.0)
 
 if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.12.0")
   cmake_policy(SET CMP0074 NEW)

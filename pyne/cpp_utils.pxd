@@ -11,5 +11,4 @@ cdef extern from "utils.h" namespace "pyne":
     bint toggle_warnings() except +
 
     double endftod(char *) except +
-    void use_fast_endftod() except +
     void pyne_start() except +

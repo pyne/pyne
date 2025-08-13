@@ -9,13 +9,15 @@ Next Version
    * Support Cython3+ (#1528)
    * Add CI for MacOS (#1557)
    * Add Git versioning support (#1570)
+   * Add Git support for version handling to amalgamate.py (#1571)
 
 **Change**
    * Test install script on multiple Ubuntu versions (#1484)
    * Update MOAB, OpenMC, hdf5 versions in apt build (#1529)
    * Add dockerfile and workflow to build PyNE with Conda (#1540)
    * Remove deprecated references to ``basestring`` (#1544)
-   * Amalgamate Script Enhancement (#1550)
+   * Remove endftod.f90 and rely on C++ version (#1554)
+   * Refactor amalgamation logic for clarity and efficiency (#1573 #1550)
 
 **Fix**
    * Fix Type Mismatch Error in PyNE's ENSDF Processing Module (#1519)
@@ -33,6 +35,7 @@ Next Version
    * Fix in operator for MaterialLibrary (#1564) 
    * Update Dockerfile syntax (#1566)
    * Remove reference to Python `long` (#1566)
+   * Update Ubuntu Docker configuration and fix compatibility issues (#1572, #1575)
 
 v0.7.8
 ======
