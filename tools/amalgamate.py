@@ -215,7 +215,17 @@ def main():
     )
 
     args = parser.parse_args()
-    output_dir = Path(args.output_dir).resolve()
+    # Path objects are handled for both specified and default arguments
+    if args.output_dir == ".":
+        # Resolve to absolute path for cases where header/source have complex paths
+        output_dir = Path.cwd()
+        header_path = Path(args.header_name).resolve()
+        source_path = Path(args.source_name).resolve()
+    else:
+        output_dir = Path(args.output_dir).resolve()
+        header_path = output_dir / args.header_name
+        source_path = output_dir / args.source_name
+
     input_files = [Path(f) for f in args.files]
 
     # Get version and generate header
@@ -229,9 +239,6 @@ def main():
     except FileNotFoundError:
         license_content = f"{LICENSE_FILE} not found."
         print(f"[!] Warning: {license_content}")
-
-    header_path = output_dir / args.header_name
-    source_path = output_dir / args.source_name
 
     # Header File Generation
     header = AmalgamatedFile(header_path)
@@ -250,11 +257,20 @@ def main():
     source = AmalgamatedFile(source_path)
     source.append_line("// Amalgamated PyNE source - http://pyne.io/")
     source.append_commented_block(license_content, "License")
-    rel_header_path = header_path.relative_to(source_path.parent).as_posix()
+
+    # Use walk_up=True to allow `relative_to` to generate ".." paths.
+    # This correctly handles cases where the header is not in a sub-directory of the source.
+    rel_header_path = header_path.relative_to(
+        source_path.parent, walk_up=True
+    ).as_posix()
     source.append_line(f'#include "{rel_header_path}"\n\n')
 
     # Process all user-specified files
     for file_path in input_files:
+        if not file_path.is_absolute():
+            # Ensure input files are resolved relative to the base directory if they are not already absolute
+            file_path = (BASE_DIR / file_path).resolve()
+
         if file_path.suffix in HEADER_EXTS:
             header.append_file(file_path)
         elif file_path.suffix in SOURCE_EXTS:
