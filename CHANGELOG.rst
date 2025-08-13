@@ -10,6 +10,7 @@ Next Version
    * Add CI for MacOS (#1557)
    * Add Git versioning support (#1570)
    * Add Git support for version handling to amalgamate.py (#1571)
+   * Refactor PyNE Configuration for CMake Integration (#1556)
 
 **Change**
    * Test install script on multiple Ubuntu versions (#1484)
@@ -17,7 +18,7 @@ Next Version
    * Add dockerfile and workflow to build PyNE with Conda (#1540)
    * Remove deprecated references to ``basestring`` (#1544)
    * Remove endftod.f90 and rely on C++ version (#1554)
-   * Refactor PyNE Configuration for CMake Integration (#1556)
+   * Refactor amalgamation logic for clarity and efficiency (#1573)
 
 **Fix**
    * Fix Type Mismatch Error in PyNE's ENSDF Processing Module (#1519)
