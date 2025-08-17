@@ -225,13 +225,13 @@ int pyne::Material::detect_hdf5_layout(hid_t db, std::string path){
 
   // Test if datapath exist as a non-dataset
   H5O_info_t path_info;
-  status = H5Oget_info_by_name(db, path.c_str(), &path_info, H5P_DEFAULT);
+  status = H5Oget_info_by_name(db, path.c_str(), &path_info, H5O_INFO_BASIC, H5P_DEFAULT);
   bool path_exists = (status == 0);
 
   // Reset status and test "/material" path exist as a non-dataset
   H5O_info_t matpath_info;
   status = H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
-  status = H5Oget_info_by_name(db, "/material" , &matpath_info, H5P_DEFAULT);
+  status = H5Oget_info_by_name(db, "/material" , &matpath_info, H5O_INFO_BASIC, H5P_DEFAULT);
   bool matpath_exists = (status == 0);
   if (!matpath_exists && !path_exists){
     return prot1_layout::path_donotexists;

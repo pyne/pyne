@@ -1,7 +1,7 @@
 .. _source:
 
 ==============
-Source Install 
+Source Install
 ==============
 
 ------------
@@ -11,98 +11,95 @@ PyNE has the following dependencies:
 
    #. `Fortran compiler <https://gcc.gnu.org/wiki/GFortran>`_
    #. `C++ compiler <https://gcc.gnu.org/>`_
-   #. `CMake <http://www.cmake.org/>`_ (>= 2.8.5)
+   #. `CMake <http://www.cmake.org/>`_ (>= 3.18)
    #. `NumPy <http://www.numpy.org/>`_ (>= 1.8.0)
    #. `SciPy <http://www.scipy.org/>`_
    #. `Cython <http://cython.org/>`_ (>= 0.29.21)
    #. `HDF5 <http://www.hdfgroup.org/HDF5/>`_
    #. `PyTables <http://www.pytables.org/>`_
-   #. `Python <http://www.python.org/>`_
+   #. `Python <http://www.python.org/>`_ (>= 3.10)
    #. `LAPACK <http://www.netlib.org/lapack/>`_
    #. `BLAS <http://www.netlib.org/blas/>`_
    #. `Jinja2 <http://jinja.pocoo.org/>`_
 
-Optional Depenendencies:
+Optional Dependencies:
    #. `MOAB <https://press3.mcs.anl.gov/sigma/moab-library>`_
-   #. `DAGMC <https://svalinn.github.io/DAGMC/install/index.html>`__
+   #. `DAGMC <https://svalinn.github.io/DAGMC/install/index.html>`_
    #. `OpenMC <https://docs.openmc.org/en/stable/quickinstall.html>`_
-   
-To run tutorial and examples:
+
+To run tutorials and examples:
    #. `jupyter <http://jupyter.org/>`_
 
-Many, if not all of these dependencies can be installed using a package manager
-(i.e. :code:`apt-get` on Linux, `MacPorts <https://www.macports.org/>`__ or `Homebrew
-<https://brew.sh/>`__ on MacOS, or `Anaconda <https://www.anaconda.com/>`__ on both, etc.)
+Many of these dependencies can be installed using a package manager (i.e., :code:`apt-get` on Linux, `MacPorts <https://www.macports.org/>`_ or `Homebrew <https://brew.sh/>`_ on macOS, or `Anaconda <https://www.anaconda.com/>`_ on both).
 
+---------------------------
+Building from Source
+---------------------------
 
-Most common install flags:
-**************************
-The list of the possible flags can be retrieved using:
+With the recent updates to PyNE, the installation process has been streamlined using `pip`_ and `scikit-build-core`_. You can now build PyNE from source by following the steps below:
 
-  python setup.py --help
+1. **Download the Source Code**
 
-#. optional arguments:
+   Download and unzip the `source code`_, or clone the PyNE repository from `GitHub`_.
 
-  :code:`-h`, :code:`--help`: show this help message and exit
+2. **Install the Dependencies**
 
-  :code:`--clean`: removes the build directory before continuing.
+   Make sure that all the build dependencies (Python, C++ compiler, and Fortran compiler) are installed. Many of them can be installed using a package manager.
 
-  :code:`--user`: Installs into :code:`~/.local`
+3. **Install PyNE**
 
-#. cmake:  CMake arguments.
+   Run the following command to build and install PyNE:
 
-  :code:`-D VAR`: Set environment variable.
+   .. code-block:: bash
 
-  :code:`--build-type BT`: Set build type via :code:`CMAKE_BUILD_TYPE`, e.g. "release"  or "debug".
+      python -m pip install .
 
-  :code:`--deps-root DEPS_ROOT`: The path to the directory containing all dependencies
+   It is recommended to create a `virtual environment`_ before installing PyNE.
 
-  :code:`--fast`: (default) Will try to compile from assembly, if possible. This is faster than compiling from source.
+4. **Configure and Build Nuclear Data**
 
-  :code:`--slow`: Will NOT try to compile from assembly, if possible. This is slower as it must compile from source.
+   After installation, you will need to build and install the nuclear data:
 
-#. make:  Make arguments.
+   .. code-block:: bash
 
-  :code:`-j J`: Degree of parallelism for build.
+      nuc_data_make
 
-#. other/dependencies:
+   This command creates a database of nuclear data. Since much of the data is subject to licensing or export controls, PyNE cannot distribute it directly. Instead, the `nuc_data_make` program attempts to retrieve it from public sources or locate it on your machine.
 
-  :code:`--hdf5 HDF5_PATH`: Path to HDF5 root direcitory.
+-----------------------------
+Configuring Build Options
+-----------------------------
 
-  :code:`--moab MOAB_PATH`: Path to MOAB root directory.
+PyNE provides several build options that can be customized based on your needs. These options are set by configuring the `SKBUILD_CMAKE_ARGS` environment variable. Below are the most common options and their default values:
 
-  :code:`--dagmc DAGMC_PATH`: Path to DAGMC root directory.
+- **DOWNLOAD_HDF5**: Should PyNE download HDF5? (Default: `ON`)
+- **ENABLE_EIGEN3**: Should PyNE use Eigen3? (Default: `ON`)
+- **DOWNLOAD_EIGEN3**: Should PyNE download Eigen3? (Default: `ON`)
+- **ENABLE_LAPACK**: Should PyNE use LAPACK? (Default: `ON`)
+- **DOWNLOAD_LAPACK**: Should PyNE download LAPACK? (Default: `ON`)
+- **ENABLE_MOAB**: Should PyNE use MOAB? (Default: `ON`)
+- **DOWNLOAD_MOAB**: Should PyNE download MOAB? (Default: `ON`)
+- **ENABLE_DAGMC**: Should PyNE use DAGMC? (Default: `ON`)
+- **DOWNLOAD_DAGMC**: Should PyNE download DAGMC? (Default: `ON`)
+- **ENABLE_SPATIAL_SOLVERS**: Should PyNE build advanced AHOT spatial solvers? (Default: `ON`)
+- **ENABLE_ENSDF_PROCESSING**: Should PyNE build ENSDF processing tools? (Default: `OFF`)
+- **ENABLE_FAST_COMPILE**: Should PyNE use fast compilation? (Default: `OFF`)
 
-  :code:`--prefix INSTALL_PATH`: Prefix for install location.
+To modify these options, export the appropriate flags using `SKBUILD_CMAKE_ARGS`. For example, if you want to disable HDF5 downloading and MOAB/DAGMC, you can set the environment variable as follows:
 
-  :code:`--build-dir BUILD_DIR`: where to place the build directory
+.. code-block:: bash
 
-  :code:`--bootstrap`: Bootstraps the PyNE installation, including :code:`nuc_data_make` and possibly decaygen.
+    export SKBUILD_CMAKE_ARGS="-DDOWNLOAD_HDF5=OFF; \
+                               -DHDF5_ROOT=/path/to/hdf5; \
+                               -DDOWNLOAD_EIGEN3=OFF; \
+                               -DDOWNLOAD_LAPACK=OFF; \
+                               -DENABLE_MOAB=OFF; \
+                               -DENABLE_DAGMC=OFF;"
 
+Then, proceed with the installation as described above.
 
-
-Most of the dependencies are readily available through package managers.  Once
-all the dependencies are installed, PyNE can be installed. Download and unzip
-the source (`zip`_, `tar`_) or checkout a verison from the PyNE repository
-(`Github`_).  Then run the following commands from the directory above the
-unzipped directory::
-
-    cd pyne/
-    python setup.py install --user
-    cd
-    nuc_data_make
-
-The ``setup.py`` command compiles and installs the PyNE source code.
-Note that this command must be done in the top PyNE directory.
-The ``nuc_data_make`` builds and installs a database of nuclear data.
-This must be done as a second step because most nuclear data is under 
-some form of license restriction or export control which prevents the 
-developers from distributing it with PyNE.  However, the 
-``nuc_data_make`` program (which is installed by ``setup.py``) will
-do its best to find relevant nuclear data elsewhere on your machine
-or from public sources on the internet.
-
-
-.. _zip: https://github.com/pyne/pyne/zipball/0.7.1
-.. _tar: https://github.com/pyne/pyne/tarball/0.7.1
+.. _pip: https://packaging.python.org/en/latest/guides/tool-recommendations/
+.. _scikit-build-core: https://scikit-build-core.readthedocs.io/en/latest/
+.. _virtual environment: https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/
+.. _source code: https://github.com/pyne/pyne/releases/
 .. _GitHub: http://github.com/pyne/pyne

@@ -1,15 +1,15 @@
-name: Build & Publish Conda Docker Image for PyNE-CI
+name: Build & Publish Manylinux Docker Image for PyNE-CI
 
 on:
   # allows us to run workflows manually
   workflow_dispatch:
   push:
     paths:
-      - 'docker/conda_build.dockerfile'
-      - '.github/workflows/conda_docker.yml'
+      - 'docker/manylinux.dockerfile'
+      - '.github/workflows/manylinux_docker.yml'
 
 env:
-  DOCKER_IMAGE_BASENAME: ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_22.04_py3_conda
+  DOCKER_IMAGE_BASENAME: ghcr.io/${{ github.repository_owner }}/manylinux
   USE_LATEST_TAG: false
 
 jobs:
@@ -36,17 +36,18 @@ jobs:
         if: github.repository_owner == 'pyne' && github.ref_name == 'develop'
         run: echo "USE_LATEST_TAG=true" >> $GITHUB_ENV
 
-      # build pyne-deps stage using multistage docker build action
+      # build base python, moab, dagmc, openmc using multistage docker build action
       - uses: firehed/multistage-docker-build-action@v1
         id: build_all_stages
         with:
           repository: ${{ env.DOCKER_IMAGE_BASENAME }}
-          stages: pyne-deps
-          server-stage: pyne-deps
+          stages: base, moab, dagmc
+          server-stage: openmc
           quiet: false
           parallel: true
           tag-latest-on-default: ${{ env.USE_LATEST_TAG }}
-          dockerfile: docker/conda_build.dockerfile
+          dockerfile: docker/manylinux.dockerfile
+          build-args: BUILD_STAGE=openmc
 
   # Downloads the images uploaded to ghcr in previous stages and runs pyne
   # tests to check that they work.
@@ -54,6 +55,11 @@ jobs:
     needs: [multistage_image_build]
     runs-on: ubuntu-latest
     
+    strategy:
+      matrix: 
+        build_stage: [base, moab, dagmc, openmc]
+      fail-fast: false
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -69,27 +75,31 @@ jobs:
         if: github.repository_owner == 'pyne' && github.ref_name == 'develop'
         run: echo "USE_LATEST_TAG=true" >> $GITHUB_ENV
 
-      # build test stage and pyne stage using multistage docker build action
+      # build test stage and pyne-dev stage using multistage docker build action
       - uses: firehed/multistage-docker-build-action@v1
         id: multistage_build_and_test
         with:
           repository: ${{ env.DOCKER_IMAGE_BASENAME }}
-          stages: pyne-deps
+          stages: ${{ matrix.build_stage }}
           server-stage: pyne
           quiet: false
           parallel: true
           tag-latest-on-default: ${{ env.USE_LATEST_TAG }}
-          dockerfile: docker/conda_build.dockerfile
+          dockerfile: docker/manylinux.dockerfile
+          build-args: BUILD_STAGE=${{ matrix.build_stage }}
 
-  # if the previous step that tests the docker images passes, then the images
+  # if the previous step that tests the docker images passes then the images
   # can be copied from the ghcr where they are saved using :ci_testing tags to
   # :latest and :stable tags.
   pushing_test_stable_img:
     if: github.repository_owner == 'pyne' && github.ref_name == 'develop'
     needs: [BuildTest]
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        stage: [base, moab, dagmc, openmc]
 
-    name: "ghcr.io/${{ github.repository_owner }}/pyne_ubuntu_22.04_py3_conda/pyne-deps: latest -> stable"
+    name: "ghcr.io/${{ github.repository_owner }}/manylinux/${{ matrix.stage }}: latest -> stable"
 
     steps:
       - name: Log in to the Container registry
@@ -102,5 +112,5 @@ jobs:
       - name: Push Image to stable img
         uses: akhilerm/tag-push-action@v2.1.0
         with:
-          src: ${{ env.DOCKER_IMAGE_BASENAME }}/pyne-deps:latest
-          dst: ${{ env.DOCKER_IMAGE_BASENAME }}/pyne-deps:stable
+          src: ${{ env.DOCKER_IMAGE_BASENAME }}/${{ matrix.stage }}:latest
+          dst: ${{ env.DOCKER_IMAGE_BASENAME }}/${{ matrix.stage }}:stable

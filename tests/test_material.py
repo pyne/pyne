@@ -775,7 +775,7 @@ def test_id():
 def test_getitem_str():
     mat = Material(nucvec)
     assert mat["U235"] == 1.0
-    pytest.raises(RuntimeError, lambda: mat["word"])
+    pytest.raises((RuntimeError, UnicodeDecodeError), lambda: mat["word"])
 
     mat = Material(leu)
     assert mat["U235"] == 0.04

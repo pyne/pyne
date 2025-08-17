@@ -26,6 +26,8 @@ from pyne.dagmc import HAVE_DAGMC
 
 if not HAVE_PYMOAB:
     pytest.skip("No pymoab. Skipping tests", allow_module_level=True)
+    
+from pyne.dagmc import HAVE_DAGMC
 
 warnings.simplefilter("ignore", QAWarning)
 

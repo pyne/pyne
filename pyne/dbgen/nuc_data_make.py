@@ -1,5 +1,6 @@
 from __future__ import print_function
 import os
+import shutil
 import argparse
 from pyne.utils import QA_warn
 
@@ -7,8 +8,6 @@ try:
     import urllib.request as urllib2
 except ImportError:
     import urllib2
-import shutil
-from distutils.dir_util import mkpath, remove_tree
 
 from pyne.api import nuc_data
 from pyne.utils import message
@@ -181,8 +180,8 @@ def main(args=None):
     # Make the build dir
     if args.clean == 2 and os.path.exists(args.build_dir):
         print("Removing build_dir from {0}".format(args.build_dir))
-        remove_tree(args.build_dir)
-    mkpath(args.build_dir)
+        shutil.rmtree(args.build_dir)
+    os.makedirs(args.build_dir, exist_ok=True)
 
     # Determine what to make
     if args.make == "none":

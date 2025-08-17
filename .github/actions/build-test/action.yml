@@ -1,7 +1,8 @@
 name: BuildTest
-description: Builds and tests an installation of PyNE in a single docker image.
-  This action is used for bootstrap testing when building the docker images as
-  well as testing of each PR using those docker images.
+description: > 
+  Builds and tests an installation of PyNE in a single docker image.
+  This action is used for bootstrap testing when building the docker
+  images as well as testing of each PR using those docker images.
 inputs:
   stage:
     description: The docker stage that will be used as the docker image for testing.
@@ -9,14 +10,31 @@ inputs:
     default: ""
 runs:
   using: "composite"
-  steps:
-    - name: Building PyNE
+  steps: 
+    - name: Build and install PyNE
+      env:
+        SKBUILD_CMAKE_ARGS: >
+          "-DDOWNLOAD_HDF5=OFF;
+          -DHDF5_ROOT=${HDF5_ROOT};
+          -DDOWNLOAD_EIGEN3=OFF;
+          -DEIGEN3_INCLUDE_DIRS=${EIGEN3_ROOT}/include/eigen3;
+          -DDOWNLOAD_LAPACK=OFF;
+          -DLAPACK_ROOT=${LAPACK_ROOT};
+          -DLAPACK_LIBRARY_DIRS=${LAPACK_ROOT}/lib64;
+          -DENABLE_MOAB=OFF;
+          -DDOWNLOAD_MOAB=OFF;
+          -DENABLE_DAGMC=OFF;
+          -DDOWNLOAD_DAGMC=OFF;
+          $PYNE_MOAB_ARGS;
+          $PYNE_DAGMC_ARGS"
       shell: bash -l {0}
       run: |
         cd $GITHUB_WORKSPACE
-        python setup.py install --user --clean --hdf5 /root/opt/hdf5/hdf5-1.14.6 $PYNE_MOAB_ARGS $PYNE_DAGMC_ARGS
-        export PATH="$PATH:/github/home/.local/bin"
-        cd ../
+        python -m build -w 
+        cd dist 
+        auditwheel repair pyne*.whl
+        cd wheelhouse
+        python -m pip install pyne*.whl
         nuc_data_make
 
     - name: Testing PyNE

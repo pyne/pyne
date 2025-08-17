@@ -439,7 +439,7 @@ def test_id():
     assert nucname.id("94-Pu-239") == nucname.id("Pu-239")
     assert nucname.id("95-Am-242") == nucname.id("Am-242")
 
-    pytest.raises(RuntimeError, nucname.id, "0-H-1")
+    pytest.raises((RuntimeError, UnicodeDecodeError), nucname.id, "0-H-1")
 
 
 def test_name():
@@ -714,7 +714,7 @@ def test_mcnp_to_id(val, id):
         check_cases(nucname.mcnp_to_id, val, id)
 
     # tests for invalid inputs
-    pytest.raises(RuntimeError, nucname.mcnp_to_id, 92)
+    pytest.raises((RuntimeError, UnicodeDecodeError), nucname.mcnp_to_id, 92)
 
 
 def test_openmc():

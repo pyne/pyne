@@ -10,6 +10,8 @@ Next Version
    * Add CI for MacOS (#1557)
    * Add Git versioning support (#1570)
    * Add Git support for version handling to amalgamate.py (#1571)
+   * Refactor PyNE Configuration for CMake Integration (#1556)
+   * Redesign Build System for PyNE with Scikit-Build (#1549)
 
 **Change**
    * Test install script on multiple Ubuntu versions (#1484)
@@ -43,6 +45,7 @@ v0.7.8
    * Move tests from nose to pytest (#1478 #1493)
    * Update MOAB dead link and add PyNE logo to readme file (#1481)
    * Install packages with conda in Dockerfile (#1509 #1510 #1511)
+
 
 **Fix**
    * Add missing rxname offsets (#1482)

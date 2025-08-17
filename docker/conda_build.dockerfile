@@ -60,15 +60,13 @@ RUN echo 'export PATH=/opt/conda/bin:$PATH' >/etc/profile.d/conda.sh && \
 # ------------------------------
 FROM pyne-deps AS pyne
 
-# Arguments for PyNE build
-ENV PYNE_MOAB_ARGS="--moab" \
-    PYNE_DAGMC_ARGS="--dagmc"
+ENV SKBUILD_CMAKE_ARGS "-DDOWNLOAD_HDF5=OFF;-DDOWNLOAD_EIGEN3=OFF;-DDOWNLOAD_LAPACK=OFF;-DDOWNLOAD_MOAB=OFF;-DDOWNLOAD_DAGMC=OFF"
 
 # Copy PyNE source and build
 COPY . $HOME/pyne
 WORKDIR $HOME/pyne
 
-RUN python setup.py install --prefix /opt/conda $PYNE_MOAB_ARGS $PYNE_DAGMC_ARGS --clean -j 4 && \
+RUN python -m pip -v install . && \
     cd tests && \
     nuc_data_make && \
     pytest -ra

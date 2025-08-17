@@ -275,9 +275,9 @@ cdef class _Material:
         self.mat_pointer.from_hdf5(c_filename, c_datapath, row, protocol)
 
 
-    def write_hdf5(self, filename, datapath="/mat_name", nucpath="",
+    def write_hdf5(self, filename, datapath="/mat_name", nucpath="/nuc_id",
                    row=-0.0, chunksize=100):
-        """write_hdf5(filename, datapath="/mat_name", nucpath="", row=-0.0, chunksize=100)
+        """write_hdf5(filename, datapath="/mat_name", nucpath="/nuc_id", row=-0.0, chunksize=100)
         Writes the material to an HDF5 file, using Protocol 1 (see the
         from_hdf5() method).
 

@@ -15,7 +15,7 @@ cimport pyne.cpp_utils
 cimport pyne.pyne_config
 import pyne.pyne_config
 
-cimport cpp_nucname
+cimport pyne.cpp_nucname
 cimport pyne.stlcontainers as conv
 import pyne.stlcontainers as conv
 

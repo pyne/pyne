@@ -17,9 +17,10 @@ try:
     from pyne._dagmc import *
     HAVE_DAGMC = True
 except ImportError:
-    warn(
-        "DAGMC module is not available. Please install PyNE with DAGMC enabled.\n"
-        "For more information, see: https://pyne.io/install/",
-        ImportWarning
-        )
     HAVE_DAGMC = False
+    msg =(
+    "\n\n\033[1m\033[91mDAGMC module is not available.\033[0m\n"
+    "\033[1mPlease install PyNE with DAGMC enabled.\033[0m\n"
+    "For more information, see: \033[94mhttps://pyne.io/install\033[0m\n"
+    )
+    warn(msg, Warning)
