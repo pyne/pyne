@@ -17,7 +17,3 @@ except ImportError:
     )
     raise
 
-try:
-    __version__ = version("pyne")
-except PackageNotFoundError:
-    __version__ = "unknown"
