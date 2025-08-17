@@ -6,7 +6,7 @@ ARG HDF5_VERSION="1.14.3"
 ARG EIGEN3_VERSION="3.4.0"
 ARG LAPACK_VERSION="3.12.0"
 ARG MOAB_VERSION="master"
-ARG DAGMC_VERSION="3.2.3"
+ARG DAGMC_VERSION="3.2.4"
 ARG OPENMC_VERSION="0.15.0"
 
 # Build base stage
@@ -85,6 +85,12 @@ RUN wget https://github.com/Reference-LAPACK/lapack/archive/refs/tags/v${LAPACK_
 # Add LAPACK to the system path
 ENV LD_LIBRARY_PATH="${LAPACK_ROOT}/lib:${LAPACK_ROOT}/lib64:${LD_LIBRARY_PATH}"
 
+# Set Python ABI
+ARG Python_ABI
+
+# Use Python from manylinux as the default Python
+ENV PATH="/opt/python/${Python_ABI}/bin:${PATH}"
+
 # Build MOAB stage
 FROM base AS moab
 
@@ -103,7 +109,14 @@ RUN git clone --depth 1 -b ${MOAB_VERSION} https://bitbucket.org/fathomteam/moab
         -DENABLE_BLASLAPACK=OFF \
         -DENABLE_FORTRAN=OFF && \
     make -j$(nproc) && make install && \
-    cd ../..
+    cd $HOME/moab && \
+    export SKBUILD_CMAKE_ARGS="-DENABLE_HDF5=ON; \
+        -DHDF5_ROOT=${HDF5_ROOT}; \
+        -DEIGEN3_DIR=${EIGEN3_ROOT}/include/eigen3; \
+        -DENABLE_BLASLAPACK=OFF; \
+        -DENABLE_FORTRAN=OFF" && \
+    python -m pip install . && \
+    rm -rf $HOME/moab
 
 # Add MOAB to the system path
 ENV PATH="${MOAB_ROOT}/bin:${PATH}"
@@ -122,6 +135,7 @@ RUN git clone --depth 1 -b v${DAGMC_VERSION} https://github.com/svalinn/DAGMC.gi
     mkdir -p build && cd build && \
     cmake .. \
         -DCMAKE_INSTALL_PREFIX=${DAGMC_ROOT} \
+        -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
         -DMOAB_DIR=${MOAB_ROOT} \
         -DBUILD_STATIC_LIBS=OFF \
         -DBUILD_UWUW=OFF \
@@ -131,9 +145,7 @@ RUN git clone --depth 1 -b v${DAGMC_VERSION} https://github.com/svalinn/DAGMC.gi
         -DBUILD_TESTS=OFF \
         -DBUILD_RPATH=OFF && \
     make -j$(nproc) && make install && \
-    cd ../.. && \
-    rm -rf dagmc
-
+    rm -rf $HOME/dagmc
 
 # Add DAGMC to the system path
 ENV PATH="${DAGMC_ROOT}/bin:${PATH}"
@@ -146,30 +158,15 @@ FROM dagmc AS openmc
 
 ARG OPENMC_VERSION
 
-# Build and install OpenMC
-ENV OPENMC_ROOT=/opt/openmc
+# Install OpenMC Python package
 RUN git clone --depth 1 -b v${OPENMC_VERSION} https://github.com/openmc-dev/openmc.git openmc && \
     cd openmc && \
-    mkdir -p build && cd build && \
-    cmake .. \
-        -DCMAKE_INSTALL_PREFIX=${OPENMC_ROOT} \
-        -DHDF5_ROOT=${HDF5_ROOT} && \
-    make -j$(nproc) && make install && \
-    cd ../..
-
-# Add OpenMC to the system path
-ENV PATH="${OPENMC_ROOT}/bin:${PATH}"
-ENV LD_LIBRARY_PATH="${OPENMC_ROOT}/lib:${OPENMC_ROOT}/lib64:${LD_LIBRARY_PATH}"
+    python -m pip install . && \
+    rm -rf $HOME/openmc
 
 
 # PyNE stage
 FROM ${BUILD_STAGE} AS pyne
-
-ARG Python_ABI
-
-# Use Python from manylinux as the default Python
-ENV PATH="/opt/python/${Python_ABI}/bin:${PATH}"
-RUN ln -sf /opt/python/${Python_ABI}/bin/python3 /usr/bin/python
 
 # Install necessary Python packages
 RUN python -m pip install --upgrade \
@@ -213,27 +210,6 @@ RUN cd $HOME/pyne && auditwheel repair dist/pyne-*.whl -w dist
 
 # Install PyNE
 RUN cd $HOME/pyne/dist && python -m pip install *manylinux**.whl
-
-# Install Python packages of MOAB if it was built
-RUN if [ -d "${MOAB_ROOT}" ]; then \
-    cd $HOME/moab && \
-    export SKBUILD_CMAKE_ARGS="-DENABLE_HDF5=ON; \
-        -DHDF5_ROOT=${HDF5_ROOT}; \
-        -DEIGEN3_DIR=${EIGEN3_ROOT}/include/eigen3; \
-        -DENABLE_BLASLAPACK=OFF; \
-        -DENABLE_FORTRAN=OFF" && \
-    python -m pip install . && \
-    cd .. && \
-    rm -rf $HOME/moab; \
-    fi
-
-# Install Python packages of Openmc if it was built
-RUN if [ -d "${OPENMC_ROOT}" ]; then \
-    cd $HOME/openmc && \
-    python -m pip install . && \
-    cd .. && \
-    rm -rf $HOME/openmc; \
-    fi
 
 # Test PyNE
 RUN cd $HOME/pyne/tests && \
