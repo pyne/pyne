@@ -35,7 +35,9 @@ jobs:
           # ISSUE: DYLD_LIBRARY_PATH for gcc is not set on Intel macOS
           echo "DYLD_LIBRARY_PATH=/usr/local/opt/gcc/lib/gcc/current/:$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
           echo "MACOSX_DEPLOYMENT_TARGET=${{ matrix.os == 'macos-14' && '14.0' || '13.0' }}" >> $GITHUB_ENV
-          echo "FC=gfortran-14" >> $GITHUB_ENV
+          echo "CC=gcc-15" >> $GITHUB_ENV
+          echo "CXX=g++-15" >> $GITHUB_ENV
+          echo "FC=gfortran-15" >> $GITHUB_ENV
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -63,14 +65,11 @@ jobs:
         shell: bash -l {0}
         run: |
           pip install -vvv dist/pyne*.whl
-      - name: Nuc data make
-        shell: bash -l {0}
-        run: |
-          nuc_data_make
       - name: Test PyNE
         shell: bash -l {0}
         run: |
           cd tests
+          nuc_data_make
           pip install pytest
           pytest -ra
       - name: Upload wheels

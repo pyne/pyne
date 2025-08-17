@@ -52,7 +52,9 @@ jobs:
           CIBW_ENVIRONMENT_MACOS: >
             MACOSX_DEPLOYMENT_TARGET=${{ matrix.os == 'macos-14' && '14.0' || '13.0' }}
             DYLD_LIBRARY_PATH=/usr/local/opt/gcc/lib/gcc/current/:$DYLD_LIBRARY_PATH
-            FC=gfortran-14
+            CC=gcc-15
+            CXX=g++-15
+            FC=gfortran-15
           CIBW_BUILD_FRONTEND: "build"
         with:
           package-dir: .

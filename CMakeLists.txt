@@ -90,7 +90,7 @@ set(BUILD_SHARED_LIBS ON CACHE BOOL "Build shared libraries")
 # PyNE will download and build HDF5 if DOWNLOAD_HDF5 is ON.
 if(NOT DOWNLOAD_HDF5)
   message(STATUS "HDF5 root: ${HDF5_ROOT}")
-  find_package(HDF5 REQUIRED COMPONENTS C HL)
+  find_package(HDF5 REQUIRED)
 else()
   message(STATUS "HDF5 will be downloaded and installed")
 
