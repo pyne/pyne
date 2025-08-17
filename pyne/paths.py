@@ -5,9 +5,6 @@ from . import __path__
 
 PYNE_CORE_BASE_PATH = os.path.join(__path__[0], "core")
 
-# TODO: Remove this when Scikit build support is enabled 
-PYNE_CORE_BASE_PATH = os.path.join(__path__[0], '..', '..', '..', '..')
-
 
 def get_paths(subdir, pattern="*", recursive=False):
     """

@@ -11,7 +11,10 @@ execute_process(COMMAND
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   )
 
-pyne_download_platform()
+# Download necessary files
+pyne_download_files()
+
+# Include directories
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}"
                     "${CMAKE_CURRENT_BINARY_DIR}"
                     )
@@ -129,7 +132,7 @@ if(ENABLE_MOAB)
   if(DOWNLOAD_MOAB)
     add_dependencies(${CMAKE_PROJECT_NAME} moab-project)
   endif()
-  target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE MOAB)
+  target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE ${MOAB_LIBRARIES})
 endif()
 
 # Link DAGMC library
@@ -139,7 +142,7 @@ if(ENABLE_DAGMC)
   if(DOWNLOAD_DAGMC)
     add_dependencies(${CMAKE_PROJECT_NAME} dagmc-project)
   endif()
-  target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE dagmc)
+  target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE ${DAGMC_LIBRARIES})
 endif()
 
 # Link LAPACK library
@@ -150,7 +153,7 @@ if(ENABLE_LAPACK)
     add_dependencies(${CMAKE_PROJECT_NAME} lapack-project)
   endif()
   target_link_libraries(${CMAKE_PROJECT_NAME} 
-    PRIVATE blas lapack
+    PRIVATE ${BLAS_LIBRARIES} ${LAPACK_LIBRARIES}
     )
 endif()
 
