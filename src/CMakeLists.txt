@@ -122,7 +122,7 @@ endif()
 if(HDF5_C_LIBRARIES)
   target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE ${HDF5_C_LIBRARIES})
 else()
-  target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE hdf5 hdf5_hl)
+  target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES})
 endif()
 
 # Link MOAB library
@@ -132,7 +132,7 @@ if(ENABLE_MOAB)
   if(DOWNLOAD_MOAB)
     add_dependencies(${CMAKE_PROJECT_NAME} moab-project)
   endif()
-  target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE ${MOAB_LIBRARIES})
+  target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE MOAB)
 endif()
 
 # Link DAGMC library
