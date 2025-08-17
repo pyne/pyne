@@ -90,7 +90,7 @@ set(BUILD_SHARED_LIBS ON CACHE BOOL "Build shared libraries")
 # PyNE will download and build HDF5 if DOWNLOAD_HDF5 is ON.
 if(NOT DOWNLOAD_HDF5)
   message(STATUS "HDF5 root: ${HDF5_ROOT}")
-  find_package(HDF5 REQUIRED)
+  find_package(HDF5 REQUIRED COMPONENTS C HL)
 else()
   message(STATUS "HDF5 will be downloaded and installed")
 
@@ -396,6 +396,7 @@ if(ENABLE_LAPACK)
         -DUSE_OPTIMIZED_BLAS:BOOL=ON
       DOWNLOAD_EXTRACT_TIMESTAMP true
       BUILD_BYPRODUCTS "${LAPACK_LIBRARY_DIRS}/*${CMAKE_SHARED_LIBRARY_SUFFIX}*"
+      BUILD_COMMAND ${CMAKE_COMMAND} --build .
       )
 
     # LAPACK is a shared library, so we need to install it
