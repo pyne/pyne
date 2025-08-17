@@ -7,7 +7,7 @@ inputs:
   stage:
     description: The docker stage that will be used as the docker image for testing.
     required: true
-    default: ''
+    default: ""
 runs:
   using: "composite"
   steps: 
@@ -35,7 +35,6 @@ runs:
         auditwheel repair pyne*.whl
         cd wheelhouse
         python -m pip install pyne*.whl
-        export PATH="$PATH:/github/home/.local/bin"
         nuc_data_make
 
     - name: Testing PyNE

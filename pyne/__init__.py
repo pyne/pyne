@@ -1,22 +1,20 @@
 import os
-from importlib.metadata import version, PackageNotFoundError
-from warnings import warn
+import warnings
+import importlib.metadata
 
-
-if os.name == "nt":
-    p = os.environ["PATH"].split(";")
-    lib = os.path.join(os.path.split(__file__)[0], "core", "lib*")
-    os.environ["PATH"] = ";".join([lib] + p)
+__version__ = importlib.metadata.version("pyne")
 
 try:
     from .pyne_config import *
+    from .paths import *
 except ImportError:
-    msg = (
-        "Error importing PyNE: you should not try to import PyNE from "
-        "its source directory; please exit the PyNE source tree, and relaunch "
-        "your python interpreter from there."
+    warnings.warn(
+        "It seems that PyNE is being run from its source directory. "
+        "This setup is not recommended as it may lead to unexpected behavior, "
+        "such as conflicts between source and installed versions. "
+        "Please run your script from outside the PyNE source tree.",
+        RuntimeWarning,
     )
-    warn(msg, Warning)
     raise
 
 try:

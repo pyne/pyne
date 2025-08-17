@@ -279,7 +279,7 @@ cdef class Value(object):
         else:
             return NotImplemented
 
-    def __nonzero__(self):
+    def __bool__(self):
         if self._inst.isBool():
             return self._inst.asBool()
         else:

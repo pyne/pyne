@@ -6,8 +6,6 @@ entries with a combined header. The SurfSrc.__cmp__() method is reimplemented
 to compare only the parts of the ssr files that matter for this operation.
 """
 
-from itertools import izip
-
 from numpy import copysign
 
 from pyne.mcnp import SurfSrc
@@ -97,7 +95,7 @@ def combine_multiple_ss_files(newssrname, ssrnames):
     ssrfiles[0].read_tracklist()
     newssr.tracklist = ssrfiles[0].tracklist
 
-    for ssrfile, trackoffset in izip(ssrfiles[1:], trackoffsets[1:]):
+    for ssrfile, trackoffset in zip(ssrfiles[1:], trackoffsets[1:]):
         ssrfile.read_tracklist()
         for cnt, trackdata in enumerate(ssrfile.tracklist):
             trackdata.nps += copysign(trackoffset, trackdata.nps)

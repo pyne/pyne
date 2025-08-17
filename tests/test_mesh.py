@@ -4,21 +4,7 @@ import time
 import shutil
 import warnings
 import itertools
-
-# The buildin zip in python3 behaves as itertools.izip as python2.
-# For python2, we need to import izip as zip.
-# For python3, do nothing with zip.
-try:
-    from itertools import izip as zip
-except ImportError:
-    pass
-
-# izip_longest in python3 was renamed to zip_longest in python3
-try:
-    from itertools import izip_longest as zip_longest
-except ImportError:
-    from itertools import zip_longest
-
+from itertools import zip_longest
 from operator import itemgetter
 import pytest
 import numpy as np
@@ -644,7 +630,7 @@ def test_iterate_1d():
 
 
 def test_vtx_iterator():
-    # use vanilla izip as we"ll test using non-equal-length iterators
+    # use vanilla zip as we"ll test using non-equal-length iterators
 
     sm = Mesh(
         structured=True, structured_coords=[range(10, 15), range(21, 25), range(31, 34)]

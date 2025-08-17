@@ -1,3 +1,4 @@
+# cpp_material_library.pxd
 """C++ wrapper for material class."""
 from libcpp.set cimport set
 from libcpp.string cimport string as std_string
@@ -7,6 +8,7 @@ from libcpp.vector cimport vector
 from libcpp.utility cimport pair
 from libcpp cimport bool
 from libcpp.memory cimport shared_ptr
+from libc.stddef cimport size_t
 
 cimport cpp_jsoncpp
 
@@ -44,6 +46,6 @@ cdef extern from "material_library.h" namespace "pyne":
         std_set[std_string] get_keylist() except +
         std_set[int] get_nuclist() except +
         int size() except +
+        size_t count(std_string) except +
         cpp_umap[std_string, shared_ptr[cpp_material.Material]].iterator begin() except +
         cpp_umap[std_string, shared_ptr[cpp_material.Material]].iterator end() except +
-

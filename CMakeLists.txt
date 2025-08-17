@@ -16,6 +16,15 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 # Setup the project
 project(pyne)
 
+# Get the version from Git
+include(GetVersionFromGit)
+
+# Output version information
+message(STATUS "PyNE version: ${PYNE_VERSION}")
+message(STATUS "PyNE dev state: ${PYNE_DEV_STATE}")
+message(STATUS "PyNE commit hash: ${PYNE_COMMIT_HASH}")
+message(STATUS "PyNE commit count: ${PYNE_COMMIT_COUNT}")
+
 # Include the GNUInstallDirs module.
 # This module provides installation directories as per the GNU Coding Standards.
 include(GNUInstallDirs)
@@ -448,6 +457,25 @@ add_subdirectory(src)
 add_subdirectory(pyne)
 add_subdirectory(pyne/xs)
 
+
+# configure PyNEConfig.cmake file and install
+configure_file(cmake/PyNEConfig.cmake.in "${CMAKE_CURRENT_BINARY_DIR}/cmake/PyNEConfig.cmake" @ONLY)
+
+if(SKBUILD)
+  set(INSTALL_CONFIGDIR ${SKBUILD_DATA_DIR}/${CMAKE_INSTALL_LIBDIR}/cmake/PyNE)
+else()
+  set(INSTALL_CONFIGDIR ${CMAKE_INSTALL_LIBDIR}/cmake/PyNE)
+endif()
+
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/cmake/PyNEConfig.cmake
+  DESTINATION ${INSTALL_CONFIGDIR}
+  )
+
+# install targets
+install(EXPORT PyNETargets
+  FILE PyNETargets.cmake
+  DESTINATION ${INSTALL_CONFIGDIR}
+)
 
 ############################################################
 # Summary                                                  #

@@ -19,25 +19,18 @@ subsequent fee for these data.
 """
 from __future__ import print_function
 import os
-import re
-import sys
 import shutil
 from pyne.utils import QA_warn
+from html.parser import HTMLParser
+import numpy as np
+import tables as tb
+from pyne import nucname
+from pyne.dbgen.api import BASIC_FILTERS
 
 try:
     import urllib.request as urllib2
 except ImportError:
     import urllib2
-if sys.version_info[0] >= 3:
-    from html.parser import HTMLParser
-else:
-    from HTMLParser import HTMLParser
-
-import numpy as np
-import tables as tb
-
-from pyne import nucname
-from pyne.dbgen.api import BASIC_FILTERS
 
 QA_warn(__name__)
 

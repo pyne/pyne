@@ -3,8 +3,6 @@ Miscellaneous functions, classes etc
 """
 import sys
 
-IS_PYTHON3 = sys.version_info[0] >= 3
-
 
 class has_next_iterator(object):
     """
@@ -24,10 +22,7 @@ class has_next_iterator(object):
         if self._has_next:
             result = self._the_next
         else:
-            if IS_PYTHON3:
-                result = next(self.it)
-            else:
-                result = self.it.next()
+            result = next(self.it)
         self._has_next = None
         return result
 
@@ -35,20 +30,14 @@ class has_next_iterator(object):
         if self._has_next:
             result = self._the_next
         else:
-            if IS_PYTHON3:
-                result = next(self.it)
-            else:
-                result = self.it.next()
+            result = next(self.it)
         self._has_next = None
         return result
 
     def has_next(self):
         if self._has_next is None:
             try:
-                if IS_PYTHON3:
-                    self._the_next = next(self.it)
-                else:
-                    self._the_next = self.it.next()
+                self._the_next = next(self.it)
             except StopIteration:
                 self._has_next = False
             else:

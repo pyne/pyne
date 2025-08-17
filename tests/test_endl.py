@@ -4,23 +4,13 @@ import io
 import warnings
 import sys
 from hashlib import md5
-
 import numpy as np
 from numpy.testing import assert_array_equal, assert_allclose
-
 from pyne.utils import QAWarning
-
-warnings.simplefilter("ignore", QAWarning)
 from pyne.endl import Library
-
-if sys.version_info[0] > 2:
-    from io import StringIO
-else:
-    from StringIO import StringIO
-
-
 from utils import download_file
 
+warnings.simplefilter("ignore", QAWarning)
 
 def test_loadfile():
     download_file(

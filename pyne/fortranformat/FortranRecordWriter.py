@@ -1,15 +1,8 @@
 import sys
 
-IS_PYTHON3 = sys.version_info[0] >= 3
-
-if IS_PYTHON3:
-    exec("from ._output import output as _output")
-    exec("from ._lexer import lexer as _lexer")
-    exec("from ._parser import parser as _parser")
-else:
-    exec("from _output import output as _output")
-    exec("from _lexer import lexer as _lexer")
-    exec("from _parser import parser as _parser")
+exec("from ._output import output as _output")
+exec("from ._lexer import lexer as _lexer")
+exec("from ._parser import parser as _parser")
 
 
 class FortranRecordWriter(object):

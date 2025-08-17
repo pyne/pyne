@@ -2,16 +2,11 @@
 from __future__ import unicode_literals, division
 import sys
 import warnings
-
 import pytest
-
+from pyne import rxname
 from pyne.utils import QAWarning
 
 warnings.simplefilter("ignore", QAWarning)
-from pyne import rxname
-
-if sys.version_info[0] > 2:
-    long = int
 
 
 def _hash(s):
@@ -74,8 +69,8 @@ def test_name_ids():
     assert rxname.name(_hash("a")) == "a"
     assert rxname.name(_hash("total")) == "total"
 
-    assert rxname.name(long(_hash("a"))) == "a"
-    assert rxname.name(long(_hash("total"))) == "total"
+    assert rxname.name(int(_hash("a"))) == "a"
+    assert rxname.name(int(_hash("total"))) == "total"
 
     assert rxname.name(str(_hash("a"))) == "a"
     assert rxname.name(str(_hash("total"))) == "total"
@@ -85,8 +80,8 @@ def test_name_mts():
     assert rxname.name(107) == "a"
     assert rxname.name(1) == "total"
 
-    assert rxname.name(long(107)) == "a"
-    assert rxname.name(long(1)) == "total"
+    assert rxname.name(int(107)) == "a"
+    assert rxname.name(int(1)) == "total"
 
     assert rxname.name("107") == "a"
     assert rxname.name("1") == "total"
@@ -117,8 +112,8 @@ def test_id_ids():
     assert rxname.id(_hash("a")) == _hash("a")
     assert rxname.id(_hash("total")) == _hash("total")
 
-    assert rxname.id(long(_hash("a"))) == _hash("a")
-    assert rxname.id(long(_hash("total"))) == _hash("total")
+    assert rxname.id(int(_hash("a"))) == _hash("a")
+    assert rxname.id(int(_hash("total"))) == _hash("total")
 
     assert rxname.id(str(_hash("a"))) == _hash("a")
     assert rxname.id(str(_hash("total"))) == _hash("total")
@@ -128,8 +123,8 @@ def test_id_mts():
     assert rxname.id(107) == _hash("a")
     assert rxname.id(1) == _hash("total")
 
-    assert rxname.id(long(107)) == _hash("a")
-    assert rxname.id(long(1)) == _hash("total")
+    assert rxname.id(int(107)) == _hash("a")
+    assert rxname.id(int(1)) == _hash("total")
 
     assert rxname.id("107") == _hash("a")
     assert rxname.id("1") == _hash("total")
@@ -160,8 +155,8 @@ def test_mt_ids():
     assert rxname.mt(_hash("a")) == 107
     assert rxname.mt(_hash("total")) == 1
 
-    assert rxname.mt(long(_hash("a"))) == 107
-    assert rxname.mt(long(_hash("total"))) == 1
+    assert rxname.mt(int(_hash("a"))) == 107
+    assert rxname.mt(int(_hash("total"))) == 1
 
     assert rxname.mt(str(_hash("a"))) == 107
     assert rxname.mt(str(_hash("total"))) == 1
@@ -171,8 +166,8 @@ def test_mt_mts():
     assert rxname.mt(107) == 107
     assert rxname.mt(1) == 1
 
-    assert rxname.mt(long(107)) == 107
-    assert rxname.mt(long(1)) == 1
+    assert rxname.mt(int(107)) == 107
+    assert rxname.mt(int(1)) == 1
 
     assert rxname.mt("107") == 107
     assert rxname.mt("1") == 1
@@ -225,8 +220,8 @@ def test_label_ids():
     assert rxname.label(_hash("a")) == alabel
     assert rxname.label(_hash("total")) == totlabel
 
-    assert rxname.label(long(_hash("a"))) == alabel
-    assert rxname.label(long(_hash("total"))) == totlabel
+    assert rxname.label(int(_hash("a"))) == alabel
+    assert rxname.label(int(_hash("total"))) == totlabel
 
     assert rxname.label(str(_hash("a"))) == alabel
     assert rxname.label(str(_hash("total"))) == totlabel
@@ -236,8 +231,8 @@ def test_label_mts():
     assert rxname.label(107) == alabel
     assert rxname.label(1) == totlabel
 
-    assert rxname.label(long(107)) == alabel
-    assert rxname.label(long(1)) == totlabel
+    assert rxname.label(int(107)) == alabel
+    assert rxname.label(int(1)) == totlabel
 
     assert rxname.label("107") == alabel
     assert rxname.label("1") == totlabel
@@ -274,8 +269,8 @@ def test_doc_ids():
     assert rxname.doc(_hash("a")) == adoc
     assert rxname.doc(_hash("total")) == totdoc
 
-    assert rxname.doc(long(_hash("a"))) == adoc
-    assert rxname.doc(long(_hash("total"))) == totdoc
+    assert rxname.doc(int(_hash("a"))) == adoc
+    assert rxname.doc(int(_hash("total"))) == totdoc
 
     assert rxname.doc(str(_hash("a"))) == adoc
     assert rxname.doc(str(_hash("total"))) == totdoc
@@ -285,8 +280,8 @@ def test_doc_mts():
     assert rxname.doc(107) == adoc
     assert rxname.doc(1) == totdoc
 
-    assert rxname.doc(long(107)) == adoc
-    assert rxname.doc(long(1)) == totdoc
+    assert rxname.doc(int(107)) == adoc
+    assert rxname.doc(int(1)) == totdoc
 
     assert rxname.doc("107") == adoc
     assert rxname.doc("1") == totdoc

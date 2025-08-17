@@ -17,6 +17,7 @@ from libcpp.utility cimport pair as cpp_pair
 from libcpp.set cimport set as cpp_set
 from libcpp.string cimport string as std_string
 from libc.stdlib cimport malloc, free
+from libc.stddef cimport size_t
 from libcpp.unordered_map cimport unordered_map as cpp_umap
 from libcpp.memory cimport shared_ptr
 
@@ -227,6 +228,13 @@ cdef class _MaterialLibrary:
         """
         filename = filename.encode()
         self._inst.write_openmc(filename)
+
+    def __contains__(self, key):
+        """Checks if a key exists in the material library."""
+        c_key = ensure_material_key(key)
+        # Call the C++ count method
+        count_result = self._inst.count(<std_string>c_key)
+        return count_result > 0
 
     def __setitem__(self, key, value):
         """Add a Material to this material library, if the material key already exist it will be overwritten.

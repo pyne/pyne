@@ -19,11 +19,6 @@ from pyne.dagmc import HAVE_DAGMC
 if not HAVE_PYMOAB:
     pytest.skip(allow_module_level=True)
 
-if sys.version_info[0] > 2:
-    izip = zip
-else:
-    from itertools import izip
-
 warnings.simplefilter("ignore", QAWarning)
 
 thisdir = os.path.dirname(__file__)
@@ -90,7 +85,7 @@ def test_response_to_hdf5():
     # skip test if h5diff not exist
     is_h5diff = os.system("which h5diff")
     if is_h5diff != 0:
-        pytest.skip()
+        pytest.skip("h5diff not found", allow_module_level=True)
 
     for response in responses:
         # read  output.txt and write h5 file

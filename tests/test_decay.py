@@ -4,14 +4,9 @@ import os
 import sys
 import json
 import warnings
+from urllib.request import urlretrieve
+from functools import lru_cache
 
-if sys.version_info[0] >= 3:
-    from urllib.request import urlretrieve
-    from functools import lru_cache
-else:
-    from urllib import urlretrieve
-
-    lru_cache = lambda *args, **kwargs: (lambda f: f)
 
 
 import numpy as np
@@ -96,11 +91,7 @@ def pivot_mat_keys():
     """
     nuc_keys = {}
     for key in MATS.keys():
-        if sys.version_info[0] >= 3:
-            key = str(key, encoding="UTF-8")
-        else:
-            key = str(key).encode("UTF-8")
-
+        key = str(key, encoding="UTF-8")
         _, nuc, t = key.split("_")
         nuc = int(nuc)
         if nuc in METASTABLE_BLACKLIST:

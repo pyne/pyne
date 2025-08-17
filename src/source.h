@@ -32,7 +32,7 @@ class Source {
   virtual std::string mcnp(int version=5) const {return "";}
 
   // fluka tally
-  virtual std::string fluka() {}
+  virtual std::string fluka() { return ""; }
 };
 
 class PointSource : public Source {

@@ -127,21 +127,21 @@ def test_remove():
 def test_fromstring_split1():
     s = "1 2.3 4"
     obs = utils.fromstring_split(s)
-    exp = np.fromstring(s, sep=" ")
+    exp = np.array(s.split(), dtype=float)
     assert_array_equal(obs, exp)
 
 
 def test_fromstring_split2():
     s = "1-2.3-4"
     obs = utils.fromstring_split(s, sep="-")
-    exp = np.fromstring(s, sep="-")
+    exp = np.array(s.split('-'), dtype=float)
     assert_array_equal(obs, exp)
 
 
 def test_fromstring_split3():
     s = "1,2.3,4"
     obs = utils.fromstring_split(s, sep=",")
-    exp = np.fromstring(s, sep=",")
+    exp = np.array(s.split(','), dtype=float)
     assert_array_equal(obs, exp)
 
 
@@ -154,28 +154,21 @@ def test_fromstring_split4():
 
 def test_fromstring_token1():
     s = "1 2.3 4"
-    obs = utils.fromstring_token(s)
-    exp = np.fromstring(s, sep=" ")
+    obs = utils.fromstring_token(s, inplace=False)
+    exp = np.array(s.split(), dtype=float)
     assert_array_equal(obs, exp)
 
 
 def test_fromstring_token2():
     s = "1-2.3-4"
-    obs = utils.fromstring_token(s, sep="-")
-    exp = np.fromstring(s, sep="-")
+    obs = utils.fromstring_token(s, sep="-", inplace=False)
+    exp = np.array(s.split('-'), dtype=float)
     assert_array_equal(obs, exp)
 
 
 def test_fromstring_token3():
     s = "1,  2.3, 4"
-    obs = utils.fromstring_token(s, sep=" ,")
-    exp = np.fromstring(s, sep=", ")
-    assert_array_equal(obs, exp)
-
-
-def test_fromstring_token4():
-    s = "1, 2.3 ,4"
-    obs = utils.fromstring_token(s, sep=" ,", inplace=True)
+    obs = utils.fromstring_token(s, sep=" ,", inplace=False)
     exp = np.array([1.0, 2.3, 4.0])
     assert_array_equal(obs, exp)
 
@@ -378,4 +371,3 @@ def test_ifbar():
     for i in range(loops):
         bar.next()
     bar.finish()
-

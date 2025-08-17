@@ -65,10 +65,7 @@ def grab_materials_compendium(location="materials_compendium.csv"):
         The materials in the compendium.
     """
     natural_abund("H1")  # initialize natural_abund_map
-    if sys.version_info[0] > 2:
-        f = open(location, "r", newline="", encoding="utf-8")
-    else:
-        f = open(location, "rb")
+    f = open(location, "r", newline="", encoding="utf-8")
     reader = csv.reader(f, delimiter=",", quotechar='"')
     lines = list(filter(is_comp_matname_or_density, reader))
     mats = parse_materials({}, lines)

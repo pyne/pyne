@@ -17,10 +17,8 @@ ALLOW_ZERO_WIDTH_EDS = True
 RECORD_SEPARATOR = "\n"
 
 # The maximum size for an integer
-if sys.version_info[0] >= 3:
-    PROC_MAXINT = sys.maxsize
-else:
-    PROC_MAXINT = sys.maxint
+PROC_MAXINT = sys.maxsize
+
 # Processor dependant default for including leading plus or not
 PROC_INCL_PLUS = False
 # Option to allow signed binary, octal and hex on input (not a FORTRAN feature)
@@ -42,10 +40,7 @@ PROC_BLANKS_AS_ZEROS = False
 def reset():
     global RET_WRITTEN_VARS_ONLY, RET_UNWRITTEN_VARS_NONE, PROC_INCL_PLUS, PROC_ALLOW_NEG_BOZ, PROC_PAD_CHAR, PROC_NEG_AS_ZERO, PROC_SIGN_ZERO, PROC_MIN_FIELD_WIDTH, PROC_DECIMAL_CHAR, G0_NO_BLANKS, PROC_NO_LEADING_BLANK, PROC_BLANKS_AS_ZEROS, PROC_MAXINT, G_INPUT_TRIAL_EDS, ALLOW_ZERO_WIDTH_EDS
     G_INPUT_TRIAL_EDS = ["F", "L", "A"]
-    if sys.version_info[0] >= 3:
-        PROC_MAXINT = sys.maxsize
-    else:
-        PROC_MAXINT = sys.maxint
+    PROC_MAXINT = sys.maxsize
     RET_WRITTEN_VARS_ONLY = False
     RET_UNWRITTEN_VARS_NONE = True
     PROC_INCL_PLUS = False

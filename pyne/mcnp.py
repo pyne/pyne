@@ -43,10 +43,8 @@ else:
         ImportWarning,
     )
 
-if sys.version_info[0] > 2:
-
-    def cmp(a, b):
-        return (a > b) - (a < b)
+def cmp(a, b):
+    return (a > b) - (a < b)
 
 
 class Mctal(object):
@@ -1230,7 +1228,7 @@ class PtracReader(object):
         variable_ids = dict()
 
         if self.eightbytes:
-            mcnp_version = self.mcnp_version_info[8:13]
+            mcnp_version = self.mcnp_version_info[8:13].strip()
             if mcnp_version in ["6", "6.mpi"]:
                 variable_info = self.read_next(
                     "iqqqqqqqqqqiiiiiiiii", 120, raw_format=True

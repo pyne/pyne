@@ -1,0 +1,47 @@
+#ifndef PYNE_VERSION_H
+#define PYNE_VERSION_H
+
+#include <array>
+#include <string>
+#include <sstream>
+
+namespace pyne {
+
+constexpr int VERSION_MAJOR = @PYNE_VERSION_MAJOR@;
+constexpr int VERSION_MINOR = @PYNE_VERSION_MINOR@;
+constexpr int VERSION_PATCH = @PYNE_VERSION_PATCH@;
+constexpr bool VERSION_DEV = @PYNE_DEV_STATE@;
+
+constexpr const char* VERSION_COMMIT_COUNT = "@PYNE_COMMIT_COUNT@";
+constexpr const char* VERSION_COMMIT_HASH  = "@PYNE_COMMIT_HASH@";
+
+constexpr std::array<int, 3> VERSION_TRIPLE = {
+    VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH
+};
+
+inline std::string version_string() {
+    std::ostringstream oss;
+    oss << VERSION_MAJOR << "." 
+        << VERSION_MINOR << "." 
+        << VERSION_PATCH;
+    
+    if (VERSION_DEV)
+        oss << "-dev";
+
+    bool has_commit_count = VERSION_COMMIT_COUNT && VERSION_COMMIT_COUNT[0] != '\0';
+    bool has_commit_hash  = VERSION_COMMIT_HASH  && VERSION_COMMIT_HASH[0]  != '\0';
+
+    if (has_commit_count || has_commit_hash) {
+        oss << " (commit";
+        if (has_commit_count)
+            oss << " " << VERSION_COMMIT_COUNT;
+        if (has_commit_hash)
+            oss << " " << VERSION_COMMIT_HASH;
+        oss << ")";
+    }
+    return oss.str();
+}
+
+} // namespace pyne
+
+#endif // PYNE_VERSION_H

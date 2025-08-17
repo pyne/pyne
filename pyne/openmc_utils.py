@@ -5,20 +5,16 @@ import os
 import io
 import sys
 from warnings import warn
+import numpy as np
+import tables as tb
+from html.parser import HTMLParser
+from pyne.mesh import MeshTally, HAVE_PYMOAB
 
 try:
     from collections.abc import namedtuple
 except ImportError:
     from collections import namedtuple
-import numpy as np
-import tables as tb
 
-if sys.version_info[0] == 2:
-    from HTMLParser import HTMLParser
-else:
-    from html.parser import HTMLParser
-
-from pyne.mesh import MeshTally, HAVE_PYMOAB
 
 if HAVE_PYMOAB:
     from pyne.mesh import NativeMeshTag
@@ -163,11 +159,8 @@ class CrossSections(HTMLParser):
             This is a path to the cross_sections.xml file, a file handle, or
             None indicating an empty container.
         """
-        # HTMLParser is only a new-style class in python 3
-        if sys.version_info[0] > 2:
-            super(CrossSections, self).__init__()
-        else:
-            HTMLParser.__init__(self)
+
+        super(CrossSections, self).__init__()
         self.reset()
         self._tag = None
         self.path = None

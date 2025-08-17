@@ -135,8 +135,8 @@ cdef extern from "numpy/arrayobject.h":
 
 cdef extern from "extra_types.h" namespace "extra_types":
     cdef cppclass MemoryKnight[T]:
-        MemoryKnight() nogil except +
-        T * defnew() nogil except +
-        T * renew(void *) nogil except +
-        void deall(T *) nogil except +
+        MemoryKnight() except + nogil
+        T * defnew() except + nogil
+        T * renew(void *) except + nogil
+        void deall(T *) except + nogil
 

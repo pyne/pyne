@@ -1,6 +1,8 @@
 set(PYNE_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}" ${PYNE_INCLUDE_DIRS}
     PARENT_SCOPE)
 
+# Generate version.h
+configure_file(version.h.in "${CMAKE_CURRENT_BINARY_DIR}/version.h" @ONLY)
 pyne_download_files()
 
 # Generate atomic data
@@ -9,7 +11,10 @@ execute_process(COMMAND
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   )
 
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
+pyne_download_platform()
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}"
+                    "${CMAKE_CURRENT_BINARY_DIR}"
+                    )
 
 # setup source files
 set(PYNE_SRCS
@@ -27,7 +32,6 @@ set(PYNE_SRCS
   "rxname.cpp"
   "tally.cpp"
   "transmuters.cpp"
-  "endftod.f90"
   "utils.cpp"
   )
 
