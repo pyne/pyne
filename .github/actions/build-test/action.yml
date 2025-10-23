@@ -14,8 +14,7 @@ runs:
       shell: bash -l {0}
       run: |
         cd $GITHUB_WORKSPACE
-        python setup.py install --user --clean --hdf5 /root/opt/hdf5/hdf5-1.14.6 $PYNE_MOAB_ARGS $PYNE_DAGMC_ARGS
-        export PATH="$PATH:/github/home/.local/bin"
+        python setup.py install --clean $PYNE_MOAB_ARGS $PYNE_DAGMC_ARGS
         cd ../
         nuc_data_make
 

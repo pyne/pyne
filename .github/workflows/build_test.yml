@@ -31,11 +31,11 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        stage: [base_python, moab, dagmc, openmc]
+        stage: [base, moab, dagmc, openmc]
       fail-fast: false
 
     container:
-      image: ghcr.io/pyne/pyne_ubuntu_22.04_py3/${{ matrix.stage }}:stable
+      image: ghcr.io/pyne/pyne_ubuntu_py3/${{ matrix.stage }}:stable
 
     steps:
       - name: Checkout repository
