@@ -47,9 +47,9 @@ def download_exe(exe_path, exe_url, compressed=0, decomp_path="", dl_size=0):
             f.write(html)
 
         # set proper permissions on newly downloaded file
-        os.chmod(exe_path, 744)
+        os.chmod(exe_path, 0o744)
         if compressed:
-            os.chmod(exe_path, 777)
+            os.chmod(exe_path, 0o777)
             tfile = tarfile.open(exe_path, "r:gz")
             tfile.extractall(decomp_path)
 
