@@ -676,7 +676,7 @@ class NativeMeshTag(Tag):
                 raise ValueError("Incompatible shape for scalar or vector data")
         elif self.size > 1:
             try:
-                return _ops[op](self[:], other[:][None, :])
+                return _ops[op](self[:], other[:][:, None])
             except:
                 raise ValueError("Incompatible shape for vector or scalar data")
 
