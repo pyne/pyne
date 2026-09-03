@@ -11,7 +11,14 @@ on:
       - ".github/workflows/docker_publish.yml"
       - ".github/workflows/install_script.yml"
       - ".github/workflows/virtualbox_image.yml"
-      - "doc/**"
+      - "docs/*"
+      - "examples/*"
+      - "img/*"
+      - "news/*"
+      - "tutorial/*"
+      - "tools/*"
+      - "./*.rst"
+      - "license.txt"
       - "CHANGELOG.rst"
   push:
     paths-ignore:
@@ -21,7 +28,14 @@ on:
       - ".github/workflows/docker_publish.yml"
       - ".github/workflows/install_script.yml"
       - ".github/workflows/virtualbox_image.yml"
-      - "doc/**"
+      - "docs/*"
+      - "examples/*"
+      - "img/*"
+      - "news/*"
+      - "tutorial/*"
+      - "tools/*"
+      - "./*.rst"
+      - "license.txt"
       - "CHANGELOG.rst"
 
 jobs:
