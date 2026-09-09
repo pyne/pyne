@@ -1,14 +1,16 @@
 """Purpose:
-
-  This module is for spectrometry analysis
-  will have functions for general spectrum processing
-
+This module is for spectrometry analysis
+will have functions for general spectrum processing
 """
 from pyne.utils import QA_warn
 
 
 import copy
-
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+from scipy.optimize import curve_fit
+from scipy.interpolate import splrep, sproot
 
 QA_warn(__name__)
 
@@ -160,3 +162,156 @@ def net_counts(spec, c1, c2, m):
     gc = gross_count(spec, c1, c2)
     nc = gc - bg
     return nc
+
+
+def net_area(spec,c1,c2):
+    """Calculates the net area under a peak by subtracting background from total
+    counts under the peak. 
+    
+    Parameters
+    ----------
+    spec : a spectrum object
+
+    c1 : int
+        First channel of the peak
+    c2 : int
+        Second channel of the peak
+    Returns
+    -------
+    net_area: float
+        net area under the peak that is not background
+    Notes
+    ----
+    Counts list has to be iterated by the channel number, i.e. counts[300] is
+    counts at the 300th channel.
+    """
+    p = sum(spec.counts[c1:c2])
+    n = c2 - c1
+    count1 = spec.counts[c1]
+    count2 = spec.counts[c2]
+    net_area = p - ((n/2.0)*(count1+count2))
+    return net_area
+
+def end_point_average_area(spec,c1,c2,var=5):
+    """Calculates the net area under a peak by end point averaging the 
+    background counts and subtracting the background from total
+    counts under the peak. 
+    
+    Parameters
+    ----------
+    spec : a spectrum object
+     
+    c1 : int
+        First channel of the peak
+    c2 : int
+        Second channel of the peak
+    var : int
+        amount of channels to collect intial and final count averages from.
+    
+    Returns
+    -------
+    end_point_average : float
+        net area under the peak that is not background counts
+    Notes
+    ----
+    Counts list has to be iterated by the channel number, i.e. counts[300] is
+    counts at the 300th channel.
+    var is preset to 5
+    """
+    p = sum(spec.counts[c1:c2])
+    n = c2 - c1
+    n1 = var
+    n2 = var
+    count1 = sum(spec.counts[c1-var:c1])
+    count2 = sum(spec.counts[c2:c2+var])
+    end_point_average = p - ((n/2.0)*((count1/n1)+(count2/n2)))
+    return end_point_average
+
+def gaussian_fit(spec,c1,c2):
+    """Plots the gaussian fit to the raw data. 
+    
+    Parameters
+    ----------
+    spec : a spectrum object
+     
+    c1 : int
+        First channel of the peak
+    c2 : int
+        Second channel of the peak
+    
+    Returns
+    -------
+    gaussian fit : plot or figure
+        Gaussian fit of channels versus counts data
+    
+    """   
+    x = spec.channels[c1:c2]
+    y = spec.counts[c1:c2]
+    n = len(x)
+    mean = sum(x*y)/n                   
+    sigma = np.sqrt(sum(y*(x-mean)**2)/n)
+    amp = max(y)
+    x_center = x.mean()
+    x_peak = x[list(y).index(max(y))]
+    def gauss(x,amp,x_center,sigma):
+        return amp*np.exp(-(x-x_center)**2/(2*sigma**2))
+    
+    popt,pcov = curve_fit(gauss,x,y,p0=[amp,x_center, sigma])
+    #po = # for [amp, cen, wid]
+    plt.plot(x,y,'b*:',label='data')
+    plt.plot(x,gauss(x,*popt),'ro:',label='fit')
+    plt.legend()
+    plt.title('Gaussian fit' )
+    plt.xlabel('Channels')
+    plt.ylabel('Counts')
+    plt.show()
+    
+def fwhm(spec,c1,c2,k=3):
+    """Gives FWHM of a peak. 
+    
+    Parameters
+    ----------
+    spec : a spectrum object
+     
+    c1 : int
+        First channel of the peak
+    c2 : int
+        Second channel of the peak
+    k : int
+	The order of the spline fit 
+    Returns
+    -------
+    fwhm : int or float
+        FWHM of a peak.
+    
+    """   
+    x = np.array(spec.channels[c1:c2])
+    y = np.array(spec.counts[c1:c2])
+    n = len(x)                          
+    amp = max(y)
+    x_center = x.mean()
+    def gauss(x,amp,x_center,sigma):
+        return amp*np.exp(-(x-x_center)**2/(2.0*sigma**2))  
+    popt,pcov = curve_fit(gauss,x,y,p0=[amp,x_center, n/2.0])
+    half_max = max(gauss(x,*popt))/2.0
+    s = splrep(x, y - half_max, k=k)
+    roots = sproot(s)
+    fwhm = roots[-1] - roots[0]
+    return fwhm
+
+def resolution(fwhm,e_0):
+    """Gives resolution of a peak. 
+    
+    Parameters
+    ----------
+    fwhm : float
+        Full Width Half Maximum of peak
+     e_0 : int
+        Peak centroid energyt 
+    Returns
+    -------
+    res : float
+        Resolution of a peak.
+    """   
+    res = fwhm/float(e_0)
+    return(res)
