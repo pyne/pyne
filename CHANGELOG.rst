@@ -10,6 +10,7 @@ Next Version
    * Add CI for MacOS (#1557)
    * Add Git versioning support (#1570)
    * Add Git support for version handling to amalgamate.py (#1571)
+   * Refactor PyNE Configuration for CMake Integration (#1556)
 
 **Change**
    * Test install script on multiple Ubuntu versions (#1484)
