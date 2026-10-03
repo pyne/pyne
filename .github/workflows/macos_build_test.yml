@@ -30,8 +30,8 @@ jobs:
       fail-fast: false
       matrix:
         macos_versions: [
-            macos-13,
-            macos-14,
+            macos-15,
+            macos-26,
         ]
 
     runs-on: ["${{ matrix.macos_versions }}"]

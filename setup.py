@@ -131,13 +131,13 @@ DECAY_CPP = os.path.join("src", "decay.cpp")
 DECAY_S = glob("src/decay*.s")
 DECAY_H_REP = os.path.join("src", "_decay.h")
 DECAY_CPP_REP = os.path.join("src", "_decay.cpp")
-DECAY_URL = "http://raw.githubusercontent.com/pyne/data/master/decay.tar.gz"
+DECAY_URL = "https://github.com/pyne/data/raw/77f1aa4b4c29e3b66f42f31658e598455e604227/decay.tar.gz"
 
 
 CRAM_H = os.path.join("src", "cram.h")
 CRAM_C = os.path.join("src", "cram.c")
 CRAM_S = glob("src/cram*.s")
-CRAM_URL = "http://raw.githubusercontent.com/pyne/data/master/cram.tar.gz"
+CRAM_URL = "https://github.com/pyne/data/raw/77f1aa4b4c29e3b66f42f31658e598455e604227/cram.tar.gz"
 
 
 local_ensdf_evaluators = [

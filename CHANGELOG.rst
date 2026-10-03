@@ -18,6 +18,7 @@ Next Version
    * Remove deprecated references to ``basestring`` (#1544)
    * Remove endftod.f90 and rely on C++ version (#1554)
    * Refactor amalgamation logic for clarity and efficiency (#1573)
+   * Update macOS CI runners to macos-15 and macos-26 and simplify changelog check workflow (#1588)
 
 **Fix**
    * Fix Type Mismatch Error in PyNE's ENSDF Processing Module (#1519)
@@ -37,6 +38,9 @@ Next Version
    * Remove reference to Python `long` (#1566)
    * Update Ubuntu Docker configuration and fix compatibility issues (#1572, #1575)
    * Allow `nucname.cpp` to read metastable states higher than m with `pyne.alara.num_dens_to_mesh()` (#1581)
+   * Fix Changelog CI test with newer runner (#1587)
+   * Lock commit used for `pyne/data` to support reproducible builds (#1585)
+   * Drop use of the ``numpy.reshape`` ``newshape`` keyword argument, removed in NumPy 2.4 (#1588)
 
 v0.7.8
 ======

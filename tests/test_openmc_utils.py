@@ -235,16 +235,16 @@ def test_get_result_error_from_openmc_sp():
     flux = tally.get_slice(scores=["flux"])
     num_e_groups = len(flux.mean.flatten()) // num_ves
     exp_result = np.divide(flux.mean.flatten(), ve_vol)
-    exp_result = np.reshape(exp_result, newshape=(num_e_groups, num_ves))
+    exp_result = np.reshape(exp_result, (num_e_groups, num_ves))
     exp_result = exp_result.transpose()
     exp_res_tot = np.sum(exp_result, axis=1)
 
     exp_rel_err = flux.std_dev / flux.mean
-    exp_rel_err = np.reshape(exp_rel_err, newshape=(num_e_groups, num_ves))
+    exp_rel_err = np.reshape(exp_rel_err, (num_e_groups, num_ves))
     exp_rel_err = exp_rel_err.transpose()
 
     exp_rel_err_tot = np.zeros_like(exp_res_tot)
-    std_dev = np.reshape(flux.std_dev.flatten(), newshape=(num_e_groups, num_ves))
+    std_dev = np.reshape(flux.std_dev.flatten(), (num_e_groups, num_ves))
     std_dev = std_dev.transpose()
     var_tot = np.sum(np.square(std_dev), axis=1)
     exp_rel_err_tot = np.sqrt(var_tot) / (exp_res_tot * ve_vol)
@@ -305,10 +305,10 @@ def test_create_meshtally():
     flux = tally.get_slice(scores=["flux"])
     num_e_groups = len(flux.mean.flatten()) // num_ves
     exp_result = np.divide(flux.mean.flatten(), ve_vol)
-    exp_result = np.reshape(exp_result, newshape=(num_e_groups, num_ves))
+    exp_result = np.reshape(exp_result, (num_e_groups, num_ves))
     exp_result = exp_result.transpose()
     exp_rel_err = flux.std_dev / flux.mean
-    exp_rel_err = np.reshape(exp_rel_err, newshape=(num_e_groups, num_ves))
+    exp_rel_err = np.reshape(exp_rel_err, (num_e_groups, num_ves))
     exp_rel_err = exp_rel_err.transpose()
 
     # changes the order of exp results
