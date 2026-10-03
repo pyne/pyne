@@ -2559,9 +2559,9 @@ def _parse_tape9_xsfpy(deck):
     pdeck["sigma_2n"] = dict([(nuc, val) for nuc, val in cards[["f0", "f2"]]])
 
     f3_keys = {
-        "fission_products": "sigma_alpha",
-        "actinides": "sigma_3n",
-        "activation_products": "sigma_alpha",
+        "fission_products": "sigma_3n",
+        "actinides": "sigma_alpha",
+        "activation_products": "sigma_3n",
     }
     pdeck[f3_keys[subtype]] = dict([(nuc, val) for nuc, val in cards[["f0", "f3"]]])
 

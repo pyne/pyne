@@ -244,8 +244,7 @@ def bricc(inputdict_unchecked):
         briccnh = inputdict_unchecked["BrIccNH"]
         if briccnh:
             proc = subprocess.Popen(
-                exe_path,
-                [input_file, "BrIccNH"],
+                [exe_path, input_file, "BrIccNH"],
                 stdout=subprocess.PIPE,
                 stdin=subprocess.PIPE,
             )

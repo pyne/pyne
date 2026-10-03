@@ -751,7 +751,7 @@ class Spectr(_BinaryReader):
     """Reads ultra-fine group spectrum file from MC**2"""
 
     def __init__(self, filename):
-        super(SPECTR, self).__init__(filename)
+        super(Spectr, self).__init__(filename)
         self.fc = {}
         self.read1D()
         self.flux = self.read2D()
