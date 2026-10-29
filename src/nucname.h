@@ -162,7 +162,10 @@ namespace nucname
   {
   public:
     /// default constructor
-    IndeterminateNuclideForm () {};
+    IndeterminateNuclideForm ()
+    {
+      setINFEstr();
+    };
 
     /// default destuctor
     ~IndeterminateNuclideForm () throw () {};
@@ -174,6 +177,7 @@ namespace nucname
     {
        nucwas = wasptr;
        nucnow = nowptr;
+       setINFEstr();
     };
 
     /// Constructor given previous and current state of nulide name
@@ -183,6 +187,7 @@ namespace nucname
     {
       nucwas = wasptr;
       nucnow = pyne::to_str(nowptr);
+      setINFEstr();
     };
 
     /// Constructor given previous and current state of nulide name
@@ -192,6 +197,7 @@ namespace nucname
     {
       nucwas = pyne::to_str(wasptr);
       nucnow = nowptr;
+      setINFEstr();
     };
 
     /// Constructor given previous and current state of nulide name
@@ -201,13 +207,13 @@ namespace nucname
     {
       nucwas = pyne::to_str(wasptr);
       nucnow = pyne::to_str(nowptr);
+      setINFEstr();
     };
 
-    /// Generates an informational message for the exception
-    /// \return The error string
-    virtual const char* what() const throw()
+    /// Builds the message returned by what()
+    void setINFEstr()
     {
-      std::string INFEstr ("Indeterminate nuclide form: ");
+      INFEstr = "Indeterminate nuclide form: ";
       if (!nucwas.empty())
         INFEstr += nucwas;
 
@@ -216,13 +222,19 @@ namespace nucname
         INFEstr += " --> ";
         INFEstr += nucnow;
       }
-      const char* INFEstr_rtn = INFEstr.c_str();
-      return INFEstr_rtn;
+    };
+
+    /// Generates an informational message for the exception
+    /// \return The error string
+    virtual const char* what() const throw()
+    {
+      return INFEstr.c_str();
     }
 
   private:
     std::string nucwas; ///< previous nuclide state
     std::string nucnow; ///< current nuclide state
+    std::string INFEstr; ///< the message returned by what()
   };
 
   /// \name isnuclide functions

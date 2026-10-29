@@ -1,6 +1,7 @@
 """Material tests"""
 import os
 import platform
+import re
 from copy import deepcopy
 import warnings
 
@@ -182,6 +183,25 @@ def test_from_hdf5_protocol_0():
     mat.from_hdf5("mat.h5", "/mat", -3, 0)
     assert mat.mass == 1.0
     assert mat.comp == {922350000: 1.0, 942390000: 0.0}
+
+
+def test_from_hdf5_path_not_found_message():
+    # PathNotFound::what() must not return a dangling pointer
+    datapath = "/a/path/long/enough/to/be/heap/allocated"
+    msg = f"the path {datapath} was not found in the HDF5 file mat.h5"
+    with pytest.raises(RuntimeError, match=f"^{re.escape(msg)}$"):
+        Material().from_hdf5("mat.h5", datapath, protocol=0)
+
+
+def test_hdf5_file_not_hdf5_message(tmp_path):
+    # FileNotHDF5::what() must not return a dangling pointer
+    filename = tmp_path / "not_hdf5.txt"
+    filename.write_text("not an HDF5 file\n")
+    msg = f"Not a valid HDF5 file: {filename}"
+    with pytest.raises(RuntimeError, match=f"^{re.escape(msg)}$"):
+        Material().from_hdf5(str(filename), "/mat")
+    with pytest.raises(RuntimeError, match=f"^{re.escape(msg)}$"):
+        Material({"U235": 1.0}).write_hdf5(str(filename), "/mat")
 
 
 def test_hdf5_protocol_1_old():

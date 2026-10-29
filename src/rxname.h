@@ -307,7 +307,10 @@ namespace rxname
   public:
 
     /// default constructor
-    IndeterminateReactionForm () {};
+    IndeterminateReactionForm ()
+    {
+      setINFEstr();
+    };
 
     /// default destructor
     ~IndeterminateReactionForm () throw () {};
@@ -318,6 +321,7 @@ namespace rxname
     {
        rxwas = wasptr;
        rxnow = nowptr;
+       setINFEstr();
     };
 
     /// Constructor using original reaction (\a wasptr) and the eventual state
@@ -326,6 +330,7 @@ namespace rxname
     {
       rxwas = wasptr;
       rxnow = pyne::to_str(nowptr);
+      setINFEstr();
     };
 
     /// Constructor using original reaction (\a wasptr) and the eventual state
@@ -334,6 +339,7 @@ namespace rxname
     {
       rxwas = pyne::to_str(wasptr);
       rxnow = nowptr;
+      setINFEstr();
     };
 
     /// Constructor using original reaction (\a wasptr) and the eventual state
@@ -342,12 +348,13 @@ namespace rxname
     {
       rxwas = pyne::to_str(wasptr);
       rxnow = pyne::to_str(nowptr);
+      setINFEstr();
     };
 
-    /// Returns a helpful error message containing prior and current reaction state.
-    virtual const char* what() const throw()
+    /// Builds the message returned by what()
+    void setINFEstr()
     {
-      std::string INFEstr ("Indeterminate reaction form: ");
+      INFEstr = "Indeterminate reaction form: ";
       if (!rxwas.empty())
         INFEstr += rxwas;
 
@@ -356,13 +363,18 @@ namespace rxname
         INFEstr += " --> ";
         INFEstr += rxnow;
       }
-      const char* INFEstr_rtn = INFEstr.c_str();
-      return INFEstr_rtn;
+    };
+
+    /// Returns a helpful error message containing prior and current reaction state.
+    virtual const char* what() const throw()
+    {
+      return INFEstr.c_str();
     }
 
   private:
     std::string rxwas;  ///< previous reaction state
     std::string rxnow;  ///< current reaction state
+    std::string INFEstr;  ///< the message returned by what()
   };
 }
 }

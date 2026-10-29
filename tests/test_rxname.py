@@ -1,5 +1,6 @@
 """rxname tests"""
 from __future__ import unicode_literals, division
+import re
 import sys
 import warnings
 import pytest
@@ -96,6 +97,15 @@ def test_name_nucdelta():
 def test_name_not():
     pytest.raises(RuntimeError, rxname.name, "Waka waka")
     pytest.raises(RuntimeError, rxname.name, 0)
+
+
+def test_name_indeterminate_message():
+    # IndeterminateReactionForm::what() must not return a dangling pointer
+    msg = "Indeterminate reaction form: z=n, 10010000, 922350000 --> ???"
+    with pytest.raises(RuntimeError, match=f"^{re.escape(msg)}$"):
+        rxname.name("H1", "U235")
+    with pytest.raises(RuntimeError, match=f"^{re.escape(msg)}$"):
+        rxname.id("H1", "U235")
 
 
 def test_id_names():

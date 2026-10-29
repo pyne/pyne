@@ -168,7 +168,10 @@ namespace particle
   {
   public:
     /// Default constructor
-    NotAParticle () {};
+    NotAParticle ()
+    {
+      setNaPstr();
+    };
 
     /// Default destructor
     ~NotAParticle () throw () {};
@@ -178,20 +181,26 @@ namespace particle
     NotAParticle(std::string particle_name)
     {
        part_name = particle_name;
+       setNaPstr();
+    }
+
+    /// builds the message returned by what()
+    void setNaPstr()
+    {
+      NaPstr = "Not a valid particle name ";
+      if(!part_name.empty())
+        NaPstr += part_name;
     }
 
     /// raises error message
     virtual const char* what() const throw()
     {
-      std::string pname ("Not a valid particle name ");
-      if(!part_name.empty())
-        pname += part_name;
-      const char *pname_rtn = pname.c_str();
-      return pname_rtn;
+      return NaPstr.c_str();
     }
 
     private:
        std::string part_name;  /// the particle name
+       std::string NaPstr;  /// the message returned by what()
 
 
   };

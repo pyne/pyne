@@ -5,6 +5,7 @@ import warnings
 import sys
 from hashlib import md5
 import numpy as np
+import pytest
 from numpy.testing import assert_array_equal, assert_allclose
 from pyne.utils import QAWarning
 from pyne.endl import Library
@@ -13,11 +14,14 @@ from utils import download_file
 warnings.simplefilter("ignore", QAWarning)
 
 def test_loadfile():
-    download_file(
-        "https://www-nds.iaea.org/epdl97/data/endl/eedl/za082000",
-        "epdl97_eedl_Pb",
-        "502105669e0c0ad917301d219c649aaf",
-    )
+    try:
+        download_file(
+            "https://www-nds.iaea.org/epdl97/data/endl/eedl/za082000",
+            "epdl97_eedl_Pb",
+            "502105669e0c0ad917301d219c649aaf",
+        )
+    except OSError as err:
+        pytest.skip(f"epdl97_eedl_Pb could not be downloaded: {err}")
     testlib = Library("epdl97_eedl_Pb")
 
     # test the nuclides

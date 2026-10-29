@@ -42,7 +42,10 @@ namespace h5wrap
   public:
 
     /// default constructor
-    FileNotHDF5(){};
+    FileNotHDF5()
+    {
+      setFNH5str();
+    };
 
     /// default destructor
     ~FileNotHDF5() throw () {};
@@ -51,21 +54,26 @@ namespace h5wrap
     FileNotHDF5(std::string fname)
     {
       filename = fname;
+      setFNH5str();
+    };
+
+    /// builds the message returned by what()
+    void setFNH5str()
+    {
+      FNH5str = "Not a valid HDF5 file: ";
+      if (!filename.empty())
+        FNH5str += filename;
     };
 
     /// helpful error message that includes the filename
     virtual const char* what() const throw()
     {
-      std::string FNH5str ("Not a valid HDF5 file: ");
-      if (!filename.empty())
-        FNH5str += filename;
-
-      const char* FNH5str_rtn = FNH5str.c_str();
-      return FNH5str_rtn;
+      return FNH5str.c_str();
     };
 
   private:
     std::string filename; ///< the file which is not in HDF5 format.
+    std::string FNH5str;  ///< the message returned by what()
   };
 
 
@@ -75,7 +83,10 @@ namespace h5wrap
   public:
 
     /// default constructor
-    GroupNotFound(){};
+    GroupNotFound()
+    {
+      setGNFstr();
+    };
 
     /// default destructor
     ~GroupNotFound() throw () {};
@@ -84,22 +95,29 @@ namespace h5wrap
     GroupNotFound(std::string fname, std::string gname)
     {
       filename = fname;
+      groupname = gname;
+      setGNFstr();
+    };
+
+    /// builds the message returned by what()
+    void setGNFstr()
+    {
+      GNFstr = "the group ";
+      GNFstr += groupname;
+      GNFstr += " not found in the file ";
+      GNFstr += filename;
     };
 
     /// helpful error message that includes the filename and the groupname
     virtual const char* what() const throw()
     {
-      std::string msg ("the group ");
-      msg += groupname;
-      msg += " not found in the file ";
-      msg += filename;
-      const char* msg_rtn = msg.c_str();
-      return msg_rtn;
+      return GNFstr.c_str();
     };
 
   private:
     std::string filename;   ///< the HDF5 file
     std::string groupname;  ///< the group in the hierarchy
+    std::string GNFstr;     ///< the message returned by what()
   };
 
   /// Custom exception for when a path is not found in an HDF5 file
@@ -108,7 +126,10 @@ namespace h5wrap
   public:
 
     /// default constructor
-    PathNotFound(){};
+    PathNotFound()
+    {
+      setPNFstr();
+    };
 
     /// default destructor
     ~PathNotFound() throw () {};
@@ -118,22 +139,28 @@ namespace h5wrap
     {
       filename = fname;
       path = pname;
+      setPNFstr();
+    };
+
+    /// builds the message returned by what()
+    void setPNFstr()
+    {
+      PNFstr = "the path ";
+      PNFstr += path;
+      PNFstr += " was not found in the HDF5 file ";
+      PNFstr += filename;
     };
 
     /// helpful error message that includes the filename and the pathname
     virtual const char* what() const throw()
     {
-      std::string msg ("the path ");
-      msg += path;
-      msg += " was not found in the HDF5 file ";
-      msg += filename;
-      const char* msg_rtn = msg.c_str();
-      return msg_rtn;
+      return PNFstr.c_str();
     };
 
   private:
     std::string filename; ///< the HDF5 file
     std::string path;     ///< the path in the file
+    std::string PNFstr;   ///< the message returned by what()
   };
 
 

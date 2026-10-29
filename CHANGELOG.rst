@@ -41,6 +41,7 @@ Next Version
    * Fix Changelog CI test with newer runner (#1587)
    * Lock commit used for `pyne/data` to support reproducible builds (#1585)
    * Drop use of the ``numpy.reshape`` ``newshape`` keyword argument, removed in NumPy 2.4 (#1588)
+   * Fix dangling pointers from exception ``what()`` methods and missing group name in ``GroupNotFound`` (#1590)
 
 v0.7.8
 ======

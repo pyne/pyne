@@ -10,6 +10,7 @@ except ImportError:
     import urllib
 
 import numpy as np
+import pytest
 import tables as tb
 
 from numpy.testing import assert_array_equal, assert_array_almost_equal
@@ -26,11 +27,20 @@ from utils import download_file
 
 del sys.path[0]
 
-download_file(
-    "https://www-nds.iaea.org/wolfram/w180/beta3/W180.ace",
-    "W180.ace",
-    "5349513f196ad594d172bc6ea61dc382",
-)
+
+@pytest.fixture(scope="module")
+def w180_ace():
+    # Download only for the tests that need the file, and skip them if the
+    # server refuses, so that a failed download doesn't abort collection of
+    # every test in this module.
+    try:
+        download_file(
+            "https://www-nds.iaea.org/wolfram/w180/beta3/W180.ace",
+            "W180.ace",
+            "5349513f196ad594d172bc6ea61dc382",
+        )
+    except OSError as err:
+        pytest.skip(f"W180.ace could not be downloaded: {err}")
 
 nuc_data = str(pyne_conf.NUC_DATA_PATH,'UTF-8')
 
@@ -780,7 +790,7 @@ sample_xs_openmc = StringIO(
 )
 
 
-def test_openmc():
+def test_openmc(w180_ace):
     sample_xs_openmc.seek(0)
     ods = data_source.OpenMCDataSource(
         cross_sections=sample_xs_openmc, src_group_struct=np.logspace(1, -9, 11)
@@ -800,7 +810,7 @@ def test_openmc():
     assert np.all(obs >= 0.0)
 
 
-def test_openmc_bkg_none():
+def test_openmc_bkg_none(w180_ace):
     C_12 = 60120000
     W_180 = 741800000
     sample_xs_openmc.seek(0)
@@ -815,7 +825,7 @@ def test_openmc_bkg_none():
     assert_array_almost_equal(0.0, observed)
 
 
-def test_openmc_bkg():
+def test_openmc_bkg(w180_ace):
     C = 60000000
     W_180 = 741800000
     sample_xs_openmc.seek(0)
@@ -831,7 +841,7 @@ def test_openmc_bkg():
         assert_array_almost_equal(expected, observed)
 
 
-def test_openmc_self_shielding1():
+def test_openmc_self_shielding1(w180_ace):
     C = 60000000
     W_180 = 741800000
     sample_xs_openmc.seek(0)
@@ -846,7 +856,7 @@ def test_openmc_self_shielding1():
     assert np.all(observed <= non_ss)
 
 
-def test_open_self_shielding2():
+def test_open_self_shielding2(w180_ace):
     C = 60000000
     W_180 = 741800000
     sample_xs_openmc.seek(0)

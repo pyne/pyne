@@ -2,6 +2,7 @@
 from __future__ import unicode_literals, division
 from unittest import TestCase
 import pytest
+import re
 import warnings
 
 from pyne.utils import QAWarning
@@ -444,6 +445,13 @@ def test_id():
     pytest.raises(RuntimeError, nucname.id, "Am-242j")
     pytest.raises(RuntimeError, nucname.id, "") #nuc.empty()
     pytest.raises(RuntimeError, nucname.id, -100) #nuc < 0
+
+
+def test_id_indeterminate_message():
+    # IndeterminateNuclideForm::what() must not return a dangling pointer
+    msg = "Indeterminate nuclide form: 1230000"
+    with pytest.raises(RuntimeError, match=f"^{re.escape(msg)}$"):
+        nucname.id(1230000)
 
 
 def test_name():

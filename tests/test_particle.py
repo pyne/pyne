@@ -1,8 +1,10 @@
 """Tally tests"""
 import os
+import re
 import warnings
 
 from unittest import TestCase
+import pytest
 
 
 from pyne.utils import QAWarning
@@ -30,6 +32,13 @@ def test_name():
     assert name("Protium") == "Proton"
     assert name(10010000) == "Proton"
     assert name("10010000") == "Proton"
+
+
+def test_name_not_a_particle_message():
+    # NotAParticle::what() must not return a dangling pointer
+    msg = "Not a valid particle name Waka waka"
+    with pytest.raises(RuntimeError, match=f"^{re.escape(msg)}$"):
+        name("Waka waka")
 
 
 def test_is_heavy_ion():
